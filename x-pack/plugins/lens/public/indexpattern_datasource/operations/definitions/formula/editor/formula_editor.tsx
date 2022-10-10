@@ -7,9 +7,11 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,6 +20,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
@@ -41,7 +44,6 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 import { MemoizedFormulaHelp } from './formula_help';
-import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
@@ -66,6 +68,7 @@ export const WrappedFormulaEditor = ({
   ...rest
 }: ParamEditorProps<FormulaIndexPatternColumn>) => {
   const dateHistogramInterval = getDateHistogramInterval(
+    rest.data.datatableUtilities,
     rest.layer,
     rest.indexPattern,
     activeData,
@@ -84,12 +87,13 @@ const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
 export function FormulaEditor({
   layer,
-  updateLayer,
+  paramEditorUpdater,
   currentColumn,
   columnId,
   indexPattern,
   operationDefinitionMap,
   unifiedSearch,
+  dataViews,
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
@@ -110,6 +114,8 @@ export function FormulaEditor({
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
+
+  const { euiTheme } = useEuiTheme();
 
   const visibleOperationsMap = useMemo(
     () => filterByVisibleOperation(operationDefinitionMap),
@@ -151,7 +157,7 @@ export function FormulaEditor({
     setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
-      updateLayer(
+      paramEditorUpdater(
         (prevLayer) =>
           insertOrReplaceFormulaColumn(
             columnId,
@@ -181,7 +187,7 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
         if (currentColumn.params.formula) {
           // Only submit if valid
-          updateLayer(
+          paramEditorUpdater(
             insertOrReplaceFormulaColumn(
               columnId,
               {
@@ -230,7 +236,7 @@ export function FormulaEditor({
         if (previousFormulaWasBroken || previousFormulaWasOkButNoData) {
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
-            updateLayer(
+            paramEditorUpdater(
               insertOrReplaceFormulaColumn(
                 columnId,
                 {
@@ -312,7 +318,7 @@ export function FormulaEditor({
           }
         );
 
-        updateLayer(newLayer);
+        paramEditorUpdater(newLayer);
 
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
         const markers: monaco.editor.IMarkerData[] = managedColumns
@@ -417,6 +423,7 @@ export function FormulaEditor({
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
             unifiedSearch,
+            dataViews,
             dateHistogramInterval: baseIntervalRef.current,
           });
         }
@@ -428,6 +435,7 @@ export function FormulaEditor({
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
           unifiedSearch,
+          dataViews,
           dateHistogramInterval: baseIntervalRef.current,
         });
       }
@@ -444,7 +452,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, baseIntervalRef]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(
@@ -531,7 +539,8 @@ export function FormulaEditor({
             tokenInfo.ast.type !== 'namedArgument' ||
             (tokenInfo.ast.name !== 'kql' &&
               tokenInfo.ast.name !== 'lucene' &&
-              tokenInfo.ast.name !== 'shift') ||
+              tokenInfo.ast.name !== 'shift' &&
+              tokenInfo.ast.name !== 'reducedTimeRange') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -551,7 +560,11 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'" && tokenInfo.ast.name !== 'shift') {
+          if (
+            char === "'" &&
+            tokenInfo.ast.name !== 'shift' &&
+            tokenInfo.ast.name !== 'reducedTimeRange'
+          ) {
             editOperation = {
               range: {
                 ...currentPosition,
@@ -600,7 +613,7 @@ export function FormulaEditor({
     value: text ?? '',
     onChange: setText,
     options: {
-      automaticLayout: false,
+      automaticLayout: true,
       fontSize: 14,
       folding: false,
       lineNumbers: 'off',
@@ -648,7 +661,26 @@ export function FormulaEditor({
         'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
       })}
     >
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      {!isFullscreen && (
+        <EuiFormLabel
+          css={css`
+            margin-top: ${euiTheme.size.base};
+            margin-bottom: ${euiTheme.size.xs};
+          `}
+        >
+          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingFormula', {
+            defaultMessage: 'Formula',
+          })}
+        </EuiFormLabel>
+      )}
+      <div
+        className="lnsIndexPatternDimensionEditor--shaded"
+        css={css`
+          border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
+          border-radius: ${!isFullscreen ? euiTheme.border.radius.medium : 0};
+          height: ${isFullscreen ? '100%' : 'auto'};
+        `}
+      >
         <div className="lnsFormula">
           <div className="lnsFormula__editor">
             <div className="lnsFormula__editorHeader">
@@ -696,7 +728,6 @@ export function FormulaEditor({
                       toggleFullscreen();
                       // Help text opens when entering full screen, and closes when leaving full screen
                       setIsHelpOpen(!isFullscreen);
-                      trackUiEvent('toggle_formula_fullscreen');
                     }}
                     iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
@@ -814,14 +845,10 @@ export function FormulaEditor({
                         anchorPosition="leftCenter"
                         isOpen={isHelpOpen}
                         closePopover={() => setIsHelpOpen(false)}
-                        ownFocus={false}
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => {
-                              if (!isHelpOpen) {
-                                trackUiEvent('open_formula_popover');
-                              }
                               setIsHelpOpen(!isHelpOpen);
                             }}
                             iconType="documentation"

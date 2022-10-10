@@ -26,7 +26,10 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import type { FleetConfigType, ExperimentalFeatures } from '../../common';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import type { FleetConfigType } from '../../common/types';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
@@ -37,6 +40,8 @@ import type {
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+
+import type { BulkActionsResolver } from './agents';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -57,6 +62,8 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
+  private savedObjectsTagging: SavedObjectTaggingStart | undefined;
+  private bulkActionsResolver: BulkActionsResolver | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -74,6 +81,8 @@ class AppContextService {
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
+    this.savedObjectsTagging = appContext.savedObjectsTagging;
+    this.bulkActionsResolver = appContext.bulkActionsResolver;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -140,6 +149,13 @@ class AppContextService {
       throw new Error('Saved objects start service not set.');
     }
     return this.savedObjects;
+  }
+
+  public getSavedObjectsTagging() {
+    if (!this.savedObjectsTagging) {
+      throw new Error('Saved object tagging start service not set.');
+    }
+    return this.savedObjectsTagging;
   }
 
   public getInternalUserSOClient(request: KibanaRequest) {
@@ -215,6 +231,10 @@ class AppContextService {
 
   public getTelemetryEventsSender() {
     return this.telemetryEventsSender;
+  }
+
+  public getBulkActionsResolver() {
+    return this.bulkActionsResolver;
   }
 }
 

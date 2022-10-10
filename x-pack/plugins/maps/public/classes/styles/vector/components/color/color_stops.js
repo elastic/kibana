@@ -7,9 +7,9 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
 
 export const ColorStops = ({
@@ -19,7 +19,6 @@ export const ColorStops = ({
   getStopError,
   renderStopInput,
   addNewRow,
-  canDeleteStop,
   swatches,
 }) => {
   function getStopInput(stop, index) {
@@ -75,7 +74,7 @@ export const ColorStops = ({
     };
 
     let deleteButton;
-    if (canDeleteStop(colorStops, index)) {
+    if (colorStops.length > 1) {
       const onRemove = () => {
         const newColorStops = removeRow(colorStops, index);
         onChange({
@@ -119,11 +118,12 @@ export const ColorStops = ({
         display="rowCompressed"
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+          <EuiFlexItem grow={true} className="mapStyleSettings__fixedBox">
             {stopInput}
           </EuiFlexItem>
           <EuiFlexItem>
             <MbValidatedColorPicker
+              key={color}
               onChange={onColorChange}
               color={color}
               swatches={swatches}
@@ -135,5 +135,10 @@ export const ColorStops = ({
     );
   });
 
-  return <div>{rows}</div>;
+  return (
+    <div>
+      {rows}
+      <EuiSpacer size="s" />
+    </div>
+  );
 };

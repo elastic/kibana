@@ -11,14 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useMemo } from 'react';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { PolicyDetailsRouteState } from '../../../../../../../../common/endpoint/types';
+import type { PolicyDetailsRouteState } from '../../../../../../../../common/endpoint/types';
 import { useAppUrl, useToasts } from '../../../../../../../common/lib/kibana';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { LinkWithIcon } from './link_with_icon';
 import { StyledEuiFlexItem } from './styled_components';
 import { useSummaryArtifact } from '../../../../../../hooks/artifacts';
-import { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
-import { useTestIdGenerator } from '../../../../../../components/hooks/use_test_id_generator';
+import type { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 
 const ARTIFACTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>

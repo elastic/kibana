@@ -29,7 +29,7 @@ interface IndexedColor extends Color {
   index: number;
 }
 
-interface ColorFormatEditorFormatParams {
+export interface ColorFormatEditorFormatParams {
   colors: Color[];
 }
 
@@ -38,8 +38,8 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({
-      fieldType: props.fieldType,
-    });
+      fieldType: props.fieldType, // FIXME: why add `fieldType` as an EditorFormatParam?
+    } as unknown as ColorFormatEditorFormatParams);
   }
 
   onColorChange = (newColorParams: Partial<Color>, index: number) => {

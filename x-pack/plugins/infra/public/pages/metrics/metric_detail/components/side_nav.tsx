@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui';
+import {
+  EuiHideFor,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
+  EuiShowFor,
+  EuiSideNav,
+} from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { NavItem } from '../lib/side_nav_context';
 interface Props {

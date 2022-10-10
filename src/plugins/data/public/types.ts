@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DatatableUtilitiesService } from '../common';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
@@ -29,12 +30,15 @@ export interface DataSetupDependencies {
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  management: ManagementSetup;
 }
 
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
+  screenshotMode: ScreenshotModePluginStart;
+  share: SharePluginStart;
 }
 
 /**
@@ -95,15 +99,4 @@ export interface DataPublicPluginStart {
   query: QueryStart;
 
   nowProvider: NowProviderPublicContract;
-}
-
-export interface IDataPluginServices extends Partial<CoreStart> {
-  appName: string;
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  storage: IStorageWrapper;
-  data: DataPublicPluginStart;
-  usageCollection?: UsageCollectionStart;
 }

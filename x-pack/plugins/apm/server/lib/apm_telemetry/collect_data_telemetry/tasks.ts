@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
+import { fromKueryExpression } from '@kbn/es-query';
+import { flatten, merge, sortBy, sum, pickBy, uniq } from 'lodash';
+import { createHash } from 'crypto';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
+import {
+  SavedServiceGroup,
+  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
+} from '../../../../common/service_groups';
+import { getKueryFields } from '../../helpers/get_kuery_fields';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -19,11 +27,12 @@ import {
   CLOUD_REGION,
   CONTAINER_ID,
   ERROR_GROUP_ID,
+  FAAS_TRIGGER_TYPE,
   HOST_NAME,
   HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -43,8 +52,7 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry } from '../types';
-
+import { APMTelemetry, APMPerService } from '../types';
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
@@ -174,7 +182,7 @@ export const tasks: TelemetryTask[] = [
         SERVICE_VERSION,
         HOST_NAME,
         CONTAINER_ID,
-        POD_NAME,
+        KUBERNETES_POD_NAME,
       ].map((field) => ({ terms: { field, missing_bucket: true } }));
 
       const observerHostname = {
@@ -1118,6 +1126,216 @@ export const tasks: TelemetryTask[] = [
             },
           },
         },
+      };
+    },
+  },
+  {
+    name: 'service_groups',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<SavedServiceGroup>({
+        type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+
+      const kueryNodes = response.saved_objects.map(
+        ({ attributes: { kuery } }) => fromKueryExpression(kuery)
+      );
+
+      const kueryFields = getKueryFields(kueryNodes);
+
+      return {
+        service_groups: {
+          kuery_fields: uniq(kueryFields),
+          total: response.total ?? 0,
+        },
+      };
+    },
+  },
+  {
+    name: 'per_service',
+    executor: async ({ indices, search }) => {
+      const response = await search({
+        index: [indices.metric],
+        body: {
+          size: 0,
+          timeout,
+          query: {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }],
+            },
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                size: 1000,
+              },
+              aggs: {
+                service_names: {
+                  terms: {
+                    field: SERVICE_NAME,
+                    size: 1000,
+                  },
+                  aggs: {
+                    top_metrics: {
+                      top_metrics: {
+                        sort: '_score',
+                        metrics: [
+                          {
+                            field: AGENT_NAME,
+                          },
+                          {
+                            field: AGENT_VERSION,
+                          },
+                          {
+                            field: SERVICE_LANGUAGE_NAME,
+                          },
+                          {
+                            field: SERVICE_LANGUAGE_VERSION,
+                          },
+                          {
+                            field: SERVICE_FRAMEWORK_NAME,
+                          },
+                          {
+                            field: SERVICE_FRAMEWORK_VERSION,
+                          },
+                          {
+                            field: SERVICE_RUNTIME_NAME,
+                          },
+                          {
+                            field: SERVICE_RUNTIME_VERSION,
+                          },
+                          {
+                            field: KUBERNETES_POD_NAME,
+                          },
+                          {
+                            field: CONTAINER_ID,
+                          },
+                        ],
+                      },
+                    },
+                    [CLOUD_REGION]: {
+                      terms: {
+                        field: CLOUD_REGION,
+                        size: 5,
+                      },
+                    },
+                    [CLOUD_PROVIDER]: {
+                      terms: {
+                        field: CLOUD_PROVIDER,
+                        size: 3,
+                      },
+                    },
+                    [CLOUD_AVAILABILITY_ZONE]: {
+                      terms: {
+                        field: CLOUD_AVAILABILITY_ZONE,
+                        size: 5,
+                      },
+                    },
+                    [FAAS_TRIGGER_TYPE]: {
+                      terms: {
+                        field: FAAS_TRIGGER_TYPE,
+                        size: 5,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const envBuckets = response.aggregations?.environments.buckets ?? [];
+      const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
+        const envHash = createHash('sha256')
+          .update(envBucket.key as string)
+          .digest('hex');
+        const serviceBuckets = envBucket.service_names?.buckets ?? [];
+        return serviceBuckets.map((serviceBucket) => {
+          const nameHash = createHash('sha256')
+            .update(serviceBucket.key as string)
+            .digest('hex');
+          const fullServiceName = `${nameHash}~${envHash}`;
+          return {
+            service_id: fullServiceName,
+            timed_out: response.timed_out,
+            cloud: {
+              availability_zones:
+                serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+              regions:
+                serviceBucket[CLOUD_REGION]?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+              providers:
+                serviceBucket[CLOUD_PROVIDER]?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+            },
+            faas: {
+              trigger: {
+                type:
+                  serviceBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
+                    (inner) => inner.key as string
+                  ) ?? [],
+              },
+            },
+            agent: {
+              name: serviceBucket.top_metrics?.top[0].metrics[
+                AGENT_NAME
+              ] as string,
+              version: serviceBucket.top_metrics?.top[0].metrics[
+                AGENT_VERSION
+              ] as string,
+            },
+            service: {
+              language: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_LANGUAGE_NAME
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_LANGUAGE_VERSION
+                ] as string,
+              },
+              framework: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_FRAMEWORK_NAME
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_FRAMEWORK_VERSION
+                ] as string,
+              },
+              runtime: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_RUNTIME_NAME
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_RUNTIME_VERSION
+                ] as string,
+              },
+            },
+            kubernetes: {
+              pod: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  KUBERNETES_POD_NAME
+                ] as string,
+              },
+            },
+            container: {
+              id: serviceBucket.top_metrics?.top[0].metrics[
+                CONTAINER_ID
+              ] as string,
+            },
+          };
+        });
+      });
+      return {
+        per_service: data,
       };
     },
   },

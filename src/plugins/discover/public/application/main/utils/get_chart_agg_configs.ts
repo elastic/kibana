@@ -16,7 +16,7 @@ export function getChartAggConfigs(
   histogramInterval: string,
   data: DataPublicPluginStart
 ) {
-  const indexPattern = searchSource.getField('index')!;
+  const dataView = searchSource.getField('index')!;
   const visStateAggs = [
     {
       type: 'count',
@@ -26,11 +26,11 @@ export function getChartAggConfigs(
       type: 'date_histogram',
       schema: 'segment',
       params: {
-        field: indexPattern.timeFieldName!,
+        field: dataView.timeFieldName!,
         interval: histogramInterval,
         timeRange: data.query.timefilter.timefilter.getTime(),
       },
     },
   ];
-  return data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
+  return data.search.aggs.createAggConfigs(dataView, visStateAggs);
 }

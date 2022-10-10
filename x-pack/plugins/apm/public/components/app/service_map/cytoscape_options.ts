@@ -104,7 +104,10 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
+const getStyle = (
+  theme: EuiTheme,
+  isTraceExplorerEnabled: boolean
+): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -150,9 +153,9 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'text-background-color': theme.eui.euiColorPrimary,
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected() ? 0.1 : 0,
-        'text-background-padding': theme.eui.paddingSizes.xs,
+        'text-background-padding': theme.eui.euiSizeXS,
         'text-background-shape': 'roundrectangle',
-        'text-margin-y': parseInt(theme.eui.paddingSizes.s, 10),
+        'text-margin-y': parseInt(theme.eui.euiSizeS, 10),
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'ellipsis',
@@ -172,9 +175,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         // fairly new.
         //
         // @ts-expect-error
-        'target-distance-from-node': isIE11
-          ? undefined
-          : theme.eui.paddingSizes.xs,
+        'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
         width: 1,
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
@@ -189,10 +190,10 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         // @ts-expect-error
         'source-distance-from-node': isIE11
           ? undefined
-          : parseInt(theme.eui.paddingSizes.xs, 10),
+          : parseInt(theme.eui.euiSizeXS, 10),
         'target-distance-from-node': isIE11
           ? undefined
-          : parseInt(theme.eui.paddingSizes.xs, 10),
+          : parseInt(theme.eui.euiSizeXS, 10),
       },
     },
     {
@@ -211,6 +212,20 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'target-arrow-color': theme.eui.euiColorDarkShade,
       },
     },
+    ...(isTraceExplorerEnabled
+      ? [
+          {
+            selector: 'edge.hover',
+            style: {
+              width: 4,
+              'z-index': zIndexEdgeHover,
+              'line-color': theme.eui.euiColorDarkShade,
+              'source-arrow-color': theme.eui.euiColorDarkShade,
+              'target-arrow-color': theme.eui.euiColorDarkShade,
+            },
+          },
+        ]
+      : []),
     {
       selector: 'node.hover',
       style: {
@@ -256,10 +271,11 @@ ${theme.eui.euiColorLightShade}`,
 });
 
 export const getCytoscapeOptions = (
-  theme: EuiTheme
+  theme: EuiTheme,
+  isTraceExplorerEnabled: boolean
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(theme),
+  style: getStyle(theme, isTraceExplorerEnabled),
 });

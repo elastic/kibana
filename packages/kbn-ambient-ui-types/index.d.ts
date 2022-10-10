@@ -24,6 +24,12 @@ declare module '*.svg' {
   export default content;
 }
 
+declare module '*.gif' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
 declare module '*.mdx' {
   let MDXComponent: (props: any) => JSX.Element;
   // eslint-disable-next-line import/no-default-export

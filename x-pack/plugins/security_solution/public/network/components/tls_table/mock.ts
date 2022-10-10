@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkTlsStrategyResponse } from '../../../../common/search_strategy';
+import type { NetworkTlsStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockTlsData: NetworkTlsStrategyResponse = {
   totalCount: 2,

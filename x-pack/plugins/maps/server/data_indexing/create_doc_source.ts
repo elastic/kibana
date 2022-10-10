@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import { IndexPatternsCommonService } from '@kbn/data-plugin/server';
+import { DataViewsCommonService } from '@kbn/data-plugin/server';
 import { CreateDocSourceResp, IndexSourceMappings, BodySettings } from '../../common/types';
 import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 
@@ -21,7 +21,7 @@ export async function createDocSource(
   index: string,
   mappings: IndexSourceMappings,
   { asCurrentUser }: IScopedClusterClient,
-  indexPatternsService: IndexPatternsCommonService
+  indexPatternsService: DataViewsCommonService
 ): Promise<CreateDocSourceResp> {
   try {
     await createIndex(index, mappings, asCurrentUser);

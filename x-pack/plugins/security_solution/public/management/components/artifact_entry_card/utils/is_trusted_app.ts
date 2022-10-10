@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnyArtifact } from '../types';
-import { TrustedApp } from '../../../../../common/endpoint/types';
+import type { AnyArtifact } from '../types';
+import type { TrustedApp } from '../../../../../common/endpoint/types';
 
 /**
  * Type guard for `AnyArtifact` to check if it is a trusted app entry

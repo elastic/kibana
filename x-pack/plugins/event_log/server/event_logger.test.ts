@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nanosToMillis } from '../common';
 import { IEvent, IEventLogger, IEventLogService } from '.';
 import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
@@ -137,9 +138,18 @@ describe('EventLogger', () => {
 
     expect(timeStopValue).toBeGreaterThanOrEqual(timeStartValue);
 
-    const duration = event.event!.duration!;
+    const duration = Number(event.event!.duration!);
     expect(duration).toBeGreaterThan(0.95 * delayMS * 1000 * 1000);
-    expect(duration / (1000 * 1000)).toBeCloseTo(timeStopValue - timeStartValue);
+    expect(nanosToMillis(duration)).toBeCloseTo(timeStopValue - timeStartValue);
+  });
+
+  test('can set specific start time in startTiming', () => {
+    const event: IEvent = {};
+    eventLogger.startTiming(event, new Date('2020-01-01T02:00:00.000Z'));
+
+    const timeStart = event.event!.start!;
+    expect(timeStart).toBeTruthy();
+    expect(timeStart).toEqual('2020-01-01T02:00:00.000Z');
   });
 
   test('timing method endTiming() method works when startTiming() is not called', async () => {

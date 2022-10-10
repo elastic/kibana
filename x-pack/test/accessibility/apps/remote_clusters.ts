@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const retry = getService('retry');
 
-  describe('Remote Clusters', () => {
+  describe('Remote Clusters Accessibility', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('remoteClusters');
     });

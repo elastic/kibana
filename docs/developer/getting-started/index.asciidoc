@@ -7,21 +7,10 @@ Get started building your own plugins, or contributing directly to the {kib} rep
 [[developing-on-windows]]
 === Developing on Windows
 
-In order to support Windows development we currently require you to use one of the following:
-
-- https://git-scm.com/download/win[Git bash] (other bash emulators like https://cmder.net/[Cmder] could work but we did not test them)
-- https://docs.microsoft.com/en-us/windows/wsl/about[WSL]
-
-As well as installing https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015].
-
-In addition we also require you to do the following:
-
-- Install https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015]
-- Enable the https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development[Windows Developer Mode]
-- Enable https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-8dot3name[8.3 filename support] by running the following command in a windows command prompt with admin rights `fsutil 8dot3name set 0`
-
-Before running the steps listed below, please make sure you have installed everything 
-that we require and listed above and that you are running all the commands from now on through Git bash or WSL.
+We do not support Windows native development anymore and in order to develop Kibana on Windows please https://docs.microsoft.com/en-us/windows/wsl/setup/environment[setup a WSL environment] which will 
+give you a much better experience.
+In addition to that you will also benefit from https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps[run GUI apps on WSL] like Chrome for test and debug purposes.
+Once completed, follow the rest of this guide inside the WSL.
 
 [discrete]
 [[get-kibana-code]]
@@ -40,8 +29,7 @@ cd kibana
 
 Install the version of Node.js listed in the `.node-version` file. This
 can be automated with tools such as
-https://github.com/nvm-sh/nvm[nvm],
-https://github.com/coreybutler/nvm-windows[nvm-windows] or
+https://github.com/nvm-sh/nvm[nvm] or
 https://github.com/wbyoung/avn[avn]. As we also include a `.nvmrc` file
 you can switch to the correct version when using nvm by running:
 

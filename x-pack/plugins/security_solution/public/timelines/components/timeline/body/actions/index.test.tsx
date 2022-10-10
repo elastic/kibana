@@ -7,12 +7,13 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
-import { Actions } from '.';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { licenseService } from '../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -20,9 +21,7 @@ jest.mock('../../../../../detections/components/user_info', () => ({
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-}));
+jest.mock('../../../../../common/hooks/use_selector');
 jest.mock(
   '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => ({
@@ -34,33 +33,49 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(),
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalKibanaLib = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
         },
       },
-      cases: mockCasesContract(),
-      uiSettings: {
-        get: jest.fn(),
-      },
-      savedObjects: {
-        client: {},
-      },
-      timelines: { ...mockTimelines },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
+  };
+});
+
+jest.mock('../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => false),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
     },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
-}));
+  };
+});
 
 const defaultProps = {
   ariaRowindex: 2,
@@ -87,6 +102,10 @@ const defaultProps = {
 };
 
 describe('Actions', () => {
+  beforeAll(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
+
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
@@ -117,6 +136,7 @@ describe('Actions', () => {
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
   });
+
   describe('Alert context menu enabled?', () => {
     test('it disables for eventType=raw', () => {
       const wrapper = mount(
@@ -219,6 +239,75 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+
+    test('it should not show session view button on action tabs for basic users', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'] } },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(false);
+    });
+
+    test('it should show session view button on action tabs when user access the session viewer via K8S dashboard', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'] } },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions
+            {...defaultProps}
+            ecsData={ecsData}
+            timelineId={TimelineId.kubernetesPageSessions}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+
+    test('it should show session view button on action tabs for enterprise users', () => {
+      const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+      licenseServiceMock.isEnterprise.mockReturnValue(true);
+
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'] } },
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('isAlert', () => {
+    test('it returns true when the eventType is an alert', () => {
+      expect(isAlert('signal')).toBe(true);
+    });
+
+    test('it returns false when the eventType is NOT an alert', () => {
+      expect(isAlert('raw')).toBe(false);
     });
   });
 });

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import {
   findMathNodes,
@@ -27,7 +27,8 @@ import type {
   GenericIndexPatternColumn,
   GenericOperationDefinition,
 } from '..';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
+import type { IndexPattern } from '../../../../types';
 import type { TinymathNodeTypes } from './types';
 
 interface ValidationErrors {
@@ -88,6 +89,14 @@ interface ValidationErrors {
   filtersTypeConflict: {
     message: string;
     type: { operation: string; outerType: string; innerType: string };
+  };
+  useAlternativeFunction: {
+    message: string;
+    type: {
+      operation: string;
+      params: string;
+      alternativeFn: string;
+    };
   };
 }
 
@@ -335,6 +344,12 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
       });
       break;
+    case 'useAlternativeFunction':
+      message = i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
+        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead.`,
+        values: { operation: out.operation, params: out.params, alternativeFn: out.alternativeFn },
+      });
+      break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
@@ -486,6 +501,19 @@ function getQueryValidationErrors(
         });
       }
     }
+
+    if (arg.name === 'reducedTimeRange') {
+      const parsedReducedTimeRange = parseTimeShift(arg.value || '');
+      if (parsedReducedTimeRange === 'invalid' || parsedReducedTimeRange === 'previous') {
+        errors.push({
+          message: i18n.translate('xpack.lens.indexPattern.invalidReducedTimeRange', {
+            defaultMessage:
+              'Invalid reduced time range. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+          }),
+          locations: [arg.location],
+        });
+      }
+    }
   });
   return errors;
 }
@@ -624,23 +652,23 @@ function runFullASTValidation(
       }
     } else {
       if (nodeOperation.input === 'field') {
-        if (shouldHaveFieldArgument(node)) {
-          if (!isArgumentValidType(firstArg, 'variable')) {
-            if (isMathNode(firstArg)) {
-              errors.push(
-                getMessageFromId({
-                  messageId: 'wrongFirstArgument',
-                  values: {
-                    operation: node.name,
-                    type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-                      defaultMessage: 'field',
-                    }),
-                    argument: `math operation`,
-                  },
-                  locations: node.location ? [node.location] : [],
-                })
-              );
-            } else {
+        if (!isArgumentValidType(firstArg, 'variable')) {
+          if (isMathNode(firstArg)) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongFirstArgument',
+                values: {
+                  operation: node.name,
+                  type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+                    defaultMessage: 'field',
+                  }),
+                  argument: `math operation`,
+                },
+                locations: node.location ? [node.location] : [],
+              })
+            );
+          } else {
+            if (shouldHaveFieldArgument(node)) {
               errors.push(
                 getMessageFromId({
                   messageId: 'wrongFirstArgument',
@@ -659,40 +687,27 @@ function runFullASTValidation(
                 })
               );
             }
-          } else {
-            // If the first argument is valid proceed with the other arguments validation
-            const fieldErrors = validateFieldArguments(node, variables, {
-              isFieldOperation: true,
-              firstArg,
-              returnedType: getReturnedType(nodeOperation, indexPattern, firstArg),
-            });
-            if (fieldErrors.length) {
-              errors.push(...fieldErrors);
-            }
-          }
-          const functionErrors = validateFunctionArguments(node, functions, 0, {
-            isFieldOperation: true,
-            type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-              defaultMessage: 'field',
-            }),
-            firstArgValidation: false,
-          });
-          if (functionErrors.length) {
-            errors.push(...functionErrors);
           }
         } else {
-          // Named arguments only
-          if (functions?.length || variables?.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'shouldNotHaveField',
-                values: {
-                  operation: node.name,
-                },
-                locations: node.location ? [node.location] : [],
-              })
-            );
+          // If the first argument is valid proceed with the other arguments validation
+          const fieldErrors = validateFieldArguments(node, variables, {
+            isFieldOperation: true,
+            firstArg,
+            returnedType: getReturnedType(nodeOperation, indexPattern, firstArg),
+          });
+          if (fieldErrors.length) {
+            errors.push(...fieldErrors);
           }
+        }
+        const functionErrors = validateFunctionArguments(node, functions, 0, {
+          isFieldOperation: true,
+          type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+            defaultMessage: 'field',
+          }),
+          firstArgValidation: false,
+        });
+        if (functionErrors.length) {
+          errors.push(...functionErrors);
         }
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
@@ -985,20 +1000,45 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
     const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
     // if there is only 1 mandatory arg, this is already handled by the wrongFirstArgument check
     if (mandatoryArguments.length > 1 && node.args.length < mandatoryArguments.length) {
-      const missingArgs = positionalArguments.filter(
-        ({ name, optional }, i) => !optional && node.args[i] == null
+      const missingArgs = mandatoryArguments.filter((_, i) => node.args[i] == null);
+      const [missingArgsWithAlternatives, missingArgsWithoutAlternative] = partition(
+        missingArgs,
+        (
+          v
+        ): v is {
+          name: string;
+          alternativeWhenMissing: string;
+        } => v.alternativeWhenMissing != null
       );
-      errors.push(
-        getMessageFromId({
-          messageId: 'missingMathArgument',
-          values: {
-            operation: node.name,
-            count: mandatoryArguments.length - node.args.length,
-            params: missingArgs.map(({ name }) => name).join(', '),
-          },
-          locations: node.location ? [node.location] : [],
-        })
-      );
+
+      if (missingArgsWithoutAlternative.length) {
+        errors.push(
+          getMessageFromId({
+            messageId: 'missingMathArgument',
+            values: {
+              operation: node.name,
+              count: mandatoryArguments.length - node.args.length,
+              params: missingArgsWithoutAlternative.map(({ name }) => name).join(', '),
+            },
+            locations: node.location ? [node.location] : [],
+          })
+        );
+      }
+      if (missingArgsWithAlternatives.length) {
+        // pick only the first missing argument alternative
+        const [firstArg] = missingArgsWithAlternatives;
+        errors.push(
+          getMessageFromId({
+            messageId: 'useAlternativeFunction',
+            values: {
+              operation: node.name,
+              params: firstArg.name,
+              alternativeFn: firstArg.alternativeWhenMissing,
+            },
+            locations: node.location ? [node.location] : [],
+          })
+        );
+      }
     }
   });
   return errors;

@@ -12,9 +12,7 @@ import {
   EuiSelect,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonIcon,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -39,7 +37,9 @@ export function setTimeScaling(
         currentColumn.timeScale,
         timeScale,
         currentColumn.timeShift,
-        currentColumn.timeShift
+        currentColumn.timeShift,
+        currentColumn.reducedTimeRange,
+        currentColumn.reducedTimeRange
       );
   return {
     ...layer,
@@ -65,16 +65,9 @@ export function TimeScaling({
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
 }) {
-  const hasDateHistogram = layer.columnOrder.some(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
-  );
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
-  if (
-    !selectedOperation.timeScalingMode ||
-    selectedOperation.timeScalingMode === 'disabled' ||
-    !hasDateHistogram ||
-    !selectedColumn.timeScale
-  ) {
+
+  if (!selectedOperation.timeScalingMode || selectedOperation.timeScalingMode === 'disabled') {
     return null;
   }
 
@@ -101,33 +94,28 @@ export function TimeScaling({
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiSelect
+            fullWidth
             compressed
-            options={Object.entries(unitSuffixesLong).map(([unit, text]) => ({
-              value: unit,
-              text,
-            }))}
+            options={[
+              {
+                value: '',
+                text: i18n.translate('xpack.lens.timeScale.normalizeNone', {
+                  defaultMessage: 'None',
+                }),
+              },
+              ...Object.entries(unitSuffixesLong).map(([unit, text]) => ({
+                value: unit,
+                text,
+              })),
+            ]}
             data-test-subj="indexPattern-time-scaling-unit"
-            value={selectedColumn.timeScale}
+            value={selectedColumn.timeScale ?? ''}
             onChange={(e) => {
-              updateLayer(setTimeScaling(columnId, layer, e.target.value as TimeScaleUnit));
+              const value = e.target.value || undefined;
+              updateLayer(setTimeScaling(columnId, layer, value as TimeScaleUnit));
             }}
           />
         </EuiFlexItem>
-        {selectedOperation.timeScalingMode === 'optional' && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="indexPattern-time-scaling-remove"
-              color="danger"
-              aria-label={i18n.translate('xpack.lens.timeScale.removeLabel', {
-                defaultMessage: 'Remove normalizing by time unit',
-              })}
-              onClick={() => {
-                updateLayer(setTimeScaling(columnId, layer, undefined));
-              }}
-              iconType="cross"
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiFormRow>
   );

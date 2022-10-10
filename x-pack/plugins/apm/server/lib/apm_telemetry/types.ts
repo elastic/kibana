@@ -24,6 +24,47 @@ export interface AggregatedTransactionsCounts {
   transaction_count: number;
 }
 
+export interface APMPerService {
+  service_id: string;
+  timed_out: boolean;
+  cloud: {
+    availability_zones: string[];
+    regions: string[];
+    providers: string[];
+  };
+  faas: {
+    trigger: {
+      type: string[];
+    };
+  };
+  agent: {
+    name: string;
+    version: string;
+  };
+  service: {
+    language: {
+      name: string;
+      version: string;
+    };
+    framework: {
+      name: string;
+      version: string;
+    };
+    runtime: {
+      name: string;
+      version: string;
+    };
+  };
+  kubernetes: {
+    pod: {
+      name: string;
+    };
+  };
+  container: {
+    id: string;
+  };
+}
+
 export interface APMUsage {
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
@@ -130,6 +171,11 @@ export interface APMUsage {
       };
     };
   };
+  service_groups: {
+    kuery_fields: string[];
+    total: number;
+  };
+  per_service: APMPerService[];
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
@@ -143,7 +189,9 @@ export interface APMUsage {
     | 'agents'
     | 'indices_stats'
     | 'cardinality'
-    | 'environments',
+    | 'environments'
+    | 'service_groups'
+    | 'per_service',
     { took: { ms: number } }
   >;
 }

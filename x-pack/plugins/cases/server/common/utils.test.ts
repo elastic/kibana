@@ -9,11 +9,14 @@ import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
+  CaseConnector,
   CaseResponse,
+  CaseSeverity,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
   CommentType,
+  ConnectorTypes,
 } from '../../common/api';
 import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
 import {
@@ -29,7 +32,9 @@ import {
   extractLensReferencesFromCommentString,
   getOrUpdateLensReferences,
   asArray,
+  transformNewCase,
 } from './utils';
+import { newCase } from '../routes/api/__mocks__/request_responses';
 
 interface CommentReference {
   ids: string[];
@@ -67,6 +72,187 @@ function createCommentFindResponse(
 }
 
 describe('common utils', () => {
+  describe('transformNewCase', () => {
+    beforeAll(() => {
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    const connector: CaseConnector = {
+      id: '123',
+      name: 'My connector',
+      type: ConnectorTypes.jira,
+      fields: { issueType: 'Task', priority: 'High', parent: null },
+    };
+
+    it('transform correctly', () => {
+      const myCase = {
+        newCase: { ...newCase, connector },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with severity provided', () => {
+      const myCase = {
+        newCase: { ...newCase, connector, severity: CaseSeverity.MEDIUM },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "medium",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with assignees provided', () => {
+      const myCase = {
+        newCase: { ...newCase, connector, assignees: [{ uid: '1' }] },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [
+            Object {
+              "uid": "1",
+            },
+          ],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+  });
+
   describe('transformCases', () => {
     it('transforms correctly', () => {
       const casesMap = new Map<string, CaseResponse>(
@@ -87,6 +273,7 @@ describe('common utils', () => {
         Object {
           "cases": Array [
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -110,6 +297,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "defacement",
@@ -126,6 +314,7 @@ describe('common utils', () => {
               "version": "WzAsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -149,6 +338,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "Data Destruction",
@@ -165,6 +355,7 @@ describe('common utils', () => {
               "version": "WzQsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -192,6 +383,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "LOLBins",
@@ -208,6 +400,7 @@ describe('common utils', () => {
               "version": "WzUsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -239,6 +432,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "closed",
               "tags": Array [
                 "LOLBins",
@@ -276,6 +470,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -303,6 +498,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -331,6 +527,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -358,6 +555,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -387,6 +585,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -436,6 +635,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -466,6 +666,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -489,6 +690,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "defacement",
@@ -581,6 +783,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": "elastic@elastic.co",
             "full_name": "Elastic",
+            "profile_uid": undefined,
             "username": "elastic",
           },
           "owner": "securitySolution",
@@ -610,6 +813,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": undefined,
             "full_name": undefined,
+            "profile_uid": undefined,
             "username": undefined,
           },
           "owner": "securitySolution",
@@ -642,6 +846,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": null,
             "full_name": null,
+            "profile_uid": undefined,
             "username": null,
           },
           "owner": "securitySolution",
@@ -831,7 +1036,11 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        makeLensEmbeddableFactory(() => ({}), {}),
+        makeLensEmbeddableFactory(
+          () => ({}),
+          () => ({}),
+          {}
+        ),
         commentString
       );
 
@@ -930,7 +1139,11 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const updatedReferences = getOrUpdateLensReferences(
-        makeLensEmbeddableFactory(() => ({}), {}),
+        makeLensEmbeddableFactory(
+          () => ({}),
+          () => ({}),
+          {}
+        ),
         newCommentString,
         {
           references: currentCommentReferences,

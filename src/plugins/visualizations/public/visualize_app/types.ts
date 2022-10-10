@@ -10,6 +10,8 @@ import type { EventEmitter } from 'events';
 import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   CoreStart,
   PluginInitializerContext,
@@ -25,10 +27,11 @@ import type {
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { Query, DataPublicPluginStart, TimeRange } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
@@ -36,8 +39,7 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -51,6 +53,7 @@ import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {
+  dataView?: string;
   filters: Filter[];
   uiState: SerializableRecord;
   vis: SavedVisState;
@@ -72,6 +75,7 @@ export interface VisualizeAppStateTransitions {
   ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: SavedVisState) => VisualizeAppState;
   updateSavedQuery: (state: VisualizeAppState) => (savedQueryId?: string) => VisualizeAppState;
+  updateDataView: (state: VisualizeAppState) => (dataViewId?: string) => VisualizeAppState;
 }
 
 export type VisualizeAppStateContainer = ReduxLikeStateContainer<
@@ -83,7 +87,9 @@ export interface VisualizeServices extends CoreStart {
   stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
+  dataViewEditor: DataViewEditorStart;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  core: CoreStart;
   urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
@@ -102,11 +108,11 @@ export interface VisualizeServices extends CoreStart {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   presentationUtil: PresentationUtilPluginStart;
-  usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface VisInstance {
@@ -140,6 +146,7 @@ export interface EditorRenderProps {
   query?: Query;
   savedSearch?: SavedSearch;
   uiState: PersistedState;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */

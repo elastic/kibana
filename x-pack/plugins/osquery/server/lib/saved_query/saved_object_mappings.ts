@@ -6,14 +6,34 @@
  */
 
 import { produce } from 'immer';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
+  usageMetricSavedObjectType,
 } from '../../../common/types';
 
+export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    count: {
+      type: 'long',
+    },
+    errors: {
+      type: 'long',
+    },
+  },
+};
+
+export const usageMetricType: SavedObjectsType = {
+  name: usageMetricSavedObjectType,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: usageMetricSavedObjectMappings,
+};
+
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     description: {
       type: 'text',
@@ -107,6 +127,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -175,6 +196,7 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',

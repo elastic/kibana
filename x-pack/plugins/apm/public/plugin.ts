@@ -29,11 +29,13 @@ import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
 } from '@kbn/alerting-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
   FetchDataParams,
   METRIC_TYPE,
@@ -47,6 +49,8 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
+import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import {
   getApmEnrollmentFlyoutData,
@@ -57,6 +61,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ConfigSchema } from '.';
+import { APMServiceDetailLocator } from './locator/service_detail_locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -72,6 +77,7 @@ export interface ApmPluginSetupDeps {
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -88,11 +94,23 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  infra?: InfraClientStartExports;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  storage: IStorageWrapper;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
+
+const allServicesTitle = i18n.translate(
+  'xpack.apm.navigation.allServicesTitle',
+  {
+    defaultMessage: 'All services',
+  }
+);
+
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
@@ -104,6 +122,20 @@ const dependenciesTitle = i18n.translate(
   'xpack.apm.navigation.dependenciesTitle',
   {
     defaultMessage: 'Dependencies',
+  }
+);
+
+const apmSettingsTitle = i18n.translate(
+  'xpack.apm.navigation.apmSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+const apmStorageExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.apmStorageExplorerTitle',
+  {
+    defaultMessage: 'Storage Explorer',
   }
 );
 
@@ -162,7 +194,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends',
+                    path: '/dependencies/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -172,7 +204,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_backend'
+                          'side_nav_dependency'
                         );
                       }
                     },
@@ -270,15 +302,29 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           ? [
               {
                 id: 'service-groups-list',
-                title: 'Service groups',
+                title: servicesTitle,
                 path: '/service-groups',
               },
             ]
           : []),
-        { id: 'services', title: servicesTitle, path: '/services' },
+        {
+          id: 'services',
+          title: serviceGroupsEnabled ? allServicesTitle : servicesTitle,
+          path: '/services',
+        },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        {
+          id: 'dependencies',
+          title: dependenciesTitle,
+          path: '/dependencies/inventory',
+        },
+        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'storage-explorer',
+          title: apmStorageExplorerTitle,
+          path: '/storage-explorer',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -301,7 +347,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     registerApmAlerts(observabilityRuleTypeRegistry);
 
-    return {};
+    const locator = plugins.share.url.locators.create(
+      new APMServiceDetailLocator(core.uiSettings)
+    );
+
+    return {
+      locator,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;

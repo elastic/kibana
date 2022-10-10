@@ -165,7 +165,7 @@ export const TagCloudChart = ({
       }
 
       fireEvent({
-        name: 'filterBucket',
+        name: 'filter',
         data: {
           data: [
             {

@@ -17,16 +17,21 @@ export type StaticPage =
   | 'data_streams'
   | 'settings'
   | 'settings_edit_fleet_server_hosts'
-  | 'settings_create_outputs';
+  | 'settings_create_outputs'
+  | 'settings_create_download_sources'
+  | 'debug';
 
 export type DynamicPage =
   | 'integrations_all'
   | 'integrations_installed'
+  | 'integrations_installed_updates_available'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
   | 'integration_details_settings'
   | 'integration_details_custom'
+  | 'integration_details_language_clients'
+  | 'integration_details_api_reference'
   | 'integration_policy_edit'
   | 'integration_policy_upgrade'
   | 'policy_details'
@@ -36,12 +41,13 @@ export type DynamicPage =
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs'
-  | 'settings_edit_outputs';
+  | 'settings_edit_outputs'
+  | 'settings_edit_download_sources';
 
 export type Page = StaticPage | DynamicPage;
 
 export interface DynamicPagePathValues {
-  [key: string]: string;
+  [key: string]: string | boolean;
 }
 
 export const FLEET_BASE_PATH = '/app/fleet';
@@ -66,6 +72,9 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
+  settings_create_download_sources: '/settings/create-download-sources',
+  settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
+  debug: '/_debug',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
@@ -76,12 +85,15 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?',
   integrations_installed: '/installed/:category?',
+  integrations_installed_updates_available: '/installed/updates_available/:category?',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
   integration_details_assets: '/detail/:pkgkey/assets',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
+  integration_details_api_reference: '/detail/:pkgkey/api-reference',
+  integration_details_language_clients: '/language_clients/:pkgkey/overview',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
@@ -104,6 +116,17 @@ export const pagePathGetters: {
     const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
   },
+  integrations_installed_updates_available: ({
+    query,
+    category,
+  }: {
+    query?: string;
+    category?: string;
+  }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/installed/updates_available${categoryPath}${queryParams}`];
+  },
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
@@ -124,15 +147,24 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/custom${integration ? `?integration=${integration}` : ''}`,
   ],
+  integration_details_api_reference: ({ pkgkey, integration }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/detail/${pkgkey}/api-reference${integration ? `?integration=${integration}` : ''}`,
+  ],
   integration_policy_edit: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
   // Upgrades happen on the same edit form, just with a flag set. Separate page record here
-  // allows us to set different breadcrumbds for upgrades when needed.
+  // allows us to set different breadcrumbs for upgrades when needed.
   integration_policy_upgrade: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
+  ],
+  // This route allows rendering custom language integration pages registered in the language_client plugin
+  integration_details_language_clients: ({ pkgkey }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/language_clients/${pkgkey}/overview`,
   ],
   policies: () => [FLEET_BASE_PATH, '/policies'],
   policies_list: () => [FLEET_BASE_PATH, '/policies'],
@@ -140,11 +172,17 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
-    FLEET_BASE_PATH,
-    // prettier-ignore
-    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${agentPolicyId ? `?policyId=${agentPolicyId}` : ''}`,
-  ],
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
+    const qs = stringify({
+      ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
+      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+    });
+    return [
+      FLEET_BASE_PATH,
+      // prettier-ignore
+      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+    ];
+  },
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
@@ -168,7 +206,19 @@ export const pagePathGetters: {
   ],
   settings_edit_outputs: ({ outputId }) => [
     FLEET_BASE_PATH,
-    FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId),
+    FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId as string),
+  ],
+  settings_edit_download_sources: ({ downloadSourceId }) => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_download_sources.replace(
+      ':downloadSourceId',
+      downloadSourceId as string
+    ),
   ],
   settings_create_outputs: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings_create_outputs],
+  settings_create_download_sources: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_create_download_sources,
+  ],
+  debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
 };

@@ -6,9 +6,9 @@
  */
 
 import { mapValues } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import {
   getInternalArtifactMock,
   getInternalArtifactMockWithDiffs,

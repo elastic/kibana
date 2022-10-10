@@ -18,11 +18,13 @@ import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
 } from '../../../types';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
   return {
     ...core,
+    actions: { validateEmailAddresses: jest.fn() },
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
@@ -40,6 +42,9 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     setBreadcrumbs: jest.fn(),
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
+    dataViewEditor: {
+      openEditor: jest.fn(),
+    } as unknown as DataViewEditorStart,
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),

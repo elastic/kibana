@@ -206,7 +206,7 @@ test('should call updateSourceData with feature collection with updated feature 
   expect(onJoinError.notCalled);
 });
 
-test('should call updateSourceData when no results returned from terms aggregation', async () => {
+test('should call updateSourceData when no results returned from terms aggregation (properties map is undefined)', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
@@ -245,6 +245,58 @@ test('should call updateSourceData when no results returned from terms aggregati
         type: 'Feature',
         properties: {
           [COUNT_PROPERTY_NAME]: 20,
+          [FEATURE_VISIBLE_PROPERTY_NAME]: false,
+          [LEFT_FIELD]: 'bravo',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [-100, 40],
+        },
+      },
+    ],
+  });
+  expect(onJoinError.notCalled);
+});
+
+test('should call updateSourceData when no results returned from terms aggregation (properties map is empty)', async () => {
+  const updateSourceData = sinon.spy();
+  const onJoinError = sinon.spy();
+
+  await performInnerJoins(
+    {
+      refreshed: false,
+      featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
+    },
+    [
+      {
+        dataHasChanged: true,
+        join: innerJoin,
+        propertiesMap: new Map<string, Record<string | number, unknown>>(),
+      },
+    ],
+    updateSourceData,
+    onJoinError
+  );
+
+  const firstCallArgs = updateSourceData.args[0];
+  const updateSourceDataFeatureCollection = firstCallArgs[0];
+  expect(updateSourceDataFeatureCollection).toEqual({
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {
+          [FEATURE_VISIBLE_PROPERTY_NAME]: false,
+          [LEFT_FIELD]: 'alpha',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [-112, 46],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: {
           [FEATURE_VISIBLE_PROPERTY_NAME]: false,
           [LEFT_FIELD]: 'bravo',
         },

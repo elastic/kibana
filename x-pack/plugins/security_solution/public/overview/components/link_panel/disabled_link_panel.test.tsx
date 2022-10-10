@@ -37,4 +37,19 @@ describe('DisabledLinkPanel', () => {
     );
     expect(screen.getByRole('link')).toHaveAttribute('href', defaultProps.docLink);
   });
+
+  it('renders more buttons', () => {
+    const moreButtons: React.ReactElement = <div data-test-subj="more-button">{'More Button'}</div>;
+    const testProps = {
+      ...defaultProps,
+      moreButtons,
+    };
+    render(
+      <TestProviders>
+        <DisabledLinkPanel {...testProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('more-button')).toBeInTheDocument();
+  });
 });

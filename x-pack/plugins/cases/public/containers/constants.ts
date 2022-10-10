@@ -5,5 +5,36 @@
  * 2.0.
  */
 
+import { SingleCaseMetricsFeature } from './types';
+
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 5;
+
+export const casesQueriesKeys = {
+  all: ['cases'] as const,
+  users: ['users'] as const,
+  connectors: ['connectors'] as const,
+  connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
+  casesList: () => [...casesQueriesKeys.all, 'list'] as const,
+  casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
+  casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
+  cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
+  caseView: () => [...casesQueriesKeys.all, 'case'] as const,
+  case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
+  caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
+    [...casesQueriesKeys.case(id), 'metrics', features] as const,
+  userActions: (id: string, connectorId: string) =>
+    [...casesQueriesKeys.case(id), 'user-actions', connectorId] as const,
+  userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,
+  userProfilesList: (ids: string[]) => [...casesQueriesKeys.userProfiles(), ids] as const,
+  currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,
+  suggestUsers: (params: unknown) => [...casesQueriesKeys.users, 'suggest', params] as const,
+  connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
+  license: () => [...casesQueriesKeys.connectors, 'license'] as const,
+  tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+};
+
+export const casesMutationsKeys = {
+  deleteCases: ['delete-cases'] as const,
+  updateCases: ['update-cases'] as const,
+};

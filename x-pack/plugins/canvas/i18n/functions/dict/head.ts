@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { head } from '../../../canvas_plugin_src/functions/common/head';
+import type { head } from '../../../canvas_plugin_src/functions/common/head';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE } from '../../constants';

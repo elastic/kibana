@@ -6,15 +6,16 @@ experimental[]
 
 Use the event log index to determine:
 
-* Whether a rule successfully ran but its associated actions did not
+* Whether a rule ran successfully but its associated actions did not
 * Whether a rule was ever activated
-* Additional information about rule execution errors
-* Duration times for rule and action executions
+* Additional information about errors when the rule ran
+* Run durations for the rules and actions
 
 [float]
-==== Example Event Log Queries
+==== Example event log queries
 
-Event log query to look at all event related to a specific rule id:
+The following event log query looks at all events related to a specific rule id:
+
 [source, txt]
 --------------------------------------------------
 GET /.kibana-event-log*/_search
@@ -77,7 +78,9 @@ GET /.kibana-event-log*/_search
 }
 --------------------------------------------------
 
-Event log query to look at all events related to executing a rule or action. These events include duration.
+The following event log query looks at all events related to running a rule or
+action. These events include duration:
+
 [source, txt]
 --------------------------------------------------
 GET /.kibana-event-log*/_search
@@ -124,8 +127,10 @@ GET /.kibana-event-log*/_search
 }
 --------------------------------------------------
 
-Event log query to look at the errors. 
-You should see an `error.message` property in that event, with a message from the action executor that might provide more detail on why the action encountered an error:
+The following event log query looks at the errors. You should see an
+`error.message` property in that event, with a message that might provide more
+details about why the action encountered an error:
+
 [source, txt]
 --------------------------------------------------
 {
@@ -150,7 +155,9 @@ You should see an `error.message` property in that event, with a message from th
 }
 --------------------------------------------------
 
-And see the errors for the rules you might provide the next search query:
+You might also see the errors for the rules, which can use in the next search
+query. For example:
+
 [source, txt]
 --------------------------------------------------
 {

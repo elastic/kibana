@@ -7,7 +7,7 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
 export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,

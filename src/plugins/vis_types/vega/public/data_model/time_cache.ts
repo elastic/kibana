@@ -7,7 +7,7 @@
  */
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { CacheBounds } from './types';
 
 /**

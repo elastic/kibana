@@ -9,21 +9,20 @@ import * as runtimeTypes from 'io-ts';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { stringEnum, unionWithNullType } from '../../utility_types';
-import { NoteResult, NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
-import {
-  PinnedEventToReturnSavedObjectRuntimeType,
-  PinnedEventSavedObject,
-  PinnedEvent,
-} from './pinned_event';
+import type { NoteResult, NoteSavedObject } from './note';
+import { NoteSavedObjectToReturnRuntimeType } from './note';
+import type { PinnedEvent } from './pinned_event';
+import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
   outcome as savedObjectResolveOutcome,
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
-import { FlowTarget } from '../../search_strategy/security_solution/network';
+import type { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
-import { Direction, Maybe } from '../../search_strategy';
+import type { Maybe } from '../../search_strategy';
+import { Direction } from '../../search_strategy';
 
 export * from './actions';
 export * from './cells';
@@ -201,12 +200,14 @@ export const TimelineStatusLiteralRt = runtimeTypes.union([
 
 const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
 
-export type TimelineStatusLiteral = runtimeTypes.TypeOf<typeof TimelineStatusLiteralRt>;
 export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
 export enum RowRendererId {
+  /** event.kind: signal */
+  alert = 'alert',
+  /** endpoint alerts (created on the endpoint) */
   alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
@@ -301,8 +302,6 @@ export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>
 
 export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
 
-export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
-
 /**
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
  * other saved objects.
@@ -315,32 +314,30 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
 
 export enum TimelineId {
   usersPageEvents = 'users-page-events',
-  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
-  hostsPageExternalAlerts = 'hosts-page-external-alerts',
-  hostsPageSessions = 'hosts-page-sessions',
+  networkPageEvents = 'network-page-events',
+  hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
-  networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.usersPageEvents),
-  runtimeTypes.literal(TimelineId.usersPageExternalAlerts),
   runtimeTypes.literal(TimelineId.hostsPageEvents),
-  runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.networkPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
-  runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
   runtimeTypes.literal(TimelineId.rulePreview),
+  runtimeTypes.literal(TimelineId.kubernetesPageSessions),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
@@ -422,17 +419,6 @@ export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResp
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
- * All Timeline Saved object type with metadata
- */
-
-export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
-  total: runtimeTypes.number,
-  data: TimelineSavedToReturnObjectRuntimeType,
-});
-
-export type AllTimelineSavedObject = runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType>;
-
-/**
  * Import/export timelines
  */
 
@@ -453,16 +439,6 @@ export interface ExportTimelineNotFoundError {
   statusCode: number;
   message: string;
 }
-
-export interface BulkGetInput {
-  type: string;
-  id: string;
-}
-
-export type NotesAndPinnedEventsByTimelineId = Record<
-  string,
-  { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
->;
 
 export const importTimelineResultSchema = runtimeTypes.exact(
   runtimeTypes.type({
@@ -526,7 +502,7 @@ export type TimelineExpandedNetworkType =
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       };
     }
   | EmptyObject;

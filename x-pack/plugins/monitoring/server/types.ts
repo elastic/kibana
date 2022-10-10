@@ -34,7 +34,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { RouteConfig, RouteMethod } from '@kbn/core/server';
+import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -124,6 +124,7 @@ export interface LegacyRequest<Params = any, Query = any, Body = any> {
   payload: Body;
   params: Params;
   query: Query;
+  headers: Headers;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
@@ -198,11 +199,7 @@ export type Pipeline = {
   [key in PipelineMetricKey]?: number;
 };
 
-export type PipelineMetricKey =
-  | 'logstash_cluster_pipeline_throughput'
-  | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count'
-  | 'logstash_node_pipeline_throughput';
+export type PipelineMetricKey = PipelineThroughputMetricKey | PipelineNodeCountMetricKey;
 
 export type PipelineThroughputMetricKey =
   | 'logstash_cluster_pipeline_throughput'
@@ -210,16 +207,18 @@ export type PipelineThroughputMetricKey =
 
 export type PipelineNodeCountMetricKey =
   | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count';
+  | 'logstash_cluster_pipeline_nodes_count'
+  | 'logstash_node_pipeline_node_count'
+  | 'logstash_node_pipeline_nodes_count';
 
 export interface PipelineWithMetrics {
   id: string;
-  metrics: {
-    logstash_cluster_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_cluster_pipeline_node_count?: PipelineMetricsProcessed;
-    logstash_node_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_node_pipeline_node_count?: PipelineMetricsProcessed;
-  };
+  metrics:
+    | {
+        [key in PipelineMetricKey]: PipelineMetricsProcessed | undefined;
+      }
+    // backward compat with references that don't properly type the metric keys
+    | { [key: string]: PipelineMetricsProcessed | undefined };
 }
 
 export interface PipelineResponse {

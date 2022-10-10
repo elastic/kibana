@@ -30,6 +30,24 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('case metrics', () => {
+    it('accepts the features as string', async () => {
+      const newCase = await createCase(supertest, getPostCaseRequest());
+
+      const metrics = await getCaseMetrics({
+        supertest,
+        caseId: newCase.id,
+        features: 'connectors',
+      });
+
+      expect(metrics).to.eql({
+        connectors: {
+          total: 0,
+        },
+      });
+
+      await deleteAllCaseItems(es);
+    });
+
     describe('closed case from kbn archive', () => {
       const closedCaseId = 'e49ad6e0-cf9d-11eb-a603-13e7747d215z';
 

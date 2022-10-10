@@ -20,8 +20,6 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { ace } from '@kbn/es-ui-shared-plugin/public';
-// @ts-ignore
-import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
@@ -35,6 +33,7 @@ import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -55,10 +54,11 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `GET _search
+const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }`;
 
@@ -66,7 +66,15 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService, http },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+      storage,
+    },
     docLinkVersion,
   } = useServicesContext();
 
@@ -193,19 +201,41 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       }
     }
 
+    function restoreFolds() {
+      if (editor) {
+        const foldRanges = storage.get(StorageKeys.FOLDS, []);
+        editor.getCoreEditor().addFoldsAtRanges(foldRanges);
+      }
+    }
+
+    restoreFolds();
+
+    function saveFoldsOnChange() {
+      if (editor) {
+        editor.getCoreEditor().on('changeFold', () => {
+          const foldRanges = editor.getCoreEditor().getAllFoldRanges();
+          storage.set(StorageKeys.FOLDS, foldRanges);
+        });
+      }
+    }
+
+    saveFoldsOnChange();
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
+    autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      clearSubscriptions();
+      autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
+        // Close autocomplete popup on unmount
+        editorInstanceRef.current?.getCoreEditor().detachCompleter();
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
@@ -217,6 +247,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     setInputEditor,
     settingsService,
     http,
+    autocompleteInfo,
+    storage,
   ]);
 
   useEffect(() => {
@@ -227,8 +259,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    const { isKeyboardShortcutsDisabled } = settings;
-    if (!isKeyboardShortcutsDisabled) {
+    const { isKeyboardShortcutsEnabled } = settings;
+    if (isKeyboardShortcutsEnabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
         sendCurrentRequest,

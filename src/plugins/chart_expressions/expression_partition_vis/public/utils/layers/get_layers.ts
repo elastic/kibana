@@ -58,7 +58,10 @@ export const getLayers = (
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
-      fillLabel,
+      fillLabel:
+        layerIndex === 0 && chartType === ChartTypes.MOSAIC
+          ? { ...fillLabel, minFontSize: 14, maxFontSize: 14, clipText: true }
+          : fillLabel,
       sortPredicate,
       shape: {
         fillColor: (d) =>

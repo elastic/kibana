@@ -14,11 +14,21 @@
 import _ from 'lodash';
 import { DataView } from './data_view';
 
-// Takes a hit, merges it with any stored/scripted fields, and with the metaFields
-// returns a flattened version
-
-function flattenHit(indexPattern: DataView, hit: Record<string, any>, deep: boolean) {
-  const flat = {} as Record<string, any>;
+/**
+ * Takes a hit, merges it with whatever stored/scripted fields, and with the metaFields
+ * returns a flattened version
+ *
+ * @param {DataView} indexPattern
+ * @param {Record<string, unknown>} hit - userland data
+ * @param {boolean} deep - whether to look into objects within arrays
+ * @returns {Record<string, unknown[]>}
+ */
+function flattenHit(
+  indexPattern: DataView,
+  hit: Record<string, unknown>,
+  deep: boolean
+): Record<string, unknown[]> {
+  const flat = {} as Record<string, unknown[]>;
 
   // recursively merge _source
   const fields = indexPattern.fields.getByName;
@@ -61,8 +71,11 @@ function flattenHit(indexPattern: DataView, hit: Record<string, any>, deep: bool
   return flat;
 }
 
-function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<string, any>) {
-  return function (flattened: Record<string, any>) {
+function decorateFlattenedWrapper(
+  hit: Record<string, unknown[]>,
+  metaFields: Record<string, string>
+) {
+  return function (flattened: Record<string, unknown>) {
     // assign the meta fields
     _.each(metaFields, function (meta) {
       if (meta === '_source') return;
@@ -70,7 +83,7 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
     });
 
     // unwrap computed fields
-    _.forOwn(hit.fields, function (val, key: any) {
+    _.forOwn(hit.fields, function (val, key: string) {
       // Flatten an array with 0 or 1 elements to a single value.
       if (Array.isArray(val) && val.length <= 1) {
         flattened[key] = val[0];
@@ -108,8 +121,8 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
  *
  * @internal
  */
-export function flattenHitWrapper(dataView: DataView, metaFields = {}, cache = new WeakMap()) {
-  return function cachedFlatten(hit: Record<string, any>, deep = false) {
+export function flattenHitWrapper<T>(dataView: DataView, metaFields = {}, cache = new WeakMap()) {
+  return function cachedFlatten(hit: Record<string, unknown[]>, deep = false) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);
     const flattened = cached || flattenHit(dataView, hit, deep);

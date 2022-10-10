@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { map, mergeMap, catchError } from 'rxjs/operators';
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
+import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
@@ -24,11 +24,12 @@ import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
-import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
+
+const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
@@ -44,13 +45,6 @@ export const ruleRegistrySearchStrategyProvider = (
   const requestUserEs = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
-      // We want to ensure this request came from our UI. We can't really do this
-      // but we have a best effort we can try
-      if (!getIsKibanaRequest(deps.request.headers)) {
-        throw Boom.notFound(
-          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
-        );
-      }
       // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
       // is different than every other solution so we need to special case
       // those requests.
@@ -89,17 +83,16 @@ export const ruleRegistrySearchStrategyProvider = (
               );
               return accum;
             }
-
-            return [
-              ...accum,
-              ...ruleDataService
-                .findIndicesByFeature(featureId, Dataset.alerts)
-                .map((indexInfo) => {
-                  return featureId === 'siem'
-                    ? `${indexInfo.baseName}-${space?.id ?? ''}*`
-                    : `${indexInfo.baseName}*`;
-                }),
-            ];
+            const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
+            if (alertIndexInfo) {
+              return [
+                ...accum,
+                featureId === 'siem'
+                  ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
+                  : `${alertIndexInfo.baseName}*`,
+              ];
+            }
+            return accum;
           }, []);
 
           if (indices.length === 0) {
@@ -121,16 +114,21 @@ export const ruleRegistrySearchStrategyProvider = (
           const sort = request.sort ?? [];
 
           const query = {
-            bool: {
-              filter,
-            },
+            ...(request.query?.ids != null
+              ? { ids: request.query?.ids }
+              : {
+                  bool: {
+                    filter,
+                  },
+                }),
           };
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           const params = {
             index: indices,
             body: {
               _source: false,
-              fields: ['*'],
+              // TODO the fields need to come from the request
+              fields: !isEmpty(request?.fields) ? request?.fields : EMPTY_FIELDS,
               sort,
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,

@@ -7,15 +7,17 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { SessionsComponentsProps } from './types';
-import { ESBoolQuery } from '../../../../common/typed_json';
+import type { SessionsComponentsProps } from './types';
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
-import { sessionsDefaultModel } from './default_headers';
+import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { CellRenderer } from './cell_renderer';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { useLicense } from '../../hooks/use_license';
+import { TimelineId } from '../../../../common/types/timeline';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -24,15 +26,8 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
     bool: {
       filter: [
         {
-          bool: {
-            should: [
-              {
-                match: {
-                  'process.entry_leader.same_as_process': true,
-                },
-              },
-            ],
-            minimum_should_match: 1,
+          exists: {
+            field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
           },
         },
       ],
@@ -41,10 +36,10 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   meta: {
     alias: null,
     disabled: false,
-    key: 'process.entry_leader.same_as_process',
+    key: 'process.entry_leader.entity_id',
     negate: false,
     params: {},
-    type: 'boolean',
+    type: 'string',
   },
 };
 
@@ -55,6 +50,8 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   pageFilters,
   startDate,
   filterQuery,
+  columns = sessionsHeaders,
+  defaultColumns = sessionsHeaders,
 }) => {
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
@@ -79,9 +76,13 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     ],
     [pageFilters, parsedFilterQuery]
   );
-
-  const ACTION_BUTTON_COUNT = 5;
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT =
+    isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions ? 5 : 4;
+  const leadingControlColumns = useMemo(
+    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
+    [ACTION_BUTTON_COUNT]
+  );
 
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
@@ -90,12 +91,12 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
         pageFilters={sessionsFilter}
-        defaultModel={sessionsDefaultModel}
+        defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
         entityType={entityType}
         id={timelineId}
         leadingControlColumns={leadingControlColumns}
-        renderCellValue={CellRenderer}
+        renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}

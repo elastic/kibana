@@ -20,6 +20,11 @@ export interface StaticLookupFormatEditorFormatParams {
   unknownKeyValue: string;
 }
 
+interface LookupItem {
+  key: string;
+  value: string;
+}
+
 interface StaticLookupItem {
   key: string;
   value: string;
@@ -42,7 +47,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
   addLookup = () => {
     const lookupEntries = [...(this.props.formatParams.lookupEntries || [])];
     this.onChange({
-      lookupEntries: [...lookupEntries, {}],
+      lookupEntries: [...lookupEntries, {} as LookupItem],
     });
   };
 

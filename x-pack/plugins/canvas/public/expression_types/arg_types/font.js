@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, mapValues } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { openSans } from '../../../common/lib/fonts';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { TextStylePicker } from '../../components/text_style_picker';

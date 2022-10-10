@@ -100,6 +100,7 @@ describe('GaugeComponent', function () {
       formatFactory: formatService.deserialize,
       paletteService: await paletteThemeService.getPalettes(),
       uiState,
+      renderComplete: jest.fn(),
     };
   });
 
@@ -210,45 +211,6 @@ describe('GaugeComponent', function () {
   });
 
   describe('ticks and color bands', () => {
-    it('displays auto ticks', () => {
-      const customProps = {
-        ...wrapperProps,
-        args: {
-          ...wrapperProps.args,
-          metric: 'metric-accessor',
-          min: 'min-accessor',
-          max: 'max-accessor',
-        },
-      };
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 3.33, 6.67, 10]);
-    });
-    it('spreads auto ticks only over the [min, max] domain if color bands defined bigger domain', () => {
-      const palette = {
-        type: 'palette' as const,
-        name: 'custom',
-        params: {
-          colors: ['#aaa', '#bbb', '#ccc'],
-          gradient: false,
-          stops: [10, 20, 30] as unknown as ColorStop[],
-          range: 'number',
-          rangeMin: 0,
-          rangeMax: 30,
-        },
-      };
-      const customProps = {
-        ...wrapperProps,
-        args: {
-          ...wrapperProps.args,
-          metric: 'metric-accessor',
-          min: 'min-accessor',
-          max: 'max-accessor',
-          palette,
-        },
-      } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 3.33, 6.67, 10]);
-    });
     it('sets proper color bands and ticks on color bands for values smaller than maximum', () => {
       const palette = {
         type: 'palette' as const,
@@ -277,7 +239,7 @@ describe('GaugeComponent', function () {
       expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 4, 10]);
       expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 4, 10]);
     });
-    it('sets proper color bands and ticks on color bands if palette steps are smaller than minimum', () => {
+    it('sets proper color bands if palette steps are smaller than minimum', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -302,10 +264,9 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 4, 10]);
       expect(goal.prop('bands')).toEqual([0, 4, 10]);
     });
-    it('sets proper color bands and ticks on color bands if percent palette steps are smaller than 0', () => {
+    it('sets proper color bands if percent palette steps are smaller than 0', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -330,10 +291,9 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 8, 10]);
       expect(goal.prop('bands')).toEqual([0, 8, 10]);
     });
-    it('doesnt set ticks for values differing <10%', () => {
+    it('doesnt set bands for values differing <10%', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -358,10 +318,9 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 1, 3, 10]);
       expect(goal.prop('bands')).toEqual([0, 1, 1.5, 3, 10]);
     });
-    it('sets proper color bands and ticks on color bands for values greater than maximum', () => {
+    it('sets proper color bands for values greater than maximum', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -386,7 +345,6 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 10]);
       expect(goal.prop('bands')).toEqual([0, 10]);
     });
     it('passes number bands from color palette with no stops defined', () => {
@@ -415,7 +373,6 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 5, 10]);
       expect(goal.prop('bands')).toEqual([0, 5, 10]);
     });
     it('passes percent bands from color palette', () => {
@@ -444,7 +401,6 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 2, 6, 8, 10]);
       expect(goal.prop('bands')).toEqual([0, 2, 6, 8, 10]);
     });
   });

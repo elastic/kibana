@@ -9,6 +9,11 @@ import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { tEnum } from '../../utils/t_enum';
 
+export enum LocationStatus {
+  GA = 'ga',
+  EXPERIMENTAL = 'experimental',
+}
+
 export enum BandwidthLimitKey {
   DOWNLOAD = 'download',
   UPLOAD = 'upload',
@@ -32,9 +37,12 @@ export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
 export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
 export const LocationGeoCodec = t.interface({
-  lat: t.number,
-  lon: t.number,
+  lat: t.union([t.string, t.number]),
+  lon: t.union([t.string, t.number]),
 });
+
+export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);
+export type LocationStatusType = t.TypeOf<typeof LocationStatusCodec>;
 
 export const ManifestLocationCodec = t.interface({
   url: t.string,
@@ -42,26 +50,40 @@ export const ManifestLocationCodec = t.interface({
     name: t.string,
     location: LocationGeoCodec,
   }),
-  status: t.string,
+  status: LocationStatusCodec,
 });
 
-export const ServiceLocationCodec = t.interface({
-  id: t.string,
-  label: t.string,
-  geo: LocationGeoCodec,
-  url: t.string,
-  isServiceManaged: t.boolean,
-});
+export const ServiceLocationCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    label: t.string,
+    isServiceManaged: t.boolean,
+  }),
+  t.partial({
+    url: t.string,
+    geo: LocationGeoCodec,
+    status: LocationStatusCodec,
+    isInvalid: t.boolean,
+  }),
+]);
+
+export const PublicLocationCodec = t.intersection([
+  ServiceLocationCodec,
+  t.interface({ url: t.string }),
+]);
+
+export const PublicLocationsCodec = t.array(PublicLocationCodec);
 
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
-    isServiceManaged: t.boolean,
   }),
   t.partial({
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
+    isInvalid: t.boolean,
+    isServiceManaged: t.boolean,
   }),
 ]);
 
@@ -120,3 +142,5 @@ export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiRes
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
 export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;
 export type Locations = t.TypeOf<typeof LocationsCodec>;
+export type PublicLocation = t.TypeOf<typeof PublicLocationCodec>;
+export type PublicLocations = t.TypeOf<typeof PublicLocationsCodec>;

@@ -10,9 +10,17 @@ import React from 'react';
 import { TimelineId } from '../../../../common/types';
 import { HostsType } from '../../../hosts/store/model';
 import { TestProviders } from '../../mock';
-import { EventsQueryTabBody, EventsQueryTabBodyComponentProps } from './events_query_tab_body';
+import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
+import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
+import { licenseService } from '../../hooks/use_license';
+import { mockHistory } from '../../mock/router';
+
+const mockGetDefaultControlColumn = jest.fn();
+jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
+  getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+}));
 
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
@@ -32,14 +40,37 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
-const FakeStatefulEventsViewer = () => <div>{'MockedStatefulEventsViewer'}</div>;
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => mockHistory,
+}));
+
+const FakeStatefulEventsViewer = ({ additionalFilters }: { additionalFilters: JSX.Element }) => (
+  <div>
+    {additionalFilters}
+    {'MockedStatefulEventsViewer'}
+  </div>
+);
 jest.mock('../events_viewer', () => ({ StatefulEventsViewer: FakeStatefulEventsViewer }));
 
 jest.mock('../../containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn().mockReturnValue({
-    globalFullScreen: true,
+    globalFullScreen: false,
   }),
 }));
+
+jest.mock('../../hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => false),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('EventsQueryTabBody', () => {
   const commonProps: EventsQueryTabBodyComponentProps = {
@@ -51,6 +82,10 @@ describe('EventsQueryTabBody', () => {
     startDate: new Date('2000').toISOString(),
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders EventsViewer', () => {
     const { queryByText } = render(
       <TestProviders>
@@ -59,10 +94,11 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(queryByText('MockedStatefulEventsViewer')).toBeInTheDocument();
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
   });
 
   it('renders the matrix histogram when globalFullScreen is false', () => {
-    (useGlobalFullScreen as jest.Mock).mockReturnValue({
+    (useGlobalFullScreen as jest.Mock).mockReturnValueOnce({
       globalFullScreen: false,
     });
 
@@ -72,11 +108,11 @@ describe('EventsQueryTabBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('eventsHistogramQueryPanel')).toBeInTheDocument();
+    expect(queryByTestId(`${ALERTS_EVENTS_HISTOGRAM_ID}Panel`)).toBeInTheDocument();
   });
 
   it("doesn't render the matrix histogram when globalFullScreen is true", () => {
-    (useGlobalFullScreen as jest.Mock).mockReturnValue({
+    (useGlobalFullScreen as jest.Mock).mockReturnValueOnce({
       globalFullScreen: true,
     });
 
@@ -86,7 +122,33 @@ describe('EventsQueryTabBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('eventsHistogramQueryPanel')).not.toBeInTheDocument();
+    expect(queryByTestId(`${ALERTS_EVENTS_HISTOGRAM_ID}Panel`)).not.toBeInTheDocument();
+  });
+
+  it('renders the matrix histogram stacked by events default value', () => {
+    const result = render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(result.getByTestId('header-section-supplements').querySelector('select')?.value).toEqual(
+      'event.action'
+    );
+  });
+
+  it('renders the matrix histogram stacked by alerts default value', () => {
+    const result = render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    result.getByTestId('showExternalAlertsCheckbox').click();
+
+    expect(result.getByTestId('header-section-supplements').querySelector('select')?.value).toEqual(
+      'event.module'
+    );
   });
 
   it('deletes query when unmouting', () => {
@@ -110,5 +172,29 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('only have 4 columns on Action bar for non-Enterprise user', () => {
+    render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+  });
+
+  it('shows 5 columns on Action bar for Enterprise user', () => {
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+    licenseServiceMock.isEnterprise.mockReturnValue(true);
+
+    render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import {
+import type {
   ColumnHeaderOptions,
   ColumnId,
   RowRendererId,
@@ -14,8 +14,8 @@ import {
   TimelineTypeLiteral,
 } from '.';
 
-import { Direction } from '../../search_strategy';
-import { DataProvider } from './data_provider';
+import type { Direction } from '../../search_strategy';
+import type { DataProvider } from './data_provider';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
 
@@ -33,6 +33,7 @@ export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTimeline {
   columnId: string;
   columnType: string;
+  esTypes?: string[];
   sortDirection: SortDirection;
 }
 

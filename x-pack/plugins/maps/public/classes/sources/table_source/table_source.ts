@@ -8,7 +8,6 @@
 import uuid from 'uuid';
 import { GeoJsonProperties } from 'geojson';
 import type { Query } from '@kbn/data-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
@@ -45,9 +44,9 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   readonly _descriptor: TableSourceDescriptor;
 
-  constructor(descriptor: Partial<TableSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<TableSourceDescriptor>) {
     const sourceDescriptor = TableSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
   }
 

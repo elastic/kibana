@@ -10,12 +10,12 @@ import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useNetworkTls, ID } from '../../containers/tls';
 import { TlsTable } from '../../components/tls_table';
-import { TlsQueryTabBodyProps } from './types';
+import type { FTQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
+const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
   endDate,
   filterQuery,
   flowTarget,
@@ -26,7 +26,8 @@ const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
   startDate,
   type,
 }) => {
-  const { toggleStatus } = useQueryToggle(ID);
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
@@ -36,6 +37,7 @@ const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
       endDate,
       filterQuery,
       flowTarget,
+      id: queryId,
       indexNames,
       ip,
       skip: querySkip,

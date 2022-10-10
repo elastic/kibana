@@ -14,6 +14,8 @@ You can add text labels to your Point features by configuring label style proper
 |===
 |*Label*
 |Specifies label content.
+|*Label visibility*
+|Specifies the zoom range for which labels are displayed.
 |*Label color*
 |The text color.
 |*Label size*
@@ -83,6 +85,8 @@ Manage your custom icons in <<maps-settings, Map settings>>.
 |The fill color of the polygon features.
 |*Label*
 |Specifies label content. For polygons, the label is positioned at the polygon centroid. For multi-polygons, the label is positioned at the largest polygon centroid.
+|*Label visibility*
+|Specifies the zoom range for which labels are displayed.
 |*Label color*
 |The text color.
 |*Label size*
@@ -106,6 +110,8 @@ Manage your custom icons in <<maps-settings, Map settings>>.
 |The width of the line features.
 |*Label*
 |Specifies label content. For lines, the label is positioned at the center of the line. For multi-lines, the label is positioned at the center of the longest line.
+|*Label visibility*
+|Specifies the zoom range for which labels are displayed.
 |*Label color*
 |The text color.
 |*Label size*

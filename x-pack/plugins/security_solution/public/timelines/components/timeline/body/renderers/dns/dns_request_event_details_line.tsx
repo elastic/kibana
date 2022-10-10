@@ -76,6 +76,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   field="dns.question.name"
                   isDraggable={isDraggable}
                   value={dnsQuestionName}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
             </>
@@ -93,6 +95,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   field="dns.question.type"
                   isDraggable={isDraggable}
                   value={dnsQuestionType}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
             </>
@@ -110,6 +114,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   field="dns.resolved_ip"
                   isDraggable={isDraggable}
                   value={dnsResolvedIp}
+                  isAggregatable={true}
+                  fieldType="ip"
                 />
               </TokensFlexItem>
             </>
@@ -130,6 +136,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   field="dns.response_code"
                   isDraggable={isDraggable}
                   value={dnsResponseCode}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
@@ -165,6 +173,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                     field="event.code"
                     isDraggable={isDraggable}
                     value={eventCode}
+                    isAggregatable={true}
+                    fieldType="number"
                   />
                 </TokensFlexItem>
               ) : (
@@ -176,6 +186,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                     field="winlog.event_id"
                     isDraggable={isDraggable}
                     value={winlogEventId}
+                    isAggregatable={true}
+                    fieldType="keyword"
                   />
                 </TokensFlexItem>
               )}

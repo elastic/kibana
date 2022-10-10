@@ -8,10 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '..';
 import type { IndexPatternLayer } from '../../../types';
@@ -26,7 +28,9 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
@@ -34,6 +38,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 // mocking random id generator function
@@ -302,7 +314,7 @@ describe('filters', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
         />
@@ -355,21 +367,21 @@ describe('filters', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
         );
         expect(
           instance
-            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
             .at(0)
             .text()
         ).toEqual('More than one');
         expect(
           instance
-            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(3)
+            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .at(1)
             .text()
         ).toEqual('src : 2');
       });
@@ -380,15 +392,15 @@ describe('filters', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
         );
 
         instance
-          .find('[data-test-subj="lns-customBucketContainer-remove"]')
-          .at(2)
+          .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
+          .at(0)
           .simulate('click');
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,
@@ -411,6 +423,14 @@ describe('filters', () => {
           },
         });
       });
+    });
+  });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports number of filters', () => {
+      expect(
+        filtersOperation.getMaxPossibleNumValues!(layer.columns.col1 as FiltersIndexPatternColumn)
+      ).toBe(2);
     });
   });
 });

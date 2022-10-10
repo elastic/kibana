@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react'; // eslint-disable-line no-unused-vars
+import { PureComponent } from 'react'; // eslint-disable-line no-unused-vars
 import { loadRemoteClusters } from '../services/api';
 
 export class RemoteClustersProvider extends PureComponent {

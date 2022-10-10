@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import {
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 
-import { ExceptionItemLikeOptions } from '../types';
+import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';

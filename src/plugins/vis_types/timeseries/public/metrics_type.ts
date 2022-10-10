@@ -23,11 +23,12 @@ import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
 } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR } from '../common/constants';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS } from '../common/constants';
 import { toExpressionAst } from './to_ast';
-import { getDataViewsStart } from './services';
+import { getDataViewsStart, getUISettings } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
+import { convertTSVBtoLensConfiguration } from './convert_to_lens';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -167,17 +168,24 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  navigateToLens: async (params?: VisParams) => {
-    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
-
-    const triggerConfiguration = params
-      ? await triggerTSVBtoLensConfiguration(params as Panel)
-      : null;
-    return triggerConfiguration;
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(
+        vis?.params
+          ? await convertTSVBtoLensConfiguration(vis.params as Panel, timeFilter?.getAbsoluteTime())
+          : null
+      ),
+    };
   },
+  navigateToLens: async (vis, timeFilter) =>
+    vis?.params
+      ? await convertTSVBtoLensConfiguration(vis?.params as Panel, timeFilter?.getAbsoluteTime())
+      : null,
+
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),
   }),
   requiresSearch: true,
+  suppressWarnings: () => !getUISettings().get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS),
   getUsedIndexPattern: getUsedIndexPatterns,
 };

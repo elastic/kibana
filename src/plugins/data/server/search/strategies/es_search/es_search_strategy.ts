@@ -11,10 +11,10 @@ import { tap } from 'rxjs/operators';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
-import type { SearchUsage } from '../../collectors';
+import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
-import { searchUsageObserver } from '../../collectors/usage';
+import { searchUsageObserver } from '../../collectors/search/usage';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -28,9 +28,9 @@ export const esSearchStrategyProvider = (
    * @throws `KbnServerError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
-  search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
+  search: (request, { abortSignal, transport, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
-    // See data_enhanced for other type support.
+    // See ese for other type support.
     if (request.indexType) {
       throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
@@ -48,6 +48,7 @@ export const esSearchStrategyProvider = (
         };
         const body = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
+          ...transport,
         });
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);

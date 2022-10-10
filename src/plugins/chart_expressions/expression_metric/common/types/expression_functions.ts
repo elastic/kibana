@@ -7,29 +7,29 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
+import { LayoutDirection } from '@elastic/charts';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-  Style,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
-import { VisParams, visType, LabelPositionType } from './expression_renderers';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
-  percentageMode: boolean;
-  colorMode: ColorMode;
-  showLabels: boolean;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  max?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
+  subtitle?: string;
+  secondaryPrefix?: string;
+  progressDirection: LayoutDirection;
+  color?: string;
   palette?: PaletteOutput<CustomPaletteState>;
-  font: Style;
-  labelFont: Style;
-  labelPosition: LabelPositionType;
-  metric: Array<ExpressionValueVisDimension | string>;
-  bucket?: ExpressionValueVisDimension | string;
-  colorFullBackground: boolean;
-  autoScale?: boolean;
+  maxCols: number;
+  minTiles?: number;
 }
 
 export type MetricInput = Datatable;

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from './services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -165,7 +165,7 @@ export const dashboardLibraryNotification = {
   getTooltip: () =>
     i18n.translate('dashboard.panel.libraryNotification.toolTip', {
       defaultMessage:
-        'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
+        'Editing this panel might affect other dashboards. To change this panel only, unlink it from the library.',
     }),
   getPopoverAriaLabel: () =>
     i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
@@ -188,6 +188,29 @@ export const dashboardReplacePanelAction = {
   getNoMatchingObjectsMessage: () =>
     i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
       defaultMessage: 'No matching objects found.',
+    }),
+};
+
+export const dashboardFilterNotificationBadge = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.filters', {
+      defaultMessage: 'Panel filters',
+    }),
+  getEditButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.editButton', {
+      defaultMessage: 'Edit filters',
+    }),
+  getCloseButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.closeButton', {
+      defaultMessage: 'Close',
+    }),
+  getQueryTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.queryTitle', {
+      defaultMessage: 'Query',
+    }),
+  getFiltersTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
+      defaultMessage: 'Filters',
     }),
 };
 
@@ -359,11 +382,24 @@ export const panelStorageErrorStrings = {
     }),
 };
 
-export const dashboardLoadingErrorStrings = {
+export const dashboardSavedObjectErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {
       defaultMessage: 'Error encountered while loading saved dashboard: {message}',
       values: { message },
+    }),
+  getDashboardGridError: (message: string) =>
+    i18n.translate('dashboard.loadingError.dashboardGridErrorMessage', {
+      defaultMessage: 'Unable to load dashboard: {message}',
+      values: { message },
+    }),
+  getErrorDeletingDashboardToast: () =>
+    i18n.translate('dashboard.deleteError.toastDescription', {
+      defaultMessage: 'Error encountered while deleting dashboard',
+    }),
+  getPanelTooOldError: () =>
+    i18n.translate('dashboard.loadURLError.PanelTooOld', {
+      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
     }),
 };
 
@@ -404,7 +440,7 @@ export const emptyScreenStrings = {
 /*
   Dashboard Listing Page
 */
-export const dashboardListingTable = {
+export const dashboardListingTableStrings = {
   getEntityName: () =>
     i18n.translate('dashboard.listing.table.entityName', {
       defaultMessage: 'dashboard',
@@ -414,15 +450,6 @@ export const dashboardListingTable = {
       defaultMessage: 'dashboards',
     }),
   getTableListTitle: () => getDashboardPageTitle(),
-  getTableCaption: () => getDashboardPageTitle(),
-  getTitleColumnName: () =>
-    i18n.translate('dashboard.listing.table.titleColumnName', {
-      defaultMessage: 'Title',
-    }),
-  getDescriptionColumnName: () =>
-    i18n.translate('dashboard.listing.table.descriptionColumnName', {
-      defaultMessage: 'Description',
-    }),
 };
 
 export const dashboardUnsavedListingStrings = {
@@ -431,8 +458,8 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'You have unsaved changes in the following {dash}:',
       values: {
         dash: plural
-          ? dashboardListingTable.getEntityNamePlural()
-          : dashboardListingTable.getEntityName(),
+          ? dashboardListingTableStrings.getEntityNamePlural()
+          : dashboardListingTableStrings.getEntityName(),
       },
     }),
   getLoadingTitle: () =>

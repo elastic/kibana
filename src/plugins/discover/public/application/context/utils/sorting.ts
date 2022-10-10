@@ -15,19 +15,19 @@ export enum SortDirection {
 
 /**
  * The list of field names that are allowed for sorting, but not included in
- * index pattern fields.
+ * data view fields.
  */
 const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
 
 /**
  * Returns a field from the intersection of the set of sortable fields in the
- * given index pattern and a given set of candidate field names.
+ * given data view and a given set of candidate field names.
  */
-export function getFirstSortableField(indexPattern: DataView, fieldNames: string[]) {
+export function getFirstSortableField(dataView: DataView, fieldNames: string[]) {
   const sortableFields = fieldNames.filter(
     (fieldName) =>
       META_FIELD_NAMES.includes(fieldName) ||
-      (indexPattern.fields.getByName(fieldName) || { sortable: false }).sortable
+      (dataView.fields.getByName(fieldName) || { sortable: false }).sortable
   );
   return sortableFields[0];
 }

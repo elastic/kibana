@@ -7,10 +7,10 @@
 
 import React, { useMemo, useContext, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EventStats } from '../../../common/endpoint/types';
+import type { EventStats } from '../../../common/endpoint/types';
 import { useColors } from './use_colors';
 import { useLinkProps } from './use_link_props';
-import { ResolverAction } from '../store/actions';
+import type { ResolverAction } from '../store/actions';
 import { SideEffectContext } from './side_effect_context';
 import { FormattedCount } from '../../common/components/formatted_number';
 

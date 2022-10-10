@@ -47,7 +47,7 @@ export const strings = {
     }),
   getLegendSizeArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.legendSizeHelpText', {
-      defaultMessage: 'Specifies the legend size in pixels',
+      defaultMessage: 'Specifies the legend size',
     }),
   getNestedLegendArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.nestedLegendHelpText', {
@@ -123,9 +123,10 @@ export const strings = {
 export const errors = {
   moreThanNBucketsAreNotSupportedError: (maxLength: number) =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.moreThenNumberBuckets', {
-      defaultMessage: 'More than {maxLength} buckets are not supported',
+      defaultMessage: 'More than {maxLength} buckets are not supported.',
       values: { maxLength },
     }),
+
   splitRowAndSplitColumnAreSpecifiedError: () =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
       defaultMessage:

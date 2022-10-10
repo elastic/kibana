@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import {
   Actions,
   ActionTypes,
+  CaseAttributes,
+  CaseSeverity,
   CaseStatuses,
   CaseUserActionAttributes,
   ConnectorUserAction,
@@ -28,10 +36,12 @@ import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
+  EXTERNAL_REFERENCE_REF_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 
 import {
+  createCaseSavedObjectResponse,
   createConnectorObject,
   createExternalService,
   createJiraConnector,
@@ -44,8 +54,17 @@ import {
   updatedCases,
   comment,
   attachments,
+  updatedAssigneesCases,
+  originalCasesWithAssignee,
+  updatedTagsCases,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import {
+  externalReferenceAttachmentSO,
+  getPersistableStateAttachmentTypeRegistry,
+  persistableStateAttachment,
+} from '../../attachment_framework/mocks';
 
 const createConnectorUserAction = (
   overrides?: Partial<CaseUserActionAttributes>
@@ -107,6 +126,7 @@ const createCaseUserAction = (): SavedObject<CaseUserActionAttributes> => {
         description: 'a desc',
         settings: { syncAlerts: false },
         status: CaseStatuses.open,
+        severity: CaseSeverity.LOW,
         tags: [],
         owner: SECURITY_SOLUTION_OWNER,
       },
@@ -131,6 +151,7 @@ const createUserActionSO = ({
   pushedConnectorId,
   payload,
   type,
+  references = [],
 }: {
   action: UserAction;
   type?: string;
@@ -139,6 +160,7 @@ const createUserActionSO = ({
   commentId?: string;
   connectorId?: string;
   pushedConnectorId?: string;
+  references?: SavedObjectReference[];
 }): SavedObject<CaseUserActionAttributes> => {
   const defaultParams = {
     action,
@@ -161,6 +183,7 @@ const createUserActionSO = ({
       ...(attributesOverrides && { ...attributesOverrides }),
     },
     references: [
+      ...references,
       {
         type: CASE_SAVED_OBJECT,
         name: CASE_REF_NAME,
@@ -197,7 +220,39 @@ const createUserActionSO = ({
   } as SavedObject<CaseUserActionAttributes>;
 };
 
+const createPersistableStateUserAction = () => {
+  return {
+    ...createUserActionSO({
+      action: Actions.create,
+      commentId: 'persistable-state-test-id',
+      payload: {
+        comment: {
+          ...persistableStateAttachment,
+          persistableStateAttachmentState: { foo: 'foo' },
+        },
+      },
+      type: 'comment',
+      references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
+    }),
+  };
+};
+
+const createExternalReferenceUserAction = () => {
+  return {
+    ...createUserActionSO({
+      action: Actions.create,
+      commentId: 'external-reference-test-id',
+      payload: {
+        comment: omit(externalReferenceAttachmentSO, 'externalReferenceId'),
+      },
+      type: 'comment',
+      references: [{ id: 'my-id', name: EXTERNAL_REFERENCE_REF_NAME, type: 'test-so' }],
+    }),
+  };
+};
+
 const testConnectorId = (
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry,
   userAction: SavedObject<CaseUserActionAttributes>,
   path: string,
   expectedConnectorId = '1'
@@ -205,7 +260,8 @@ const testConnectorId = (
   it('does set payload.connector.id to none when it cannot find the reference', () => {
     const userActionWithEmptyRef = { ...userAction, references: [] };
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)])
+      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
+      persistableStateAttachmentTypeRegistry
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
@@ -219,7 +275,8 @@ const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-      ])
+      ]),
+      persistableStateAttachmentTypeRegistry
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -233,7 +290,8 @@ const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-      ])
+      ]),
+      persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -241,7 +299,8 @@ const testConnectorId = (
 
   it('populates the payload.connector.id', () => {
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userAction)])
+      createSOFindResponse([createUserActionFindSO(userAction)]),
+      persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);
@@ -249,6 +308,8 @@ const testConnectorId = (
 };
 
 describe('CaseUserActionService', () => {
+  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+
   beforeAll(() => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
@@ -260,7 +321,12 @@ describe('CaseUserActionService', () => {
 
   describe('transformFindResponseToExternalModel', () => {
     it('does not populate the ids when the response is an empty array', () => {
-      expect(transformFindResponseToExternalModel(createSOFindResponse([]))).toMatchInlineSnapshot(`
+      expect(
+        transformFindResponseToExternalModel(
+          createSOFindResponse([]),
+          persistableStateAttachmentTypeRegistry
+        )
+      ).toMatchInlineSnapshot(`
         Object {
           "page": 1,
           "per_page": 0,
@@ -272,7 +338,8 @@ describe('CaseUserActionService', () => {
 
     it('preserves the saved object fields and attributes when inject the ids', () => {
       const transformed = transformFindResponseToExternalModel(
-        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())])
+        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())]),
+        persistableStateAttachmentTypeRegistry
       );
 
       expect(transformed).toMatchInlineSnapshot(`
@@ -334,7 +401,8 @@ describe('CaseUserActionService', () => {
         createSOFindResponse([
           createUserActionFindSO(createConnectorUserAction()),
           createUserActionFindSO(createConnectorUserAction()),
-        ])
+        ]),
+        persistableStateAttachmentTypeRegistry
       ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
       expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
@@ -348,7 +416,8 @@ describe('CaseUserActionService', () => {
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.case_id).toEqual('');
@@ -360,7 +429,8 @@ describe('CaseUserActionService', () => {
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
@@ -370,7 +440,8 @@ describe('CaseUserActionService', () => {
         const userAction = createConnectorUserAction();
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.case_id).toEqual('1');
@@ -383,7 +454,8 @@ describe('CaseUserActionService', () => {
         });
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
@@ -395,7 +467,8 @@ describe('CaseUserActionService', () => {
         };
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.action_id).toEqual('100');
@@ -404,22 +477,161 @@ describe('CaseUserActionService', () => {
 
     describe('create connector', () => {
       const userAction = createConnectorUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('update connector', () => {
       const userAction = updateConnectorUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('push connector', () => {
       const userAction = pushConnectorUserAction();
-      testConnectorId(userAction, 'externalService.connector_id', '100');
+      testConnectorId(
+        persistableStateAttachmentTypeRegistry,
+        userAction,
+        'externalService.connector_id',
+        '100'
+      );
     });
 
     describe('create case', () => {
       const userAction = createCaseUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
+    });
+
+    describe('persistable state attachments', () => {
+      it('populates the persistable state', () => {
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        expect(transformed).toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 1,
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "action": "create",
+                  "action_id": "100",
+                  "case_id": "1",
+                  "comment_id": "persistable-state-test-id",
+                  "created_at": "abc",
+                  "created_by": Object {
+                    "email": "a",
+                    "full_name": "abc",
+                    "username": "b",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "comment": Object {
+                      "owner": "securitySolutionFixture",
+                      "persistableStateAttachmentState": Object {
+                        "foo": "foo",
+                        "injectedId": "testRef",
+                      },
+                      "persistableStateAttachmentTypeId": ".test",
+                      "type": "persistableState",
+                    },
+                  },
+                  "type": "comment",
+                },
+                "id": "100",
+                "references": Array [
+                  Object {
+                    "id": "testRef",
+                    "name": "myTestReference",
+                    "type": "test-so",
+                  },
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                  Object {
+                    "id": "persistable-state-test-id",
+                    "name": "associated-cases-comments",
+                    "type": "cases-comments",
+                  },
+                ],
+                "score": 0,
+                "type": "cases-user-actions",
+              },
+            ],
+            "total": 1,
+          }
+        `);
+      });
+    });
+
+    describe('external references', () => {
+      it('populates the external references attributes', () => {
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        expect(transformed).toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 1,
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "action": "create",
+                  "action_id": "100",
+                  "case_id": "1",
+                  "comment_id": "external-reference-test-id",
+                  "created_at": "abc",
+                  "created_by": Object {
+                    "email": "a",
+                    "full_name": "abc",
+                    "username": "b",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "comment": Object {
+                      "externalReferenceAttachmentTypeId": ".test",
+                      "externalReferenceId": "my-id",
+                      "externalReferenceMetadata": null,
+                      "externalReferenceStorage": Object {
+                        "soType": "test-so",
+                        "type": "savedObject",
+                      },
+                      "owner": "securitySolution",
+                      "type": "externalReference",
+                    },
+                  },
+                  "type": "comment",
+                },
+                "id": "100",
+                "references": Array [
+                  Object {
+                    "id": "my-id",
+                    "name": "externalReferenceId",
+                    "type": "test-so",
+                  },
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                  Object {
+                    "id": "external-reference-test-id",
+                    "name": "associated-cases-comments",
+                    "type": "cases-comments",
+                  },
+                ],
+                "score": 0,
+                "type": "cases-user-actions",
+              },
+            ],
+            "total": 1,
+          }
+        `);
+      });
     });
   });
 
@@ -436,7 +648,7 @@ describe('CaseUserActionService', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      service = new CaseUserActionService(mockLogger);
+      service = new CaseUserActionService(mockLogger, persistableStateAttachmentTypeRegistry);
     });
 
     describe('createUserAction', () => {
@@ -447,6 +659,7 @@ describe('CaseUserActionService', () => {
             payload: casePayload,
             type: ActionTypes.create_case,
           });
+
           expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
             'cases-user-actions',
             {
@@ -460,6 +673,7 @@ describe('CaseUserActionService', () => {
               type: 'create_case',
               owner: 'securitySolution',
               payload: {
+                assignees: [{ uid: '1' }],
                 connector: {
                   fields: {
                     category: 'Denial of Service',
@@ -477,6 +691,7 @@ describe('CaseUserActionService', () => {
                 owner: 'securitySolution',
                 settings: { syncAlerts: true },
                 status: 'open',
+                severity: 'low',
                 tags: ['sir'],
                 title: 'Case SIR',
               },
@@ -511,6 +726,33 @@ describe('CaseUserActionService', () => {
                 type: 'status',
                 owner: 'securitySolution',
                 payload: { status: 'closed' },
+              },
+              { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
+            );
+          });
+        });
+
+        describe('severity', () => {
+          it('creates an update severity user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { severity: CaseSeverity.MEDIUM },
+              type: ActionTypes.severity,
+            });
+
+            expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+              'cases-user-actions',
+              {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'severity',
+                owner: 'securitySolution',
+                payload: { severity: 'medium' },
               },
               { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
             );
@@ -619,46 +861,49 @@ describe('CaseUserActionService', () => {
           user: commonArgs.user,
         });
 
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'delete_case',
+                owner: 'securitySolution',
+                payload: {},
               },
-              type: 'delete_case',
-              owner: 'securitySolution',
-              payload: {},
+              references: [
+                { id: '1', name: 'associated-cases', type: 'cases' },
+                { id: '3', name: 'connectorId', type: 'action' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '1', name: 'associated-cases', type: 'cases' },
-              { id: '3', name: 'connectorId', type: 'action' },
-            ],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'delete_case',
+                owner: 'securitySolution',
+                payload: {},
               },
-              type: 'delete_case',
-              owner: 'securitySolution',
-              payload: {},
+              references: [
+                { id: '2', name: 'associated-cases', type: 'cases' },
+                { id: '4', name: 'connectorId', type: 'action' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '2', name: 'associated-cases', type: 'cases' },
-              { id: '4', name: 'connectorId', type: 'action' },
-            ],
-            type: 'cases-user-actions',
-          },
-        ]);
+          ],
+          { refresh: undefined }
+        );
       });
     });
 
@@ -671,137 +916,425 @@ describe('CaseUserActionService', () => {
           user: commonArgs.user,
         });
 
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'title',
+                owner: 'securitySolution',
+                payload: { title: 'updated title' },
               },
-              type: 'title',
-              owner: 'securitySolution',
-              payload: { title: 'updated title' },
+              references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
             },
-            references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'status',
+                owner: 'securitySolution',
+                payload: { status: 'closed' },
               },
-              type: 'status',
-              owner: 'securitySolution',
-              payload: { status: 'closed' },
+              references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
             },
-            references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'connector',
-              owner: 'securitySolution',
-              payload: {
-                connector: {
-                  fields: {
-                    category: 'Denial of Service',
-                    destIp: true,
-                    malwareHash: true,
-                    malwareUrl: true,
-                    priority: '2',
-                    sourceIp: true,
-                    subcategory: '45',
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'connector',
+                owner: 'securitySolution',
+                payload: {
+                  connector: {
+                    fields: {
+                      category: 'Denial of Service',
+                      destIp: true,
+                      malwareHash: true,
+                      malwareUrl: true,
+                      priority: '2',
+                      sourceIp: true,
+                      subcategory: '45',
+                    },
+                    name: 'ServiceNow SN',
+                    type: '.servicenow-sir',
                   },
-                  name: 'ServiceNow SN',
-                  type: '.servicenow-sir',
                 },
               },
+              references: [
+                { id: '1', name: 'associated-cases', type: 'cases' },
+                { id: '456', name: 'connectorId', type: 'action' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '1', name: 'associated-cases', type: 'cases' },
-              { id: '456', name: 'connectorId', type: 'action' },
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'description',
+                owner: 'securitySolution',
+                payload: { description: 'updated desc' },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: 'add',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'tags',
+                owner: 'securitySolution',
+                payload: { tags: ['one', 'two'] },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'tags',
+                owner: 'securitySolution',
+                payload: { tags: ['defacement'] },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'settings',
+                owner: 'securitySolution',
+                payload: { settings: { syncAlerts: false } },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: 'update',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                owner: 'securitySolution',
+                payload: {
+                  severity: 'critical',
+                },
+                type: 'severity',
+              },
+              references: [
+                {
+                  id: '2',
+                  name: 'associated-cases',
+                  type: 'cases',
+                },
+              ],
+              type: 'cases-user-actions',
+            },
+          ],
+          { refresh: undefined }
+        );
+      });
+
+      it('creates the correct user actions when an assignee is added', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedAssigneesCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
             ],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'description',
-              owner: 'securitySolution',
-              payload: { description: 'updated desc' },
+            Object {
+              "refresh": undefined,
             },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when an assignee is removed', async () => {
+        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
           {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
             attributes: {
-              action: 'add',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'tags',
-              owner: 'securitySolution',
-              payload: { tags: ['one', 'two'] },
+              assignees: [],
             },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
           },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: casesWithAssigneeRemoved,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when assignees are added and removed', async () => {
+        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
           {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
             attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'tags',
-              owner: 'securitySolution',
-              payload: { tags: ['defacement'] },
+              assignees: [{ uid: '2' }],
             },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
           },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: caseAssignees,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "2",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
               },
-              type: 'settings',
-              owner: 'securitySolution',
-              payload: { settings: { syncAlerts: false } },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
             },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-        ]);
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when tags are added and removed', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedTagsCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "a",
+                      "b",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "defacement",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
       });
     });
 
@@ -811,56 +1344,59 @@ describe('CaseUserActionService', () => {
           ...commonArgs,
           attachments,
         });
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'comment',
-              owner: 'securitySolution',
-              payload: {
-                comment: { comment: 'a comment', owner: 'securitySolution', type: 'user' },
-              },
-            },
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: '1', name: 'associated-cases-comments', type: 'cases-comments' },
-            ],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'comment',
-              owner: 'securitySolution',
-              payload: {
-                comment: {
-                  alertId: 'alert-id-1',
-                  index: 'alert-index-1',
-                  owner: 'securitySolution',
-                  rule: { id: 'rule-id-1', name: 'rule-name-1' },
-                  type: 'alert',
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'comment',
+                owner: 'securitySolution',
+                payload: {
+                  comment: { comment: 'a comment', owner: 'securitySolution', type: 'user' },
                 },
               },
+              references: [
+                { id: '123', name: 'associated-cases', type: 'cases' },
+                { id: '1', name: 'associated-cases-comments', type: 'cases-comments' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: '2', name: 'associated-cases-comments', type: 'cases-comments' },
-            ],
-            type: 'cases-user-actions',
-          },
-        ]);
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'comment',
+                owner: 'securitySolution',
+                payload: {
+                  comment: {
+                    alertId: 'alert-id-1',
+                    index: 'alert-index-1',
+                    owner: 'securitySolution',
+                    rule: { id: 'rule-id-1', name: 'rule-name-1' },
+                    type: 'alert',
+                  },
+                },
+              },
+              references: [
+                { id: '123', name: 'associated-cases', type: 'cases' },
+                { id: '2', name: 'associated-cases-comments', type: 'cases-comments' },
+              ],
+              type: 'cases-user-actions',
+            },
+          ],
+          { refresh: undefined }
+        );
       });
     });
 
@@ -988,16 +1524,14 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases-user-actions.attributes.type",
                       },
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "connector",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
                       },
                     ],
                     "function": "is",
@@ -1006,16 +1540,14 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases-user-actions.attributes.type",
                       },
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "create_case",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
                       },
                     ],
                     "function": "is",

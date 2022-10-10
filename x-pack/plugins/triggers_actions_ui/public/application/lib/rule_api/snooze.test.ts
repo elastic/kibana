@@ -13,14 +13,25 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('snoozeRule', () => {
   test('should call mute alert API', async () => {
-    const result = await snoozeRule({ http, id: '1/', snoozeEndTime: '9999-01-01T00:00:00.000Z' });
+    const result = await snoozeRule({
+      http,
+      id: '1/',
+      snoozeSchedule: {
+        id: null,
+        duration: 864000000,
+        rRule: {
+          dtstart: '9999-01-01T00:00:00.000Z',
+          tzid: 'UTC',
+        },
+      },
+    });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           "/internal/alerting/rule/1%2F/_snooze",
           Object {
-            "body": "{\\"snooze_end_time\\":\\"9999-01-01T00:00:00.000Z\\"}",
+            "body": "{\\"snooze_schedule\\":{\\"duration\\":864000000,\\"rRule\\":{\\"dtstart\\":\\"9999-01-01T00:00:00.000Z\\",\\"tzid\\":\\"UTC\\"}}}",
           },
         ],
       ]

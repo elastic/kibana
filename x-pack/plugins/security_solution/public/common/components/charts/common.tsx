@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import {
-  DARK_THEME,
-  LIGHT_THEME,
-  mergeWithDefaultTheme,
+import type {
   PartialTheme,
   Rendering,
   Rotation,
   ScaleType,
   SettingsProps,
   TickFormatter,
-  Position,
   BrushEndListener,
   AxisStyle,
   BarSeriesStyle,
 } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME, mergeWithDefaultTheme, Position } from '@elastic/charts';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -151,4 +149,8 @@ export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefin
 
 export const Wrapper = styled.div`
   position: relative;
+`;
+
+export const ChartWrapper = styled(EuiFlexGroup)`
+  z-index: 0;
 `;

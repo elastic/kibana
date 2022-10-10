@@ -21,11 +21,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
 import connectionIllustration from '../../../../../assets/connection_illustration.svg';
+import { SourceDataItem } from '../../../../../types';
 import { SOURCE_NAME_LABEL } from '../../../constants';
 
 import { AddSourceHeader } from '../add_source_header';
@@ -33,9 +35,13 @@ import { CONFIG_CUSTOM_BUTTON, CONFIG_CUSTOM_LINK_TEXT, CONFIG_INTRO_ALT_TEXT } 
 
 import { AddCustomSourceLogic } from './add_custom_source_logic';
 
-export const ConfigureCustom: React.FC = () => {
+interface ConfigureCustomProps {
+  sourceData: SourceDataItem;
+}
+
+export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) => {
   const { setCustomSourceNameValue, createContentSource } = useActions(AddCustomSourceLogic);
-  const { customSourceNameValue, buttonLoading, sourceData } = useValues(AddCustomSourceLogic);
+  const { customSourceNameValue, buttonLoading } = useValues(AddCustomSourceLogic);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -47,6 +53,7 @@ export const ConfigureCustom: React.FC = () => {
 
   const {
     serviceType,
+    baseServiceType,
     configuration: { documentationUrl, githubRepository },
     name,
     categories = [],
@@ -54,7 +61,11 @@ export const ConfigureCustom: React.FC = () => {
 
   return (
     <>
-      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
+      <AddSourceHeader
+        name={name}
+        serviceType={baseServiceType ?? serviceType}
+        categories={categories}
+      />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup
         justifyContent="flexStart"

@@ -10,7 +10,6 @@ import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
-import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
 
 export const getConnectorById = (
@@ -23,8 +22,16 @@ const validators: Record<
   (connector: CaseActionConnector) => ReturnType<ValidationConfig['validator']>
 > = {
   [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
-  [ConnectorTypes.serviceNowITSM]: servicenowConnectorValidator,
-  [ConnectorTypes.serviceNowSIR]: servicenowConnectorValidator,
+};
+
+export const connectorDeprecationValidator = (
+  connector: CaseActionConnector
+): ReturnType<ValidationConfig['validator']> => {
+  if (connector.isDeprecated) {
+    return {
+      message: 'Deprecated connector',
+    };
+  }
 };
 
 export const getConnectorsFormValidators = ({
@@ -36,6 +43,14 @@ export const getConnectorsFormValidators = ({
 }): FieldConfig => ({
   ...config,
   validations: [
+    {
+      validator: ({ value: connectorId }) => {
+        const connector = getConnectorById(connectorId as string, connectors);
+        if (connector != null) {
+          return connectorDeprecationValidator(connector);
+        }
+      },
+    },
     {
       validator: ({ value: connectorId }) => {
         const connector = getConnectorById(connectorId as string, connectors);
@@ -72,28 +87,6 @@ export const getConnectorIcon = (
   return emptyResponse;
 };
 
-// TODO: Remove when the applications are certified
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
-  /**
-   * It is not possible to know if a preconfigured connector
-   * is deprecated or not as the config property of a
-   * preconfigured connector is not returned by the
-   * actions framework
-   */
-  if (connector == null || connector.config == null || connector.isPreconfigured) {
-    return false;
-  }
-
-  if (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir') {
-    /**
-     * Connector's prior to the Elastic ServiceNow application
-     * use the Table API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_TableAPI)
-     * Connectors after the Elastic ServiceNow application use the
-     * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
-     * A ServiceNow connector is considered deprecated if it uses the Table API.
-     */
-    return !!connector.config.usesTableApi;
-  }
-
-  return false;
+  return connector?.isDeprecated ?? false;
 };

@@ -11,13 +11,14 @@ import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
+import { css } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import type { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
@@ -28,7 +29,7 @@ import { extractIndexPatternValues } from '../../../common/index_patterns_utils'
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
-import { getDataStart, getCoreStart } from '../../services';
+import { getDataStart, getCoreStart, getUnifiedSearchStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
 
@@ -177,16 +178,23 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       return null;
     }
 
+    const tsvbEditorStyles = css`
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+    `;
+
     return (
       <KibanaContextProvider
         services={{
           appName: APP_NAME,
           storage: this.localStorage,
+          unifiedSearch: getUnifiedSearchStart(),
           data: getDataStart(),
           ...getCoreStart(),
         }}
       >
-        <div className="tvbEditor" data-test-subj="tvbVisEditor">
+        <div css={tsvbEditorStyles} data-test-subj="tvbVisEditor">
           {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
           <div className="tvbEditor--hideForReporting">
             <VisPicker currentVisType={model.type} onChange={this.handleChange} />

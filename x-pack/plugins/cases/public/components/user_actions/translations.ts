@@ -46,6 +46,13 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlert
   defaultMessage: 'Show alert details',
 });
 
+export const SHOW_ALERT_TABLE_TOOLTIP = i18n.translate(
+  'xpack.cases.caseView.showAlertTableTooltip',
+  {
+    defaultMessage: 'Show alerts',
+  }
+);
+
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',
 });
@@ -70,4 +77,20 @@ export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel'
 
 export const CONFIRM_BUTTON = i18n.translate('xpack.cases.caseView.delete.confirm', {
   defaultMessage: 'Delete',
+});
+
+export const ASSIGNED = i18n.translate('xpack.cases.caseView.assigned', {
+  defaultMessage: 'assigned',
+});
+
+export const UNASSIGNED = i18n.translate('xpack.cases.caseView.unAssigned', {
+  defaultMessage: 'unassigned',
+});
+
+export const THEMSELVES = i18n.translate('xpack.cases.caseView.assignee.themselves', {
+  defaultMessage: 'themselves',
+});
+
+export const AND = i18n.translate('xpack.cases.caseView.assignee.and', {
+  defaultMessage: 'and',
 });

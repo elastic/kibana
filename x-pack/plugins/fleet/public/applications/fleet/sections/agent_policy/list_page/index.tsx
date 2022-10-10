@@ -89,6 +89,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
     kuery: search,
+    full: true,
   });
 
   // Some policies retrieved, set up table props
@@ -181,6 +182,25 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         iconType="plusInCircle"
         isDisabled={!hasFleetAllPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
+        data-test-subj="createAgentPolicyButton"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyList.addButton"
+          defaultMessage="Create agent policy"
+        />
+      </EuiButton>
+    ),
+    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
+  );
+
+  const emptyStateCreateAgentPolicyButton = useMemo(
+    () => (
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        isDisabled={!hasFleetAllPrivileges}
+        onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
+        data-test-subj="emptyPromptCreateAgentPolicyButton"
       >
         <FormattedMessage
           id="xpack.fleet.agentPolicyList.addButton"
@@ -202,10 +222,10 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             />
           </h2>
         }
-        actions={createAgentPolicyButton}
+        actions={emptyStateCreateAgentPolicyButton}
       />
     ),
-    [createAgentPolicyButton]
+    [emptyStateCreateAgentPolicyButton]
   );
 
   const onTableChange = (criteria: CriteriaWithPagination<AgentPolicy>) => {

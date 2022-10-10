@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { act } from '@testing-library/react';
 import { getContext } from 'kea';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -47,7 +48,7 @@ describe('renderApp', () => {
     const unmount = renderApp(MockApp, kibanaDeps, pluginData);
     expect(mockContainer.querySelector('.hello-world')).not.toBeNull();
 
-    unmount();
+    act(() => unmount());
     expect(mockContainer.innerHTML).toEqual('');
   });
 
@@ -60,20 +61,30 @@ describe('renderApp', () => {
   };
 
   describe('Enterprise Search apps', () => {
-    afterEach(() => unmount());
+    afterEach(() => {
+      act(() => {
+        unmount();
+      });
+    });
 
     it('renders EnterpriseSearchOverview', () => {
-      mount(EnterpriseSearchOverview);
+      act(() => {
+        mount(EnterpriseSearchOverview);
+      });
       expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 
     it('renders AppSearch', () => {
-      mount(AppSearch);
+      act(() => {
+        mount(AppSearch);
+      });
       expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
 
     it('renders WorkplaceSearch', () => {
-      mount(WorkplaceSearch);
+      act(() => {
+        mount(WorkplaceSearch);
+      });
       expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
   });

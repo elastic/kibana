@@ -8,8 +8,9 @@
 import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { UsersTableType } from '../store/model';
-import { UsersNavTab } from './navigation/types';
+import type { UsersNavTab } from './navigation/types';
 import { USERS_PATH } from '../../../common/constants';
+import { TECHNICAL_PREVIEW } from '../../overview/pages/translations';
 
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
 
@@ -38,23 +39,21 @@ export const navTabsUsers = (
       href: getTabsOnUsersUrl(UsersTableType.anomalies),
       disabled: false,
     },
-    [UsersTableType.risk]: {
-      id: UsersTableType.risk,
-      name: i18n.NAVIGATION_RISK_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.risk),
-      disabled: false,
-    },
     [UsersTableType.events]: {
       id: UsersTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnUsersUrl(UsersTableType.events),
       disabled: false,
     },
-    [UsersTableType.alerts]: {
-      id: UsersTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.alerts),
+    [UsersTableType.risk]: {
+      id: UsersTableType.risk,
+      name: i18n.NAVIGATION_RISK_TITLE,
+      href: getTabsOnUsersUrl(UsersTableType.risk),
       disabled: false,
+      isBeta: true,
+      betaOptions: {
+        text: TECHNICAL_PREVIEW,
+      },
     },
   };
 

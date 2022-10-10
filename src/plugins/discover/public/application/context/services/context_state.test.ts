@@ -13,7 +13,11 @@ import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
+discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
+discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
@@ -30,6 +34,8 @@ describe('Test Discover Context State', () => {
         get: <T>(key: string) =>
           (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
       } as IUiSettingsClient,
+      data: discoverServiceMock.data,
+      dataView: dataViewMock,
     });
     state.startSync();
   });
@@ -47,7 +53,11 @@ describe('Test Discover Context State', () => {
         "successorCount": 4,
       }
     `);
-    expect(state.globalState.getState()).toMatchInlineSnapshot(`null`);
+    expect(state.globalState.getState()).toMatchInlineSnapshot(`
+      Object {
+        "filters": Array [],
+      }
+    `);
     expect(state.startSync).toBeDefined();
     expect(state.stopSync).toBeDefined();
     expect(state.getFilters()).toStrictEqual([]);
@@ -123,7 +133,7 @@ describe('Test Discover Context State', () => {
               "query": "jpg",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": undefined,
           },
           "query": Object {
             "match_phrase": Object {
@@ -147,7 +157,7 @@ describe('Test Discover Context State', () => {
               "query": "png",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": undefined,
           },
           "query": Object {
             "match_phrase": Object {

@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Cold start rate by transaction name when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       describe('without comparison', () => {
         let body: ColdStartRate;

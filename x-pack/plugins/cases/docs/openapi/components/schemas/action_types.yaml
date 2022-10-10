@@ -1,0 +1,15 @@
+type: string
+description: The type of action.
+enum:
+  - create_case
+  - comment
+  - connector
+  - delete_case
+  - description
+  - pushed
+  - tags
+  - title
+  - status
+  - settings
+  - severity
+example: create_case

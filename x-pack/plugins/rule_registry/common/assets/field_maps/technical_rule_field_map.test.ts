@@ -43,6 +43,10 @@ it('matches snapshot', () => {
       "kibana.alert.end": Object {
         "type": "date",
       },
+      "kibana.alert.instance.id": Object {
+        "required": true,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "required": false,
@@ -193,6 +197,10 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.time_range": Object {
+        "format": "epoch_millis||strict_date_optional_time",
+        "type": "date_range",
       },
       "kibana.alert.uuid": Object {
         "required": true,

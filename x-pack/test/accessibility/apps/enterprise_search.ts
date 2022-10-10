@@ -9,17 +9,21 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const { common } = getPageObjects(['common']);
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Enterprise Search', () => {
+  describe('Enterprise Search Accessibility', () => {
     // NOTE: These accessibility tests currently only run against Enterprise Search in Kibana
     // without a sidecar Enterprise Search service/host configured, and as such only test
     // the basic setup guides and not the full application(s)
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Overview', () => {
@@ -29,11 +33,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('loads a landing page with product cards', async function () {
         await retry.waitFor(
-          'AS product card visible',
+          'Elasticsearch product card visible',
+          async () => await testSubjects.exists('elasticsearchProductCard')
+        );
+        await retry.waitFor(
+          'App Search product card visible',
           async () => await testSubjects.exists('appSearchProductCard')
         );
         await retry.waitFor(
-          'WS product card visible',
+          'Workplace Search product card visible',
           async () => await testSubjects.exists('workplaceSearchProductCard')
         );
         await a11y.testAppSnapshot();
@@ -44,6 +52,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'setup guide visible',
           async () => await testSubjects.exists('setupGuide')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('Content', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/content');
+      });
+
+      it('loads a setup guide', async function () {
+        await retry.waitFor(
+          'setup guide visible',
+          async () => await testSubjects.exists('setupGuide')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('Elasticsearch', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/elasticsearch');
+      });
+
+      it('loads a setup guide', async function () {
+        await retry.waitFor(
+          'setup guide visible',
+          async () => await testSubjects.exists('elasticsearchGuide')
         );
         await a11y.testAppSnapshot();
       });

@@ -70,7 +70,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.try(async () => {
           const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
           const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
-
           expect(apmMainContainerTextItems).to.not.contain('No services found');
 
           expect(apmMainContainerTextItems).to.contain('opbeans-go');

@@ -2,7 +2,7 @@
 id: kibHelloWorldApp
 slug: /kibana-dev-docs/getting-started/hello-world-app
 title: Hello World
-summary: Build a very basic plugin that registers an application that says "Hello World!".
+description: Build a very basic plugin that registers an application that says "Hello World!".
 date: 2021-08-03
 tags: ['kibana', 'dev', 'contributor', 'tutorials']
 ---
@@ -40,6 +40,10 @@ and add the following:
   "id": "helloWorld",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
+    "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
   "ui": true
 }
 ```
@@ -77,6 +81,7 @@ And add the following to it:
 
 ```
 $ mkdir public
+$ cd public
 $ touch plugin.tsx
 ```
 

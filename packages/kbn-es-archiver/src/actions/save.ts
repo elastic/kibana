@@ -52,7 +52,7 @@ export async function saveAction({
     // export and save the matching indices to mappings.json
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream({ client, stats, keepIndexNames }),
+      createGenerateIndexRecordsStream({ client, stats, keepIndexNames, log }),
       ...createFormatArchiveStreams(),
       createWriteStream(resolve(outputDir, 'mappings.json')),
     ] as [Readable, ...Writable[]]),

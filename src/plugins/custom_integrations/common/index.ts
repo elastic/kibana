@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
@@ -23,7 +22,8 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   custom: 'Custom',
   datastore: 'Datastore',
   elastic_stack: 'Elastic Stack',
-  google_cloud: 'Google cloud',
+  google_cloud: 'Google Cloud',
+  infrastructure: 'Infrastructure',
   kubernetes: 'Kubernetes',
   languages: 'Languages',
   message_queue: 'Message queue',
@@ -36,6 +36,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   security: 'Security',
   sample_data: 'Sample data',
   support: 'Support',
+  threat_intel: 'Threat intelligence',
   ticketing: 'Ticketing',
   version_control: 'Version control',
   web: 'Web',
@@ -82,6 +83,7 @@ export const SHIPPER_DISPLAY = {
   sample_data: 'Sample data',
   tests: 'Tests',
   tutorial: 'Tutorials',
+  placeholders: 'Extra Integrations',
 };
 
 /**
@@ -113,6 +115,7 @@ export interface CustomIntegration {
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
+  uiExternalLink?: string;
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];

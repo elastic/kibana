@@ -7,17 +7,17 @@
 
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Logger } from '@kbn/core/server';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Filter } from '@kbn/es-query';
 import { buildEqlSearchRequest } from '../build_events_query';
-import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { getInputIndex } from '../get_input_output_index';
+import { createEnrichEventsFunction } from '../enrichments';
 
-import {
+import type {
   BulkCreate,
   WrapHits,
   WrapSequences,
@@ -25,70 +25,79 @@ import {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
 } from '../types';
-import { createSearchAfterReturnType, makeFloatString } from '../utils';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { buildReasonMessageForEqlAlert } from '../reason_formatters';
-import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
 import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  makeFloatString,
+  getUnprocessedExceptionsWarnings,
+} from '../utils';
+import { buildReasonMessageForEqlAlert } from '../reason_formatters';
+import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const eqlExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
-  experimentalFeatures,
+  ruleExecutionLogger,
   services,
   version,
-  logger,
   bulkCreate,
   wrapHits,
   wrapSequences,
+  primaryTimestamp,
+  secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
-  experimentalFeatures: ExperimentalFeatures;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
-  logger: Logger;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
-    if (hasLargeValueItem(exceptionItems)) {
-      result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
-      );
-      result.warning = true;
-    }
 
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
+    const request = buildEqlSearchRequest({
+      query: ruleParams.query,
+      index: inputIndex,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      size: ruleParams.maxSignals,
+      filters: ruleParams.filters,
+      primaryTimestamp,
+      secondaryTimestamp,
+      runtimeMappings,
+      eventCategoryOverride: ruleParams.eventCategoryOverride,
+      timestampField: ruleParams.timestampField,
+      tiebreakerField: ruleParams.tiebreakerField,
+      exceptionFilter,
     });
 
-    const request = buildEqlSearchRequest(
-      ruleParams.query,
-      inputIndex,
-      tuple.from.toISOString(),
-      tuple.to.toISOString(),
-      completeRule.ruleParams.maxSignals,
-      ruleParams.timestampOverride,
-      exceptionItems,
-      ruleParams.eventCategoryOverride
-    );
-
+    ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+    if (exceptionsWarning) {
+      result.warningMessages.push(exceptionsWarning);
+    }
     const eqlSignalSearchStart = performance.now();
-    logger.debug(`EQL query request: ${JSON.stringify(request)}`);
 
     const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
       request
@@ -110,13 +119,17 @@ export const eqlExecutor = async ({
     }
 
     if (newSignals?.length) {
-      const insertResult = await bulkCreate(newSignals);
-      result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
-      result.createdSignalsCount += insertResult.createdItemsCount;
-      result.createdSignals = insertResult.createdItems;
-    }
+      const createResult = await bulkCreate(
+        newSignals,
+        undefined,
+        createEnrichEventsFunction({
+          services,
+          logger: ruleExecutionLogger,
+        })
+      );
 
-    result.success = true;
+      addToSearchAfterReturn({ current: result, next: createResult });
+    }
     return result;
   });
 };

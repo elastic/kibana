@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup, SavedObjectsClientContract } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
 export class IndexService {
@@ -18,16 +18,8 @@ export class IndexService {
     return privilege.hasAllPrivileges;
   }
 
-  async dataViewExists(savedObjectsClient: SavedObjectsClientContract, indexName: string) {
-    const response = await savedObjectsClient.find<DataView>({
-      type: 'index-pattern',
-      perPage: 1,
-      search: `"${indexName}"`,
-      searchFields: ['title'],
-      fields: ['title'],
-    });
-    const ip = response.savedObjects.find((obj) => obj.attributes.title === indexName);
-    return ip !== undefined;
+  async dataViewExists(dataViewsContract: DataViewsContract, indexName: string) {
+    return (await dataViewsContract.find(indexName)).some(({ title }) => title === indexName);
   }
 }
 

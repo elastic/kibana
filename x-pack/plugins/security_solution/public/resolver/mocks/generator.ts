@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   EventStats,
   FieldsObject,
   NewResolverTree,
   ResolverNode,
   SafeResolverEvent,
 } from '../../../common/endpoint/types';
-import { EventOptions } from '../../../common/endpoint/types/generator';
-import {
-  EndpointDocGenerator,
-  Tree,
-  TreeNode,
-  TreeOptions,
-  Event,
-} from '../../../common/endpoint/generate_data';
+import type { EventOptions } from '../../../common/endpoint/types/generator';
+import type { Tree, TreeNode, TreeOptions, Event } from '../../../common/endpoint/generate_data';
+import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 import * as eventModel from '../../../common/endpoint/models/event';
 
 /**

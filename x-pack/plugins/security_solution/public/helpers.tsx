@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { has, get, isEmpty } from 'lodash/fp';
+import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
-import { matchPath, RouteProps, Redirect } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom';
+import { matchPath, Redirect } from 'react-router-dom';
 
-import { Capabilities, CoreStart } from '@kbn/core/public';
+import type { Capabilities, CoreStart } from '@kbn/core/public';
 import {
   ALERTS_PATH,
   APP_UI_ID,
+  CASES_FEATURE_ID,
+  CASES_PATH,
   EXCEPTIONS_PATH,
+  LANDING_PATH,
   RULES_PATH,
   SERVER_APP_ID,
-  CASES_FEATURE_ID,
-  LANDING_PATH,
-  CASES_PATH,
+  THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
-import { Ecs } from '../common/ecs';
-import {
+import type { Ecs } from '../common/ecs';
+import type {
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
-import { TimelineEqlResponse } from '../common/search_strategy/timeline';
+import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
 import { NoPrivilegesPage } from './app/no_privileges';
 import { SecurityPageName } from './app/types';
-import { CASES_SUB_PLUGIN_KEY, InspectResponse, StartedSubPlugins } from './types';
+import type { InspectResponse, StartedSubPlugins } from './types';
+import { CASES_SUB_PLUGIN_KEY } from './types';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -158,6 +161,13 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
 export const isDetectionsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `(${ALERTS_PATH}|${RULES_PATH}|${EXCEPTIONS_PATH})`,
+    strict: false,
+  });
+};
+
+export const isThreatIntelligencePath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `(${THREAT_INTELLIGENCE_PATH})`,
     strict: false,
   });
 };

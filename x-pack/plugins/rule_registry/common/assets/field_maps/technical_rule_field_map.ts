@@ -23,7 +23,12 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword', required: true },
   [Fields.SPACE_IDS]: { type: 'keyword', array: true, required: true },
   [Fields.ALERT_UUID]: { type: 'keyword', required: true },
+  [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_START]: { type: 'date' },
+  [Fields.ALERT_TIME_RANGE]: {
+    type: 'date_range',
+    format: 'epoch_millis||strict_date_optional_time',
+  },
   [Fields.ALERT_END]: { type: 'date' },
   [Fields.ALERT_DURATION]: { type: 'long' },
   [Fields.ALERT_SEVERITY]: { type: 'keyword' },

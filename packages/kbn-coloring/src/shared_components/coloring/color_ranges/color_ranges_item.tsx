@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext } from 'react';
+import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFieldNumber,
@@ -19,6 +20,7 @@ import {
   EuiColorPickerSwatch,
   EuiButtonIcon,
   EuiFieldNumberProps,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import {
@@ -29,7 +31,7 @@ import {
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';
-import { isLastItem } from './utils';
+import { getAutoBoundInformation, isLastItem } from './utils';
 import { isValidColor } from '../utils';
 import {
   ColorRangeDeleteButton,
@@ -65,15 +67,6 @@ const getMode = (
   return (isLast ? checkIsMaxContinuity : checkIsMinContinuity)(continuity) ? 'auto' : 'edit';
 };
 
-const getPlaceholderForAutoMode = (isLast: boolean) =>
-  isLast
-    ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
-        defaultMessage: 'Max. value',
-      })
-    : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
-        defaultMessage: 'Min. value',
-      });
-
 const getActionButton = (mode: ColorRangeItemMode) => {
   if (mode === 'value') {
     return ColorRangeDeleteButton;
@@ -84,7 +77,7 @@ const getActionButton = (mode: ColorRangeItemMode) => {
 const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
   const items: EuiFieldNumberProps['append'] = [];
 
-  if (rangeType === 'percent' && mode !== 'auto') {
+  if (rangeType === 'percent') {
     items.push('%');
   }
 
@@ -110,6 +103,8 @@ export function ColorRangeItem({
   const isColorValid = isValidColor(colorRange.color);
   const ActionButton = getActionButton(mode);
   const isValid = validation?.isValid ?? true;
+
+  const { euiTheme } = useEuiTheme();
 
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
@@ -162,15 +157,34 @@ export function ColorRangeItem({
     }
   );
 
+  const styles = useMemo(
+    () => css`
+      display: block;
+      min-width: ${euiTheme.size.xl};
+      text-align: center;
+    `,
+    [euiTheme.size.xl]
+  );
+
+  const autoBoundInfo = getAutoBoundInformation({
+    isPercentage: rangeType === 'percent',
+    isUpper: isLast,
+    isAuto: mode === 'auto',
+  });
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={isLast ? styles : null}>
         {!isLast ? (
           <EuiColorPicker
             onChange={onUpdateColor}
             button={
               isColorValid ? (
-                <EuiColorPickerSwatch color={colorRange.color} aria-label={selectNewColorText} />
+                <EuiColorPickerSwatch
+                  color={colorRange.color}
+                  aria-label={selectNewColorText}
+                  style={{ width: euiTheme.size.xl, height: euiTheme.size.xl }}
+                />
               ) : (
                 <EuiButtonIcon
                   color="danger"
@@ -190,7 +204,7 @@ export function ColorRangeItem({
             isInvalid={!isColorValid}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="l" />
+          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
@@ -203,7 +217,7 @@ export function ColorRangeItem({
           }
           disabled={isDisabled}
           onChange={onValueChange}
-          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
+          placeholder={mode === 'auto' ? autoBoundInfo.representation : ''}
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
@@ -225,6 +239,8 @@ export function ColorRangeItem({
             rangeType={rangeType}
             colorRanges={colorRanges}
             dispatch={dispatch}
+            tooltipContent={autoBoundInfo.actionDescription}
+            iconFactory={autoBoundInfo.icon}
             accessor={accessor}
           />
         </EuiFlexItem>

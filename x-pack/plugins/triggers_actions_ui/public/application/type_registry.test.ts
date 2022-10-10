@@ -10,7 +10,6 @@ import {
   ValidationResult,
   RuleTypeModel,
   ActionTypeModel,
-  ConnectorValidationResult,
   GenericValidationResult,
 } from '../types';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
@@ -42,9 +41,6 @@ const getTestActionType = (
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',
     selectMessage: selectedMessage || 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -83,14 +79,15 @@ describe('get()', () => {
         "actionConnectorFields": null,
         "actionParamsFields": Object {
           "$$typeof": Symbol(react.lazy),
-          "_ctor": [Function],
-          "_result": null,
-          "_status": -1,
+          "_init": [Function],
+          "_payload": Object {
+            "_result": [Function],
+            "_status": -1,
+          },
         },
         "iconClass": "test",
         "id": "my-action-type-snapshot",
         "selectMessage": "test",
-        "validateConnector": [Function],
         "validateParams": [Function],
       }
     `);
@@ -119,7 +116,6 @@ describe('list()', () => {
         selectMessage: 'test',
         actionConnectorFields: null,
         actionParamsFields: actionType.actionParamsFields,
-        validateConnector: actionTypes[0].validateConnector,
         validateParams: actionTypes[0].validateParams,
       },
     ]);

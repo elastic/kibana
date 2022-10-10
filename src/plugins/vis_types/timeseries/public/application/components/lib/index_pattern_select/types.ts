@@ -13,6 +13,7 @@ import type { FetchedIndexPattern, IndexPatternValue } from '../../../../../comm
 export interface SelectIndexComponentProps {
   fetchedIndex: FetchedIndexPattern & {
     defaultIndex?: DataView | null;
+    missedIndex?: string;
   };
   onIndexChange: (value: IndexPatternValue) => void;
   onModeChange: (useKibanaIndexes: boolean, index?: FetchedIndexPattern) => void;

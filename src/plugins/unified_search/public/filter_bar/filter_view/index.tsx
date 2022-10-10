@@ -6,43 +6,49 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBadgeProps, useInnerText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { FilterLabel } from '..';
-import type { FilterLabelStatus } from '../filter_item';
+import type { FilterLabelStatus } from '../filter_item/filter_item';
 
 interface Props {
   filter: Filter;
+  readOnly: boolean;
   valueLabel: string;
+  fieldLabel?: string;
   filterLabelStatus: FilterLabelStatus;
   errorMessage?: string;
-  readonly?: boolean;
   hideAlias?: boolean;
   [propName: string]: any;
 }
 
 export const FilterView: FC<Props> = ({
   filter,
+  readOnly,
   iconOnClick,
   onClick,
   valueLabel,
+  fieldLabel,
   errorMessage,
   filterLabelStatus,
-  readonly,
   hideAlias,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
 
-  let title =
-    errorMessage ||
-    i18n.translate('unifiedSearch.filter.filterBar.moreFilterActionsMessage', {
-      defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
-      values: { innerText },
-    });
+  const filterString = readOnly
+    ? i18n.translate('unifiedSearch.filter.filterBar.filterString', {
+        defaultMessage: 'Filter: {innerText}.',
+        values: { innerText },
+      })
+    : i18n.translate('unifiedSearch.filter.filterBar.filterActionsMessage', {
+        defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+        values: { innerText },
+      });
 
+  let title: string = errorMessage || filterString;
   if (isFilterPinned(filter)) {
     title = `${i18n.translate('unifiedSearch.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
@@ -54,22 +60,13 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  const badgeProps: EuiBadgeProps = readonly
-    ? {
-        title,
-        color: 'hollow',
-        onClick,
-        onClickAriaLabel: i18n.translate(
-          'unifiedSearch.filter.filterBar.filterItemReadOnlyBadgeAriaLabel',
-          {
-            defaultMessage: 'Filter entry',
-          }
-        ),
-        iconOnClick,
-      }
+  const sharedProps = { color: 'hollow', tabIndex: 0 };
+  const badgeProps: EuiBadgeProps = readOnly
+    ? // prevent native tooltip for read-only filter pulls by setting title to undefined
+      { ...sharedProps, title: undefined }
     : {
-        title,
-        color: 'hollow',
+        ...sharedProps,
+        title, // use native tooltip for non-read-only filter pills
         iconType: 'cross',
         iconSide: 'right',
         closeButtonProps: {
@@ -94,16 +91,27 @@ export const FilterView: FC<Props> = ({
         ),
       };
 
-  return (
+  const FilterPill = () => (
     <EuiBadge {...badgeProps} {...rest}>
-      <span ref={ref}>
-        <FilterLabel
-          filter={filter}
-          valueLabel={valueLabel}
-          filterLabelStatus={filterLabelStatus}
-          hideAlias={hideAlias}
-        />
-      </span>
+      <FilterLabel
+        filter={filter}
+        valueLabel={valueLabel}
+        fieldLabel={fieldLabel}
+        filterLabelStatus={filterLabelStatus}
+        hideAlias={hideAlias}
+      />
     </EuiBadge>
+  );
+
+  return readOnly ? (
+    <EuiToolTip position="bottom" content={title}>
+      <span ref={ref}>
+        <FilterPill />
+      </span>
+    </EuiToolTip>
+  ) : (
+    <span ref={ref}>
+      <FilterPill />
+    </span>
   );
 };

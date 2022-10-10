@@ -7,13 +7,15 @@
 
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
-import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
+import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionGroupId } from './constants';
 
-export type OnlyEsQueryAlertParams = Omit<EsQueryAlertParams, 'searchConfiguration' | 'searchType'>;
+export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration'> & {
+  searchType: 'esQuery';
+};
 
-export type OnlySearchSourceAlertParams = Omit<
-  EsQueryAlertParams,
+export type OnlySearchSourceRuleParams = Omit<
+  EsQueryRuleParams,
   'esQuery' | 'index' | 'timeField'
 > & {
   searchType: 'searchSource';
@@ -21,7 +23,7 @@ export type OnlySearchSourceAlertParams = Omit<
 
 export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   P,
-  EsQueryAlertState,
+  EsQueryRuleState,
   {},
   ActionContext,
   typeof ActionGroupId

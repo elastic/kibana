@@ -10,9 +10,7 @@ import moment from 'moment';
 import type { IScopedSearchSessionsClient } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 
-export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
-  IScopedSearchSessionsClient<T>
-> {
+export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessionsClient> {
   return {
     getId: jest.fn(),
     trackId: jest.fn(),
@@ -24,6 +22,7 @@ export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
     cancel: jest.fn(),
     extend: jest.fn(),
     delete: jest.fn(),
+    status: jest.fn(),
     getConfig: jest.fn(
       () =>
         ({

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiTlsHandshakesLensAttributes: LensAttributes = {
   title: '[Network] TLS handshakes',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: '1f48a633-8eee-45ae-9471-861227e9ca03',

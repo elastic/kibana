@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ErrorToastOptions, Toast } from '@kbn/core/public';
+import type { ErrorToastOptions, Toast } from '@kbn/core/public';
 import { useState } from 'react';
 import { useKibana } from '../lib/kibana';
 

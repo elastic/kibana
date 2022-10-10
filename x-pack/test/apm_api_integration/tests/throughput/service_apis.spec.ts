@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
@@ -104,16 +104,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
   let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceGoDevInstance = apm
-          .service(serviceName, 'development', 'go')
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
         await synthtraceEsClient.index([
@@ -122,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),
@@ -131,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_DEV_RATE)
             .generator((timestamp) =>
               serviceGoDevInstance
-                .transaction('GET /api/product/:id')
+                .transaction({ transactionName: 'GET /api/product/:id' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),

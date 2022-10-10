@@ -86,6 +86,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
           authenticationInfo as AuthenticationInfo
         ),
         {
+          userProfileGrant: { type: 'accessToken', accessToken },
           authHeaders: {
             authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
           },

@@ -14,6 +14,8 @@ import {
 } from '@kbn/core/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { createUICapabilities } from '@kbn/cases-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -24,12 +26,14 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
+import { slo } from './saved_objects';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces: SpacesPluginStart;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -40,47 +44,83 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   public setup(core: CoreSetup, plugins: PluginSetup) {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
-    if (config.unsafe.cases.enabled) {
-      plugins.features.registerKibanaFeature({
-        id: casesFeatureId,
-        name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
-          defaultMessage: 'Cases',
-        }),
-        order: 1100,
-        category: DEFAULT_APP_CATEGORIES.observability,
-        app: [casesFeatureId, 'kibana'],
-        catalogue: [observabilityFeatureId],
-        cases: [observabilityFeatureId],
-        privileges: {
-          all: {
-            app: [casesFeatureId, 'kibana'],
-            catalogue: [observabilityFeatureId],
-            cases: {
-              all: [observabilityFeatureId],
-            },
-            api: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
+    const casesCapabilities = createUICapabilities();
+
+    plugins.features.registerKibanaFeature({
+      id: casesFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 1100,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [casesFeatureId, 'kibana'],
+      catalogue: [observabilityFeatureId],
+      cases: [observabilityFeatureId],
+      privileges: {
+        all: {
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            create: [observabilityFeatureId],
+            read: [observabilityFeatureId],
+            update: [observabilityFeatureId],
+            push: [observabilityFeatureId],
           },
-          read: {
-            app: [casesFeatureId, 'kibana'],
-            catalogue: [observabilityFeatureId],
-            cases: {
-              read: [observabilityFeatureId],
-            },
-            api: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
+          savedObject: {
+            all: [],
+            read: [],
           },
+          ui: casesCapabilities.all,
         },
-      });
-    }
+        read: {
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            read: [observabilityFeatureId],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: casesCapabilities.read,
+        },
+      },
+      subFeatures: [
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureName', {
+            defaultMessage: 'Delete',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  api: [],
+                  id: 'cases_delete',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.deleteSubFeatureDetails',
+                    {
+                      defaultMessage: 'Delete cases and comments',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    delete: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -98,6 +138,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
+    if (config.unsafe.slo.enabled) {
+      core.savedObjects.registerType(slo);
+    }
+
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const { ruleDataService } = plugins.ruleRegistry;
@@ -108,7 +152,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         start,
       },
       logger: this.initContext.logger.get(),
-      repository: getGlobalObservabilityServerRouteRepository(),
+      repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
     });
 

@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 
 import {
   from,
@@ -14,11 +15,8 @@ import {
   severityRuleAlertsResponseParsed,
   to,
 } from './mock_data';
-import {
-  useRuleAlertsItems,
-  UseRuleAlertsItems,
-  UseRuleAlertsItemsProps,
-} from './use_rule_alerts_items';
+import type { UseRuleAlertsItems, UseRuleAlertsItemsProps } from './use_rule_alerts_items';
+import { useRuleAlertsItems } from './use_rule_alerts_items';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -77,6 +75,7 @@ describe('useRuleAlertsItems', () => {
       query: severityRuleAlertsQuery,
       indexName: 'signal-alerts',
       skip: false,
+      queryName: ALERTS_QUERY_NAMES.BY_SEVERITY,
     });
   });
 
@@ -121,6 +120,7 @@ describe('useRuleAlertsItems', () => {
       query: severityRuleAlertsQuery,
       indexName: 'signal-alerts',
       skip: true,
+      queryName: ALERTS_QUERY_NAMES.BY_SEVERITY,
     });
 
     expect(result.current).toEqual({

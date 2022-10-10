@@ -15,6 +15,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { MlStorageContextProvider } from './contexts/storage';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -25,7 +26,10 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats' | 'maps'> &
+export type MlDependencies = Omit<
+  MlSetupDependencies,
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'
+> &
   MlStartDependencies;
 
 interface AppProps {
@@ -86,6 +90,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     fieldFormats: deps.fieldFormats,
     dashboard: deps.dashboard,
     charts: deps.charts,
+    cases: deps.cases,
+    unifiedSearch: deps.unifiedSearch,
+    licensing: deps.licensing,
     ...coreStart,
   };
 
@@ -103,7 +110,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
               mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
             }}
           >
-            <MlRouter pageDeps={pageDeps} />
+            <MlStorageContextProvider>
+              <MlRouter pageDeps={pageDeps} />
+            </MlStorageContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>
@@ -140,7 +149,7 @@ export const renderApp = (
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  const mlLicense = setLicenseCache(deps.licensing, [
+  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, [
     () =>
       ReactDOM.render(
         <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,

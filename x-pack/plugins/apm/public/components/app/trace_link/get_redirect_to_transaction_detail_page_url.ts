@@ -12,10 +12,12 @@ export const getRedirectToTransactionDetailPageUrl = ({
   transaction,
   rangeFrom,
   rangeTo,
+  waterfallItemId,
 }: {
   transaction: Transaction;
   rangeFrom?: string;
   rangeTo?: string;
+  waterfallItemId?: string;
 }) => {
   return format({
     pathname: `/services/${transaction.service.name}/transactions/view`,
@@ -37,6 +39,7 @@ export const getRedirectToTransactionDetailPageUrl = ({
           diff: transaction.transaction.duration.us / 1000,
           direction: 'up',
         }),
+      waterfallItemId,
     },
   });
 };

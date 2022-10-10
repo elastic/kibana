@@ -11,7 +11,6 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :docker-image:    {docker-repo}:{version}
 :es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
 :es-docker-image: {es-docker-repo}:{version}
-:blob:            {kib-repo}blob/{branch}/
 :security-ref:    https://www.elastic.co/community/security/
 :Data-source:     Data view
 :data-source:     data view
@@ -19,6 +18,8 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :a-data-source:   a data view
 
 include::{docs-root}/shared/attributes.asciidoc[]
+
+:blob: {kib-repo}blob/{branch}/
 
 include::user/index.asciidoc[]
 
@@ -28,4 +29,7 @@ include::CHANGELOG.asciidoc[]
 
 include::developer/index.asciidoc[]
 
+include::apis.asciidoc[]
+
 include::redirects.asciidoc[]
+

@@ -7,12 +7,12 @@
 
 import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
-import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 import React, { memo } from 'react';
 
 export const EuiPanelStyled = styled(EuiPanel)`
   &.artifactEntryCard + &.artifactEntryCard {
-    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
+    margin-top: ${({ theme }) => theme.eui.euiSizeL};
   }
 `;
 

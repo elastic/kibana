@@ -13,6 +13,7 @@ import {
   ReportApiJSON,
   ReportDocument,
   ReportDocumentHead,
+  ReportFields,
   ReportSource,
 } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
@@ -55,11 +56,14 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public process_expiration?: ReportSource['process_expiration'];
   public migration_version: string;
 
+  public readonly queue_time_ms: ReportFields['queue_time_ms'];
+  public readonly execution_time_ms: ReportFields['execution_time_ms'];
+
   /*
    * Create an unsaved report
    * Index string is required
    */
-  constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>) {
+  constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>, fields?: ReportFields) {
     this._id = opts._id != null ? opts._id : puid.generate();
     this._index = opts._index;
     this._primary_term = opts._primary_term;
@@ -93,6 +97,9 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
+
+    this.queue_time_ms = fields?.queue_time_ms;
+    this.execution_time_ms = fields?.execution_time_ms;
   }
 
   /*
@@ -174,6 +181,8 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       attempts: this.attempts,
       started_at: this.started_at,
       completed_at: this.completed_at,
+      queue_time_ms: this.queue_time_ms?.[0],
+      execution_time_ms: this.execution_time_ms?.[0],
       migration_version: this.migration_version,
       payload: omit(this.payload, 'headers'),
       output: omit(this.output, 'content'),

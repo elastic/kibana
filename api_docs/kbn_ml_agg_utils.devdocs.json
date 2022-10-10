@@ -1,0 +1,1065 @@
+{
+  "id": "@kbn/ml-agg-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.buildSamplerAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "buildSamplerAggregation",
+        "description": [
+          "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is."
+        ],
+        "signature": [
+          "(aggs: any, samplerShardSize: number) => Record<string, ",
+          "AggregationsAggregationContainer",
+          ">"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.buildSamplerAggregation.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "aggs",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.buildSamplerAggregation.$2",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.fetchAggIntervals",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchAggIntervals",
+        "description": [
+          "\nReturns aggregation intervals for the supplied document fields."
+        ],
+        "signature": [
+          "(client: ",
+          "ElasticsearchClient",
+          ", indexPattern: string, query: ",
+          "QueryDslQueryContainer",
+          ", fields: ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.HistogramField",
+            "text": "HistogramField"
+          },
+          "[], samplerShardSize: number, runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumericColumnStatsMap",
+            "text": "NumericColumnStatsMap"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$2",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.HistogramField",
+                "text": "HistogramField"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$5",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$6",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.fetchHistogramsForFields",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchHistogramsForFields",
+        "description": [
+          "\nFetches data to be used in mini histogram charts. Supports auto-identifying\nthe histogram interval and min/max values.\n"
+        ],
+        "signature": [
+          "(client: ",
+          "ElasticsearchClient",
+          ", indexPattern: string, query: any, fields: ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.FieldsForHistograms",
+            "text": "FieldsForHistograms"
+          },
+          ", samplerShardSize: number, runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined) => Promise<(",
+          "NumericChartData",
+          " | OrdinalChartData | UnsupportedChartData)[]>"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "Elasticsearch Client"
+            ],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$2",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [
+              "index pattern to be queried"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "Elasticsearch query"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "the fields the histograms should be generated for"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.FieldsForHistograms",
+                "text": "FieldsForHistograms"
+              }
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$5",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [
+              "shard_size parameter of the sampler aggregation"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$6",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [
+              "optional runtime mappings"
+            ],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "an array of histogram data for each supplied field"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.getSamplerAggregationsResponsePath",
+        "type": "Function",
+        "tags": [],
+        "label": "getSamplerAggregationsResponsePath",
+        "description": [],
+        "signature": [
+          "(samplerShardSize: number) => string[]"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getSamplerAggregationsResponsePath.$1",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.numberValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "numberValidator",
+        "description": [
+          "\nValidate if a number is greater than a specified minimum & lesser than specified maximum"
+        ],
+        "signature": [
+          "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => (value: number) => ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumberValidationResult",
+            "text": "NumberValidationResult"
+          },
+          " | null"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.numberValidator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "conditions",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-agg-utils",
+                "id": "def-server.numberValidator.$1.min",
+                "type": "number",
+                "tags": [],
+                "label": "min",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-agg-utils",
+                "id": "def-server.numberValidator.$1.max",
+                "type": "number",
+                "tags": [],
+                "label": "max",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-agg-utils",
+                "id": "def-server.numberValidator.$1.integerOnly",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "integerOnly",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.AggCardinality",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggCardinality",
+        "description": [
+          "\nInterface for cardinality aggregation."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.AggCardinality.cardinality",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cardinality",
+            "description": [],
+            "signature": [
+              "FieldAggCardinality | ScriptAggCardinality"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePoint",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePoint",
+        "description": [
+          "\nChange point meta data for a field/value pair."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.ChangePoint",
+            "text": "ChangePoint"
+          },
+          " extends ",
+          "FieldValuePair"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.bg_count",
+            "type": "number",
+            "tags": [],
+            "label": "bg_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.total_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_doc_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.total_bg_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_bg_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.score",
+            "type": "number",
+            "tags": [],
+            "label": "score",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.normalizedScore",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePoint.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointGroup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointGroup",
+        "description": [
+          "\nTree leaves"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "ChangePointGroupItem[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroup.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointGroupHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointGroupHistogram",
+        "description": [
+          "\nChange point histogram data for a group of field/value pairs."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroupHistogram.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointGroupHistogram.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointHistogram",
+        "description": [
+          "\nChange point histogram data for a field/value pair."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.ChangePointHistogram",
+            "text": "ChangePointHistogram"
+          },
+          " extends ",
+          "FieldValuePair"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointHistogram.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "server",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-server.ChangePointHistogramItem",
+                "text": "ChangePointHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.ChangePointHistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePointHistogramItem",
+        "description": [
+          "\nChange point histogram data item."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointHistogramItem.doc_count_overall",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count_overall",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointHistogramItem.doc_count_change_point",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count_change_point",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointHistogramItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.ChangePointHistogramItem.key_as_string",
+            "type": "string",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.HistogramField",
+        "type": "Interface",
+        "tags": [],
+        "label": "HistogramField",
+        "description": [
+          "\nParameters to identify which histogram data needs to be generated for a field."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.HistogramField.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.HistogramField.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "KBN_FIELD_TYPES"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.NumberValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumberValidationResult",
+        "description": [],
+        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumberValidationResult.min",
+            "type": "boolean",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumberValidationResult.max",
+            "type": "boolean",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumberValidationResult.integerOnly",
+            "type": "boolean",
+            "tags": [],
+            "label": "integerOnly",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.NumericColumnStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumericColumnStats",
+        "description": [
+          "\nInterface to describe attributes used for histograms."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericColumnStats.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericColumnStats.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumericColumnStats.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.FieldsForHistograms",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldsForHistograms",
+        "description": [
+          "\nAll types of histogram field definitions for fetching histogram data."
+        ],
+        "signature": [
+          "(",
+          "NumericHistogramField",
+          " | NumericHistogramFieldWithColumnStats | OrdinalHistogramField | UnsupportedHistogramField)[]"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.NumericColumnStatsMap",
+        "type": "Type",
+        "tags": [],
+        "label": "NumericColumnStatsMap",
+        "description": [
+          "\nRecord/Map of histogram attributes where the key is the aggregation name."
+        ],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumericColumnStats",
+            "text": "NumericColumnStats"
+          },
+          "; }"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

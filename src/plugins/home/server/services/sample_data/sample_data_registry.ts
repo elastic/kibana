@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import {

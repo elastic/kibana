@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { identity, defaults, flow } from 'lodash';
+import { identity, defaults, flow, omit } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
@@ -283,7 +283,7 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    this.logger.debug(`Running task ${this}`);
+    this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
@@ -313,7 +313,10 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
-      this.logger.error(`Task ${this} failed: ${err}`);
+      this.logger.error(`Task ${this} failed: ${err}`, {
+        tags: [this.taskType, this.instance.task.id, 'task-run-failed'],
+        error: { stack_trace: err.stack },
+      });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -324,6 +327,8 @@ export class TaskManagerRunner implements TaskRunner {
       );
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
+    } finally {
+      this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
 
@@ -370,7 +375,7 @@ export class TaskManagerRunner implements TaskRunner {
 
       this.instance = asReadyToRun(
         (await this.bufferedTaskStore.update({
-          ...taskInstance,
+          ...taskWithoutEnabled(taskInstance),
           status: TaskStatus.Running,
           startedAt: now,
           attempts,
@@ -451,7 +456,7 @@ export class TaskManagerRunner implements TaskRunner {
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
     return promiseResult(
       this.bufferedTaskStore.update({
-        ...this.instance.task,
+        ...taskWithoutEnabled(this.instance.task),
         status: TaskStatus.Idle,
         attempts: this.instance.task.attempts + 1,
         startedAt: null,
@@ -544,7 +549,7 @@ export class TaskManagerRunner implements TaskRunner {
               retryAt: null,
               ownerId: null,
             },
-            this.instance.task
+            taskWithoutEnabled(this.instance.task)
           )
         )
       );
@@ -670,6 +675,12 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
+}
+
+// Omits "enabled" field from task updates so we don't overwrite any user
+// initiated changes to "enabled" while the task was running
+function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
+  return omit(task, 'enabled');
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

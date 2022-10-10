@@ -9,7 +9,7 @@
 
 import dateMath from '@kbn/datemath';
 import { formatDate } from '@elastic/eui';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { TIME_FORMAT } from '../constants/time_format';
 
 export function formatHumanReadableDate(ts: number) {
@@ -29,6 +29,17 @@ export function validateTimeRange(time?: TimeRange): boolean {
   const momentDateFrom = dateMath.parse(time.from);
   const momentDateTo = dateMath.parse(time.to);
   return !!(momentDateFrom && momentDateFrom.isValid() && momentDateTo && momentDateTo.isValid());
+}
+
+export function createAbsoluteTimeRange(time: TimeRange) {
+  if (validateTimeRange(time) === false) {
+    return null;
+  }
+
+  return {
+    to: dateMath.parse(time.to)?.valueOf(),
+    from: dateMath.parse(time.from)?.valueOf(),
+  };
 }
 
 export const timeFormatter = (value: number) => {

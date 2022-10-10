@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, Flags } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import fs from 'fs';
 import Path from 'path';
 import { savePrsToCsv } from './search_and_save_pr_list';

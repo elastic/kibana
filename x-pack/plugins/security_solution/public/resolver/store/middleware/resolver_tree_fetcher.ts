@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
-import {
+import type { Dispatch, MiddlewareAPI } from 'redux';
+import type {
   ResolverEntityIndex,
   ResolverNode,
   NewResolverTree,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
-import { ResolverState, DataAccessLayer } from '../../types';
+import type { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
-import { ResolverAction } from '../actions';
+import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
+import type { ResolverAction } from '../actions';
 import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
 
 /**
@@ -83,15 +84,56 @@ export function ResolverTreeFetcher(
           nodes: result,
         };
 
-        api.dispatch({
-          type: 'serverReturnedResolverData',
-          payload: {
-            result: resolverTree,
-            dataSource,
+        if (resolverTree.nodes.length === 0) {
+          const unboundedTree = await dataAccessLayer.resolverTree({
+            dataId: entityIDToFetch,
             schema: dataSourceSchema,
-            parameters: databaseParameters,
-          },
-        });
+            indices: databaseParameters.indices,
+            ancestors: ancestorsRequestAmount(dataSourceSchema),
+            descendants: descendantsRequestAmount(),
+          });
+          if (unboundedTree.length > 0) {
+            const timestamps = unboundedTree
+              .map((event) => firstNonNullValue(event.data['@timestamp']))
+              .sort();
+            const oldestTimestamp = timestamps[0];
+            const newestTimestamp = timestamps.slice(-1);
+            api.dispatch({
+              type: 'serverReturnedResolverData',
+              payload: {
+                result: { ...resolverTree, nodes: unboundedTree },
+                dataSource,
+                schema: dataSourceSchema,
+                parameters: databaseParameters,
+                detectedBounds: {
+                  from: String(oldestTimestamp),
+                  to: String(newestTimestamp),
+                },
+              },
+            });
+            // 0 results with unbounded query, fail as before
+          } else {
+            api.dispatch({
+              type: 'serverReturnedResolverData',
+              payload: {
+                result: resolverTree,
+                dataSource,
+                schema: dataSourceSchema,
+                parameters: databaseParameters,
+              },
+            });
+          }
+        } else {
+          api.dispatch({
+            type: 'serverReturnedResolverData',
+            payload: {
+              result: resolverTree,
+              dataSource,
+              schema: dataSourceSchema,
+              parameters: databaseParameters,
+            },
+          });
+        }
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {

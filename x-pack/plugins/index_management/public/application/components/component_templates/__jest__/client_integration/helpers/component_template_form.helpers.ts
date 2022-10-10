@@ -162,5 +162,6 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.requestTab'
   | 'versionField'
   | 'aliasesEditor'
+  | 'mappingsEditor'
   | 'settingsEditor'
   | 'versionField.input';

@@ -72,7 +72,6 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
               type: SOURCE_TYPES.ES_TERM_SOURCE,
@@ -114,7 +113,6 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
             } as unknown as ESTermSourceDescriptor,

@@ -8,11 +8,7 @@ import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import {
-  ruleRegistrySearchStrategyProvider,
-  EMPTY_RESPONSE,
-  RULE_SEARCH_STRATEGY_NAME,
-} from './search_strategy';
+import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
@@ -78,12 +74,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
-    ruleDataService.findIndicesByFeature.mockImplementation(() => {
-      return [
-        {
-          baseName: 'test',
-        } as IndexInfo,
-      ];
+    ruleDataService.findIndexByFeature.mockImplementation(() => {
+      return {
+        baseName: 'test',
+      } as IndexInfo;
     });
 
     data.search.getSearchStrategy.mockImplementation(() => {
@@ -108,7 +102,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   afterEach(() => {
-    ruleDataService.findIndicesByFeature.mockClear();
+    ruleDataService.findIndexByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
     (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
@@ -156,12 +150,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       };
     });
 
-    ruleDataService.findIndicesByFeature.mockImplementation(() => {
-      return [
-        {
-          baseName: 'myTestIndex',
-        } as unknown as IndexInfo,
-      ];
+    ruleDataService.findIndexByFeature.mockImplementation(() => {
+      return {
+        baseName: 'myTestIndex',
+      } as unknown as IndexInfo;
     });
 
     let searchRequest: RuleRegistrySearchRequest = {} as unknown as RuleRegistrySearchRequest;
@@ -199,8 +191,8 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    ruleDataService.findIndicesByFeature.mockImplementationOnce(() => {
-      return [];
+    ruleDataService.findIndexByFeature.mockImplementationOnce(() => {
+      return null;
     });
 
     const strategy = ruleRegistrySearchStrategyProvider(
@@ -389,19 +381,12 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     ).toStrictEqual([{ test: { order: 'desc' } }]);
   });
 
-  it('should reject, to the best of our ability, public requests', async () => {
-    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
-      return false;
-    });
+  it('passes the query ids if provided', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
-      sort: [
-        {
-          test: {
-            order: 'desc',
-          },
-        },
-      ],
+      featureIds: [AlertConsumers.SIEM],
+      query: {
+        ids: { values: ['test-id'] },
+      },
     };
     const options = {};
     const deps = {
@@ -417,17 +402,82 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       spaces
     );
 
-    let err = null;
-    try {
-      await strategy
-        .search(request, options, deps as unknown as SearchStrategyDependencies)
-        .toPromise();
-    } catch (e) {
-      err = e;
-    }
-    expect(err).not.toBeNull();
-    expect(err.message).toBe(
-      `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      {
+        params: {
+          body: {
+            _source: false,
+            fields: [
+              {
+                field: '*',
+                include_unmapped: true,
+              },
+            ],
+            from: 0,
+            query: {
+              ids: {
+                values: ['test-id'],
+              },
+            },
+            size: 1000,
+            sort: [],
+          },
+          index: ['test-testSpace*'],
+        },
+      },
+      {},
+      { request: {} }
+    );
+  });
+
+  it('passes the fields if provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+      query: {
+        ids: { values: ['test-id'] },
+      },
+      fields: [{ field: '@timestamp', include_unmapped: true }],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      {
+        params: {
+          body: {
+            _source: false,
+            fields: [{ field: '@timestamp', include_unmapped: true }],
+            from: 0,
+            query: {
+              ids: {
+                values: ['test-id'],
+              },
+            },
+            size: 1000,
+            sort: [],
+          },
+          index: ['test-testSpace*'],
+        },
+      },
+      {},
+      { request: {} }
     );
   });
 });

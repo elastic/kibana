@@ -1,0 +1,122 @@
+{
+  "id": "@kbn/core-metrics-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-metrics-server-internal",
+        "id": "def-server.MetricsServiceSetupDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsServiceSetupDeps",
+        "description": [],
+        "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-server-internal",
+            "id": "def-server.MetricsServiceSetupDeps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "InternalHttpServiceSetup"
+            ],
+            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-internal",
+            "id": "def-server.MetricsServiceSetupDeps.elasticsearchService",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearchService",
+            "description": [],
+            "signature": [
+              "InternalElasticsearchServiceSetup"
+            ],
+            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-metrics-server-internal",
+        "id": "def-server.opsConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "opsConfig",
+        "description": [],
+        "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-server-internal",
+            "id": "def-server.opsConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "\"ops\""
+            ],
+            "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-internal",
+            "id": "def-server.opsConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ObjectType",
+              "<{ interval: ",
+              "Type",
+              "<moment.Duration>; cGroupOverrides: ",
+              "ObjectType",
+              "<{ cpuPath: ",
+              "Type",
+              "<string | undefined>; cpuAcctPath: ",
+              "Type",
+              "<string | undefined>; }>; }>"
+            ],
+            "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

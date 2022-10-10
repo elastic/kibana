@@ -30,9 +30,9 @@ const Header = styled.header.attrs({
     ${border &&
     css`
       border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.paddingSizes.l};
+      padding-bottom: ${theme.eui.euiSizeL};
       .euiProgress {
-        top: ${theme.eui.paddingSizes.l};
+        top: ${theme.eui.euiSizeL};
       }
     `}
   `}

@@ -169,14 +169,16 @@ export interface IAnalyticsClient {
    * Reports a telemetry event.
    * @param eventType The event type registered via the `registerEventType` API.
    * @param eventData The properties matching the schema declared in the `registerEventType` API.
+   *
+   * @track-adoption
    */
-  reportEvent: <EventTypeData extends Record<string, unknown>>(
+  reportEvent: <EventTypeData extends object>(
     eventType: EventType,
     eventData: EventTypeData
   ) => void;
   /**
    * Registers the event type that will be emitted via the reportEvent API.
-   * @param eventTypeOps
+   * @param eventTypeOps The definition of the event type {@link EventTypeOpts}.
    */
   registerEventType: <EventTypeData>(eventTypeOps: EventTypeOpts<EventTypeData>) => void;
 
@@ -198,8 +200,10 @@ export interface IAnalyticsClient {
    */
   optIn: (optInConfig: OptInConfig) => void;
   /**
-   * Registers the context provider to enrich the any reported events.
+   * Registers the context provider to enrich any reported events.
    * @param contextProviderOpts {@link ContextProviderOpts}
+   *
+   * @track-adoption
    */
   registerContextProvider: <Context>(contextProviderOpts: ContextProviderOpts<Context>) => void;
   /**
@@ -211,4 +215,8 @@ export interface IAnalyticsClient {
    * Observable to emit the stats of the processed events.
    */
   readonly telemetryCounter$: Observable<TelemetryCounter>;
+  /**
+   * Stops the client.
+   */
+  shutdown: () => void;
 }

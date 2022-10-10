@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectsUpdateResponse,
@@ -16,7 +16,7 @@ import {
   SavedObjectsBaseOptions,
 } from '@kbn/core/server';
 import { signalsMigrationType } from './saved_objects';
-import { SignalsMigrationSOAttributes } from './saved_objects_schema';
+import type { SignalsMigrationSOAttributes } from './saved_objects_schema';
 
 export interface SignalsMigrationSOClient {
   bulkGet: (

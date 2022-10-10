@@ -10,7 +10,6 @@ export type {
   SortField,
   TimerangeInput,
   PaginationInputPaginated,
-  DocValueFields,
   CursorType,
   TotalValue,
 } from '@kbn/timelines-plugin/common';
@@ -24,20 +23,6 @@ export interface PageInfoPaginated {
   activePage: number;
   fakeTotalCount: number;
   showMorePagesIndicator: boolean;
-}
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: Maybe<string>;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: Maybe<string>;
-}
-
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
 }
 
 export interface ShardsResponse {
@@ -69,6 +54,7 @@ export interface Hits<T, U> {
 
 export interface GenericBuckets {
   key: string;
+  key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
 

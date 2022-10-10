@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from '@kbn/core/server';
 import { IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableInput, EmbeddableOutput } from '..';
@@ -16,7 +14,7 @@ export type EmbeddableFactoryDefinition<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends SavedObjectAttributes = SavedObjectAttributes
+  T = unknown
 > =
   // Required parameters
   Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> &

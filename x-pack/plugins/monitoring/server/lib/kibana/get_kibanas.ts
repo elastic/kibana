@@ -6,19 +6,14 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
-import { createQuery } from '../create_query';
-// @ts-ignore
-import { calculateAvailability } from '../calculate_availability';
-// @ts-ignore
-import { KibanaMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
-import { Globals } from '../../static_globals';
 import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
-import { KibanaInfo, buildKibanaInfo } from './build_kibana_info';
+import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { KibanaMetric } from '../metrics';
+import { buildKibanaInfo, KibanaInfo } from './build_kibana_info';
+import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 interface Kibana {
   process?: {
@@ -40,7 +35,8 @@ interface Kibana {
   };
   concurrent_connections?: number;
   kibana?: KibanaInfo;
-  availability: boolean;
+  statusIsStale: boolean;
+  lastSeenTimestamp: string;
 }
 
 /*
@@ -61,7 +57,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
   const moduleType = 'kibana';
   const type = 'kibana_stats';
   const dataset = 'stats';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -74,7 +70,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getKibanaDataset(dataset),
         metricset: dataset,
         start,
         end,
@@ -122,6 +118,8 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
     const legacyStats = hit._source.kibana_stats;
     const mbStats = hit._source.kibana?.stats;
 
+    const lastSeenTimestamp = hit._source['@timestamp'] ?? hit._source.timestamp;
+
     const kibana: Kibana = {
       kibana: buildKibanaInfo(hit),
       concurrent_connections:
@@ -145,7 +143,8 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
       requests: {
         total: mbStats?.request?.total ?? legacyStats?.requests?.total,
       },
-      availability: calculateAvailability(hit._source['@timestamp'] ?? hit._source.timestamp),
+      statusIsStale: isKibanaStatusStale(lastSeenTimestamp),
+      lastSeenTimestamp,
     };
     return kibana;
   });

@@ -6,32 +6,42 @@
  */
 
 import { useEffect, useState } from 'react';
+import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 import { casesFeatureId } from '../../common';
 
-export interface UseGetUserCasesPermissions {
-  crud: boolean;
-  read: boolean;
-}
-
 export function useGetUserCasesPermissions() {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
+  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
+    all: false,
+    read: false,
+    create: false,
+    update: false,
+    delete: false,
+    push: false,
+  });
   const uiCapabilities = useKibana().services.application.capabilities;
 
+  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
+    uiCapabilities[casesFeatureId]
+  );
+
   useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities[casesFeatureId]?.crud_cases === 'boolean'
-        ? (uiCapabilities[casesFeatureId].crud_cases as boolean)
-        : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities[casesFeatureId]?.read_cases === 'boolean'
-        ? (uiCapabilities[casesFeatureId].read_cases as boolean)
-        : false;
     setCasesPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
+      all: casesCapabilities.all,
+      create: casesCapabilities.create,
+      read: casesCapabilities.read,
+      update: casesCapabilities.update,
+      delete: casesCapabilities.delete,
+      push: casesCapabilities.push,
     });
-  }, [uiCapabilities]);
+  }, [
+    casesCapabilities.all,
+    casesCapabilities.create,
+    casesCapabilities.read,
+    casesCapabilities.update,
+    casesCapabilities.delete,
+    casesCapabilities.push,
+  ]);
 
   return casesPermissions;
 }

@@ -6,6 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { set } from 'lodash/fp';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
@@ -14,9 +15,12 @@ import {
   updateTableLimit,
   updateTableSorting,
   updateUserRiskScoreSeverityFilter,
+  updateUsersAnomaliesInterval,
+  updateUsersAnomaliesJobIdFilter,
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
-import { UsersTableType, UsersModel } from './model';
+import type { UsersModel } from './model';
+import { UsersTableType } from './model';
 import { Direction } from '../../../common/search_strategy/common';
 import { RiskScoreFields } from '../../../common/search_strategy';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
@@ -40,17 +44,16 @@ export const initialUsersState: UsersModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: RiskScoreFields.riskScore,
+          field: RiskScoreFields.userRiskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
       },
-      [UsersTableType.anomalies]: null,
-      [UsersTableType.events]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
+      [UsersTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
       },
-      [UsersTableType.alerts]: {
+      [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
@@ -58,12 +61,11 @@ export const initialUsersState: UsersModel = {
   },
   details: {
     queries: {
-      [UsersTableType.anomalies]: null,
-      [UsersTableType.events]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
+      [UsersTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
       },
-      [UsersTableType.alerts]: {
+      [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
@@ -114,6 +116,7 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
         [tableType]: {
           ...state.page.queries[tableType],
           sort,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },
@@ -132,4 +135,18 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       },
     },
   }))
+  .case(updateUsersAnomaliesJobIdFilter, (state, { jobIds, usersType }) => {
+    if (usersType === 'page') {
+      return set('page.queries.anomalies.jobIdSelection', jobIds, state);
+    } else {
+      return set('details.queries.anomalies.jobIdSelection', jobIds, state);
+    }
+  })
+  .case(updateUsersAnomaliesInterval, (state, { interval, usersType }) => {
+    if (usersType === 'page') {
+      return set('page.queries.anomalies.intervalSelection', interval, state);
+    } else {
+      return set('details.queries.anomalies.intervalSelection', interval, state);
+    }
+  })
   .build();

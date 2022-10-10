@@ -15,22 +15,30 @@ interface StylesDeps {
   hasAlerts: boolean;
   hasInvestigatedAlert: boolean;
   isSelected: boolean;
+  isSessionLeader: boolean;
 }
 
-export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }: StylesDeps) => {
+export const useStyles = ({
+  depth,
+  hasAlerts,
+  hasInvestigatedAlert,
+  isSelected,
+  isSessionLeader,
+}: StylesDeps) => {
   const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
 
+    const ALERT_INDICATOR_WIDTH = '3px';
+    const LINE_HEIGHT = '21px';
+    const FONT_SIZE = '13px';
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
     const PROCESS_TREE_LEFT_PADDING = size.s;
 
     const darkText: CSSObject = {
       color: colors.text,
       fontFamily: font.familyCode,
-      paddingLeft: size.xxs,
-      paddingRight: size.xs,
     };
 
     const children: CSSObject = {
@@ -77,14 +85,19 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
 
     const { bgColor, borderColor, hoverColor, searchResColor } = getHighlightColors();
 
+    const fontSpacingReset: CSSObject = {
+      fontSize: 0,
+      lineHeight: 0,
+    };
+
     const processNode: CSSObject = {
+      ...fontSpacingReset,
       display: 'block',
       cursor: 'pointer',
       position: 'relative',
-      padding: `${size.xs} 0px`,
+      marginBottom: isSessionLeader ? size.s : '0px',
       '&:hover:before': {
         backgroundColor: hoverColor,
-        transform: `translateY(-${size.xs})`,
       },
       '&:before': {
         position: 'absolute',
@@ -92,10 +105,31 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         pointerEvents: 'none',
         content: `''`,
         marginLeft: `calc(-${depth} * ${TREE_INDENT} - ${PROCESS_TREE_LEFT_PADDING})`,
-        borderLeft: `${size.xs} solid ${borderColor}`,
+        borderLeft: `${ALERT_INDICATOR_WIDTH} solid ${borderColor}`,
         backgroundColor: bgColor,
         width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
-        transform: `translateY(-${size.xs})`,
+      },
+      '.euiToolTipAnchor': {
+        verticalAlign: 'middle',
+      },
+    };
+
+    const textSection: CSSObject = {
+      marginLeft: size.s,
+      span: {
+        fontSize: FONT_SIZE,
+        lineHeight: LINE_HEIGHT,
+        verticalAlign: 'middle',
+      },
+    };
+
+    const sessionLeader: CSSObject = {
+      ...fontSpacingReset,
+      'span, b': {
+        fontSize: FONT_SIZE,
+        lineHeight: LINE_HEIGHT,
+        display: 'inline-block',
+        verticalAlign: 'middle',
       },
     };
 
@@ -111,16 +145,17 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       verticalAlign: 'middle',
       color: euiVars.euiTextSubduedColor,
       wordBreak: 'break-all',
-      minHeight: `calc(${size.l} - ${size.xxs})`,
-      lineHeight: `calc(${size.l} - ${size.xxs})`,
+      padding: `${size.xs} 0px`,
+      button: {
+        marginLeft: '6px',
+        marginRight: size.xxs,
+      },
     };
 
     const workingDir: CSSObject = {
       color: colors.successText,
       fontFamily: font.familyCode,
-      fontWeight: font.weight.medium,
-      paddingLeft: size.s,
-      paddingRight: size.xxs,
+      fontWeight: font.weight.regular,
     };
 
     const timeStamp: CSSObject = {
@@ -131,6 +166,8 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       paddingRight: size.base,
       paddingLeft: size.xxl,
       position: 'relative',
+      lineHeight: LINE_HEIGHT,
+      marginTop: '1px',
     };
 
     const alertDetails: CSSObject = {
@@ -149,8 +186,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       timeStamp,
       alertDetails,
       icon,
+      textSection,
+      sessionLeader,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars, isSessionLeader]);
 
   return cached;
 };

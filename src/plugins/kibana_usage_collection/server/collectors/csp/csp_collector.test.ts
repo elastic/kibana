@@ -24,6 +24,7 @@ describe('csp collector', () => {
   function updateCsp(config: Partial<ICspConfig>) {
     httpMock.csp = new CspConfig({
       ...CspConfig.DEFAULT,
+      disableUnsafeEval: false,
       style_src: [],
       worker_src: [],
       script_src: [],

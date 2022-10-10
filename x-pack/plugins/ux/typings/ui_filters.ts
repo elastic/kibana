@@ -13,6 +13,10 @@ export type UxUIFilters = {
   [key in UxLocalUIFilterName]?: string[];
 };
 
+export interface SetupUX {
+  uiFilters: UxUIFilters;
+}
+
 export interface BreakdownItem {
   name: string;
   type: string;

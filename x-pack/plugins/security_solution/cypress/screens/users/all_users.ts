@@ -8,5 +8,3 @@
 export const ALL_USERS_TABLE = '[data-test-subj="table-allUsers-loading-false"]';
 
 export const HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
-
-export const USER_NAME_CELL = '[data-test-subj="render-content-user.name"]';

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { ALERTS_PATH, SecurityPageName } from '../../../../common/constants';

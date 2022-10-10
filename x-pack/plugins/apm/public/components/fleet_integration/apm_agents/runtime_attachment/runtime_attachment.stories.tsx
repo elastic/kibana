@@ -7,18 +7,38 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuntimeAttachment } from '.';
 import { JavaRuntimeAttachment } from './supported_agents/java_runtime_attachment';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+
+const coreMock = {
+  http: {
+    get: async () => ({
+      versions: ['1.1.0', '1.1.2', '2.0.1'],
+      latest: '2.0.1',
+    }),
+  },
+  notifications: { toasts: { add: () => {} } },
+  uiSettings: { get: () => {} },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<{}> = {
   title: 'fleet/Runtime agent attachment',
   component: RuntimeAttachment,
   decorators: [
     (StoryComponent) => {
+      createCallApmApi(coreMock);
+
       return (
-        <div style={{ width: 700 }}>
-          <StoryComponent />
-        </div>
+        <KibanaReactContext.Provider>
+          <div style={{ width: 700 }}>
+            <StoryComponent />
+          </div>
+        </KibanaReactContext.Provider>
       );
     },
   ],
@@ -32,12 +52,11 @@ const excludeOptions = [
 ];
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
-const versions = ['1.27.1', '1.27.0', '1.26.0', '1.25.0'];
-
 export const RuntimeAttachmentExample: Story = () => {
   const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState(
     {}
   );
+  const [isEnabled, setIsEnabled] = useState(true);
   return (
     <>
       <RuntimeAttachment
@@ -57,7 +76,7 @@ export const RuntimeAttachmentExample: Story = () => {
         toggleDescription="Attach the Java agent to running and starting Java applications."
         discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs"
         showUnsavedWarning={true}
-        initialIsEnabled={true}
+        initialIsEnabled={isEnabled}
         initialDiscoveryRules={[
           {
             operation: 'include',
@@ -70,8 +89,10 @@ export const RuntimeAttachmentExample: Story = () => {
             probe: '10948653898867',
           },
         ]}
-        versions={versions}
-        selectedVersion={versions[0]}
+        version={null}
+        invalidatePackagePolicy={() => {
+          setIsEnabled(false);
+        }}
       />
       <hr />
       <pre>{JSON.stringify(runtimeAttachmentSettings, null, 4)}</pre>
@@ -97,7 +118,6 @@ const policy = {
   namespace: 'default',
   policy_id: 'policy-elastic-agent-on-cloud',
   enabled: true,
-  output_id: '',
   inputs: [
     {
       type: 'apm',
@@ -209,6 +229,10 @@ const policy = {
           value: false,
           type: 'bool',
         },
+        pprof_enabled: {
+          value: false,
+          type: 'bool',
+        },
         tls_enabled: {
           value: false,
           type: 'bool',
@@ -316,7 +340,6 @@ const newPolicy = {
   namespace: 'default',
   policy_id: 'policy-elastic-agent-on-cloud',
   enabled: true,
-  output_id: '',
   package: {
     name: 'apm',
     title: 'Elastic APM',
@@ -434,6 +457,10 @@ const newPolicy = {
           type: 'yaml',
         },
         expvar_enabled: {
+          value: false,
+          type: 'bool',
+        },
+        pprof_enabled: {
           value: false,
           type: 'bool',
         },

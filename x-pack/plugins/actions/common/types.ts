@@ -7,6 +7,12 @@
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+export {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from './connector_feature_config';
 export interface ActionType {
   id: string;
   name: string;
@@ -14,6 +20,7 @@ export interface ActionType {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
 }
 
 export enum InvalidEmailReason {
@@ -49,6 +56,10 @@ export interface ActionTypeExecutorResult<Data> {
   data?: Data;
   retry?: null | boolean | Date;
 }
+
+export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
+  error?: Error;
+};
 
 export function isActionTypeExecutorResult(
   result: unknown

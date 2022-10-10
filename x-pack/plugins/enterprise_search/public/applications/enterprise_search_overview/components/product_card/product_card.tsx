@@ -7,81 +7,147 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions } from 'kea';
 import { snakeCase } from 'lodash';
 
-import { EuiCard, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  IconType,
+} from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { KibanaLogic } from '../../../shared/kibana';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 import './product_card.scss';
 
-interface ProductCardProps {
-  // Expects product plugin constants (@see common/constants.ts)
-  product: {
-    ID: string;
-    NAME: string;
-    CARD_DESCRIPTION: string;
-    URL: string;
-  };
-  image: string;
-  url?: string;
+interface ProductResourceLink {
+  label: string;
+  to: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, image, url }) => {
+export interface ProductCardProps {
+  cta: string;
+  description: string;
+  emptyCta?: boolean;
+  features: string[];
+  icon: IconType;
+  name: string;
+  productId: string;
+  resourceLinks: ProductResourceLink[];
+  url: string;
+}
+
+export const ProductCard: React.FC<ProductCardProps> = ({
+  cta,
+  description,
+  emptyCta = false,
+  features,
+  icon,
+  productId,
+  name,
+  resourceLinks,
+  url,
+}) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const { config } = useValues(KibanaLogic);
-
-  const LAUNCH_BUTTON_TEXT = i18n.translate(
-    'xpack.enterpriseSearch.overview.productCard.launchButton',
-    {
-      defaultMessage: 'Open {productName}',
-      values: { productName: product.NAME },
-    }
-  );
-
-  const SETUP_BUTTON_TEXT = i18n.translate(
-    'xpack.enterpriseSearch.overview.productCard.setupButton',
-    {
-      defaultMessage: 'Set up {productName}',
-      values: { productName: product.NAME },
-    }
-  );
 
   return (
-    <EuiCard
-      className="productCard"
-      titleElement="h2"
-      title={i18n.translate('xpack.enterpriseSearch.overview.productCard.heading', {
-        defaultMessage: 'Elastic {productName}',
-        values: { productName: product.NAME },
-      })}
-      image={
-        <div className="productCard__imageContainer">
-          <img src={image} className="productCard__image" alt="" role="presentation" />
-        </div>
-      }
+    <EuiPanel
+      hasBorder
       paddingSize="l"
-      description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
-      footer={
-        <EuiButtonTo
-          fill
-          to={url || product.URL}
-          shouldNotCreateHref
-          onClick={() =>
-            sendEnterpriseSearchTelemetry({
-              action: 'clicked',
-              metric: snakeCase(product.ID),
-            })
-          }
-        >
-          {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
-        </EuiButtonTo>
-      }
-      data-test-subj={`${product.ID}ProductCard`}
-    />
+      data-test-subj={`${productId}ProductCard`}
+      className="productCard"
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} data-test-subj="productCard-icon">
+          <EuiIcon size="xl" type={icon} />
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="productCard-details">
+          <EuiTitle size="s">
+            <h3>{name}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            {description}
+          </EuiText>
+          <EuiSpacer />
+          <div>
+            {emptyCta ? (
+              <EuiButtonTo
+                to={url}
+                shouldNotCreateHref
+                onClick={() =>
+                  sendEnterpriseSearchTelemetry({
+                    action: 'clicked',
+                    metric: snakeCase(productId),
+                  })
+                }
+              >
+                {cta}
+              </EuiButtonTo>
+            ) : (
+              <EuiButtonEmptyTo
+                flush="both"
+                to={url}
+                shouldNotCreateHref
+                onClick={() =>
+                  sendEnterpriseSearchTelemetry({
+                    action: 'clicked',
+                    metric: snakeCase(productId),
+                  })
+                }
+              >
+                {cta}
+              </EuiButtonEmptyTo>
+            )}
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="productCard-features">
+          <EuiListGroup flush className="productCard-features">
+            {features.map((item: string, index: number) => (
+              <EuiListGroupItem
+                key={index}
+                size="s"
+                label={item}
+                icon={<EuiIcon color="success" type="checkInCircleFilled" />}
+              />
+            ))}
+          </EuiListGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4 data-test-subj="productCard-resources">
+              {i18n.translate('xpack.enterpriseSearch.productCard.resourcesTitle', {
+                defaultMessage: 'Resources',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            data-test-subj="productCard-resourceLinks"
+          >
+            {resourceLinks.map((resource, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                <EuiLink href={resource.to} target="_blank" external>
+                  {resource.label}
+                </EuiLink>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

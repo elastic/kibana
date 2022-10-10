@@ -44,6 +44,7 @@ export function PalettePicker({
     >
       <>
         <EuiColorPalettePicker
+          fullWidth
           data-test-subj="lns-palettePicker"
           compressed
           palettes={palettesToShow}

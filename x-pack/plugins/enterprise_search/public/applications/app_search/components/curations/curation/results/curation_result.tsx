@@ -10,14 +10,16 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { useValues } from 'kea';
 
+import type { SearchResult } from '@elastic/search-ui';
+
 import { EngineLogic } from '../../../engine';
 import { Result } from '../../../result';
-import { Result as ResultType, ResultAction } from '../../../result/types';
+import { ResultAction } from '../../../result/types';
 
 interface Props {
   actions: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
-  result: ResultType;
+  result: SearchResult;
   index?: number;
 }
 

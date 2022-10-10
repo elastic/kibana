@@ -4,6 +4,17 @@ This directory tree contains files subject to the Elastic License 2.0. The files
 to the Elastic License 2.0 are grouped in this directory to clearly separate them
 from files dual-licensed under the Server Side Public License and the Elastic License 2.0.
 
+## Alert Details page (feature flag)
+
+If you have:
+
+```yaml
+xpack.observability.unsafe.alertDetails.enabled: true
+```
+In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
+
+
+
 # Development
 
 By default, Kibana will run with X-Pack installed as mentioned in the [contributing guide](../CONTRIBUTING.md).
@@ -20,7 +31,7 @@ For information on testing, see [the Elastic functional test development guide](
 
 #### Running functional tests
 
-The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/security_api_integration/saml.config.ts)).
+The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.base.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/security_api_integration/saml.config.ts)).
 
 The script runs all sets of tests sequentially like so:
 * builds Elasticsearch and X-Pack

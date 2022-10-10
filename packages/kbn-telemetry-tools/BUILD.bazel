@@ -7,12 +7,20 @@ PKG_REQUIRE_NAME = "@kbn/telemetry-tools"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/__fixture__/**",
+    "**/*.stories.*",
     "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ]
 )
 
@@ -34,7 +42,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-eslint-plugin-imports",
   "//packages/kbn-utility-types",
   "//packages/kbn-utils",
-  "@npm//glob",
+  "@npm//globby",
   "@npm//listr",
   "@npm//normalize-path",
 ]
@@ -44,8 +52,8 @@ TYPES_DEPS = [
   "//packages/kbn-eslint-plugin-imports:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "@npm//globby",
   "@npm//tslib",
-  "@npm//@types/glob",
   "@npm//@types/jest",
   "@npm//@types/listr",
   "@npm//@types/lodash",
@@ -74,9 +82,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

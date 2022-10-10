@@ -120,7 +120,11 @@ describe('<JobTable />', () => {
     it('should open the detail panel when clicking on the job id', () => {
       const row = tableRows.first();
       const job = jobs[0];
-      const linkJobId = row.find(`[data-test-subj="jobTableCell-id"]`).hostNodes().find('EuiLink');
+      const linkJobId = row
+        .find(`[data-test-subj="jobTableCell-id"]`)
+        .hostNodes()
+        .find('EuiLink')
+        .find('button');
 
       linkJobId.simulate('click');
 

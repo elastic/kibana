@@ -5,18 +5,33 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import { readFile } from 'fs/promises';
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
+import { uniq } from 'lodash';
+import semverGte from 'semver/functions/gte';
+import semverGt from 'semver/functions/gt';
+import semverCoerce from 'semver/functions/coerce';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
+import { appContextService } from '../../services';
+
+const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
-  PostBulkAgentReassignResponse,
+  GetAgentTagsResponse,
+  GetAvailableVersionsResponse,
+  GetActionStatusResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -24,16 +39,16 @@ import type {
   GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
+  PostBulkUpdateAgentTagsRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
-import { licenseService } from '../../services';
+import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
@@ -43,13 +58,13 @@ export const getAgentHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (soClient.errors.isNotFoundError(error)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -75,7 +90,7 @@ export const deleteAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -87,10 +102,16 @@ export const updateAgentHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
+  const partialAgent: any = {};
+  if (request.body.user_provided_metadata) {
+    partialAgent.user_provided_metadata = request.body.user_provided_metadata;
+  }
+  if (request.body.tags) {
+    partialAgent.tags = uniq(request.body.tags);
+  }
+
   try {
-    await AgentService.updateAgent(esClient, request.params.agentId, {
-      user_provided_metadata: request.body.user_provided_metadata,
-    });
+    await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
@@ -103,7 +124,34 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const bulkUpdateAgentTagsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkUpdateAgentTagsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  const agentOptions = Array.isArray(request.body.agents)
+    ? { agentIds: request.body.agents }
+    : { kuery: request.body.agents };
+
+  try {
+    const results = await AgentService.updateAgentTags(
+      soClient,
+      esClient,
+      { ...agentOptions, batchSize: request.body.batchSize },
+      request.body.tagsToAdd ?? [],
+      request.body.tagsToRemove ?? []
+    );
+
+    return response.ok({ body: { actionId: results.actionId } });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -121,6 +169,8 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
     });
     const totalInactive = request.query.showInactive
       ? await AgentService.countInactiveAgents(esClient, {
@@ -138,7 +188,29 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getAgentTagsHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetTagsRequestSchema.query>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const tags = await AgentService.getAgentTags(esClient, {
+      showInactive: request.query.showInactive,
+      kuery: request.query.kuery,
+    });
+
+    const body: GetAgentTagsResponse = {
+      items: tags,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -161,7 +233,7 @@ export const putAgentsReassignHandler: RequestHandler<
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -170,13 +242,6 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
-  if (!licenseService.isGoldPlus()) {
-    return response.customError({
-      statusCode: 403,
-      body: { message: 'Requires Gold license' },
-    });
-  }
-
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -188,21 +253,13 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      agentOptions,
+      { ...agentOptions, batchSize: request.body.batchSize },
       request.body.policy_id
     );
 
-    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -223,7 +280,7 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -234,22 +291,74 @@ export const getAgentDataHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   try {
-    let items;
+    const returnDataPreview = request.query.previewData;
+    const agentIds = isStringArray(request.query.agentsIds)
+      ? request.query.agentsIds
+      : [request.query.agentsIds];
 
-    if (isStringArray(request.query.agentsIds)) {
-      items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsIds);
-    } else {
-      items = await AgentService.getIncomingDataByAgentsId(esClient, [request.query.agentsIds]);
-    }
+    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId(
+      esClient,
+      agentIds,
+      returnDataPreview
+    );
 
-    const body = { items };
+    const body = { items, dataPreview };
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
+
+// Read a static file generated at build time
+export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
+  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
+  let versionsToDisplay: string[] = [];
+
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
+
+  try {
+    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
+
+    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+    // De-dup and sort in descending order
+    const data: string[] = JSON.parse(file);
+
+    const versions = data
+      .map((item: any) => semverCoerce(item)?.version || '')
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+    const parsedVersions = uniq(versions) as string[];
+
+    // Add current version if not already present
+    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
+    versionsToDisplay = !hasCurrentVersion
+      ? [kibanaVersionCoerced].concat(parsedVersions)
+      : parsedVersions;
+    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getActionStatusHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetActionStatusRequestSchema.query>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
+    const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};

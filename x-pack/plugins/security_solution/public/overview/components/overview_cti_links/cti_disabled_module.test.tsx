@@ -12,7 +12,8 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CtiDisabledModule } from './cti_disabled_module';
 import { ThemeProvider } from 'styled-components';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,

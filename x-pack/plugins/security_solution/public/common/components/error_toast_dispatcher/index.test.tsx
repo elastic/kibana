@@ -18,7 +18,7 @@ import {
 import { createStore } from '../../store/store';
 
 import { ErrorToastDispatcher } from '.';
-import { State } from '../../store/types';
+import type { State } from '../../store/types';
 
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;

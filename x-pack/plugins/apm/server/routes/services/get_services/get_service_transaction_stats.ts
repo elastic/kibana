@@ -29,31 +29,32 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 interface AggregationParams {
   environment: string;
   kuery: string;
-  probability: number;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }
 
 export async function getServiceTransactionStats({
   environment,
   kuery,
-  probability,
   setup,
   searchAggregatedTransactions,
   maxNumServices,
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
@@ -77,6 +78,7 @@ export async function getServiceTransactionStats({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -93,9 +95,7 @@ export async function getServiceTransactionStats({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: randomSampler,
             aggs: {
               services: {
                 terms: {

@@ -14,6 +14,7 @@ import {
   startWith,
   tap,
   debounceTime,
+  filter,
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -52,6 +53,8 @@ interface SwimLanePagination {
  * Service for managing anomaly timeline state.
  */
 export class AnomalyTimelineStateService extends StateService {
+  // TODO: Add services for getSelectionInfluencers, getSelectionJobIds, & getSelectionTimeRange
+  // to consolidate usage
   private readonly _explorerURLStateCallback: (
     update: AnomalyExplorerSwimLaneUrlState,
     replaceState?: boolean
@@ -69,7 +72,7 @@ export class AnomalyTimelineStateService extends StateService {
     undefined
   );
   private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
-  private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
+  private _swimLanePagination$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
     viewByPerPage: 10,
   });
@@ -151,6 +154,7 @@ export class AnomalyTimelineStateService extends StateService {
       combineLatest([
         this.anomalyExplorerCommonStateService.getSelectedJobs$(),
         this.getContainerWidth$(),
+        this._timeBounds$,
       ]).subscribe(([selectedJobs, containerWidth]) => {
         this._swimLaneBucketInterval$.next(
           this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
@@ -204,7 +208,7 @@ export class AnomalyTimelineStateService extends StateService {
       if (influencersFilerQuery) {
         resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
       }
-      this._swimLanePaginations$.next(resultPaginaiton);
+      this._swimLanePagination$.next(resultPaginaiton);
     });
   }
 
@@ -212,7 +216,7 @@ export class AnomalyTimelineStateService extends StateService {
     return combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
-      this.getContainerWidth$(),
+      this.getSwimLaneBucketInterval$(),
       this._timeBounds$,
       this._refreshSubject$,
     ])
@@ -220,12 +224,12 @@ export class AnomalyTimelineStateService extends StateService {
         tap(() => {
           this._isOverallSwimLaneLoading$.next(true);
         }),
-        switchMap(([selectedJobs, severity, containerWidth]) => {
+        switchMap(([selectedJobs, severity, bucketInterval]) => {
           return from(
             this.anomalyTimelineService.loadOverallData(
-              selectedJobs!,
-              containerWidth,
+              selectedJobs,
               undefined,
+              bucketInterval!,
               severity
             )
           );
@@ -245,7 +249,6 @@ export class AnomalyTimelineStateService extends StateService {
         this.getViewBySwimlaneFieldName$(),
         this.getSwimLanePagination$(),
         this.getSwimLaneCardinality$(),
-        this.getContainerWidth$(),
         this.getSelectedCells$(),
         this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
@@ -256,7 +259,6 @@ export class AnomalyTimelineStateService extends StateService {
           InfluencersFilterQuery,
           string,
           SwimLanePagination,
-          number,
           number,
           AppStateSelectedCells,
           TimeBucketsInterval,
@@ -273,7 +275,6 @@ export class AnomalyTimelineStateService extends StateService {
             viewBySwimlaneFieldName,
             swimLanePagination,
             swimLaneCardinality,
-            swimlaneContainerWidth,
             selectedCells,
             swimLaneBucketInterval,
           ]) => {
@@ -297,7 +298,7 @@ export class AnomalyTimelineStateService extends StateService {
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
-                swimlaneContainerWidth,
+                swimLaneBucketInterval,
                 selectionInfluencers,
                 influencersFilterQuery
               )
@@ -314,7 +315,7 @@ export class AnomalyTimelineStateService extends StateService {
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this._swimLaneSeverity$,
-      this.getContainerWidth$(),
+      this.getSwimLaneBucketInterval$(),
       this.getViewBySwimlaneFieldName$(),
       this.getSwimLanePagination$(),
       this._topFieldValues$.pipe(distinctUntilChanged(isEqual)),
@@ -331,7 +332,7 @@ export class AnomalyTimelineStateService extends StateService {
             selectedJobs,
             influencersFilterQuery,
             severity,
-            swimlaneContainerWidth,
+            bucketInterval,
             viewBySwimlaneFieldName,
             swimLanePagination,
             topFieldValues,
@@ -348,9 +349,9 @@ export class AnomalyTimelineStateService extends StateService {
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
-                swimlaneContainerWidth,
-                influencersFilterQuery,
                 undefined,
+                influencersFilterQuery,
+                bucketInterval!,
                 severity
               )
             );
@@ -618,11 +619,11 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   public getSwimLanePagination$(): Observable<SwimLanePagination> {
-    return this._swimLanePaginations$.asObservable();
+    return this._swimLanePagination$.asObservable();
   }
 
   public getSwimLanePagination(): SwimLanePagination {
-    return this._swimLanePaginations$.getValue();
+    return this._swimLanePagination$.getValue();
   }
 
   public setSwimLanePagination(update: Partial<SwimLanePagination>) {
@@ -725,15 +726,20 @@ export class AnomalyTimelineStateService extends StateService {
     this._explorerURLStateCallback(
       {
         viewByFromPage: 1,
-        viewByPerPage: this._swimLanePaginations$.getValue().viewByPerPage,
+        viewByPerPage: this._swimLanePagination$.getValue().viewByPerPage,
         viewByFieldName: fieldName,
       },
       true
     );
   }
 
-  public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval | null> {
-    return this._swimLaneBucketInterval$.pipe(skipWhile((v) => !v));
+  public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval> {
+    return this._swimLaneBucketInterval$.pipe(
+      filter((v): v is TimeBucketsInterval => !!v),
+      distinctUntilChanged((prev, curr) => {
+        return prev.asSeconds() === curr.asSeconds();
+      })
+    );
   }
 
   public getSwimLaneBucketInterval(): TimeBucketsInterval | null {

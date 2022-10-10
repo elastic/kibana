@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { has } from 'lodash';
-import { Query } from '../../query/types';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL
@@ -16,9 +15,15 @@ import { Query } from '../../query/types';
  * @return Object
  */
 
-export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
+export function migrateLegacyQuery(
+  query: Query | { [key: string]: any } | string | AggregateQuery
+): Query | AggregateQuery {
   // Lucene was the only option before, so language-less queries are all lucene
+  // If the query is already a AggregateQuery, just return it
   if (!has(query, 'language')) {
+    if (typeof query === 'object' && isOfAggregateQueryType(query)) {
+      return query;
+    }
     return { query, language: 'lucene' };
   }
 

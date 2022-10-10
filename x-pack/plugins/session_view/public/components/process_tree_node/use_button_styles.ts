@@ -37,7 +37,8 @@ export const useButtonStyles = () => {
         },
       },
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorVis6, 0.04),
+        background: transparentize(euiVars.euiColorVis6, 0.12),
+        textDecoration: 'none',
       },
       '&.isExpanded > span svg': {
         transform: `rotate(180deg)`,
@@ -61,13 +62,32 @@ export const useButtonStyles = () => {
       background: transparentize(euiVars.euiColorDanger, 0.04),
       border: `${border.width.thin} solid ${transparentize(euiVars.euiColorDanger, 0.48)}`,
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorDanger, 0.04),
+        background: transparentize(euiVars.euiColorDanger, 0.12),
+        textDecoration: 'none',
       },
       '&.isExpanded': {
         color: colors.ghost,
         background: euiVars.euiColorDanger,
         '&:hover, &:focus': {
           background: `${euiVars.euiColorDanger}`,
+        },
+      },
+    };
+
+    const outputButton: CSSObject = {
+      ...button,
+      color: euiVars.euiColorVis1,
+      background: transparentize(euiVars.euiColorVis1, 0.04),
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis1, 0.48)}`,
+      '&&:hover, &&:focus': {
+        background: transparentize(euiVars.euiColorVis1, 0.12),
+        textDecoration: 'none',
+      },
+      '&.isExpanded': {
+        color: colors.ghost,
+        background: euiVars.euiColorVis1,
+        '&:hover, &:focus': {
+          background: `${euiVars.euiColorVis1}`,
         },
       },
     };
@@ -95,6 +115,7 @@ export const useButtonStyles = () => {
       buttonArrow,
       button,
       alertButton,
+      outputButton,
       userChangedButton,
       buttonSize,
     };

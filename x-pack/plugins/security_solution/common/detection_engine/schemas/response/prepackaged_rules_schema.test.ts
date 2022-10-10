@@ -7,10 +7,8 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import {
-  PrePackagedRulesAndTimelinesSchema,
-  prePackagedRulesAndTimelinesSchema,
-} from './prepackaged_rules_schema';
+import type { PrePackagedRulesAndTimelinesSchema } from './prepackaged_rules_schema';
+import { prePackagedRulesAndTimelinesSchema } from './prepackaged_rules_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('prepackaged_rules_schema', () => {

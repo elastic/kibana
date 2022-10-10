@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createInternalReadonlySoClient,
   InternalReadonlySoClientMethodNotAllowedError,

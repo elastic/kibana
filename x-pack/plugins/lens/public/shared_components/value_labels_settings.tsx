@@ -26,7 +26,7 @@ const valueLabelsOptions: Array<{
   },
   {
     id: `value_labels_inside`,
-    value: 'inside',
+    value: 'show',
     label: i18n.translate('xpack.lens.shared.valueLabelsVisibility.inside', {
       defaultMessage: 'Show',
     }),

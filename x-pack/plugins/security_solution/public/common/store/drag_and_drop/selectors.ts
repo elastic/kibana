@@ -6,8 +6,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { IdToDataProvider } from './model';
-import { State } from '../types';
+import type { IdToDataProvider } from './model';
+import type { State } from '../types';
 
 const selectDataProviders = (state: State): IdToDataProvider => state.dragAndDrop.dataProviders;
 

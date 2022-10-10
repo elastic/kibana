@@ -12,7 +12,6 @@ import {
   getRuleMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
-  getRuleExecutionSummarySucceeded,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
@@ -21,8 +20,17 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRulesRoute } from './update_rules_route';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { legacyMigrate } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -37,10 +45,9 @@ describe('update_rules', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
-      getRuleExecutionSummarySucceeded()
-    );
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     updateRulesRoute(server.router, ml);
   });
@@ -56,6 +63,7 @@ describe('update_rules', () => {
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getUpdateRequest(),
         requestContextMock.convertContext(context)
@@ -69,6 +77,7 @@ describe('update_rules', () => {
     });
 
     test('returns error when updating non-rule', async () => {
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getUpdateRequest(),

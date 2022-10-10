@@ -6,11 +6,9 @@
  */
 
 import _ from 'lodash';
+import type { Event, Tree, TreeNode } from './generate_data';
 import {
   EndpointDocGenerator,
-  Event,
-  Tree,
-  TreeNode,
   RelatedEventCategory,
   ECSCategory,
   ANCESTRY_LIMIT,
@@ -506,7 +504,7 @@ describe('data generator', () => {
         events[previousProcessEventIndex].process?.parent?.entity_id
       );
       expect(events[events.length - 1].event?.kind).toEqual('alert');
-      expect(events[events.length - 1].event?.category).toEqual('malware');
+      expect(events[events.length - 1].event?.category).toEqual('behavior');
     });
   });
 

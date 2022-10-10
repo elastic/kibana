@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternSavedObject } from '../../types';
+import type { IndexPatternSavedObject } from '../../types';
 
 export const mockIndexPatternSavedObjects: IndexPatternSavedObject[] = [
   {

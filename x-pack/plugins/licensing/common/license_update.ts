@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { ConnectableObservable, Observable, Subject, from, merge, firstValueFrom } from 'rxjs';
+import { type Observable, Subject, merge, firstValueFrom } from 'rxjs';
 
-import { filter, map, pairwise, exhaustMap, publishReplay, share, takeUntil } from 'rxjs/operators';
+import {
+  filter,
+  map,
+  pairwise,
+  exhaustMap,
+  share,
+  shareReplay,
+  takeUntil,
+  finalize,
+  startWith,
+} from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
-import { ILicense } from './types';
+import type { ILicense } from './types';
 
 export function createLicenseUpdate(
   triggerRefresh$: Observable<unknown>,
@@ -18,25 +28,35 @@ export function createLicenseUpdate(
   initialValues?: ILicense
 ) {
   const manuallyRefresh$ = new Subject<void>();
-  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(exhaustMap(fetcher), share());
 
-  const cached$ = fetched$.pipe(
+  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(
     takeUntil(stop$),
-    publishReplay(1)
-    // have to cast manually as pipe operator cannot return ConnectableObservable
-    // https://github.com/ReactiveX/rxjs/issues/2972
-  ) as ConnectableObservable<ILicense>;
+    exhaustMap(fetcher),
+    share()
+  );
 
-  const cachedSubscription = cached$.connect();
-  stop$.subscribe({ complete: () => cachedSubscription.unsubscribe() });
+  // provide a first, empty license, so that we can compare in the filter below
+  const startWithArgs = initialValues ? [undefined, initialValues] : [undefined];
 
-  const initialValues$ = initialValues ? from([undefined, initialValues]) : from([undefined]);
-
-  const license$: Observable<ILicense> = merge(initialValues$, cached$).pipe(
+  const license$: Observable<ILicense> = fetched$.pipe(
+    shareReplay(1),
+    startWith(...startWithArgs),
     pairwise(),
     filter(([previous, next]) => hasLicenseInfoChanged(previous, next!)),
     map(([, next]) => next!)
   );
+
+  // start periodic license fetch right away
+  const licenseSub = license$.subscribe();
+
+  stop$
+    .pipe(
+      finalize(() => {
+        manuallyRefresh$.complete();
+        licenseSub.unsubscribe();
+      })
+    )
+    .subscribe();
 
   return {
     license$,

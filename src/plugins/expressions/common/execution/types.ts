@@ -7,7 +7,6 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
@@ -65,6 +64,11 @@ export interface ExecutionContext<
    * Returns the state (true|false) of the sync colors across panels switch.
    */
   isSyncColorsEnabled?: () => boolean;
+
+  /**
+   * Returns the state (true|false) of the sync tooltips across panels switch.
+   */
+  isSyncTooltipsEnabled?: () => boolean;
 
   /**
    * Contains the meta-data about the source of the expression.

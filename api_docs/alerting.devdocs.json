@@ -29,6 +29,7 @@
         ],
         "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [
           "A URL that is meant to be relative to your application id, or a state object that your application uses to render\nthe rule. This information is intended to be used with cores NavigateToApp function, along with the application id that was\noriginally registered to {@link PluginSetupContract.registerNavigation }."
         ],
@@ -43,7 +44,7 @@
               "The rule to view"
             ],
             "signature": [
-              "{ id: string; monitoring?: ",
+              "{ name: string; params: never; tags: string[]; id: string; monitoring?: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -51,7 +52,7 @@
                 "section": "def-common.RuleMonitoring",
                 "text": "RuleMonitoring"
               },
-              " | undefined; name: string; tags: string[]; enabled: boolean; params: never; actions: ",
+              " | undefined; enabled: boolean; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -75,7 +76,7 @@
                 "section": "def-common.MappedParams",
                 "text": "MappedParams"
               },
-              " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+              " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; muteAll: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -83,10 +84,19 @@
                 "section": "def-common.RuleExecutionStatus",
                 "text": "RuleExecutionStatus"
               },
-              "; snoozeEndTime?: Date | null | undefined; }"
+              "; snoozeSchedule?: ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleSnooze",
+                "text": "RuleSnooze"
+              },
+              " | undefined; activeSnoozes?: string[] | undefined; isSnoozedUntil?: Date | null | undefined; }"
             ],
             "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -102,6 +112,7 @@
       "description": [],
       "path": "x-pack/plugins/alerting/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "alerting",
@@ -127,6 +138,7 @@
           ],
           "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "alerting",
@@ -142,6 +154,7 @@
               ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -158,6 +171,7 @@
               ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -180,6 +194,7 @@
               ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -207,6 +222,7 @@
           ],
           "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "alerting",
@@ -222,6 +238,7 @@
               ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -244,6 +261,7 @@
               ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -262,6 +280,7 @@
       "description": [],
       "path": "x-pack/plugins/alerting/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "alerting",
@@ -283,6 +302,7 @@
           ],
           "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "alerting",
@@ -296,6 +316,7 @@
               ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -317,6 +338,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -330,6 +352,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -343,6 +366,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -360,6 +384,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -401,6 +426,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -414,6 +440,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -444,6 +471,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -464,6 +492,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -483,6 +512,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -496,6 +526,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -520,13 +551,14 @@
               ", filterOpts: ",
               "AlertingAuthorizationFilterOpts",
               ") => Promise<{ filter?: ",
-              "KueryNode",
-              " | ",
               "JsonObject",
+              " | ",
+              "KueryNode",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -546,6 +578,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -560,6 +593,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -600,13 +634,14 @@
                 "text": "WriteOperations"
               },
               ") => Promise<{ filter?: ",
-              "KueryNode",
-              " | ",
               "JsonObject",
+              " | ",
+              "KueryNode",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -626,6 +661,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -640,6 +676,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -668,6 +705,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -713,6 +751,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -728,6 +767,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -758,6 +798,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -778,6 +819,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -802,6 +844,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -815,6 +858,40 @@
             ],
             "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.isRuleSnoozed",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuleSnoozed",
+        "description": [],
+        "signature": [
+          "(rule: RuleSnoozeProps) => boolean"
+        ],
+        "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.isRuleSnoozed.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "RuleSnoozeProps"
+            ],
+            "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -833,6 +910,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -846,6 +924,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -873,6 +952,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -885,7 +965,8 @@
               "ActionGroupIds"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -895,7 +976,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -909,6 +991,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -929,6 +1012,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -946,6 +1030,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -969,6 +1054,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -984,6 +1070,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -999,6 +1086,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -1017,7 +1105,8 @@
               }
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1036,7 +1125,195 @@
               }
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.BulkEditError",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkEditError",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditError.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "{ id: string; name: string; }"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.BulkEditOptionsFilter",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkEditOptionsFilter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkEditOptionsFilter",
+            "text": "BulkEditOptionsFilter"
+          },
+          "<Params>"
+        ],
+        "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsFilter.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "string | ",
+              "KueryNode",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsFilter.operations",
+            "type": "Array",
+            "tags": [],
+            "label": "operations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.BulkEditOperation",
+                "text": "BulkEditOperation"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsFilter.paramsModifier",
+            "type": "Function",
+            "tags": [],
+            "label": "paramsModifier",
+            "description": [],
+            "signature": [
+              "RuleParamsModifier<Params> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.BulkEditOptionsIds",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkEditOptionsIds",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkEditOptionsIds",
+            "text": "BulkEditOptionsIds"
+          },
+          "<Params>"
+        ],
+        "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsIds.ids",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsIds.operations",
+            "type": "Array",
+            "tags": [],
+            "label": "operations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.BulkEditOperation",
+                "text": "BulkEditOperation"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsIds.paramsModifier",
+            "type": "Function",
+            "tags": [],
+            "label": "paramsModifier",
+            "description": [],
+            "signature": [
+              "RuleParamsModifier<Params> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1060,6 +1337,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -1069,7 +1347,8 @@
             "label": "page",
             "description": [],
             "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1079,7 +1358,8 @@
             "label": "perPage",
             "description": [],
             "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1089,7 +1369,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1109,7 +1390,8 @@
               "<Params>[]"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1123,6 +1405,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -1192,6 +1475,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -1212,6 +1496,7 @@
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1231,6 +1516,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1253,6 +1539,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1268,6 +1555,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -1283,6 +1571,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -1295,27 +1584,13 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
-              "PublicMethodsOf",
-              "<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.RulesClient",
-                "text": "RulesClient"
-              },
-              ">"
+              "RulesClientApi"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -1325,17 +1600,12 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1350,13 +1620,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "PublicMethodsOf",
               "<",
@@ -1371,6 +1635,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "alerting",
@@ -1380,17 +1645,12 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1416,6 +1676,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1441,6 +1702,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -1450,7 +1712,8 @@
             "label": "alertId",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1460,7 +1723,8 @@
             "label": "executionId",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1473,7 +1737,8 @@
               "Date"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1486,7 +1751,8 @@
               "Date | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1506,7 +1772,8 @@
               "<InstanceState, InstanceContext, ActionGroupIds>"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1519,7 +1786,8 @@
               "Params"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1532,7 +1800,8 @@
               "State"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1553,7 +1822,8 @@
               "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1563,7 +1833,8 @@
             "label": "spaceId",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1576,7 +1847,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1586,7 +1858,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1599,7 +1872,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1612,7 +1886,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1625,7 +1900,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1645,10 +1921,11 @@
             "section": "def-server.RuleExecutorServices",
             "text": "RuleExecutorServices"
           },
-          "<InstanceState, InstanceContext, ActionGroupIds>"
+          "<State, Context, ActionGroupIds>"
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -1658,18 +1935,17 @@
             "label": "searchSourceClient",
             "description": [],
             "signature": [
-              "Promise<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.ISearchStartSearchSource",
                 "text": "ISearchStartSearchSource"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -1679,334 +1955,11 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              "SavedObject",
-              "<T>>; bulkCreate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; checkConflicts: (objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsObject",
-                "text": "SavedObjectsCheckConflictsObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsResponse",
-                "text": "SavedObjectsCheckConflictsResponse"
-              },
-              ">; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
-              "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkGetObject",
-                "text": "SavedObjectsBulkGetObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; bulkResolve: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveObject",
-                "text": "SavedObjectsBulkResolveObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveResponse",
-                "text": "SavedObjectsBulkResolveResponse"
-              },
-              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
-                "text": "SavedObjectsResolveResponse"
-              },
-              "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
-              "<T>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
-              "<T>>; collectMultiNamespaceReferences: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-              },
-              ">; updateObjectsSpaces: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                "text": "SavedObjectsUpdateObjectsSpacesObject"
-              },
-              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                "text": "SavedObjectsUpdateObjectsSpacesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                "text": "SavedObjectsUpdateObjectsSpacesResponse"
-              },
-              ">; bulkUpdate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateObject",
-                "text": "SavedObjectsBulkUpdateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateOptions",
-                "text": "SavedObjectsBulkUpdateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateResponse",
-                "text": "SavedObjectsBulkUpdateResponse"
-              },
-              "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                "text": "SavedObjectsRemoveReferencesToOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                "text": "SavedObjectsRemoveReferencesToResponse"
-              },
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                "text": "SavedObjectsOpenPointInTimeOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                "text": "SavedObjectsOpenPointInTimeResponse"
-              },
-              ">; closePointInTime: (id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                "text": "SavedObjectsClosePointInTimeResponse"
-              },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                "text": "SavedObjectsCreatePointInTimeFinderOptions"
-              },
-              ", dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
-              "<T, A>; errors: typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsErrorHelpers",
-                "text": "SavedObjectsErrorHelpers"
-              },
-              "; }"
+              "SavedObjectsClientContract"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2016,16 +1969,11 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2035,39 +1983,27 @@
             "label": "scopedClusterClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.alertFactory",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "alertFactory",
             "description": [],
             "signature": [
-              "{ create: (id: string) => ",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.PublicAlert",
-                "text": "PublicAlert"
-              },
-              "<InstanceState, InstanceContext, ActionGroupIds>; done: () => ",
-              "AlertFactoryDoneUtils",
-              "<InstanceState, InstanceContext, ActionGroupIds>; }"
+              "Pick<",
+              "AlertFactory",
+              "<State, Context, ActionGroupIds>, \"done\" | \"create\"> & { alertLimit: Pick<{ getValue: () => number; setLimitReached: (reached: boolean) => void; checkLimitUsage: () => void; }, \"getValue\" | \"setLimitReached\">; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2081,6 +2017,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2096,6 +2033,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2121,6 +2059,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -2134,7 +2073,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2147,7 +2087,8 @@
               "Params"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2171,6 +2112,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -2180,7 +2122,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2190,7 +2133,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2205,7 +2149,8 @@
               "<Params> | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2225,7 +2170,8 @@
               "<ActionGroupIds>[]"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2238,7 +2184,8 @@
               "ActionGroupIds"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2258,7 +2205,8 @@
               "<RecoveryActionGroupId> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2288,6 +2236,7 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2308,7 +2257,8 @@
                   "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
                 ],
                 "path": "x-pack/plugins/alerting/server/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2320,7 +2270,8 @@
             "label": "producer",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2357,7 +2308,8 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2370,7 +2322,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2393,7 +2346,8 @@
               "[]) => Params; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2403,7 +2357,8 @@
             "label": "isExportable",
             "description": [],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2416,7 +2371,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2429,7 +2385,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2442,7 +2399,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -2455,21 +2413,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleType.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "RuleTypeConfig",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2485,6 +2430,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2496,6 +2442,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization_kuery.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2507,6 +2454,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2518,6 +2466,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2550,6 +2499,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2560,10 +2510,11 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "{ readonly minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }"
+          "Pick<Readonly<{} & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }>, \"minimumScheduleInterval\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2578,6 +2529,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2592,6 +2544,68 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.BulkEditOperation",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkEditOperation",
+        "description": [],
+        "signature": [
+          "{ operation: \"delete\" | \"set\" | \"add\"; field: \"tags\"; value: string[]; } | { operation: \"set\" | \"add\"; field: \"actions\"; value: NormalizedAlertAction[]; } | { operation: \"set\"; field: \"schedule\"; value: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; } | { operation: \"set\"; field: \"snoozeSchedule\"; value: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnoozeSchedule",
+            "text": "RuleSnoozeSchedule"
+          },
+          "; } | { operation: \"delete\"; field: \"snoozeSchedule\"; value?: string[] | undefined; } | { operation: \"set\"; field: \"apiKey\"; value?: undefined; }"
+        ],
+        "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.BulkEditOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkEditOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkEditOptionsFilter",
+            "text": "BulkEditOptionsFilter"
+          },
+          "<Params> | ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkEditOptionsIds",
+            "text": "BulkEditOptionsIds"
+          },
+          "<Params>"
+        ],
+        "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2606,6 +2620,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2636,6 +2651,7 @@
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2650,14 +2666,13 @@
           "Alert",
           "<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; scheduleActionsWithSubGroup: (actionGroup: ActionGroupIds, subgroup: string, context?: Context) => ",
-          "Alert",
           "<State, Context, ActionGroupIds>; setContext: (context: Context) => ",
           "Alert",
           "<State, Context, ActionGroupIds>; getContext: () => Context; hasContext: () => boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/alert/alert.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2672,6 +2687,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2682,7 +2698,25 @@
         "label": "RulesClient",
         "description": [],
         "signature": [
-          "{ aggregate: ({ options: { fields, filter, ...options }, }?: { options?: ",
+          "{ get: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          " = never>({ id, includeLegacyId, includeSnoozeData, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<Params> | ",
+          "SanitizedRuleWithLegacyId",
+          "<Params>>; delete: ({ id }: { id: string; }) => Promise<{}>; aggregate: ({ options: { fields, filter, ...options }, }?: { options?: ",
           "AggregateOptions",
           " | undefined; }) => Promise<",
           "AggregateResult",
@@ -2704,7 +2738,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>>; delete: ({ id }: { id: string; }) => Promise<{}>; find: <Params extends ",
+          "<Params>>; find: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2712,49 +2746,15 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>({ options: { fields, ...options }, excludeFromPublicApi, }?: { options?: ",
+          " = never>({ options: { fields, ...options }, excludeFromPublicApi, includeSnoozeData, }?: { options?: ",
           "FindOptions",
-          " | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
+          " | undefined; excludeFromPublicApi?: boolean | undefined; includeSnoozeData?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
             "section": "def-server.FindResult",
             "text": "FindResult"
-          },
-          "<Params>>; get: <Params extends ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          " = never>({ id, includeLegacyId, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.SanitizedRule",
-            "text": "SanitizedRule"
-          },
-          "<Params> | ",
-          "SanitizedRuleWithLegacyId",
-          "<Params>>; resolve: <Params extends ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          " = never>({ id, includeLegacyId, }: { id: string; includeLegacyId?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.ResolvedSanitizedRule",
-            "text": "ResolvedSanitizedRule"
           },
           "<Params>>; update: <Params extends ",
           {
@@ -2774,6 +2774,22 @@
             "section": "def-server.PartialRule",
             "text": "PartialRule"
           },
+          "<Params>>; resolve: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          " = never>({ id, includeLegacyId, includeSnoozeData, }: { id: string; includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ResolvedSanitizedRule",
+            "text": "ResolvedSanitizedRule"
+          },
           "<Params>>; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart, numberOfExecutions, }: ",
           "GetAlertSummaryParams",
           ") => Promise<",
@@ -2791,19 +2807,92 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogWithErrorsResult",
-            "text": "IExecutionLogWithErrorsResult"
+            "section": "def-common.IExecutionLogResult",
+            "text": "IExecutionLogResult"
           },
-          ">; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeEndTime, }: { id: string; snoozeEndTime: string | -1; }) => Promise<void>; unsnooze: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
+          ">; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, }: ",
+          "GetGlobalExecutionLogParams",
+          ") => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IExecutionLogResult",
+            "text": "IExecutionLogResult"
+          },
+          ">; getActionErrorLog: ({ id, dateStart, dateEnd, filter, page, perPage, sort, }: ",
+          "GetActionErrorLogByIdParams",
+          ") => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IExecutionErrorsResult",
+            "text": "IExecutionErrorsResult"
+          },
+          ">; getGlobalExecutionKpiWithAuth: ({ dateStart, dateEnd, filter, }: ",
+          "GetGlobalExecutionKPIParams",
+          ") => Promise<{ success: number; unknown: number; failure: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getRuleExecutionKPI: ({ id, dateStart, dateEnd, filter }: ",
+          "GetRuleExecutionKPIParams",
+          ") => Promise<{ success: number; unknown: number; failure: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; bulkEdit: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">(options: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkEditOptions",
+            "text": "BulkEditOptions"
+          },
+          "<Params>) => Promise<{ rules: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<Params>[]; errors: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkEditError",
+            "text": "BulkEditError"
+          },
+          "[]; total: number; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnoozeSchedule",
+            "text": "RuleSnoozeSchedule"
+          },
+          "; }) => Promise<void>; unsnooze: ({ id, scheduleIds, }: { id: string; scheduleIds?: string[] | undefined; }) => Promise<void>; calculateIsSnoozedUntil: (rule: { muteAll: boolean; snoozeSchedule?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnooze",
+            "text": "RuleSnooze"
+          },
+          " | undefined; }) => string | null; clearExpiredSnoozes: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
-          ") => Promise<void>; listAlertTypes: () => Promise<Set<",
+          ") => Promise<void>; runSoon: ({ id }: { id: string; }) => Promise<string | undefined>; listAlertTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; getSpaceId: () => string | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2818,6 +2907,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2832,6 +2922,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2852,6 +2943,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -2865,6 +2957,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2879,6 +2972,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2921,6 +3015,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -2941,6 +3036,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2959,6 +3055,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -2972,6 +3069,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2990,6 +3088,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3003,6 +3102,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3021,6 +3121,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3034,6 +3135,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3048,6 +3150,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3066,6 +3169,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3079,6 +3183,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3097,6 +3202,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3110,6 +3216,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3128,6 +3235,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3141,6 +3249,7 @@
             ],
             "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3168,6 +3277,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3180,7 +3290,8 @@
               "ActionGroupIds"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3190,7 +3301,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3204,6 +3316,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3213,7 +3326,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3223,7 +3337,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3236,7 +3351,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3249,7 +3365,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3263,6 +3380,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3272,7 +3390,8 @@
             "label": "isSufficientlySecure",
             "description": [],
             "path": "x-pack/plugins/alerting/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3282,7 +3401,8 @@
             "label": "hasPermanentEncryptionKey",
             "description": [],
             "path": "x-pack/plugins/alerting/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3301,7 +3421,8 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3315,6 +3436,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3335,7 +3457,8 @@
               "; timestamp: string; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3356,7 +3479,8 @@
               "; timestamp: string; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3377,7 +3501,8 @@
               "; timestamp: string; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3391,6 +3516,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3403,7 +3529,8 @@
               "\"OK\" | \"Active\""
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3413,7 +3540,8 @@
             "label": "muted",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3426,20 +3554,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertStatus.actionSubgroup",
-            "type": "string",
-            "tags": [],
-            "label": "actionSubgroup",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3452,7 +3568,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3466,6 +3583,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3475,7 +3593,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3485,7 +3604,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3498,7 +3618,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3508,7 +3629,8 @@
             "label": "ruleTypeId",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3518,7 +3640,8 @@
             "label": "consumer",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3528,7 +3651,8 @@
             "label": "muteAll",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3541,7 +3665,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3551,7 +3676,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3561,7 +3687,8 @@
             "label": "statusStartDate",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3571,7 +3698,8 @@
             "label": "statusEndDate",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3584,7 +3712,8 @@
               "\"OK\" | \"Active\" | \"Error\""
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3597,7 +3726,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3610,7 +3740,8 @@
               "{ date: string; message: string; }[]"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3631,7 +3762,8 @@
               "; }"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3650,7 +3782,8 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3664,6 +3797,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3673,7 +3807,8 @@
             "label": "average",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3686,7 +3821,8 @@
               "{ [x: string]: number; }"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3700,6 +3836,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3709,7 +3846,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3719,7 +3857,8 @@
             "label": "timestamp",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3729,7 +3868,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3739,7 +3879,8 @@
             "label": "message",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3753,6 +3894,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3762,7 +3904,8 @@
             "label": "totalErrors",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3782,7 +3925,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3796,6 +3940,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3805,7 +3950,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3815,7 +3961,8 @@
             "label": "timestamp",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3825,7 +3972,8 @@
             "label": "duration_ms",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3835,7 +3983,8 @@
             "label": "status",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3845,7 +3994,19 @@
             "label": "message",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3855,7 +4016,8 @@
             "label": "num_active_alerts",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3865,7 +4027,8 @@
             "label": "num_new_alerts",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3875,7 +4038,8 @@
             "label": "num_recovered_alerts",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3885,17 +4049,19 @@
             "label": "num_triggered_actions",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.IExecutionLog.num_scheduled_actions",
+            "id": "def-common.IExecutionLog.num_generated_actions",
             "type": "number",
             "tags": [],
-            "label": "num_scheduled_actions",
+            "label": "num_generated_actions",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3905,7 +4071,8 @@
             "label": "num_succeeded_actions",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3915,7 +4082,8 @@
             "label": "num_errored_actions",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3925,7 +4093,8 @@
             "label": "total_search_duration_ms",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3935,7 +4104,8 @@
             "label": "es_search_duration_ms",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3945,7 +4115,8 @@
             "label": "schedule_delay_ms",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3955,7 +4126,30 @@
             "label": "timed_out",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.rule_id",
+            "type": "string",
+            "tags": [],
+            "label": "rule_id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.rule_name",
+            "type": "string",
+            "tags": [],
+            "label": "rule_name",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3969,6 +4163,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -3978,7 +4173,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3998,7 +4194,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4023,6 +4220,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4032,7 +4230,8 @@
             "label": "interval",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4046,6 +4245,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4058,7 +4258,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4071,7 +4272,241 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RRuleRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "RRuleRecord",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.dtstart",
+            "type": "string",
+            "tags": [],
+            "label": "dtstart",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.tzid",
+            "type": "string",
+            "tags": [],
+            "label": "tzid",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.freq",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "freq",
+            "description": [],
+            "signature": [
+              "0 | 2 | 1 | 3 | 4 | 5 | 6 | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.until",
+            "type": "string",
+            "tags": [],
+            "label": "until",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.wkst",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "wkst",
+            "description": [],
+            "signature": [
+              "WeekdayStr",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.byweekday",
+            "type": "Array",
+            "tags": [],
+            "label": "byweekday",
+            "description": [],
+            "signature": [
+              "(string | number)[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.bymonth",
+            "type": "Array",
+            "tags": [],
+            "label": "bymonth",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.bysetpos",
+            "type": "Array",
+            "tags": [],
+            "label": "bysetpos",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.bymonthday",
+            "type": "Array",
+            "tags": [],
+            "label": "bymonthday",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.byyearday",
+            "type": "Array",
+            "tags": [],
+            "label": "byyearday",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.byweekno",
+            "type": "Array",
+            "tags": [],
+            "label": "byweekno",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.byhour",
+            "type": "Array",
+            "tags": [],
+            "label": "byhour",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.byminute",
+            "type": "Array",
+            "tags": [],
+            "label": "byminute",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RRuleRecord.bysecond",
+            "type": "Array",
+            "tags": [],
+            "label": "bysecond",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4095,6 +4530,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4104,7 +4540,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4114,7 +4551,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4124,7 +4562,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4137,7 +4576,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4147,7 +4587,8 @@
             "label": "alertTypeId",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4157,7 +4598,8 @@
             "label": "consumer",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4176,7 +4618,8 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4196,7 +4639,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4209,7 +4653,8 @@
               "Params"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4229,7 +4674,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4242,7 +4688,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4255,7 +4702,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4268,7 +4716,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4281,7 +4730,8 @@
               "Date"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4294,7 +4744,8 @@
               "Date"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4307,7 +4758,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4320,7 +4772,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4333,7 +4786,19 @@
               "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.muteAll",
+            "type": "boolean",
+            "tags": [],
+            "label": "muteAll",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4346,17 +4811,8 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.Rule.muteAll",
-            "type": "boolean",
-            "tags": [],
-            "label": "muteAll",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4369,7 +4825,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4388,7 +4845,8 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4408,20 +4866,57 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.Rule.snoozeEndTime",
+            "id": "def-common.Rule.snoozeSchedule",
+            "type": "Array",
+            "tags": [],
+            "label": "snoozeSchedule",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleSnooze",
+                "text": "RuleSnooze"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.activeSnoozes",
+            "type": "Array",
+            "tags": [],
+            "label": "activeSnoozes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.isSnoozedUntil",
             "type": "CompoundType",
             "tags": [],
-            "label": "snoozeEndTime",
+            "label": "isSnoozedUntil",
             "description": [],
             "signature": [
               "Date | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4435,6 +4930,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4444,7 +4940,8 @@
             "label": "group",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4454,7 +4951,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4464,7 +4962,8 @@
             "label": "actionTypeId",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4477,7 +4976,8 @@
               "SavedObjectAttributes"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4491,6 +4991,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4503,7 +5004,8 @@
               "{ [status: string]: number; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4516,7 +5018,8 @@
               "{ enabled: number; disabled: number; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4529,7 +5032,8 @@
               "{ muted: number; unmuted: number; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4542,73 +5046,22 @@
               "{ snoozed: number; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionRunResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuleExecutionRunResult",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionRunResult.state",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; numberOfScheduledActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionRunResult.monitoring",
-            "type": "Object",
+            "id": "def-common.RuleAggregations.ruleTags",
+            "type": "Array",
             "tags": [],
-            "label": "monitoring",
+            "label": "ruleTags",
             "description": [],
             "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.RuleMonitoring",
-                "text": "RuleMonitoring"
-              },
-              " | undefined"
+              "string[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionRunResult.schedule",
-            "type": "Object",
-            "tags": [],
-            "label": "schedule",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.IntervalSchedule",
-                "text": "IntervalSchedule"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-            "deprecated": false
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4622,6 +5075,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4631,49 +5085,11 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"unknown\" | \"warning\" | \"pending\" | \"ok\" | \"active\""
+              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionStatus.numberOfTriggeredActions",
-            "type": "number",
-            "tags": [],
-            "label": "numberOfTriggeredActions",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionStatus.numberOfScheduledActions",
-            "type": "number",
-            "tags": [],
-            "label": "numberOfScheduledActions",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionStatus.metrics",
-            "type": "Object",
-            "tags": [],
-            "label": "metrics",
-            "description": [],
-            "signature": [
-              "{ numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; } | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4686,7 +5102,8 @@
               "Date"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4699,7 +5116,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4720,7 +5138,8 @@
               "; message: string; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4741,7 +5160,8 @@
               "; message: string; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4766,6 +5186,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4786,7 +5207,8 @@
               "[]; calculated_metrics: { p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; success_ratio: number; }; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4811,6 +5233,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4820,7 +5243,8 @@
             "label": "success",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4830,7 +5254,8 @@
             "label": "timestamp",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4843,7 +5268,91 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleSnoozeSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleSnoozeSchedule",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.rRule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rRule",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RRuleRecord",
+                "text": "RRuleRecord"
+              },
+              "> & Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RRuleRecord",
+                "text": "RRuleRecord"
+              },
+              ", \"dtstart\" | \"tzid\">"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.skipRecurrences",
+            "type": "Array",
+            "tags": [],
+            "label": "skipRecurrences",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4857,6 +5366,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule_navigation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4869,7 +5379,8 @@
               "JsonObject"
             ],
             "path": "x-pack/plugins/alerting/common/rule_navigation.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4893,6 +5404,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -4902,7 +5414,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4912,7 +5425,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4932,7 +5446,8 @@
               "<ActionGroupIds>[]"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4952,7 +5467,8 @@
               "<RecoveryActionGroupId>"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4965,7 +5481,8 @@
               "{ context: ActionVariable[]; state: ActionVariable[]; params: ActionVariable[]; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4978,7 +5495,8 @@
               "ActionGroupIds"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -4988,7 +5506,8 @@
             "label": "producer",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5001,7 +5520,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5011,7 +5531,8 @@
             "label": "isExportable",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5024,7 +5545,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5037,7 +5559,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5050,7 +5573,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5060,7 +5584,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -5073,7 +5598,8 @@
               "{ [x: string]: ConsumerPrivileges; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5087,6 +5613,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule_navigation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
@@ -5096,13 +5623,26 @@
             "label": "path",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rule_navigation.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ActionsCompletion",
+        "type": "Enum",
+        "tags": [],
+        "label": "ActionsCompletion",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.HealthStatus",
@@ -5112,6 +5652,7 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5123,10 +5664,53 @@
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleExecutionStatusWarningReasons",
+        "type": "Enum",
+        "tags": [],
+        "label": "RuleExecutionStatusWarningReasons",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.actionErrorLogSortableColumns",
+        "type": "Array",
+        "tags": [],
+        "label": "actionErrorLogSortableColumns",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ActionErrorLogSortFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionErrorLogSortFields",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.ActionGroupIdsOf",
@@ -5155,6 +5739,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5169,6 +5754,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5183,6 +5769,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5197,6 +5784,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5211,6 +5799,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5225,6 +5814,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5239,6 +5829,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5253,6 +5844,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5263,38 +5855,26 @@
         "label": "ExecutionLogSortFields",
         "description": [],
         "signature": [
-          "\"timestamp\" | \"execution_duration\" | \"total_search_duration\" | \"es_search_duration\" | \"schedule_delay\" | \"num_triggered_actions\" | \"num_scheduled_actions\""
+          "\"timestamp\" | \"execution_duration\" | \"total_search_duration\" | \"es_search_duration\" | \"schedule_delay\" | \"num_triggered_actions\" | \"num_generated_actions\" | \"num_active_alerts\" | \"num_recovered_alerts\" | \"num_new_alerts\""
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.IExecutionLogWithErrorsResult",
+        "id": "def-common.IExecutionKPIResult",
         "type": "Type",
         "tags": [],
-        "label": "IExecutionLogWithErrorsResult",
+        "label": "IExecutionKPIResult",
         "description": [],
         "signature": [
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogResult",
-            "text": "IExecutionLogResult"
-          },
-          " & ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionErrorsResult",
-            "text": "IExecutionErrorsResult"
-          }
+          "{ success: number; unknown: number; failure: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }"
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5309,6 +5889,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5323,6 +5904,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5345,6 +5927,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5359,6 +5942,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5373,6 +5957,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5387,6 +5972,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5401,6 +5987,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5419,17 +6006,12 @@
             "text": "SanitizedRule"
           },
           "<Params> & Omit<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsResolveResponse",
-            "text": "SavedObjectsResolveResponse"
-          },
+          "SavedObjectsResolveResponse",
           "<unknown>, \"saved_object\">"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5447,6 +6029,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5461,34 +6044,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionMetrics",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleExecutionMetrics",
-        "description": [],
-        "signature": [
-          "{ numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }"
-        ],
-        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionState",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleExecutionState",
-        "description": [],
-        "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; numberOfScheduledActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
-        ],
-        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5499,21 +6055,11 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"error\" | \"unknown\" | \"warning\" | \"pending\" | \"ok\" | \"active\""
+          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionStatusWarningReasons",
-        "type": "string",
-        "tags": [],
-        "label": "RuleExecutionStatusWarningReasons",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5542,6 +6088,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_navigation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5556,6 +6103,22 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleSnooze",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleSnooze",
+        "description": [],
+        "signature": [
+          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; skipRecurrences?: string[] | undefined; }[]"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5570,6 +6133,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5584,6 +6148,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5598,6 +6163,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5612,6 +6178,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5626,6 +6193,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5636,7 +6204,7 @@
         "label": "SanitizedRule",
         "description": [],
         "signature": [
-          "{ id: string; monitoring?: ",
+          "{ name: string; params: Params; tags: string[]; id: string; monitoring?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5644,7 +6212,7 @@
             "section": "def-common.RuleMonitoring",
             "text": "RuleMonitoring"
           },
-          " | undefined; name: string; tags: string[]; enabled: boolean; params: Params; actions: ",
+          " | undefined; enabled: boolean; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5668,7 +6236,7 @@
             "section": "def-common.MappedParams",
             "text": "MappedParams"
           },
-          " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; muteAll: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5676,10 +6244,19 @@
             "section": "def-common.RuleExecutionStatus",
             "text": "RuleExecutionStatus"
           },
-          "; snoozeEndTime?: Date | null | undefined; }"
+          "; snoozeSchedule?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnooze",
+            "text": "RuleSnooze"
+          },
+          " | undefined; activeSnoozes?: string[] | undefined; isSnoozedUntil?: Date | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5702,6 +6279,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5724,6 +6302,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -5740,6 +6319,109 @@
         ],
         "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.EMPTY_EXECUTION_KPI_RESULT",
+        "type": "Object",
+        "tags": [],
+        "label": "EMPTY_EXECUTION_KPI_RESULT",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.success",
+            "type": "number",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.unknown",
+            "type": "number",
+            "tags": [],
+            "label": "unknown",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.failure",
+            "type": "number",
+            "tags": [],
+            "label": "failure",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.activeAlerts",
+            "type": "number",
+            "tags": [],
+            "label": "activeAlerts",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.newAlerts",
+            "type": "number",
+            "tags": [],
+            "label": "newAlerts",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.recoveredAlerts",
+            "type": "number",
+            "tags": [],
+            "label": "recoveredAlerts",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.erroredActions",
+            "type": "number",
+            "tags": [],
+            "label": "erroredActions",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.triggeredActions",
+            "type": "number",
+            "tags": [],
+            "label": "triggeredActions",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5750,10 +6432,11 @@
         "label": "executionLogSortableColumns",
         "description": [],
         "signature": [
-          "readonly [\"timestamp\", \"execution_duration\", \"total_search_duration\", \"es_search_duration\", \"schedule_delay\", \"num_triggered_actions\", \"num_scheduled_actions\"]"
+          "readonly [\"timestamp\", \"execution_duration\", \"total_search_duration\", \"es_search_duration\", \"schedule_delay\", \"num_triggered_actions\", \"num_generated_actions\", \"num_active_alerts\", \"num_recovered_alerts\", \"num_new_alerts\"]"
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5789,6 +6472,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5803,6 +6487,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5817,6 +6502,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5840,6 +6526,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5893,6 +6580,7 @@
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

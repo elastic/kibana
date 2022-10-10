@@ -13,6 +13,11 @@ type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   euiColorVis6_asText: string;
+  buttonsBackgroundNormalDefaultPrimary: string;
+  terminalOutputBackground: string;
+  terminalOutputMarkerAccent: string;
+  terminalOutputMarkerWarning: string;
+  terminalOutputSliderBackground: string;
 };
 type EuiVars = typeof euiLightVars & ExtraEuiVars;
 type EuiThemeReturn = ReturnType<typeof useEuiThemeHook> & { euiVars: EuiVars };
@@ -29,6 +34,12 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
     const extraEuiVars: ExtraEuiVars = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335),
+      buttonsBackgroundNormalDefaultPrimary: '#006DE4',
+      // Terminal Output Colors don't change with the theme
+      terminalOutputBackground: '#1d1e23',
+      terminalOutputMarkerAccent: euiLightVars.euiColorAccent,
+      terminalOutputMarkerWarning: euiDarkVars.euiColorWarning,
+      terminalOutputSliderBackground: euiLightVars.euiColorDarkestShade,
     };
 
     return {

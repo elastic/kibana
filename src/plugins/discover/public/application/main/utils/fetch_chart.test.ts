@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 import { of, throwError as throwErrorRx } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { calculateBounds, IKibanaSearchResponse } from '@kbn/data-plugin/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { calculateBounds } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
 
 function getDeps() {
@@ -62,7 +61,7 @@ const requestResult = {
   total: 1,
   loaded: 1,
   isRestored: false,
-} as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>;
+};
 
 describe('test fetchCharts', () => {
   test('updateSearchSource helper function', () => {
@@ -113,11 +112,12 @@ describe('test fetchCharts', () => {
   });
 
   test('rejects promise on query failure', async () => {
-    savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
+    savedSearchMockWithTimeField.searchSource.fetch$ = () =>
+      throwErrorRx(() => new Error('Oh noes!'));
 
-    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, getDeps())).rejects.toEqual({
-      msg: 'Oh noes!',
-    });
+    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, getDeps())).rejects.toEqual(
+      new Error('Oh noes!')
+    );
   });
 
   test('fetch$ is called with request specific execution context', async () => {

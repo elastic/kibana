@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { KibanaServices } from '../../../../common/lib/kibana';
+
 import {
   createRule,
   updateRule,
@@ -15,10 +17,10 @@ import {
   createPrepackagedRules,
   importRules,
   exportRules,
-  fetchRuleExecutionEvents,
   fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
+  findRuleExceptionReferences,
 } from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
@@ -27,7 +29,9 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
-import { buildEsQuery } from '@kbn/es-query';
+import type { FindRulesReferencedByExceptionsListProp } from './types';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
+
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
@@ -95,9 +99,12 @@ describe('Detections Rules API', () => {
 
     test('POSTs rule', async () => {
       const payload = getCreateRulesSchemaMock();
-      await previewRule({ rule: { ...payload, invocationCount: 1 }, signal: abortCtrl.signal });
+      await previewRule({
+        rule: { ...payload, invocationCount: 1, timeframeEnd: '2015-03-12 05:17:10' },
+        signal: abortCtrl.signal,
+      });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/preview', {
-        body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1","invocationCount":1}',
+        body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1","invocationCount":1,"timeframeEnd":"2015-03-12 05:17:10"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -434,14 +441,13 @@ describe('Detections Rules API', () => {
     });
 
     test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules({ signal: abortCtrl.signal });
+      await createPrepackagedRules();
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        signal: abortCtrl.signal,
         method: 'PUT',
       });
     });
     test('happy path', async () => {
-      const resp = await createPrepackagedRules({ signal: abortCtrl.signal });
+      const resp = await createPrepackagedRules();
       expect(resp).toEqual({
         rules_installed: 0,
         rules_updated: 0,
@@ -508,6 +514,7 @@ describe('Detections Rules API', () => {
         success: true,
         success_count: 33,
         errors: [],
+        rules_count: 33,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -517,6 +524,7 @@ describe('Detections Rules API', () => {
         success: true,
         success_count: 33,
         errors: [],
+        rules_count: 33,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -616,56 +624,6 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('fetchRuleExecutionEvents', () => {
-    const responseMock = { events: [] };
-
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(responseMock);
-    });
-
-    test('calls API with correct parameters', async () => {
-      await fetchRuleExecutionEvents({
-        ruleId: '42',
-        start: '2001-01-01T17:00:00.000Z',
-        end: '2001-01-02T17:00:00.000Z',
-        queryText: '',
-        statusFilters: '',
-        signal: abortCtrl.signal,
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/internal/detection_engine/rules/42/execution/events',
-        {
-          method: 'GET',
-          query: {
-            end: '2001-01-02T17:00:00.000Z',
-            page: undefined,
-            per_page: undefined,
-            query_text: '',
-            sort_field: undefined,
-            sort_order: undefined,
-            start: '2001-01-01T17:00:00.000Z',
-            status_filters: '',
-          },
-          signal: abortCtrl.signal,
-        }
-      );
-    });
-
-    test('returns API response as is', async () => {
-      const response = await fetchRuleExecutionEvents({
-        ruleId: '42',
-        start: 'now-30',
-        end: 'now',
-        queryText: '',
-        statusFilters: '',
-        signal: abortCtrl.signal,
-      });
-      expect(response).toEqual(responseMock);
-    });
-  });
-
   describe('fetchTags', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -707,6 +665,38 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const resp = await getPrePackagedRulesStatus({ signal: abortCtrl.signal });
       expect(resp).toEqual(prePackagedRulesStatus);
+    });
+  });
+
+  describe('findRuleExceptionReferences', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
+    });
+
+    test('GETs exception references', async () => {
+      const payload: FindRulesReferencedByExceptionsListProp[] = [
+        {
+          id: '123',
+          listId: 'list_id_1',
+          namespaceType: 'single',
+        },
+        {
+          id: '456',
+          listId: 'list_id_2',
+          namespaceType: 'single',
+        },
+      ];
+      await findRuleExceptionReferences({ lists: payload, signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL, {
+        query: {
+          ids: '123,456',
+          list_ids: 'list_id_1,list_id_2',
+          namespace_types: 'single,single',
+        },
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
     });
   });
 });

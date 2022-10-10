@@ -69,6 +69,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
     jobCreatorUpdate();
     loadChart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(timeRange)]);
 
   useEffect(() => {
@@ -76,13 +77,14 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       start: jobCreator.start,
       end: jobCreator.end,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
-    if (range.start.epoch !== null && range.end.epoch !== null) {
+    if (range.start !== null && range.end !== null) {
       setTimeRange({
-        start: range.start.epoch,
-        end: range.end.epoch,
+        start: range.start,
+        end: range.end,
       });
     } else {
       const { toasts } = services.notifications;

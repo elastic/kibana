@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 
 import { GridData } from '..';

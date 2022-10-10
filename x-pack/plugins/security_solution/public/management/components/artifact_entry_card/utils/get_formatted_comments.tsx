@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiText, EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiAvatar, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
-import { COMMENT_EVENT } from '../../../../common/components/exceptions/translations';
+import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
+import { COMMENT_EVENT } from '../../../../detection_engine/rule_exceptions/utils/translations';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 const CustomEuiAvatar = styled(EuiAvatar)`
@@ -28,7 +29,7 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
       <FormattedRelativePreferenceDate value={commentItem.created_at} dateFormat="MMM D, YYYY" />
     ),
     event: COMMENT_EVENT,
-    timelineIcon: <CustomEuiAvatar size="s" name={commentItem.created_by} />,
+    timelineAvatar: <CustomEuiAvatar size="s" name={commentItem.created_by} />,
     children: <EuiText size="s">{commentItem.comment}</EuiText>,
   }));
 };

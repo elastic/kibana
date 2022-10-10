@@ -15,8 +15,8 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -32,10 +32,8 @@ import example1SampleCode from '!!raw-loader!./examples/1_using_existing_format'
 import example2SampleCodePart1 from '!!raw-loader!../common/example_currency_format';
 // @ts-ignore
 import example2SampleCodePart2 from '!!raw-loader!./examples/2_creating_custom_formatter';
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 // @ts-ignore
 import example2SampleCodePart3 from '!!raw-loader!../server/examples/2_creating_custom_formatter';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
 // @ts-ignore
 import example3SampleCode from '!!raw-loader!./examples/3_creating_custom_format_editor';
 

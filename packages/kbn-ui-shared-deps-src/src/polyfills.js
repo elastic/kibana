@@ -7,7 +7,7 @@
  */
 
 require('core-js/stable');
-require('regenerator-runtime/runtime');
+require('@babel/runtime/regenerator');
 
 if (typeof window.Event === 'object') {
   // IE11 doesn't support unknown event types, required by react-use

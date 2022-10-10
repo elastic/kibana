@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { RunWithCommands } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
 
 import { Render } from './lib/render';
 import { ContextExtensions } from './generate_command';
 
 import { PackageCommand } from './commands/package_command';
+import { CodeownersCommand } from './commands/codeowners_command';
 import { PackagesBuildManifestCommand } from './commands/packages_build_manifest_command';
 
 /**
@@ -27,6 +28,6 @@ export function runGenerateCli() {
         };
       },
     },
-    [PackageCommand, PackagesBuildManifestCommand]
+    [PackageCommand, PackagesBuildManifestCommand, CodeownersCommand]
   ).execute();
 }

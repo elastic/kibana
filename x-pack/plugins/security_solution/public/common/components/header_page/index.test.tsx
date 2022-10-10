@@ -136,9 +136,6 @@ describe('HeaderPage', () => {
       'border-bottom',
       euiDarkVars.euiBorderThin
     );
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
-      'padding-bottom',
-      euiDarkVars.paddingSizes.l
-    );
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 });

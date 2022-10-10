@@ -14,7 +14,8 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
+import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -68,9 +69,70 @@ const errorsMainStatisticsRoute = createApmServerRoute({
   },
 });
 
+const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string,
+        transactionName: t.string,
+        maxNumberOfErrorGroups: toNumberRt,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    errorGroups: Array<{
+      groupId: string;
+      name: string;
+      lastSeen: number;
+      occurrences: number;
+      culprit: string | undefined;
+      handled: boolean | undefined;
+      type: string | undefined;
+    }>;
+  }> => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
+    const { serviceName } = params.path;
+    const {
+      environment,
+      kuery,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      maxNumberOfErrorGroups,
+    } = params.query;
+
+    const errorGroups = await getErrorGroupMainStatistics({
+      environment,
+      kuery,
+      serviceName,
+      setup,
+      start,
+      end,
+      maxNumberOfErrorGroups,
+      transactionName,
+      transactionType,
+    });
+
+    return { errorGroups };
+  },
+});
+
 const errorsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+    'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -82,9 +144,9 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       offsetRt,
       t.type({
         numBuckets: toNumberRt,
-        groupIds: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
+    body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -107,7 +169,8 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, numBuckets, groupIds, start, end, offset },
+      query: { environment, kuery, numBuckets, start, end, offset },
+      body: { groupIds },
     } = params;
 
     return getErrorGroupPeriods({
@@ -204,9 +267,63 @@ const errorDistributionRoute = createApmServerRoute({
   },
 });
 
+const topErroneousTransactionsRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      t.type({
+        numBuckets: toNumberRt,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    topErroneousTransactions: Array<{
+      transactionName: string;
+      currentPeriodTimeseries: Array<{ x: number; y: number }>;
+      previousPeriodTimeseries: Array<{ x: number; y: number }>;
+      transactionType: string | undefined;
+      occurrences: number;
+    }>;
+  }> => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
+
+    const {
+      path: { serviceName, groupId },
+      query: { environment, kuery, numBuckets, start, end, offset },
+    } = params;
+
+    return await getTopErroneousTransactionsPeriods({
+      environment,
+      groupId,
+      kuery,
+      serviceName,
+      setup,
+      start,
+      end,
+      numBuckets,
+      offset,
+    });
+  },
+});
+
 export const errorsRouteRepository = {
   ...errorsMainStatisticsRoute,
+  ...errorsMainStatisticsByTransactionNameRoute,
   ...errorsDetailedStatisticsRoute,
   ...errorGroupsRoute,
   ...errorDistributionRoute,
+  ...topErroneousTransactionsRoute,
 };

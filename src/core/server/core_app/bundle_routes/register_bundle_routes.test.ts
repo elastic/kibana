@@ -9,8 +9,8 @@
 import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
 import { PackageInfo } from '@kbn/config';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { InternalPluginInfo, UiPlugins } from '../../plugins';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
 

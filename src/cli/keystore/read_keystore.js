@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 import { Keystore } from '.';
 import { getKeystore } from '../../cli_keystore/get_keystore';

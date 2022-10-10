@@ -15,6 +15,7 @@
  */
 
 import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { ControlGroupInput, CONTROL_GROUP_TYPE } from '../types';
@@ -47,7 +48,8 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   }
 
   public create = async (initialInput: ControlGroupInput, parent?: Container) => {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { ControlGroupContainer } = await import('./control_group_container');
-    return new ControlGroupContainer(initialInput, parent);
+    return new ControlGroupContainer(reduxEmbeddablePackage, initialInput, parent);
   };
 }

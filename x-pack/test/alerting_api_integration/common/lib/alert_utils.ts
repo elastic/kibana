@@ -76,6 +76,16 @@ export class AlertUtils {
     return request;
   }
 
+  public getAPIKeyRequest(ruleId: string) {
+    const request = this.supertestWithoutAuth.get(
+      `${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/${ruleId}/_get_api_key`
+    );
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
   public getDisableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_disable`)

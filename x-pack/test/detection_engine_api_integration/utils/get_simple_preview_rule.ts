@@ -26,4 +26,5 @@ export const getSimplePreviewRule = (
   type: 'query',
   query: 'user.name: root or user.name: admin',
   invocationCount,
+  timeframeEnd: new Date().toISOString(),
 });

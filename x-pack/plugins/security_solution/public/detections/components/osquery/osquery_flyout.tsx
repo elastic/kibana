@@ -7,10 +7,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { useHandleAddToTimeline } from '../../../common/components/event_details/add_to_timeline_button';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
-import { OsqueryEventDetailsHeader } from './osquery_flyout_header';
 import { ACTION_OSQUERY } from './translations';
 
 const OsqueryActionWrapper = styled.div`
@@ -18,41 +18,52 @@ const OsqueryActionWrapper = styled.div`
 `;
 
 export interface OsqueryFlyoutProps {
-  agentId: string;
+  agentId?: string;
+  defaultValues?: {};
   onClose: () => void;
 }
-
-export const OsqueryFlyout: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }) => {
+export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+  agentId,
+  defaultValues,
+  onClose,
+}) => {
   const {
     services: { osquery },
   } = useKibana();
 
-  // @ts-expect-error
-  const { OsqueryAction } = osquery;
-  return (
-    <EuiFlyout
-      ownFocus
-      maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
-      size="m"
-      onClose={onClose}
-    >
-      <EuiFlyoutHeader hasBorder>
-        <OsqueryEventDetailsHeader
-          primaryText={<h2>{ACTION_OSQUERY}</h2>}
-          handleClick={onClose}
-          data-test-subj="flyout-header-osquery"
-        />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
-          <OsqueryAction agentId={agentId} formType="steps" />
-        </OsqueryActionWrapper>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
+  const handleAddToTimeline = useHandleAddToTimeline();
+
+  if (osquery?.OsqueryAction) {
+    return (
+      <EuiFlyout
+        ownFocus
+        maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
+        size="m"
+        onClose={onClose}
+      >
+        <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
+          <EuiTitle>
+            <h2>{ACTION_OSQUERY}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
+            <osquery.OsqueryAction
+              agentId={agentId}
+              formType="steps"
+              defaultValues={defaultValues}
+              addToTimeline={handleAddToTimeline}
+            />
+          </OsqueryActionWrapper>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
+
+  return null;
 };
 
-OsqueryFlyout.displayName = 'OsqueryFlyout';
+export const OsqueryFlyout = React.memo(OsqueryFlyoutComponent);

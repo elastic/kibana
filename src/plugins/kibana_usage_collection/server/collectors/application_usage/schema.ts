@@ -135,6 +135,8 @@ export const applicationUsageSchema = {
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  enterpriseSearchAnalytics: commonSchema,
+  elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   graph: commonSchema,
@@ -150,6 +152,7 @@ export const applicationUsageSchema = {
   monitoring: commonSchema,
   'observability-overview': commonSchema,
   osquery: commonSchema,
+  profiling: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
   security_access_agreement: commonSchema,
@@ -166,5 +169,6 @@ export const applicationUsageSchema = {
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
+  synthetics: commonSchema,
   ux: commonSchema,
 };

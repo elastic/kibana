@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { Datatable, DatatableRow } from './datatable';
 import { ExpressionValueRender } from './render';
 
 const name = 'pointseries';
 
+export const PointSeriesColumnNames = {
+  X: 'x',
+  Y: 'y',
+  COLOR: 'color',
+  SIZE: 'size',
+  TEXT: 'text',
+} as const;
+
 /**
  * Allowed column names in a PointSeries
  */
-export type PointSeriesColumnName = 'x' | 'y' | 'color' | 'size' | 'text';
+export type PointSeriesColumnName = $Values<typeof PointSeriesColumnNames>;
 
 /**
  * Column in a PointSeries

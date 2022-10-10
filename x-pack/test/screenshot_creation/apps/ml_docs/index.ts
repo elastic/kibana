@@ -11,22 +11,26 @@ export const ECOMMERCE_INDEX_PATTERN = 'kibana_sample_data_ecommerce';
 export const FLIGHTS_INDEX_PATTERN = 'kibana_sample_data_flights';
 export const LOGS_INDEX_PATTERN = 'kibana_sample_data_logs';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getPageObject, getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const ml = getService('ml');
+  const securityPage = getPageObject('security');
 
   describe('machine learning docs', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     before(async () => {
       await ml.testResources.installAllKibanaSampleData();
       await ml.testResources.setKibanaTimeZoneToUTC();
+      await ml.testResources.disableKibanaAnnouncements();
       await browser.setWindowSize(1920, 1080);
     });
 
     after(async () => {
+      await securityPage.forceLogout();
       await ml.testResources.removeAllKibanaSampleData();
       await ml.testResources.resetKibanaTimeZone();
+      await ml.testResources.resetKibanaAnnouncements();
     });
 
     loadTestFile(require.resolve('./anomaly_detection'));

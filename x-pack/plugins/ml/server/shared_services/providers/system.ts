@@ -7,15 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type {
+  MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+} from '../../../common/types/capabilities';
+import type { GetGuards } from '../shared_services';
 import { MlLicense } from '../../../common/license';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { capabilitiesProvider } from '../../lib/capabilities';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
-import { GetGuards } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(

@@ -94,7 +94,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     module: {
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
-      // already bundled with all its necessary depedencies
+      // already bundled with all its necessary dependencies
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
         /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
@@ -144,6 +144,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 sourceMap: !worker.dist,
               },
             },
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: !worker.dist,
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                },
+              },
+            },
           ],
         },
         {
@@ -166,8 +175,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   loader: 'postcss-loader',
                   options: {
                     sourceMap: !worker.dist,
-                    config: {
-                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                    postcssOptions: {
+                      config: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },
@@ -179,7 +188,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
+                          `src/core/public/styles/core_app/_globals_${theme}.scss`
                         )
                       )};\n${content}`;
                     },
@@ -237,7 +246,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        core_app_image_assets: Path.resolve(
+          worker.repoRoot,
+          'src/core/public/styles/core_app/images'
+        ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
@@ -272,12 +284,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         compressionOptions: {
           level: 11,
         },
-      }),
-      new CompressionPlugin({
-        algorithm: 'gzip',
-        filename: '[path].gz',
-        test: /\.(js|css)$/,
-        cache: false,
       }),
     ],
 

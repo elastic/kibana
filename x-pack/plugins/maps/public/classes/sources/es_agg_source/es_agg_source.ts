@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import { GeoJsonProperties } from 'geojson';
 import { DataView } from '@kbn/data-plugin/common';
 import { IESSource } from '../es_source';
@@ -22,7 +21,7 @@ export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string>;
   getMetricFields(): IESAggField[];
   getMetricFieldForName(fieldName: string): IESAggField | null;
   getValueAggsDsl(indexPattern: DataView): { [key: string]: unknown };
@@ -43,8 +42,8 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     };
   }
 
-  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters?: Adapters) {
-    super(descriptor, inspectorAdapters);
+  constructor(descriptor: AbstractESAggSourceDescriptor) {
+    super(descriptor);
     this._metricFields = [];
     if (descriptor.metrics) {
       descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {
@@ -89,7 +88,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
+  async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
     switch (aggType) {
       case AGG_TYPE.COUNT:
         return COUNT_PROP_LABEL;

@@ -15,11 +15,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ServiceGroupsListItems } from './service_groups_list';
 import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
+import { getDateRange } from '../../../../context/url_params_context/helpers';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
@@ -38,6 +39,31 @@ export function ServiceGroupsList() {
     []
   );
 
+  const { start, end } = useMemo(
+    () =>
+      getDateRange({
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+      }),
+    []
+  );
+
+  const { data: servicesCountData = { servicesCounts: {} } } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi('GET /internal/apm/service_groups/services_count', {
+          params: {
+            query: {
+              start,
+              end,
+            },
+          },
+        });
+      }
+    },
+    [start, end]
+  );
+
   const { serviceGroups } = data;
 
   const isLoading =
@@ -51,7 +77,7 @@ export function ServiceGroupsList() {
 
   const sortedItems = sortBy(filteredItems, (item) =>
     apmServiceGroupsSortType === 'alphabetical'
-      ? item.groupName
+      ? item.groupName.toLowerCase()
       : item.updatedAt
   );
 
@@ -130,10 +156,20 @@ export function ServiceGroupsList() {
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.apm.serviceGroups.listDescription', {
+                  defaultMessage:
+                    'Displayed service counts reflect the last 24 hours.',
+                })}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               {items.length ? (
-                <ServiceGroupsListItems items={items} isLoading={isLoading} />
+                <ServiceGroupsListItems
+                  items={items}
+                  servicesCounts={servicesCountData.servicesCounts}
+                  isLoading={isLoading}
+                />
               ) : (
                 <EuiEmptyPrompt
                   iconType="layers"

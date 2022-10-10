@@ -8,15 +8,27 @@ PKG_REQUIRE_NAME = "@kbn/test"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*"
+    "src/failed_tests_reporter/es_config",
+    "**/*.html",
+    "**/*.js",
+    "**/*.ts",
   ],
   exclude = [
+    "types/**/*",
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
     "**/*.snap",
     "**/__fixture__/**",
     "**/__fixtures__/**",
     "**/__snapshots__/**",
-  ]
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
 )
 
 SRCS = SOURCE_FILES
@@ -32,7 +44,6 @@ NPM_MODULE_EXTRA_FILES = [
   "jest_integration_node/jest-preset.js",
   "jest_node/jest-preset.js",
   "jest.config.js",
-  "README.md",
   "package.json",
 ]
 
@@ -64,9 +75,10 @@ RUNTIME_DEPS = [
     "@npm//jest-snapshot",
     "@npm//jest-styled-components",
     "@npm//joi",
+    "@npm//js-yaml",
+    "@npm//minimatch",
     "@npm//mustache",
     "@npm//normalize-path",
-    "@npm//parse-link-header",
     "@npm//prettier",
     "@npm//react-dom",
     "@npm//react-redux",
@@ -75,16 +87,19 @@ RUNTIME_DEPS = [
     "@npm//rxjs",
     "@npm//semver",
     "@npm//strip-ansi",
+    "@npm//supertest",
     "@npm//xmlbuilder",
     "@npm//xml2js",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-bazel-packages:npm_module_types",
+  "//packages/kbn-get-repo-files:npm_module_types",
+  "//packages/kbn-ftr-screenshot-filename:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
@@ -96,29 +111,34 @@ TYPES_DEPS = [
   "@npm//form-data",
   "@npm//get-port",
   "@npm//getopts",
+  "@npm//globby",
   "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-snapshot",
   "@npm//redux",
   "@npm//rxjs",
+  "@npm//playwright",
   "@npm//xmlbuilder",
+  "@npm//@types/archiver",
   "@npm//@types/chance",
   "@npm//@types/dedent",
   "@npm//@types/enzyme",
   "@npm//@types/he",
   "@npm//@types/history",
   "@npm//@types/jest",
+  "@npm//@types/js-yaml",
   "@npm//@types/joi",
   "@npm//@types/lodash",
+  "@npm//@types/minimatch",
   "@npm//@types/mustache",
   "@npm//@types/normalize-path",
   "@npm//@types/node",
-  "@npm//@types/parse-link-header",
   "@npm//@types/prettier",
   "@npm//@types/react-dom",
-  "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
+  "@npm//@types/supertest",
+  "@npm//@types/uuid",
   "@npm//@types/xml2js",
 ]
 
@@ -143,9 +163,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

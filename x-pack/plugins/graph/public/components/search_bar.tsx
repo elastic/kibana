@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IDataPluginServices, Query } from '@kbn/data-plugin/public';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -95,9 +95,19 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings } = services;
+  const {
+    savedObjects,
+    uiSettings,
+    appName,
+    unifiedSearch,
+    data,
+    storage,
+    notifications,
+    http,
+    docLinks,
+  } = services;
   if (!overlays) return null;
 
   return (
@@ -110,8 +120,50 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
       }}
     >
       <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
+              defaultMessage: 'Select a data source to begin graphing relationships.',
+            })}
+          >
+            <EuiButton
+              className="gphSearchBar__datasourceButton"
+              data-test-subj="graphDatasourceButton"
+              onClick={() => {
+                confirmWipeWorkspace(
+                  () =>
+                    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected),
+                  i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+                    defaultMessage:
+                      'If you change data sources, your current fields and vertices will be reset.',
+                  }),
+                  {
+                    confirmButtonText: i18n.translate(
+                      'xpack.graph.clearWorkspace.confirmButtonLabel',
+                      {
+                        defaultMessage: 'Change data source',
+                      }
+                    ),
+                    title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+                      defaultMessage: 'Unsaved changes',
+                    }),
+                  }
+                );
+              }}
+            >
+              {currentIndexPattern
+                ? currentIndexPattern.getName()
+                : // This branch will be shown if the user exits the
+                  // initial picker modal
+                  i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                    defaultMessage: 'Select a data source',
+                  })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
         <EuiFlexItem>
           <QueryStringInput
+            timeRangeForSuggestionsOverride={false} // to don't filter suggestions by the global time range
             disableAutoFocus
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
@@ -119,52 +171,17 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               defaultMessage: 'Search your data and add to graph',
             })}
             query={query}
-            prepend={
-              <EuiToolTip
-                content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                  defaultMessage: 'Select a data source to begin graphing relationships.',
-                })}
-              >
-                <EuiButtonEmpty
-                  size="xs"
-                  className="gphSearchBar__datasourceButton"
-                  data-test-subj="graphDatasourceButton"
-                  onClick={() => {
-                    confirmWipeWorkspace(
-                      () =>
-                        openSourceModal(
-                          { overlays, savedObjects, uiSettings },
-                          onIndexPatternSelected
-                        ),
-                      i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-                        defaultMessage:
-                          'If you change data sources, your current fields and vertices will be reset.',
-                      }),
-                      {
-                        confirmButtonText: i18n.translate(
-                          'xpack.graph.clearWorkspace.confirmButtonLabel',
-                          {
-                            defaultMessage: 'Change data source',
-                          }
-                        ),
-                        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-                          defaultMessage: 'Unsaved changes',
-                        }),
-                      }
-                    );
-                  }}
-                >
-                  {currentIndexPattern
-                    ? currentIndexPattern.title
-                    : // This branch will be shown if the user exits the
-                      // initial picker modal
-                      i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                        defaultMessage: 'Select a data source',
-                      })}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            }
             onChange={setQuery}
+            appName={appName}
+            deps={{
+              unifiedSearch,
+              data,
+              storage,
+              notifications,
+              http,
+              docLinks,
+              uiSettings,
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

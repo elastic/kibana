@@ -216,7 +216,7 @@ const StickyFlexGroup = euiStyled(EuiFlexGroup)`
 `;
 
 const EditorRowsWrapper = euiStyled.div`
-  margin: ${({ theme }) => theme.eui.paddingSizes.m} 0;
+  margin: ${({ theme }) => theme.eui.euiSizeM} 0;
 `;
 
 export const LOADING_VIEW = i18n.translate(

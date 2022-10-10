@@ -7,4 +7,5 @@
  */
 
 export * from './utils';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export * from './test_helpers';

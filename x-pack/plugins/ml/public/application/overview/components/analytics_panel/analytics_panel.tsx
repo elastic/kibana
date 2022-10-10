@@ -51,12 +51,12 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     setErrorMessage,
     setIsInitialized,
     setLazyJobCount,
-    false,
     false
   );
 
   useEffect(() => {
     getAnalytics(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
   const errorDisplay = (

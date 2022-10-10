@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 export const ruleAssetSavedObjectType = 'security-rule';
 

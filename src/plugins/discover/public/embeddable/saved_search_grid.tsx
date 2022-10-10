@@ -7,9 +7,10 @@
  */
 import React, { useState, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { DataTableRecord } from '../types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
-import { ElasticSearchHit } from '../types';
+import './saved_search_grid.scss';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
@@ -18,7 +19,7 @@ export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
 export const DataGridMemoized = memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   return (
     <EuiFlexGroup
@@ -34,7 +35,11 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         </EuiFlexItem>
       )}
       <EuiFlexItem style={{ minHeight: 0 }}>
-        <DataGridMemoized {...props} setExpandedDoc={setExpandedDoc} expandedDoc={expandedDoc} />
+        <DataGridMemoized
+          {...props}
+          setExpandedDoc={!props.isPlainRecord ? setExpandedDoc : undefined}
+          expandedDoc={expandedDoc}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

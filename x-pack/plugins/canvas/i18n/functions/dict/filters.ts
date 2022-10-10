@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filtersFunctionFactory } from '../../../public/functions/filters';
+import type { filtersFunctionFactory } from '../../../public/functions/filters';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

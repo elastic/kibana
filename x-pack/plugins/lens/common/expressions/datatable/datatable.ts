@@ -39,7 +39,7 @@ export const getDatatable = (
 ): DatatableExpressionFunction => ({
   name: 'lens_datatable',
   type: 'render',
-  inputTypes: ['lens_multitable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
     defaultMessage: 'Datatable renderer',
   }),

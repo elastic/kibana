@@ -8,29 +8,64 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { AlertSummaryRow } from '../helpers';
-import { defaultToEmptyTag } from '../../empty_value';
+import type { AlertSummaryRow } from '../helpers';
+import { getEmptyTagValue } from '../../empty_value';
+import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
+import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 
-const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
-  ({ data, values, timelineId }) => {
-    const { loading, count } = useAlertPrevalence({
-      field: data.field,
-      timelineId,
-      value: values,
-      signalIndexName: null,
-    });
+/**
+ * Renders a Prevalence cell based on a regular alert prevalence query
+ */
+const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
+  data,
+  eventId,
+  fieldFromBrowserField,
+  linkValue,
+  timelineId,
+  values,
+}) => {
+  const { loading, count } = useAlertPrevalence({
+    field: data.field,
+    timelineId,
+    value: values,
+    signalIndexName: null,
+  });
 
-    if (loading) {
-      return <EuiLoadingSpinner />;
-    } else {
-      return defaultToEmptyTag(count);
-    }
+  const cellDataProviders = useActionCellDataProvider({
+    contextId: timelineId,
+    eventId,
+    field: data.field,
+    fieldFormat: data.format,
+    fieldFromBrowserField,
+    fieldType: data.type,
+    isObjectArray: data.isObjectArray,
+    linkValue,
+    values,
+  });
+
+  if (loading) {
+    return <EuiLoadingSpinner />;
+  } else if (
+    typeof count === 'number' &&
+    cellDataProviders?.dataProviders &&
+    cellDataProviders?.dataProviders.length
+  ) {
+    return (
+      <InvestigateInTimelineButton
+        asEmptyButton={true}
+        dataProviders={cellDataProviders.dataProviders}
+      >
+        <span data-test-subj="alert-prevalence">{count}</span>
+      </InvestigateInTimelineButton>
+    );
+  } else {
+    return getEmptyTagValue();
   }
-);
+};
 
 PrevalenceCell.displayName = 'PrevalenceCell';
 
-export const PrevalenceCellRenderer = (data: AlertSummaryRow['description']) => {
-  return <PrevalenceCell {...data} />;
-};
+export const PrevalenceCellRenderer = (data: AlertSummaryRow['description']) => (
+  <PrevalenceCell {...data} />
+);

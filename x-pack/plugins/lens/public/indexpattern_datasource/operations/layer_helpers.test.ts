@@ -23,7 +23,7 @@ import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
+import type { IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
@@ -38,9 +38,16 @@ import {
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from '@kbn/core/public';
+import { IndexPattern } from '../../types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+const dataMock = dataPluginMock.createStartContract();
 
 jest.mock('.');
 jest.mock('../../id_generator');
+jest.mock('../dimension_panel/reference_editor', () => ({
+  ReferenceEditor: () => null,
+}));
 
 const indexPatternFields = [
   {
@@ -95,6 +102,8 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields, documentField]),
+  isPersisted: true,
+  spec: {},
 };
 
 describe('state_helpers', () => {
@@ -159,24 +168,40 @@ describe('state_helpers', () => {
         params: { window: 5 },
         references: ['formulaX0'],
       };
+
       expect(
         copyColumn({
-          layer: {
-            indexPatternId: '',
-            columnOrder: [],
-            columns: {
-              source,
-              formulaX0: sum,
-              formulaX1: movingAvg,
-              formulaX2: math,
+          layers: {
+            layer: {
+              indexPatternId: '',
+              columnOrder: [],
+              columns: {
+                source,
+                formulaX0: sum,
+                formulaX1: movingAvg,
+                formulaX2: math,
+              },
             },
           },
-          targetId: 'copy',
-          sourceColumn: source,
+          source: {
+            column: source,
+            groupId: 'one',
+            columnId: 'source',
+            layerId: 'layer',
+            dataView: indexPattern,
+            filterOperations: () => true,
+            indexPatternId: '1',
+          },
+          target: {
+            columnId: 'copy',
+            groupId: 'one',
+            dataView: indexPattern,
+            layerId: 'layer',
+            filterOperations: () => true,
+            indexPatternId: '1',
+          },
           shouldDeleteSource: false,
-          indexPattern,
-          sourceColumnId: 'source',
-        })
+        }).layer
       ).toEqual({
         indexPatternId: '',
         columnOrder: [
@@ -906,6 +931,39 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should set incompleteColumns without crashing when switching to a field-based operation from managed reference column with custom label', () => {
+      expect(
+        replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My formula',
+                dataType: 'number',
+                isBucketed: false,
+                customLabel: true,
+
+                // Private
+                operationType: 'formula',
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          columnId: 'col1',
+          indexPattern,
+          op: 'median',
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'formula' }) },
+          incompleteColumns: {
+            col1: { operationType: 'median' },
+          },
+        })
+      );
+    });
+
     it('should carry over params from old column if switching fields', () => {
       expect(
         replaceColumn({
@@ -1322,14 +1380,14 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
     it('should execute adjustments for other columns when creating a reference', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
+        customLabel: true,
         dataType: 'string',
         isBucketed: true,
 
@@ -1389,8 +1447,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         }),
-        'col1',
-        'willBeReference'
+        'col1'
       );
     });
 
@@ -1463,6 +1520,42 @@ describe('state_helpers', () => {
         expect(result.columns).toEqual(
           expect.objectContaining({
             id1: expectedColumn,
+            col1: expect.any(Object),
+          })
+        );
+      });
+
+      it('should not wrap around the previous operation as a reference if excluded by validateMetadata (case new1)', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Count',
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'count' as const,
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          op: 'cumulative_sum' as OperationType,
+          visualizationGroups: [],
+        });
+
+        expect(result.columnOrder).toEqual(['col1', 'id1']);
+        expect(result.columns).toEqual(
+          expect.objectContaining({
+            id1: expect.objectContaining({
+              label: 'Sum of bytes',
+              sourceField: 'bytes',
+              operationType: 'sum' as const,
+            }),
             col1: expect.any(Object),
           })
         );
@@ -2341,8 +2434,7 @@ describe('state_helpers', () => {
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
         { indexPatternId: '1', columnOrder: ['col1', 'col2'], columns: { col1: termsColumn } },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
@@ -2732,6 +2824,8 @@ describe('state_helpers', () => {
       hasRestrictions: true,
       getFieldByName: getFieldByNameFactory(fields),
       fields,
+      isPersisted: true,
+      spec: {},
     };
 
     it('should switch index pattern id in layer', () => {
@@ -2959,7 +3053,8 @@ describe('state_helpers', () => {
         indexPattern,
         {},
         '1',
-        {}
+        {},
+        dataMock
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -2985,7 +3080,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -3020,7 +3116,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(notCalledMock).not.toHaveBeenCalled();
       expect(mock).toHaveBeenCalledTimes(1);
@@ -3056,7 +3153,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(savedRef).toHaveBeenCalled();
       expect(incompleteRef).not.toHaveBeenCalled();
@@ -3085,7 +3183,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(mock).toHaveBeenCalledWith(
         {

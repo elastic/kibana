@@ -18,6 +18,7 @@ import {
   useVisualizeAppState,
   useEditorUpdates,
   useLinkedSearchUpdates,
+  useDataViewUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
@@ -84,6 +85,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visEditorController
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
+  useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);
 
   useEffect(() => {
     // clean up all registered listeners if any is left

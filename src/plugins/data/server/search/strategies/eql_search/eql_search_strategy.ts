@@ -19,7 +19,8 @@ import { toEqlKibanaSearchResponse } from './response_utils';
 import { EqlSearchResponse } from './types';
 import { ISearchStrategy } from '../../types';
 import { getDefaultSearchParams } from '../es_search';
-import { getDefaultAsyncGetParams, getIgnoreThrottled } from '../ese_search/request_utils';
+import { getIgnoreThrottled } from '../ese_search/request_utils';
+import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger
@@ -45,22 +46,28 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getDefaultAsyncGetParams(null, options)
+          ? getCommonDefaultAsyncGetParams(null, options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getDefaultAsyncGetParams(null, options),
+              ...getCommonDefaultAsyncGetParams(null, options),
               ...request.params,
             };
         const response = id
           ? await client.get(
               { ...params, id },
-              { ...request.options, signal: options.abortSignal, meta: true }
+              {
+                ...request.options,
+                ...options.transport,
+                signal: options.abortSignal,
+                meta: true,
+              }
             )
           : // @ts-expect-error optional key cannot be used since search doesn't expect undefined
             await client.search(params as EqlSearchStrategyRequest['params'], {
               ...request.options,
-              abortController: { signal: options.abortSignal },
+              ...options.transport,
+              signal: options.abortSignal,
               meta: true,
             });
 

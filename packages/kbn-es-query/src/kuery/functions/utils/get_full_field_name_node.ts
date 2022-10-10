@@ -7,8 +7,9 @@
  */
 
 import { getFields } from './get_fields';
-import { DataViewBase, DataViewFieldBase, KueryNode } from '../../..';
+import { DataViewBase, DataViewFieldBase, KueryNode } from '../../../..';
 import { getDataViewFieldSubtypeNested } from '../../../utils';
+import { isNode as isWildcardNode } from '../../node_types/wildcard';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
@@ -23,7 +24,7 @@ export function getFullFieldNameNode(
   // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
   // users handle this themselves so we automatically add nested queries in this scenario and skip the
   // error checking below.
-  if (!indexPattern || (fullFieldNameNode.type === 'wildcard' && !nestedPath)) {
+  if (!indexPattern || (isWildcardNode(fullFieldNameNode) && !nestedPath)) {
     return fullFieldNameNode;
   }
   const fields = getFields(fullFieldNameNode, indexPattern);

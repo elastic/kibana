@@ -83,7 +83,7 @@ describe('threshold expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="thresholdPopover"]').first().simulate('click');
+    wrapper.find('[data-test-subj="thresholdPopover"]').last().simulate('click');
     expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertThresholdInput"]').exists()).toBeTruthy();
 
@@ -122,7 +122,7 @@ describe('threshold expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="thresholdPopover"]').first().simulate('click');
+    wrapper.find('[data-test-subj="thresholdPopover"]').last().simulate('click');
     expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
     expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(1);
 
@@ -139,5 +139,28 @@ describe('threshold expression', () => {
       .simulate('change', { target: { value: '<' } });
     wrapper.update();
     expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(1);
+  });
+
+  it('is valid when the threshold value is 0', () => {
+    const onChangeSelectedThreshold = jest.fn();
+    const onChangeSelectedThresholdComparator = jest.fn();
+    const wrapper = shallow(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[0]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={onChangeSelectedThreshold}
+        onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="alertThresholdInput"]')).toMatchInlineSnapshot(`
+    <EuiFieldNumber
+      data-test-subj="alertThresholdInput"
+      isInvalid={false}
+      min={0}
+      onChange={[Function]}
+      value={0}
+    />
+    `);
   });
 });

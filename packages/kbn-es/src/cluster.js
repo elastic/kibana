@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+const fs = require('fs');
 const fsp = require('fs/promises');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
+const Rx = require('rxjs');
 const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
@@ -215,6 +217,25 @@ exports.Cluster = class Cluster {
         }),
       ]);
     });
+
+    if (options.onEarlyExit) {
+      this._outcome
+        .then(
+          () => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly`);
+            }
+          },
+          (error) => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly: ${error.stack}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`failure handling early exit: ${error.stack}`);
+        });
+    }
   }
 
   /**
@@ -261,6 +282,24 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Stops ES process, it it's running, without waiting for it to shutdown gracefully
+   */
+  async kill() {
+    if (this._stopCalled) {
+      return;
+    }
+
+    this._stopCalled;
+
+    if (!this._process || !this._outcome) {
+      throw new Error('ES has not been started');
+    }
+
+    await treeKillAsync(this._process.pid, 'SIGKILL');
+    await this._outcome;
+  }
+
+  /**
    * Common logic from this.start() and this.run()
    *
    * Start the elasticsearch process (stored at `this._process`)
@@ -278,6 +317,7 @@ exports.Cluster = class Cluster {
       startTime,
       skipReadyCheck,
       readyTimeout,
+      writeLogsToPath,
       ...options
     } = opts;
 
@@ -285,32 +325,56 @@ exports.Cluster = class Cluster {
       throw new Error('ES has already been started');
     }
 
-    this._log.info(chalk.bold('Starting'));
+    /** @type {NodeJS.WritableStream | undefined} */
+    let stdioTarget;
+
+    if (writeLogsToPath) {
+      stdioTarget = fs.createWriteStream(writeLogsToPath, 'utf8');
+      this._log.info(
+        chalk.bold('Starting'),
+        `and writing logs to ${path.relative(process.cwd(), writeLogsToPath)}`
+      );
+    } else {
+      this._log.info(chalk.bold('Starting'));
+    }
+
     this._log.indent(4);
 
-    const esArgs = [
-      'action.destructive_requires_name=true',
-      'ingest.geoip.downloader.enabled=false',
-      'search.check_ccs_compatibility=true',
-      'cluster.routing.allocation.disk.threshold_enabled=false',
-    ].concat(options.esArgs || []);
+    const esArgs = new Map([
+      ['action.destructive_requires_name', 'true'],
+      ['cluster.routing.allocation.disk.threshold_enabled', 'false'],
+      ['ingest.geoip.downloader.enabled', 'false'],
+      ['search.check_ccs_compatibility', 'true'],
+    ]);
+
+    // options.esArgs overrides the default esArg values
+    for (const arg of [].concat(options.esArgs || [])) {
+      const [key, ...value] = arg.split('=');
+      esArgs.set(key.trim(), value.join('=').trim());
+    }
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
-      esArgs.push('xpack.security.http.ssl.enabled=true');
-
-      // Include default keystore settings only if keystore isn't configured.
-      if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
-        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
-        esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+      esArgs.set('xpack.security.http.ssl.enabled', 'true');
+      // Include default keystore settings only if ssl isn't disabled by esArgs and keystore isn't configured.
+      if (!esArgs.get('xpack.security.http.ssl.keystore.path')) {
         // We are explicitly using ES_NOPASSWORD_P12_PATH instead of ES_P12_PATH + ES_P12_PASSWORD. The reasoning for this is that setting
         // the keystore password using environment variables causes Elasticsearch to emit deprecation warnings.
+        esArgs.set(`xpack.security.http.ssl.keystore.path`, ES_NOPASSWORD_P12_PATH);
+        esArgs.set(`xpack.security.http.ssl.keystore.type`, `PKCS12`);
       }
     }
 
-    const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
-      filter: SettingsFilter.NonSecureOnly,
-    }).reduce(
+    const args = parseSettings(
+      extractConfigFiles(
+        Array.from(esArgs).map((e) => e.join('=')),
+        installPath,
+        { log: this._log }
+      ),
+      {
+        filter: SettingsFilter.NonSecureOnly,
+      }
+    ).reduce(
       (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
       []
     );
@@ -379,7 +443,8 @@ exports.Cluster = class Cluster {
     let reportSent = false;
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
-      const lines = parseEsLog(data.toString());
+      const chunk = data.toString();
+      const lines = parseEsLog(chunk);
       lines.forEach((line) => {
         if (!reportSent && line.message.includes('publish_address')) {
           reportSent = true;
@@ -387,12 +452,36 @@ exports.Cluster = class Cluster {
             success: true,
           });
         }
-        this._log.info(line.formattedMessage);
+
+        if (stdioTarget) {
+          stdioTarget.write(chunk);
+        } else {
+          this._log.info(line.formattedMessage);
+        }
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => {
+      const chunk = data.toString();
+      if (stdioTarget) {
+        stdioTarget.write(chunk);
+      } else {
+        this._log.error(chalk.red());
+      }
+    });
+
+    // close the stdio target if we have one defined
+    if (stdioTarget) {
+      Rx.combineLatest([
+        Rx.fromEvent(this._process.stderr, 'end'),
+        Rx.fromEvent(this._process.stdout, 'end'),
+      ])
+        .pipe(Rx.first())
+        .subscribe(() => {
+          stdioTarget.end();
+        });
+    }
 
     // observe the exit code of the process and reflect in _outcome promies
     const exitCode = new Promise((resolve) => this._process.once('exit', resolve));

@@ -106,7 +106,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                       <Fragment>
                         <strong>{header}</strong>
                         <EuiText size="s" color="subdued">
-                          <p className="euiTextColor--subdued">
+                          <p>
                             ID: {destination.id}
                             <br />
                             Last updated: {lastUpdated}

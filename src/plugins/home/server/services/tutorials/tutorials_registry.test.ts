@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '@kbn/core/server/mocks';
 import { CoreSetup } from '@kbn/core/server';

@@ -18,6 +18,8 @@ export function deserializePipelines(pipelinesByName: {
       ...pipelinesByName[name],
       processors: (pipelinesByName[name]?.processors as Processor[]) ?? [],
       on_failure: pipelinesByName[name]?.on_failure as Processor[],
+      // @ts-expect-error Missing _meta on es types https://github.com/elastic/elasticsearch-js/issues/1724
+      isManaged: Boolean(pipelinesByName[name]?._meta?.managed === true),
       name,
     };
   });

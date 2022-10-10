@@ -6,18 +6,18 @@
  */
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnlyEsQueryAlertParams } from '../types';
+import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
 /**
- * Fetching matching documents for a given alert from elasticsearch by a given index and query
+ * Fetching matching documents for a given rule from elasticsearch by a given index and query
  */
 export async function fetchEsQuery(
-  alertId: string,
+  ruleId: string,
   name: string,
-  params: OnlyEsQueryAlertParams,
+  params: OnlyEsQueryRuleParams,
   timestamp: string | undefined,
   services: {
     scopedClusterClient: IScopedClusterClient;
@@ -26,39 +26,45 @@ export async function fetchEsQuery(
 ) {
   const { scopedClusterClient, logger } = services;
   const esClient = scopedClusterClient.asCurrentUser;
-  const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
+  const {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    parsedQuery: { query, fields, runtime_mappings, _source },
+    dateStart,
+    dateEnd,
+  } = getSearchParams(params);
 
-  const filter = timestamp
-    ? {
-        bool: {
-          filter: [
-            parsedQuery.query,
-            {
-              bool: {
-                must_not: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          range: {
-                            [params.timeField]: {
-                              lte: timestamp,
-                              format: 'strict_date_optional_time',
+  const filter =
+    timestamp && params.excludeHitsFromPreviousRun
+      ? {
+          bool: {
+            filter: [
+              query,
+              {
+                bool: {
+                  must_not: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [params.timeField]: {
+                                lte: timestamp,
+                                format: 'strict_date_optional_time',
+                              },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-        },
-      }
-    : parsedQuery.query;
+            ],
+          },
+        }
+      : query;
 
-  const query = buildSortedEventsQuery({
+  const sortedQuery = buildSortedEventsQuery({
     index: params.index,
     from: dateStart,
     to: dateEnd,
@@ -68,16 +74,19 @@ export async function fetchEsQuery(
     searchAfterSortId: undefined,
     timeField: params.timeField,
     track_total_hits: true,
+    fields,
+    runtime_mappings,
+    _source,
   });
 
   logger.debug(
-    `es query alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`
+    `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
   );
 
-  const { body: searchResult } = await esClient.search(query, { meta: true });
+  const { body: searchResult } = await esClient.search(sortedQuery, { meta: true });
 
   logger.debug(
-    ` es query alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
+    ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
   return {
     numMatches: (searchResult.hits.total as estypes.SearchTotalHits).value,

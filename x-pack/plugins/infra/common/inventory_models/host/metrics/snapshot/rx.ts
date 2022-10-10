@@ -5,9 +5,38 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
-export const rx = networkTrafficWithInterfaces(
-  'rx',
-  'system.network.in.bytes',
-  'system.network.name'
-);
+import { MetricsUIAggregation } from '../../../types';
+export const rx: MetricsUIAggregation = {
+  rx_avg: {
+    avg: {
+      field: 'host.network.ingress.bytes',
+    },
+  },
+  rx_period: {
+    filter: {
+      exists: {
+        field: 'host.network.ingress.bytes',
+      },
+    },
+    aggs: {
+      period: {
+        max: {
+          field: 'metricset.period',
+        },
+      },
+    },
+  },
+  rx: {
+    bucket_script: {
+      buckets_path: {
+        value: 'rx_avg',
+        period: 'rx_period>period',
+      },
+      script: {
+        source: 'params.value / (params.period / 1000)',
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
+    },
+  },
+};

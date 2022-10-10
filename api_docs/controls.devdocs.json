@@ -47,6 +47,7 @@
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -59,7 +60,23 @@
               "\"control_group\""
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.anyControlOutputConsumerLoading$",
+            "type": "Object",
+            "tags": [],
+            "label": "anyControlOutputConsumerLoading$",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<boolean>"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -73,6 +90,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -86,6 +104,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -103,6 +122,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -116,6 +136,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -133,6 +154,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -148,6 +170,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -169,6 +192,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -184,6 +208,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -200,12 +225,45 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
               "If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.\nOtherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types."
             ]
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreateTimeSliderControlButton",
+            "description": [],
+            "signature": [
+              "(closePopover?: (() => void) | undefined) => JSX.Element"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "closePopover",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "controls",
@@ -223,6 +281,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "`SolutionToolbarPopover` button for input controls"
@@ -240,10 +299,32 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
                 "id": "def-public.ControlGroupContainer.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "reduxEmbeddablePackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddablePackage",
+                    "text": "ReduxEmbeddablePackage"
+                  }
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "initialInput",
@@ -259,11 +340,12 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.Unnamed.$2",
+                "id": "def-public.ControlGroupContainer.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -296,6 +378,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -313,6 +396,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -364,9 +448,7 @@
                 "section": "def-public.ControlOutput",
                 "text": "ControlOutput"
               },
-              ">, ",
-              "SavedObjectAttributes",
-              ">, partial?: Partial<TEmbeddableInput>) => ",
+              ">, unknown>, partial?: Partial<TEmbeddableInput>) => ",
               {
                 "pluginId": "controls",
                 "scope": "common",
@@ -378,6 +460,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -422,12 +505,11 @@
                     "section": "def-public.ControlOutput",
                     "text": "ControlOutput"
                   },
-                  ">, ",
-                  "SavedObjectAttributes",
-                  ">"
+                  ">, unknown>"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -442,6 +524,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -466,6 +549,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -479,6 +563,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -497,6 +582,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -510,6 +596,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -527,6 +614,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -542,6 +630,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -555,6 +644,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -572,6 +662,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -641,12 +732,11 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">"
+          ">, unknown>"
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -659,7 +749,8 @@
               "true"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -672,7 +763,8 @@
               "\"control_group\""
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -703,6 +795,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -716,7 +809,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "controls",
@@ -730,7 +824,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -764,6 +859,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -777,7 +873,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -793,6 +890,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -812,6 +910,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -829,6 +928,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -844,6 +944,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -867,6 +968,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -922,6 +1024,7 @@
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -941,6 +1044,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -978,6 +1082,7 @@
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1027,8 +1132,9 @@
           },
           ">"
         ],
-        "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+        "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -1040,8 +1146,9 @@
             "signature": [
               "\"optionsListControl\""
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
-            "deprecated": false
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1050,8 +1157,9 @@
             "tags": [],
             "label": "deferEmbeddableLoad",
             "description": [],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
-            "deprecated": false
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1063,12 +1171,34 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
                 "id": "def-public.OptionsListEmbeddable.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "reduxEmbeddablePackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddablePackage",
+                    "text": "ReduxEmbeddablePackage"
+                  }
+                ],
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.OptionsListEmbeddable.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "input",
@@ -1082,13 +1212,14 @@
                     "text": "OptionsListEmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.OptionsListEmbeddable.Unnamed.$2",
+                "id": "def-public.OptionsListEmbeddable.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "output",
@@ -1102,13 +1233,14 @@
                     "text": "ControlOutput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.OptionsListEmbeddable.Unnamed.$3",
+                "id": "def-public.OptionsListEmbeddable.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -1139,8 +1271,9 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1156,8 +1289,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1171,8 +1305,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1186,8 +1321,9 @@
             "signature": [
               "(node: HTMLElement) => void"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1199,11 +1335,28 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddable.isChained",
+            "type": "Function",
+            "tags": [],
+            "label": "isChained",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -1272,9 +1425,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">,",
+          ">, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -1292,8 +1443,9 @@
           },
           ">"
         ],
-        "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+        "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -1302,8 +1454,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
-            "deprecated": false
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1315,8 +1468,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1330,8 +1484,9 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1385,8 +1540,9 @@
               },
               ">"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1404,8 +1560,9 @@
                     "text": "OptionsListEmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1441,8 +1598,9 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1498,8 +1656,9 @@
               },
               ">"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -1519,14 +1678,15 @@
                   },
                   ">"
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
                 "id": "def-public.OptionsListEmbeddableFactory.presaveTransformFunction.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -1556,8 +1716,9 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1565,13 +1726,47 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableFactory.controlEditorComponent",
+            "id": "def-public.OptionsListEmbeddableFactory.isFieldCompatible",
             "type": "Function",
             "tags": [],
-            "label": "controlEditorComponent",
+            "label": "isFieldCompatible",
             "description": [],
             "signature": [
-              "({ onChange, initialInput, setValidState, setDefaultTitle, getRelevantDataViewId, setLastUsedDataViewId, }: ",
+              "(dataControlField: ",
+              "DataControlField",
+              ") => void"
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.OptionsListEmbeddableFactory.isFieldCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataControlField",
+                "description": [],
+                "signature": [
+                  "DataControlField"
+                ],
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableFactory.controlEditorOptionsComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "controlEditorOptionsComponent",
+            "description": [],
+            "signature": [
+              "({ initialInput, onChange, }: ",
               {
                 "pluginId": "controls",
                 "scope": "public",
@@ -1589,13 +1784,14 @@
               },
               ">) => JSX.Element"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.OptionsListEmbeddableFactory.controlEditorComponent.$1",
+                "id": "def-public.OptionsListEmbeddableFactory.controlEditorOptionsComponent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1618,8 +1814,9 @@
                   },
                   ">"
                 ],
-                "path": "src/plugins/controls/public/control_types/options_list/options_list_editor.tsx",
-                "deprecated": false
+                "path": "src/plugins/controls/public/options_list/components/options_list_editor_options.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1633,8 +1830,9 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1648,8 +1846,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1663,8 +1862,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1678,8 +1878,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1710,8 +1911,9 @@
                 "text": "EmbeddableStateWithType"
               }
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1725,7 +1927,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "controls",
@@ -1739,7 +1942,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1771,8 +1975,9 @@
               "SavedObjectReference",
               "[]; }"
             ],
-            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1786,7 +1991,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1834,8 +2040,9 @@
           },
           ">"
         ],
-        "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+        "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -1847,8 +2054,9 @@
             "signature": [
               "\"rangeSliderControl\""
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
-            "deprecated": false
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1857,8 +2065,9 @@
             "tags": [],
             "label": "deferEmbeddableLoad",
             "description": [],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
-            "deprecated": false
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -1870,12 +2079,34 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
                 "id": "def-public.RangeSliderEmbeddable.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "reduxEmbeddablePackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddablePackage",
+                    "text": "ReduxEmbeddablePackage"
+                  }
+                ],
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.RangeSliderEmbeddable.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "input",
@@ -1889,13 +2120,14 @@
                     "text": "RangeSliderEmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.RangeSliderEmbeddable.Unnamed.$2",
+                "id": "def-public.RangeSliderEmbeddable.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "output",
@@ -1909,13 +2141,14 @@
                     "text": "ControlOutput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.RangeSliderEmbeddable.Unnamed.$3",
+                "id": "def-public.RangeSliderEmbeddable.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -1946,8 +2179,9 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1963,8 +2197,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1978,8 +2213,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1993,8 +2229,9 @@
             "signature": [
               "(node: HTMLElement) => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2006,11 +2243,28 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddable.isChained",
+            "type": "Function",
+            "tags": [],
+            "label": "isChained",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -2079,9 +2333,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">,",
+          ">, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -2099,8 +2351,9 @@
           },
           ">"
         ],
-        "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+        "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2109,8 +2362,57 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.getDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescription",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "controls",
@@ -2122,23 +2424,25 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.Unnamed",
+            "id": "def-public.RangeSliderEmbeddableFactory.isEditable",
             "type": "Function",
             "tags": [],
-            "label": "Constructor",
+            "label": "isEditable",
             "description": [],
             "signature": [
-              "any"
+              "() => Promise<boolean>"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2192,8 +2496,9 @@
               },
               ">"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2211,8 +2516,9 @@
                     "text": "RangeSliderEmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2248,8 +2554,9 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2305,8 +2612,9 @@
               },
               ">"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2326,14 +2634,15 @@
                   },
                   ">"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
                 "id": "def-public.RangeSliderEmbeddableFactory.presaveTransformFunction.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -2363,8 +2672,9 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2372,122 +2682,36 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.controlEditorComponent",
+            "id": "def-public.RangeSliderEmbeddableFactory.isFieldCompatible",
             "type": "Function",
             "tags": [],
-            "label": "controlEditorComponent",
+            "label": "isFieldCompatible",
             "description": [],
             "signature": [
-              "({ onChange, initialInput, setValidState, setDefaultTitle, getRelevantDataViewId, setLastUsedDataViewId, }: ",
-              {
-                "pluginId": "controls",
-                "scope": "public",
-                "docId": "kibControlsPluginApi",
-                "section": "def-public.ControlEditorProps",
-                "text": "ControlEditorProps"
-              },
-              "<",
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.RangeSliderEmbeddableInput",
-                "text": "RangeSliderEmbeddableInput"
-              },
-              ">) => JSX.Element"
+              "(dataControlField: ",
+              "DataControlField",
+              ") => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.RangeSliderEmbeddableFactory.controlEditorComponent.$1",
+                "id": "def-public.RangeSliderEmbeddableFactory.isFieldCompatible.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "dataControlField",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "controls",
-                    "scope": "public",
-                    "docId": "kibControlsPluginApi",
-                    "section": "def-public.ControlEditorProps",
-                    "text": "ControlEditorProps"
-                  },
-                  "<",
-                  {
-                    "pluginId": "controls",
-                    "scope": "common",
-                    "docId": "kibControlsPluginApi",
-                    "section": "def-common.RangeSliderEmbeddableInput",
-                    "text": "RangeSliderEmbeddableInput"
-                  },
-                  ">"
+                  "DataControlField"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_editor.tsx",
-                "deprecated": false
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.isEditable",
-            "type": "Function",
-            "tags": [],
-            "label": "isEditable",
-            "description": [],
-            "signature": [
-              "() => Promise<boolean>"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.getDisplayName",
-            "type": "Function",
-            "tags": [],
-            "label": "getDisplayName",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.getIconType",
-            "type": "Function",
-            "tags": [],
-            "label": "getIconType",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.getDescription",
-            "type": "Function",
-            "tags": [],
-            "label": "getDescription",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -2517,8 +2741,9 @@
                 "text": "EmbeddableStateWithType"
               }
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2532,7 +2757,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "controls",
@@ -2546,7 +2772,8 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2578,8 +2805,9 @@
               "SavedObjectReference",
               "[]; }"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2593,7 +2821,8 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2630,6 +2859,7 @@
         ],
         "path": "src/plugins/controls/public/controls_callout/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -2643,7 +2873,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2659,6 +2890,7 @@
         "description": [],
         "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2672,6 +2904,7 @@
             ],
             "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2687,6 +2920,7 @@
         "description": [],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2700,27 +2934,36 @@
               "[] | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.CommonControlOutput.dataViews",
-            "type": "Array",
+            "id": "def-public.CommonControlOutput.dataViewId",
+            "type": "string",
             "tags": [],
-            "label": "dataViews",
+            "label": "dataViewId",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.CommonControlOutput.timeslice",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice",
+            "description": [],
+            "signature": [
+              "[number, number] | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2744,6 +2987,7 @@
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2756,52 +3000,8 @@
               "Partial<T> | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlEditorProps.getRelevantDataViewId",
-            "type": "Function",
-            "tags": [],
-            "label": "getRelevantDataViewId",
-            "description": [],
-            "signature": [
-              "(() => string | undefined) | undefined"
-            ],
-            "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlEditorProps.setLastUsedDataViewId",
-            "type": "Function",
-            "tags": [],
-            "label": "setLastUsedDataViewId",
-            "description": [],
-            "signature": [
-              "((newId: string) => void) | undefined"
-            ],
-            "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlEditorProps.setLastUsedDataViewId.$1",
-                "type": "string",
-                "tags": [],
-                "label": "newId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/controls/public/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2815,6 +3015,7 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -2828,66 +3029,7 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlEditorProps.setValidState",
-            "type": "Function",
-            "tags": [],
-            "label": "setValidState",
-            "description": [],
-            "signature": [
-              "(valid: boolean) => void"
-            ],
-            "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlEditorProps.setValidState.$1",
-                "type": "boolean",
-                "tags": [],
-                "label": "valid",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/controls/public/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlEditorProps.setDefaultTitle",
-            "type": "Function",
-            "tags": [],
-            "label": "setDefaultTitle",
-            "description": [],
-            "signature": [
-              "(defaultTitle: string) => void"
-            ],
-            "path": "src/plugins/controls/public/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlEditorProps.setDefaultTitle.$1",
-                "type": "string",
-                "tags": [],
-                "label": "defaultTitle",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/controls/public/types.ts",
-                "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2924,6 +3066,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -2933,10 +3076,11 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"HIERARCHICAL\" | \"NONE\""
+              "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2956,7 +3100,22 @@
               " | undefined"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupInput.defaultControlGrow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultControlGrow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2969,7 +3128,8 @@
               "\"twoLine\" | \"oneLine\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -2988,7 +3148,8 @@
               }
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3014,13 +3175,14 @@
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-public.IEditableControlFactory.controlEditorComponent",
+            "id": "def-public.IEditableControlFactory.controlEditorOptionsComponent",
             "type": "Function",
             "tags": [],
-            "label": "controlEditorComponent",
+            "label": "controlEditorOptionsComponent",
             "description": [],
             "signature": [
               "((props: ",
@@ -3035,10 +3197,11 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.IEditableControlFactory.controlEditorComponent.$1",
+                "id": "def-public.IEditableControlFactory.controlEditorOptionsComponent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
@@ -3055,6 +3218,7 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3088,6 +3252,7 @@
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "controls",
@@ -3101,12 +3266,13 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "controls",
                 "id": "def-public.IEditableControlFactory.presaveTransformFunction.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -3130,7 +3296,42 @@
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.IEditableControlFactory.isFieldCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isFieldCompatible",
+            "description": [],
+            "signature": [
+              "((dataControlField: ",
+              "DataControlField",
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.IEditableControlFactory.isFieldCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataControlField",
+                "description": [],
+                "signature": [
+                  "DataControlField"
+                ],
+                "path": "src/plugins/controls/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -3154,31 +3355,12 @@
             "text": "OptionsListEmbeddableInput"
           },
           " extends ",
-          "ControlInput"
+          "DataControlInput"
         ],
-        "path": "src/plugins/controls/common/control_types/options_list/types.ts",
+        "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.fieldName",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.dataViewId",
-            "type": "string",
-            "tags": [],
-            "label": "dataViewId",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.selectedOptions",
@@ -3189,8 +3371,23 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.runPastTimeout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "runPastTimeout",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3202,21 +3399,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.loading",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "loading",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3230,6 +3415,7 @@
         "description": [],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3242,7 +3428,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3255,7 +3442,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3268,7 +3456,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3281,7 +3470,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3302,31 +3492,12 @@
             "text": "RangeSliderEmbeddableInput"
           },
           " extends ",
-          "ControlInput"
+          "DataControlInput"
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableInput.fieldName",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableInput.dataViewId",
-            "type": "string",
-            "tags": [],
-            "label": "dataViewId",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "controls",
             "id": "def-public.RangeSliderEmbeddableInput.value",
@@ -3337,8 +3508,9 @@
             "signature": [
               "[string, string]"
             ],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
-            "deprecated": false
+            "path": "src/plugins/controls/common/range_slider/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3358,6 +3530,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3375,10 +3548,11 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<TControlEmbeddableInput, TControlEmbeddableOutput>"
+          "<TControlEmbeddableInput, TControlEmbeddableOutput> & { isChained?: (() => boolean) | undefined; renderPrepend?: (() => React.ReactNode) | undefined; }"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3424,12 +3598,11 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">"
+          ">, unknown>"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3447,17 +3620,19 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          " & ",
+          " & Omit<",
           {
             "pluginId": "controls",
             "scope": "public",
             "docId": "kibControlsPluginApi",
             "section": "def-public.CommonControlOutput",
             "text": "CommonControlOutput"
-          }
+          },
+          ", \"dataViewId\"> & { dataViewIds: string[]; }"
         ],
         "path": "src/plugins/controls/public/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3480,14 +3655,8 @@
           " | undefined; filters?: ",
           "Filter",
           "[] | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; controlStyle?: ",
+          "TimeRange",
+          " | undefined; timeslice?: [number, number] | undefined; controlStyle?: ",
           "ControlStyle",
           " | undefined; ignoreParentSettings?: ",
           "ParentIgnoreSettings",
@@ -3495,6 +3664,7 @@
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3523,6 +3693,7 @@
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3537,6 +3708,7 @@
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3547,10 +3719,11 @@
         "label": "ControlWidth",
         "description": [],
         "signature": [
-          "\"auto\" | \"small\" | \"medium\" | \"large\""
+          "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3563,8 +3736,9 @@
         "signature": [
           "\"optionsListControl\""
         ],
-        "path": "src/plugins/controls/common/control_types/options_list/types.ts",
+        "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3577,8 +3751,9 @@
         "signature": [
           "\"rangeSliderControl\""
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3591,8 +3766,9 @@
         "signature": [
           "\"timeSlider\""
         ],
-        "path": "src/plugins/controls/common/control_types/time_slider/types.ts",
+        "path": "src/plugins/controls/common/time_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3600,7 +3776,48 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-server.initializeControlGroupTelemetry",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeControlGroupTelemetry",
+        "description": [],
+        "signature": [
+          "(statsSoFar: Record<string, unknown>) => ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupTelemetry",
+            "text": "ControlGroupTelemetry"
+          }
+        ],
+        "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-server.initializeControlGroupTelemetry.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "statsSoFar",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -3609,6 +3826,62 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.controlGroupInputToRawControlGroupAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "controlGroupInputToRawControlGroupAttributes",
+        "description": [],
+        "signature": [
+          "(controlGroupInput: Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">) => ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.RawControlGroupAttributes",
+            "text": "RawControlGroupAttributes"
+          }
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.controlGroupInputToRawControlGroupAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ", \"id\">"
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "controls",
         "id": "def-common.getDefaultControlGroupInput",
@@ -3627,9 +3900,236 @@
           },
           ", \"id\">"
         ],
-        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.persistableControlGroupInputIsEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "persistableControlGroupInputIsEqual",
+        "description": [],
+        "signature": [
+          "(a: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          },
+          " | undefined, b: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.persistableControlGroupInputIsEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.persistableControlGroupInputIsEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.rawControlGroupAttributesToControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "rawControlGroupAttributesToControlGroupInput",
+        "description": [],
+        "signature": [
+          "(rawControlGroupAttributes: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.RawControlGroupAttributes",
+            "text": "RawControlGroupAttributes"
+          },
+          ") => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\"> | undefined"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.rawControlGroupAttributesToControlGroupInput.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawControlGroupAttributes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.RawControlGroupAttributes",
+                "text": "RawControlGroupAttributes"
+              }
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.rawControlGroupAttributesToSerializable",
+        "type": "Function",
+        "tags": [],
+        "label": "rawControlGroupAttributesToSerializable",
+        "description": [],
+        "signature": [
+          "(rawControlGroupAttributes: Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.RawControlGroupAttributes",
+            "text": "RawControlGroupAttributes"
+          },
+          ", \"id\">) => ",
+          "SerializableRecord"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.rawControlGroupAttributesToSerializable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawControlGroupAttributes",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.RawControlGroupAttributes",
+                "text": "RawControlGroupAttributes"
+              },
+              ", \"id\">"
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.serializableToRawControlGroupAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "serializableToRawControlGroupAttributes",
+        "description": [],
+        "signature": [
+          "(serializable: ",
+          "SerializableRecord",
+          ") => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.RawControlGroupAttributes",
+            "text": "RawControlGroupAttributes"
+          },
+          ", \"type\" | \"id\">"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.serializableToRawControlGroupAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "serializable",
+            "description": [],
+            "signature": [
+              "SerializableRecord"
+            ],
+            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -3663,6 +4163,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3672,10 +4173,11 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"HIERARCHICAL\" | \"NONE\""
+              "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3695,7 +4197,22 @@
               " | undefined"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupInput.defaultControlGrow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultControlGrow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3708,7 +4225,8 @@
               "\"twoLine\" | \"oneLine\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3727,7 +4245,89 @@
               }
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.ControlGroupTelemetry",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupTelemetry",
+        "description": [],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupTelemetry.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupTelemetry.chaining_system",
+            "type": "Object",
+            "tags": [],
+            "label": "chaining_system",
+            "description": [],
+            "signature": [
+              "{ [key: string]: number; }"
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupTelemetry.label_position",
+            "type": "Object",
+            "tags": [],
+            "label": "label_position",
+            "description": [],
+            "signature": [
+              "{ [key: string]: number; }"
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupTelemetry.ignore_settings",
+            "type": "Object",
+            "tags": [],
+            "label": "ignore_settings",
+            "description": [],
+            "signature": [
+              "{ [key: string]: number; }"
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupTelemetry.by_type",
+            "type": "Object",
+            "tags": [],
+            "label": "by_type",
+            "description": [],
+            "signature": [
+              "{ [key: string]: { total: number; details: { [key: string]: number; }; }; }"
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3759,6 +4359,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3768,7 +4369,8 @@
             "label": "order",
             "description": [],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3778,10 +4380,22 @@
             "label": "width",
             "description": [],
             "signature": [
-              "\"auto\" | \"small\" | \"medium\" | \"large\""
+              "\"small\" | \"medium\" | \"large\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlPanelState.grow",
+            "type": "boolean",
+            "tags": [],
+            "label": "grow",
+            "description": [],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3795,6 +4409,7 @@
         "description": [],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
@@ -3817,7 +4432,8 @@
               ">"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3838,31 +4454,12 @@
             "text": "OptionsListEmbeddableInput"
           },
           " extends ",
-          "ControlInput"
+          "DataControlInput"
         ],
-        "path": "src/plugins/controls/common/control_types/options_list/types.ts",
+        "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.fieldName",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.dataViewId",
-            "type": "string",
-            "tags": [],
-            "label": "dataViewId",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.selectedOptions",
@@ -3873,8 +4470,23 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.runPastTimeout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "runPastTimeout",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "controls",
@@ -3886,21 +4498,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.loading",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "loading",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3921,31 +4521,12 @@
             "text": "RangeSliderEmbeddableInput"
           },
           " extends ",
-          "ControlInput"
+          "DataControlInput"
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.RangeSliderEmbeddableInput.fieldName",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.RangeSliderEmbeddableInput.dataViewId",
-            "type": "string",
-            "tags": [],
-            "label": "dataViewId",
-            "description": [],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "controls",
             "id": "def-common.RangeSliderEmbeddableInput.value",
@@ -3956,8 +4537,9 @@
             "signature": [
               "[string, string]"
             ],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
-            "deprecated": false
+            "path": "src/plugins/controls/common/range_slider/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3977,6 +4559,7 @@
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3987,10 +4570,41 @@
         "label": "ControlWidth",
         "description": [],
         "signature": [
-          "\"auto\" | \"small\" | \"medium\" | \"large\""
+          "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.DEFAULT_CONTROL_STYLE",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "DEFAULT_CONTROL_STYLE",
+        "description": [],
+        "signature": [
+          "\"twoLine\" | \"oneLine\""
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.DEFAULT_CONTROL_WIDTH",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "DEFAULT_CONTROL_WIDTH",
+        "description": [],
+        "signature": [
+          "\"small\" | \"medium\" | \"large\""
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4003,8 +4617,40 @@
         "signature": [
           "\"optionsListControl\""
         ],
-        "path": "src/plugins/controls/common/control_types/options_list/types.ts",
+        "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.PersistableControlGroupInput",
+        "type": "Type",
+        "tags": [],
+        "label": "PersistableControlGroupInput",
+        "description": [
+          "\nOnly parts of the Control Group Input should be persisted"
+        ],
+        "signature": [
+          "{ controlStyle: ",
+          "ControlStyle",
+          "; ignoreParentSettings?: ",
+          "ParentIgnoreSettings",
+          " | undefined; chainingSystem: ",
+          "ControlGroupChainingSystem",
+          "; panels: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlsPanels",
+            "text": "ControlsPanels"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4017,8 +4663,71 @@
         "signature": [
           "\"rangeSliderControl\""
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.RawControlGroupAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "RawControlGroupAttributes",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          },
+          ", \"ignoreParentSettings\" | \"panels\"> & { ignoreParentSettingsJSON: string; panelsJSON: string; }"
+        ],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.SerializableControlGroupInput",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializableControlGroupInput",
+        "description": [
+          "\nSome use cases need the Persistable Control Group Input to conform to the SerializableRecord format which requires string index signatures in any objects"
+        ],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          },
+          ", \"ignoreParentSettings\" | \"panels\"> & { panels: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlsPanels",
+            "text": "ControlsPanels"
+          },
+          " & ",
+          "SerializableRecord",
+          "; ignoreParentSettings: ",
+          "ParentIgnoreSettings",
+          " & ",
+          "SerializableRecord",
+          "; }"
+        ],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4031,8 +4740,9 @@
         "signature": [
           "\"timeSlider\""
         ],
-        "path": "src/plugins/controls/common/control_types/time_slider/types.ts",
+        "path": "src/plugins/controls/common/time_slider/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -5,35 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "id": Array [
-                    "123",
-                  ],
-                },
-                "function": "indexPatternLoad",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
+        "colorMode": Array [
+          "None",
         ],
-        "metricsAtAllLevels": Array [
-          false,
-        ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "font": Array [
           Object {
             "chain": Array [
@@ -50,6 +24,25 @@ Object {
                   ],
                   "weight": Array [
                     "bold",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
                   ],
                 },
                 "function": "font",
@@ -66,7 +59,7 @@ Object {
           false,
         ],
       },
-      "function": "metricVis",
+      "function": "legacyMetricVis",
       "type": "function",
     },
   ],
@@ -79,35 +72,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "id": Array [
-                    "123",
-                  ],
-                },
-                "function": "indexPatternLoad",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
+        "colorMode": Array [
+          "None",
         ],
-        "metricsAtAllLevels": Array [
-          false,
-        ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "font": Array [
           Object {
             "chain": Array [
@@ -133,11 +100,30 @@ Object {
             "type": "expression",
           },
         ],
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "showLabels": Array [
           false,
         ],
       },
-      "function": "metricVis",
+      "function": "legacyMetricVis",
       "type": "function",
     },
   ],

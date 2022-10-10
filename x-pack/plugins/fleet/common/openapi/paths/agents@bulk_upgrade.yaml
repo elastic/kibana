@@ -8,15 +8,9 @@ post:
         application/json:
           schema:
               type: object
-              additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    type: string
-                required:
-                  - success
+              properties:
+                actionId: 
+                  type: string
     '400':
       description: BAD REQUEST
       content:
@@ -32,3 +26,9 @@ post:
       application/json:
         schema:
           $ref: ../components/schemas/bulk_upgrade_agents.yaml
+        example:
+          version: 8.4.0
+          source_uri: https://artifacts.elastic.co/downloads/beats/elastic-agent
+          rollout_duration_seconds: 3600
+          agents: [agent1, agent2]
+          start_time: 2022-08-03T14:00:00.000Z

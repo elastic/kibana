@@ -42,10 +42,13 @@ export {
   OptionsListEmbeddableFactory,
   OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
+} from './options_list';
+
+export {
   RangeSliderEmbeddableFactory,
   RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
-} from './control_types';
+} from './range_slider';
 
 export { LazyControlsCallout, type CalloutProps } from './controls_callout';
 

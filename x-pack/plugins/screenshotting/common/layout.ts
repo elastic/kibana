@@ -40,7 +40,7 @@ export interface LayoutSelectorDictionary {
 /**
  * Screenshot layout parameters.
  */
-export type LayoutParams<Id = string> = Ensure<
+export type LayoutParams<Id = LayoutType> = Ensure<
   {
     /**
      * Unique layout name.
@@ -68,8 +68,4 @@ export type LayoutParams<Id = string> = Ensure<
 /**
  * Supported layout types.
  */
-export enum LayoutTypes {
-  PRESERVE_LAYOUT = 'preserve_layout',
-  PRINT = 'print',
-  CANVAS = 'canvas',
-}
+export type LayoutType = 'preserve_layout' | 'print' | 'canvas';

@@ -46,7 +46,7 @@ exports[`Storyshots components/Tags/Tag as badge with color 1`] = `
 
 exports[`Storyshots components/Tags/Tag as health 1`] = `
 <div
-  className="euiHealth euiHealth--textSizeS"
+  className="euiHealth emotion-euiHealth-s"
 >
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -72,7 +72,7 @@ exports[`Storyshots components/Tags/Tag as health 1`] = `
 
 exports[`Storyshots components/Tags/Tag as health with color 1`] = `
 <div
-  className="euiHealth euiHealth--textSizeS"
+  className="euiHealth emotion-euiHealth-s"
 >
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

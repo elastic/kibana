@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { SignalSearchResponse, SignalsEnrichment } from '../types';
+import type { SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
+import type { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({
-  buildRuleMessage,
-  exceptionItems,
-  logger,
+  ruleExecutionLogger,
   services,
   threatFilters,
   threatIndex,
@@ -22,6 +20,8 @@ export const buildThreatEnrichment = ({
   threatQuery,
   pitId,
   reassignPitId,
+  listClient,
+  exceptionFilter,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {
@@ -35,26 +35,26 @@ export const buildThreatEnrichment = ({
     };
     const threatResponse = await getThreatList({
       esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
-      threatFilters: [...threatFilters, matchedThreatsFilter],
-      query: threatQuery,
-      language: threatLanguage,
       index: threatIndex,
-      searchAfter: undefined,
-      logger,
-      buildRuleMessage,
+      language: threatLanguage,
       perPage: undefined,
+      query: threatQuery,
+      ruleExecutionLogger,
+      searchAfter: undefined,
+      threatFilters: [...threatFilters, matchedThreatsFilter],
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,
       },
       pitId,
       reassignPitId,
+      runtimeMappings: undefined,
+      listClient,
+      exceptionFilter,
     });
 
     return threatResponse.hits.hits;
   };
 
-  return (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
-    enrichSignalThreatMatches(signals, getMatchedThreats, threatIndicatorPath);
+  return (signals) => enrichSignalThreatMatches(signals, getMatchedThreats, threatIndicatorPath);
 };

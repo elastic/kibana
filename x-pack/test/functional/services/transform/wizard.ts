@@ -19,12 +19,16 @@ export type HistogramCharts = Array<{
 
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const browser = getService('browser');
   const canvasElement = getService('canvasElement');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const find = getService('find');
   const ml = getService('ml');
+  const toasts = getService('toasts');
+
   const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
@@ -798,6 +802,72 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
+    async assertTransformNumFailureRetriesInputExists() {
+      await testSubjects.existOrFail('transformNumFailureRetriesInput');
+      expect(await testSubjects.isDisplayed('transformNumFailureRetriesInput')).to.eql(
+        true,
+        `Expected 'Number of retries failure' input to be displayed`
+      );
+    },
+
+    async assertNumFailureRetriesValue(expectedValue: string) {
+      await this.assertTransformNumFailureRetriesInputExists();
+      const actualValue = await testSubjects.getAttribute(
+        'transformNumFailureRetriesInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform num failure retries text should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertTransformNumFailureRetriesErrorMessageExists(expected: boolean) {
+      const row = await testSubjects.find('transformNumFailureRetriesFormRow');
+      const errorElements = await row.findAllByClassName('euiFormErrorText');
+
+      if (expected) {
+        expect(errorElements.length).greaterThan(
+          0,
+          'Expected Transform num failure retries to display error message'
+        );
+      } else {
+        expect(errorElements.length).eql(
+          0,
+          'Expected Transform num failure retries to not display error message'
+        );
+      }
+    },
+
+    async setTransformNumFailureRetriesValue(value: string, expectedResult: 'error' | string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.setValue('transformNumFailureRetriesInput', value);
+        if (expectedResult !== 'error') {
+          await this.assertTransformNumFailureRetriesErrorMessageExists(false);
+          await this.assertNumFailureRetriesValue(expectedResult);
+        } else {
+          await this.assertTransformNumFailureRetriesErrorMessageExists(true);
+        }
+      });
+    },
+
+    async assertTransformNumFailureRetriesSummaryValue(expectedValue: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('transformWizardAdvancedSettingsNumFailureRetriesLabel');
+        const row = await testSubjects.find(
+          'transformWizardAdvancedSettingsNumFailureRetriesLabel'
+        );
+        const actualValue = await (
+          await row.findByClassName('euiFormRow__fieldWrapper')
+        ).getVisibleText();
+
+        expect(actualValue).to.eql(
+          expectedValue,
+          `Transform num failure retries summary value should be '${expectedValue}' (got '${actualValue}')`
+        );
+      });
+    },
+
     async assertTransformMaxPageSearchSizeInputExists() {
       await testSubjects.existOrFail('transformMaxPageSearchSizeInput');
       expect(await testSubjects.isDisplayed('transformMaxPageSearchSizeInput')).to.eql(
@@ -815,6 +885,22 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         expectedValue,
         `Transform maximum page search size input text should be '${expectedValue}' (got '${actualValue}')`
       );
+    },
+
+    async assertAccordionAdvancedSettingsSummaryAccordionExists() {
+      await testSubjects.existOrFail('transformWizardAccordionAdvancedSettingsSummary');
+    },
+
+    // for now we expect this to be used only for opening the accordion
+    async openTransformAdvancedSettingsSummaryAccordion() {
+      await this.assertAccordionAdvancedSettingsSummaryAccordionExists();
+      await find.clickByCssSelector(
+        '[aria-controls="transformWizardAccordionAdvancedSettingsSummary"]'
+      );
+
+      await testSubjects.existOrFail('transformWizardAdvancedSettingsFrequencyLabel');
+      await testSubjects.existOrFail('transformWizardAdvancedSettingsMaxPageSearchSizeLabel');
+      await testSubjects.existOrFail('transformWizardAdvancedSettingsNumFailureRetriesLabel');
     },
 
     async assertCreateAndStartButtonExists() {
@@ -965,6 +1051,34 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await this.assertStartButtonEnabled(false);
         await this.assertProgressbarExists();
       });
+    },
+
+    async assertAggregationEntryEditPopoverValid(aggName: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`transformAggregationEntryEditButton_${aggName}`);
+
+        await testSubjects.existOrFail(`transformAggPopoverForm_${aggName}`);
+        const isApplyAggChangeEnabled = await testSubjects.isEnabled(
+          `~transformAggPopoverForm_${aggName} > ~transformApplyAggChanges`
+        );
+
+        expect(isApplyAggChangeEnabled).to.eql(
+          true,
+          'Expected Transform aggregation entry `Apply` to be enabled'
+        );
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      });
+    },
+
+    async assertErrorToastsNotExist() {
+      const toastCount = await toasts.getToastCount();
+      // Toast element index starts at 1, not 0
+      for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
+        const toast = await toasts.getToastElement(toastIdx);
+        const isErrorToast = await toast.elementHasClass('euiToast--danger');
+        expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
+      }
     },
   };
 }

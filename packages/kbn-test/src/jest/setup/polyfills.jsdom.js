@@ -14,3 +14,10 @@ require('whatwg-fetch');
 if (!global.URL.hasOwnProperty('createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
 }
+
+// https://github.com/jsdom/jsdom/issues/2524
+if (!global.hasOwnProperty('TextEncoder')) {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}

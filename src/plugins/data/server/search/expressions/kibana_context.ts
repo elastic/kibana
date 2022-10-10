@@ -7,9 +7,9 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/server';
 import { getKibanaContextFn } from '../../../common/search/expressions';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
-import { SavedObjectsClientCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

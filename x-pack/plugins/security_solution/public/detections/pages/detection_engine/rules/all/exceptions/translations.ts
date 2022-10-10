@@ -28,12 +28,14 @@ export const EXCEPTION_LIST_ACTIONS = i18n.translate(
   }
 );
 
-export const NUMBER_RULES_ASSIGNED_TO_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.numberRulesAssignedTitle',
-  {
-    defaultMessage: 'Number of rules assigned to',
-  }
-);
+export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.all.exceptions.showingExceptionLists',
+    {
+      values: { totalLists },
+      defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
+    }
+  );
 
 export const RULES_ASSIGNED_TO_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.rulesAssignedTitle',
@@ -153,8 +155,15 @@ export const referenceErrorMessage = (referenceCount: number) =>
   });
 
 export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.exceptions.searchPlaceholder',
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.searchPlaceholder',
   {
-    defaultMessage: 'e.g. Example List Name',
+    defaultMessage: 'Search by name or list id',
+  }
+);
+
+export const REFRESH_EXCEPTIONS_TABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.refresh',
+  {
+    defaultMessage: 'Refresh',
   }
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import {
   createPackagePolicyServiceMock,
   createArtifactsClientMock,
@@ -13,31 +13,40 @@ import {
   createMockAgentService,
   createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
-import { createFleetAuthzMock, Installation } from '@kbn/fleet-plugin/common';
+import {
+  createFleetAuthzMock,
+  Installation,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   ExternalCallback,
   FleetStartContract,
+  PostPackagePolicyDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import {
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const chance = new Chance();
 
 const mockRouteContext = {
-  core: {
-    savedObjects: {
-      client: savedObjectsClientMock.create(),
-    },
-  },
+  core: coreMock.createRequestHandlerContext(),
 } as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> => {
@@ -66,15 +75,29 @@ describe('Cloud Security Posture Plugin', () => {
     const mockPlugins: CspServerPluginStartDeps = {
       fleet: fleetMock,
       data: dataPluginMock.createStartContract(),
+      taskManager: taskManagerMock.createStart(),
+      security: securityMock.createStart(),
+      licensing: licensingMock.createStart(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
     const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
     findMock.mockReturnValue(
       Promise.resolve({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
+        saved_objects: [
+          {
+            type: 'csp_rule',
+            attributes: {
+              enabled: false,
+              metadata: {
+                rego_rule_id: 'cis_1_1_1',
+                benchmark: { id: 'cis_k8s' },
+              },
+            },
+          },
+        ],
+        total: 1,
+        per_page: 10,
         page: 1,
       })
     );
@@ -131,7 +154,7 @@ describe('Cloud Security Posture Plugin', () => {
       );
 
       const packageMock = createPackagePolicyMock();
-      packageMock.package!.name = CIS_KUBERNETES_PACKAGE_NAME;
+      packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
@@ -197,6 +220,126 @@ describe('Cloud Security Posture Plugin', () => {
       }
 
       expect(spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('packagePolicyPostCreate should return the updated packagePolicy', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+        async (): Promise<Installation | undefined> => {
+          return;
+        }
+      );
+
+      fleetMock.packagePolicyService.update.mockImplementation(
+        (
+          soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          id: string,
+          packagePolicyUpdate: UpdatePackagePolicy
+        ): Promise<PackagePolicy> => {
+          // @ts-expect-error 2322
+          return packagePolicyUpdate;
+        }
+      );
+
+      const packageMock = createPackagePolicyMock();
+      packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      packageMock.vars = { runtimeCfg: { type: 'foo' } };
+
+      const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
+      fleetMock.registerExternalCallback.mockImplementation((...args) => {
+        if (args[0] === 'packagePolicyPostCreate') {
+          packagePolicyPostCreateCallbacks.push(args[1]);
+        }
+      });
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+
+      // Act
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(0);
+
+      expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
+
+      for (const cb of packagePolicyPostCreateCallbacks) {
+        const updatedPackagePolicy = await cb(
+          packageMock,
+          contextMock,
+          httpServerMock.createKibanaRequest()
+        );
+        if (fleetMock.packagePolicyService.update.mock.calls.length) {
+          expect(updatedPackagePolicy).toHaveProperty('vars');
+          expect(updatedPackagePolicy.vars).toHaveProperty('runtimeCfg');
+          expect(updatedPackagePolicy.vars!.runtimeCfg).toHaveProperty('value');
+        }
+      }
+      expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should uninstall resources when package is removed', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+        async (): Promise<Installation | undefined> => {
+          return;
+        }
+      );
+
+      const deletedPackagePolicyMock = deletePackagePolicyMock();
+      deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+      const packagePolicyPostDeleteCallbacks: PostPackagePolicyDeleteCallback[] = [];
+      fleetMock.registerExternalCallback.mockImplementation((...args) => {
+        if (args[0] === 'postPackagePolicyDelete') {
+          packagePolicyPostDeleteCallbacks.push(args[1]);
+        }
+      });
+
+      const coreStart = coreMock.createStart();
+      const repositoryFindMock = coreStart.savedObjects.createInternalRepository()
+        .find as jest.Mock;
+
+      repositoryFindMock.mockReturnValueOnce(
+        Promise.resolve({
+          saved_objects: [
+            {
+              type: 'csp-rule-template',
+              id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+              benchmark: {
+                id: 'cis_k8s',
+              },
+            },
+          ],
+        })
+      );
+
+      repositoryFindMock.mockReturnValueOnce(
+        Promise.resolve({
+          saved_objects: [],
+        })
+      );
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'uninstallResources').mockImplementation();
+
+      // Act
+      await plugin.start(coreStart, mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+
+      expect(packagePolicyPostDeleteCallbacks.length).toBeGreaterThan(0);
+
+      for (const cb of packagePolicyPostDeleteCallbacks) {
+        await cb(deletedPackagePolicyMock);
+      }
+      expect(repositoryFindMock).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 });

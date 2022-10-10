@@ -52,7 +52,7 @@ export const useImportWorkpad = () => {
 
           workpad.id = getId('workpad');
 
-          // sanity check for workpad object
+          // check for workpad object
           if (isInvalidWorkpad(workpad)) {
             onComplete();
             throw new Error(errors.getMissingPropertiesErrorMessage());

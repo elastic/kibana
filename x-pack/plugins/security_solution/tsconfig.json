@@ -32,18 +32,21 @@
     { "path": "../actions/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../cases/tsconfig.json" },
-    { "path": "../data_enhanced/tsconfig.json" },
+    { "path": "../cloud_integrations/cloud_experiments/tsconfig.json" },
+    { "path": "../cloud_security_posture/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../fleet/tsconfig.json" },
+    { "path": "../kubernetes_security/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../lists/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },
     { "path": "../osquery/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
+    { "path": "../session_view/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
-    { "path": "../timelines/tsconfig.json" },
-    { "path": "../session_view/tsconfig.json" }
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../threat_intelligence/tsconfig.json" },
+    { "path": "../timelines/tsconfig.json" }
   ]
 }

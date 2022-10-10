@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
+import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
+// TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
+// without using Partial
 /**
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
+export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<FullResponseSchema> => ({
   actions: [],
   author: [],
   created_by: 'elastic',
@@ -37,7 +39,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   index: ['auditbeat-*', 'filebeat-*'],
   immutable: false,
   interval: '5m',
-  output_index: '.siem-signals-default',
+  output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {
@@ -97,4 +99,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   version: 1,
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });

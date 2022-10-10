@@ -7,6 +7,9 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
+import { omit, pick } from 'lodash';
+import moment from 'moment-timezone';
+import { gte } from 'semver';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -19,12 +22,16 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
+import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
 import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
+const MINIMUM_SS_MIGRATION_VERSION = '8.3.0';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 export const FILEBEAT_7X_INDICATOR_PATH = 'threatintel.indicator';
 
@@ -33,7 +40,8 @@ interface AlertLogMeta extends LogMeta {
 }
 
 type AlertMigration = (
-  doc: SavedObjectUnsanitizedDoc<RawRule>
+  doc: SavedObjectUnsanitizedDoc<RawRule>,
+  context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<RawRule>;
 
 function createEsoMigration(
@@ -59,6 +67,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
+export const isEsQueryRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
+  doc.attributes.alertTypeId === '.es-query';
+
 export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
 
@@ -75,6 +86,7 @@ export const isSecuritySolutionLegacyNotification = (
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  searchSourceMigrations: MigrateFunctionsObject,
   isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
@@ -155,22 +167,39 @@ export function getMigrations(
   const migrationRules830 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(removeInternalTags)
+    pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
   );
 
-  return {
-    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
-    '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
-    '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
-    '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
-    '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
-    '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
-    '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
-    '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
-    '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
-  };
+  const migrationRules841 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(removeIsSnoozedUntil)
+  );
+
+  const migrationRules850 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),
+    pipeMigrations(stripOutRuntimeFieldsInOldESQuery)
+  );
+
+  return mergeSavedObjectMigrationMaps(
+    {
+      '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
+      '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
+      '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
+      '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
+      '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
+      '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
+      '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
+      '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
+      '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
+      '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+      '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
+      '8.4.1': executeMigrationWithErrorHandling(migrationRules841, '8.4.1'),
+      '8.5.0': executeMigrationWithErrorHandling(migrationRules850, '8.5.0'),
+    },
+    getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
+  );
 }
 
 function executeMigrationWithErrorHandling(
@@ -697,6 +726,23 @@ function addSecuritySolutionAADRuleTypes(
     : doc;
 }
 
+function addSearchType(doc: SavedObjectUnsanitizedDoc<RawRule>) {
+  const searchType = doc.attributes.params.searchType;
+
+  return isEsQueryRuleType(doc) && !searchType
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: {
+            ...doc.attributes.params,
+            searchType: 'esQuery',
+          },
+        },
+      }
+    : doc;
+}
+
 function addSecuritySolutionAADRuleTypeTags(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
@@ -717,6 +763,47 @@ function addSecuritySolutionAADRuleTypeTags(
         },
       }
     : doc;
+}
+
+function stripOutRuntimeFieldsInOldESQuery(
+  doc: SavedObjectUnsanitizedDoc<RawRule>,
+  context: SavedObjectMigrationContext
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const isESDSLrule =
+    isEsQueryRuleType(doc) && !isSerializedSearchSource(doc.attributes.params.searchConfiguration);
+
+  if (isESDSLrule) {
+    try {
+      const parsedQuery = JSON.parse(doc.attributes.params.esQuery as string);
+      // parsing and restringifying will cause us to lose the formatting so we only do so if this rule has
+      // fields other than `query` which is the only valid field at this stage
+      const hasFieldsOtherThanQuery = Object.keys(parsedQuery).some((key) => key !== 'query');
+      return hasFieldsOtherThanQuery
+        ? {
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              params: {
+                ...doc.attributes.params,
+                esQuery: JSON.stringify(pick(parsedQuery, 'query'), null, 4),
+              },
+            },
+          }
+        : doc;
+    } catch (err) {
+      // Instead of failing the upgrade when an unparsable rule is encountered, we log that the rule caouldn't be migrated and
+      // as a result legacy parameters might cause the rule to behave differently if it is, in fact, still running at all
+      context.log.error<AlertLogMeta>(
+        `unable to migrate and remove legacy runtime fields in rule ${doc.id} due to invalid query: "${doc.attributes.params.esQuery}" - query must be JSON`,
+        {
+          migrations: {
+            alertDocument: doc,
+          },
+        }
+      );
+    }
+  }
+  return doc;
 }
 
 function addThreatIndicatorPathToThreatMatchRules(
@@ -859,6 +946,33 @@ function addMappedParams(
   return doc;
 }
 
+function convertSnoozes(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { snoozeEndTime },
+  } = doc;
+
+  return {
+    ...doc,
+    attributes: {
+      ...(omit(doc.attributes, ['snoozeEndTime']) as RawRule),
+      snoozeSchedule: snoozeEndTime
+        ? [
+            {
+              duration: Date.parse(snoozeEndTime as string) - Date.now(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: moment.tz.guess(),
+                count: 1,
+              },
+            },
+          ]
+        : [],
+    },
+  };
+}
+
 function getCorrespondingAction(
   actions: SavedObjectAttribute,
   connectorRef: string
@@ -899,6 +1013,70 @@ function removeInternalTags(
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
-  return (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
-    migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+  return (doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext) =>
+    migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc, context), doc);
+}
+
+function mapSearchSourceMigrationFunc(
+  migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
+): MigrateFunction {
+  return (doc) => {
+    const _doc = doc as { attributes: RawRule };
+
+    const serializedSearchSource = _doc.attributes.params.searchConfiguration;
+
+    if (isSerializedSearchSource(serializedSearchSource)) {
+      return {
+        ..._doc,
+        attributes: {
+          ..._doc.attributes,
+          params: {
+            ..._doc.attributes.params,
+            searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
+          },
+        },
+      };
+    }
+    return _doc;
+  };
+}
+
+/**
+ * This creates a migration map that applies search source migrations to legacy es query rules.
+ * It doesn't modify existing migrations. The following migrations will occur at minimum version of 8.3+.
+ */
+function getSearchSourceMigrations(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  searchSourceMigrations: MigrateFunctionsObject
+) {
+  const filteredMigrations: SavedObjectMigrationMap = {};
+  for (const versionKey in searchSourceMigrations) {
+    if (gte(versionKey, MINIMUM_SS_MIGRATION_VERSION)) {
+      const migrateSearchSource = mapSearchSourceMigrationFunc(
+        searchSourceMigrations[versionKey]
+      ) as unknown as AlertMigration;
+
+      filteredMigrations[versionKey] = executeMigrationWithErrorHandling(
+        createEsoMigration(
+          encryptedSavedObjects,
+          (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> =>
+            isEsQueryRuleType(doc),
+          pipeMigrations(migrateSearchSource)
+        ),
+        versionKey
+      );
+    }
+  }
+  return filteredMigrations;
+}
+
+function removeIsSnoozedUntil(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  return {
+    ...doc,
+    attributes: {
+      ...(omit(doc.attributes, ['isSnoozedUntil']) as RawRule),
+    },
+  };
 }

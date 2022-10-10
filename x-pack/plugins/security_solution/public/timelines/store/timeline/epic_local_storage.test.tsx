@@ -20,7 +20,8 @@ import {
   kibanaObservable,
 } from '../../../common/mock';
 
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   removeColumn,
   upsertColumn,
@@ -32,13 +33,11 @@ import {
   updateSort,
 } from './actions';
 import { DefaultCellRenderer } from '../../components/timeline/cell_rendering/default_cell_renderer';
-import {
-  QueryTabContentComponent,
-  Props as QueryTabContentComponentProps,
-} from '../../components/timeline/query_tab_content';
+import type { Props as QueryTabContentComponentProps } from '../../components/timeline/query_tab_content';
+import { QueryTabContentComponent } from '../../components/timeline/query_tab_content';
 import { defaultRowRenderers } from '../../components/timeline/body/renderers';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
-import { Sort } from '../../components/timeline/body/sort';
+import type { Sort } from '../../components/timeline/body/sort';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
@@ -58,7 +57,8 @@ describe('epicLocalStorage', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];
@@ -78,6 +78,7 @@ describe('epicLocalStorage', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
+      kqlQueryLanguage: 'kuery',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -161,6 +162,7 @@ describe('epicLocalStorage', () => {
           {
             columnId: 'event.severity',
             columnType: 'number',
+            esTypes: ['long'],
             sortDirection: Direction.desc,
           },
         ],

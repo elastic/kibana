@@ -34,6 +34,7 @@ export enum InstallStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
   installing = 'installing',
+  reinstalling = 'reinstalling',
   uninstalling = 'uninstalling',
 }
 
@@ -45,16 +46,18 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload' | 'bundled';
 
-export type EpmPackageInstallStatus =
-  | 'installed'
-  | 'installing'
-  | 'install_failed'
-  | 'installed_bundled';
+export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
+export type DetailViewPanelName =
+  | 'overview'
+  | 'policies'
+  | 'assets'
+  | 'settings'
+  | 'custom'
+  | 'api-reference';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
-export type DocAssetType = 'doc' | 'notice';
+export type DocAssetType = 'doc' | 'notice' | 'license';
 export type AssetType =
   | KibanaAssetType
   | ElasticsearchAssetType
@@ -76,6 +79,7 @@ export enum KibanaAssetType {
   mlModule = 'ml_module',
   tag = 'tag',
   osqueryPackAsset = 'osquery_pack_asset',
+  osquerySavedQuery = 'osquery_saved_query',
 }
 
 /*
@@ -93,6 +97,7 @@ export enum KibanaSavedObjectType {
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   tag = 'tag',
   osqueryPackAsset = 'osquery-pack-asset',
+  osquerySavedQuery = 'osquery-saved-query',
 }
 
 export enum ElasticsearchAssetType {
@@ -136,6 +141,7 @@ type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'
 interface RegistryAdditionalProperties {
   assets?: string[];
   download: string;
+  signature_path?: string;
   path: string;
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
@@ -151,36 +157,52 @@ interface RegistryOverridePropertyValue {
   screenshots?: RegistryImage[];
 }
 
-export type RegistryRelease = PackageSpecManifest['release'];
+export type RegistryRelease = NonNullable<PackageSpecManifest['release']>;
 export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
 export enum RegistryPolicyTemplateKeys {
-  name = 'name',
-  title = 'title',
-  description = 'description',
-  icons = 'icons',
-  screenshots = 'screenshots',
   categories = 'categories',
   data_streams = 'data_streams',
   inputs = 'inputs',
   readme = 'readme',
   multiple = 'multiple',
+  type = 'type',
+  vars = 'vars',
+  input = 'input',
+  template_path = 'template_path',
+  name = 'name',
+  title = 'title',
+  description = 'description',
+  icons = 'icons',
+  screenshots = 'screenshots',
 }
-
-export interface RegistryPolicyTemplate {
+interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
   [RegistryPolicyTemplateKeys.title]: string;
   [RegistryPolicyTemplateKeys.description]: string;
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.multiple]?: boolean;
+}
+export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
   [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.readme]?: string;
-  [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
+
+export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
+  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.input]: string;
+  [RegistryPolicyTemplateKeys.template_path]: string;
+  [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+}
+
+export type RegistryPolicyTemplate =
+  | RegistryPolicyIntegrationTemplate
+  | RegistryPolicyInputOnlyTemplate;
 
 export enum RegistryInputKeys {
   type = 'type',
@@ -315,7 +337,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;
   [RegistryDataStreamKeys.title]: string;
-  [RegistryDataStreamKeys.release]: string;
+  [RegistryDataStreamKeys.release]: RegistryRelease;
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
@@ -336,7 +358,14 @@ export interface RegistryDataStreamPrivileges {
   indices?: string[];
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
+export type RegistryVarType =
+  | 'integer'
+  | 'bool'
+  | 'password'
+  | 'text'
+  | 'yaml'
+  | 'string'
+  | 'textarea';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -374,8 +403,8 @@ export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
-  removable?: boolean;
   notice?: string;
+  licensePath?: string;
   keepPoliciesUpToDate?: boolean;
 }
 
@@ -400,12 +429,24 @@ export interface IntegrationCardItem {
   integration: string;
   id: string;
   categories: string[];
+  fromIntegrations?: string;
+  isUnverified?: boolean;
+  showLabels?: boolean;
 }
 
+export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+
+// TODO - Expand this with other experimental indexing types
+export type ExperimentalIndexingFeature = 'synthetic_source';
+
+export interface ExperimentalDataStreamFeature {
+  data_stream: string;
+  features: Record<ExperimentalIndexingFeature, boolean>;
+}
 
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
@@ -420,6 +461,14 @@ export interface Installation extends SavedObjectAttributes {
   install_source: InstallSource;
   installed_kibana_space_id?: string;
   keep_policies_up_to_date?: boolean;
+  install_format_schema_version?: string;
+  verification_status: PackageVerificationStatus;
+  verification_key_id?: string | null;
+  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
+  experimental_data_stream_features?: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>;
 }
 
 export interface PackageUsageStats {
@@ -431,8 +480,7 @@ export type Installable<T> =
   | InstalledRegistry<T>
   | Installing<T>
   | NotInstalled<T>
-  | InstallFailed<T>
-  | InstalledBundled<T>;
+  | InstallFailed<T>;
 
 export type InstallStatusExcluded<T = {}> = T & {
   status: undefined;
@@ -441,10 +489,6 @@ export type InstallStatusExcluded<T = {}> = T & {
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
-};
-
-export type InstalledBundled<T = {}> = T & {
-  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {
@@ -475,6 +519,7 @@ export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
 
 export interface IndexTemplateMappings {
   properties: any;
+  dynamic_templates?: any;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101

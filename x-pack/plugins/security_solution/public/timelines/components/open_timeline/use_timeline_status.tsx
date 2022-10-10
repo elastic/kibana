@@ -8,17 +8,19 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 
-import {
-  TimelineStatus,
-  TimelineType,
+import type {
   TimelineTypeLiteralWithNull,
-  TemplateTimelineType,
   TemplateTimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
+import {
+  TimelineStatus,
+  TimelineType,
+  TemplateTimelineType,
+} from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
-import { TemplateTimelineFilter } from './types';
+import type { TemplateTimelineFilter } from './types';
 import { installPrepackedTimelines } from '../../containers/api';
 
 export const useTimelineStatus = ({

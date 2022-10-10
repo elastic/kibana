@@ -151,5 +151,13 @@ Example: Visualize the rate of bytes received over time by a memcached server:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.counterRate.documentation.quick',
+    {
+      defaultMessage: `
+      The rate of change over time for an ever growing time series metric.
+      `,
+    }
+  ),
   shiftable: true,
 };

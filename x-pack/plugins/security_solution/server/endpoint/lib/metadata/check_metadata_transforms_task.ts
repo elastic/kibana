@@ -6,19 +6,19 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import {
+import type {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';

@@ -9,7 +9,7 @@
 
 import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { MapExtent } from './map_descriptor';
 
 export type Timeslice = {
@@ -21,8 +21,12 @@ export type Timeslice = {
 export type DataFilters = {
   buffer?: MapExtent; // extent with additional buffer
   extent?: MapExtent; // map viewport
-  filters: Filter[];
-  query?: Query;
+  filters: Filter[]; // search bar filters
+  query?: Query; // search bar query
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   searchSessionId?: string;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
@@ -41,6 +45,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   sourceQuery?: Query;
   sourceMeta: object | null;
   isForceRefresh: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 };
 
 export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
@@ -99,6 +104,7 @@ type NumericalStyleFieldData = {
 
 type CategoricalStyleFieldData = {
   buckets: Array<{ key: string; doc_count: number }>;
+  sum_other_doc_count: number;
 };
 
 export type StyleMetaData = {

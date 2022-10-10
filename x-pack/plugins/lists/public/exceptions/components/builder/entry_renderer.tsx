@@ -118,10 +118,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const handleOperatorChange = useCallback(
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
-
+      handleError(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry]
+    [onChange, entry, handleError]
   );
 
   const handleFieldMatchValueChange = useCallback(
@@ -241,7 +241,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && allowLargeValueLists
+          isFirst
         );
 
     const comboBox = (
@@ -292,6 +292,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     );
   };
 
+  // eslint-disable-next-line complexity
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
@@ -338,13 +339,16 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
-        let os: OperatingSystem = OperatingSystem.WINDOWS;
-        if (osTypes) {
-          [os] = osTypes as OperatingSystem[];
+        let actualWarning: React.ReactNode | string | undefined;
+        if (listType !== 'detection') {
+          let os: OperatingSystem = OperatingSystem.WINDOWS;
+          if (osTypes) {
+            [os] = osTypes as OperatingSystem[];
+          }
+          const warning = validateFilePathInput({ os, value: wildcardValue });
+          actualWarning =
+            warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
         }
-        const warning = validateFilePathInput({ os, value: wildcardValue });
-        const actualWarning =
-          warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
 
         return (
           <AutocompleteFieldWildcardComponent
@@ -379,6 +383,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             onChange={handleFieldListValueChange}
             data-test-subj="exceptionBuilderEntryFieldList"
+            allowLargeValueLists={allowLargeValueLists}
           />
         );
       case OperatorTypeEnum.EXISTS:

@@ -15,15 +15,16 @@ describe('getEventCount', () => {
     jest.clearAllMocks();
   });
 
-  it('can respect tuple', () => {
-    getEventCount({
+  it('can respect tuple', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      primaryTimestamp: '@timestamp',
+      exceptionFilter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -51,16 +52,17 @@ describe('getEventCount', () => {
     });
   });
 
-  it('can override timestamp', () => {
-    getEventCount({
+  it('can override timestamp', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
-      timestampOverride: 'event.ingested',
+      primaryTimestamp: 'event.ingested',
+      secondaryTimestamp: '@timestamp',
+      exceptionFilter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -99,6 +101,43 @@ describe('getEventCount', () => {
                     },
                   ],
                   minimum_should_match: 1,
+                },
+              },
+              { match_all: {} },
+            ],
+          },
+        },
+      },
+      ignore_unavailable: true,
+      index: ['test-index'],
+    });
+  });
+
+  it('can override timestamp without fallback to @timestamp', async () => {
+    await getEventCount({
+      esClient,
+      query: '*:*',
+      language: 'kuery',
+      filters: [],
+      index: ['test-index'],
+      tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      primaryTimestamp: 'event.ingested',
+      exceptionFilter: undefined,
+    });
+
+    expect(esClient.count).toHaveBeenCalledWith({
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { bool: { must: [], filter: [], should: [], must_not: [] } },
+              {
+                range: {
+                  'event.ingested': {
+                    lte: '2022-01-14T05:00:00.000Z',
+                    gte: '2022-01-13T05:00:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               { match_all: {} },

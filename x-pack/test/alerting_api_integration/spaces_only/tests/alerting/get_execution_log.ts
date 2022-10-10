@@ -68,14 +68,13 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       expect(response.body.total).to.eql(2);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
 
       const execLogs = response.body.data;
       expect(execLogs.length).to.eql(2);
 
       let previousTimestamp: string | null = null;
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         if (previousTimestamp) {
           // default sort is `desc` by timestamp
           expect(Date.parse(log.timestamp)).to.be.lessThan(Date.parse(previousTimestamp));
@@ -122,8 +121,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
       expect(response.body.total).to.eql(0);
       expect(response.body.data).to.eql([]);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
     });
 
     it('gets execution log for rule that is currently running', async () => {
@@ -148,8 +145,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       // since these events should have been excluded from the agg, should return empty
       expect(response.body.total).to.eql(0);
       expect(response.body.data).to.eql([]);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
     });
 
     it('gets execution log for rule that performs ES searches', async () => {
@@ -178,13 +173,12 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       expect(response.body.total).to.eql(1);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
 
       const execLogs = response.body.data;
       expect(execLogs.length).to.eql(1);
 
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         expect(log.duration_ms).to.be.greaterThan(0);
         expect(log.schedule_delay_ms).to.be.greaterThan(0);
         expect(log.status).to.equal('success');
@@ -239,16 +233,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
           `rule execution failure: test.throw:${createdRule.id}: 'abc' - this alert is intended to fail`
         );
       }
-
-      expect(response.body.totalErrors).to.eql(1);
-      expect(response.body.errors.length).to.eql(1);
-
-      for (const errors of response.body.errors) {
-        expect(errors.type).to.equal('alerting');
-        expect(errors.message).to.equal(
-          `rule execution failure: test.throw:${createdRule.id}: 'abc' - this alert is intended to fail`
-        );
-      }
     });
 
     it('gets execution log for rule that times out', async () => {
@@ -283,16 +267,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       for (const log of execLogs) {
         expect(log.status).to.equal('success');
         expect(log.timed_out).to.equal(true);
-      }
-
-      expect(response.body.totalErrors).to.eql(1);
-      expect(response.body.errors.length).to.eql(1);
-
-      for (const errors of response.body.errors) {
-        expect(errors.type).to.equal('alerting');
-        expect(errors.message).to.equal(
-          `rule: test.patternLongRunning:${createdRule.id}: 'abc' execution cancelled due to timeout - exceeded rule type timeout of 3s`
-        );
       }
     });
 
@@ -337,13 +311,12 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       expect(response.body.total).to.eql(1);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
 
       const execLogs = response.body.data;
       expect(execLogs.length).to.eql(1);
 
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         expect(log.status).to.equal('success');
 
         expect(log.num_active_alerts).to.equal(1);
@@ -402,6 +375,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(execLogs.length).to.eql(1);
 
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         expect(log.status).to.equal('success');
 
         expect(log.num_active_alerts).to.equal(1);
@@ -411,16 +385,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_generated_actions).to.equal(1);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(1);
-      }
-
-      expect(response.body.totalErrors).to.eql(1);
-      expect(response.body.errors.length).to.eql(1);
-
-      for (const errors of response.body.errors) {
-        expect(errors.type).to.equal('actions');
-        expect(errors.message).to.equal(
-          `action execution failure: test.throw:${createdConnector.id}: connector that throws - an error occurred while running the action executor: this action is intended to fail`
-        );
       }
     });
 
@@ -446,8 +410,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
       expect(response.body.total).to.eql(0);
       expect(response.body.data.length).to.eql(0);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors.length).to.eql(0);
     });
 
     it('handles sort query parameter', async () => {
@@ -468,8 +430,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       expect(response.body.total).to.eql(3);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
 
       const execLogs = response.body.data;
       expect(execLogs.length).to.eql(3);

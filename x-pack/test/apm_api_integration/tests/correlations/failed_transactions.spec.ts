@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
 import { EventOutcome } from '@kbn/apm-plugin/common/event_outcome';
+import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // These tests go through the full sequence of queries required
@@ -29,11 +30,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('failed transactions without data', { config: 'trial', archives: [] }, () => {
     it('handles the empty state', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -44,12 +46,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const errorDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
             termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -60,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const fieldCandidatesResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
+        endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
         params: {
           query: getOptions(),
         },
@@ -72,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/p_values',
+        endpoint: 'POST /internal/apm/correlations/p_values/transactions',
         params: {
           body: {
             ...getOptions(),
@@ -104,11 +107,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
     it('runs queries and returns results', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -119,12 +123,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const errorDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
             termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -135,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const fieldCandidatesResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
+        endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
         params: {
           query: getOptions(),
         },
@@ -157,7 +162,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/p_values',
+        endpoint: 'POST /internal/apm/correlations/p_values/transactions',
         params: {
           body: {
             ...getOptions(),
@@ -179,7 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }
 
       const failedtransactionsFieldStats = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/field_stats',
+        endpoint: 'POST /internal/apm/correlations/field_stats/transactions',
         params: {
           body: {
             ...getOptions(),

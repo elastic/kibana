@@ -50,6 +50,9 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
         attributes={attributes}
         renderMode="view"
         disableTriggers
+        executionContext={{
+          type: 'cases',
+        }}
       />
       <LensChartTooltipFix />
     </Container>

@@ -17,7 +17,7 @@ jest.mock('@kbn/utils', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   callEnterpriseSearchConfigAPI,
@@ -207,8 +207,19 @@ describe('callEnterpriseSearchConfigAPI', () => {
     (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve('Bad Data'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
-      'Could not perform access check to Enterprise Search: TypeError: response.json is not a function'
+      'Could not perform access check to Enterprise Search: 500'
     );
+
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(
+      Promise.resolve(
+        new Response('{}', {
+          status: 500,
+          statusText: 'I failed',
+        })
+      )
+    );
+    const expected = { responseStatus: 500, responseStatusText: 'I failed' };
+    expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual(expected);
   });
 
   it('handles timeouts', async () => {

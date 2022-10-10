@@ -59,7 +59,6 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     locator,
     params,
     slug = undefined,
-    humanReadableSlug = false,
   }: ShortUrlCreateParams<P>): Promise<ShortUrl<P>> {
     const { http } = this.dependencies;
     const data = await http.fetch<ShortUrlData<P>>('/api/short_url', {
@@ -67,7 +66,6 @@ export class BrowserShortUrlClient implements IShortUrlClient {
       body: JSON.stringify({
         locatorId: locator.id,
         slug,
-        humanReadableSlug,
         params,
       }),
     });
@@ -113,7 +111,6 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
     const result = await this.createWithLocator({
       locator,
-      humanReadableSlug: true,
       params: {
         url: relativeUrl,
       },

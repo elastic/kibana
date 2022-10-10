@@ -8,30 +8,32 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { LogFilterState } from '../../../containers/logs/log_filter';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState } from '../../../containers/logs/log_position';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { useLogFilterStateContext } from '../../../containers/logs/log_filter';
+import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
+import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights/log_highlights';
+import { useLogPositionStateContext } from '../../../containers/logs/log_position';
+import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 
 export const LogsToolbar = () => {
   const { derivedDataView } = useLogViewContext();
-  const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
-    LogViewConfiguration.Context
-  );
+  const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } =
+    useLogViewConfigurationContext();
   const { filterQueryDraft, isFilterQueryDraftValid, applyLogFilterQuery, setLogFilterQueryDraft } =
-    useContext(LogFilterState.Context);
-  const { setSurroundingLogsId } = useContext(LogFlyout.Context);
+    useLogFilterStateContext();
+  const { setSurroundingLogsId } = useLogEntryFlyoutContext();
+  const { http, notifications, docLinks, uiSettings, data, storage, unifiedSearch } =
+    useKibanaContextForPlugin().services;
 
   const {
     setHighlightTerms,
@@ -41,7 +43,7 @@ export const LogsToolbar = () => {
     hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-  } = useContext(LogHighlightsState.Context);
+  } = useLogHighlightsStateContext();
   const {
     isStreaming,
     startLiveStreaming,
@@ -49,7 +51,7 @@ export const LogsToolbar = () => {
     startDateExpression,
     endDateExpression,
     updateDateRange,
-  } = useContext(LogPositionState.Context);
+  } = useLogPositionStateContext();
 
   return (
     <div>
@@ -72,6 +74,10 @@ export const LogsToolbar = () => {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
             query={filterQueryDraft}
+            appName={i18n.translate('xpack.infra.appName', {
+              defaultMessage: 'Infra logs',
+            })}
+            deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
           />
         </QueryBarFlexItem>
         <EuiFlexItem grow={false}>

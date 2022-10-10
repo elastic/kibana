@@ -11,7 +11,7 @@ import React from 'react';
 
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -139,7 +139,7 @@ function getProps({
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
 
-  const dataViews = dataPluginMock.createStartContract().dataViews;
+  const dataViews = dataViewPluginMocks.createStartContract();
   // `undefined` titles can technically happen via import/export or other manual manipulation
   dataViews.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
@@ -352,7 +352,7 @@ describe('<EditRolePage />', () => {
   });
 
   it('can render if index patterns are not available', async () => {
-    const dataViews = dataPluginMock.createStartContract().dataViews;
+    const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     const wrapper = mountWithIntl(
@@ -364,6 +364,102 @@ describe('<EditRolePage />', () => {
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);
+  });
+
+  describe('in create mode', () => {
+    it('renders an error for existing role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        error: 'A role with this name already exists.',
+        isInvalid: true,
+      });
+      expectSaveFormButtons(wrapper);
+      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+    });
+
+    it('renders an error on save of existing role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.saveRole.mockRejectedValue({
+        body: {
+          statusCode: 409,
+          message: 'Role already exists and cannot be created: system_indices_superuser',
+        },
+      });
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      saveButton.simulate('click');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        error: 'A role with this name already exists.',
+        isInvalid: true,
+      });
+      // A usual toast notification is not expected with this specific error
+      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expectSaveFormButtons(wrapper);
+      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+    });
+
+    it('does not render an error for new role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('does not render a notification on save of new role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      saveButton.simulate('click');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expectSaveFormButtons(wrapper);
+    });
   });
 });
 

@@ -8,18 +8,16 @@
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import * as reactTestingLibrary from '@testing-library/react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 
 import { eventFiltersListQueryHttpMock } from '../../../../../event_filters/test_utils';
 import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
 import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
 import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
-import { PolicyData } from '../../../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../../../common/endpoint/types';
 import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
-import { EventFiltersApiClient } from '../../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { EVENT_FILTERS_LABELS } from '../../endpoint_policy_edit_extension';
 
@@ -71,9 +69,11 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     );
 
     await render();
-    expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toHaveTextContent(
-      'Event filters3'
-    );
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toHaveTextContent(
+        'Event filters3'
+      );
+    });
   });
 
   it('should show the card even when no event filters associated with the policy', async () => {

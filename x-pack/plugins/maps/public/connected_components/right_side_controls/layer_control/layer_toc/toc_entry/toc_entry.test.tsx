@@ -65,7 +65,7 @@ const defaultProps = {
   isEditButtonDisabled: false,
   hideTOCDetails: () => {},
   showTOCDetails: () => {},
-  editModeActiveForLayer: false,
+  isFeatureEditorOpenForLayer: false,
   cancelEditing: () => {},
 };
 

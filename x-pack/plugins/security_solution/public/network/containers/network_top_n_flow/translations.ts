@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_NETWORK_TOP_N_FLOW = i18n.translate(
-  'xpack.securitySolution.networkTopNFlow.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on network top n flow search`,
-  }
-);
-
 export const FAIL_NETWORK_TOP_N_FLOW = i18n.translate(
   'xpack.securitySolution.networkTopNFlow.failSearchDescription',
   {

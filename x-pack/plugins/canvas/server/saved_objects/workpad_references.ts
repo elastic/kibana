@@ -8,7 +8,7 @@
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { SavedObjectReference } from '@kbn/core/server';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 
 export const extractReferences = (

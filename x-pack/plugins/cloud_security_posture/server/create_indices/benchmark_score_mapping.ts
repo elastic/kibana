@@ -24,22 +24,10 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
       type: 'integer',
     },
     cluster_id: {
-      type: 'text',
-      fields: {
-        keyword: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-      },
+      type: 'keyword',
     },
     'rule.benchmark.name': {
-      type: 'text',
-      fields: {
-        keyword: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-      },
+      type: 'keyword',
     },
   },
 };

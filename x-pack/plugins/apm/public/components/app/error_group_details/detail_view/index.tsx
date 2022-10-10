@@ -6,7 +6,10 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTab,
@@ -38,13 +41,12 @@ import {
   logStacktraceTab,
 } from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
-
-const HeaderContainer = euiStyled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.eui.euiSize};
-`;
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { ERROR_GROUP_ID } from '../../../../../common/elasticsearch_fieldnames';
+import { TraceSearchType } from '../../../../../common/trace_explorer';
+import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
+import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -73,6 +75,15 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
 
   const { detailTab, offset, comparisonEnabled } = urlParams;
 
+  const router = useApmRouter();
+
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
+
+  const {
+    path: { groupId },
+    query,
+  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+
   if (!error) {
     return null;
   }
@@ -85,30 +96,72 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
 
+  const traceExplorerLink = router.link('/traces/explorer', {
+    query: {
+      ...query,
+      query: `${ERROR_GROUP_ID}:${groupId}`,
+      type: TraceSearchType.kql,
+      traceId: '',
+      transactionId: '',
+      waterfallItemId: '',
+      detailTab: TransactionTab.timeline,
+    },
+  });
+
   return (
     <EuiPanel hasBorder={true}>
-      <HeaderContainer>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate(
-              'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
-              {
-                defaultMessage: 'Error occurrence',
-              }
-            )}
-          </h3>
-        </EuiTitle>
-        <DiscoverErrorLink error={error} kuery={kuery}>
-          {i18n.translate(
-            'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
-            {
-              defaultMessage:
-                'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
-              values: { occurrencesCount },
-            }
-          )}
-        </DiscoverErrorLink>
-      </HeaderContainer>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow>
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
+                {
+                  defaultMessage: 'Error occurrence',
+                }
+              )}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isTraceExplorerEnabled && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={traceExplorerLink}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiIcon type="apmTrace" />
+                </EuiFlexItem>
+                <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                  {i18n.translate(
+                    'xpack.apm.errorGroupDetails.viewOccurrencesInTraceExplorer',
+                    {
+                      defaultMessage: 'Explore traces with this error',
+                    }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <DiscoverErrorLink error={error} kuery={kuery}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiIcon type="discoverApp" />
+              </EuiFlexItem>
+              <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                {i18n.translate(
+                  'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+                  {
+                    defaultMessage:
+                      'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover',
+                    values: { occurrencesCount },
+                  }
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </DiscoverErrorLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <Summary
         items={[

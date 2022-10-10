@@ -7,7 +7,8 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';

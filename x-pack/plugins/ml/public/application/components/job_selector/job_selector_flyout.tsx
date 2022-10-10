@@ -116,6 +116,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       groups: groupSelection,
       time,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onSelectionConfirmed, newSelection, jobGroupsMaps, applyTimeRangeConfig]);
 
   function removeId(id: string) {
@@ -156,6 +157,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   // Fetch jobs list on flyout open
   useEffect(() => {
     fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchJobs() {
@@ -171,7 +173,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
       }
     } catch (e) {
-      console.error('Error fetching jobs with time range', e); // eslint-disable-line
+      console.error('Error fetching jobs with time range', e); // eslint-disable-line no-console
       const { toasts } = notifications;
       toasts.addDanger({
         title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {

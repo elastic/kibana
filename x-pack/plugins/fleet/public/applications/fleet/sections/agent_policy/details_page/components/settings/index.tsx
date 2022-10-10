@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { pick } from 'lodash';
 import {
   EuiBottomBar,
   EuiFlexGroup,
@@ -35,6 +36,9 @@ import {
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
+import { DevtoolsRequestFlyoutButton } from '../../../../../components';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -85,6 +89,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           data_output_id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           monitoring_output_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          download_source_id,
         } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
@@ -94,6 +100,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           unenroll_timeout,
           data_output_id,
           monitoring_output_id,
+          download_source_id,
         });
         if (data) {
           notifications.toasts.addSuccess(
@@ -122,6 +129,26 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       }
       setIsLoading(false);
     };
+
+    const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+    const devtoolRequest = useMemo(
+      () =>
+        generateUpdateAgentPolicyDevToolsRequest(
+          agentPolicy.id,
+          pick(
+            agentPolicy,
+            'name',
+            'description',
+            'namespace',
+            'monitoring_enabled',
+            'unenroll_timeout',
+            'data_output_id',
+            'monitoring_output_id',
+            'download_source_id'
+          )
+        ),
+      [agentPolicy]
+    );
 
     const onSubmit = async () => {
       // Retrieve agent count if fleet is enabled
@@ -194,6 +221,23 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
+                    {showDevtoolsRequest ? (
+                      <EuiFlexItem grow={false}>
+                        <DevtoolsRequestFlyoutButton
+                          isDisabled={isLoading || Object.keys(validation).length > 0}
+                          btnProps={{
+                            color: 'ghost',
+                          }}
+                          description={i18n.translate(
+                            'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',
+                            {
+                              defaultMessage: 'This Kibana request updates an agent policy.',
+                            }
+                          )}
+                          request={devtoolRequest}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         onClick={onSubmit}

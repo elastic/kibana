@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiHealth, EuiToolTip, EuiHealthProps } from '@elastic/eui';
 import styled from 'styled-components';
+import type { EuiHealthProps } from '@elastic/eui';
+import { EuiHealth, EuiToolTip } from '@elastic/eui';
 
 const StatusTextWrapper = styled.div`
   width: 100%;

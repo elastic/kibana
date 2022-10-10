@@ -10,7 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { i18n } from '@kbn/i18n';
 import path from 'path';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import {
   accessAsync,
   checkValuesProperty,

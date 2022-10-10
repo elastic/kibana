@@ -11,6 +11,7 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" }
+    { "path": "../field_formats/tsconfig.json" },
+    { "path": "../usage_collection/tsconfig.json" }
   ]
 }

@@ -6,13 +6,16 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
-import { PoliciesSelector, PoliciesSelectorProps } from '.';
+import type { PoliciesSelectorProps } from '.';
+import { PoliciesSelector } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 // TODO: remove this mock when feature flag is removed
@@ -44,12 +47,14 @@ describe('Policies selector', () => {
   policy.id = 'abc123';
 
   describe('When click on policy', () => {
-    it('should have a default value', () => {
+    it('should have a default value', async () => {
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await waitForEuiPopoverOpen();
+
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
 
       userEvent.click(element.getByText('Unassigned entries'));
@@ -60,13 +65,14 @@ describe('Policies selector', () => {
       ]);
     });
 
-    it('should disable enabled default value', () => {
+    it('should disable enabled default value', async () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await waitForEuiPopoverOpen();
 
       userEvent.click(element.getByText(policy.name));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
@@ -76,12 +82,13 @@ describe('Policies selector', () => {
       ]);
     });
 
-    it('should remove disabled default value', () => {
+    it('should remove disabled default value', async () => {
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await waitForEuiPopoverOpen();
 
       userEvent.click(element.getByText('Global entries'));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
@@ -93,29 +100,32 @@ describe('Policies selector', () => {
   });
 
   describe('When filter policy', () => {
-    it('should filter policy by name', () => {
+    it('should filter policy by name', async () => {
       const element = getElement({});
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), policy.name);
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
     });
-    it('should filter with no results', () => {
+    it('should filter with no results', async () => {
       const element = getElement({});
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), 'no results');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
       expect(element.queryAllByText(policy.name)).toStrictEqual([]);
     });
-    it('should filter with special chars', () => {
+    it('should filter with special chars', async () => {
       const element = getElement({});
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), '*');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);

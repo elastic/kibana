@@ -8,21 +8,23 @@
 import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   InternalArtifactSchema,
   InternalManifestSchema,
   InternalManifestEntrySchema,
   InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
-import {
+import type {
   ManifestSchemaVersion,
   SemanticVersion,
-  semanticVersion,
 } from '../../../../common/endpoint/schema/common';
-import { manifestSchema, ManifestSchema } from '../../../../common/endpoint/schema/manifest';
+import { semanticVersion } from '../../../../common/endpoint/schema/common';
+import type { ManifestSchema } from '../../../../common/endpoint/schema/manifest';
+import { manifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
 import { getArtifactId } from './common';
-import { ManifestVersion, manifestVersion } from '../../schemas/artifacts/manifest';
+import type { ManifestVersion } from '../../schemas/artifacts/manifest';
+import { manifestVersion } from '../../schemas/artifacts/manifest';
 
 function createInternalManifestEntries(
   artifactIds: string[],

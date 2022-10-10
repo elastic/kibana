@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';

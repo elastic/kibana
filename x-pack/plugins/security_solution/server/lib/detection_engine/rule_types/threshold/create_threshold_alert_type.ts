@@ -9,15 +9,17 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { thresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
-import { ThresholdAlertState } from '../../signals/types';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { ThresholdAlertState } from '../../signals/types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { version } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -32,6 +34,17 @@ export const createThresholdAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -51,35 +64,43 @@ export const createThresholdAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
           bulkCreate,
-          exceptionItems,
           completeRule,
           tuple,
           wrapHits,
           ruleDataReader,
+          inputIndex,
+          runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
+          ruleExecutionLogger,
+          aggregatableTimestampField,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         startedAt,
         state,
       } = execOptions;
-
       const result = await thresholdExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        logger,
         completeRule,
+        tuple,
+        ruleExecutionLogger,
         services,
+        version,
         startedAt,
         state,
-        tuple,
-        version,
+        bulkCreate,
         wrapHits,
         ruleDataReader,
+        inputIndex,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        aggregatableTimestampField,
+        exceptionFilter,
+        unprocessedExceptions,
       });
-
       return result;
     },
   };

@@ -17,7 +17,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { RecentTimelineHeader } from './header';
-import {
+import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';

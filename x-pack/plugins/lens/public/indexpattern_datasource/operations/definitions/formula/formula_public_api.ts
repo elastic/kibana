@@ -6,10 +6,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { IndexPattern, PersistedIndexPatternLayer } from '../../../types';
+import { convertDataViewIntoLensIndexPattern } from '../../../../data_views_service/loader';
+import type { IndexPattern } from '../../../../types';
+import type { PersistedIndexPatternLayer } from '../../../types';
 
 import { insertOrReplaceFormulaColumn } from './parse';
-import { convertDataViewIntoLensIndexPattern } from '../../../loader';
 
 /** @public **/
 export interface FormulaPublicApi {
@@ -30,6 +31,12 @@ export interface FormulaPublicApi {
     column: {
       formula: string;
       label?: string;
+      format?: {
+        id: string;
+        params?: {
+          decimals: number;
+        };
+      };
     },
     layer: PersistedIndexPatternLayer,
     dataView: DataView
@@ -51,7 +58,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
   };
 
   return {
-    insertOrReplaceFormulaColumn: (id, { formula, label }, layer, dataView) => {
+    insertOrReplaceFormulaColumn: (id, { formula, label, format }, layer, dataView) => {
       const indexPattern = getCachedLensIndexPattern(dataView);
 
       return insertOrReplaceFormulaColumn(
@@ -65,6 +72,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
           isBucketed: false,
           params: {
             formula,
+            format,
           },
         },
         { ...layer, indexPatternId: indexPattern.id },

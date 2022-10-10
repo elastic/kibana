@@ -20,7 +20,7 @@ export type CanvasNavLinkServiceFactory = KibanaPluginServiceFactory<
 export const navLinkServiceFactory: CanvasNavLinkServiceFactory = ({ coreStart, appUpdater }) => ({
   updatePath: (path: string) => {
     appUpdater?.next(() => ({
-      defaultPath: `#${path}`,
+      defaultPath: `${path}`,
     }));
 
     getSessionStorage().set(`${SESSIONSTORAGE_LASTPATH}:${coreStart.http.basePath.get()}`, path);

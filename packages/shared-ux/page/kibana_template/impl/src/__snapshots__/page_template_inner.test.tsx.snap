@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaPageTemplateInner isEmpty no pageHeader 1`] = `
+<_EuiPageTemplate
+  className="kbnPageTemplate"
+  minHeight={0}
+  offset={0}
+/>
+`;
+
+exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
+<_EuiPageTemplate
+  className="kbnPageTemplate"
+  minHeight={0}
+  offset={0}
+>
+  <_EuiPageHeader
+    description="test"
+    iconType="test"
+    pageTitle="test"
+    rightSideItems={
+      Array [
+        "test",
+      ]
+    }
+  />
+  <div
+    data-test-subj="child"
+  >
+    Child element
+  </div>
+</_EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplateInner isEmpty pageHeader & no children 1`] = `
+<_EuiPageTemplate
+  className="kbnPageTemplate"
+  minHeight={0}
+  offset={0}
+>
+  <_EuiPageEmptyPrompt
+    actions={
+      Array [
+        "test",
+      ]
+    }
+    body={
+      <p>
+        test
+      </p>
+    }
+    iconColor=""
+    iconType="test"
+    title={
+      <h1>
+        test
+      </h1>
+    }
+  />
+</_EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplateInner page sidebar 1`] = `
+<_EuiPageTemplate
+  className="kbnPageTemplate"
+  minHeight={0}
+  offset={0}
+>
+  <EuiPageSidebar>
+    Test
+  </EuiPageSidebar>
+</_EuiPageTemplate>
+`;

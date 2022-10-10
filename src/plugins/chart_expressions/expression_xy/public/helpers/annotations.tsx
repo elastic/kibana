@@ -9,20 +9,39 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import classnames from 'classnames';
-import type { IconPosition, YAxisMode, YConfig } from '../../common/types';
+import type {
+  IconPosition,
+  ReferenceLineDecorationConfig,
+  MergedAnnotation,
+} from '../../common/types';
 import { getBaseIconPlacement } from '../components';
-import { hasIcon } from './icon';
-import { annotationsIconSet } from './annotations_icon_set';
+import { hasIcon, iconSet } from './icon';
+import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
 
-// Note: it does not take into consideration whether the reference line is in view or not
+type PartialReferenceLineDecorationConfig = Pick<
+  ReferenceLineDecorationConfig,
+  'icon' | 'iconPosition' | 'textVisibility'
+> & {
+  position?: Position;
+};
 
+type PartialMergedAnnotation = Pick<
+  MergedAnnotation,
+  'position' | 'icon' | 'textVisibility' | 'label'
+>;
+
+const isExtendedDecorationConfig = (
+  config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
+): config is PartialReferenceLineDecorationConfig =>
+  (config as PartialReferenceLineDecorationConfig)?.iconPosition ? true : false;
+
+// Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
-  visualConfigs: Array<
-    Pick<YConfig, 'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'> | undefined
-  >,
-  axesMap: Record<'left' | 'right', unknown>
+  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined>,
+  axesMap: AxesMap,
+  shouldRotate: boolean
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
   const paddings: Partial<Record<Position, number>> = {};
@@ -31,12 +50,18 @@ export const getLinesCausedPaddings = (
     if (!config) {
       return;
     }
-    const { axisMode, icon, iconPosition, textVisibility } = config;
-    if (axisMode && (hasIcon(icon) || textVisibility)) {
-      const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
+    const { position, icon, textVisibility } = config;
+    const iconPosition = isExtendedDecorationConfig(config) ? config.iconPosition : undefined;
+
+    if (position && (hasIcon(icon) || (textVisibility && 'label' in config))) {
+      const placement = getBaseIconPlacement(
+        iconPosition,
+        axesMap,
+        getOriginalAxisPosition(position, shouldRotate)
+      );
       paddings[placement] = Math.max(
         paddings[placement] || 0,
-        LINES_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
+        LINES_MARKER_SIZE * (textVisibility && 'label' in config && config.label ? 2 : 1) // double the padding size if there's text
       );
       icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
     }
@@ -48,6 +73,7 @@ export const getLinesCausedPaddings = (
       paddings[placement] = LINES_MARKER_SIZE;
     }
   });
+
   return paddings;
 };
 
@@ -138,7 +164,7 @@ export const AnnotationIcon = ({
   if (isNumericalString(type)) {
     return <NumberIcon number={Number(type)} />;
   }
-  const iconConfig = annotationsIconSet.find((i) => i.value === type);
+  const iconConfig = iconSet.find((i) => i.value === type);
   if (!iconConfig) {
     return null;
   }
@@ -158,7 +184,7 @@ export const AnnotationIcon = ({
 };
 
 interface MarkerConfig {
-  axisMode?: YAxisMode;
+  position?: Position;
   icon?: string;
   textVisibility?: boolean;
   iconPosition?: IconPosition;

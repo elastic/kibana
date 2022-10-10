@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { performance } from 'perf_hooks';
 import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
-import { SignalSourceHit } from '../../types';
+import type { SignalSourceHit } from '../../types';
 import { emptyEsResult } from '../../__mocks__/empty_signal_source_hit';
 
 /**
@@ -294,6 +294,16 @@ describe('merge_missing_fields_with_source', () => {
         'bar.foo': [],
       };
 
+      const bigFields: SignalSourceHit['fields'] = [...Array(7000).keys()].reduce(
+        (acc, item, index) => {
+          return {
+            [`my-runtime-field-${index}`]: ['nice'],
+            ...acc,
+          };
+        },
+        {}
+      );
+
       test('when source is an empty array (f_[]), merged doc is empty array (f_[])"', () => {
         const _source: SignalSourceHit['_source'] = {
           'bar.foo': [],
@@ -355,6 +365,29 @@ describe('merge_missing_fields_with_source', () => {
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      /**
+       * tests for https://github.com/elastic/kibana/issues/135963
+       * This test will fail when we replace the import
+       * import { set } from '@kbn/safer-lodash-set';
+       * to use the fp version
+       * import { set } from '@kbn/safer-lodash-set/fp';
+       * and switch around the return inside of filteredEntries.reduce
+       * to be the following:
+       * return set(fieldsKey, valueToMerge, merged);
+       */
+      test('when fields is big', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'bar.foo': [],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields: bigFields };
+        const start = performance.now();
+        // we don't care about the response just determining performance
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        const end = performance.now();
+        expect(end - start).toBeLessThan(500);
       });
     });
   });

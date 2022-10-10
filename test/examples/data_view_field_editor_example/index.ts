@@ -20,7 +20,6 @@ export default function ({
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
 
   describe('data view field editor example', function () {
-    this.tags('ciGroup11');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await browser.setWindowSize(1300, 900);

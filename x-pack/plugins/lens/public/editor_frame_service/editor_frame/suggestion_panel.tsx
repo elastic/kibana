@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, toExpression } from '@kbn/interpreter';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
@@ -30,6 +30,7 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
   Visualization,
@@ -39,8 +40,8 @@ import {
   DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { prependDatasourceExpression } from './expression_helpers';
-import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
+import { getDatasourceExpressionsByLayers } from './expression_helpers';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
 import {
   getMissingIndexPattern,
   validateDatasourceAndVisualization,
@@ -58,12 +59,11 @@ import {
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
-  selectActiveData,
   selectDatasourceStates,
   selectChangesApplied,
   applyChanges,
+  selectStagedActiveData,
 } from '../../state_management';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from './config_panel/dimension_container';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -113,6 +113,7 @@ const PreviewRenderer = ({
         <ExpressionRendererComponent
           className="lnsSuggestionPanel__expressionRenderer"
           padding="s"
+          renderMode="preview"
           expression={expression}
           debounce={2000}
           renderError={() => {
@@ -146,7 +147,7 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
-          hasBorder
+          hasBorder={true}
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             'lnsSuggestionPanel__button-isSelected': selected,
@@ -191,7 +192,7 @@ export function SuggestionPanel({
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
-  const activeData = useLensSelector(selectActiveData);
+  const activeData = useLensSelector(selectStagedActiveData);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
@@ -209,7 +210,8 @@ export function SuggestionPanel({
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+    frame.dataViews.indexPatterns
   );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(() => {
     const newSuggestions = missingIndexPatterns.length
@@ -223,6 +225,7 @@ export function SuggestionPanel({
             : undefined,
           visualizationState: currentVisualization.state,
           activeData,
+          dataViews: frame.dataViews,
         })
           .filter(
             ({
@@ -240,6 +243,8 @@ export function SuggestionPanel({
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
                   {
+                    ...frame,
+                    dataViews: frame.dataViews,
                     datasourceLayers: getDatasourceLayers(
                       suggestionDatasourceId
                         ? {
@@ -249,7 +254,8 @@ export function SuggestionPanel({
                             },
                           }
                         : {},
-                      datasourceMap
+                      datasourceMap,
+                      frame.dataViews.indexPatterns
                     ),
                   }
                 ) == null
@@ -300,7 +306,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
-    frame.activeData,
+    activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
@@ -344,7 +350,6 @@ export function SuggestionPanel({
 
   function rollbackToCurrentVisualization() {
     if (lastSelectedSuggestion !== -1) {
-      trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatchLens(rollbackSuggestion());
       dispatchLens(applyChanges());
@@ -410,7 +415,6 @@ export function SuggestionPanel({
               ExpressionRenderer={AutoRefreshExpressionRenderer}
               key={index}
               onSelect={() => {
-                trackUiEvent('suggestion_clicked');
                 if (lastSelectedSuggestion === index) {
                   rollbackToCurrentVisualization();
                 } else {
@@ -454,7 +458,6 @@ export function SuggestionPanel({
                 size="xs"
                 iconType="refresh"
                 onClick={() => {
-                  trackUiEvent('suggestion_confirmed');
                   dispatchLens(submitSuggestion());
                 }}
               >
@@ -485,6 +488,7 @@ function getPreviewExpression(
   visualizableState: VisualizableState,
   visualization: Visualization,
   datasources: Record<string, Datasource>,
+  datasourceStates: DatasourceStates,
   frame: FramePublicAPI
 ) {
   if (!visualization.toPreviewExpression) {
@@ -494,34 +498,46 @@ function getPreviewExpression(
   const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
     datasourceLayers: { ...frame.datasourceLayers },
   };
+  try {
+    // use current frame api and patch apis for changed datasource layers
+    if (
+      visualizableState.keptLayerIds &&
+      visualizableState.datasourceId &&
+      visualizableState.datasourceState
+    ) {
+      const datasource = datasources[visualizableState.datasourceId];
+      const datasourceState = visualizableState.datasourceState;
+      const updatedLayerApis: DatasourceLayers = pick(
+        frame.datasourceLayers,
+        visualizableState.keptLayerIds
+      );
+      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
+      changedLayers.forEach((layerId) => {
+        if (updatedLayerApis[layerId]) {
+          updatedLayerApis[layerId] = datasource.getPublicAPI({
+            layerId,
+            state: datasourceState,
+            indexPatterns: frame.dataViews.indexPatterns,
+          });
+        }
+      });
+    }
 
-  // use current frame api and patch apis for changed datasource layers
-  if (
-    visualizableState.keptLayerIds &&
-    visualizableState.datasourceId &&
-    visualizableState.datasourceState
-  ) {
-    const datasource = datasources[visualizableState.datasourceId];
-    const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: DatasourceLayers = pick(
-      frame.datasourceLayers,
-      visualizableState.keptLayerIds
+    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+      datasources,
+      datasourceStates,
+      frame.dataViews.indexPatterns
     );
-    const changedLayers = datasource.getLayers(visualizableState.datasourceState);
-    changedLayers.forEach((layerId) => {
-      if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI({
-          layerId,
-          state: datasourceState,
-        });
-      }
-    });
-  }
 
-  return visualization.toPreviewExpression(
-    visualizableState.visualizationState,
-    suggestionFrameApi.datasourceLayers
-  );
+    return visualization.toPreviewExpression(
+      visualizableState.visualizationState,
+      suggestionFrameApi.datasourceLayers,
+      datasourceExpressionsByLayers ?? undefined
+    );
+  } catch (error) {
+    showMemoizedErrorNotification(error);
+    return null;
+  }
 }
 
 function preparePreviewExpression(
@@ -534,10 +550,21 @@ function preparePreviewExpression(
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
 
+  const datasourceStatesWithSuggestions = suggestionDatasourceId
+    ? {
+        ...datasourceStates,
+        [suggestionDatasourceId]: {
+          isLoading: false,
+          state: suggestionDatasourceState,
+        },
+      }
+    : datasourceStates;
+
   const expression = getPreviewExpression(
     visualizableState,
     visualization,
     datasourceMap,
+    datasourceStatesWithSuggestions,
     framePublicAPI
   );
 
@@ -545,19 +572,5 @@ function preparePreviewExpression(
     return;
   }
 
-  const expressionWithDatasource = prependDatasourceExpression(
-    expression,
-    datasourceMap,
-    suggestionDatasourceId
-      ? {
-          ...datasourceStates,
-          [suggestionDatasourceId]: {
-            isLoading: false,
-            state: suggestionDatasourceState,
-          },
-        }
-      : datasourceStates
-  );
-
-  return expressionWithDatasource;
+  return typeof expression === 'string' ? fromExpression(expression) : expression;
 }

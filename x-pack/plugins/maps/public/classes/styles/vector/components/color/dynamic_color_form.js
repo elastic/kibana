@@ -10,6 +10,7 @@ import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
 import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { OtherCategoryColorPicker } from './other_category_color_picker';
 import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 
 export function DynamicColorForm({
@@ -67,6 +68,13 @@ export function DynamicColorForm({
     });
   };
 
+  const onOtherCategoryColorChange = (color) => {
+    onDynamicStyleChange(styleProperty.getStyleName(), {
+      ...styleOptions,
+      otherCategoryColor: color,
+    });
+  };
+
   const getField = () => {
     const fieldName = styleProperty.getFieldName();
     if (!fieldName) {
@@ -103,18 +111,24 @@ export function DynamicColorForm({
       );
     } else if (styleProperty.isCategorical()) {
       return (
-        <ColorMapSelect
-          isCustomOnly={!field.supportsAutoDomain}
-          onColorMapTypeChange={onColorMapTypeChange}
-          onChange={onColorMapSelect}
-          colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
-          colorPaletteId={styleOptions.colorCategory}
-          customColorMap={styleOptions.customColorPalette}
-          useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
-          styleProperty={styleProperty}
-          showColorMapTypeToggle={showColorMapTypeToggle}
-          swatches={swatches}
-        />
+        <>
+          <ColorMapSelect
+            isCustomOnly={!field.supportsAutoDomain}
+            onColorMapTypeChange={onColorMapTypeChange}
+            onChange={onColorMapSelect}
+            colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
+            colorPaletteId={styleOptions.colorCategory}
+            customColorMap={styleOptions.customColorPalette}
+            useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
+            styleProperty={styleProperty}
+            showColorMapTypeToggle={showColorMapTypeToggle}
+            swatches={swatches}
+          />
+          <OtherCategoryColorPicker
+            onChange={onOtherCategoryColorChange}
+            color={styleOptions.otherCategoryColor}
+          />
+        </>
       );
     }
   };

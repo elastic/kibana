@@ -107,7 +107,7 @@ const modelColumns = [
 ];
 
 interface Props {
-  setAnalyticsId: React.Dispatch<React.SetStateAction<AnalyticsSelectorIds | undefined>>;
+  setAnalyticsId: (update: AnalyticsSelectorIds) => void;
   jobsOnly?: boolean;
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -140,7 +140,7 @@ export function AnalyticsIdSelector({
         await getDataFrameAnalytics();
       setAnalyticsJobs(dataFrameAnalytics);
     } catch (e) {
-      console.error('Error fetching analytics', e); // eslint-disable-line
+      console.error('Error fetching analytics', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.analyticsFetchErrorMessage', {
@@ -157,7 +157,7 @@ export function AnalyticsIdSelector({
       const response = await trainedModelsApiService.getTrainedModels();
       setTrainedModels(response);
     } catch (e) {
-      console.error('Error fetching trained models', e); // eslint-disable-line
+      console.error('Error fetching trained models', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {
@@ -178,6 +178,7 @@ export function AnalyticsIdSelector({
     if (jobsOnly === false) {
       fetchAnalyticsModels();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const applySelection = useCallback(() => {
@@ -185,6 +186,7 @@ export function AnalyticsIdSelector({
       setAnalyticsId(selected);
     }
     closeFlyout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.model_id, selected?.job_id]);
 
   const pagination = {

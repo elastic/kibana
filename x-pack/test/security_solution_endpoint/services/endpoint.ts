@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+  HOST_METADATA_GET_ROUTE,
+  METADATA_DATASTREAM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
@@ -22,7 +27,29 @@ import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_sc
 import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
+import { DeepPartial } from 'utility-types';
+import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
+import { merge } from 'lodash';
+import { kibanaPackageJson } from '@kbn/utils';
+import seedrandom from 'seedrandom';
 import { FtrService } from '../../functional/ftr_provider_context';
+
+// Document Generator override that uses a custom Endpoint Metadata generator and sets the
+// `agent.version` to the current version
+const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
+  constructor(seedValue: string | seedrandom.prng) {
+    const MetadataGenerator = class extends EndpointMetadataGenerator {
+      protected randomVersion(): string {
+        return kibanaPackageJson.version;
+      }
+    };
+
+    super(seedValue, MetadataGenerator);
+  }
+};
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
@@ -30,6 +57,8 @@ export class EndpointTestResources extends FtrService {
   private readonly kbnClient = this.ctx.getService('kibanaServer');
   private readonly transform = this.ctx.getService('transform');
   private readonly config = this.ctx.getService('config');
+  private readonly supertest = this.ctx.getService('supertest');
+  private readonly log = this.ctx.getService('log');
 
   private generateTransformId(endpointPackageVersion?: string): string {
     return `${metadataTransformPrefix}-${endpointPackageVersion ?? ''}`;
@@ -77,6 +106,30 @@ export class EndpointTestResources extends FtrService {
     await this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
   }
 
+  private async stopTransform(transformId: string) {
+    const stopRequest = {
+      transform_id: `${transformId}*`,
+      force: true,
+      wait_for_completion: true,
+      allow_no_match: true,
+    };
+    return this.esClient.transform.stopTransform(stopRequest);
+  }
+
+  private async startTransform(transformId: string) {
+    const transformsResponse = await this.esClient.transform.getTransformStats({
+      transform_id: `${transformId}*`,
+    });
+    return Promise.all(
+      transformsResponse.transforms.map((transform) => {
+        if (STARTED_TRANSFORM_STATES.has(transform.state)) {
+          return Promise.resolve();
+        }
+        return this.esClient.transform.startTransform({ transform_id: transform.id });
+      })
+    );
+  }
+
   /**
    * Loads endpoint host/alert/event data into elasticsearch
    * @param [options]
@@ -86,6 +139,8 @@ export class EndpointTestResources extends FtrService {
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
+   * @param [options.waitTimeout=60000] If waitUntilTransformed=true, number of ms to wait until timeout
+   * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
    */
   async loadEndpointData(
     options: Partial<{
@@ -95,6 +150,8 @@ export class EndpointTestResources extends FtrService {
       enableFleetIntegration: boolean;
       generatorSeed: string;
       waitUntilTransformed: boolean;
+      waitTimeout: number;
+      customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
     }> = {}
   ): Promise<IndexedHostsAndAlertsResponse> {
     const {
@@ -104,25 +161,43 @@ export class EndpointTestResources extends FtrService {
       enableFleetIntegration = true,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
+      waitTimeout = 60000,
+      customIndexFn,
     } = options;
 
+    if (waitUntilTransformed) {
+      // need this before indexing docs so that the united transform doesn't
+      // create a checkpoint with a timestamp after the doc timestamps
+      await this.stopTransform(metadataTransformPrefix);
+      await this.stopTransform(METADATA_UNITED_TRANSFORM);
+    }
+
     // load data into the system
-    const indexedData = await indexHostsAndAlerts(
-      this.esClient as Client,
-      this.kbnClient,
-      generatorSeed,
-      numHosts,
-      numHostDocs,
-      'metrics-endpoint.metadata-default',
-      'metrics-endpoint.policy-default',
-      'logs-endpoint.events.process-default',
-      'logs-endpoint.alerts-default',
-      alertsPerHost,
-      enableFleetIntegration
-    );
+    const indexedData = customIndexFn
+      ? await customIndexFn()
+      : await indexHostsAndAlerts(
+          this.esClient as Client,
+          this.kbnClient,
+          generatorSeed,
+          numHosts,
+          numHostDocs,
+          'metrics-endpoint.metadata-default',
+          'metrics-endpoint.policy-default',
+          'logs-endpoint.events.process-default',
+          'logs-endpoint.alerts-default',
+          alertsPerHost,
+          enableFleetIntegration,
+          undefined,
+          CurrentKibanaVersionDocGenerator
+        );
 
     if (waitUntilTransformed) {
-      await this.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
+      await this.startTransform(metadataTransformPrefix);
+      const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
+      await this.waitForEndpoints(metadataIds, waitTimeout);
+      await this.startTransform(METADATA_UNITED_TRANSFORM);
+      const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
+      await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }
 
     return indexedData;
@@ -244,5 +319,68 @@ export class EndpointTestResources extends FtrService {
     typeof installOrUpgradeEndpointFleetPackage
   > {
     return installOrUpgradeEndpointFleetPackage(this.kbnClient);
+  }
+
+  /**
+   * Fetch (GET) the details of an endpoint
+   * @param endpointAgentId
+   */
+  async fetchEndpointMetadata(endpointAgentId: string): Promise<HostInfo> {
+    const metadata = this.supertest
+      .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200)
+      .then((response) => response.body as HostInfo);
+
+    return metadata;
+  }
+
+  /**
+   * Sends an updated metadata document for a given endpoint to the datastream and waits for the
+   * update to show up on the Metadata API (after transform runs)
+   */
+  async sendEndpointMetadataUpdate(
+    endpointAgentId: string,
+    updates: DeepPartial<HostMetadata> = {}
+  ): Promise<HostInfo> {
+    const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId);
+    const generatedMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
+
+    const updatedMetadataDoc = merge(
+      { ...currentMetadata.metadata },
+      // Grab the updated `event` and timestamp from the generator data
+      {
+        event: generatedMetadataDoc.event,
+        '@timestamp': generatedMetadataDoc['@timestamp'],
+      },
+      updates
+    );
+
+    await this.esClient.index({
+      index: METADATA_DATASTREAM,
+      body: updatedMetadataDoc,
+      op_type: 'create',
+    });
+
+    let response: HostInfo | undefined;
+
+    // Wait for the update to show up on Metadata API (after transform runs)
+    await this.retry.waitFor(
+      `Waiting for update to endpoint id [${endpointAgentId}] to be processed by transform`,
+      async () => {
+        response = await this.fetchEndpointMetadata(endpointAgentId);
+
+        return response.metadata.event.id === updatedMetadataDoc.event.id;
+      }
+    );
+
+    if (!response) {
+      throw new Error(`Response object not set. Issue fetching endpoint metadata`);
+    }
+
+    this.log.info(`Endpoint metadata doc update done: \n${JSON.stringify(response)}`);
+
+    return response;
   }
 }

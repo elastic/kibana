@@ -8,8 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ComplianceDashboardData } from '../../../common/types';
-import { LATEST_FINDINGS_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
-import { CspAppContext } from '../../plugin';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
@@ -33,21 +32,23 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
-export const defineGetComplianceDashboardRoute = (
-  router: CspRouter,
-  cspContext: CspAppContext
-): void =>
+export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,
       validate: false,
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
     },
     async (context, _, response) => {
+      const cspContext = await context.csp;
+
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const esClient = cspContext.esClient.asCurrentUser;
 
         const { id: pitId } = await esClient.openPointInTime({
-          index: LATEST_FINDINGS_INDEX_PATTERN,
+          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
           keep_alive: '30s',
         });
 

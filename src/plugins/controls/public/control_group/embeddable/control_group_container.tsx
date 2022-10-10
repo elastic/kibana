@@ -6,73 +6,47 @@
  * Side Public License, v 1.
  */
 
+import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
-import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
-import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
+import { merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
-import {
-  distinctUntilChanged,
-  debounceTime,
-  catchError,
-  switchMap,
-  map,
-  skip,
-  mapTo,
-} from 'rxjs/operators';
 
 import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
+  ReduxEmbeddablePackage,
+  ReduxEmbeddableTools,
   SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
+  ControlGroupReduxState,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
 } from '../types';
+import {
+  cachedChildEmbeddableOrder,
+  ControlGroupChainingSystems,
+  controlOrdersAreEqual,
+} from './control_group_chaining_system';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { ControlGroupChainingSystems } from './control_group_chaining_system';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-
-const ControlGroupReduxWrapper = withSuspense<
-  ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
->(LazyReduxEmbeddableWrapper);
+import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
+import { TIME_SLIDER_CONTROL } from '../../time_slider';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
   flyoutRef = newRef;
-};
-
-export interface ChildEmbeddableOrderCache {
-  IdsToOrder: { [key: string]: number };
-  idsInOrder: string[];
-  lastChildId: string;
-}
-
-const controlOrdersAreEqual = (panelsA: ControlsPanels, panelsB: ControlsPanels) => {
-  const ordersA = Object.values(panelsA).map((panel) => ({
-    id: panel.explicitInput.id,
-    order: panel.order,
-  }));
-  const ordersB = Object.values(panelsB).map((panel) => ({
-    id: panel.explicitInput.id,
-    order: panel.order,
-  }));
-  return deepEqual(ordersA, ordersB);
 };
 
 export class ControlGroupContainer extends Container<
@@ -81,14 +55,18 @@ export class ControlGroupContainer extends Container<
   ControlGroupOutput
 > {
   public readonly type = CONTROL_GROUP_TYPE;
+  public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
-  private childOrderCache: ChildEmbeddableOrderCache;
   private recalculateFilters$: Subject<null>;
-
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    ControlGroupReduxState,
+    typeof controlGroupReducers
+  >;
 
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
@@ -118,21 +96,50 @@ export class ControlGroupContainer extends Container<
     buttonType: CreateControlButtonTypes,
     closePopover?: () => void
   ) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <CreateControlButton
-        buttonType={buttonType}
-        defaultControlWidth={this.getInput().defaultControlWidth}
-        updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+      <ControlsServicesProvider>
+        <CreateControlButton
+          buttonType={buttonType}
+          defaultControlWidth={this.getInput().defaultControlWidth}
+          defaultControlGrow={this.getInput().defaultControlGrow}
+          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+          updateDefaultGrow={(defaultControlGrow: boolean) =>
+            this.updateInput({ defaultControlGrow })
+          }
+          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+          closePopover={closePopover}
+          getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
+          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+        />
+      </ControlsServicesProvider>
+    );
+  };
+
+  public getCreateTimeSliderControlButton = (closePopover?: () => void) => {
+    const childIds = this.getChildIds();
+    const hasTimeSliderControl = childIds.some((id) => {
+      const child = this.getChild(id);
+      return child.type === TIME_SLIDER_CONTROL;
+    });
+    return (
+      <CreateTimeSliderControlButton
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
         closePopover={closePopover}
-        getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
-        setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+        hasTimeSliderControl={hasTimeSliderControl}
       />
     );
   };
 
   private getEditControlGroupButton = (closePopover: () => void) => {
-    return <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />;
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
+    return (
+      <ControlsServicesProvider>
+        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
+      </ControlsServicesProvider>
+    );
   };
 
   /**
@@ -153,6 +160,7 @@ export class ControlGroupContainer extends Container<
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
+              this.getCreateTimeSliderControlButton(closePopover),
               this.getEditControlGroupButton(closePopover),
             ]}
           />
@@ -161,10 +169,14 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  constructor(initialInput: ControlGroupInput, parent?: Container) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    initialInput: ControlGroupInput,
+    parent?: Container
+  ) {
     super(
       initialInput,
-      { embeddableLoaded: {} },
+      { dataViewIds: [], embeddableLoaded: {}, filters: [] },
       pluginServices.getServices().controls.getControlFactory,
       parent,
       ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
@@ -172,8 +184,14 @@ export class ControlGroupContainer extends Container<
 
     this.recalculateFilters$ = new Subject();
 
-    // set up order cache so that it is aligned on input changes.
-    this.childOrderCache = this.getEmbeddableOrderCache();
+    // build redux embeddable tools
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+      ControlGroupReduxState,
+      typeof controlGroupReducers
+    >({
+      embeddable: this,
+      reducers: controlGroupReducers,
+    });
 
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
@@ -193,54 +211,27 @@ export class ControlGroupContainer extends Container<
           skip(1),
           distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
         )
-        .subscribe(() => {
+        .subscribe((input) => {
           this.recalculateDataViews();
           this.recalculateFilters();
-          this.childOrderCache = this.getEmbeddableOrderCache();
-          this.childOrderCache.idsInOrder.forEach((id) =>
-            this.getChild(id)?.refreshInputFromParent()
-          );
+          const childOrderCache = cachedChildEmbeddableOrder(input.panels);
+          childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
         })
-    );
-
-    /**
-     * Create a pipe that outputs the child's ID, any time any child's output changes.
-     */
-    const anyChildChangePipe = pipe(
-      map(() => this.getChildIds()),
-      distinctUntilChanged(deepEqual),
-
-      // children may change, so make sure we subscribe/unsubscribe with switchMap
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            this.getChild(childId)
-              .getOutput$()
-              .pipe(
-                // Embeddables often throw errors into their output streams.
-                catchError(() => EMPTY),
-                mapTo(childId)
-              )
-          )
-        )
-      )
     );
 
     /**
      * run OnChildOutputChanged when any child's output has changed
      */
     this.subscriptions.add(
-      this.getOutput$()
-        .pipe(anyChildChangePipe)
-        .subscribe((childOutputChangedId) => {
-          this.recalculateDataViews();
-          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
-            childOutputChangedId,
-            childOrder: this.childOrderCache,
-            getChild: (id) => this.getChild(id),
-            recalculateFilters$: this.recalculateFilters$,
-          });
-        })
+      this.getAnyChildOutputChange$().subscribe((childOutputChangedId) => {
+        this.recalculateDataViews();
+        ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+          childOutputChangedId,
+          childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
+          getChild: (id) => this.getChild(id),
+          recalculateFilters$: this.recalculateFilters$,
+        });
+      })
     );
 
     /**
@@ -251,40 +242,30 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  private getEmbeddableOrderCache = (): ChildEmbeddableOrderCache => {
-    const panels = this.getInput().panels;
-    const IdsToOrder: { [key: string]: number } = {};
-    const idsInOrder: string[] = [];
-    Object.values(panels)
-      .sort((a, b) => (a.order > b.order ? 1 : -1))
-      .forEach((panel) => {
-        IdsToOrder[panel.explicitInput.id] = panel.order;
-        idsInOrder.push(panel.explicitInput.id);
-      });
-    const lastChildId = idsInOrder[idsInOrder.length - 1];
-    return { IdsToOrder, idsInOrder, lastChildId };
-  };
-
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
 
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
+    let timeslice;
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
+      if (childOutput.timeslice) {
+        timeslice = childOutput.timeslice;
+      }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters) });
+    this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
   };
 
   private recalculateDataViews = () => {
-    const allDataViews: DataView[] = [];
+    const allDataViewIds: Set<string> = new Set();
     Object.values(this.children).map((child) => {
-      const childOutput = child.getOutput() as ControlOutput;
-      allDataViews.push(...(childOutput.dataViews ?? []));
+      const dataViewId = (child.getOutput() as ControlOutput).dataViewId;
+      if (dataViewId) allDataViewIds.add(dataViewId);
     });
-    this.updateOutput({ dataViews: uniqBy(allDataViews, 'id') });
+    this.updateOutput({ dataViewIds: Array.from(allDataViewIds) });
   };
 
   protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
@@ -302,18 +283,21 @@ export class ControlGroupContainer extends Container<
     }
     return {
       order: nextOrder,
-      width: this.getInput().defaultControlWidth,
+      width:
+        panelState.type === TIME_SLIDER_CONTROL ? 'large' : this.getInput().defaultControlWidth,
+      grow: panelState.type === TIME_SLIDER_CONTROL ? true : this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
 
   protected onRemoveEmbeddable(idToRemove: string) {
     const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
-    const removedOrder = this.childOrderCache.IdsToOrder[idToRemove];
-    for (let i = removedOrder + 1; i < this.childOrderCache.idsInOrder.length; i++) {
-      const currentOrder = newPanels[this.childOrderCache.idsInOrder[i]].order;
-      newPanels[this.childOrderCache.idsInOrder[i]] = {
-        ...newPanels[this.childOrderCache.idsInOrder[i]],
+    const childOrderCache = cachedChildEmbeddableOrder(this.getInput().panels);
+    const removedOrder = childOrderCache.IdsToOrder[idToRemove];
+    for (let i = removedOrder + 1; i < childOrderCache.idsInOrder.length; i++) {
+      const currentOrder = newPanels[childOrderCache.idsInOrder[i]].order;
+      newPanels[childOrderCache.idsInOrder[i]] = {
+        ...newPanels[childOrderCache.idsInOrder[i]],
         order: currentOrder - 1,
       };
     }
@@ -321,22 +305,24 @@ export class ControlGroupContainer extends Container<
   }
 
   protected getInheritedInput(id: string): ControlInput {
-    const { filters, query, ignoreParentSettings, timeRange, chainingSystem } = this.getInput();
+    const { filters, query, ignoreParentSettings, timeRange, chainingSystem, panels } =
+      this.getInput();
 
     const precedingFilters = ControlGroupChainingSystems[chainingSystem].getPrecedingFilters({
       id,
-      childOrder: this.childOrderCache,
+      childOrder: cachedChildEmbeddableOrder(panels),
       getChild: (getChildId: string) => this.getChild<ControlEmbeddable>(getChildId),
     });
     const allFilters = [
       ...(ignoreParentSettings?.ignoreFilters ? [] : filters ?? []),
-      ...(precedingFilters ?? []),
+      ...(precedingFilters?.filters ?? []),
     ];
     return {
       ignoreParentSettings,
       filters: allFilters,
       query: ignoreParentSettings?.ignoreQuery ? undefined : query,
       timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,
+      timeslice: ignoreParentSettings?.ignoreTimerange ? undefined : precedingFilters?.timeslice,
       id,
     };
   }
@@ -349,7 +335,10 @@ export class ControlGroupContainer extends Container<
     if (panelsLoading()) {
       return new Promise<void>((resolve, reject) => {
         const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-          if (this.destroyed) reject();
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
           if (!panelsLoading()) {
             subscription.unsubscribe();
             resolve();
@@ -365,13 +354,16 @@ export class ControlGroupContainer extends Container<
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+    const { Wrapper: ControlGroupReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
-      <PresentationUtilProvider>
-        <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
-          <ControlGroup />
-        </ControlGroupReduxWrapper>
-      </PresentationUtilProvider>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <ControlsServicesProvider>
+          <ControlGroupReduxWrapper>
+            <ControlGroup />
+          </ControlGroupReduxWrapper>
+        </ControlsServicesProvider>
+      </KibanaThemeProvider>,
       dom
     );
   }
@@ -380,6 +372,7 @@ export class ControlGroupContainer extends Container<
     super.destroy();
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
+    this.reduxEmbeddableTools.cleanup();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 }

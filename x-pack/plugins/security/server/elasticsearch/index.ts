@@ -7,7 +7,10 @@
 
 import type { AuthenticatedUser } from '../../common/model';
 
-export type AuthenticationInfo = Omit<AuthenticatedUser, 'authentication_provider'>;
+export type AuthenticationInfo = Omit<
+  AuthenticatedUser,
+  'authentication_provider' | 'elastic_cloud_user'
+>;
 export type {
   ElasticsearchServiceStart,
   OnlineStatusRetryScheduler,

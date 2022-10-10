@@ -8,29 +8,33 @@
 
 const preset = require('../jest-preset');
 
+const presetClone = { ...preset };
+
+delete presetClone.testEnvironment; // simply redefining as `testEnvironment: 'node'` has some weird side-effects (https://github.com/elastic/kibana/pull/138877)
+
 /** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
 /** @type {JestConfig} */
 module.exports = {
-  ...preset,
+  ...presetClone,
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/after_env.integration.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
   ],
   reporters: [
     'default',
     [
-      '@kbn/test/target_node/jest/junit_reporter',
+      '@kbn/test/target_node/src/jest/junit_reporter',
       {
         rootDirectory: '.',
         reportName: 'Jest Integration Tests',
       },
     ],
     [
-      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+      '@kbn/test/target_node/src/jest/ci_stats_jest_reporter',
       {
         testGroupType: 'Jest Integration Tests',
       },
@@ -40,7 +44,10 @@ module.exports = {
     ? [['json', { file: 'jest-integration.json' }]]
     : ['html', 'text'],
 
-  testEnvironment: 'node',
   snapshotSerializers: [],
-  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/babel_polyfill.js'],
+  haste: {
+    ...preset.haste,
+    throwOnModuleCollision: true,
+  },
 };

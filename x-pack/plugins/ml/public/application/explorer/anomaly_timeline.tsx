@@ -10,8 +10,9 @@ import { isEqual } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -25,11 +26,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import type { Query } from '@kbn/es-query';
+import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
+import { useCasesModal } from '../contexts/kibana/use_cases_modal';
+import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import {
+  OVERALL_LABEL,
+  SWIMLANE_TYPE,
+  SwimlaneType,
+  VIEW_BY_JOB_LABEL,
+} from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
 import { ExplorerState } from './reducers/explorer_reducer';
-import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
+import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
@@ -37,7 +48,7 @@ import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
-import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
+import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
@@ -60,8 +71,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const {
       services: {
         application: { capabilities },
+        charts: chartsService,
+        cases,
       },
     } = useMlKibana();
+
+    const globalTimeRange = useTimeRangeUpdates(true);
+
+    const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
 
     const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
       useAnomalyExplorerContext();
@@ -79,14 +96,17 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const { overallAnnotations } = explorerState;
 
-    const { filterActive } = useObservable(
+    const { filterActive, queryString } = useObservable(
       anomalyExplorerCommonStateService.getFilterSettings$(),
       anomalyExplorerCommonStateService.getFilterSettings()
     );
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
-    const selectedJobs = useObservable(anomalyExplorerCommonStateService.getSelectedJobs$());
+    const selectedJobs = useObservable(
+      anomalyExplorerCommonStateService.getSelectedJobs$(),
+      anomalyExplorerCommonStateService.getSelectedJobs()
+    );
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 
@@ -144,26 +164,109 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
+    const openCasesModalCallback = useCasesModal(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
+
+    const openCasesModal = useCallback(
+      (swimLaneType: SwimlaneType) => {
+        openCasesModalCallback({
+          swimlaneType: swimLaneType,
+          ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
+          jobIds: selectedJobs?.map((v) => v.id),
+          timeRange: globalTimeRange,
+          ...(isDefined(queryString) && queryString !== ''
+            ? {
+                query: {
+                  query: queryString,
+                  language: SEARCH_QUERY_LANGUAGE.KUERY,
+                } as Query,
+              }
+            : {}),
+        });
+      },
+      [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName, queryString]
+    );
+
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
-    const menuItems = useMemo(() => {
-      const items = [];
+    const closePopoverOnAction = useCallback(
+      (actionCallback: Function) => {
+        return () => {
+          setIsMenuOpen(false);
+          actionCallback();
+        };
+      },
+      [setIsMenuOpen]
+    );
+
+    const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
+      const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
+      const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items: rootItems }];
+
       if (canEditDashboards) {
-        items.push(
-          <EuiContextMenuItem
-            key="addToDashboard"
-            onClick={setIsAddDashboardActive.bind(null, true)}
-            data-test-subj="mlAnomalyTimelinePanelAddToDashboardButton"
-          >
+        rootItems.push({
+          name: (
             <FormattedMessage
               id="xpack.ml.explorer.addToDashboardLabel"
               defaultMessage="Add to dashboard"
             />
-          </EuiContextMenuItem>
-        );
+          ),
+          onClick: closePopoverOnAction(setIsAddDashboardActive.bind(null, true)),
+          'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
+        });
       }
-      return items;
-    }, [canEditDashboards]);
+
+      const casesPrivileges = cases?.helpers.canUseCases();
+
+      if ((!!casesPrivileges?.create || !!casesPrivileges?.update) && selectCaseModal) {
+        rootItems.push({
+          panel: 1,
+          name: (
+            <FormattedMessage
+              id="xpack.ml.explorer.attachToCaseLabel"
+              defaultMessage="Add to case"
+            />
+          ),
+          'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
+        });
+
+        panels.push({
+          id: 1,
+          initialFocusedItemIndex: 0,
+          title: (
+            <FormattedMessage
+              id="xpack.ml.explorer.attachToCaseLabel"
+              defaultMessage="Add to case"
+            />
+          ),
+          items: [
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.explorer.attachOverallSwimLane"
+                  defaultMessage="Overall"
+                />
+              ),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, 'overall')),
+              'data-test-subj': 'mlAnomalyTimelinePanelAttachOverallButton',
+            },
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.explorer.attachViewBySwimLane"
+                  defaultMessage="View by {viewByField}"
+                  values={{ viewByField: viewBySwimlaneFieldName }}
+                />
+              ),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, 'viewBy')),
+              'data-test-subj': 'mlAnomalyTimelinePanelAttachViewByButton',
+            },
+          ],
+        });
+      }
+
+      return panels;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [canEditDashboards, openCasesModal, viewBySwimlaneFieldName]);
 
     // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
     const overallCellSelection: AppStateSelectedCells | undefined = useMemo(() => {
@@ -192,6 +295,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const onResize = useCallback((value: number) => {
       anomalyTimelineStateService.setContainerWidth(value);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -199,7 +303,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
           <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="baseline">
             <EuiFlexItem grow={false}>
-              <EuiTitle className="panel-title">
+              <EuiTitle size={'xs'}>
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.explorer.anomalyTimelineTitle"
@@ -213,8 +317,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <AnomalyTimelineHelpPopover />
             </EuiFlexItem>
 
-            {menuItems.length > 0 && (
-              <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+            {menuPanels[0].items!.length > 0 ? (
+              <EuiFlexItem
+                grow={false}
+                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+              >
                 <EuiPopover
                   button={
                     <EuiButtonIcon
@@ -233,13 +340,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel items={menuItems} />
+                  <EuiContextMenu initialPanelId={0} panels={menuPanels} />
                 </EuiPopover>
               </EuiFlexItem>
-            )}
+            ) : null}
           </EuiFlexGroup>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="baseline">
             {viewBySwimlaneOptions.length > 0 && (
@@ -261,7 +368,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={true} css={{ 'max-width': '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {
@@ -275,7 +382,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <div className="panel-sub-title">
+              <EuiText size={'xs'} color={'subdued'}>
                 {viewByLoadedForTimeFormatted && (
                   <FormattedMessage
                     id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
@@ -295,9 +402,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     defaultMessage="(Job score across all influencers)"
                   />
                 )}
-              </div>
+              </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
+            <EuiFlexItem grow={false} css={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
               <EuiButtonEmpty
                 size="xs"
                 onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}
@@ -348,6 +455,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }
             showTimeline={false}
             showLegend={false}
+            yAxisWidth={Y_AXIS_LABEL_WIDTH}
+            chartsService={chartsService}
           />
 
           <EuiSpacer size="m" />
@@ -366,6 +475,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
               swimlaneLimit={swimlaneLimit}
+              chartsService={chartsService}
               onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
                 if (perPageUpdate) {
                   anomalyTimelineStateService.setSwimLanePagination({
@@ -379,6 +489,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 }
               }}
               isLoading={loading || viewBySwimlaneDataLoading}
+              yAxisWidth={Y_AXIS_LABEL_WIDTH}
               noDataWarning={
                 <EuiText textAlign={'center'}>
                   <h5>
@@ -412,6 +523,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }}
             jobIds={selectedJobs.map(({ id }) => id)}
             viewBy={viewBySwimlaneFieldName!}
+            queryString={queryString}
           />
         )}
       </>

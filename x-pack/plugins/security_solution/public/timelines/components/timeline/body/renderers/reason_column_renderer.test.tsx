@@ -13,7 +13,8 @@ import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
-import { RowRendererId, ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { RowRendererId, TimelineId } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
@@ -133,6 +134,20 @@ describe('reasonColumnRenderer', () => {
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
 
       expect(wrapper.queryByTestId('reason-cell-renderer')).toBeInTheDocument();
+    });
+
+    it("doesn't render reason renderers when timeline id is for the rule preview page", () => {
+      const renderedColumn = reasonColumnRenderer.renderColumn({
+        ...defaultProps,
+        isDetails: true,
+        ecsData: validEcs,
+        rowRenderers,
+        timelineId: TimelineId.rulePreview,
+      });
+
+      const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
+
+      expect(wrapper.queryByTestId('reason-cell-renderer')).not.toBeInTheDocument();
     });
   });
 });

@@ -6,19 +6,19 @@
  */
 
 import type {
+  EqlSearchRequest,
+  FieldCapsRequest,
+  FieldCapsResponse,
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
+import { omit } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
@@ -30,7 +30,11 @@ import {
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { unpackProcessorEvents } from './unpack_processor_events';
+import {
+  unpackProcessorEvents,
+  processorEventsToIndex,
+} from './unpack_processor_events';
+import { fakeSyntheticSource } from './fake_synthetic_source';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -39,10 +43,19 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 
 export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+  apm: { events: ProcessorEvent[] };
+};
+
+export type APMEventEqlSearchRequest = Omit<EqlSearchRequest, 'index'> & {
+  apm: { events: ProcessorEvent[] };
+};
+
+export type APMEventFieldCapsRequest = Omit<FieldCapsRequest, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
@@ -53,7 +66,6 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  profile: Profile;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
@@ -87,6 +99,48 @@ export class APMEventClient {
     this.includeFrozen = config.options.includeFrozen;
   }
 
+  private callAsyncWithDebug<T extends { body: any }>({
+    requestType,
+    params,
+    cb,
+    operationName,
+  }: {
+    requestType: string;
+    params: Record<string, any>;
+    cb: (requestOpts: { signal: AbortSignal; meta: true }) => Promise<T>;
+    operationName: string;
+  }): Promise<T['body']> {
+    return callAsyncWithDebug({
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params,
+          requestType,
+          operationName,
+        }),
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: params,
+      cb: () => {
+        const controller = new AbortController();
+
+        const promise = withApmSpan(operationName, () => {
+          return cancelEsRequestOnAbort(
+            cb({ signal: controller.signal, meta: true }),
+            this.request,
+            controller
+          );
+        });
+
+        return unwrapEsResponse(promise);
+      },
+    });
+  }
+
   async search<TParams extends APMEventESSearchRequest>(
     operationName: string,
     params: TParams
@@ -103,39 +157,88 @@ export class APMEventClient {
       preference: 'any',
     };
 
-    // only "search" operation is currently supported
-    const requestType = 'search';
-
-    return callAsyncWithDebug({
-      cb: () => {
-        const searchPromise = withApmSpan(operationName, () => {
-          const controller = new AbortController();
-          return cancelEsRequestOnAbort(
-            this.esClient.search(searchParams, {
-              signal: controller.signal,
-              meta: true,
-            }),
-            this.request,
-            controller
+    return this.callAsyncWithDebug({
+      cb: (opts) =>
+        (
+          this.esClient.search(searchParams, opts) as unknown as Promise<{
+            body: TypedSearchResponse<TParams>;
+          }>
+        ).then((response) => {
+          // ensure metric data is compatible with synthetic source
+          // enabled
+          const metricEventsOnly = params.apm.events.every(
+            (event) => event === ProcessorEvent.metric
           );
-        });
 
-        return unwrapEsResponse(searchPromise);
-      },
-      getDebugMessage: () => ({
-        body: getDebugBody({
-          params: searchParams,
-          requestType,
-          operationName,
+          if (!response.body?.hits?.hits) {
+            return response;
+          }
+
+          const hits = response.body.hits.hits.map((hit) => {
+            if (
+              metricEventsOnly ||
+              // take filter_path etc into account
+              (hit._source &&
+                'processor' in hit._source &&
+                hit._source.processor?.event === ProcessorEvent.metric)
+            ) {
+              return {
+                ...hit,
+                _source: fakeSyntheticSource(hit._source),
+              };
+            }
+            return hit;
+          });
+
+          return {
+            ...response,
+            body: {
+              ...response.body,
+              hits: {
+                ...response.body.hits,
+                hits,
+              },
+            },
+          };
         }),
-        title: getDebugTitle(this.request),
-      }),
-      isCalledWithInternalUser: false,
-      debug: this.debug,
-      request: this.request,
-      requestType,
       operationName,
-      requestParams: searchParams,
+      params: searchParams,
+      requestType: 'search',
+    });
+  }
+
+  async eqlSearch(operationName: string, params: APMEventEqlSearchRequest) {
+    const index = processorEventsToIndex(params.apm.events, this.indices);
+
+    const requestParams = {
+      index,
+      ...omit(params, 'apm'),
+    };
+
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: 'eql_search',
+      params: requestParams,
+      cb: (opts) => this.esClient.eql.search(requestParams, opts),
+    });
+  }
+
+  async fieldCaps(
+    operationName: string,
+    params: APMEventFieldCapsRequest
+  ): Promise<FieldCapsResponse> {
+    const index = processorEventsToIndex(params.apm.events, this.indices);
+
+    const requestParams = {
+      index,
+      ...omit(params, 'apm'),
+    };
+
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: 'field_caps',
+      params: requestParams,
+      cb: (opts) => this.esClient.fieldCaps(requestParams, opts),
     });
   }
 
@@ -143,43 +246,18 @@ export class APMEventClient {
     operationName: string,
     params: APMEventESTermsEnumRequest
   ): Promise<TermsEnumResponse> {
-    const requestType = 'terms_enum';
-    const { index } = unpackProcessorEvents(params, this.indices);
+    const index = processorEventsToIndex(params.apm.events, this.indices);
 
-    return callAsyncWithDebug({
-      cb: () => {
-        const { apm, ...rest } = params;
-        const termsEnumPromise = withApmSpan(operationName, () => {
-          const controller = new AbortController();
-          return cancelEsRequestOnAbort(
-            this.esClient.termsEnum(
-              {
-                index: Array.isArray(index) ? index.join(',') : index,
-                ...rest,
-              },
-              { signal: controller.signal, meta: true }
-            ),
-            this.request,
-            controller
-          );
-        });
+    const requestParams = {
+      index: Array.isArray(index) ? index.join(',') : index,
+      ...omit(params, 'apm'),
+    };
 
-        return unwrapEsResponse(termsEnumPromise);
-      },
-      getDebugMessage: () => ({
-        body: getDebugBody({
-          params,
-          requestType,
-          operationName,
-        }),
-        title: getDebugTitle(this.request),
-      }),
-      isCalledWithInternalUser: false,
-      debug: this.debug,
-      request: this.request,
-      requestType,
+    return this.callAsyncWithDebug({
       operationName,
-      requestParams: params,
+      requestType: 'terms_enum',
+      params: requestParams,
+      cb: (opts) => this.esClient.termsEnum(requestParams, opts),
     });
   }
 }

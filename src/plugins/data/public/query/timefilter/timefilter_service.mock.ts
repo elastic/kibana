@@ -7,9 +7,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
 import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
-import { TimeRange } from '../../../common';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 
@@ -19,10 +19,10 @@ const createSetupContractMock = () => {
     isTimeRangeSelectorEnabled: jest.fn(),
     isTimeTouched: jest.fn(),
     isRefreshIntervalTouched: jest.fn(),
-    getEnabledUpdated$: jest.fn(),
-    getTimeUpdate$: jest.fn(),
-    getRefreshIntervalUpdate$: jest.fn(),
-    getAutoRefreshFetch$: jest.fn(() => new Observable<() => void>()),
+    getEnabledUpdated$: jest.fn().mockImplementation(() => new Observable<() => void>()),
+    getTimeUpdate$: jest.fn().mockImplementation(() => new Observable<() => void>()),
+    getRefreshIntervalUpdate$: jest.fn().mockImplementation(() => new Observable<() => void>()),
+    getAutoRefreshFetch$: jest.fn().mockImplementation(() => new Observable<() => void>()),
     getFetch$: jest.fn().mockImplementation(() => new Observable<() => void>()),
     getTime: jest.fn(),
     setTime: jest.fn(),

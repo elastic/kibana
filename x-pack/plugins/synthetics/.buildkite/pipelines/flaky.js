@@ -74,8 +74,8 @@ function getGroupRunnerJob(env) {
   return {
     command: `${
       env[E2E_GREP] ? `GREP="${env[E2E_GREP]}" ` : ''
-    }.buildkite/scripts/steps/functional/uptime.sh`,
-    label: `Uptime E2E - Synthetics runner`,
+    }.buildkite/scripts/steps/functional/synthetics_plugin.sh`,
+    label: `Synthetics Pluging E2E - Synthetics runner`,
     agents: { queue: 'n2-4' },
     depends_on: BUILD_UUID,
     parallelism: env[E2E_COUNT],

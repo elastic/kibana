@@ -23,8 +23,11 @@ export type {
   PackagePolicyConfigRecordEntry,
   PackagePolicyPackage,
   Output,
+  DownloadSource,
   DataStream,
   Settings,
+  ActionStatus,
+  CurrentUpgrade,
   GetFleetStatusResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
@@ -77,6 +80,7 @@ export type {
   PostEnrollmentAPIKeyResponse,
   PostLogstashApiKeyResponse,
   GetOutputsResponse,
+  GetCurrentUpgradesResponse,
   PutOutputRequest,
   PutOutputResponse,
   PostOutputRequest,
@@ -119,8 +123,17 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
-} from '../../common';
-export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
+  GetDownloadSourceResponse,
+  PostDownloadSourceRequest,
+  PutDownloadSourceRequest,
+  GetAvailableVersionsResponse,
+} from '../../common/types';
+export {
+  entries,
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  InstallStatus,
+} from '../../common/types';
 
 export * from './intra_app_route_state';
 export * from './ui_extensions';

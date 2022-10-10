@@ -8,21 +8,24 @@
 import React from 'react';
 import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
-import { SecuritySubPluginRoutes } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 /**
  * Returns the React Router Routes for the management area
  */
 const ManagementRoutes = () => (
-  <CurrentLicense>
-    <ManagementContainer />
-  </CurrentLicense>
+  <PluginTemplateWrapper>
+    <CurrentLicense>
+      <ManagementContainer />
+    </CurrentLicense>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: MANAGEMENT_PATH,
-    render: ManagementRoutes,
+    component: ManagementRoutes,
   },
 ];

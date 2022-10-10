@@ -101,7 +101,7 @@ function TopNVisualization(props) {
 
   return (
     <div className="tvbVis" style={style}>
-      <TopN {...params} />
+      <TopN {...params} initialRender={props.initialRender} />
       {accessDeniedDrilldownUrl && (
         <ExternalUrlErrorModal
           url={accessDeniedDrilldownUrl}

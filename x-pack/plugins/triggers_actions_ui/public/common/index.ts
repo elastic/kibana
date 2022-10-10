@@ -6,10 +6,23 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110895
-/* eslint-disable @kbn/eslint/no_export_all */
 
-export * from './expression_items';
-export * from './constants';
-export * from './index_controls';
-export * from './lib';
-export * from './types';
+export {
+  GroupByExpression,
+  ForLastExpression,
+  ValueExpression,
+  WhenExpression,
+  OfExpression,
+  ThresholdExpression,
+} from './expression_items';
+export {
+  COMPARATORS,
+  builtInComparators,
+  builtInAggregationTypes,
+  builtInGroupByTypes,
+} from './constants';
+export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
+export type { IOption } from './index_controls';
+export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
+export { getTimeFieldOptions, useKibana } from './lib';
+export type { Comparator, AggregationType, GroupByType, RuleStatus } from './types';

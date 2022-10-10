@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-logging/src/logger.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/logging",
@@ -54,6 +55,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -69,6 +71,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -85,6 +88,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -120,6 +124,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -135,6 +140,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -151,6 +157,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -186,6 +193,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -201,6 +209,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -217,6 +226,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -252,6 +262,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -267,6 +278,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -283,6 +295,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -318,6 +331,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -333,6 +347,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -349,6 +364,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -384,6 +400,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -399,6 +416,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -415,6 +433,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -441,6 +460,7 @@
             ],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -454,6 +474,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -473,6 +494,7 @@
         ],
         "path": "packages/kbn-logging/src/logger_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/logging",
@@ -495,6 +517,7 @@
             ],
             "path": "packages/kbn-logging/src/logger_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
@@ -510,6 +533,7 @@
                 ],
                 "path": "packages/kbn-logging/src/logger_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -556,6 +580,8 @@
           "EcsError",
           " | undefined; event?: ",
           "EcsEvent",
+          " | undefined; faas?: ",
+          "EcsFaas",
           " | undefined; file?: ",
           "EcsFile",
           " | undefined; group?: ",
@@ -606,6 +632,7 @@
         ],
         "path": "packages/kbn-logging/src/ecs/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -616,10 +643,11 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"database\" | \"package\" | \"network\" | \"web\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"host\" | \"database\" | \"email\" | \"package\" | \"network\" | \"web\" | \"file\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -630,10 +658,11 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"metric\" | \"event\" | \"state\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"signal\" | \"state\" | \"event\" | \"pipeline_error\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -644,10 +673,11 @@
         "label": "EcsEventOutcome",
         "description": [],
         "signature": [
-          "\"unknown\" | \"success\" | \"failure\""
+          "\"success\" | \"unknown\" | \"failure\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -658,10 +688,11 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"user\" | \"error\" | \"info\" | \"group\" | \"end\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"error\" | \"connection\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -744,6 +775,7 @@
         ],
         "path": "packages/kbn-logging/src/log_meta.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

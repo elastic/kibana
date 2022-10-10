@@ -8,8 +8,10 @@
 
 import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
+import { DateNanosFormatEditorFormatParams } from './date_nanos';
 
 export type { DateNanosFormatEditor } from './date_nanos';
-export const dateNanosFormatEditorFactory: FieldFormatEditorFactory = () =>
-  import('./date_nanos').then((m) => m.DateNanosFormatEditor);
+export const dateNanosFormatEditorFactory: FieldFormatEditorFactory<
+  DateNanosFormatEditorFormatParams
+> = () => import('./date_nanos').then((m) => m.DateNanosFormatEditor);
 dateNanosFormatEditorFactory.formatId = formatId;

@@ -12,8 +12,7 @@ import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
 import { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { RetryService } from '../../../../test/common/services/retry/retry';
+import { FtrService } from '../ftr_provider_context';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
   return resp.text
@@ -36,8 +35,10 @@ interface SendOptions {
   space?: string;
 }
 
-export const BSecureSearchFactory = (retry: RetryService) => ({
-  send: async <T extends IEsSearchResponse>({
+export class BsearchSecureService extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
+
+  async send<T extends IEsSearchResponse>({
     supertestWithoutAuth,
     auth,
     referer,
@@ -45,9 +46,10 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
     options,
     strategy,
     space,
-  }: SendOptions): Promise<T> => {
+  }: SendOptions) {
     const spaceUrl = getSpaceUrlPrefix(space);
-    const { body } = await retry.try(async () => {
+
+    const { body } = await this.retry.try(async () => {
       let result;
       const url = `${spaceUrl}/internal/search/${strategy}`;
       if (referer && kibanaVersion) {
@@ -79,46 +81,40 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
           .set('kbn-xsrf', 'true')
           .send(options);
       }
-      if (result.status === 500 || result.status === 200) {
+      if ((result.status === 500 || result.status === 200) && result.body) {
         return result;
       }
       throw new Error('try again');
     });
 
-    if (body.isRunning) {
-      const result = await retry.try(async () => {
-        const resp = await supertestWithoutAuth
-          .post(`${spaceUrl}/internal/bsearch`)
-          .auth(auth.username, auth.password)
-          .set('kbn-xsrf', 'true')
-          .send({
-            batch: [
-              {
-                request: {
-                  id: body.id,
-                  ...options,
-                },
-                options: {
-                  strategy,
-                },
-              },
-            ],
-          })
-          .expect(200);
-        const [parsedResponse] = parseBfetchResponse(resp);
-        expect(parsedResponse.result.isRunning).equal(false);
-        return parsedResponse.result;
-      });
-      return result;
-    } else {
-      return body;
+    if (!body.isRunning) {
+      return body as T;
     }
-  },
-});
 
-export function BSecureSearchProvider({
-  getService,
-}: FtrProviderContext): ReturnType<typeof BSecureSearchFactory> {
-  const retry = getService('retry');
-  return BSecureSearchFactory(retry);
+    const result = await this.retry.try(async () => {
+      const resp = await supertestWithoutAuth
+        .post(`${spaceUrl}/internal/bsearch`)
+        .auth(auth.username, auth.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          batch: [
+            {
+              request: {
+                id: body.id,
+                ...options,
+              },
+              options: {
+                strategy,
+              },
+            },
+          ],
+        })
+        .expect(200);
+      const [parsedResponse] = parseBfetchResponse(resp);
+      expect(parsedResponse.result.isRunning).equal(false);
+      return parsedResponse.result;
+    });
+
+    return result as T;
+  }
 }

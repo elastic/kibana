@@ -7,9 +7,9 @@
  */
 
 import chalk from 'chalk';
-import { CliArgs, Env, RawConfigService } from './config';
+import { CliArgs, Env, RawConfigService } from '@kbn/config';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
-import { CriticalError } from './errors';
 
 interface BootstrapArgs {
   configs: string[];
@@ -115,7 +115,7 @@ function onRootShutdown(reason?: any) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-console
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
 
     process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);

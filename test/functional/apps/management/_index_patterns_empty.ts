@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         body: { user: 'matt', message: 20 },
       });
       await testSubjects.click('refreshIndicesButton');
-      await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
+      await testSubjects.existOrFail('createDataViewButton', { timeout: 5000 });
       await PageObjects.settings.createIndexPattern('logstash-*', '');
     });
 

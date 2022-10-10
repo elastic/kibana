@@ -6,8 +6,7 @@
  */
 
 import path from 'path';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { KIBANA_ROOT } from '@kbn/test';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

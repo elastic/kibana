@@ -24,7 +24,7 @@ import type {
 import { checkSuperuser } from '../../routes/security';
 import { FleetUnauthorizedError } from '../../errors';
 
-import { installTransform, isTransform } from './elasticsearch/transform/install';
+import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import { fetchFindLatestPackageOrThrow, getRegistryPackage } from './registry';
 import { ensureInstalledPackage, getInstallation } from './packages';
 
@@ -120,9 +120,13 @@ class PackageClientImpl implements PackageClient {
     return fetchFindLatestPackageOrThrow(packageName);
   }
 
-  public async getRegistryPackage(packageName: string, packageVersion: string) {
+  public async getRegistryPackage(
+    packageName: string,
+    packageVersion: string,
+    options?: Parameters<typeof getRegistryPackage>['2']
+  ) {
     await this.#runPreflight();
-    return getRegistryPackage(packageName, packageVersion);
+    return getRegistryPackage(packageName, packageVersion, options);
   }
 
   public async reinstallEsAssets(
@@ -146,14 +150,15 @@ class PackageClientImpl implements PackageClient {
     return installedAssets;
   }
 
-  #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    return installTransform(
+  async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
+    const { installedTransforms } = await installTransforms(
       packageInfo,
       paths,
       this.internalEsClient,
       this.internalSoClient,
       this.logger
     );
+    return installedTransforms;
   }
 
   #runPreflight() {

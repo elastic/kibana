@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 import { compact } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 
@@ -37,6 +37,7 @@ export async function getTransaction({
       events: [ProcessorEvent.transaction as const],
     },
     body: {
+      track_total_hits: false,
       size: 1,
       query: {
         bool: {

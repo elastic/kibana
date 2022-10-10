@@ -9,8 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-
-import { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -18,11 +16,13 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { maybe } from '../../../../common/utils/maybe';
-import { fromQuery, push, toQuery } from '../../shared/links/url_helpers';
+import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
+import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 const tabs = [
   traceSamplesTab,
@@ -48,38 +48,11 @@ export function TransactionDetailsTabs() {
       environment,
     });
 
-  const selectSampleFromChartSelection = (selection: XYBrushEvent) => {
-    if (selection !== undefined) {
-      const { x } = selection;
-      if (Array.isArray(x)) {
-        history.push({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            sampleRangeFrom: Math.round(x[0]),
-            sampleRangeTo: Math.round(x[1]),
-          }),
-        });
-      }
-    }
-  };
-
   const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
   const { traceSamples } = traceSamplesData;
 
-  const clearChartSelection = () => {
-    // enforces a reset of the current sample to be highlighted in the chart
-    // and selected in waterfall section below, otherwise we end up with
-    // stale data for the selected sample
-    push(history, {
-      query: {
-        sampleRangeFrom: '',
-        sampleRangeTo: '',
-        traceId: '',
-        transactionId: '',
-      },
-    });
-  };
+  const { clearChartSelection, selectSampleFromChartSelection } =
+    useSampleChartSelection();
 
   // When filtering in either the latency correlations or failed transactions correlations tab,
   // scroll to the top of the page and switch to the 'Trace samples' tab to trigger a refresh.
@@ -97,7 +70,7 @@ export function TransactionDetailsTabs() {
         sample.transactionId === transactionId && sample.traceId === traceId
     );
 
-    if (!selectedSample) {
+    if (traceSamplesStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
       const preferredSample = maybe(traceSamples[0]);
 
@@ -112,7 +85,7 @@ export function TransactionDetailsTabs() {
         }),
       });
     }
-  }, [history, traceSamples, transactionId, traceId]);
+  }, [history, traceSamples, transactionId, traceId, traceSamplesStatus]);
 
   return (
     <>

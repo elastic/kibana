@@ -19,19 +19,22 @@ export function ApmServiceWrapper() {
 
   const router = useApmRouter();
 
-  useBreadcrumb([
-    {
-      title: ServiceInventoryTitle,
-      href: router.link('/services', { query }),
-    },
-    {
-      title: serviceName,
-      href: router.link('/services/{serviceName}', {
-        query,
-        path: { serviceName },
-      }),
-    },
-  ]);
+  useBreadcrumb(
+    () => [
+      {
+        title: ServiceInventoryTitle,
+        href: router.link('/services', { query }),
+      },
+      {
+        title: serviceName,
+        href: router.link('/services/{serviceName}', {
+          query,
+          path: { serviceName },
+        }),
+      },
+    ],
+    [query, router, serviceName]
+  );
 
   return <Outlet />;
 }

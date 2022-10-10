@@ -69,7 +69,7 @@ describe('InspectorPanel', () => {
     const component = mountWithIntl(
       <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   it('should not allow updating adapters', () => {

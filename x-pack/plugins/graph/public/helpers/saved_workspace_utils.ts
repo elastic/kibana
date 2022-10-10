@@ -53,6 +53,7 @@ function mapHits(hit: any, url: string): GraphWorkspaceSavedObject {
   const source = hit.attributes;
   source.id = hit.id;
   source.url = url;
+  source.updatedAt = hit.updatedAt;
   source.icon = 'fa-share-alt'; // looks like a graph
   return source;
 }
@@ -161,18 +162,6 @@ export async function saveSavedWorkspace(
     overlays: OverlayStart;
   }
 ) {
-  // Save the original id in case the save fails.
-  const originalId = savedObject.id;
-  // Read https://github.com/elastic/kibana/issues/9056 and
-  // https://github.com/elastic/kibana/issues/9012 for some background into why this copyOnSave variable
-  // exists.
-  // The goal is to move towards a better rename flow, but since our users have been conditioned
-  // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
-  // UI/UX can be worked out.
-  if (savedObject.copyOnSave) {
-    delete savedObject.id;
-  }
-
   let attributes: SavedObjectAttributes = {};
 
   forOwn(mapping, (fieldType, fieldName) => {
@@ -190,14 +179,28 @@ export async function saveSavedWorkspace(
     throw new Error('References not returned from extractReferences');
   }
 
+  // Save the original id in case the save fails.
+  const originalId = savedObject.id;
+
   try {
+    // Read https://github.com/elastic/kibana/issues/9056 and
+    // https://github.com/elastic/kibana/issues/9012 for some background into why this copyOnSave variable
+    // exists.
+    // The goal is to move towards a better rename flow, but since our users have been conditioned
+    // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
+    // UI/UX can be worked out.
+    if (savedObject.copyOnSave) {
+      delete savedObject.id;
+    }
+
+    savedObject.isSaving = true;
+
     await checkForDuplicateTitle(
       savedObject as any,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       services
     );
-    savedObject.isSaving = true;
 
     const createOpt = {
       id: savedObject.id,

@@ -9,18 +9,20 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
-import type { FieldStatsResponse } from '../../../../../common';
-import type { FrameDatasourceAPI } from '../../../../types';
+import type { FrameDatasourceAPI, IndexPattern, IndexPatternField } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
-import { LastValueIndexPatternColumn } from '../last_value';
+import type { LastValueIndexPatternColumn } from '../last_value';
+import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 
-import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
 import { isColumnOfType } from '../helpers';
 
@@ -89,11 +91,23 @@ export function getDisallowedTermsMessage(
   columnId: string,
   indexPattern: IndexPattern
 ) {
+  const referenced: Set<string> = new Set();
+  Object.entries(layer.columns).forEach(([cId, c]) => {
+    if ('references' in c) {
+      c.references.forEach((r) => {
+        referenced.add(r);
+      });
+    }
+  });
   const hasMultipleShifts =
     uniq(
-      Object.values(layer.columns)
-        .filter((col) => operationDefinitionMap[col.operationType].shiftable)
-        .map((col) => col.timeShift || '')
+      Object.entries(layer.columns)
+        .filter(
+          ([colId, col]) =>
+            operationDefinitionMap[col.operationType].shiftable &&
+            (!isReferenced(layer, colId) || col.timeShift)
+        )
+        .map(([colId, col]) => col.timeShift || '')
     ).length > 1;
   if (!hasMultipleShifts) {
     return undefined;
@@ -107,7 +121,12 @@ export function getDisallowedTermsMessage(
       label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
         defaultMessage: 'Use filters',
       }),
-      newState: async (core: CoreStart, frame: FrameDatasourceAPI, layerId: string) => {
+      newState: async (
+        data: DataPublicPluginStart,
+        core: CoreStart,
+        frame: FrameDatasourceAPI,
+        layerId: string
+      ) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
         const fieldNames = [
           currentColumn.sourceField,
@@ -131,23 +150,21 @@ export function getDisallowedTermsMessage(
         );
         if (!activeDataFieldNameMatch || currentTerms.length === 0) {
           if (fieldNames.length === 1) {
-            const response: FieldStatsResponse<string | number> = await core.http.post(
-              `/api/lens/index_stats/${indexPattern.id}/field`,
-              {
-                body: JSON.stringify({
-                  fieldName: fieldNames[0],
-                  dslQuery: buildEsQuery(
-                    indexPattern,
-                    frame.query,
-                    frame.filters,
-                    getEsQueryConfig(core.uiSettings)
-                  ),
-                  fromDate: frame.dateRange.fromDate,
-                  toDate: frame.dateRange.toDate,
-                  size: currentColumn.params.size,
-                }),
-              }
-            );
+            const currentDataView = await data.dataViews.get(indexPattern.id);
+            const response: FieldStatsResponse<string | number> = await loadFieldStats({
+              services: { data },
+              dataView: currentDataView,
+              field: indexPattern.getFieldByName(fieldNames[0])! as DataViewField,
+              dslQuery: buildEsQuery(
+                indexPattern,
+                frame.query,
+                frame.filters,
+                getEsQueryConfig(core.uiSettings)
+              ),
+              fromDate: frame.dateRange.fromDate,
+              toDate: frame.dateRange.toDate,
+              size: currentColumn.params.size,
+            });
             currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
           }
         }
@@ -213,12 +230,23 @@ function checkLastValue(column: GenericIndexPatternColumn) {
   );
 }
 
+export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
+  // allow the rank by metric only if the percentile rank value is integer
+  // https://github.com/elastic/elasticsearch/issues/66677
+  return (
+    column.operationType !== 'percentile_rank' ||
+    (column.operationType === 'percentile_rank' &&
+      Number.isInteger((column as PercentileRanksIndexPatternColumn).params.value))
+  );
+}
+
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
   const column = layer.columns[columnId];
   return (
     column &&
     !column.isBucketed &&
     checkLastValue(column) &&
+    isPercentileRankSortable(column) &&
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );

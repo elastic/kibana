@@ -8,15 +8,15 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
-import {
+import type {
   DataProvider,
   DataProviderType,
   QueryOperator,
 } from '../../components/timeline/data_providers/data_provider';
 
-import { KqlMode, TimelineModel } from './model';
-import { InsertTimeline } from './types';
-import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
+import type { KqlMode, TimelineModel } from './model';
+import type { InsertTimeline } from './types';
+import type { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
   RowRendererId,
@@ -45,8 +45,8 @@ export {
   updateSort,
   upsertColumn,
 } from '@kbn/timelines-plugin/public';
-import { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
+import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -62,7 +62,7 @@ export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_T
 
 export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
-export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
+export const addProvider = actionCreator<{ id: string; providers: DataProvider[] }>('ADD_PROVIDER');
 
 export const saveTimeline = actionCreator<TimelinePersistInput>('SAVE_TIMELINE');
 
@@ -70,7 +70,7 @@ export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELI
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
-export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number }>(
+export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number | undefined }>(
   'SET_TIMELINE_UPDATED_AT'
 );
 
@@ -225,5 +225,5 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | null;
+  value: string | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');

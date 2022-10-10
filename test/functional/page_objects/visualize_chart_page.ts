@@ -32,6 +32,10 @@ export class VisualizeChartPageObject extends FtrService {
     return await this.elasticChart.getChartDebugData(chartSelector);
   }
 
+  public async getAllESChartsDebugDataByTestSubj(chartSelector: string) {
+    return await this.elasticChart.getAllChartsDebugDataByTestSubj(chartSelector);
+  }
+
   /**
    * Is new charts library advanced setting enabled
    */
@@ -131,9 +135,7 @@ export class VisualizeChartPageObject extends FtrService {
    * @param axis axis value, 'ValueAxis-1' by default
    */
   public async getLineChartData(selector: string, dataLabel = 'Count') {
-    // For now lines are rendered as areas to enable stacking
-    const areas = (await this.getEsChartDebugState(selector))?.areas ?? [];
-    const lines = areas.map(({ lines: { y1 }, name, color }) => ({ ...y1, name, color }));
+    const lines = (await this.getEsChartDebugState(selector))?.lines ?? [];
     const points = lines.find(({ name }) => name === dataLabel)?.points ?? [];
     return points.map(({ y }) => y);
   }
@@ -163,6 +165,8 @@ export class VisualizeChartPageObject extends FtrService {
   public async filterLegend(name: string, force = false) {
     await this.toggleLegend(force);
     await this.testSubjects.click(`legend-${name}`);
+    // wait for a short amount of time for popover to stabilize as there is no good way to check for that
+    await this.common.sleep(250);
     const filterIn = await this.testSubjects.find(`legend-${name}-filterIn`);
     await filterIn.click();
     await this.waitForVisualizationRenderingStabilized();
@@ -397,7 +401,7 @@ export class VisualizeChartPageObject extends FtrService {
 
   public async getMetric() {
     const elements = await this.find.allByCssSelector(
-      '[data-test-subj="visualizationLoader"] .mtrVis__container'
+      '[data-test-subj="visualizationLoader"] .legacyMtrVis__container'
     );
     const values = await Promise.all(
       elements.map(async (element) => {

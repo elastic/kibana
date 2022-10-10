@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { partition } from 'lodash';
+import { partition, uniq } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -22,12 +22,14 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
+import { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
+import type { IndexPattern, IndexPatternMap } from '../types';
+import { dedupeAggs } from './dedupe_aggs';
 
-type OriginalColumn = { id: string } & GenericIndexPatternColumn;
+export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
 declare global {
   interface Window {
@@ -38,6 +40,15 @@ declare global {
   }
 }
 
+// esAggs column ID manipulation functions
+export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
+const updatePositionIndex = (currentId: string, newIndex: number) => {
+  const [fullId, percentile] = currentId.split('.');
+  const idParts = fullId.split('-');
+  idParts[1] = String(newIndex);
+  return idParts.join('-') + (percentile ? `.${percentile}` : '');
+};
+
 function getExpressionForLayer(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
@@ -47,41 +58,55 @@ function getExpressionForLayer(
   if (columnOrder.length === 0 || !indexPattern) {
     return null;
   }
-
   const columns = { ...layer.columns };
-  Object.keys(columns).forEach((columnId) => {
+  // make sure the columns are in topological order
+  const sortedColumns = sortedReferences(
+    columnOrder.map((colId) => [colId, columns[colId]] as const)
+  );
+
+  sortedColumns.forEach((columnId) => {
     const column = columns[columnId];
     const rootDef = operationDefinitionMap[column.operationType];
-    if (
-      'references' in column &&
-      rootDef.filterable &&
-      rootDef.input === 'fullReference' &&
-      column.filter
-    ) {
+    if ('references' in column && rootDef.filterable && column.filter) {
       // inherit filter to all referenced operations
-      column.references.forEach((referenceColumnId) => {
-        const referencedColumn = columns[referenceColumnId];
-        const referenceDef = operationDefinitionMap[column.operationType];
-        if (referenceDef.filterable) {
-          columns[referenceColumnId] = { ...referencedColumn, filter: column.filter };
-        }
-      });
+      function setFilterForAllReferences(currentColumn: GenericIndexPatternColumn) {
+        if (!('references' in currentColumn)) return;
+        currentColumn.references.forEach((referenceColumnId) => {
+          let referencedColumn = columns[referenceColumnId];
+          const hasFilter = referencedColumn.filter;
+          const referenceDef = operationDefinitionMap[column.operationType];
+          if (referenceDef.filterable && !hasFilter) {
+            referencedColumn = { ...referencedColumn, filter: column.filter };
+            columns[referenceColumnId] = referencedColumn;
+          }
+          if (!hasFilter) {
+            // only push through the current filter if the current level doesn't have its own
+            setFilterForAllReferences(referencedColumn);
+          }
+        });
+      }
+      setFilterForAllReferences(column);
     }
 
-    if (
-      'references' in column &&
-      rootDef.shiftable &&
-      rootDef.input === 'fullReference' &&
-      column.timeShift
-    ) {
+    if ('references' in column && rootDef.shiftable && column.timeShift) {
       // inherit time shift to all referenced operations
-      column.references.forEach((referenceColumnId) => {
-        const referencedColumn = columns[referenceColumnId];
-        const referenceDef = operationDefinitionMap[column.operationType];
-        if (referenceDef.shiftable) {
-          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
-        }
-      });
+      function setTimeShiftForAllReferences(currentColumn: GenericIndexPatternColumn) {
+        if (!('references' in currentColumn)) return;
+        currentColumn.references.forEach((referenceColumnId) => {
+          let referencedColumn = columns[referenceColumnId];
+          const hasShift = referencedColumn.timeShift;
+          const referenceDef = operationDefinitionMap[column.operationType];
+          if (referenceDef.shiftable && !hasShift) {
+            referencedColumn = { ...referencedColumn, timeShift: column.timeShift };
+            columns[referenceColumnId] = referencedColumn;
+          }
+          if (!hasShift) {
+            // only push through the current time shift if the current level doesn't have its own
+            setTimeShiftForAllReferences(referencedColumn);
+          }
+        });
+      }
+      setTimeShiftForAllReferences(column);
     }
   });
 
@@ -93,9 +118,10 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
+  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
 
   if (referenceEntries.length || esAggEntries.length) {
-    const aggs: ExpressionAstExpressionBuilder[] = [];
+    let aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
 
     sortedReferences(referenceEntries).forEach((colId) => {
@@ -107,19 +133,29 @@ function getExpressionForLayer(
     });
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
+    let esAggsIdMap: Record<string, OriginalColumn[]> = {};
+    const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
+        const aggId = String(index);
+
         const wrapInFilter = Boolean(def.filterable && col.filter);
+        const wrapInTimeFilter =
+          def.canReduceTimeRange &&
+          !hasDateHistogram &&
+          col.reducedTimeRange &&
+          indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${index}-metric` : String(index),
+          wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
           uiSettings,
-          orderedColumnIds
+          orderedColumnIds,
+          operationDefinitionMap
         );
-        if (wrapInFilter) {
+        if (wrapInFilter || wrapInTimeFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
@@ -132,6 +168,8 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
+                  timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
+                  timeShift: col.timeShift,
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
@@ -139,12 +177,25 @@ function getExpressionForLayer(
             }
           ).toAst();
         }
-        aggs.push(
-          buildExpression({
-            type: 'expression',
-            chain: [aggAst],
-          })
-        );
+
+        const expressionBuilder = buildExpression({
+          type: 'expression',
+          chain: [aggAst],
+        });
+        aggs.push(expressionBuilder);
+
+        const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+          ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
+          : `col-${index}-${aggId}`;
+
+        esAggsIdMap[esAggsId] = [
+          {
+            ...col,
+            id: colId,
+          },
+        ];
+
+        aggExpressionToEsAggsIdMap.set(expressionBuilder, esAggsId);
       }
     });
 
@@ -164,19 +215,71 @@ function getExpressionForLayer(
       );
     }
 
-    const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
-        : `col-${index}-${index}`;
+    const allOperations = uniq(
+      esAggEntries.map(([_, column]) => operationDefinitionMap[column.operationType])
+    );
 
-      return {
-        ...currentIdMap,
-        [esAggsId]: {
-          ...column,
-          id: colId,
-        },
-      };
-    }, {} as Record<string, OriginalColumn>);
+    // De-duplicate aggs for supported operations
+    const dedupedResult = dedupeAggs(aggs, esAggsIdMap, aggExpressionToEsAggsIdMap, allOperations);
+    aggs = dedupedResult.aggs;
+    esAggsIdMap = dedupedResult.esAggsIdMap;
+
+    // Apply any operation-specific custom optimizations
+    allOperations.forEach((operation) => {
+      const optimizeAggs = operation.optimizeEsAggs?.bind(operation);
+      if (optimizeAggs) {
+        const { aggs: newAggs, esAggsIdMap: newIdMap } = optimizeAggs(
+          aggs,
+          esAggsIdMap,
+          aggExpressionToEsAggsIdMap
+        );
+
+        aggs = newAggs;
+        esAggsIdMap = newIdMap;
+      }
+    });
+
+    /*
+      Update ID mappings with new agg array positions.
+
+      Given this esAggs-ID-to-original-column map after percentile (for example) optimization:
+      col-0-0:    column1
+      col-?-1.34: column2 (34th percentile)
+      col-2-2:    column3
+      col-?-1.98: column4 (98th percentile)
+
+      and this array of aggs
+      0: { id: 0 }
+      1: { id: 2 }
+      2: { id: 1 }
+
+      We need to update the anticipated agg indicies to match the aggs array:
+      col-0-0:    column1
+      col-2-1.34: column2 (34th percentile)
+      col-1-2:    column3
+      col-3-3.98: column4 (98th percentile)
+    */
+
+    const updatedEsAggsIdMap: Record<string, OriginalColumn[]> = {};
+    let counter = 0;
+
+    const esAggsIds = Object.keys(esAggsIdMap);
+    aggs.forEach((builder) => {
+      const esAggId = builder.functions[0].getArgument('id')?.[0];
+      const matchingEsAggColumnIds = esAggsIds.filter((id) => extractAggId(id) === esAggId);
+
+      matchingEsAggColumnIds.forEach((currentId) => {
+        const currentColumn = esAggsIdMap[currentId][0];
+        const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
+          ? counter + (currentColumn.isBucketed ? 0 : 1)
+          : counter;
+        const newId = updatePositionIndex(currentId, aggIndex);
+        updatedEsAggsIdMap[newId] = esAggsIdMap[currentId];
+
+        counter++;
+      });
+    });
+
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
         (isColumnOfType<RangeIndexPatternColumn>('range', col) && col.params?.parentFormat) ||
@@ -209,25 +312,25 @@ function getExpressionForLayer(
       ([, col]) => col.operationType === 'date_histogram'
     );
 
-    const columnsWithTimeScale = firstDateHistogramColumn
-      ? columnEntries.filter(
-          ([, col]) =>
-            col.timeScale &&
-            operationDefinitionMap[col.operationType].timeScalingMode &&
-            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
-        )
-      : [];
+    const columnsWithTimeScale = columnEntries.filter(
+      ([, col]) =>
+        col.timeScale &&
+        operationDefinitionMap[col.operationType].timeScalingMode &&
+        operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+    );
+
     const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {
         const scalingCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
-            dateColumnId: [firstDateHistogramColumn![0]],
+            dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
+            reducedTimeRange: col.reducedTimeRange ? [col.reducedTimeRange] : [],
           },
         };
 
@@ -277,6 +380,7 @@ function getExpressionForLayer(
     return {
       type: 'expression',
       chain: [
+        { type: 'function', function: 'kibana', arguments: {} },
         buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
@@ -291,9 +395,9 @@ function getExpressionForLayer(
         }).toAst(),
         {
           type: 'function',
-          function: 'lens_rename_columns',
+          function: 'lens_map_to_columns',
           arguments: {
-            idMap: [JSON.stringify(idMap)],
+            idMap: [JSON.stringify(updatedEsAggsIdMap)],
           },
         },
         ...expressions,
@@ -336,12 +440,13 @@ function sortedReferences(columns: Array<readonly [string, GenericIndexPatternCo
 export function toExpression(
   state: IndexPatternPrivateState,
   layerId: string,
+  indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId],
+      indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings
     );
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 
 /**
  * Simple empty Elasticsearch result for testing

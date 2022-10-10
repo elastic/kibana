@@ -54,6 +54,8 @@ jest.mock('../../../../store/timeline', () => {
 describe('UserName', () => {
   const props = {
     fieldName: 'user.name',
+    fieldType: 'keyword',
+    isAggregatable: true,
     contextId: 'test-context-id',
     eventId: 'test-event-id',
     isDraggable: false,
@@ -108,7 +110,7 @@ describe('UserName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="users-link-anchor"]').first().simulate('click');
+    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
       expect(toggleExpandedDetail).toHaveBeenCalledWith({
         panelView: 'userDetail',
@@ -134,7 +136,7 @@ describe('UserName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="users-link-anchor"]').first().simulate('click');
+    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'userDetail',

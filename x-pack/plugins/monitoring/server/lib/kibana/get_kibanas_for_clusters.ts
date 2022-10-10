@@ -6,11 +6,12 @@
  */
 
 import { chain, find } from 'lodash';
-import { LegacyRequest, Cluster, Bucket } from '../../types';
+import { Globals } from '../../static_globals';
+import { Bucket, Cluster, LegacyRequest } from '../../types';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
-import { Globals } from '../../static_globals';
+import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -25,7 +26,7 @@ import { Globals } from '../../static_globals';
  *  - number of instances
  *  - combined health
  */
-export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
+export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], ccs?: string) {
   const config = req.server.config;
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
@@ -33,7 +34,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
   const moduleType = 'kibana';
   const type = 'kibana_stats';
   const dataset = 'stats';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
@@ -51,7 +52,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
         body: {
           query: createQuery({
             type,
-            dsDataset: `${moduleType}.${dataset}`,
+            dsDataset: getKibanaDataset(dataset),
             metricset: dataset,
             start,
             end,
@@ -74,6 +75,11 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
                     },
                   },
                   aggs: {
+                    last_seen: {
+                      max: {
+                        field: 'kibana_stats.timestamp',
+                      },
+                    },
                     response_time_max: {
                       max: {
                         field: 'kibana_stats.response_times.max',
@@ -185,6 +191,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
         let responseTime = 0;
         let memorySize = 0;
         let memoryLimit = 0;
+        let someStatusIsStale = true;
 
         // if the cluster has kibana instances at all
         if (kibanaUuids.length) {
@@ -204,6 +211,8 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
           responseTime = aggregations.response_time_max?.value;
           memorySize = aggregations.memory_rss?.value;
           memoryLimit = aggregations.memory_heap_size_limit?.value;
+
+          someStatusIsStale = kibanaUuids.some(hasStaleStatus);
         }
 
         return {
@@ -211,6 +220,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
           stats: {
             uuids: kibanaUuids.map(({ key }: Bucket) => key),
             status,
+            some_status_is_stale: someStatusIsStale,
             requests_total: requestsTotal,
             concurrent_connections: connections,
             response_time_max: responseTime,
@@ -222,4 +232,20 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
       });
     })
   );
+}
+
+function hasStaleStatus(kibana: any) {
+  const buckets: any[] = kibana?.latest_report?.buckets ?? [];
+
+  if (buckets.length === 0) {
+    return true;
+  }
+
+  const lastSeenTimestamp: string | null = buckets[0]?.last_seen?.value_as_string ?? null;
+
+  if (lastSeenTimestamp === null) {
+    return true;
+  }
+
+  return isKibanaStatusStale(lastSeenTimestamp);
 }

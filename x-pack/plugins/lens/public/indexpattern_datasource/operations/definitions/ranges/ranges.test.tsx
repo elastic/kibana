@@ -12,8 +12,10 @@ import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@ela
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { IndexPatternLayer, IndexPattern } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
 import {
@@ -24,8 +26,9 @@ import {
   SLICES,
 } from './constants';
 import { RangePopover } from './advanced_editor';
-import { DragDropBuckets } from '../shared_components';
+import { DragDropBuckets } from '../../../../shared_components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
+import { IndexPattern } from '../../../../types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -53,6 +56,8 @@ jest.mock('lodash', () => {
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
+const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
@@ -81,12 +86,22 @@ const defaultOptions = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
   dateRange: {
     fromDate: 'now-1y',
     toDate: 'now',
   },
   data: dataPluginMockValue,
+  fieldFormats: fieldFormatsPluginMockValue,
   unifiedSearch: unifiedSearchPluginMockValue,
+  dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',
@@ -110,6 +125,8 @@ const defaultOptions = {
         aggregatable: true,
       },
     ]),
+    isPersisted: true,
+    spec: {},
   },
   operationDefinitionMap: {},
   isFullscreen: false,
@@ -371,7 +388,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -387,7 +404,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -430,7 +447,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -500,7 +517,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -516,7 +533,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -536,7 +553,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={
               {
@@ -562,7 +579,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -617,7 +634,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -672,7 +689,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -680,7 +697,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -719,7 +736,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -727,7 +744,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -769,7 +786,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -780,8 +797,8 @@ describe('ranges', () => {
         // This series of act closures are made to make it work properly the update flush
         act(() => {
           instance
-            .find('[data-test-subj="lns-customBucketContainer-remove"]')
-            .last()
+            .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
+            .at(0)
             .simulate('click');
         });
 
@@ -807,14 +824,14 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
         );
 
         act(() => {
-          instance.find(RangePopover).last().find(EuiLink).simulate('click');
+          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -839,7 +856,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
             indexPattern={{
@@ -869,7 +886,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
             indexPattern={{
@@ -893,7 +910,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -905,7 +922,7 @@ describe('ranges', () => {
         const updateLayerSpy = jest.fn();
         // now set a format on the range operation
         (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
-          id: 'custom',
+          id: 'bytes',
           params: { decimals: 3 },
         };
 
@@ -913,7 +930,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -921,11 +938,11 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiLink).first().simulate('click');
+          instance.find(EuiLink).first().find('button').simulate('click');
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
-          id: 'custom',
+          id: 'bytes',
           params: { decimals: 3 },
         });
       });

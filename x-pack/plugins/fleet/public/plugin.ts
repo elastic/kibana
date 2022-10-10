@@ -27,10 +27,12 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { once } from 'lodash';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 
@@ -42,21 +44,14 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  setupRouteService,
-  appRoutesService,
-  calculateAuthz,
-  parseExperimentalConfigValue,
-} from '../common';
-import type {
-  CheckPermissionsResponse,
-  PostFleetSetupResponse,
-  FleetAuthz,
-  ExperimentalFeatures,
-} from '../common';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -72,7 +67,7 @@ import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extensi
 
 export type { FleetConfigType } from '../common/types';
 
-import { setCustomIntegrations } from './services/custom_integrations';
+import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -106,14 +101,18 @@ export interface FleetStartDeps {
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
   cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup & CloudStart;
+  discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -276,19 +275,25 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     });
     const { capabilities } = core.application;
 
+    // Set the custom integrations language clients
+    setCustomIntegrationsStart(deps.customIntegrations);
+
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
-      authz: calculateAuthz({
-        fleet: {
-          all: capabilities.fleetv2.all as boolean,
-          setup: false,
-        },
-        integrations: {
-          all: capabilities.fleet.all as boolean,
-          read: capabilities.fleet.read as boolean,
-        },
-        isSuperuser: false,
-      }),
+      authz: {
+        ...calculateAuthz({
+          fleet: {
+            all: capabilities.fleetv2.all as boolean,
+            setup: false,
+          },
+          integrations: {
+            all: capabilities.fleet.all as boolean,
+            read: capabilities.fleet.read as boolean,
+          },
+          isSuperuser: false,
+        }),
+        packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
+      },
 
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();

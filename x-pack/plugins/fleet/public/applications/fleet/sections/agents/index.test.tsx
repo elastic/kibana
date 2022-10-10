@@ -51,9 +51,7 @@ describe('AgentApp', () => {
     mockedUseGetSettings.mockReturnValue({
       isLoading: false,
       data: {
-        item: {
-          has_seen_fleet_migration_notice: true,
-        },
+        item: {},
       },
     } as any);
     mockedUseAuthz.mockReturnValue({
@@ -69,6 +67,8 @@ describe('AgentApp', () => {
       enabled: true,
       isReady: false,
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
 
@@ -82,6 +82,8 @@ describe('AgentApp', () => {
       isReady: false,
       missingRequirements: ['api_keys'],
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
     expect(utils.queryByText('MissingESRequirementsPage')).not.toBeNull();
@@ -95,6 +97,8 @@ describe('AgentApp', () => {
       isReady: false,
       missingRequirements: ['fleet_server'],
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
     expect(utils.queryByText('FleetServerRequirementPage')).not.toBeNull();
@@ -109,6 +113,8 @@ describe('AgentApp', () => {
       missingRequirements: [],
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
 

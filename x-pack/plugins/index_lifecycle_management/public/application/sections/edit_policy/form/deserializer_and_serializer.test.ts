@@ -42,6 +42,7 @@ const originalPolicy: SerializedPolicy = {
         rollover: {
           max_age: '1d',
           max_primary_shard_size: '33gb',
+          max_primary_shard_docs: 12,
           max_docs: 1000,
           max_size: '10gb',
         },
@@ -372,11 +373,15 @@ describe('deserializer and serializer', () => {
     formInternal.phases.hot!.actions.rollover!.max_size = '';
     formInternal.phases.hot!.actions.rollover!.max_age = '';
     formInternal.phases.hot!.actions.rollover!.max_docs = '' as any;
+    formInternal.phases.hot!.actions.rollover!.max_primary_shard_size = '';
+    formInternal.phases.hot!.actions.rollover!.max_primary_shard_docs = '' as any;
 
     const result = serializer(formInternal);
 
+    expect(result.phases.hot!.actions.rollover!.max_size).toBeUndefined();
     expect(result.phases.hot!.actions.rollover!.max_age).toBeUndefined();
     expect(result.phases.hot!.actions.rollover!.max_docs).toBeUndefined();
-    expect(result.phases.hot!.actions.rollover!.max_size).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_primary_shard_size).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_primary_shard_docs).toBeUndefined();
   });
 });

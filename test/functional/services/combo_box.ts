@@ -8,8 +8,6 @@
 
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
-// @ts-ignore not supported yet
-import { scrollIntoViewIfNecessary } from './lib/web_element_wrapper/scroll_into_view_if_necessary';
 
 /**
  * wrapper around EuiComboBox interactions

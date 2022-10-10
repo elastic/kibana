@@ -11,6 +11,7 @@ import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUtils,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
   defaultLogViewAttributes,
@@ -53,7 +54,7 @@ export class LogViewsClient implements ILogViewsClient {
   public async getLogView(logViewId: string): Promise<LogView> {
     return await this.getSavedLogView(logViewId)
       .catch((err) =>
-        this.savedObjectsClient.errors.isNotFoundError(err) || err instanceof NotFoundError
+        SavedObjectsErrorHelpers.isNotFoundError(err) || err instanceof NotFoundError
           ? this.getInternalLogView(logViewId)
           : Promise.reject(err)
       )

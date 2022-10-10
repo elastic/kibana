@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { responseMock } from './response_factory';
+import type { responseMock } from './response_factory';
 
 type ResponseMock = ReturnType<typeof responseMock.create>;
 type Method = keyof ResponseMock;

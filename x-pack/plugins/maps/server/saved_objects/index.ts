@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { getPersistedStateMigrations, setupSavedObjects } from './setup_saved_objects';
+export {
+  getMapsDataViewMigrations,
+  getMapsFilterMigrations,
+  setupSavedObjects,
+} from './setup_saved_objects';

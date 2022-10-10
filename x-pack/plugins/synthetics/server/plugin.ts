@@ -16,19 +16,25 @@ import {
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { initSyntheticsServer } from './server';
+import { initUptimeServer } from './legacy_uptime/uptime_server';
+import { uptimeFeature } from './feature';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
-import { initServerWithKibana } from './kibana.index';
 import {
   KibanaTelemetryAdapter,
   UptimeCorePluginsSetup,
   UptimeCorePluginsStart,
   UptimeServerSetup,
-} from './lib/adapters';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
+} from './legacy_uptime/lib/adapters';
+import { TelemetryEventsSender } from './legacy_uptime/lib/telemetry/sender';
+import {
+  registerUptimeSavedObjects,
+  savedObjectsAdapter,
+} from './legacy_uptime/lib/saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
-import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
-import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
+import { SyntheticsService } from './synthetics_service/synthetics_service';
+import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -37,7 +43,8 @@ export class Plugin implements PluginType {
   private initContext: PluginInitializerContext;
   private logger: Logger;
   private server?: UptimeServerSetup;
-  private syntheticService?: SyntheticsService;
+  private syntheticsService?: SyntheticsService;
+  private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
@@ -79,26 +86,24 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
+      spaces: plugins.spaces,
     } as UptimeServerSetup;
 
-    if (this.server.config.service) {
-      this.syntheticService = new SyntheticsService(
-        this.logger,
-        this.server,
-        this.server.config.service
-      );
+    this.syntheticsService = new SyntheticsService(this.server);
 
-      this.syntheticService.registerSyncTask(plugins.taskManager);
-      this.telemetryEventsSender.setup(plugins.telemetry);
-    }
+    this.syntheticsService.setup(plugins.taskManager);
 
-    initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
+    this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
-    registerUptimeSavedObjects(
-      core.savedObjects,
-      plugins.encryptedSavedObjects,
-      Boolean(this.server.config.service)
-    );
+    this.telemetryEventsSender.setup(plugins.telemetry);
+
+    plugins.features.registerKibanaFeature(uptimeFeature);
+
+    initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
+
+    initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins);
+
+    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
@@ -110,32 +115,21 @@ export class Plugin implements PluginType {
     };
   }
 
-  public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    if (this.server?.config.service) {
-      this.savedObjectsClient = new SavedObjectsClient(
-        coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
-      );
-    } else {
-      this.savedObjectsClient = new SavedObjectsClient(
-        coreStart.savedObjects.createInternalRepository()
-      );
-    }
+  public start(coreStart: CoreStart, pluginsStart: UptimeCorePluginsStart) {
+    this.savedObjectsClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
+    );
 
     if (this.server) {
-      this.server.security = plugins.security;
-      this.server.fleet = plugins.fleet;
-      this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.security = pluginsStart.security;
+      this.server.fleet = pluginsStart.fleet;
+      this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.server?.config.service) {
-      this.syntheticService?.init();
-      this.syntheticService?.scheduleSyncTask(plugins.taskManager);
-      if (this.server && this.syntheticService) {
-        this.server.syntheticsService = this.syntheticService;
-      }
-      this.telemetryEventsSender.start(plugins.telemetry, coreStart);
-    }
+    this.syntheticsService?.start(pluginsStart.taskManager);
+
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
   }
 
   public stop() {}

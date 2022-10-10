@@ -7,8 +7,7 @@
 
 import { counterRate, CounterRateArgs } from '.';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 describe('lens_counter_rate', () => {

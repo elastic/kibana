@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
+import type { RulesErrors } from './get_export_by_object_ids';
+import { getExportByObjectIds, getRulesFromObjects } from './get_export_by_object_ids';
+import type { FindHit } from '../routes/__mocks__/request_responses';
 import {
   getRuleMock,
   getFindResultWithSingleHit,
-  FindHit,
   getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
@@ -23,7 +24,7 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
 describe('get_export_by_object_ids', () => {
@@ -82,6 +83,9 @@ describe('get_export_by_object_ids', () => {
           name: 'Detect Root/Admin Users',
           query: 'user.name: root or user.name: admin',
           references: ['http://example.com', 'https://example.com'],
+          related_integrations: [],
+          required_fields: [],
+          setup: '',
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           meta: { someMeta: 'someField' },
@@ -191,6 +195,10 @@ describe('get_export_by_object_ids', () => {
             name: 'Detect Root/Admin Users',
             query: 'user.name: root or user.name: admin',
             references: ['http://example.com', 'https://example.com'],
+            related_integrations: [],
+            required_fields: [],
+            response_actions: undefined,
+            setup: '',
             timeline_id: 'some-timeline-id',
             timeline_title: 'some-timeline-title',
             meta: { someMeta: 'someField' },
@@ -206,6 +214,13 @@ describe('get_export_by_object_ids', () => {
             version: 1,
             exceptions_list: getListArrayMock(),
             execution_summary: undefined,
+            outcome: undefined,
+            alias_target_id: undefined,
+            alias_purpose: undefined,
+            timestamp_override: undefined,
+            timestamp_override_fallback_disabled: undefined,
+            namespace: undefined,
+            data_view_id: undefined,
           },
         ],
       };

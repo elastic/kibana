@@ -6,7 +6,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { getPlatformIconModule } from './helpers';
 
 export interface PlatformIconProps {
@@ -14,19 +14,9 @@ export interface PlatformIconProps {
 }
 
 const PlatformIconComponent: React.FC<PlatformIconProps> = ({ platform }) => {
-  const [Icon, setIcon] = useState<React.ReactElement | null>(null);
+  const platformIconModule = useMemo(() => getPlatformIconModule(platform), [platform]);
 
-  // FIXME: This is a hack to force the icon to be loaded asynchronously.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const platformIconModule = getPlatformIconModule(platform);
-      setIcon(<EuiIcon type={platformIconModule} title={platform} size="l" />);
-    }, 0);
-
-    return () => clearInterval(interval);
-  }, [platform, setIcon]);
-
-  return Icon;
+  return <EuiIcon type={platformIconModule} title={platform} size="l" />;
 };
 
 export const PlatformIcon = React.memo(PlatformIconComponent);

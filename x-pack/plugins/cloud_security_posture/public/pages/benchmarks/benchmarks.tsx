@@ -9,47 +9,44 @@ import React, { useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFieldSearchProps,
-  EuiPageHeaderProps,
   EuiButton,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
   EuiText,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { allNavigationItems } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
+import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
-import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
-import { BENCHMARK_INTEGRATIONS } from './translations';
 import {
   useCspBenchmarkIntegrations,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
-import { SEARCH_PLACEHOLDER } from './translations';
+import * as TEST_SUBJ from './test_subjects';
 
-const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
 const SEARCH_DEBOUNCE_MS = 300;
-export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'csp_benchmarks_table';
-export const ADD_INTEGRATION_TEST_SUBJ = 'csp_add_integration';
 
 const AddCisIntegrationButton = () => {
   const cisIntegrationLink = useCISIntegrationLink();
 
   return (
     <EuiButton
-      data-test-subj={ADD_INTEGRATION_TEST_SUBJ}
+      data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
       iconType="plusInCircle"
       href={cisIntegrationLink}
+      isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.addCisIntegrationButtonLabel"
-        defaultMessage="Add a CIS integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
+        defaultMessage="Add a KSPM integration"
       />
     </EuiButton>
   );
@@ -62,12 +59,12 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
       <EuiText>
         <strong>
           <FormattedMessage
-            id="xpack.csp.benchmarks.integrationsNotFoundMessage"
+            id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle"
             defaultMessage="No benchmark integrations found"
           />
           {name && (
             <FormattedMessage
-              id="xpack.csp.benchmarks.integrationsNotFoundForNameMessage"
+              id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundForNameTitle"
               defaultMessage=' for "{name}"'
               values={{ name }}
             />
@@ -79,7 +76,7 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
     <EuiText>
       <EuiTextColor color="subdued">
         <FormattedMessage
-          id="xpack.csp.benchmarks.integrationsNotFoundWithFiltersMessage"
+          id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle"
           defaultMessage="We weren't able to find any benchmark integrations with the above filters."
         />
       </EuiTextColor>
@@ -117,7 +114,10 @@ const BenchmarkSearchField = ({
         <EuiFieldSearch
           onSearch={setLocalValue}
           isLoading={isLoading}
-          placeholder={SEARCH_PLACEHOLDER}
+          placeholder={i18n.translate(
+            'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
+            { defaultMessage: 'e.g. benchmark name' }
+          )}
           incremental
         />
       </EuiFlexItem>
@@ -125,28 +125,34 @@ const BenchmarkSearchField = ({
   );
 };
 
-const PAGE_HEADER: EuiPageHeaderProps = {
-  pageTitle: BENCHMARK_INTEGRATIONS,
-  rightSideItems: [<AddCisIntegrationButton />],
-};
-
 export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 5,
+    perPage: 10,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
 
   const queryResult = useCspBenchmarkIntegrations(query);
-
-  useCspBreadcrumbs(BENCHMARKS_BREADCRUMBS);
-
   const totalItemCount = queryResult.data?.total || 0;
 
   return (
-    <CspPageTemplate pageHeader={PAGE_HEADER}>
+    <CloudPosturePage>
+      <EuiPageHeader
+        data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
+        pageTitle={
+          <CloudPosturePageTitle
+            title={i18n.translate(
+              'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
+              { defaultMessage: 'Benchmark Integrations' }
+            )}
+          />
+        }
+        rightSideItems={[<AddCisIntegrationButton />]}
+        bottomBorder
+      />
+      <EuiSpacer />
       <BenchmarkSearchField
         isLoading={queryResult.isFetching}
         onSearch={(name) => setQuery((current) => ({ ...current, name }))}
@@ -159,7 +165,7 @@ export const Benchmarks = () => {
       <EuiSpacer size="s" />
       <BenchmarksTable
         benchmarks={queryResult.data?.items || []}
-        data-test-subj={BENCHMARKS_TABLE_DATA_TEST_SUBJ}
+        data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}
         pageIndex={query.page}
@@ -186,6 +192,6 @@ export const Benchmarks = () => {
           ) : undefined
         }
       />
-    </CspPageTemplate>
+    </CloudPosturePage>
   );
 };

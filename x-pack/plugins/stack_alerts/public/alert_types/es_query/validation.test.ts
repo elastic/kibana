@@ -6,9 +6,16 @@
  */
 
 import { EsQueryAlertParams, SearchType } from './types';
-import { validateExpression } from './validation';
+import { validateExpression, hasExpressionValidationErrors } from './validation';
 
 describe('expression params validation', () => {
+  test('if params are not set should return a proper error message', () => {
+    const initialParams: EsQueryAlertParams<SearchType.esQuery> =
+      {} as EsQueryAlertParams<SearchType.esQuery>;
+    expect(validateExpression(initialParams).errors.searchType.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.searchType[0]).toBe('Query type is required.');
+  });
+
   test('if index property is invalid should return proper error message', () => {
     const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
       index: [],
@@ -18,6 +25,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.index[0]).toBe('Index is required.');
@@ -32,6 +40,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
@@ -46,6 +55,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe('Query must be valid JSON.');
@@ -60,9 +70,11 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
+    expect(hasExpressionValidationErrors(initialParams)).toBe(true);
   });
 
   test('if searchConfiguration property is not set should return proper error message', () => {
@@ -89,6 +101,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       thresholdComparator: '<',
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold 0 is required.');
@@ -104,6 +117,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       thresholdComparator: 'between',
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold 1 is required.');
@@ -119,6 +133,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       thresholdComparator: 'between',
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe(
@@ -135,11 +150,26 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.size[0]).toBe(
       'Size must be between 0 and 10,000.'
     );
+  });
+
+  test('if size property is 0 should not return error message', () => {
+    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: 0,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBe(0);
   });
 
   test('if size property is > 10000 should return proper error message', () => {
@@ -151,10 +181,26 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
+      excludeHitsFromPreviousRun: true,
     };
     expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.size[0]).toBe(
       'Size must be between 0 and 10,000.'
     );
+  });
+
+  test('should not return error messages if all is correct', () => {
+    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: '{"query":{"match_all":{}}}',
+      size: 250,
+      timeWindowSize: 100,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '@timestamp',
+      excludeHitsFromPreviousRun: true,
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBe(0);
+    expect(hasExpressionValidationErrors(initialParams)).toBe(false);
   });
 });

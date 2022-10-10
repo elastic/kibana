@@ -12,8 +12,17 @@ SOURCE_FILES = glob(
     "lib.js",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/__fixtures__"
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -26,7 +35,6 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
 ]
 
 RUNTIME_DEPS = [
@@ -35,7 +43,6 @@ RUNTIME_DEPS = [
   "@npm//dedent",
   "@npm//eslint",
   "@npm//eslint-module-utils",
-  "@npm//micromatch",
 ]
 
 js_library(

@@ -17,6 +17,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { treemapVisFunction } from './treemap_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#treemapVis', () => {
   const fn = functionWrapper(treemapVisFunction());
@@ -135,10 +136,13 @@ describe('interpreter/functions#treemapVis', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
-    };
-    await fn(context, visConfig, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, visConfig, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });

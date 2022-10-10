@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_NETWORK_HTTP = i18n.translate(
-  'xpack.securitySolution.networkHttp.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on network http search`,
-  }
-);
-
 export const FAIL_NETWORK_HTTP = i18n.translate(
   'xpack.securitySolution.networkHttp.failSearchDescription',
   {

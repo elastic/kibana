@@ -8,7 +8,7 @@
 
 import { NotificationsStart, CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { IndexPatternsContract } from './data_views';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] =
@@ -20,7 +20,7 @@ export const [getUiSettings, setUiSettings] =
 export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
 
 export const [getIndexPatterns, setIndexPatterns] =
-  createGetterSetter<IndexPatternsContract>('IndexPatterns');
+  createGetterSetter<DataViewsContract>('IndexPatterns');
 
 export const [getSearchService, setSearchService] =
   createGetterSetter<DataPublicPluginStart['search']>('Search');

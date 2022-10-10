@@ -14,7 +14,7 @@ export class VegaDebugInspectorViewService extends FtrService {
   private readonly dataGrid = this.ctx.getService('dataGrid');
 
   async openVegaDebugInspectorView() {
-    await this.inspector.openInspectorView('inspectorViewChooserVega debug');
+    await this.inspector.openInspectorView('Vega debug');
   }
 
   public getOpenDataViewerButton() {

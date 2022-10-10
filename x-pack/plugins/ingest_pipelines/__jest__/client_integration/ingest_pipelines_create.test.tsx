@@ -80,6 +80,18 @@ describe('<PipelinesCreate />', () => {
       expect(find('apiRequestFlyout.apiRequestFlyoutTitle').text()).toBe('Request');
     });
 
+    test('should allow to prepopulate the name field', async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup, '?name=test-pipeline');
+      });
+
+      testBed.component.update();
+
+      expect(testBed.exists('nameField.input')).toBe(true);
+      expect(testBed.find('nameField.input').props().disabled).toBe(true);
+      expect(testBed.find('nameField.input').props().value).toBe('test-pipeline');
+    });
+
     describe('form validation', () => {
       test('should prevent form submission if required fields are missing', async () => {
         const { form, actions, component, find } = testBed;

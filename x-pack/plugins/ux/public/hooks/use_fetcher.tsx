@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import {

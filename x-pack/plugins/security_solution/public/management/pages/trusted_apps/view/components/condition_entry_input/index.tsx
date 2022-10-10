@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, useCallback, useMemo, useState } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import {
-  TrustedAppConditionEntry,
-  OperatorFieldIds,
-} from '../../../../../../../common/endpoint/types';
+import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
+import { OperatorFieldIds } from '../../../../../../../common/endpoint/types';
 
 import {
   CONDITION_FIELD_DESCRIPTION,
@@ -28,7 +21,7 @@ import {
   ENTRY_PROPERTY_TITLES,
   OPERATOR_TITLES,
 } from '../../translations';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/path_placeholder';
 
 const ConditionEntryCell = memo<{
@@ -100,6 +93,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isVisited, setIsVisited] = useState(false);
 
+    const handleVisited = useCallback(() => {
+      onVisited?.(entry);
+
+      if (!isVisited) {
+        setIsVisited(true);
+      }
+    }, [entry, isVisited, onVisited]);
+
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       const getDropdownDisplay = (field: ConditionEntryField) => (
         <>
@@ -139,8 +140,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleFieldUpdate = useCallback(
-      (newField) => onChange({ ...entry, field: newField }, entry),
-      [entry, onChange]
+      (newField) => {
+        onChange({ ...entry, field: newField }, entry);
+
+        if (entry.value) {
+          handleVisited();
+        }
+      },
+      [handleVisited, entry, onChange]
     );
 
     const handleOperatorUpdate = useCallback(
@@ -151,13 +158,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 
     const handleValueOnBlur = useCallback(() => {
-      if (onVisited) {
-        onVisited(entry);
-      }
-      if (!isVisited) {
-        setIsVisited(true);
-      }
-    }, [entry, onVisited, isVisited]);
+      handleVisited();
+    }, [handleVisited]);
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>

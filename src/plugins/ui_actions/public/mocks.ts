@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UiActionsSetup, UiActionsStart } from '.';
+import { Action, UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
@@ -39,7 +39,9 @@ const createStartContract = (): Start => {
     hasAction: jest.fn(),
     getTrigger: jest.fn(),
     getTriggerActions: jest.fn((id: string) => []),
-    getTriggerCompatibleActions: jest.fn(),
+    getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
+      Promise.resolve([] as Array<Action<object>>)
+    ),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
   };

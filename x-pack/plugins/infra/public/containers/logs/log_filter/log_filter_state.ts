@@ -105,4 +105,5 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
   };
 };
 
-export const LogFilterState = createContainer(useLogFilterState);
+export const [LogFilterStateProvider, useLogFilterStateContext] =
+  createContainer(useLogFilterState);

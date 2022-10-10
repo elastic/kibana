@@ -22,6 +22,7 @@ import {
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
+  ALERT_TIME_RANGE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -145,6 +146,8 @@ export const createLifecycleExecutor =
       state: previousState,
     } = options;
 
+    const ruleDataClientWriter = await ruleDataClient.getWriter();
+
     const state = getOrElse(
       (): WrappedLifecycleRuleState<State> => ({
         wrapped: previousState as State,
@@ -233,7 +236,12 @@ export const createLifecycleExecutor =
           ...commonRuleFields,
           ...currentAlertData,
           [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
-
+          [ALERT_TIME_RANGE]: isRecovered
+            ? {
+                gte: started,
+                lte: commonRuleFields[TIMESTAMP],
+              }
+            : { gte: started },
           [ALERT_INSTANCE_ID]: alertId,
           [ALERT_START]: started,
           [ALERT_UUID]: alertUuid,
@@ -267,7 +275,7 @@ export const createLifecycleExecutor =
     if (allEventsToIndex.length > 0 && writeAlerts) {
       logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
-      await ruleDataClient.getWriter().bulk({
+      await ruleDataClientWriter.bulk({
         body: allEventsToIndex.flatMap(({ event, indexName }) => [
           indexName
             ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
@@ -275,6 +283,10 @@ export const createLifecycleExecutor =
           event,
         ]),
       });
+    } else {
+      logger.debug(
+        `[Rule Registry] Not indexing ${allEventsToIndex.length} alerts because writing has been disabled.`
+      );
     }
 
     const nextTrackedAlerts = Object.fromEntries(

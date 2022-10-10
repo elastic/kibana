@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createRulesBulkSchema, CreateRulesBulkSchema } from './create_rules_bulk_schema';
+import type { CreateRulesBulkSchema } from './create_rules_bulk_schema';
+import { createRulesBulkSchema } from './create_rules_bulk_schema';
 import { exactCheck, foldLeftRight, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { getCreateRulesSchemaMock } from './rule_schemas.mock';
 

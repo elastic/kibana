@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...authentication,
         authentication_provider: { name: '__http__', type: 'http' },
         authentication_type: 'token',
+        elastic_cloud_user: false,
       },
     };
   }

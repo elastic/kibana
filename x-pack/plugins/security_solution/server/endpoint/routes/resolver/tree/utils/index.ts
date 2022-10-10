@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ResolverSchema } from '../../../../../../common/endpoint/types';
+import type { ResolverSchema } from '../../../../../../common/endpoint/types';
 
 /**
  * Represents a time range filter
@@ -21,15 +20,21 @@ export interface TimeRange {
 export type NodeID = string | number;
 
 /**
- * Returns the doc value fields filter to use in queries to limit the number of fields returned in the
+ * Returns valid IDs that can be used in a search.
+ *
+ * @param ids array of ids
+ */
+export function validIDs(ids: NodeID[]): NodeID[] {
+  return ids.filter((id) => String(id) !== '');
+}
+
+/**
+ * Returns the resolver fields filter to use in queries to limit the number of fields returned in the
  * query response.
- *
- * See for more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-fields.html#docvalue-fields
- *
  * @param schema is the node schema information describing how relationships are formed between nodes
  *  in the resolver graph.
  */
-export function docValueFields(schema: ResolverSchema): Array<{ field: string }> {
+export function resolverFields(schema: ResolverSchema): Array<{ field: string }> {
   const filter = [{ field: '@timestamp' }, { field: schema.id }, { field: schema.parent }];
   if (schema.ancestry) {
     filter.push({ field: schema.ancestry });
@@ -39,13 +44,4 @@ export function docValueFields(schema: ResolverSchema): Array<{ field: string }>
     filter.push({ field: schema.name });
   }
   return filter;
-}
-
-/**
- * Returns valid IDs that can be used in a search.
- *
- * @param ids array of ids
- */
-export function validIDs(ids: NodeID[]): NodeID[] {
-  return ids.filter((id) => String(id) !== '');
 }

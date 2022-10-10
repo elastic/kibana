@@ -11,7 +11,11 @@ import { DataViewBase } from './types';
 import { getDataViewFieldSubtypeNested } from '../utils';
 
 /** @internal */
-export const handleNestedFilter = (filter: Filter, indexPattern?: DataViewBase) => {
+export const handleNestedFilter = (
+  filter: Filter,
+  indexPattern?: DataViewBase,
+  config: { ignoreUnmapped?: boolean } = {}
+) => {
   if (!indexPattern) return filter;
 
   const fieldName = getFilterField(filter);
@@ -36,6 +40,9 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: DataViewBase) 
       nested: {
         path: subTypeNested.nested.path,
         query: query.query || query,
+        ...(typeof config.ignoreUnmapped === 'boolean' && {
+          ignore_unmapped: config.ignoreUnmapped,
+        }),
       },
     },
   };

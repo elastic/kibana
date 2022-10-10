@@ -11,6 +11,10 @@
 
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { asyncForEach } from '@kbn/std';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { lastValueFrom } from 'rxjs';
 import {
@@ -18,11 +22,14 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { getDataViewIdFromName } from '../util/index_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
+import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
@@ -48,6 +55,17 @@ export interface ExplorerJob {
   id: string;
   selected: boolean;
   bucketSpanSeconds: number;
+  isSingleMetricViewerJob?: boolean;
+  sourceIndices?: string[];
+}
+
+export function isExplorerJob(arg: unknown): arg is ExplorerJob {
+  return (
+    isPopulatedObject(arg) &&
+    typeof arg.id === 'string' &&
+    arg.selected !== undefined &&
+    arg.bucketSpanSeconds !== undefined
+  );
 }
 
 interface ClearedSelectedAnomaliesState {
@@ -107,12 +125,25 @@ export interface ViewBySwimLaneData extends OverallSwimlaneData {
   cardinality: number;
 }
 
+export interface SourceIndexGeoFields {
+  [key: string]: { geoFields: string[]; dataViewId: string };
+}
+
+export interface SourceIndicesWithGeoFields {
+  [key: string]: SourceIndexGeoFields;
+}
+
 // create new job objects based on standard job config objects
-// new job objects just contain job id, bucket span in seconds and a selected flag.
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-    return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan!.asSeconds() };
+    return {
+      id: job.job_id,
+      selected: false,
+      bucketSpanSeconds: bucketSpan!.asSeconds(),
+      isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+      sourceIndices: job.datafeed_config.indices,
+    };
   });
 }
 
@@ -495,6 +526,8 @@ export async function loadAnomaliesTableData(
           }
 
           anomaly.isTimeSeriesViewRecord = isChartable;
+          anomaly.isGeoRecord =
+            detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
 
           if (mlJobService.customUrlsByJob[jobId] !== undefined) {
             anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
@@ -590,4 +623,52 @@ export function removeFilterFromQueryString(
   newQueryString = newQueryString.replace(startPattern, '');
 
   return newQueryString;
+}
+
+// Returns an object mapping job ids to source indices which map to geo fields for that index
+export async function getSourceIndicesWithGeoFields(
+  selectedJobs: Array<CombinedJob | ExplorerJob>,
+  dataViewsService: DataViewsContract
+): Promise<SourceIndicesWithGeoFields> {
+  const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
+  // Go through selected jobs
+  if (Array.isArray(selectedJobs)) {
+    await asyncForEach(selectedJobs, async (job) => {
+      let sourceIndices;
+      let jobId: string;
+      if (isExplorerJob(job)) {
+        sourceIndices = job.sourceIndices;
+        jobId = job.id;
+      } else {
+        sourceIndices = job.datafeed_config.indices;
+        jobId = job.job_id;
+      }
+
+      if (Array.isArray(sourceIndices)) {
+        // Check fields for each source index to see if it has geo fields
+        await asyncForEach(sourceIndices, async (sourceIndex) => {
+          const dataViewId = await getDataViewIdFromName(sourceIndex);
+
+          if (dataViewId) {
+            const dataView = await dataViewsService.get(dataViewId);
+            const geoFields = [
+              ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
+              ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
+            ];
+            if (geoFields.length > 0) {
+              if (sourceIndicesWithGeoFieldsMap[jobId] === undefined) {
+                sourceIndicesWithGeoFieldsMap[jobId] = {
+                  [sourceIndex]: { geoFields: [], dataViewId },
+                };
+              }
+              sourceIndicesWithGeoFieldsMap[jobId][sourceIndex].geoFields.push(
+                ...geoFields.map((field) => field.name)
+              );
+            }
+          }
+        });
+      }
+    });
+  }
+  return sourceIndicesWithGeoFieldsMap;
 }

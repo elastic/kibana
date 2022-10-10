@@ -7,7 +7,8 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { CommentAttributes, CommentType } from '@kbn/cases-plugin/common/api/cases/comment';
+import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
+import { CommentType } from '@kbn/cases-plugin/common/api/cases/comment';
 import type { AlertAggs, EventLogTypeStatusAggs } from '../../types';
 import type { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';
 
@@ -154,6 +155,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
         maxGapDuration: {
           value: 5651,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.savedQueryRule': {
         doc_count: 0,
@@ -186,6 +196,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
       'siem.eqlRule': {
@@ -220,6 +239,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.thresholdRule': {
         doc_count: 0,
@@ -252,6 +280,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
       'siem.mlRule': {
@@ -286,6 +323,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.indicatorRule': {
         doc_count: 0,
@@ -318,6 +364,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
     },
@@ -569,6 +624,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.savedQueryRule': {
         doc_count: 0,
@@ -600,6 +664,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -635,6 +708,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.thresholdRule': {
         doc_count: 0,
@@ -666,6 +748,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -701,6 +792,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.indicatorRule': {
         doc_count: 0,
@@ -732,6 +832,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -950,6 +1059,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
         maxGapDuration: {
           value: 5474,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.savedQueryRule': {
         doc_count: 0,
@@ -982,6 +1100,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
       'siem.eqlRule': {
@@ -1016,6 +1143,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.thresholdRule': {
         doc_count: 0,
@@ -1048,6 +1184,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
       'siem.mlRule': {
@@ -1082,6 +1227,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.indicatorRule': {
         doc_count: 0,
@@ -1114,6 +1268,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
     },
@@ -1353,6 +1516,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.savedQueryRule': {
         doc_count: 0,
@@ -1384,6 +1556,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -1419,6 +1600,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.thresholdRule': {
         doc_count: 0,
@@ -1450,6 +1640,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -1485,6 +1684,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.indicatorRule': {
         doc_count: 0,
@@ -1516,6 +1724,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -1734,6 +1951,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
         maxGapDuration: {
           value: 5651,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.savedQueryRule': {
         doc_count: 0,
@@ -1766,6 +1992,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
       'siem.eqlRule': {
@@ -1800,6 +2035,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.thresholdRule': {
         doc_count: 0,
@@ -1832,6 +2076,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
       'siem.mlRule': {
@@ -1866,6 +2119,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
       },
       'siem.indicatorRule': {
         doc_count: 0,
@@ -1898,6 +2160,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
         },
         maxGapDuration: {
           value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
         },
       },
     },
@@ -2129,6 +2400,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.savedQueryRule': {
         doc_count: 0,
@@ -2160,6 +2440,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -2195,6 +2484,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.thresholdRule': {
         doc_count: 0,
@@ -2226,6 +2524,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -2261,6 +2568,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
         maxGapDuration: {
           value: null,
         },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
       },
       'siem.indicatorRule': {
         doc_count: 0,
@@ -2292,6 +2608,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
           value: null,
         },
         maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
           value: null,
         },
       },
@@ -2482,6 +2807,11 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   threat_match: {
@@ -2505,6 +2835,11 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   machine_learning: {
@@ -2524,6 +2859,11 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
       min: 0,
     },
     gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
       max: 0,
       avg: 0,
       min: 0,
@@ -2593,6 +2933,11 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 4246.375,
       min: 2811,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 6,
   },
   saved_query: {
@@ -2616,6 +2961,11 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   threshold: {
@@ -2635,6 +2985,11 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
       min: 0,
     },
     gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
       max: 0,
       avg: 0,
       min: 0,
@@ -2675,6 +3030,11 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   threat_match: {
@@ -2698,6 +3058,11 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   machine_learning: {
@@ -2717,6 +3082,11 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
       min: 0,
     },
     gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
       max: 0,
       avg: 0,
       min: 0,
@@ -2771,6 +3141,11 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
       avg: 4141.75,
       min: 2811,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 4,
   },
   saved_query: {
@@ -2794,6 +3169,11 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   threshold: {
@@ -2813,6 +3193,11 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
       min: 0,
     },
     gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
       max: 0,
       avg: 0,
       min: 0,
@@ -2853,6 +3238,11 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   threat_match: {
@@ -2876,6 +3266,11 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   machine_learning: {
@@ -2895,6 +3290,11 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
       min: 0,
     },
     gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
       max: 0,
       avg: 0,
       min: 0,
@@ -2939,6 +3339,11 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 4351,
       min: 3051,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 2,
   },
   saved_query: {
@@ -2962,6 +3367,11 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
       avg: 0,
       min: 0,
     },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
     gap_count: 0,
   },
   threshold: {
@@ -2981,6 +3391,11 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
       min: 0,
     },
     gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
       max: 0,
       avg: 0,
       min: 0,

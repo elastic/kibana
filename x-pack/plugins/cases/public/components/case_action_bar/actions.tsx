@@ -6,7 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -14,6 +15,7 @@ import { PropertyActions } from '../property_actions';
 import { Case } from '../../../common/ui/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CaseViewActions {
   caseData: Case;
@@ -21,18 +23,30 @@ interface CaseViewActions {
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
-  // Delete case
-  const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
-    useDeleteCases();
+  const { mutate: deleteCases } = useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
+  const { permissions } = useCasesContext();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  const openModal = useCallback(() => {
+    setIsModalVisible(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalVisible(false);
+  }, []);
 
   const propertyActions = useMemo(
     () => [
-      {
-        iconType: 'trash',
-        label: i18n.DELETE_CASE(),
-        onClick: handleToggleModal,
-      },
+      ...(permissions.delete
+        ? [
+            {
+              iconType: 'trash',
+              label: i18n.DELETE_CASE(),
+              onClick: openModal,
+            },
+          ]
+        : []),
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
@@ -43,23 +57,32 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           ]
         : []),
     ],
-    [handleToggleModal, currentExternalIncident]
+    [permissions.delete, openModal, currentExternalIncident]
   );
 
-  if (isDeleted) {
-    navigateToAllCases();
+  const onConfirmDeletion = useCallback(() => {
+    setIsModalVisible(false);
+    deleteCases(
+      { caseIds: [caseData.id], successToasterTitle: i18n.DELETED_CASES(1) },
+      { onSuccess: navigateToAllCases }
+    );
+  }, [caseData.id, deleteCases, navigateToAllCases]);
+
+  if (propertyActions.length === 0) {
     return null;
   }
+
   return (
-    <>
+    <EuiFlexItem grow={false} data-test-subj="case-view-actions">
       <PropertyActions propertyActions={propertyActions} />
-      <ConfirmDeleteCaseModal
-        caseTitle={caseData.title}
-        isModalVisible={isDisplayConfirmDeleteModal}
-        onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
-      />
-    </>
+      {isModalVisible ? (
+        <ConfirmDeleteCaseModal
+          totalCasesToBeDeleted={1}
+          onCancel={closeModal}
+          onConfirm={onConfirmDeletion}
+        />
+      ) : null}
+    </EuiFlexItem>
   );
 };
 ActionsComponent.displayName = 'Actions';

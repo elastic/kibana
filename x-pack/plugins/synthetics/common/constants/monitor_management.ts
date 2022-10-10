@@ -8,11 +8,16 @@
 // values must match keys in the integration package
 export enum ConfigKey {
   APM_SERVICE_NAME = 'service.name',
+  CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
+  CONFIG_ID = 'config_id',
   ENABLED = 'enabled',
+  FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
+  MONITOR_SOURCE_TYPE = 'origin',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
+  JOURNEY_ID = 'journey_id',
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
   MONITOR_TYPE = 'type',
@@ -21,6 +26,9 @@ export enum ConfigKey {
   LOCATIONS = 'locations',
   PARAMS = 'params',
   PASSWORD = 'password',
+  PLAYWRIGHT_OPTIONS = 'playwright_options',
+  ORIGINAL_SPACE = 'original_space', // the original space the montior was saved in. Used by push monitors to ensure uniqueness of monitor id sent to heartbeat and prevent data collisions
+  PORT = 'url.port',
   PROXY_URL = 'proxy_url',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
   RESPONSE_BODY_CHECK_NEGATIVE = 'check.response.body.negative',
@@ -37,13 +45,16 @@ export enum ConfigKey {
   REVISION = 'revision',
   SCHEDULE = 'schedule',
   SCREENSHOTS = 'screenshots',
+  SOURCE_PROJECT_CONTENT = 'source.project.content',
   SOURCE_INLINE = 'source.inline.script',
   SOURCE_ZIP_URL = 'source.zip_url.url',
   SOURCE_ZIP_USERNAME = 'source.zip_url.username',
   SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
   SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
   SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
+  PROJECT_ID = 'project_id',
   SYNTHETICS_ARGS = 'synthetics_args',
+  TEXT_ASSERTION = 'playwright_text_assertion',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -58,7 +69,6 @@ export enum ConfigKey {
   UPLOAD_SPEED = 'throttling.upload_speed',
   LATENCY = 'throttling.latency',
   URLS = 'urls',
-  PORT = 'url.port',
   USERNAME = 'username',
   WAIT = 'wait',
   ZIP_URL_TLS_CERTIFICATE_AUTHORITIES = 'source.zip_url.ssl.certificate_authorities',
@@ -67,6 +77,9 @@ export enum ConfigKey {
   ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
   ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
   ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+
+  // deprecated, slated to be removed in a future version
+  ID = 'id',
 }
 
 export const secretKeys = [
@@ -80,6 +93,7 @@ export const secretKeys = [
   ConfigKey.RESPONSE_HEADERS_CHECK,
   ConfigKey.RESPONSE_RECEIVE_CHECK,
   ConfigKey.SOURCE_INLINE,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
   ConfigKey.SOURCE_ZIP_USERNAME,
   ConfigKey.SOURCE_ZIP_PASSWORD,
   ConfigKey.SYNTHETICS_ARGS,

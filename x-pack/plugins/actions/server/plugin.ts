@@ -47,8 +47,8 @@ import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
+  createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
-import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
@@ -91,12 +91,16 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
-} from './lib/is_conector_deprecated';
+} from './lib/is_connector_deprecated';
+import { createSubActionConnectorFramework } from './sub_action_framework';
+import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { CaseConnector } from './sub_action_framework/case';
 
 export interface PluginSetupContract {
   registerType<
@@ -107,8 +111,16 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
-
+  registerSubActionConnectorType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  >(
+    connector: SubActionConnectorType<Config, Secrets>
+  ): void;
   isPreconfiguredConnector(connectorId: string): boolean;
+  getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
 }
 
 export interface PluginStartContract {
@@ -262,13 +274,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
-    registerBuiltInActionTypes({
-      logger: this.logger,
-      actionTypeRegistry,
-      actionsConfigUtils,
-      publicBaseUrl: core.http.basePath.publicBaseUrl,
-    });
-
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
       registerActionsUsageCollector(
@@ -310,13 +315,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    // Routes
-    defineRoutes(
-      core.http.createRouter<ActionsRequestHandlerContext>(),
-      this.licenseState,
+    const subActionFramework = createSubActionConnectorFramework({
+      actionTypeRegistry,
+      logger: this.logger,
       actionsConfigUtils,
-      this.usageCounter
-    );
+    });
+
+    // Routes
+    defineRoutes({
+      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      licenseState: this.licenseState,
+      actionsConfigUtils,
+      usageCounter: this.usageCounter,
+    });
 
     // Cleanup failed execution task definition
     if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
@@ -342,10 +353,25 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
       },
+      registerSubActionConnectorType: <
+        Config extends ActionTypeConfig = ActionTypeConfig,
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets
+      >(
+        connector: SubActionConnectorType<Config, Secrets>
+      ) => {
+        subActionFramework.registerConnector(connector);
+      },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.preconfiguredActions.find(
           (preconfigured) => preconfigured.id === connectorId
         );
+      },
+      getSubActionConnectorClass: () => SubActionConnector,
+      getCaseConnectorClass: () => CaseConnector,
+      getActionsHealth: () => {
+        return {
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
+        };
       },
     };
   }
@@ -386,6 +412,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
 
       return new ActionsClient({
+        logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
         defaultKibanaIndex: kibanaIndex!,
@@ -404,6 +431,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           preconfiguredActions,
         }),
         executionEnqueuer: createExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
+        bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
@@ -577,6 +610,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             includedHiddenTypes,
           });
           return new ActionsClient({
+            logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
@@ -592,6 +626,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               preconfiguredActions,
             }),
             executionEnqueuer: createExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
+            bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,

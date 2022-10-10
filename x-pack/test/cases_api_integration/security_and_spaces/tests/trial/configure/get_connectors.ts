@@ -11,12 +11,14 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
+  getServiceNowOAuthConnector,
   getJiraConnector,
   getResilientConnector,
   createConnector,
   getServiceNowSIRConnector,
   getEmailConnector,
   getCaseConnectors,
+  getCasesWebhookConnector,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,20 +33,59 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return the correct connectors', async () => {
       const snConnector = await createConnector({ supertest, req: getServiceNowConnector() });
+      const snOAuthConnector = await createConnector({
+        supertest,
+        req: getServiceNowOAuthConnector(),
+      });
       const emailConnector = await createConnector({ supertest, req: getEmailConnector() });
       const jiraConnector = await createConnector({ supertest, req: getJiraConnector() });
       const resilientConnector = await createConnector({ supertest, req: getResilientConnector() });
       const sir = await createConnector({ supertest, req: getServiceNowSIRConnector() });
+      const casesWebhookConnector = await createConnector({
+        supertest,
+        req: getCasesWebhookConnector(),
+      });
 
       actionsRemover.add('default', sir.id, 'action', 'actions');
       actionsRemover.add('default', snConnector.id, 'action', 'actions');
+      actionsRemover.add('default', snOAuthConnector.id, 'action', 'actions');
       actionsRemover.add('default', emailConnector.id, 'action', 'actions');
       actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
       actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
+      actionsRemover.add('default', casesWebhookConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({ supertest });
+      const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));
 
-      expect(connectors).to.eql([
+      expect(sortedConnectors).to.eql([
+        {
+          id: casesWebhookConnector.id,
+          actionTypeId: '.cases-webhook',
+          name: 'Cases Webhook Connector',
+          config: {
+            createCommentJson: '{"body":{{{case.comment}}}}',
+            createCommentMethod: 'post',
+            createCommentUrl: 'http://some.non.existent.com/{{{external.system.id}}}/comment',
+            createIncidentJson:
+              '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+            createIncidentMethod: 'post',
+            createIncidentResponseKey: 'id',
+            createIncidentUrl: 'http://some.non.existent.com/',
+            getIncidentResponseExternalTitleKey: 'key',
+            hasAuth: true,
+            headers: { [`content-type`]: 'application/json' },
+            viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+            getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+            updateIncidentJson:
+              '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+            updateIncidentMethod: 'put',
+            updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+          },
+          isPreconfigured: false,
+          isDeprecated: false,
+          isMissingSecrets: false,
+          referencedByCount: 0,
+        },
         {
           id: jiraConnector.id,
           actionTypeId: '.jira',
@@ -90,6 +131,27 @@ export default ({ getService }: FtrProviderContext): void => {
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
+          },
+          isPreconfigured: false,
+          isDeprecated: false,
+          isMissingSecrets: false,
+          referencedByCount: 0,
+        },
+        {
+          id: snOAuthConnector.id,
+          actionTypeId: '.servicenow',
+          name: 'ServiceNow OAuth Connector',
+          config: {
+            apiUrl: 'http://some.non.existent.com',
+            usesTableApi: false,
+            isOAuth: true,
+            clientId: 'abc',
+            userIdentifierValue: 'elastic',
+            jwtKeyId: 'def',
           },
           isPreconfigured: false,
           isDeprecated: false,
@@ -99,10 +161,14 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           id: sir.id,
           actionTypeId: '.servicenow-sir',
-          name: 'ServiceNow Connector',
+          name: 'ServiceNow SIR Connector',
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
           isPreconfigured: false,
           isDeprecated: false,

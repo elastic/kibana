@@ -12,26 +12,29 @@ import { getNoneConnector, normalizeActionConnector } from '../configure_cases/u
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   UseCreateAttachments,
   useCreateAttachments,
 } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { useCasesFeatures } from '../../common/use_cases_features';
 import { getConnectorById } from '../utils';
-import { CaseAttachments } from '../../types';
+import { CaseAttachmentsWithoutOwner } from '../../types';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
+  severity: CaseSeverity.LOW,
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
   selectedOwner: null,
+  assignees: [],
 };
 
 interface Props {
@@ -41,7 +44,7 @@ interface Props {
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -50,12 +53,13 @@ export const FormContext: React.FC<Props> = ({
   onSuccess,
   attachments,
 }) => {
-  const { connectors, loading: isLoadingConnectors } = useConnectors();
-  const { owner } = useCasesContext();
+  const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
+  const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { createAttachments } = useCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
+  const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
     async (
@@ -70,6 +74,8 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+
+        startTransaction({ appId, attachments });
 
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
@@ -86,6 +92,7 @@ export const FormContext: React.FC<Props> = ({
         if (updatedCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: updatedCase.id,
+            caseOwner: updatedCase.owner,
             data: attachments,
           });
         }
@@ -107,6 +114,8 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
+      appId,
+      startTransaction,
       isSyncAlertsEnabled,
       connectors,
       postCase,

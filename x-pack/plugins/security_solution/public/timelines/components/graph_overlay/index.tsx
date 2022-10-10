@@ -6,29 +6,31 @@
  */
 
 import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors } from '../../store/timeline';
+import { timelineSelectors, timelineActions } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
-import {
-  isLoadingSelector,
-  startSelector,
-  endSelector,
-} from '../../../common/components/super_date_picker/selectors';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { sourcererSelectors } from '../../../common/store';
+import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
+
+const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
 const OverlayStyle = css`
   display: flex;
@@ -44,7 +46,7 @@ const OverlayContainer = styled.div`
 const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
-  bottom: 0;
+  bottom: 2em;
   left: 0;
   right: 0;
   z-index: ${euiThemeVars.euiZLevel3};
@@ -59,10 +61,12 @@ const StyledResolver = styled(Resolver)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM};
-  background-color: ${theme.eui.euiColorEmptyShade};`}
+  ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`}
   overflow: hidden;
   width: 100%;
+  &.${SESSION_VIEW_FULL_SCREEN} {
+    ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM}`}
+  }
 `;
 
 interface GraphOverlayProps {
@@ -81,38 +85,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
+  const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
-  const sessionViewConfig = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewConfig
-  );
-
-  const getStartSelector = useMemo(() => startSelector(), []);
-  const getEndSelector = useMemo(() => endSelector(), []);
-  const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
-  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
-  const shouldUpdate = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getIsLoadingSelector(state.inputs.timeline);
-    } else {
-      return getIsLoadingSelector(state.inputs.global);
-    }
-  });
-  const from = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getStartSelector(state.inputs.timeline);
-    } else {
-      return getStartSelector(state.inputs.global);
-    }
-  });
-  const to = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getEndSelector(state.inputs.timeline);
-    } else {
-      return getEndSelector(state.inputs.global);
-    }
-  });
 
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
@@ -123,26 +98,16 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
 
   useEffect(() => {
     return () => {
+      dispatch(timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
       if (timelineId === TimelineId.active) {
-        dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen: false }));
+        dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
-        dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen: false }));
+        dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
   }, [dispatch, timelineId]);
 
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-
-  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(
-    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
-    [defaultDataView.patternList, isInTimeline, timelinePatterns]
-  );
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(timelineId);
 
   const sessionContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -158,8 +123,13 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     return (
       <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
         <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+          <EuiHorizontalRule margin="none" />
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-          <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
+          <ScrollableFlexItem grow={2} className={fullScreen ? SESSION_VIEW_FULL_SCREEN : ''}>
+            {SessionView}
+          </ScrollableFlexItem>
         </EuiFlexGroup>
       </OverlayContainer>
     );

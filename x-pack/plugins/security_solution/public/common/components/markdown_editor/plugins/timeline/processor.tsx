@@ -9,7 +9,7 @@ import React, { useCallback, memo } from 'react';
 import { EuiToolTip, EuiLink } from '@elastic/eui';
 
 import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
-import { TimelineProps } from './types';
+import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 

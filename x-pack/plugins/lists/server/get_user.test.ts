@@ -6,16 +6,16 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { getUser } from './get_user';
 
 describe('get_user', () => {
-  let request = KibanaRequest.from(httpServerMock.createRawRequest({}));
+  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
   beforeEach(() => {
     jest.clearAllMocks();
-    request = KibanaRequest.from(httpServerMock.createRawRequest({}));
+    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
   });
 
   afterEach(() => {

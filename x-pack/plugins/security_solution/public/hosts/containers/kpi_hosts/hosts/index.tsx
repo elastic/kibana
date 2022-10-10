@@ -11,19 +11,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  HostsKpiQueries,
+import type {
   HostsKpiHostsRequestOptions,
   HostsKpiHostsStrategyResponse,
 } from '../../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../../common/typed_json';
+import { HostsKpiQueries } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
+import type { InspectResponse } from '../../../../types';
 
 export const ID = 'hostsKpiHostsQuery';
 

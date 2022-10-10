@@ -35,6 +35,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       }
       actions={
         <EuiButton
+          iconType="plusInCircle"
           isDisabled={!canWriteIntegrationPolicies}
           fill
           onClick={() =>

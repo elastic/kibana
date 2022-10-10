@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ResolverRelatedEvents,
   ResolverNode,
   ResolverEntityIndex,
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
-import { DataAccessLayer } from '../../types';
+import type { DataAccessLayer } from '../../types';
 
 type EmptiableRequests =
   | 'relatedEvents'

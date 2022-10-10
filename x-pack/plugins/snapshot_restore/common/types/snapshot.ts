@@ -9,6 +9,7 @@ export interface SnapshotConfig {
   indices?: string | string[];
   ignoreUnavailable?: boolean;
   includeGlobalState?: boolean;
+  featureStates?: string[];
   partial?: boolean;
   metadata?: {
     [key: string]: string;
@@ -19,6 +20,7 @@ export interface SnapshotConfigEs {
   indices?: string | string[];
   ignore_unavailable?: boolean;
   include_global_state?: boolean;
+  feature_states?: string[];
   partial?: boolean;
   metadata?: {
     [key: string]: string;
@@ -34,6 +36,7 @@ export interface SnapshotDetails {
   indices: string[];
   dataStreams: string[];
   includeGlobalState: boolean;
+  featureStates: string[];
   state: string;
   /** e.g. '2019-04-05T21:56:40.438Z' */
   startTime: string;

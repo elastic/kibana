@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Filter, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import {
+  Filter,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Query,
+  AggregateQuery,
+} from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -24,17 +30,20 @@ import {
   connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
-  Query,
+  QueryState,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getStateDefaults } from '../utils/get_state_defaults';
+import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
+import { cleanupUrlState } from '../utils/cleanup_url_state';
+import { getValidFilters } from '../../../utils/get_valid_filters';
 
 export interface AppState {
   /**
@@ -54,7 +63,7 @@ export interface AppState {
    */
   hideChart?: boolean;
   /**
-   * id of the used index pattern
+   * id of the used data view
    */
   index?: string;
   /**
@@ -64,7 +73,7 @@ export interface AppState {
   /**
    * Lucence or KQL query
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Array of the used sorting [[field,direction],...]
    */
@@ -85,33 +94,32 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  /**
+   * Number of rows in the grid per page
+   */
+  rowsPerPage?: number;
+}
+
+export interface AppStateUrl extends Omit<AppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
 }
 
 interface GetStateParams {
   /**
-   * Default state used for merging with with URL state to get the initial state
-   */
-  getStateDefaults?: () => AppState;
-  /**
-   * Determins the use of long vs. short/hashed urls
-   */
-  storeInSessionStorage?: boolean;
-  /**
    * Browser history
    */
   history: History;
-
   /**
-   * Core's notifications.toasts service
-   * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
+   * The current savedSearch
    */
-  toasts?: NotificationsStart['toasts'];
-
+  savedSearch: SavedSearch;
   /**
    * core ui settings service
    */
-  uiSettings: IUiSettingsClient;
+  services: DiscoverServices;
 }
 
 export interface GetStateReturn {
@@ -127,18 +135,14 @@ export interface GetStateReturn {
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
-    indexPattern: DataView,
+    dataView: DataView,
     filterManager: FilterManager,
     data: DataPublicPluginStart
   ) => () => void;
   /**
-   * Start sync between state and URL
+   * Start sync between state and URL -- only used for testing
    */
-  startSync: () => void;
-  /**
-   * Stop sync between state and URL
-   */
-  stopSync: () => void;
+  startSync: () => () => void;
   /**
    * Set app state to with a partial new app state
    */
@@ -164,48 +168,43 @@ export interface GetStateReturn {
    */
   isAppStateDirty: () => boolean;
   /**
-   * Reset AppState to default, discarding all changes
+   * Reset AppState by the given savedSearch discarding all changes
    */
-  resetAppState: () => void;
+  resetAppState: (nextSavedSearch: SavedSearch) => void;
+  /**
+   * Pause the auto refresh interval without pushing an entry to history
+   */
+  pauseAutoRefreshInterval: () => Promise<void>;
 }
+
 const APP_STATE_URL_KEY = '_a';
+const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({
-  getStateDefaults,
-  storeInSessionStorage = false,
-  history,
-  toasts,
-  uiSettings,
-}: GetStateParams): GetStateReturn {
-  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
+export function getState({ history, savedSearch, services }: GetStateParams): GetStateReturn {
+  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
+  const toasts = services.core.notifications.toasts;
+  const defaultAppState = getStateDefaults({
+    savedSearch,
+    services,
+  });
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
-
-  if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
-    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
-  }
-
-  if (appStateFromUrl?.sort && !appStateFromUrl.sort.length) {
-    // If there's an empty array given in the URL, the sort prop should be removed
-    // This allows the sort prop to be overwritten with the default sorting
-    delete appStateFromUrl.sort;
-  }
+  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
 
   let initialAppState = handleSourceColumnState(
     {
       ...defaultAppState,
       ...appStateFromUrl,
     },
-    uiSettings
+    services.uiSettings
   );
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
@@ -222,45 +221,67 @@ export function getState({
     },
   };
 
-  const { start, stop } = syncState({
-    storageKey: APP_STATE_URL_KEY,
-    stateContainer: appStateContainerModified,
-    stateStorage,
-  });
+  // Calling syncState from within initializeAndSync causes state syncing issues.
+  // syncState takes a snapshot of the initial state when it's called to compare
+  // against before syncing state updates. When syncState is called from outside
+  // of initializeAndSync, the snapshot doesn't get reset when the data view is
+  // changed. Then when the user presses the back button, the new state appears
+  // to be the same as the initial state, so syncState ignores the update.
+  const syncAppState = () =>
+    syncState({
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: appStateContainerModified,
+      stateStorage,
+    });
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
     const state = { ...appStateContainer.getState(), ...newPartial };
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
+  const pauseAutoRefreshInterval = async () => {
+    const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
+    if (state?.refreshInterval && !state.refreshInterval.pause) {
+      await stateStorage.set(
+        GLOBAL_STATE_URL_KEY,
+        { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
+        { replace: true }
+      );
+    }
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
-    startSync: start,
-    stopSync: stop,
+    startSync: () => {
+      const { start, stop } = syncAppState();
+      start();
+      return stop;
+    },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
     replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    resetAppState: () => {
+    resetAppState: (nextSavedSearch: SavedSearch) => {
       const defaultState = handleSourceColumnState(
-        getStateDefaults ? getStateDefaults() : {},
-        uiSettings
+        getStateDefaults({ savedSearch: nextSavedSearch, services }),
+        services.uiSettings
       );
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
+    pauseAutoRefreshInterval,
     initializeAndSync: (
-      indexPattern: DataView,
+      dataView: DataView,
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
-      if (appStateContainer.getState().index !== indexPattern.id) {
-        // used index pattern is different than the given by url/state which is invalid
-        setState(appStateContainerModified, { index: indexPattern.id });
+      if (appStateContainer.getState().index !== dataView.id) {
+        // used data view is different than the given by url/state which is invalid
+        setState(appStateContainerModified, { index: dataView.id });
       }
       // sync initial app filters from state to filterManager
       const filters = appStateContainer.getState().filters;
@@ -286,6 +307,16 @@ export function getState({
         data.query,
         stateStorage
       );
+
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      const currentFilters = filterManager.getFilters();
+      const validFilters = getValidFilters(dataView, currentFilters);
+      if (!isEqual(currentFilters, validFilters)) {
+        filterManager.setFilters(validFilters);
+      }
+
+      const { start, stop } = syncAppState();
 
       replaceUrlAppState({}).then(() => {
         start();
@@ -396,7 +427,7 @@ function createUrlGeneratorState({
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),
-    indexPatternId: appState.index,
+    dataViewId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
     timeRange: shouldRestoreSearchSession

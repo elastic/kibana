@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './jest_configs';
+export * from './get_all_jest_paths';
+export * from './get_tests_for_config_paths';

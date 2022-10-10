@@ -37,7 +37,7 @@ export const createCompressedStream = <Response>(
 ): Stream => {
   const output = new PassThrough();
 
-  const sub = results
+  results
     .pipe(
       concatMap((message: Response) => {
         const strMessage = JSON.stringify(message);
@@ -50,7 +50,6 @@ export const createCompressedStream = <Response>(
       }),
       finalize(() => {
         output.end();
-        sub.unsubscribe();
       })
     )
     .subscribe();

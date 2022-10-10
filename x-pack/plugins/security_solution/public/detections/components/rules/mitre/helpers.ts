@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
 import { subtechniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
 /**

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { performBulkActionSchema, PerformBulkActionSchema } from './perform_bulk_action_schema';
+import type { PerformBulkActionSchema } from './perform_bulk_action_schema';
+import {
+  performBulkActionSchema,
+  BulkAction,
+  BulkActionEditType,
+} from './perform_bulk_action_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
-import { BulkAction, BulkActionEditType } from '../common/schemas';
 
 const retrieveValidationMessage = (payload: unknown) => {
   const decoded = performBulkActionSchema.decode(payload);
@@ -342,12 +346,12 @@ describe('perform_bulk_action_schema', () => {
 
         const message = retrieveValidationMessage(payload);
 
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "edit" supplied to "action"',
-          'Invalid value "set_timeline" supplied to "edit,type"',
-          'Invalid value "{"timeline_title":"Test timeline title"}" supplied to "edit,value"',
-          'Invalid value "undefined" supplied to "edit,value,timeline_id"',
-        ]);
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "{"timeline_title":"Test timeline title"}" supplied to "edit,value"',
+            'Invalid value "undefined" supplied to "edit,value,timeline_id"',
+          ])
+        );
         expect(message.schema).toEqual({});
       });
 
@@ -361,6 +365,283 @@ describe('perform_bulk_action_schema', () => {
               value: {
                 timeline_id: 'timelineid',
                 timeline_title: 'Test timeline title',
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+    });
+
+    describe('schedules', () => {
+      test('invalid request: wrong schedules payload type', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_schedule, value: [] }],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "set_schedule" supplied to "edit,type"',
+          'Invalid value "[]" supplied to "edit,value"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: wrong type of payload data', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                interval: '-10m',
+                lookback: '1m',
+              },
+            },
+          ],
+        } as PerformBulkActionSchema;
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "edit" supplied to "action"',
+            'Invalid value "{"interval":"-10m","lookback":"1m"}" supplied to "edit,value"',
+            'Invalid value "-10m" supplied to "edit,value,interval"',
+          ])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: missing interval', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                lookback: '1m',
+              },
+            },
+          ],
+        } as PerformBulkActionSchema;
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "edit" supplied to "action"',
+            'Invalid value "{"lookback":"1m"}" supplied to "edit,value"',
+            'Invalid value "undefined" supplied to "edit,value,interval"',
+          ])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: missing lookback', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                interval: '1m',
+              },
+            },
+          ],
+        } as PerformBulkActionSchema;
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "edit" supplied to "action"',
+            'Invalid value "{"interval":"1m"}" supplied to "edit,value"',
+            'Invalid value "undefined" supplied to "edit,value,lookback"',
+          ])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('valid request: set_schedule edit action', () => {
+        const payload: PerformBulkActionSchema = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                interval: '1m',
+                lookback: '1m',
+              },
+            },
+          ],
+        } as PerformBulkActionSchema;
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+    });
+
+    describe('rule actions', () => {
+      test('invalid request: invalid rule actions payload', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.add_rule_actions, value: [] }],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining(['Invalid value "[]" supplied to "edit,value"'])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: missing throttle in payload', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                actions: [],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining(['Invalid value "undefined" supplied to "edit,value,throttle"'])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: missing actions in payload', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                throttle: '1h',
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining(['Invalid value "undefined" supplied to "edit,value,actions"'])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: invalid action_type_id property in actions array', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                throttle: '1h',
+                actions: [
+                  {
+                    action_type_id: '.webhook',
+                    group: 'default',
+                    id: '458a50e0-1a28-11ed-9098-47fd8e1f3345',
+                    params: {
+                      body: {
+                        rule_id: '{{rule.id}}',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining(['invalid keys "action_type_id"'])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('valid request: add_rule_actions edit action', () => {
+        const payload: PerformBulkActionSchema = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                throttle: '1h',
+                actions: [
+                  {
+                    group: 'default',
+                    id: '458a50e0-1a28-11ed-9098-47fd8e1f3345',
+                    params: {
+                      body: {
+                        rule_id: '{{rule.id}}',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('valid request: set_rule_actions edit action', () => {
+        const payload: PerformBulkActionSchema = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_rule_actions,
+              value: {
+                throttle: '1h',
+                actions: [
+                  {
+                    group: 'default',
+                    id: '458a50e0-1a28-11ed-9098-47fd8e1f3345',
+                    params: {
+                      documents: [
+                        {
+                          rule_id: '{{rule.id}}',
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
           ],

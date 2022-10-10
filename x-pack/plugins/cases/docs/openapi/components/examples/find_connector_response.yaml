@@ -1,0 +1,15 @@
+summary: Retrieve information about the connectors and their settings.
+value: 
+  [{
+    "id":"61787f53-4eee-4741-8df6-8fe84fa616f7",
+    "actionTypeId": ".jira",
+    "name":"my-Jira",
+    "isMissingSecrets":false,
+    "config": {
+      "apiUrl":"https://elastic.atlassian.net/",
+      "projectKey":"ES"
+    },
+    "isPreconfigured":false,
+    "isDeprecated": false,
+    "referencedByCount":0
+  }]

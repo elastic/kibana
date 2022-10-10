@@ -8,9 +8,10 @@
 /* eslint-disable max-classes-per-file */
 
 import rison from 'rison-node';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type Filter, isFilterPinned } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '@kbn/data-plugin/public';
+import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
@@ -55,6 +56,11 @@ export interface MapsAppLocatorParams extends SerializableRecord {
    * whether to hash the data in the url to avoid url length issues.
    */
   hash?: boolean;
+
+  /**
+   * Optionally pass adhoc data view spec.
+   */
+  dataViewSpec?: DataViewSpec;
 }
 
 export const MAPS_APP_LOCATOR = 'MAPS_APP_LOCATOR' as const;
@@ -78,7 +84,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
       filters?: Filter[];
       vis?: unknown;
     } = {};
-    const queryState: QueryState = {};
+    const queryState: GlobalQueryStateFromUrl = {};
 
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
@@ -87,7 +93,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let path = `/map#/${mapId || ''}`;
-    path = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, path);
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {
@@ -104,7 +110,11 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     return {
       app: APP_ID,
       path,
-      state: {},
+      state: params.dataViewSpec
+        ? {
+            dataViewSpec: params.dataViewSpec,
+          }
+        : {},
     };
   };
 }
@@ -186,7 +196,6 @@ export interface MapsAppRegionMapLocatorParams extends SerializableRecord {
   termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
-  indexPatternTitle?: string;
   metricAgg: string;
   metricFieldName?: string;
   timeRange?: TimeRange;
@@ -219,7 +228,6 @@ export class MapsAppRegionMapLocatorDefinition
       termsSize,
       colorSchema,
       indexPatternId,
-      indexPatternTitle,
       metricAgg,
       metricFieldName,
       filters,
@@ -237,7 +245,6 @@ export class MapsAppRegionMapLocatorDefinition
       termsSize,
       colorSchema,
       indexPatternId,
-      indexPatternTitle,
       metricAgg,
       metricFieldName,
     });

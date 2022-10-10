@@ -9,13 +9,21 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { DatatableColumn } from '@kbn/expressions-plugin';
-import { groupBy, escape } from 'lodash';
-import { checkColumnForPrecisionError, Query } from '@kbn/data-plugin/common';
-import type { FramePublicAPI, StateSetter } from '../types';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { groupBy, escape, uniq } from 'lodash';
+import type { Query } from '@kbn/data-plugin/common';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
+import { renewIDs } from '../utils';
+import type {
+  IndexPatternLayer,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -27,15 +35,17 @@ import {
   updateDefaultLabels,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn, isQueryValid } from './operations/definitions/filters';
+import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
-import { getOriginalId } from '../../common/expressions';
+import { getOriginalId } from '../../common/expressions/datatable/transpose_helpers';
+import { isQueryValid } from '../shared_components';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -156,9 +166,50 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   />
 );
 
+export function getTSDBRollupWarningMessages(
+  state: IndexPatternPersistedState,
+  warning: SearchResponseWarning
+) {
+  if (state) {
+    const hasTSDBRollupWarnings =
+      warning.type === 'shard_failure' &&
+      warning.reason.type === 'unsupported_aggregation_on_downsampled_index';
+    if (!hasTSDBRollupWarnings) {
+      return [];
+    }
+    return Object.values(state.layers).flatMap((layer) =>
+      uniq(
+        Object.values(layer.columns)
+          .filter((col) =>
+            [
+              'median',
+              'percentile',
+              'percentile_rank',
+              'last_value',
+              'unique_count',
+              'standard_deviation',
+            ].includes(col.operationType)
+          )
+          .map((col) => col.label)
+      ).map((label) =>
+        i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+          defaultMessage:
+            '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+          values: {
+            label,
+          },
+        })
+      )
+    );
+  }
+
+  return [];
+}
+
 export function getPrecisionErrorWarningMessages(
+  datatableUtilities: DatatableUtilitiesService,
   state: IndexPatternPrivateState,
-  { activeData }: FramePublicAPI,
+  { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
   setState: StateSetter<IndexPatternPrivateState>
 ) {
@@ -176,8 +227,8 @@ export function getPrecisionErrorWarningMessages(
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];
-        if (currentLayer && currentColumn && checkColumnForPrecisionError(column)) {
-          const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
+        if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
+          const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
           // currentColumnIsTerms is mostly a type guard. If there's a precision error,
           // we already know that we're dealing with a terms-based operation (at least for now).
           const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(
@@ -342,6 +393,21 @@ function extractQueriesFromRanges(column: RangeIndexPatternColumn) {
 }
 
 /**
+ * If the data view doesn't have a default time field, Discover can't use the global time range - construct an equivalent filter instead
+ */
+function extractTimeRangeFromDateHistogram(
+  column: DateHistogramIndexPatternColumn,
+  timeRange: TimeRange
+) {
+  return [
+    {
+      language: 'kuery',
+      query: `${column.sourceField} >= "${timeRange.from}" AND ${column.sourceField} <= "${timeRange.to}"`,
+    },
+  ];
+}
+
+/**
  * Given an Terms/Top values column transform each entry into a "field: term" KQL query
  * This works also for multi-terms variant
  */
@@ -442,14 +508,16 @@ function collectOnlyValidQueries(
 export function getFiltersInLayer(
   layer: IndexPatternLayer,
   columnIds: string[],
-  layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined
+  layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined,
+  indexPattern: IndexPattern,
+  timeRange: TimeRange | undefined
 ) {
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
   const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
     ['enabled', 'disabled'] as const
   ).map((state) => groupBy(filtersGroupedByState[state], 'language') as unknown as GroupedQueries);
 
-  const filterOperation = columnIds
+  const filterOperationsOrErrors = columnIds
     .map((colId) => {
       const column = layer.columns[colId];
 
@@ -472,6 +540,28 @@ export function getFiltersInLayer(
       }
 
       if (
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+        timeRange &&
+        column.sourceField &&
+        !column.params.ignoreTimeRange &&
+        indexPattern.timeFieldName !== column.sourceField
+      ) {
+        if (indexPattern.timeFieldName) {
+          // non-default time field is not supported in Discover if data view has a time field
+          return {
+            error: i18n.translate('xpack.lens.indexPattern.nonDefaultTimeFieldError', {
+              defaultMessage:
+                '"Explore data in Discover" does not support date histograms on non-default time fields if time field is set on the data view',
+            }),
+          };
+        }
+        // if the data view has no default time field but the date histograms' time field is bound to the time range, create a KQL query for the time range
+        return {
+          kuery: extractTimeRangeFromDateHistogram(column, timeRange),
+        };
+      }
+
+      if (
         isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
@@ -490,13 +580,30 @@ export function getFiltersInLayer(
         };
       }
     })
-    .filter(Boolean) as GroupedQueries[];
+    .filter(Boolean);
+
+  const errors = filterOperationsOrErrors.filter((filter) => filter && 'error' in filter) as Array<{
+    error: string;
+  }>;
+
+  if (errors.length) {
+    return {
+      error: errors.map(({ error }) => error).join(', '),
+    };
+  }
+
+  const filterOperations = filterOperationsOrErrors as GroupedQueries[];
+
   return {
     enabled: {
-      kuery: collectOnlyValidQueries(enabledFiltersFromMetricsByLanguage, filterOperation, 'kuery'),
+      kuery: collectOnlyValidQueries(
+        enabledFiltersFromMetricsByLanguage,
+        filterOperations,
+        'kuery'
+      ),
       lucene: collectOnlyValidQueries(
         enabledFiltersFromMetricsByLanguage,
-        filterOperation,
+        filterOperations,
         'lucene'
       ),
     },
@@ -508,3 +615,22 @@ export function getFiltersInLayer(
     },
   };
 }
+
+export const cloneLayer = (
+  layers: Record<string, IndexPatternLayer>,
+  layerId: string,
+  newLayerId: string,
+  getNewId: (id: string) => string
+) => {
+  if (layers[layerId]) {
+    return {
+      ...layers,
+      [newLayerId]: renewIDs(
+        layers[layerId],
+        Object.keys(layers[layerId]?.columns ?? {}),
+        getNewId
+      ),
+    };
+  }
+  return layers;
+};

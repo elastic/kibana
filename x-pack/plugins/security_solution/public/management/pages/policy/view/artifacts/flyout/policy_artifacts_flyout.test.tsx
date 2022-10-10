@@ -11,23 +11,21 @@ import React from 'react';
 import uuid from 'uuid';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import { PolicyData } from '../../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE } from '../../../../../common/constants';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { MAX_ALLOWED_RESULTS, PolicyArtifactsFlyout } from './policy_artifacts_flyout';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import {
+import type {
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({

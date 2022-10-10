@@ -9,13 +9,23 @@ import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
-import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
-import { SessionsComponentsProps } from './types';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { TimelineId } from '@kbn/timelines-plugin/common';
+import type { SessionsComponentsProps } from './types';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { licenseService } from '../../hooks/use_license';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../url_state/normalize_time_range');
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
+jest.mock('../../utils/normalize_time_range');
 
 const startDate = '2022-03-22T22:10:56.794Z';
 const endDate = '2022-03-21T22:10:56.791Z';
@@ -38,9 +48,27 @@ type Props = Partial<TimelineModel> & {
   entityType: EntityType;
 };
 
+const mockGetDefaultControlColumn = jest.fn();
+jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
+  getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+}));
+
 const TEST_PREFIX = 'security_solution:sessions_viewer:sessions_view';
 
 const callFilters = jest.fn();
+
+jest.mock('../../hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => false),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 // creating a dummy component for testing TGrid to avoid mocking all the implementation details
 // but still test if the TGrid will render properly
@@ -109,10 +137,11 @@ describe('SessionsView', () => {
       expect(wrapper.getByTestId(`${TEST_PREFIX}:startDate`)).toHaveTextContent(startDate);
       expect(wrapper.getByTestId(`${TEST_PREFIX}:endDate`)).toHaveTextContent(endDate);
       expect(wrapper.getByTestId(`${TEST_PREFIX}:timelineId`)).toHaveTextContent(
-        'hosts-page-sessions'
+        'hosts-page-sessions-v2'
       );
     });
   });
+
   it('passes in the right filters to TGrid', async () => {
     render(
       <TestProviders>
@@ -132,6 +161,44 @@ describe('SessionsView', () => {
           },
         },
       ]);
+    });
+  });
+  it('Action tab should have 4 columns for non Enterprise users', async () => {
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+    });
+  });
+
+  it('Action tab should have 5 columns for Enterprise or above users', async () => {
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+    licenseServiceMock.isEnterprise.mockReturnValue(true);
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
+    });
+  });
+
+  it('Action tab should have 5 columns when accessed via K8S dahsboard', async () => {
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} timelineId={TimelineId.kubernetesPageSessions} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
     });
   });
 });

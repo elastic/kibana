@@ -9,7 +9,7 @@ import {
   ExpressionAstExpression,
   ExpressionExecutionParams,
   ExpressionValue,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { pluck } from 'rxjs/operators';
 import { ExpressionsServiceStart } from '@kbn/expressions-plugin/public';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';

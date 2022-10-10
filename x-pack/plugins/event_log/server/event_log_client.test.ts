@@ -12,6 +12,7 @@ import { contextMock } from './es/context.mock';
 import { merge } from 'lodash';
 import moment from 'moment';
 import { IClusterClientAdapter } from './es/cluster_client_adapter';
+import { fromKueryExpression } from '@kbn/es-query';
 
 const expectedSavedObject = {
   id: 'saved-object-id',
@@ -240,6 +241,38 @@ describe('EventLogStart', () => {
       });
     });
   });
+  describe('aggregateEventsWithAuthFilter', () => {
+    const testAuthFilter = fromKueryExpression('test:test');
+    test('throws when no aggregation is defined in options', async () => {
+      savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
+      await expect(
+        eventLogClient.aggregateEventsWithAuthFilter('saved-object-type', testAuthFilter)
+      ).rejects.toMatchInlineSnapshot(`[Error: No aggregation defined!]`);
+    });
+    test('calls aggregateEventsWithAuthFilter with given aggregation', async () => {
+      savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
+      await eventLogClient.aggregateEventsWithAuthFilter('saved-object-type', testAuthFilter, {
+        aggs: { myAgg: {} },
+      });
+      expect(esContext.esAdapter.aggregateEventsWithAuthFilter).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        authFilter: testAuthFilter,
+        aggregateOptions: {
+          aggs: { myAgg: {} },
+          page: 1,
+          per_page: 10,
+          sort: [
+            {
+              sort_field: '@timestamp',
+              sort_order: 'asc',
+            },
+          ],
+        },
+      });
+    });
+  });
 });
 
 function fakeEvent(overrides = {}) {
@@ -250,7 +283,7 @@ function fakeEvent(overrides = {}) {
         action: 'execute',
         start: '2020-03-30T14:55:47.054Z',
         end: '2020-03-30T14:55:47.055Z',
-        duration: 1000000,
+        duration: '1000000',
       },
       kibana: {
         namespace: 'default',

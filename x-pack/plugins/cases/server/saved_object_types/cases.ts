@@ -27,6 +27,13 @@ export const createCaseSavedObjectType = (
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
+      assignees: {
+        properties: {
+          uid: {
+            type: 'keyword',
+          },
+        },
+      },
       closed_at: {
         type: 'date',
       },
@@ -39,6 +46,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -55,6 +65,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -101,6 +114,9 @@ export const createCaseSavedObjectType = (
               email: {
                 type: 'keyword',
               },
+              profile_uid: {
+                type: 'keyword',
+              },
             },
           },
           connector_name: {
@@ -143,6 +159,9 @@ export const createCaseSavedObjectType = (
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       settings: {
@@ -152,13 +171,16 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      severity: {
+        type: 'keyword',
+      },
     },
   },
   migrations: caseMigrations,
   management: {
     importableAndExportable: true,
     defaultSearchField: 'title',
-    icon: 'folderExclamation',
+    icon: 'casesApp',
     getTitle: (savedObject: SavedObject<ESCaseAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,

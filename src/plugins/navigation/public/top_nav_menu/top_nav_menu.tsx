@@ -14,40 +14,43 @@ import { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/kibana-react-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { StatefulSearchBarProps, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
-export type TopNavMenuProps = StatefulSearchBarProps &
-  Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
-    config?: TopNavMenuData[];
-    badges?: Array<EuiBadgeProps & { badgeText: string }>;
-    showSearchBar?: boolean;
-    showQueryBar?: boolean;
-    showQueryInput?: boolean;
-    showDatePicker?: boolean;
-    showFilterBar?: boolean;
-    unifiedSearch?: UnifiedSearchPublicPluginStart;
-    className?: string;
-    /**
-     * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
-     *
-     * This is meant to be used with the `setHeaderActionMenu` core API.
-     *
-     * @example
-     * ```ts
-     * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
-     *   const topNavConfig = ...; // TopNavMenuProps
-     *   return (
-     *     <Router history=history>
-     *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
-     *       <MyRoutes />
-     *     </Router>
-     *   )
-     * }
-     * ```
-     */
-    setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  };
+export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
+  StatefulSearchBarProps<QT> &
+    Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
+      config?: TopNavMenuData[];
+      badges?: Array<EuiBadgeProps & { badgeText: string }>;
+      showSearchBar?: boolean;
+      showQueryBar?: boolean;
+      showQueryInput?: boolean;
+      showDatePicker?: boolean;
+      showFilterBar?: boolean;
+      unifiedSearch?: UnifiedSearchPublicPluginStart;
+      className?: string;
+      visible?: boolean;
+      /**
+       * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
+       *
+       * This is meant to be used with the `setHeaderActionMenu` core API.
+       *
+       * @example
+       * ```ts
+       * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+       *   const topNavConfig = ...; // TopNavMenuProps
+       *   return (
+       *     <Router history=history>
+       *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
+       *       <MyRoutes />
+       *     </Router>
+       *   )
+       * }
+       * ```
+       */
+      setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+    };
 
 /*
  * Top Nav Menu is a convenience wrapper component for:
@@ -58,7 +61,9 @@ export type TopNavMenuProps = StatefulSearchBarProps &
  *
  **/
 
-export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
+export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
+  props: TopNavMenuProps<QT>
+): ReactElement | null {
   const { config, badges, showSearchBar, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.unifiedSearch)) {
@@ -100,14 +105,16 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderSearchBar(): ReactElement | null {
     // Validate presense of all required fields
     if (!showSearchBar || !props.unifiedSearch) return null;
-    const { SearchBar } = props.unifiedSearch.ui;
-    return <SearchBar {...searchBarProps} />;
+    const { AggregateQuerySearchBar } = props.unifiedSearch.ui;
+    return <AggregateQuerySearchBar<QT> {...searchBarProps} />;
   }
 
   function renderLayout() {
-    const { setMenuMountPoint } = props;
+    const { setMenuMountPoint, visible } = props;
     const menuClassName = classNames('kbnTopNavMenu', props.className);
-    const wrapperClassName = 'kbnTopNavMenu__wrapper';
+    const wrapperClassName = classNames('kbnTopNavMenu__wrapper', {
+      'kbnTopNavMenu__wrapper--hidden': visible === false,
+    });
     if (setMenuMountPoint) {
       return (
         <>
@@ -117,15 +124,15 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               {renderMenu(menuClassName)}
             </span>
           </MountPointPortal>
-          <span className={wrapperClassName}>{renderSearchBar()}</span>
+          {renderSearchBar()}
         </>
       );
     } else {
       return (
-        <span className={wrapperClassName}>
-          {renderMenu(menuClassName)}
+        <>
+          <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
           {renderSearchBar()}
-        </span>
+        </>
       );
     }
   }

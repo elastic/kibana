@@ -15,7 +15,7 @@ import {
   CollectorOptions,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { cloudDetailsMock } from './mocks';
+import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
 import { plugin } from '.';
 
 describe('kibana_usage_collection', () => {
@@ -43,6 +43,9 @@ describe('kibana_usage_collection', () => {
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
 
     expect(coreSetup.coreUsageData.registerUsageCounter).toHaveBeenCalled();
+
+    expect(registerEbtCountersMock).toHaveBeenCalledTimes(1);
+    expect(registerEbtCountersMock).toHaveBeenCalledWith(coreSetup.analytics, usageCollection);
 
     await expect(
       Promise.all(

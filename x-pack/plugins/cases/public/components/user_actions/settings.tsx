@@ -22,12 +22,14 @@ function getSettingsLabel(userAction: UserActionResponse<SettingsUserAction>): R
 
 export const createSettingsUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
     const action = userAction as UserActionResponse<SettingsUserAction>;
     if (action?.payload?.settings?.syncAlerts !== undefined) {
       const commonBuilder = createCommonUpdateUserActionBuilder({
+        userProfiles,
         userAction,
         handleOutlineComment,
         label: getSettingsLabel(action),

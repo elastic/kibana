@@ -6,10 +6,10 @@
  */
 
 import { noop, startsWith, endsWith } from 'lodash/fp';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,9 +20,10 @@ import {
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../common/containers/source';
-import { OnDataProviderEdited } from '../timeline/events';
-import { DataProviderType, QueryOperator } from '../timeline/data_providers/data_provider';
+import type { BrowserFields } from '../../../common/containers/source';
+import type { OnDataProviderEdited } from '../timeline/events';
+import type { QueryOperator } from '../timeline/data_providers/data_provider';
+import { DataProviderType } from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,
@@ -35,8 +36,7 @@ import {
 import * as i18n from './translations';
 
 const EDIT_DATA_PROVIDER_WIDTH = 400;
-const FIELD_COMBO_BOX_WIDTH = 195;
-const OPERATOR_COMBO_BOX_WIDTH = 160;
+const OPERATOR_COMBO_BOX_WIDTH = 152;
 const SAVE_CLASS_NAME = 'edit-data-provider-save';
 const VALUE_INPUT_CLASS_NAME = 'edit-data-provider-value';
 
@@ -188,25 +188,29 @@ export const StatefulEditDataProvider = React.memo<Props>(
     return (
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label={i18n.FIELD}>
-                  <EuiComboBox
-                    autoFocus
-                    data-test-subj="field"
-                    isClearable={false}
-                    onChange={onFieldSelected}
-                    options={getCategorizedFieldNames(browserFields)}
-                    placeholder={i18n.FIELD_PLACEHOLDER}
-                    selectedOptions={updatedField}
-                    singleSelection={{ asPlainText: true }}
-                    style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow label={i18n.FIELD}>
+              <EuiComboBox
+                autoFocus
+                data-test-subj="field"
+                isClearable={false}
+                onChange={onFieldSelected}
+                options={getCategorizedFieldNames(browserFields)}
+                placeholder={i18n.FIELD_PLACEHOLDER}
+                selectedOptions={updatedField}
+                singleSelection={{ asPlainText: true }}
+                fullWidth={true}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
+              <EuiFlexItem grow={true}>
                 <EuiFormRow label={i18n.OPERATOR}>
                   <EuiComboBox
                     data-test-subj="operator"
@@ -216,34 +220,28 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     placeholder={i18n.SELECT_AN_OPERATOR}
                     selectedOptions={updatedOperator}
                     singleSelection={{ asPlainText: true }}
-                    style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
+                    style={{ minWidth: OPERATOR_COMBO_BOX_WIDTH }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
+              {type !== DataProviderType.template &&
+              updatedOperator.length > 0 &&
+              updatedOperator[0].label !== i18n.EXISTS &&
+              updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label={i18n.VALUE_LABEL}>
+                    <EuiFieldText
+                      className={VALUE_INPUT_CLASS_NAME}
+                      onChange={onValueChange}
+                      placeholder={i18n.VALUE}
+                      value={sanatizeValue(updatedValue)}
+                      isInvalid={isValueFieldInvalid}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-
-          {type !== DataProviderType.template &&
-          updatedOperator.length > 0 &&
-          updatedOperator[0].label !== i18n.EXISTS &&
-          updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
-            <EuiFlexItem grow={false}>
-              <EuiFormRow label={i18n.VALUE_LABEL}>
-                <EuiFieldText
-                  className={VALUE_INPUT_CLASS_NAME}
-                  data-test-subj="value"
-                  onChange={onValueChange}
-                  placeholder={i18n.VALUE}
-                  value={sanatizeValue(updatedValue)}
-                  isInvalid={isValueFieldInvalid}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          ) : null}
 
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />

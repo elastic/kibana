@@ -10,9 +10,7 @@ import { stackManagementSchema } from '@kbn/kibana-usage-collection-plugin/serve
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/119038
-  describe.skip('Stack Management', function () {
-    this.tags('ciGroup1');
+  describe('Stack Management', function () {
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 
@@ -20,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await common.navigateToApp('home'); // Navigate to Home to make sure all the appIds are loaded
+      await common.isChromeVisible(); // Make sure the page is fully loaded
       registeredSettings = await browser.execute(() => window.__registeredUiSettings__);
     });
 

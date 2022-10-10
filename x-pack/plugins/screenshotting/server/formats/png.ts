@@ -7,12 +7,11 @@
 
 import type { CaptureResult, CaptureOptions } from '../screenshots';
 import type { LayoutParams } from '../../common';
-import { LayoutTypes } from '../../common';
 
 /**
  * The layout parameters that are accepted by PNG screenshots
  */
-export type PngLayoutParams = LayoutParams<LayoutTypes.PRESERVE_LAYOUT>;
+export type PngLayoutParams = LayoutParams<'preserve_layout'>;
 
 /**
  * Options that should be provided to a screenshot PNG request

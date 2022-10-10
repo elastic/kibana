@@ -157,7 +157,7 @@ export const CustomMetricForm = withTheme(
           </EuiPopoverTitle>
           <div
             style={{
-              padding: theme?.eui.paddingSizes.m,
+              padding: theme?.eui.euiSizeM,
               borderBottom: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
             }}
           >
@@ -218,11 +218,11 @@ export const CustomMetricForm = withTheme(
               />
             </EuiFormRow>
           </div>
-          <div style={{ padding: theme?.eui.paddingSizes.m, textAlign: 'right' }}>
+          <div style={{ padding: theme?.eui.euiSizeM, textAlign: 'right' }}>
             <EuiButtonEmpty
               onClick={onCancel}
               size="s"
-              style={{ paddingRight: theme?.eui.paddingSizes.xl }}
+              style={{ paddingRight: theme?.eui.euiSizeXL }}
             >
               <FormattedMessage
                 id="xpack.infra.waffle.customMetrics.cancelLabel"

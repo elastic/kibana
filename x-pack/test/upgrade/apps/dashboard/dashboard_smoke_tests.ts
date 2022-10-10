@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
   describe('upgrade dashboard smoke tests', function describeIndexTests() {
@@ -37,12 +36,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await kibanaServer.uiSettings.update(
-            {
-              'visualization:visualize:legacyPieChartsLibrary': true,
-            },
-            { space }
-          );
           await browser.refresh();
         });
         dashboardTests.forEach(({ name, numPanels }) => {
@@ -65,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);
           log.debug('Checking input controls rendered');
-          await dashboardExpect.inputControlItemCount(3);
+          await dashboardExpect.controlCount(3);
           log.debug('Checking tag cloud rendered');
           await dashboardExpect.tagCloudWithValuesFound([
             'Sunny',

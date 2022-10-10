@@ -5,39 +5,51 @@
  * 2.0.
  */
 
+import fs from 'fs/promises';
+
 import { compact } from 'lodash';
-
+import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common';
+import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
+import type { PreconfigurationError } from '../../common/constants';
 import type {
   DefaultPackagesInstallationError,
-  PreconfigurationError,
   BundledPackage,
   Installation,
-} from '../../common';
+} from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import { ensurePreconfiguredOutputs } from './preconfiguration/outputs';
+import {
+  ensurePreconfiguredOutputs,
+  getPreconfiguredOutputFromConfig,
+} from './preconfiguration/outputs';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
-import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
-import { settingsService } from '.';
+import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
+import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
-import { getInstallations, installPackage } from './epm/packages';
+import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { getBundledPackages } from './epm/packages';
+import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
+import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { migrateSettingsToFleetServerHost } from './fleet_server_host';
+import {
+  ensurePreconfiguredFleetServerHosts,
+  getPreconfiguredFleetServerHostFromConfig,
+} from './preconfiguration/fleet_server_host';
+
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
@@ -59,18 +71,31 @@ async function createSetupSideEffects(
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
-  const {
-    agentPolicies: policiesOrUndefined,
-    packages: packagesOrUndefined,
-    outputs: outputsOrUndefined,
-  } = appContextService.getConfig() ?? {};
+  await ensureFleetDirectories();
 
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
+  logger.debug('Setting Fleet server config');
+  await migrateSettingsToFleetServerHost(soClient);
+  logger.debug('Setting up Fleet download source');
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+
   logger.debug('Setting up Fleet outputs');
+
+  await ensurePreconfiguredFleetServerHosts(
+    soClient,
+    getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
+  );
   await Promise.all([
-    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
+    ensurePreconfiguredOutputs(
+      soClient,
+      esClient,
+      getPreconfiguredOutputFromConfig(appContextService.getConfig())
+    ),
+
     settingsService.settingsSetup(soClient),
   ]);
 
@@ -109,6 +134,7 @@ async function createSetupSideEffects(
       policies,
       packages,
       defaultOutput,
+      defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
 
@@ -117,6 +143,12 @@ async function createSetupSideEffects(
   ).filter((result) => (result.errors ?? []).length > 0);
 
   const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
+
+  logger.debug('Upgrade Fleet package install versions');
+  await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  logger.debug('Upgrade Agent policy schema version');
+  await upgradeAgentPolicySchemaVersion(soClient);
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
@@ -158,8 +190,9 @@ export async function ensureFleetGlobalEsAssets(
         (bundledPkg: BundledPackage) =>
           bundledPkg.name === pkg.name && bundledPkg.version === pkg.version
       );
-    await Promise.all(
-      installedPackages.saved_objects.map(async ({ attributes: installation }) => {
+    await pMap(
+      installedPackages.saved_objects,
+      async ({ attributes: installation }) => {
         if (installation.install_source !== 'registry') {
           const matchingBundledPackage = findMatchingBundledPkg(installation);
           if (!matchingBundledPackage) {
@@ -167,41 +200,24 @@ export async function ensureFleetGlobalEsAssets(
               `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
             );
             return;
-          } else {
-            await installPackage({
-              installSource: 'upload',
-              savedObjectsClient: soClient,
-              esClient,
-              spaceId: DEFAULT_SPACE_ID,
-              contentType: 'application/zip',
-              archiveBuffer: matchingBundledPackage.buffer,
-            }).catch((err) => {
-              logger.error(
-                `Bundled package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
-              );
-            });
-            return;
           }
         }
-        await installPackage({
-          installSource: installation.install_source,
-          savedObjectsClient: soClient,
-          pkgkey: pkgToPkgKey({ name: installation.name, version: installation.version }),
+        await reinstallPackageForInstallation({
+          soClient,
           esClient,
-          spaceId: DEFAULT_SPACE_ID,
-          // Force install the package will update the index template and the datastream write indices
-          force: true,
+          installation,
         }).catch((err) => {
           logger.error(
             `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
           );
         });
-      })
+      },
+      { concurrency: 10 }
     );
   }
 }
 
-export async function ensureDefaultEnrollmentAPIKeysExists(
+async function ensureDefaultEnrollmentAPIKeysExists(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
@@ -219,20 +235,13 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
     perPage: SO_SEARCH_LIMIT,
   });
 
-  await Promise.all(
-    agentPolicies.map(async (agentPolicy) => {
-      const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicy.id);
-
-      if (hasKey) {
-        return;
-      }
-
-      return generateEnrollmentAPIKey(soClient, esClient, {
-        name: `Default`,
-        agentPolicyId: agentPolicy.id,
-        forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
-      });
-    })
+  await pMap(
+    agentPolicies,
+    (agentPolicy) =>
+      ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
+    {
+      concurrency: 20,
+    }
   );
 }
 
@@ -265,4 +274,28 @@ export function formatNonFatalErrors(
       });
     }
   });
+}
+
+/**
+ * Confirm existence of various directories used by Fleet and warn if they don't exist
+ */
+export async function ensureFleetDirectories() {
+  const logger = appContextService.getLogger();
+  const config = appContextService.getConfig();
+
+  const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  const registryUrl = getRegistryUrl();
+
+  if (!bundledPackageLocation) {
+    logger.warn('xpack.fleet.developer.bundledPackageLocation is not configured');
+    return;
+  }
+
+  try {
+    await fs.stat(bundledPackageLocation);
+  } catch (error) {
+    logger.warn(
+      `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
+    );
+  }
 }

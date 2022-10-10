@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConnectorTypes } from './api';
 import { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
@@ -69,6 +68,7 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
+export const CASE_METRICS_URL = `${CASES_URL}/metrics` as const;
 export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as const;
 
 /**
@@ -78,6 +78,8 @@ export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as cons
 export const CASES_INTERNAL_URL = '/internal/cases' as const;
 export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
+export const INTERNAL_SUGGEST_USER_PROFILES_URL =
+  `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 
 /**
  * Action routes
@@ -86,14 +88,6 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
 export const ACTION_URL = '/api/actions' as const;
 export const ACTION_TYPES_URL = `${ACTION_URL}/connector_types` as const;
 export const CONNECTORS_URL = `${ACTION_URL}/connectors` as const;
-
-export const SUPPORTED_CONNECTORS = [
-  `${ConnectorTypes.serviceNowITSM}`,
-  `${ConnectorTypes.serviceNowSIR}`,
-  `${ConnectorTypes.jira}`,
-  `${ConnectorTypes.resilient}`,
-  `${ConnectorTypes.swimlane}`,
-];
 
 /**
  * Alerts
@@ -105,15 +99,23 @@ export const MAX_ALERTS_PER_CASE = 1000 as const;
  */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
+export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
   },
   [OBSERVABILITY_OWNER]: {
+    appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
+  },
+  [GENERAL_CASES_OWNER]: {
+    appId: 'management',
+    label: 'Stack',
+    iconType: 'casesApp',
   },
 } as const;
 
@@ -134,7 +136,7 @@ export const MAX_TITLE_LENGTH = 64 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true },
+  alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
 });
 
@@ -149,3 +151,24 @@ export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
  */
 export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
 export const CASE_TELEMETRY_SAVED_OBJECT_ID = 'cases-telemetry';
+
+/**
+ * Cases UI Capabilities
+ */
+export const CREATE_CASES_CAPABILITY = 'create_cases' as const;
+export const READ_CASES_CAPABILITY = 'read_cases' as const;
+export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
+export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
+export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
+
+/**
+ * User profiles
+ */
+
+export const DEFAULT_USER_SIZE = 10;
+export const MAX_ASSIGNEES_PER_CASE = 10;
+
+/**
+ * Delays
+ */
+export const SEARCH_DEBOUNCE_MS = 500;

@@ -38,6 +38,7 @@ export const useMlLink = (params: MlLocatorParams, getUrlParams?: LocatorGetUrlP
     return () => {
       isCancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, getUrlParams]);
 
   return href;
@@ -71,6 +72,7 @@ export const useCreateAndNavigateToMlLink = (
       const url = await mlLocator.getUrl({ page: _page, pageState });
       await navigateToUrl(url);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, navigateToUrl]
   );
 

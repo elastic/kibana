@@ -21,13 +21,6 @@ export const BACK_TO_RULES = i18n.translate(
   }
 );
 
-export const EXPERIMENTAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.experimentalDescription',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
 export const ENABLE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel',
   {
@@ -42,24 +35,31 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
-export const RULE_EXECUTION_LOGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLogsTab',
-  {
-    defaultMessage: 'Rule execution logs ',
-  }
-);
-
-export const TYPE_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusFailedDescription',
-  {
-    defaultMessage: 'Failed',
-  }
-);
-
 export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExceptionsTab',
   {
-    defaultMessage: 'Exceptions',
+    defaultMessage: 'Rule exceptions',
+  }
+);
+
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab',
+  {
+    defaultMessage: 'Endpoint exceptions',
+  }
+);
+
+export const EXECUTION_RESULTS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionResultsTab',
+  {
+    defaultMessage: 'Execution results',
+  }
+);
+
+export const EXECUTION_EVENTS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab',
+  {
+    defaultMessage: 'Execution events',
   }
 );
 

@@ -13,6 +13,7 @@ describe('parseTechnicalFields', () => {
       '@timestamp': ['2021-12-06T12:30:59.411Z'],
       'kibana.alert.status': ['active'],
       'kibana.alert.duration.us': ['488935266000'],
+      'kibana.alert.instance.id': ['My-MAC'],
       'kibana.alert.reason': ['host.uptime has reported no data over the past 1m for *'],
       'kibana.alert.workflow_status': ['open'],
       'kibana.alert.rule.uuid': ['c8ef4420-4604-11ec-b08c-c590e7b8c4cd'],
@@ -62,6 +63,7 @@ describe('parseTechnicalFields', () => {
   it('parses an alert with missing optional fields without error', () => {
     const ALERT_WITH_MISSING_OPTIONAL_FIELDS = {
       '@timestamp': ['2021-12-06T12:30:59.411Z'],
+      'kibana.alert.instance.id': ['My-MAC'],
       'kibana.alert.rule.uuid': ['c8ef4420-4604-11ec-b08c-c590e7b8c4cd'],
       'kibana.alert.status': ['active'],
       'kibana.alert.rule.producer': ['infrastructure'],

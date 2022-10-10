@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { ISearchSource, Query } from '@kbn/data-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
@@ -31,7 +32,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 
   return {
     stateContainer: {} as GetStateReturn,
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),
     query: {} as Query,
@@ -40,6 +41,12 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     onOpenInspector: jest.fn(),
     searchSource: {} as ISearchSource,
     resetSavedSearch: () => {},
+    onFieldEdited: jest.fn(),
+    onChangeDataView: jest.fn(),
+    isPlainRecord: false,
+    persistDataView: jest.fn(),
+    updateAdHocDataViewId: jest.fn(),
+    adHocDataViewList: [],
   };
 }
 

@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
+import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
+import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -18,7 +20,7 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
-  name: string;
+  name: ReactNode;
   disabled?: boolean;
   items?: Tab[];
   testSubj?: string;
@@ -58,13 +60,14 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
       await navigateToPath(path, false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pageState]
   );
 
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
 
-    return [
+    const mlTabs: Tab[] = [
       {
         id: 'main_section',
         name: '',
@@ -78,6 +81,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab overview',
           },
+          {
+            id: 'notifications',
+            pathId: ML_PAGES.NOTIFICATIONS,
+            name: <NotificationsIndicator />,
+            disabled: disableLinks,
+            testSubj: 'mlMainTab notifications',
+          },
         ],
       },
       {
@@ -85,6 +95,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
           defaultMessage: 'Anomaly Detection',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'anomaly_detection',
@@ -218,6 +229,38 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ],
       },
     ];
+
+    if (AIOPS_ENABLED) {
+      mlTabs.push({
+        id: 'aiops_section',
+        name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
+          defaultMessage: 'AIOps Labs',
+        }),
+        disabled: disableLinks,
+        items: [
+          {
+            id: 'explainlogratespikes',
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
+              defaultMessage: 'Explain Log Rate Spikes',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+          {
+            id: 'logCategorization',
+            pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
+              defaultMessage: 'Log Pattern Analysis',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab logCategorization',
+          },
+        ],
+      });
+    }
+
+    return mlTabs;
   }, [mlFeaturesDisabled, canViewMlNodes]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(

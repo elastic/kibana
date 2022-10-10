@@ -10,12 +10,11 @@ import { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
 import { HttpService } from '../http_service';
 
-import { annotations } from './annotations';
-import { dataFrameAnalytics } from './data_frame_analytics';
-import { filters } from './filters';
+import { annotationsApiProvider } from './annotations';
+import { dataFrameAnalyticsApiProvider } from './data_frame_analytics';
+import { filtersApiProvider } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
-import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import type {
@@ -45,6 +44,7 @@ import type { DataRecognizerConfigResponse, Module } from '../../../../common/ty
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+import { notificationsProvider } from './notifications';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -66,8 +66,8 @@ export interface BucketSpanEstimatorResponse {
 
 export interface GetTimeFieldRangeResponse {
   success: boolean;
-  start: { epoch: number; string: string };
-  end: { epoch: number; string: string };
+  start: number;
+  end: number;
 }
 
 export interface SuccessCardinality {
@@ -131,7 +131,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     addJob({ jobId, job }: { jobId: string; job: Job }) {
       const body = JSON.stringify(job);
-      return httpService.http<any>({
+      return httpService.http<estypes.MlPutJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}`,
         method: 'PUT',
         body,
@@ -214,7 +214,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    validateDatafeedPreview(payload: { job: CombinedJob }) {
+    validateDatafeedPreview(payload: { job: CombinedJob; start?: number; end?: number }) {
       const body = JSON.stringify(payload);
       return httpService.http<DatafeedValidationResponse>({
         path: `${basePath()}/validate/datafeed_preview`,
@@ -248,7 +248,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
       const body = JSON.stringify(datafeedConfig);
-      return httpService.http<any>({
+      return httpService.http<estypes.MlPutDatafeedResponse>({
         path: `${basePath()}/datafeeds/${datafeedId}`,
         method: 'PUT',
         body,
@@ -284,7 +284,15 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    startDatafeed({ datafeedId, start, end }: { datafeedId: string; start: number; end: number }) {
+    startDatafeed({
+      datafeedId,
+      start,
+      end,
+    }: {
+      datafeedId: string;
+      start?: number;
+      end?: number;
+    }) {
       const body = JSON.stringify({
         ...(start !== undefined ? { start } : {}),
         ...(end !== undefined ? { end } : {}),
@@ -378,13 +386,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     checkMlCapabilities() {
-      return httpService.http<MlCapabilitiesResponse>({
-        path: `${basePath()}/ml_capabilities`,
-        method: 'GET',
-      });
-    },
-
-    checkManageMLCapabilities() {
       return httpService.http<MlCapabilitiesResponse>({
         path: `${basePath()}/ml_capabilities`,
         method: 'GET',
@@ -644,14 +645,23 @@ export function mlApiServicesProvider(httpService: HttpService) {
       query,
       runtimeMappings,
       indicesOptions,
+      allowFutureTime,
     }: {
       index: string;
       timeFieldName?: string;
       query: any;
       runtimeMappings?: RuntimeMappings;
       indicesOptions?: IndicesOptions;
+      allowFutureTime?: boolean;
     }) {
-      const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
+      const body = JSON.stringify({
+        index,
+        timeFieldName,
+        query,
+        runtimeMappings,
+        indicesOptions,
+        allowFutureTime,
+      });
 
       return httpService.http<GetTimeFieldRangeResponse>({
         path: `${basePath()}/fields_service/time_field_range`,
@@ -713,13 +723,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    annotations,
-    dataFrameAnalytics,
-    filters,
+    annotations: annotationsApiProvider(httpService),
+    dataFrameAnalytics: dataFrameAnalyticsApiProvider(httpService),
+    filters: filtersApiProvider(httpService),
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
-    fileDatavisualizer,
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    notifications: notificationsProvider(httpService),
   };
 }

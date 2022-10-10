@@ -32,6 +32,7 @@ import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface EditConnectorProps {
   caseData: Case;
@@ -47,9 +48,7 @@ export interface EditConnectorProps {
     onError: () => void,
     onSuccess: () => void
   ) => void;
-  updateCase: (newCase: Case) => void;
   userActions: CaseUserActions[];
-  userCanCrud?: boolean;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -119,10 +118,9 @@ export const EditConnector = React.memo(
     isLoading,
     isValidConnector,
     onSubmit,
-    updateCase,
     userActions,
-    userCanCrud = true,
   }: EditConnectorProps) => {
+    const { permissions } = useCasesContext();
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
 
@@ -275,8 +273,6 @@ export const EditConnector = React.memo(
       connectors,
       hasDataToPush,
       onEditClick,
-      updateCase,
-      userCanCrud,
       isValidConnector,
     });
 
@@ -287,12 +283,13 @@ export const EditConnector = React.memo(
           gutterSize="xs"
           justifyContent="spaceBetween"
           responsive={false}
+          data-test-subj="case-view-edit-connector"
         >
           <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && !editConnector && userCanCrud && actionsReadCapabilities && (
+          {!isLoading && !editConnector && permissions.push && actionsReadCapabilities && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"
@@ -320,7 +317,7 @@ export const EditConnector = React.memo(
                       connectors,
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
-                      disabled: !userCanCrud,
+                      disabled: !permissions.push,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,
@@ -376,7 +373,7 @@ export const EditConnector = React.memo(
           {pushCallouts == null &&
             !isLoading &&
             !editConnector &&
-            userCanCrud &&
+            permissions.push &&
             actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
                 <span>{pushButton}</span>

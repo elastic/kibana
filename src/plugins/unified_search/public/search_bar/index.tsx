@@ -7,20 +7,21 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;
 
 const LazySearchBar = React.lazy(() => import('./search_bar'));
-const WrappedSearchBar = (props: SearchBarProps) => (
+const WrappedSearchBar = <QT extends AggregateQuery | Query = Query>(
+  props: Omit<SearchBarProps<QT>, 'intl' | 'kibana'>
+) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazySearchBar {...props} />
+    <LazySearchBar {...(props as SearchBarProps<AggregateQuery>)} />
   </React.Suspense>
 );
 
-export const SearchBar = injectI18n(withKibana(WrappedSearchBar));
+export const SearchBar = WrappedSearchBar;
 export type { StatefulSearchBarProps } from './create_search_bar';
 export type { SearchBarProps, SearchBarOwnProps } from './search_bar';
 export { createSearchBar } from './create_search_bar';

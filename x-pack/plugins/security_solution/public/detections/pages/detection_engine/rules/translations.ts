@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_DETECTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.backOptionsHeader',
-  {
-    defaultMessage: 'Back to detections',
-  }
-);
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
     defaultMessage: 'Tooltip for column: {columnName}',
@@ -26,10 +20,10 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
+export const IMPORT_VALUE_LISTS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Upload value lists',
+    defaultMessage: 'Import value lists',
   }
 );
 
@@ -99,20 +93,6 @@ export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle',
   {
     defaultMessage: 'Bulk actions',
-  }
-);
-
-export const ACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.activeRuleDescription',
-  {
-    defaultMessage: 'active',
-  }
-);
-
-export const INACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.inactiveRuleDescription',
-  {
-    defaultMessage: 'inactive',
   }
 );
 
@@ -200,6 +180,20 @@ export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ADD_RULE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addRuleActionsTitle',
+  {
+    defaultMessage: 'Add rule actions',
+  }
+);
+
+export const BULK_ACTION_SET_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setScheduleTitle',
+  {
+    defaultMessage: 'Update rule schedules',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
@@ -230,13 +224,31 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle',
     {
-      values: { elasticRulesCount },
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be exported',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be edited',
+    }
+  );
+
+export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionConfirmationPartlyTitle',
+    {
+      values: { customRulesCount },
       defaultMessage:
-        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
+        'This action can only be applied to {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
@@ -247,12 +259,31 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+export const BULK_ACTION_CONFIRMATION_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkActionConfirmationCloseButtonLabel',
   {
-    defaultMessage: 'Edit custom rules',
+    defaultMessage: 'Close',
   }
 );
+
+export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage: 'Edit {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+    }
+  );
+
+export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkExportConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage:
+        'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+    }
+  );
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -261,10 +292,10 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+export const BULK_EDIT_FLYOUT_FORM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.cancelButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
   }
 );
 
@@ -272,7 +303,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices that you would like to add. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -280,7 +311,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.transl
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Delete default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices that you would like to delete. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -308,7 +339,14 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules index patterns',
+    defaultMessage: "Overwrite all selected rules' index patterns",
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DATA_VIEWS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.dataViewsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Apply changes to rules configured with data views',
   }
 );
 
@@ -366,7 +404,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules tags',
+    defaultMessage: "Overwrite all selected rules' tags",
   }
 );
 
@@ -413,10 +451,11 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SHOWING_RULES = (totalRules: number) =>
+export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
-    values: { totalRules },
-    defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    values: { firstInPage, lastOfPage, totalRules },
+    defaultMessage:
+      'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
 
 export const SELECT_ALL_RULES = (totalRules: number) =>
@@ -449,13 +488,6 @@ export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
   {
     defaultMessage: 'You do not have Kibana Actions privileges',
-  }
-);
-
-export const DUPLICATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
-  {
-    defaultMessage: 'Duplicate',
   }
 );
 
@@ -536,13 +568,6 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
-export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
-  {
-    defaultMessage: 'See all',
-  }
-);
-
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -603,13 +628,6 @@ export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
     defaultMessage: 'Rule Monitoring',
-  }
-);
-
-export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
-  {
-    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -793,27 +811,6 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const REFRESH_PROMPT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
-  {
-    defaultMessage: 'Are you still there?',
-  }
-);
-
-export const REFRESH_PROMPT_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
-  {
-    defaultMessage: 'Continue',
-  }
-);
-
-export const REFRESH_PROMPT_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
-  {
-    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
-  }
-);
-
 export const DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
   {
@@ -857,12 +854,6 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   }
 );
 
-export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
-    values: { totalLists },
-    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
-  });
-
 /**
  * Bulk Export
  */
@@ -880,9 +871,16 @@ export const RULES_BULK_EXPORT_SUCCESS_DESCRIPTION = (exportedRules: number, tot
     {
       values: { totalRules, exportedRules },
       defaultMessage:
-        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}.',
     }
   );
+
+export const RULES_BULK_EXPORT_PREBUILT_RULES_EXCLUDED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.prebuiltRulesExcludedToastDescription',
+  {
+    defaultMessage: 'Prebuilt rules were excluded from the resulting file.',
+  }
+);
 
 export const RULES_BULK_EXPORT_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.errorToastTitle',
@@ -1066,7 +1064,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.",
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
     }
   );
 
@@ -1085,3 +1083,32 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
     }
   );
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule preview',
+  }
+);
+
+export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
+  {
+    defaultMessage:
+      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
+  }
+);
+
+export const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
+  }
+);

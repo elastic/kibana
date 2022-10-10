@@ -8,32 +8,25 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
-  enumeration,
   IsoDateString,
   NonEmptyString,
   PositiveInteger,
   PositiveIntegerGreaterThanZero,
   UUID,
+  LimitedSizeArray,
 } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
 
-export const authorOrUndefined = t.union([author, t.undefined]);
-export type AuthorOrUndefined = t.TypeOf<typeof authorOrUndefined>;
-
 export const building_block_type = t.string;
 export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
 
 export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);
-export type BuildingBlockTypeOrUndefined = t.TypeOf<typeof buildingBlockTypeOrUndefined>;
 
 export const description = NonEmptyString;
 export type Description = t.TypeOf<typeof description>;
-
-export const descriptionOrUndefined = t.union([description, t.undefined]);
-export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
 
 // outcome is a property of the saved object resolve api
 // will tell us info about the rule after 8.0 migrations
@@ -45,31 +38,24 @@ export const outcome = t.union([
 export type Outcome = t.TypeOf<typeof outcome>;
 
 export const alias_target_id = t.string;
-export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
-
 export const alias_purpose = t.union([
   t.literal('savedObjectConversion'),
   t.literal('savedObjectImport'),
 ]);
-export type AliasPurpose = t.TypeOf<typeof alias_purpose>;
-
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
-
-export const enabledOrUndefined = t.union([enabled, t.undefined]);
-export type EnabledOrUndefined = t.TypeOf<typeof enabledOrUndefined>;
-
 export const event_category_override = t.string;
-export type EventCategoryOverride = t.TypeOf<typeof event_category_override>;
-
 export const eventCategoryOverrideOrUndefined = t.union([event_category_override, t.undefined]);
-export type EventCategoryOverrideOrUndefined = t.TypeOf<typeof eventCategoryOverrideOrUndefined>;
+
+export const tiebreaker_field = t.string;
+
+export const tiebreakerFieldOrUndefined = t.union([tiebreaker_field, t.undefined]);
+
+export const timestamp_field = t.string;
+
+export const timestampFieldOrUndefined = t.union([timestamp_field, t.undefined]);
 
 export const false_positives = t.array(t.string);
-export type FalsePositives = t.TypeOf<typeof false_positives>;
-
-export const falsePositivesOrUndefined = t.union([false_positives, t.undefined]);
-export type FalsePositivesOrUndefined = t.TypeOf<typeof falsePositivesOrUndefined>;
 
 export const file_name = t.string;
 export type FileName = t.TypeOf<typeof file_name>;
@@ -111,14 +97,15 @@ export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 export const index = t.array(t.string);
 export type Index = t.TypeOf<typeof index>;
 
+export const data_view_id = t.string;
+
+export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
+
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 
 export const interval = t.string;
 export type Interval = t.TypeOf<typeof interval>;
-
-export const intervalOrUndefined = t.union([interval, t.undefined]);
-export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
 
 export const query = t.string;
 export type Query = t.TypeOf<typeof query>;
@@ -130,18 +117,12 @@ export const license = t.string;
 export type License = t.TypeOf<typeof license>;
 
 export const licenseOrUndefined = t.union([license, t.undefined]);
-export type LicenseOrUndefined = t.TypeOf<typeof licenseOrUndefined>;
 
 export const objects = t.array(t.type({ rule_id }));
 
 export const output_index = t.string;
-export type OutputIndex = t.TypeOf<typeof output_index>;
-
-export const outputIndexOrUndefined = t.union([output_index, t.undefined]);
-export type OutputIndexOrUndefined = t.TypeOf<typeof outputIndexOrUndefined>;
 
 export const saved_id = t.string;
-export type SavedId = t.TypeOf<typeof saved_id>;
 
 export const savedIdOrUndefined = t.union([saved_id, t.undefined]);
 export type SavedIdOrUndefined = t.TypeOf<typeof savedIdOrUndefined>;
@@ -150,13 +131,10 @@ export const timeline_id = t.string;
 export type TimelineId = t.TypeOf<typeof timeline_id>;
 
 export const timelineIdOrUndefined = t.union([timeline_id, t.undefined]);
-export type TimelineIdOrUndefined = t.TypeOf<typeof timelineIdOrUndefined>;
 
 export const timeline_title = t.string;
-export type TimelineTitle = t.TypeOf<typeof t.string>;
 
 export const timelineTitleOrUndefined = t.union([timeline_title, t.undefined]);
-export type TimelineTitleOrUndefined = t.TypeOf<typeof timelineTitleOrUndefined>;
 
 export const timestamp_override = t.string;
 export type TimestampOverride = t.TypeOf<typeof timestamp_override>;
@@ -165,10 +143,13 @@ export const timestampOverrideOrUndefined = t.union([timestamp_override, t.undef
 export type TimestampOverrideOrUndefined = t.TypeOf<typeof timestampOverrideOrUndefined>;
 
 export const anomaly_threshold = PositiveInteger;
-export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 
-export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
-export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
+export const timestamp_override_fallback_disabled = t.boolean;
+
+export const timestampOverrideFallbackDisabledOrUndefined = t.union([
+  timestamp_override_fallback_disabled,
+  t.undefined,
+]);
 
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
@@ -182,9 +163,6 @@ export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 export const name = NonEmptyString;
 export type Name = t.TypeOf<typeof name>;
 
-export const nameOrUndefined = t.union([name, t.undefined]);
-export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
-
 export const rule_name_override = t.string;
 export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 
@@ -195,19 +173,15 @@ export const status = t.keyof({
   open: null,
   closed: null,
   acknowledged: null,
-  'in-progress': null, // TODO: Remove after `acknowledged` migrations
+  'in-progress': null,
 });
 export type Status = t.TypeOf<typeof status>;
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
-export type Conflicts = t.TypeOf<typeof conflicts>;
 
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
-
-export const toOrUndefined = t.union([to, t.undefined]);
-export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
 export const queryFilter = t.string;
 export type QueryFilter = t.TypeOf<typeof queryFilter>;
@@ -218,44 +192,14 @@ export type QueryFilterOrUndefined = t.TypeOf<typeof queryFilterOrUndefined>;
 export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
 
-export const referencesOrUndefined = t.union([references, t.undefined]);
-export type ReferencesOrUndefined = t.TypeOf<typeof referencesOrUndefined>;
-
-export const per_page = PositiveInteger;
-export type PerPage = t.TypeOf<typeof per_page>;
-
-export const perPageOrUndefined = t.union([per_page, t.undefined]);
-export type PerPageOrUndefined = t.TypeOf<typeof perPageOrUndefined>;
-
-export const page = PositiveIntegerGreaterThanZero;
-export type Page = t.TypeOf<typeof page>;
-
-export const pageOrUndefined = t.union([page, t.undefined]);
-export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
-
 export const signal_ids = t.array(t.string);
 export type SignalIds = t.TypeOf<typeof signal_ids>;
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
 
-export const sort_field = t.string;
-export type SortField = t.TypeOf<typeof sort_field>;
-
-export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
-export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
-
-export const sort_order = t.keyof({ asc: null, desc: null });
-export type SortOrder = t.TypeOf<typeof sort_order>;
-
-export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
-export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
-
 export const tags = t.array(t.string);
 export type Tags = t.TypeOf<typeof tags>;
-
-export const tagsOrUndefined = t.union([tags, t.undefined]);
-export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
 export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
@@ -268,7 +212,6 @@ export const thresholdField = t.exact(
     value: PositiveIntegerGreaterThanZero,
   })
 );
-export type ThresholdField = t.TypeOf<typeof thresholdField>;
 
 export const thresholdFieldNormalized = t.exact(
   t.type({
@@ -276,7 +219,6 @@ export const thresholdFieldNormalized = t.exact(
     value: PositiveIntegerGreaterThanZero,
   })
 );
-export type ThresholdFieldNormalized = t.TypeOf<typeof thresholdFieldNormalized>;
 
 export const thresholdCardinalityField = t.exact(
   t.type({
@@ -284,7 +226,6 @@ export const thresholdCardinalityField = t.exact(
     value: PositiveInteger,
   })
 );
-export type ThresholdCardinalityField = t.TypeOf<typeof thresholdCardinalityField>;
 
 export const threshold = t.intersection([
   thresholdField,
@@ -296,9 +237,6 @@ export const threshold = t.intersection([
 ]);
 export type Threshold = t.TypeOf<typeof threshold>;
 
-export const thresholdOrUndefined = t.union([threshold, t.undefined]);
-export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
-
 export const thresholdNormalized = t.intersection([
   thresholdFieldNormalized,
   t.exact(
@@ -309,8 +247,22 @@ export const thresholdNormalized = t.intersection([
 ]);
 export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 
-export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
-export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
+export const thresholdWithCardinality = t.intersection([
+  thresholdFieldNormalized,
+  t.exact(
+    t.type({
+      cardinality: t.array(thresholdCardinalityField),
+    })
+  ),
+]);
+export type ThresholdWithCardinality = t.TypeOf<typeof thresholdWithCardinality>;
+
+// New terms rule type currently only supports a single term, but should support more in the future
+export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
+export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
+
+export const historyWindowStart = NonEmptyString;
+export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
 
 export const created_at = IsoDateString;
 
@@ -319,11 +271,6 @@ export const updated_at = IsoDateString;
 export const updated_by = t.string;
 
 export const created_by = t.string;
-
-export const updatedByOrNull = t.union([updated_by, t.null]);
-export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
-export const createdByOrNull = t.union([created_by, t.null]);
-export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
 
 export const rules_installed = PositiveInteger;
 export const rules_updated = PositiveInteger;
@@ -346,10 +293,8 @@ export const note = t.string;
 export type Note = t.TypeOf<typeof note>;
 
 export const namespaceOrUndefined = t.union([namespace, t.undefined]);
-export type NamespaceOrUndefined = t.TypeOf<typeof namespaceOrUndefined>;
 
 export const noteOrUndefined = t.union([note, t.undefined]);
-export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
 
 export const indexRecord = t.record(
   t.string,
@@ -373,12 +318,10 @@ export const indexRecord = t.record(
     write: t.boolean,
   })
 );
-export type IndexRecord = t.TypeOf<typeof indexRecord>;
 
 export const indexType = t.type({
   index: indexRecord,
 });
-export type IndexType = t.TypeOf<typeof indexType>;
 
 export const privilege = t.type({
   username: t.string,
@@ -415,66 +358,3 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
-
-export enum BulkAction {
-  'enable' = 'enable',
-  'disable' = 'disable',
-  'export' = 'export',
-  'delete' = 'delete',
-  'duplicate' = 'duplicate',
-  'edit' = 'edit',
-}
-
-export const bulkAction = enumeration('BulkAction', BulkAction);
-
-export enum BulkActionEditType {
-  'add_tags' = 'add_tags',
-  'delete_tags' = 'delete_tags',
-  'set_tags' = 'set_tags',
-  'add_index_patterns' = 'add_index_patterns',
-  'delete_index_patterns' = 'delete_index_patterns',
-  'set_index_patterns' = 'set_index_patterns',
-  'set_timeline' = 'set_timeline',
-}
-
-export const bulkActionEditType = enumeration('BulkActionEditType', BulkActionEditType);
-
-const bulkActionEditPayloadTags = t.type({
-  type: t.union([
-    t.literal(BulkActionEditType.add_tags),
-    t.literal(BulkActionEditType.delete_tags),
-    t.literal(BulkActionEditType.set_tags),
-  ]),
-  value: tags,
-});
-
-export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
-
-const bulkActionEditPayloadIndexPatterns = t.type({
-  type: t.union([
-    t.literal(BulkActionEditType.add_index_patterns),
-    t.literal(BulkActionEditType.delete_index_patterns),
-    t.literal(BulkActionEditType.set_index_patterns),
-  ]),
-  value: index,
-});
-
-export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
-  typeof bulkActionEditPayloadIndexPatterns
->;
-
-const bulkActionEditPayloadTimeline = t.type({
-  type: t.literal(BulkActionEditType.set_timeline),
-  value: t.type({
-    timeline_id,
-    timeline_title,
-  }),
-});
-
-export const bulkActionEditPayload = t.union([
-  bulkActionEditPayloadTags,
-  bulkActionEditPayloadIndexPatterns,
-  bulkActionEditPayloadTimeline,
-]);
-
-export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;

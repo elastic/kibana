@@ -6,19 +6,16 @@
  */
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
-import { Position } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import type { Position } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
-import {
-  CategoryDisplay,
-  layerTypes,
-  LegendDisplay,
-  NumberDisplay,
-  PieChartTypes,
-} from './constants';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
+import type { LegendSize } from '@kbn/visualizations-plugin/common';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+
+export type { OriginalColumn } from './expressions/map_to_columns';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -40,25 +37,11 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
-
 export type SortingHint = 'version';
 
-export type CustomPaletteParamsConfig = CustomPaletteParams & {
-  maxSteps?: number;
-};
+export type LayerType = typeof LayerTypes[keyof typeof LayerTypes];
 
-export type LayerType = typeof layerTypes[keyof typeof layerTypes];
-
-// Shared by XY Chart and Heatmap as for now
-export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
 export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
@@ -73,8 +56,10 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
-  groups: string[];
+  primaryGroups: string[];
+  secondaryGroups?: string[];
   metric?: string;
+  collapseFns?: Record<string, string>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
@@ -84,7 +69,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   truncateLegend?: boolean;
 }
 
@@ -98,7 +83,7 @@ export interface PieVisualizationState {
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
-export interface MetricState {
+export interface LegacyMetricState {
   layerId: string;
   accessor?: string;
   layerType: LayerType;

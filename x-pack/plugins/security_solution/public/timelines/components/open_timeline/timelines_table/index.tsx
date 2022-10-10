@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
-import {
+import type {
   ActionTimelineToShow,
   DeleteTimelines,
   OnOpenTimeline,
@@ -25,11 +25,8 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import {
-  TimelineTypeLiteralWithNull,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any

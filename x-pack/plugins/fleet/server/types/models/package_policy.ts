@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../../common';
+import { isValidNamespace } from '../../../common/services';
 
 export const NamespaceSchema = schema.string({
   minLength: 1,
@@ -32,6 +32,9 @@ const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
+  release: schema.maybe(
+    schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
+  ),
   data_stream: schema.object({
     dataset: schema.string(),
     type: schema.string(),
@@ -76,6 +79,15 @@ const PackagePolicyInputsSchema = {
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
+const ExperimentalDataStreamFeatures = schema.arrayOf(
+  schema.object({
+    data_stream: schema.string(),
+    features: schema.object({
+      synthetic_source: schema.boolean(),
+    }),
+  })
+);
+
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
@@ -87,9 +99,11 @@ const PackagePolicyBaseSchema = {
       name: schema.string(),
       title: schema.string(),
       version: schema.string(),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
     })
   ),
-  output_id: schema.string(),
+  // Deprecated TODO create remove issue
+  output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
 };
@@ -110,8 +124,17 @@ const CreatePackagePolicyProps = {
       name: schema.string(),
       title: schema.maybe(schema.string()),
       version: schema.string(),
+      experimental_data_stream_features: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            data_stream: schema.string(),
+            features: schema.object({ synthetic_source: schema.boolean() }),
+          })
+        )
+      ),
     })
   ),
+  // Deprecated TODO create remove issue
   output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(
     schema.object({
@@ -125,6 +148,52 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
+});
+
+const SimplifiedVarsSchema = schema.recordOf(
+  schema.string(),
+  schema.nullable(
+    schema.oneOf([
+      schema.boolean(),
+      schema.string(),
+      schema.number(),
+      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.number()),
+    ])
+  )
+);
+
+export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
+  id: schema.maybe(schema.string()),
+  name: schema.string(),
+  description: schema.maybe(schema.string()),
+  policy_id: schema.string(),
+  namespace: schema.string({ defaultValue: 'default' }),
+  package: schema.object({
+    name: schema.string(),
+    version: schema.string(),
+    experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+  }),
+  force: schema.maybe(schema.boolean()),
+  vars: schema.maybe(SimplifiedVarsSchema),
+  inputs: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        enabled: schema.maybe(schema.boolean()),
+        vars: schema.maybe(SimplifiedVarsSchema),
+        streams: schema.maybe(
+          schema.recordOf(
+            schema.string(),
+            schema.object({
+              enabled: schema.maybe(schema.boolean()),
+              vars: schema.maybe(SimplifiedVarsSchema),
+            })
+          )
+        ),
+      })
+    )
+  ),
 });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({

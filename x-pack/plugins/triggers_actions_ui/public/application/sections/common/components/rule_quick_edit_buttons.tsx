@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import { KueryNode } from '@kbn/es-query';
+import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 
 import { RuleTableItem } from '../../../../types';
 import {
@@ -20,81 +21,111 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 export type ComponentOpts = {
   selectedItems: RuleTableItem[];
+  isAllSelected?: boolean;
+  getFilter: () => KueryNode | null;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
+  isSnoozingRules?: boolean;
+  isUnsnoozingRules?: boolean;
+  isSchedulingRules?: boolean;
+  isUnschedulingRules?: boolean;
+  isUpdatingRuleAPIKeys?: boolean;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  setRulesToUpdateAPIKey: React.Dispatch<React.SetStateAction<string[]>>;
+  setRulesToSnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
+  setRulesToUnsnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
+  setRulesToSchedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
+  setRulesToUnschedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
+  setRulesToSnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUnsnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
 } & BulkOperationsComponentOpts;
+
+const ButtonWithTooltip = ({
+  showTooltip,
+  tooltip,
+  children,
+}: {
+  showTooltip: boolean;
+  tooltip: string;
+  children: JSX.Element;
+}) => {
+  if (!showTooltip) {
+    return children;
+  }
+  return (
+    <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip position="right" color="warning" size="s" type="alert" content={tooltip} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   selectedItems,
+  isAllSelected = false,
+  getFilter,
   onPerformingAction = noop,
   onActionPerformed = noop,
-  muteRules,
-  unmuteRules,
+  isSnoozingRules = false,
+  isUnsnoozingRules = false,
+  isSchedulingRules = false,
+  isUnschedulingRules = false,
+  isUpdatingRuleAPIKeys = false,
   enableRules,
   disableRules,
   setRulesToDelete,
+  setRulesToUpdateAPIKey,
+  setRulesToSnooze,
+  setRulesToUnsnooze,
+  setRulesToSchedule,
+  setRulesToUnschedule,
+  setRulesToSnoozeFilter,
+  setRulesToUnsnoozeFilter,
+  setRulesToScheduleFilter,
+  setRulesToUnscheduleFilter,
+  setRulesToUpdateAPIKeyFilter,
 }: ComponentOpts) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
 
-  const [isMutingRules, setIsMutingRules] = useState<boolean>(false);
-  const [isUnmutingRules, setIsUnmutingRules] = useState<boolean>(false);
   const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
   const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
   const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
 
-  const allRulesMuted = selectedItems.every(isRuleMuted);
-  const allRulesDisabled = selectedItems.every(isRuleDisabled);
   const isPerformingAction =
-    isMutingRules || isUnmutingRules || isEnablingRules || isDisablingRules || isDeletingRules;
+    isEnablingRules ||
+    isDisablingRules ||
+    isDeletingRules ||
+    isSnoozingRules ||
+    isUnsnoozingRules ||
+    isSchedulingRules ||
+    isUnschedulingRules ||
+    isUpdatingRuleAPIKeys;
 
-  const hasDisabledByLicenseRuleTypes = !!selectedItems.find(
-    (alertItem) => !alertItem.enabledInLicense
-  );
-
-  async function onmMuteAllClick() {
-    onPerformingAction();
-    setIsMutingRules(true);
-    try {
-      await muteRules(selectedItems);
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToMuteRulesMessage',
-          {
-            defaultMessage: 'Failed to mute rule(s)',
-          }
-        ),
-      });
-    } finally {
-      setIsMutingRules(false);
-      onActionPerformed();
+  const allRulesDisabled = useMemo(() => {
+    if (isAllSelected) {
+      return false;
     }
-  }
+    return selectedItems.every(isRuleDisabled);
+  }, [selectedItems, isAllSelected]);
 
-  async function onUnmuteAllClick() {
-    onPerformingAction();
-    setIsUnmutingRules(true);
-    try {
-      await unmuteRules(selectedItems);
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUnmuteRulesMessage',
-          {
-            defaultMessage: 'Failed to unmute rule(s)',
-          }
-        ),
-      });
-    } finally {
-      setIsUnmutingRules(false);
-      onActionPerformed();
+  const hasDisabledByLicenseRuleTypes = useMemo(() => {
+    if (isAllSelected) {
+      return false;
     }
-  }
+    return !!selectedItems.find((alertItem) => !alertItem.enabledInLicense);
+  }, [selectedItems, isAllSelected]);
 
   async function onEnableAllClick() {
+    if (isAllSelected) {
+      return;
+    }
     onPerformingAction();
     setIsEnablingRules(true);
     try {
@@ -104,7 +135,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage',
           {
-            defaultMessage: 'Failed to enable rule(s)',
+            defaultMessage: 'Failed to enable rules',
           }
         ),
       });
@@ -115,6 +146,9 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   async function onDisableAllClick() {
+    if (isAllSelected) {
+      return;
+    }
     onPerformingAction();
     setIsDisablingRules(true);
     try {
@@ -124,7 +158,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage',
           {
-            defaultMessage: 'Failed to disable rule(s)',
+            defaultMessage: 'Failed to disable rules',
           }
         ),
       });
@@ -135,6 +169,9 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   async function deleteSelectedItems() {
+    if (isAllSelected) {
+      return;
+    }
     onPerformingAction();
     setIsDeletingRules(true);
     try {
@@ -144,7 +181,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDeleteRulesMessage',
           {
-            defaultMessage: 'Failed to delete rule(s)',
+            defaultMessage: 'Failed to delete rules',
           }
         ),
       });
@@ -154,83 +191,255 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     }
   }
 
+  async function updateAPIKeysClick() {
+    onPerformingAction();
+    try {
+      if (isAllSelected) {
+        setRulesToUpdateAPIKeyFilter(getFilter());
+      } else {
+        setRulesToUpdateAPIKey(selectedItems.map((selected: any) => selected.id));
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUpdateRuleAPIKeysMessage',
+          {
+            defaultMessage: 'Failed to update API keys for rules',
+          }
+        ),
+      });
+    } finally {
+      onActionPerformed();
+    }
+  }
+
+  async function onSnoozeAllClick() {
+    onPerformingAction();
+    try {
+      if (isAllSelected) {
+        setRulesToSnoozeFilter(getFilter());
+      } else {
+        setRulesToSnooze(selectedItems);
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToSnoozeRules',
+          {
+            defaultMessage: 'Failed to snooze or unsnooze rules',
+          }
+        ),
+      });
+    } finally {
+      onActionPerformed();
+    }
+  }
+
+  async function onUnsnoozeAllClick() {
+    onPerformingAction();
+    try {
+      if (isAllSelected) {
+        setRulesToUnsnoozeFilter(getFilter());
+      } else {
+        setRulesToUnsnooze(selectedItems);
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToSnoozeRules',
+          {
+            defaultMessage: 'Failed to snooze or unsnooze rules',
+          }
+        ),
+      });
+    } finally {
+      onActionPerformed();
+    }
+  }
+
+  async function onScheduleAllClick() {
+    onPerformingAction();
+    try {
+      if (isAllSelected) {
+        setRulesToScheduleFilter(getFilter());
+      } else {
+        setRulesToSchedule(selectedItems);
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToSnoozeRules',
+          {
+            defaultMessage: 'Failed to snooze or unsnooze rules',
+          }
+        ),
+      });
+    } finally {
+      onActionPerformed();
+    }
+  }
+
+  async function onUnscheduleAllClick() {
+    onPerformingAction();
+    try {
+      if (isAllSelected) {
+        setRulesToUnscheduleFilter(getFilter());
+      } else {
+        setRulesToUnschedule(selectedItems);
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToSnoozeRules',
+          {
+            defaultMessage: 'Failed to snooze or unsnooze rules',
+          }
+        ),
+      });
+    } finally {
+      onActionPerformed();
+    }
+  }
+
   return (
-    <EuiFlexGroup alignItems="baseline" direction="column" gutterSize="none">
-      {!allRulesMuted && (
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            onClick={onmMuteAllClick}
-            isLoading={isMutingRules}
-            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-            data-test-subj="muteAll"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.muteAllTitle"
-              defaultMessage="Mute"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-      {allRulesMuted && (
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            onClick={onUnmuteAllClick}
-            isLoading={isUnmutingRules}
-            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-            data-test-subj="unmuteAll"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.unmuteAllTitle"
-              defaultMessage="Unmute"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-      {allRulesDisabled && (
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            onClick={onEnableAllClick}
-            isLoading={isEnablingRules}
-            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-            data-test-subj="enableAll"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
-              defaultMessage="Enable"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-      {!allRulesDisabled && (
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            onClick={onDisableAllClick}
-            isLoading={isDisablingRules}
-            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-            data-test-subj="disableAll"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
-              defaultMessage="Disable"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+    <EuiFlexGroup
+      alignItems="baseline"
+      direction="column"
+      gutterSize="none"
+      data-test-subj="ruleQuickEditButton"
+    >
       <EuiFlexItem>
         <EuiButtonEmpty
-          onClick={deleteSelectedItems}
-          isLoading={isDeletingRules}
-          iconType="trash"
-          color="danger"
-          isDisabled={isPerformingAction}
-          data-test-subj="deleteAll"
-          className="actBulkActionPopover__deleteAll"
+          onClick={onSnoozeAllClick}
+          isLoading={isSnoozingRules}
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkSnooze"
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
-            defaultMessage="Delete"
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeAllTitle"
+            defaultMessage="Snooze now"
           />
         </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={onUnsnoozeAllClick}
+          isLoading={isUnsnoozingRules}
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkUnsnooze"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.unsnoozeAllTitle"
+            defaultMessage="Unsnooze now"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={onScheduleAllClick}
+          isLoading={isSchedulingRules}
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkSnoozeSchedule"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeScheduleAllTitle"
+            defaultMessage="Schedule snooze"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={onUnscheduleAllClick}
+          isLoading={isUnschedulingRules}
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkRemoveSnoozeSchedule"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.removeSnoozeScheduleAllTitle"
+            defaultMessage="Unschedule snooze"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <ButtonWithTooltip
+        showTooltip={isAllSelected}
+        tooltip={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableDisableUnsupported',
+          {
+            defaultMessage: 'Bulk enable or disable is unsupported when selecting all rules.',
+          }
+        )}
+      >
+        <>
+          {allRulesDisabled && (
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                onClick={onEnableAllClick}
+                isLoading={isEnablingRules}
+                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes || isAllSelected}
+                data-test-subj="enableAll"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
+                  defaultMessage="Enable"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+          {!allRulesDisabled && (
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                onClick={onDisableAllClick}
+                isLoading={isDisablingRules}
+                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes || isAllSelected}
+                data-test-subj="disableAll"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
+                  defaultMessage="Disable"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </>
+      </ButtonWithTooltip>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={updateAPIKeysClick}
+          isLoading={isUpdatingRuleAPIKeys}
+          isDisabled={isPerformingAction}
+          data-test-subj="updateAPIKeys"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.updateRuleAPIKeysTitle"
+            defaultMessage="Update API keys"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ButtonWithTooltip
+          showTooltip={isAllSelected}
+          tooltip={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteUnsupported',
+            {
+              defaultMessage: 'Bulk delete is unsupported when selecting all rules.',
+            }
+          )}
+        >
+          <EuiButtonEmpty
+            onClick={deleteSelectedItems}
+            isLoading={isDeletingRules}
+            iconType="trash"
+            color="danger"
+            isDisabled={isPerformingAction || isAllSelected}
+            data-test-subj="deleteAll"
+            className="actBulkActionPopover__deleteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
+              defaultMessage="Delete"
+            />
+          </EuiButtonEmpty>
+        </ButtonWithTooltip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -240,10 +449,6 @@ export const RuleQuickEditButtonsWithApi = withBulkRuleOperations(RuleQuickEditB
 
 function isRuleDisabled(alert: RuleTableItem) {
   return alert.enabled === false;
-}
-
-function isRuleMuted(alert: RuleTableItem) {
-  return alert.muteAll === true;
 }
 
 function noop() {}

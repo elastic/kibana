@@ -28,7 +28,8 @@ export const LogQueryBar: React.FunctionComponent<{
   isQueryValid: boolean;
   onUpdateQuery: (query: string, runQuery?: boolean) => void;
 }> = memo(({ query, isQueryValid, onUpdateQuery }) => {
-  const { data } = useStartServices();
+  const { data, notifications, http, docLinks, uiSettings, unifiedSearch, storage } =
+    useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export const LogQueryBar: React.FunctionComponent<{
   return (
     <QueryStringInput
       iconType="search"
+      autoSubmit={true}
       disableLanguageSwitcher={true}
       indexPatterns={
         indexPatternFields
@@ -78,6 +80,8 @@ export const LogQueryBar: React.FunctionComponent<{
       onSubmit={(newQuery) => {
         onUpdateQuery(newQuery.query as string, true);
       }}
+      appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
+      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
     />
   );
 });

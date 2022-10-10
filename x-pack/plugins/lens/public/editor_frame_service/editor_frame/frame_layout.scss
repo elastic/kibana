@@ -14,6 +14,10 @@
   }
 }
 
+.lnsFrameLayout__wrapper {
+  position: relative;
+}
+
 .lnsFrameLayout__pageContent {
   overflow: hidden;
   flex-grow: 1;
@@ -96,7 +100,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 .lnsFrameLayout__sidebar--right {
   flex-basis: 25%;
   background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
-  min-width: $lnsPanelMinWidth + $euiSizeXL;
+  min-width: $lnsPanelMinWidth + 70;
   max-width: $euiFormMaxWidth + $euiSizeXXL;
   max-height: 100%;
 

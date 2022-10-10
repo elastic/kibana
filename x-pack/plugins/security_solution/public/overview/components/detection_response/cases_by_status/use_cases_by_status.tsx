@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import type { CasesStatus } from '@kbn/cases-plugin/common/ui';
+import { useState, useEffect, useMemo } from 'react';
+import uuid from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
-
-export interface CasesCounts {
-  count_open_cases?: number;
-  count_in_progress_cases?: number;
-  count_closed_cases?: number;
-}
 
 export interface UseCasesByStatusProps {
   skip?: boolean;
@@ -33,28 +29,33 @@ export const useCasesByStatus = ({ skip = false }) => {
   const {
     services: { cases },
   } = useKibana();
-  const { to, from } = useGlobalTime();
-
+  const { to, from, setQuery, deleteQuery } = useGlobalTime();
+  // create a unique, but stable (across re-renders) query id
+  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid.v4()}`, []);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
-  const [casesCounts, setCasesCounts] = useState<CasesCounts | null>(null);
+  const [casesCounts, setCasesCounts] = useState<CasesStatus | null>(null);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     const fetchCases = async () => {
       try {
-        const casesResponse = await cases.api.cases.getAllCasesMetrics({
-          from,
-          to,
-          owner: APP_ID,
-        });
+        const casesResponse = await cases.api.cases.getCasesStatus(
+          {
+            from,
+            to,
+            owner: APP_ID,
+          },
+          abortCtrl.signal
+        );
+
         if (isSubscribed) {
           setCasesCounts(casesResponse);
         }
       } catch (error) {
         if (isSubscribed) {
-          setCasesCounts({});
+          setCasesCounts(null);
         }
       }
       if (isSubscribed) {
@@ -65,6 +66,12 @@ export const useCasesByStatus = ({ skip = false }) => {
 
     if (!skip) {
       fetchCases();
+      setQuery({
+        id: uniqueQueryId,
+        inspect: null,
+        loading: false,
+        refetch: fetchCases,
+      });
     }
 
     if (skip) {
@@ -76,18 +83,19 @@ export const useCasesByStatus = ({ skip = false }) => {
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
+      deleteQuery({ id: uniqueQueryId });
     };
-  }, [cases.api.cases, from, skip, to]);
+  }, [cases.api.cases, from, skip, to, setQuery, deleteQuery, uniqueQueryId]);
 
   return {
-    closed: casesCounts?.count_closed_cases ?? 0,
-    inProgress: casesCounts?.count_in_progress_cases ?? 0,
+    closed: casesCounts?.countClosedCases ?? 0,
+    inProgress: casesCounts?.countInProgressCases ?? 0,
     isLoading,
-    open: casesCounts?.count_open_cases ?? 0,
+    open: casesCounts?.countOpenCases ?? 0,
     totalCounts:
-      (casesCounts?.count_closed_cases ?? 0) +
-      (casesCounts?.count_in_progress_cases ?? 0) +
-      (casesCounts?.count_open_cases ?? 0),
+      (casesCounts?.countClosedCases ?? 0) +
+      (casesCounts?.countInProgressCases ?? 0) +
+      (casesCounts?.countOpenCases ?? 0),
     updatedAt,
   };
 };

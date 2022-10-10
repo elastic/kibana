@@ -20,10 +20,6 @@ it('matches snapshot', () => {
         "scaling_factor": 100,
         "type": "scaled_float",
       },
-      "kibana.alert.instance.id": Object {
-        "required": true,
-        "type": "keyword",
-      },
     }
   `);
 });

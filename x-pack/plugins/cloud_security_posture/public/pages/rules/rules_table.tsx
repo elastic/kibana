@@ -8,62 +8,45 @@ import React, { useMemo } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
-  EuiSwitch,
-  EuiToolTip,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
   useEuiTheme,
 } from '@elastic/eui';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 import type { RuleSavedObject } from './use_csp_rules';
 
 type RulesTableProps = Pick<
   RulesState,
   'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
 > & {
-  toggleRule(rule: RuleSavedObject): void;
-  setSelectedRules(rules: RuleSavedObject[]): void;
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
-  // ForwardRef makes this ref not available in parent callbacks
-  tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
 };
 
 export const RulesTable = ({
-  toggleRule,
-  setSelectedRules,
   setPagination,
   setSelectedRuleId,
   perPage: pageSize,
   rules_page: items,
   page,
-  tableRef,
   total,
   loading,
   error,
   selectedRuleId,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const columns = useMemo(
-    () => getColumns({ toggleRule, setSelectedRuleId }),
-    [setSelectedRuleId, toggleRule]
-  );
+  const columns = useMemo(() => getColumns({ setSelectedRuleId }), [setSelectedRuleId]);
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
-    pageSizeOptions: [1, 5, 10, 25],
-  };
-
-  const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
-    selectable: () => true,
-    onSelectionChange: setSelectedRules,
+    pageSizeOptions: [10, 25, 100],
   };
 
   const onTableChange = ({ page: pagination }: Criteria<RuleSavedObject>) => {
@@ -84,7 +67,6 @@ export const RulesTable = ({
 
   return (
     <EuiBasicTable
-      ref={tableRef}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE}
       loading={loading}
       error={error}
@@ -92,25 +74,22 @@ export const RulesTable = ({
       columns={columns}
       pagination={euiPagination}
       onChange={onTableChange}
-      isSelectable={true}
-      selection={selection}
       itemId={(v) => v.id}
       rowProps={rowProps}
     />
   );
 };
 
-interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId'> {
-  toggleRule: (rule: RuleSavedObject) => void;
-}
+type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
 
 const getColumns = ({
-  toggleRule,
   setSelectedRuleId,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
-    field: 'attributes.name',
-    name: TEXT.RULE_NAME,
+    field: 'attributes.metadata.name',
+    name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {
+      defaultMessage: 'Name',
+    }),
     width: '60%',
     truncateText: true,
     render: (name, rule) => (
@@ -128,30 +107,18 @@ const getColumns = ({
     ),
   },
   {
-    field: 'section', // TODO: what field is this?
-    name: TEXT.SECTION,
+    field: 'attributes.metadata.section',
+    name: i18n.translate('xpack.csp.rules.rulesTable.cisSectionColumnLabel', {
+      defaultMessage: 'CIS Section',
+    }),
     width: '15%',
   },
   {
     field: 'updatedAt',
-    name: TEXT.LAST_MODIFIED,
+    name: i18n.translate('xpack.csp.rules.rulesTable.lastModifiedColumnLabel', {
+      defaultMessage: 'Last Modified',
+    }),
     width: '15%',
-    render: (timestamp) => moment(timestamp).fromNow(),
-  },
-  {
-    field: 'attributes.enabled',
-    name: TEXT.ENABLED,
-    render: (enabled, rule) => (
-      <EuiToolTip content={enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
-        <EuiSwitch
-          showLabel={false}
-          label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
-          checked={enabled}
-          onChange={() => toggleRule(rule)}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
-        />
-      </EuiToolTip>
-    ),
-    width: '10%',
+    render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
   },
 ];

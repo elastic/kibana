@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Alert } from '@kbn/alerting-plugin/server/alert';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 export const alertInstanceFactoryStub = <
   TParams extends RuleParams,
@@ -33,16 +32,6 @@ export const alertInstanceFactoryStub = <
     });
   },
   scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
-    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
-      state: {} as TInstanceState,
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-    });
-  },
-  scheduleActionsWithSubGroup(
-    actionGroup: TActionGroupIds,
-    subgroup: string,
-    alertcontext: TInstanceContext
-  ) {
     return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },

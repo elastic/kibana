@@ -3,7 +3,7 @@
     "cluster": ["manage"],
     "indices": [
       {
-        "names": [".items-*", ".lists-*", ".alerts-security.alerts-*", ".siem-signals-*"],
+        "names": [".items-*", ".lists-*", ".alerts-security.alerts-*", ".siem-signals-*", "logs-*"],
         "privileges": ["manage", "read", "write", "view_index_metadata", "maintenance"]
       },
       {
@@ -15,12 +15,16 @@
   "kibana": [
     {
       "feature": {
-        "discover": ["read"],
+        "discover": ["all"],
         "infrastructure": ["read"],
+        "observabilityCases": ["all"],
+        "securitySolutionCases": ["all"],
         "ml": ["all"],
         "siem": ["all"],
+        "savedObjectsManagement": ["all"],
         "osquery": ["all"],
-        "visualize": ["read"]
+        "visualize": ["read"],
+        "actions": ["all"]
       },
       "spaces": ["*"]
     }

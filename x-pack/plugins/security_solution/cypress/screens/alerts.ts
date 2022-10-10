@@ -14,9 +14,6 @@ export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__inp
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
-export const ALERT_RISK_SCORE_HEADER =
-  '[data-test-subj="dataGridHeaderCell-kibana.alert.risk_score"]';
-
 export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
 
 export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
@@ -33,6 +30,8 @@ export const ALERTS_COUNT =
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
+export const CHART_SELECT = '[data-test-subj="chartSelect"]';
+
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
@@ -44,6 +43,10 @@ export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$
 export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
+
+export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
+
+export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj="comboBoxInput"]';
 
 export const HOST_NAME = '[data-test-subj^=formatted-field][data-test-subj$=host\\.name]';
 
@@ -74,7 +77,13 @@ export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
+export const SELECT_TABLE = '[data-test-subj="table"]';
+
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
+
+export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
+
+export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
 
 export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
 
@@ -89,3 +98,15 @@ export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+
+export const HOST_RISK_HEADER_COLIMN =
+  '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
+
+export const HOST_RISK_COLUMN = '[data-gridcell-column-id="host.risk.calculated_level"]';
+
+export const USER_RISK_HEADER_COLIMN =
+  '[data-test-subj="dataGridHeaderCell-user.risk.calculated_level"]';
+
+export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
+
+export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control-column"]';

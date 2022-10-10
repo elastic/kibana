@@ -300,7 +300,7 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string
     ) {
       await this.assertSampleSizeInputExists();
-      await testSubjects.clickWhenNotDisabled('dataVisualizerShardSizeSelect');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerShardSizeSelect');
       await testSubjects.existOrFail(`dataVisualizerShardSizeOption ${sampleSize}`);
       await testSubjects.click(`dataVisualizerShardSizeOption ${sampleSize}`);
 
@@ -567,7 +567,7 @@ export function MachineLearningDataVisualizerTableProvider(
 
     public async assertLensActionShowChart(fieldName: string, visualizationContainer?: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
         );
         await testSubjects.existOrFail(visualizationContainer ?? 'lnsVisualizationContainer', {

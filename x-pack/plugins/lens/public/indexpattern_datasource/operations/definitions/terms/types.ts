@@ -13,12 +13,18 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     size: number;
     // accuracy mode is accomplished by increasing shard_size
     accuracyMode?: boolean;
+    include?: string[] | number[];
+    exclude?: string[] | number[];
+    includeIsRegex?: boolean;
+    excludeIsRegex?: boolean;
     // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
     // another option or whether the user explicitly chose to make it alphabetical.
     orderBy:
       | { type: 'alphabetical'; fallback?: boolean }
       | { type: 'rare'; maxDocCount: number }
-      | { type: 'column'; columnId: string };
+      | { type: 'column'; columnId: string }
+      | { type: 'custom' };
+    orderAgg?: FieldBasedIndexPatternColumn;
     orderDirection: 'asc' | 'desc';
     otherBucket?: boolean;
     missingBucket?: boolean;

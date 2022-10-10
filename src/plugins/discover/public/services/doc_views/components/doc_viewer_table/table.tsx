@@ -23,15 +23,15 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { usePager } from '../../../../utils/use_pager';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
@@ -104,11 +104,13 @@ const updateSearchText = debounce(
 export const DocViewerTable = ({
   columns,
   hit,
-  indexPattern: dataView,
+  dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
+
   const { storage, uiSettings, fieldFormats } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -119,7 +121,7 @@ export const DocViewerTable = ({
     getPinnedFields(currentDataViewId, storage)
   );
 
-  const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
+  const flattened = hit.flattened;
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
 
   const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
@@ -164,7 +166,7 @@ export const DocViewerTable = ({
         ? getTypeForFieldIcon(fieldMapping)
         : undefined;
 
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
+      const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
 
       return {
         action: {
@@ -184,8 +186,8 @@ export const DocViewerTable = ({
         },
         value: {
           formattedValue: formatFieldValue(
-            flattened[field],
-            hit,
+            hit.flattened[field],
+            hit.raw,
             fieldFormats,
             dataView,
             fieldMapping
@@ -267,7 +269,11 @@ export const DocViewerTable = ({
 
   const headers = [
     !isSingleDocView && (
-      <EuiTableHeaderCell align="left" width={62} isSorted={false}>
+      <EuiTableHeaderCell
+        align="left"
+        width={showActionsInsideTableCell ? 150 : 62}
+        isSorted={false}
+      >
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -307,13 +313,14 @@ export const DocViewerTable = ({
               {!isSingleDocView && (
                 <EuiTableRowCell
                   key={field + '-actions'}
-                  align="center"
-                  width={62}
+                  align={showActionsInsideTableCell ? 'left' : 'center'}
+                  width={showActionsInsideTableCell ? undefined : 62}
                   className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
+                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
                     field={field}
                     pinned={pinned}
                     fieldMapping={fieldMapping}
@@ -359,7 +366,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView]
+    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell]
   );
 
   const rowElements = [

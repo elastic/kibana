@@ -21,7 +21,7 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
@@ -54,6 +54,7 @@ export interface DataVisualizerGridInput {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
+  totalDocuments?: number;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
@@ -100,6 +101,7 @@ export const EmbeddableWrapper = ({
               dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={input.onAddFilter}
+              totalDocuments={input.totalDocuments}
             />
           );
         }

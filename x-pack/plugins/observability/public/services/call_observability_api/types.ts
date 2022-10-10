@@ -11,7 +11,6 @@ import type {
   AbstractObservabilityServerRouteRepository,
   ObservabilityServerRouteRepository,
   ObservabilityAPIReturnType,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
 
 export type ObservabilityClientOptions = Omit<

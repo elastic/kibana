@@ -7,6 +7,9 @@
  */
 
 import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+
+const mockUiStateGet = jest.fn().mockReturnValue(() => false);
 
 export const samplePieVis = {
   type: {
@@ -45,6 +48,7 @@ export const samplePieVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       collections: {
         legendPositions: [
           {
@@ -142,6 +146,7 @@ export const samplePieVis = {
     addTooltip: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: LegendSize.LARGE,
     isDonut: true,
     labels: {
       show: true,
@@ -1305,7 +1310,7 @@ export const samplePieVis = {
         {
           id: '1',
           enabled: true,
-          type: 'count',
+          type: { name: 'count' },
           params: {},
           schema: 'metric',
           toSerializedFieldFormat: () => ({
@@ -1315,7 +1320,7 @@ export const samplePieVis = {
         {
           id: '2',
           enabled: true,
-          type: 'terms',
+          type: { name: 'terms' },
           params: {
             field: 'Carrier',
             orderBy: '1',
@@ -1350,5 +1355,6 @@ export const samplePieVis = {
     vis: {
       legendOpen: false,
     },
+    get: mockUiStateGet,
   },
 };

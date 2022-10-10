@@ -8,6 +8,7 @@
 import { isVersionSupported, isOsSupported, isIsolationSupported } from './utils';
 
 describe('Host Isolation utils isVersionSupported', () => {
+  // NOTE: the `7.15.0.8295.0` and the text current versions are invalid.
   test.each`
     currentVersion            | minVersionRequired | expected
     ${'8.14.0'}               | ${'7.13.0'}        | ${true}
@@ -22,6 +23,8 @@ describe('Host Isolation utils isVersionSupported', () => {
     ${'7.14.0-alpha'}         | ${'7.14.0'}        | ${true}
     ${'8.0.0-SNAPSHOT'}       | ${'7.14.0'}        | ${true}
     ${'8.0.0'}                | ${'7.14.0'}        | ${true}
+    ${'7.15.0.8295.0'}        | ${'7.14.0'}        | ${false}
+    ${'NOT_SEMVER'}           | ${'7.14.0'}        | ${false}
   `(
     'should validate that version $a is compatible($expected) to $b',
     ({ currentVersion, minVersionRequired, expected }) => {

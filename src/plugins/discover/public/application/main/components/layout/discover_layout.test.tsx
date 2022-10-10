@@ -9,15 +9,15 @@
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
-import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
@@ -26,20 +26,27 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../utils/use_saved_search';
+  RecordRawType,
+} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
-import { ElasticSearchHit } from '../../../../types';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
+function mountComponent(
+  dataView: DataView,
+  prevSidebarClosed?: boolean,
+  mountOptions: { attachTo?: HTMLElement } = {},
+  query?: Query | AggregateQuery,
+  isPlainRecord?: boolean
+) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
     ...discoverServiceMock,
@@ -51,18 +58,17 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const indexPatternList = [indexPattern].map((ip) => {
-    return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<DataViewAttributes>>;
+  const dataViewList = [dataView];
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
+    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$;
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits as ElasticSearchHit[],
+    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -133,18 +139,18 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   };
 
   const props = {
-    indexPattern,
-    indexPatternList,
+    dataView,
+    dataViewList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: jest.fn(),
-    onChangeIndexPattern: jest.fn(),
+    onChangeDataView: jest.fn(),
     onUpdateQuery: jest.fn(),
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    state: { columns: [] },
+    state: { columns: [], query },
     stateContainer: {
       setAppState: () => {},
       appStateContainer: {
@@ -154,39 +160,68 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
+    persistDataView: jest.fn(),
+    updateAdHocDataViewId: jest.fn(),
+    adHocDataViewList: [],
   };
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverLayout {...(props as DiscoverLayoutProps)} />
-    </KibanaContextProvider>
+    </KibanaContextProvider>,
+    mountOptions
   );
 }
 
 describe('Discover component', () => {
-  test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountComponent(indexPatternMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+  test('selected data view without time field displays no chart toggle', () => {
+    const container = document.createElement('div');
+    mountComponent(dataViewMock, undefined, { attachTo: container });
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
   });
 
-  test('selected index pattern with time field displays chart toggle', () => {
-    const component = mountComponent(indexPatternWithTimefieldMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+  test('selected data view with time field displays chart toggle', () => {
+    const container = document.createElement('div');
+    mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).not.toBeNull();
+  });
+
+  test('sql query displays no chart toggle', () => {
+    const container = document.createElement('div');
+    mountComponent(
+      dataViewWithTimefieldMock,
+      false,
+      { attachTo: container },
+      { sql: 'SELECT * FROM test' },
+      true
+    );
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
+  });
+
+  test('the saved search title h1 gains focus on navigate', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const component = mountComponent(dataViewWithTimefieldMock, undefined, {
+      attachTo: container,
+    });
+    expect(
+      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
+    ).toHaveFocus();
   });
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', () => {
-      const component = mountComponent(indexPatternWithTimefieldMock, undefined);
+      const component = mountComponent(dataViewWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be opened if discover:sidebarClosed is false', () => {
-      const component = mountComponent(indexPatternWithTimefieldMock, false);
+      const component = mountComponent(dataViewWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be closed if discover:sidebarClosed is true', () => {
-      const component = mountComponent(indexPatternWithTimefieldMock, true);
+      const component = mountComponent(dataViewWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
   });

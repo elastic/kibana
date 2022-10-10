@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateSetToFilterAgainstOptions } from './types';
+import type { CreateSetToFilterAgainstOptions } from './types';
 
 /**
  * Creates a field set to filter against using the stringed version of the
@@ -26,8 +26,7 @@ export const createSetToFilterAgainst = async <T>({
   listId,
   listType,
   listClient,
-  logger,
-  buildRuleMessage,
+  ruleExecutionLogger,
 }: CreateSetToFilterAgainstOptions<T>): Promise<Set<unknown>> => {
   const valuesFromSearchResultField = events.reduce((acc, searchResultItem) => {
     const valueField = searchResultItem.fields ? searchResultItem.fields[field] : undefined;
@@ -37,10 +36,8 @@ export const createSetToFilterAgainst = async <T>({
     return acc;
   }, new Set<unknown>());
 
-  logger.debug(
-    buildRuleMessage(
-      `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
-    )
+  ruleExecutionLogger.debug(
+    `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
   );
 
   const matchedListItems = await listClient.searchListItemByValues({
@@ -49,10 +46,8 @@ export const createSetToFilterAgainst = async <T>({
     value: [...valuesFromSearchResultField],
   });
 
-  logger.debug(
-    buildRuleMessage(
-      `number of matched items from list with id ${listId}: ${matchedListItems.length}`
-    )
+  ruleExecutionLogger.debug(
+    `number of matched items from list with id ${listId}: ${matchedListItems.length}`
   );
 
   return new Set<unknown>(

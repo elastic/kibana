@@ -16,17 +16,14 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   MAX_PERCENT,
   PERCENTILE_SPACING,
   SAMPLER_TOP_TERMS_SHARD_SIZE,
   SAMPLER_TOP_TERMS_THRESHOLD,
 } from './constants';
-import {
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type { Aggs, FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type {
   Field,
@@ -89,14 +86,12 @@ export const getNumericFieldsStatsRequest = (
     // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
     // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
     if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
+      aggs[`${safeFieldName}_top`] = buildSamplerAggregation(
+        {
           top,
         },
-      };
+        0.05
+      );
     } else {
       aggs[`${safeFieldName}_top`] = top;
     }

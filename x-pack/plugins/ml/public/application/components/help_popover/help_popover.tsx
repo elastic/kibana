@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import './help_popover.scss';
 
-export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['onClick'] }) => {
+export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
   return (
     <EuiButtonIcon
       className="mlHelpPopover__buttonIcon"
@@ -31,28 +31,21 @@ export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['on
   );
 };
 
-export const HelpPopover = ({
-  anchorPosition,
-  button,
-  children,
-  closePopover,
-  isOpen,
-  title,
-}: {
+interface HelpPopoverProps {
   anchorPosition?: EuiPopoverProps['anchorPosition'];
-  button: EuiPopoverProps['button'];
-  children: ReactNode;
-  closePopover: EuiPopoverProps['closePopover'];
-  isOpen: EuiPopoverProps['isOpen'];
   title?: string;
-}) => {
+}
+
+export const HelpPopover: FC<HelpPopoverProps> = ({ anchorPosition, children, title }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
-      button={button}
+      button={<HelpPopoverButton onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)} />}
       className="mlHelpPopover"
-      closePopover={closePopover}
-      isOpen={isOpen}
+      closePopover={setIsPopoverOpen.bind(null, false)}
+      isOpen={isPopoverOpen}
       ownFocus
       panelClassName="mlHelpPopover__panel"
       panelPaddingSize="none"

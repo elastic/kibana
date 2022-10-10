@@ -8,7 +8,7 @@
 
 // Inspired by the inspector CSV exporter
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { createEscapeValue } from './escape_value';
 

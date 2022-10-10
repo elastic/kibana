@@ -85,6 +85,7 @@ class Format {
   params() {}
 }
 
+// FIXME: which interface is this?
 const field = {
   scripted: true,
   type: 'number',
@@ -190,7 +191,7 @@ describe('FieldEditor', () => {
         add: jest.fn(),
       },
     };
-    indexPattern.fieldFormatMap = { test: field };
+    indexPattern.fieldFormatMap = { test: field } as {};
     (indexPattern.deleteFieldFormat as any) = jest.fn();
 
     const component = createComponentWithContext<FieldEdiorProps>(

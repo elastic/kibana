@@ -18,6 +18,8 @@ import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storysh
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
+import { createSerializer } from '@emotion/jest';
+import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
 
 // Several of the renderers, used by the runtime, use jQuery.
 import jquery from 'jquery';
@@ -89,6 +91,12 @@ jest.mock('../public/lib/es_service', () => ({
 }));
 
 addSerializer(styleSheetSerializer);
+
+const emotionSerializer = createSerializer({
+  classNameReplacer: replaceEmotionPrefix,
+  includeStyles: false,
+});
+addSerializer(emotionSerializer);
 
 const converter = new Stories2SnapsConverter();
 

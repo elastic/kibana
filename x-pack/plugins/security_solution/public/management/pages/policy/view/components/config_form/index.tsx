@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, memo, useContext } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { ThemeContext } from 'styled-components';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { OS_TITLES } from '../../../../../common/translations';
 
 const TITLES = {

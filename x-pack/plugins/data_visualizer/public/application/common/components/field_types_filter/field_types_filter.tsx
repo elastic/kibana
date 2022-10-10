@@ -8,6 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FieldTypesHelpPopover } from './field_types_help_popover';
 import { MultiSelectPicker, Option } from '../multi_select_picker';
 import type {
   FileBasedFieldVisConfig,
@@ -67,6 +68,7 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
       onChange={setVisibleFieldTypes}
       checkedOptions={visibleFieldTypes}
       dataTestSubj={'dataVisualizerFieldTypeSelect'}
+      postfix={<FieldTypesHelpPopover fieldTypes={options.map((f) => f.value)} />}
     />
   );
 };

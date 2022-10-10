@@ -4,41 +4,118 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { getAgentsByKuery } from './crud';
+import { getAgentsByKuery, getAgentTags } from './crud';
 
-jest.mock('../../../common', () => ({
-  ...jest.requireActual('../../../common'),
+jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 
 describe('Agents CRUD test', () => {
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
-  describe('getAgentsByKuery', () => {
-    beforeEach(() => {
-      searchMock = jest.fn();
-      esClientMock = {
-        search: searchMock,
-      } as unknown as ElasticsearchClient;
+
+  beforeEach(() => {
+    searchMock = jest.fn();
+    esClientMock = {
+      search: searchMock,
+      openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
+      closePointInTime: jest.fn(),
+    } as unknown as ElasticsearchClient;
+  });
+
+  function getEsResponse(ids: string[], total: number) {
+    return {
+      hits: {
+        total,
+        hits: ids.map((id: string) => ({
+          _id: id,
+          _source: {},
+        })),
+      },
+    };
+  }
+
+  describe('getAgentTags', () => {
+    it('should return tags from aggs', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      const result = await getAgentTags(esClientMock, { showInactive: false });
+
+      expect(result).toEqual(['tag1', 'tag2']);
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
     });
 
-    function getEsResponse(ids: string[], total: number) {
-      return {
-        hits: {
-          total,
-          hits: ids.map((id: string) => ({
-            _id: id,
-            _source: {},
-          })),
+    it('should return empty list if no agent tags', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: {},
         },
-      };
-    }
+      });
 
+      const result = await getAgentTags(esClientMock, { showInactive: false });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty list if no agent index', async () => {
+      searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
+
+      const result = await getAgentTags(esClientMock, { showInactive: false });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should pass query when called with kuery', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      await getAgentTags(esClientMock, {
+        showInactive: true,
+        kuery: 'fleet-agents.policy_id: 123',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: {
+                    policy_id: '123',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
+    });
+  });
+
+  describe('getAgentsByKuery', () => {
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7)))
@@ -190,6 +267,29 @@ describe('Agents CRUD test', () => {
         perPage: 5,
         total: 7,
       });
+    });
+
+    it('should pass secondary sort for default sort', async () => {
+      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
+      await getAgentsByKuery(esClientMock, {
+        showInactive: false,
+      });
+
+      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
+        { enrolled_at: { order: 'desc' } },
+        { 'local_metadata.host.hostname.keyword': { order: 'asc' } },
+      ]);
+    });
+
+    it('should not pass secondary sort for non-default sort', async () => {
+      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
+      await getAgentsByKuery(esClientMock, {
+        showInactive: false,
+        sortField: 'policy_id',
+      });
+      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
+        { policy_id: { order: 'desc' } },
+      ]);
     });
   });
 });

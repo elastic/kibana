@@ -6,14 +6,11 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type {
-  ECSMappingEditorFieldProps,
-  ECSMappingEditorFieldRef,
-} from './ecs_mapping_editor_field';
+import type { ECSMappingEditorFieldProps } from './ecs_mapping_editor_field';
 
 const LazyECSMappingEditorField = lazy(() => import('./ecs_mapping_editor_field'));
 
-export type { ECSMappingEditorFieldProps, ECSMappingEditorFieldRef };
+export type { ECSMappingEditorFieldProps };
 export const ECSMappingEditorField = (props: ECSMappingEditorFieldProps) => (
   <Suspense fallback={null}>
     <LazyECSMappingEditorField {...props} />

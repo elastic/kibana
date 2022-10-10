@@ -23,6 +23,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -48,13 +49,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should push a case in space1', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         serviceNowSimulatorURL,
         actionsRemover,
         auth: authSpace1,
       });
       const theCase = await pushCase({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         connectorId: connector.id,
         auth: authSpace1,
@@ -75,13 +76,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not push a case in a different space', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         serviceNowSimulatorURL,
         actionsRemover,
         auth: authSpace1,
       });
       await pushCase({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         connectorId: connector.id,
         auth: getAuthWithSuperUser('space2'),

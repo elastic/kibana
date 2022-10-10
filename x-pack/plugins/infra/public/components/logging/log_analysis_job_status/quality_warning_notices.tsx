@@ -86,7 +86,7 @@ export const CategoryQualityWarnings: React.FC<{
 const QualityWarningReasonDescription = euiStyled(EuiDescriptionListDescription)`
   display: list-item;
   list-style-type: disc;
-  margin-left: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-left: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(

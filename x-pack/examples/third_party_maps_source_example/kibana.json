@@ -1,0 +1,15 @@
+{
+  "id": "mapsCustomRasterSource",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["third_party_maps_source_example"],
+  "owner": {
+    "name": "kibana-gis",
+    "githubTeam": "kibana-gis"
+  },
+  "description": "An example plugin for creating a custom raster source for Elastic Maps",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data", "maps", "developerExamples", "kibanaReact"],
+  "optionalPlugins": ["kibanaUtils", "kibanaReact"]
+}

@@ -8,6 +8,7 @@
 import { APMBaseDoc } from './apm_base_doc';
 import { EventOutcome } from './fields/event_outcome';
 import { Http } from './fields/http';
+import { SpanLink } from './fields/span_links';
 import { Stackframe } from './fields/stackframe';
 import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
@@ -63,6 +64,7 @@ export interface SpanRaw extends APMBaseDoc {
       sum: { us: number };
       compression_strategy: string;
     };
+    links?: SpanLink[];
   };
   timestamp: TimestampUs;
   transaction?: {

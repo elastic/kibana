@@ -7,7 +7,7 @@
 
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
-import { createPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode } from 'react-reverse-portal';
 import {
   mockAPMIndexPattern,
   mockAPMRegexIndexPattern,
@@ -43,7 +43,7 @@ describe('embedded_map_helpers', () => {
         '2020-07-07T08:20:18.966Z',
         '2020-07-08T08:20:18.966Z',
         setQueryMock,
-        createPortalNode(),
+        createHtmlPortalNode(),
         mockEmbeddable
       );
       expect(setQueryMock).toHaveBeenCalledTimes(1);
@@ -58,7 +58,7 @@ describe('embedded_map_helpers', () => {
         '2020-07-07T08:20:18.966Z',
         '2020-07-08T08:20:18.966Z',
         setQueryMock,
-        createPortalNode(),
+        createHtmlPortalNode(),
         mockEmbeddable
       );
       expect(setQueryMock.mock.calls[0][0].refetch).not.toBe(embeddable.reload);

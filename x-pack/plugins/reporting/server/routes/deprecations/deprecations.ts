@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, RequestHandler } from '@kbn/core/server';
+import { incrementApiUsageCounter } from '..';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
@@ -57,11 +58,14 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   };
 
   router.get(
-    {
-      path: API_GET_ILM_POLICY_STATUS,
-      validate: false,
-    },
-    authzWrapper(async ({ core }, _req, res) => {
+    { path: API_GET_ILM_POLICY_STATUS, validate: false },
+    authzWrapper(async ({ core }, req, res) => {
+      incrementApiUsageCounter(
+        req.route.method,
+        API_GET_ILM_POLICY_STATUS,
+        reporting.getUsageCounter()
+      );
+
       const {
         elasticsearch: { client: scopedClient },
       } = await core;
@@ -90,7 +94,13 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
-    authzWrapper(async ({ core }, _req, res) => {
+    authzWrapper(async ({ core }, req, res) => {
+      incrementApiUsageCounter(
+        req.route.method,
+        API_GET_ILM_POLICY_STATUS,
+        reporting.getUsageCounter()
+      );
+
       const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },

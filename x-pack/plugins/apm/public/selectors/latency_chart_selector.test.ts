@@ -35,7 +35,9 @@ describe('getLatencyChartSelector', () => {
 
   describe('without anomaly', () => {
     it('returns default values when data is undefined', () => {
-      const latencyChart = getLatencyChartSelector({});
+      const latencyChart = getLatencyChartSelector({
+        previousPeriodLabel: 'Day before',
+      });
       expect(latencyChart).toEqual({
         currentPeriod: undefined,
         previousPeriod: undefined,
@@ -46,6 +48,7 @@ describe('getLatencyChartSelector', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
         latencyAggregationType: LatencyAggregationType.avg,
+        previousPeriodLabel: 'Week before',
       });
       expect(latencyTimeseries).toEqual({
         currentPeriod: {
@@ -60,7 +63,7 @@ describe('getLatencyChartSelector', () => {
           color: 'black',
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          title: 'Previous period',
+          title: 'Week before',
         },
       });
     });
@@ -69,6 +72,7 @@ describe('getLatencyChartSelector', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
         latencyAggregationType: LatencyAggregationType.p95,
+        previousPeriodLabel: 'Day before',
       });
       expect(latencyTimeseries).toEqual({
         currentPeriod: {
@@ -82,7 +86,7 @@ describe('getLatencyChartSelector', () => {
           data: [{ x: 1, y: 10 }],
           type: 'area',
           color: 'black',
-          title: 'Previous period',
+          title: 'Day before',
         },
       });
     });
@@ -91,6 +95,7 @@ describe('getLatencyChartSelector', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
         latencyAggregationType: LatencyAggregationType.p99,
+        previousPeriodLabel: 'Day before',
       });
 
       expect(latencyTimeseries).toEqual({
@@ -105,7 +110,7 @@ describe('getLatencyChartSelector', () => {
           data: [{ x: 1, y: 10 }],
           type: 'area',
           color: 'black',
-          title: 'Previous period',
+          title: 'Day before',
         },
       });
     });
@@ -116,6 +121,7 @@ describe('getLatencyChartSelector', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
         latencyAggregationType: LatencyAggregationType.p99,
+        previousPeriodLabel: 'Previous period',
       });
       expect(latencyTimeseries).toEqual({
         currentPeriod: {

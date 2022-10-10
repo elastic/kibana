@@ -11,7 +11,7 @@ export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
-} from '../../common';
+} from '../../common/services';
 export { ExperimentalFeaturesService } from './experimental_features';
 export {
   AgentStatusKueryHelper,
@@ -40,9 +40,10 @@ export {
   validationHasErrors,
   countValidationErrors,
   getStreamsForInputType,
-} from '../../common';
-
-export * from './pkg_key_from_package_info';
-export * from './ui_extensions';
-export * from './increment_policy_name';
-export * from './has_fleet_server';
+  downloadSourceRoutesService,
+} from '../../common/services';
+export { isPackageUnverified, isVerificationError } from './package_verification';
+export { pkgKeyFromPackageInfo } from './pkg_key_from_package_info';
+export { createExtensionRegistrationCallback } from './ui_extensions';
+export { incrementPolicyName } from './increment_policy_name';
+export { policyHasFleetServer } from './has_fleet_server';

@@ -6,19 +6,21 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import {
-  ColumnHeaderOptions,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
   TimelineId,
 } from '../../../../common/types/timeline';
 
+import type {
+  DataProvider,
+  DataProvidersAnd,
+} from '../../components/timeline/data_providers/data_provider';
 import {
   IS_OPERATOR,
-  DataProvider,
   DataProviderType,
-  DataProvidersAnd,
 } from '../../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
@@ -29,7 +31,7 @@ import { defaultHeaders } from '../../../common/mock';
 
 import {
   addNewTimeline,
-  addTimelineProvider,
+  addTimelineProviders,
   addTimelineToStore,
   applyDeltaToTimelineColumnWidth,
   removeTimelineColumn,
@@ -48,13 +50,13 @@ import {
   upsertTimelineColumn,
   updateGraphEventId,
 } from './helpers';
-import { TimelineModel } from './model';
+import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
-import { TimelineById } from './types';
+import type { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
-jest.mock('../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('../../../common/utils/default_date_settings', () => {
   const actual = jest.requireActual('../../../common/utils/default_date_settings');
   return {
@@ -129,7 +131,8 @@ const basicTimeline: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -473,24 +476,26 @@ describe('Timeline', () => {
   });
 
   describe('#addTimelineProvider', () => {
-    const providerToAdd: DataProvider = {
-      ...basicDataProvider,
-      id: '567',
-      name: 'data provider 2',
-    };
+    const providerToAdd: DataProvider[] = [
+      {
+        ...basicDataProvider,
+        id: '567',
+        name: 'data provider 2',
+      },
+    ];
     test('should return a new reference and not the same reference', () => {
-      const update = addTimelineProvider({
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
     test('should add a new timeline provider', () => {
-      const update = addTimelineProvider({
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
       const addedDataProvider = [...basicTimeline.dataProviders].concat(providerToAdd);
@@ -498,9 +503,9 @@ describe('Timeline', () => {
     });
 
     test('should NOT add a new timeline provider if it already exists and the attributes "and" is empty', () => {
-      const update = addTimelineProvider({
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: basicDataProvider,
+        providers: [basicDataProvider],
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(timelineByIdMock);
@@ -515,22 +520,24 @@ describe('Timeline', () => {
           name: 'and data provider 1',
         },
       ];
-      const provider = { ...basicDataProvider };
-      const update = addTimelineProvider({
+      const providers = [{ ...basicDataProvider }];
+      const update = addTimelineProviders({
         id: 'foo',
-        provider,
+        providers,
         timelineById: myMockTimelineByIdMock,
       });
-      expect(update.foo.dataProviders[1]).toEqual(provider);
+      expect(update.foo.dataProviders[1]).toEqual(providers[0]);
     });
 
     test('should UPSERT an existing timeline provider if it already exists', () => {
-      const update = addTimelineProvider({
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: {
-          ...basicDataProvider,
-          name: 'my name changed',
-        },
+        providers: [
+          {
+            ...basicDataProvider,
+            name: 'my name changed',
+          },
+        ],
         timelineById: timelineByIdMock,
       });
       expect(update.foo.dataProviders[0].name).toEqual('my name changed');
@@ -690,147 +697,159 @@ describe('Timeline', () => {
 
   describe('#addAndProviderToTimelineProvider', () => {
     test('should add a new and provider to an existing timeline provider', () => {
-      const providerToAdd: DataProvider = {
-        ...basicDataProvider,
-        id: '567',
-        name: 'data provider 2',
-        queryMatch: {
-          field: 'handsome',
-          value: 'xavier',
-          operator: IS_OPERATOR,
+      const providerToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          id: '567',
+          name: 'data provider 2',
+          queryMatch: {
+            field: 'handsome',
+            value: 'xavier',
+            operator: IS_OPERATOR,
+          },
         },
-      };
+      ];
 
-      const newTimeline = addTimelineProvider({
+      const newTimeline = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd: DataProvider = {
-        ...basicDataProvider,
-        id: '568',
-        name: 'And Data Provider',
-        queryMatch: {
-          field: 'smart',
-          value: 'steph',
-          operator: IS_OPERATOR,
+      const andProviderToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          id: '568',
+          name: 'And Data Provider',
+          queryMatch: {
+            field: 'smart',
+            value: 'steph',
+            operator: IS_OPERATOR,
+          },
         },
-      };
+      ];
 
-      const update = addTimelineProvider({
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: andProviderToAdd,
+        providers: andProviderToAdd,
         timelineById: newTimeline,
       });
       const indexProvider = update.foo.dataProviders.findIndex((i) => i.id === '567');
       const addedAndDataProvider = update.foo.dataProviders[indexProvider].and[0];
-      const { and, ...expectedResult } = andProviderToAdd;
+      const { and, ...expectedResult } = andProviderToAdd[0];
       expect(addedAndDataProvider).toEqual(expectedResult);
       newTimeline.foo.highlightedDropAndProviderId = '';
     });
 
     test('should add another and provider because it is not a duplicate', () => {
-      const providerToAdd: DataProvider = {
-        ...basicDataProvider,
-        and: [
-          {
-            ...basicDataProvider,
-            id: '568',
-            name: 'And Data Provider',
-            queryMatch: {
-              field: 'smart',
-              value: 'xavier',
-              operator: IS_OPERATOR,
+      const providerToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          and: [
+            {
+              ...basicDataProvider,
+              id: '568',
+              name: 'And Data Provider',
+              queryMatch: {
+                field: 'smart',
+                value: 'xavier',
+                operator: IS_OPERATOR,
+              },
             },
+          ],
+          id: '567',
+          queryMatch: {
+            field: 'handsome',
+            value: 'steph',
+            operator: IS_OPERATOR,
           },
-        ],
-        id: '567',
-        queryMatch: {
-          field: 'handsome',
-          value: 'steph',
-          operator: IS_OPERATOR,
         },
-      };
+      ];
 
-      const newTimeline = addTimelineProvider({
+      const newTimeline = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd: DataProvider = {
-        ...basicDataProvider,
-        id: '569',
-        name: 'And Data Provider',
-        queryMatch: {
-          field: 'happy',
-          value: 'andrewG',
-          operator: IS_OPERATOR,
+      const andProviderToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          id: '569',
+          name: 'And Data Provider',
+          queryMatch: {
+            field: 'happy',
+            value: 'andrewG',
+            operator: IS_OPERATOR,
+          },
         },
-      };
+      ];
       // temporary, we will have to decouple DataProvider & DataProvidersAnd
       // that's bigger a refactor than just fixing a bug
       // @ts-expect-error
-      delete andProviderToAdd.and;
-      const update = addTimelineProvider({
+      delete andProviderToAdd[0].and;
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: andProviderToAdd,
+        providers: andProviderToAdd,
         timelineById: newTimeline,
       });
 
-      expect(update.foo.dataProviders[1].and[1]).toEqual(andProviderToAdd);
+      expect(update.foo.dataProviders[1].and[1]).toEqual(andProviderToAdd[0]);
       newTimeline.foo.highlightedDropAndProviderId = '';
     });
 
     test('should NOT add another and provider because it is a duplicate', () => {
-      const providerToAdd: DataProvider = {
-        ...basicDataProvider,
-        and: [
-          {
-            ...basicDataProvider,
-            id: '568',
-            name: 'And Data Provider',
-            queryMatch: {
-              field: 'smart',
-              value: 'xavier',
-              operator: IS_OPERATOR,
+      const providerToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          and: [
+            {
+              ...basicDataProvider,
+              id: '568',
+              name: 'And Data Provider',
+              queryMatch: {
+                field: 'smart',
+                value: 'xavier',
+                operator: IS_OPERATOR,
+              },
             },
+          ],
+          id: '567',
+          queryMatch: {
+            field: 'handsome',
+            value: 'steph',
+            operator: IS_OPERATOR,
           },
-        ],
-        id: '567',
-        queryMatch: {
-          field: 'handsome',
-          value: 'steph',
-          operator: IS_OPERATOR,
         },
-      };
+      ];
 
-      const newTimeline = addTimelineProvider({
+      const newTimeline = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd: DataProvider = {
-        ...basicDataProvider,
-        id: '569',
-        name: 'And Data Provider',
-        queryMatch: {
-          field: 'smart',
-          value: 'xavier',
-          operator: IS_OPERATOR,
+      const andProviderToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          id: '569',
+          name: 'And Data Provider',
+          queryMatch: {
+            field: 'smart',
+            value: 'xavier',
+            operator: IS_OPERATOR,
+          },
         },
-      };
-      const update = addTimelineProvider({
+      ];
+      const update = addTimelineProviders({
         id: 'foo',
-        provider: andProviderToAdd,
+        providers: andProviderToAdd,
         timelineById: newTimeline,
       });
 
@@ -958,6 +977,7 @@ describe('Timeline', () => {
           {
             columnId: 'some column',
             columnType: 'text',
+            esTypes: ['keyword'],
             sortDirection: Direction.desc,
           },
         ],
@@ -970,7 +990,12 @@ describe('Timeline', () => {
 
     test('should update the sort attribute', () => {
       expect(update.foo.sort).toEqual([
-        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+        {
+          columnId: 'some column',
+          columnType: 'text',
+          esTypes: ['keyword'],
+          sortDirection: Direction.desc,
+        },
       ]);
     });
   });
@@ -1057,21 +1082,23 @@ describe('Timeline', () => {
     let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
     let update: TimelineById;
     beforeEach(() => {
-      const providerToAdd: DataProvider = {
-        ...basicDataProvider,
-        and: [
-          {
-            ...basicDataProvider,
-            id: '568',
-            name: 'And Data Provider',
-          },
-        ],
-        id: '567',
-      };
+      const providerToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          and: [
+            {
+              ...basicDataProvider,
+              id: '568',
+              name: 'And Data Provider',
+            },
+          ],
+          id: '567',
+        },
+      ];
 
-      timelineByIdwithAndMock = addTimelineProvider({
+      timelineByIdwithAndMock = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
 
@@ -1312,21 +1339,23 @@ describe('Timeline', () => {
   describe('#updateTimelineAndProviderExcluded', () => {
     let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
     beforeEach(() => {
-      const providerToAdd: DataProvider = {
-        ...basicDataProvider,
-        and: [
-          {
-            ...basicDataProvider,
-            id: '568',
-            name: 'And Data Provider',
-          },
-        ],
-        id: '567',
-      };
+      const providerToAdd: DataProvider[] = [
+        {
+          ...basicDataProvider,
+          and: [
+            {
+              ...basicDataProvider,
+              id: '568',
+              name: 'And Data Provider',
+            },
+          ],
+          id: '567',
+        },
+      ];
 
-      timelineByIdwithAndMock = addTimelineProvider({
+      timelineByIdwithAndMock = addTimelineProviders({
         id: 'foo',
-        provider: providerToAdd,
+        providers: providerToAdd,
         timelineById: timelineByIdMock,
       });
     });

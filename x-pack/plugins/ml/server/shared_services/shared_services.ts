@@ -12,7 +12,7 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest, KibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -24,6 +24,7 @@ import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
 import { ModulesProvider, getModulesProvider } from './providers/modules';
 import { ResultsServiceProvider, getResultsServiceProvider } from './providers/results_service';
+import { TrainedModelsProvider, getTrainedModelsProvider } from './providers/trained_models';
 import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
@@ -53,14 +54,18 @@ export type SharedServices = JobServiceProvider &
   MlSystemProvider &
   ModulesProvider &
   ResultsServiceProvider &
-  MlAlertingServiceProvider;
+  MlAlertingServiceProvider &
+  TrainedModelsProvider;
 
 export type MlServicesProviders = JobsHealthServiceProvider;
 
 interface Guards {
   isMinimumLicense(): Guards;
+
   isFullLicense(): Guards;
+
   hasMlCapabilities: (caps: MlCapabilitiesKey[]) => Guards;
+
   ok(callback: OkCallback): any;
 }
 
@@ -100,6 +105,7 @@ export function createSharedServices(
   internalServicesProviders: MlServicesProviders;
 } {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
+
   function getGuards(
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
@@ -170,6 +176,7 @@ export function createSharedServices(
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
+      ...getTrainedModelsProvider(getGuards),
     },
     /**
      * Services providers for ML internal usage
@@ -239,7 +246,7 @@ function getRequestItemsProvider(
     };
 
     let mlSavedObjectService;
-    if (request instanceof KibanaRequest) {
+    if (request instanceof CoreKibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);

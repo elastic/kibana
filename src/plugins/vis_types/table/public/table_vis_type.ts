@@ -13,6 +13,7 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plu
 import { TableVisParams, VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { toExpressionAst } from './to_ast';
+import { convertToLens } from './convert_to_lens';
 
 export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   name: VIS_TYPE_TABLE,
@@ -39,6 +40,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: TableOptions,
     schemas: [
       {
@@ -47,7 +49,13 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
           defaultMessage: 'Metric',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         aggSettings: {
           top_hits: {
             allowStrings: true,
@@ -90,7 +98,15 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
       },
     ],
   },
+  fetchDatatable: true,
   toExpressionAst,
+  hasPartialRows: (vis) => vis.params.showPartialRows,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 };

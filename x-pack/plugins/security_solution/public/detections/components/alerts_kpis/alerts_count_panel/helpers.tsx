@@ -5,28 +5,45 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getOptionalSubAggregation } from '../../../../common/components/alerts_treemap/query';
 
-export const getAlertsCountQuery = (
-  stackByField: string,
-  from: string,
-  to: string,
+export const DEFAULT_STACK_BY_FIELD0_SIZE = 1000;
+export const DEFAULT_STACK_BY_FIELD1_SIZE = 1000;
+
+export const getAlertsCountQuery = ({
+  additionalFilters = [],
+  from,
+  runtimeMappings,
+  stackByField0,
+  stackByField1,
+  to,
+}: {
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
-  }> = [],
-  runtimeMappings?: MappingRuntimeFields
-) => {
+  }>;
+  from: string;
+  runtimeMappings?: MappingRuntimeFields;
+  stackByField0: string;
+  stackByField1: string | undefined;
+  to: string;
+}) => {
   return {
     size: 0,
     aggs: {
-      alertsByGroupingCount: {
+      stackByField0: {
         terms: {
-          field: stackByField,
+          field: stackByField0,
           order: {
             _count: 'desc',
           },
-          size: DEFAULT_MAX_TABLE_QUERY_SIZE,
+          size: DEFAULT_STACK_BY_FIELD0_SIZE,
+        },
+        aggs: {
+          ...getOptionalSubAggregation({
+            stackByField1,
+            stackByField1Size: DEFAULT_STACK_BY_FIELD1_SIZE,
+          }),
         },
       },
     },

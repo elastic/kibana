@@ -8,7 +8,7 @@
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IndexPatternField } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getIndexPatternService } from '../../../../kibana_services';
@@ -23,9 +23,9 @@ interface Props {
   isColumnCompressed?: boolean;
   onChange: (args: OnSourceChangeArgs) => void;
   sortField: string;
-  sortFields: IndexPatternField[];
+  sortFields: DataViewField[];
   sortOrder: SortDirection;
-  termFields: IndexPatternField[];
+  termFields: DataViewField[];
   topHitsSplitField: string | null;
   topHitsSize: number;
 }

@@ -7,14 +7,14 @@
 
 import { Unit } from '@kbn/datemath';
 import { countBy } from 'lodash';
-import { MappedAnomalyHit } from '../../infra_ml';
-import { MlSystem, MlAnomalyDetectors } from '../../../types';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import {
-  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
+  MetricAnomalyParams,
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../common/alerting/metrics';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
+import { MlAnomalyDetectors, MlSystem } from '../../../types';
+import { MappedAnomalyHit } from '../../infra_ml';
 import { evaluateCondition } from './evaluate_condition';
 
 interface PreviewMetricAnomalyAlertParams {

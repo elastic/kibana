@@ -8,7 +8,11 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ExpressionFunction, ExpressionFunctionParameter, Style } from '@kbn/expressions-plugin';
+import {
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  Style,
+} from '@kbn/expressions-plugin/common';
 
 import { registerExpressionsLanguage } from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
@@ -19,6 +23,7 @@ const content: ExpressionFunctionParameter<'string'> = {
   help: 'A string of text that contains Markdown. To concatenate, pass the `string` function multiple times.',
   types: ['string'],
   default: '',
+  deprecated: false,
   aliases: ['_', 'expression'],
   multi: true,
   resolve: false,
@@ -32,6 +37,7 @@ const font: ExpressionFunctionParameter<Style> = {
   help: 'The CSS font properties for the content. For example, font-family or font-weight.',
   types: ['style'],
   default: '{font}',
+  deprecated: false,
   aliases: [],
   multi: false,
   resolve: true,

@@ -45,6 +45,7 @@ export const RareDetectorsSummary: FC = () => {
     } else {
       return RARE_DETECTOR_TYPE.RARE;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function setResultsWrapper(results: Results) {
@@ -67,6 +68,7 @@ export const RareDetectorsSummary: FC = () => {
     return () => {
       resultsSubscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadChart() {

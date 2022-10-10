@@ -154,7 +154,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   }
 
   describe('index based', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
@@ -256,7 +256,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensMetricField.fieldName,
-            'mtrVis'
+            'legacyMtrVis'
           );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
@@ -267,7 +267,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensNonMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensNonMetricField.fieldName,
-            'mtrVis'
+            'legacyMtrVis'
           );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }

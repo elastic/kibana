@@ -6,10 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import { injectReferences } from './inject_references';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('inject_references', () => {

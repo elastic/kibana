@@ -29,6 +29,7 @@ interface Props {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
+  overlays: CoreStart['overlays'];
 }
 
 interface Context {
@@ -39,6 +40,7 @@ interface Context {
   breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
+  overlays: CoreStart['overlays'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
 }
@@ -51,6 +53,7 @@ export const ComponentTemplatesProvider = ({
   children: React.ReactNode;
 }) => {
   const {
+    overlays,
     httpClient,
     apiBasePath,
     trackMetric,
@@ -71,6 +74,7 @@ export const ComponentTemplatesProvider = ({
   return (
     <ComponentTemplatesContext.Provider
       value={{
+        overlays,
         api,
         documentation,
         trackMetric,

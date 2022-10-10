@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from 'react-query/types/react/types';
+import type { UseQueryResult } from '@tanstack/react-query';
 
 interface CreateReactQueryResponseInput<TData = unknown, TError = unknown> {
-  status?: UseQueryResult['status'];
+  status?: UseQueryResult['status'] | 'idle';
   data?: TData;
   error?: TError;
 }
@@ -31,6 +31,17 @@ export const createReactQueryResponse = <TData = unknown, TError = unknown>({
 
   if (status === 'loading') {
     return { status, data: undefined, isSuccess: false, isLoading: true, isError: false };
+  }
+
+  if (status === 'idle') {
+    return {
+      status: 'loading',
+      data: undefined,
+      isSuccess: false,
+      isLoading: true,
+      isError: false,
+      fetchStatus: 'idle',
+    };
   }
 
   return { status };

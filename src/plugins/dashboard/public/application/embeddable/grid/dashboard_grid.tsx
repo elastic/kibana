@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-
-// @ts-ignore
-import sizeMe from 'react-sizeme';
-
-import { injectI18n } from '@kbn/i18n-react';
-import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
+import sizeMe from 'react-sizeme';
+import classNames from 'classnames';
 import { Subscription } from 'rxjs';
+import 'react-resizable/css/styles.css';
+import 'react-grid-layout/css/styles.css';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+
+import { injectI18n } from '@kbn/i18n-react';
+import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
+
+import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { GridData } from '../../../../common';
-import { ViewMode } from '../../../services/embeddable';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardPanelState } from '../types';
-import { withKibana } from '../../../services/kibana_react';
-import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
+import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
+import { pluginServices } from '../../../services/plugin_services';
+import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 
 let lastValidGridSize = 0;
 
@@ -103,8 +103,8 @@ const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
-  kibana: DashboardReactContextValue;
   container: DashboardContainer;
+  onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
 interface State {
@@ -143,20 +143,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     this.mounted = true;
     let isLayoutInvalid = false;
     let layout;
+
+    const {
+      notifications: { toasts },
+    } = pluginServices.getServices();
+
     try {
       layout = this.buildLayoutFromPanels();
     } catch (error) {
       console.error(error); // eslint-disable-line no-console
-
       isLayoutInvalid = true;
-      this.props.kibana.notifications.toasts.danger({
-        title: this.props.intl.formatMessage({
-          id: 'dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
-          defaultMessage: 'Unable to load dashboard.',
-        }),
-        body: (error as { message: string }).message,
-        toastLifeTimeMs: 5000,
-      });
+      toasts.addDanger(dashboardSavedObjectErrorStrings.getDashboardGridError(error.message));
     }
     this.setState({
       layout,
@@ -225,14 +222,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       return null;
     }
 
-    const { container, kibana } = this.props;
+    const { container } = this.props;
     const { focusedPanelIndex, panels, expandedPanelId, viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map(
-      (key: string) => panels[key] as DashboardPanelState
-    );
+    const panelsInOrder = Object.keys(panels).map((key: string) => {
+      return panels[key] as DashboardPanelState;
+    });
 
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
@@ -242,6 +239,46 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
+    const panelIds: Record<string, Record<string, number>> = {};
+    const loadStartTime = performance.now();
+    let lastTimeToData = 0;
+    let status: DashboardLoadedEventStatus = 'done';
+    let doneCount = 0;
+
+    /**
+     * Sends an event
+     *
+     * @param info
+     * @returns
+     */
+    const onPanelStatusChange = (info: EmbeddablePhaseEvent) => {
+      if (!this.props.onDataLoaded) return;
+
+      if (panelIds[info.id] === undefined || info.status === 'loading') {
+        panelIds[info.id] = {};
+      } else if (info.status === 'error') {
+        status = 'error';
+      } else if (info.status === 'loaded') {
+        lastTimeToData = performance.now();
+      }
+
+      panelIds[info.id][info.status] = performance.now();
+
+      if (info.status === 'error' || info.status === 'rendered') {
+        doneCount++;
+        if (doneCount === panelsInOrder.length) {
+          const doneTime = performance.now();
+          const data: DashboardLoadedInfo = {
+            timeToData: (lastTimeToData || doneTime) - loadStartTime,
+            timeToDone: doneTime - loadStartTime,
+            numOfPanels: panelsInOrder.length,
+            status,
+          };
+          this.props.onDataLoaded(data);
+        }
+      }
+    };
+
     const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }, index) => (
       <DashboardGridItem
         key={explicitInput.id}
@@ -249,9 +286,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         index={index + 1}
         type={type}
         container={container}
-        PanelComponent={kibana.services.embeddable.EmbeddablePanel}
         expandedPanelId={expandedPanelId}
         focusedPanelId={focusedPanelIndex}
+        onPanelStatusChange={onPanelStatusChange}
       />
     ));
 
@@ -274,4 +311,4 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 }
 
-export const DashboardGrid = injectI18n(withKibana(DashboardGridUi));
+export const DashboardGrid = injectI18n(DashboardGridUi);

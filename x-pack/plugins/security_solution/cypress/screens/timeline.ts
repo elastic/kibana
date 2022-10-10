@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineFilter } from '../objects/timeline';
+import type { TimelineFilter } from '../objects/timeline';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
@@ -17,8 +17,6 @@ export const ATTACH_TIMELINE_TO_NEW_CASE_ICON = '[data-test-subj="attach-timelin
 
 export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
   '[data-test-subj="attach-timeline-existing-case"]';
-
-export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
 export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
@@ -92,8 +90,6 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
-export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
-
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
@@ -104,9 +100,6 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
-
-export const PINNED_EVENT_TABLE_CELL =
-  '[data-test-subj="pinned-events-table"] [data-test-subj="statefulCell"]';
 
 export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
 
@@ -222,6 +215,16 @@ export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]'
 
 export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
 
+export const QUERYBAR_MENU_POPOVER = '[data-test-subj="queryBarMenuPopover"]';
+
+export const TIMELINE_SHOWQUERYBARMENU_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="showQueryBarMenu"]`;
+
+export const TIMELINE_SWITCHQUERYLANGUAGE_BUTTON = '[data-test-subj="switchQueryLanguageButton"]';
+
+export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMenuItem"]';
+
+export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
+
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
@@ -234,6 +237,8 @@ export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
 export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-button-icon"]';
 
+export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
+
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
@@ -245,8 +250,6 @@ export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"
 export const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
 
 export const TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN = `[data-test-subj="disable-all"]`;
-
-export const TIMELINE_ROW_RENDERERS_ENABLE_ALL_BTN = `button[data-test-subj="enable-alll"]`;
 
 export const TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON = `${TIMELINE_ROW_RENDERERS_MODAL} .euiModal__closeIcon`;
 
@@ -272,3 +275,42 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
+
+export const EDIT_TIMELINE_BTN = '[data-test-subj="save-timeline-button-icon"]';
+
+export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
+
+export const ALERT_TABLE_SEVERITY_VALUES =
+  '[data-test-subj="formatted-field-kibana.alert.severity"]';
+
+export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
+
+export const ALERT_TABLE_FILE_NAME_VALUES =
+  '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
+
+export const ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE = '[data-test-subj="add-to-timeline"]';
+
+export const ACTIVE_TIMELINE_BOTTOM_BAR =
+  '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
+
+export const DATA_GRID_BODY = '[data-test-subj=body-data-grid] .euiDataGrid__virtualized';
+
+export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
+  `[data-test-subj="draggable-content-${fieldName}"]`;
+
+export const GET_TIMELINE_GRID_HEADER = (fieldName: string) =>
+  `[data-test-subj="header-${fieldName}"]`;
+
+export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
+
+export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders"]';
+
+export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
+
+export const HOVER_ACTIONS = {
+  ADD_TO_TIMELINE: '[data-test-subj="add-to-timeline"]',
+  FILTER_FOR: '[data-test-subj="filter-for-value"]',
+  FILTER_OUT: '[data-test-subj="filter-out-value"]',
+  COPY: '[data-test-subj="clipboard"]',
+  SHOW_TOP: 'show-top-field',
+};

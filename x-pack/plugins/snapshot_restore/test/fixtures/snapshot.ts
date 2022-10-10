@@ -13,6 +13,8 @@ export const getSnapshot = ({
   uuid = getRandomString(),
   state = 'SUCCESS',
   indexFailures = [],
+  includeGlobalState = true,
+  featureStates = [],
   totalIndices = getRandomNumber(),
   totalDataStreams = getRandomNumber(),
 }: Partial<{
@@ -21,6 +23,8 @@ export const getSnapshot = ({
   uuid: string;
   state: string;
   indexFailures: any[];
+  featureStates: string[];
+  includeGlobalState: boolean;
   totalIndices: number;
   totalDataStreams: number;
 }> = {}) => ({
@@ -31,7 +35,8 @@ export const getSnapshot = ({
   version: '8.0.0',
   indices: new Array(totalIndices).fill('').map(getRandomString),
   dataStreams: new Array(totalDataStreams).fill('').map(getRandomString),
-  includeGlobalState: 1,
+  featureStates,
+  includeGlobalState,
   state,
   startTime: '2019-05-23T06:25:15.896Z',
   startTimeInMillis: 1558592715896,

@@ -301,4 +301,4 @@ export const useBreadcrumbs = ({ history }: { history: History }) => {
   };
 };
 
-export const BreadcrumbContainer = createContainer(useBreadcrumbs);
+export const [BreadcrumbContainer, useBreadcrumbContainerContext] = createContainer(useBreadcrumbs);

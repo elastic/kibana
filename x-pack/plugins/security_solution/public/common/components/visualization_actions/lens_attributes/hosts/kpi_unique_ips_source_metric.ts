@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiUniqueIpsSourceMetricLensAttributes: LensAttributes = {
   description: '',
@@ -40,7 +40,7 @@ export const kpiUniqueIpsSourceMetricLensAttributes: LensAttributes = {
     },
   },
   title: '[Host] Unique IPs - source metric',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   references: [
     {
       id: '{dataViewId}',

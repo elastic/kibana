@@ -49,6 +49,9 @@ import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
+import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+
 import { APMConfig } from '.';
 import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -71,6 +74,8 @@ export interface APMPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  infra: InfraPluginSetup;
+  dataViews: {};
 
   // optional dependencies
   actions?: ActionsPlugin['setup'];
@@ -92,6 +97,8 @@ export interface APMPluginStartDependencies {
   licensing: LicensingPluginStart;
   observability: undefined;
   ruleRegistry: RuleRegistryPluginStartContract;
+  infra: InfraPluginStart;
+  dataViews: DataViewsServerPluginStart;
 
   // optional dependencies
   actions?: ActionsPlugin['start'];

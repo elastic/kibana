@@ -95,7 +95,7 @@ describe('Edit Auto-follow pattern', () => {
       const error = find('notConnectedError');
 
       expect(error.length).toBe(1);
-      expect(error.find('.euiCallOutHeader__title').text()).toBe(
+      expect(error.find('.euiCallOutHeader__title').last().text()).toBe(
         `Can't edit auto-follow pattern because remote cluster '${AUTO_FOLLOW_PATTERN_EDIT.remoteCluster}' is not connected`
       );
       expect(exists('notConnectedError.editButton')).toBe(true);

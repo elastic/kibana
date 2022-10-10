@@ -13,7 +13,7 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from '@kbn/tinymath';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,
@@ -49,12 +49,13 @@ export function getValueOrName(node: TinymathAST) {
   return node.name;
 }
 
-export function mergeWithGlobalFilter(
+export function mergeWithGlobalFilters(
   operation:
     | OperationDefinition<GenericIndexPatternColumn, 'field'>
     | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   mappedParams: Record<string, string | number>,
-  globalFilter?: Query
+  globalFilter?: Query,
+  globalReducedTimeRange?: string
 ) {
   if (globalFilter && operation.filterable) {
     const languageKey = 'kql' in mappedParams ? 'kql' : 'lucene';
@@ -67,6 +68,10 @@ export function mergeWithGlobalFilter(
       const language = globalFilter.language === 'kuery' ? 'kql' : globalFilter.language;
       mappedParams[language] = globalFilter.query as string;
     }
+  }
+  // Local definition override the global one
+  if (globalReducedTimeRange && operation.canReduceTimeRange && !mappedParams.reducedTimeRange) {
+    mappedParams.reducedTimeRange = globalReducedTimeRange;
   }
   return mappedParams;
 }
@@ -95,6 +100,9 @@ export function getOperationParams(
     if (operation.shiftable && name === 'shift') {
       args[name] = value;
     }
+    if (operation.canReduceTimeRange && name === 'reducedTimeRange') {
+      args.reducedTimeRange = value;
+    }
     return args;
   }, {});
 }
@@ -109,7 +117,6 @@ function getTypeI18n(type: string) {
   return '';
 }
 
-// Todo: i18n everything here
 export const tinymathFunctions: Record<
   string,
   {
@@ -118,6 +125,7 @@ export const tinymathFunctions: Record<
       optional?: boolean;
       defaultValue?: string | number;
       type?: string;
+      alternativeWhenMissing?: string;
     }>;
     // Help is in Markdown format
     help: string;
@@ -137,7 +145,7 @@ export const tinymathFunctions: Record<
     help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
       defaultMessage: `
 Adds up two numbers.
-Also works with + symbol
+Also works with \`+\` symbol.
 
 Example: Calculate the sum of two fields
 
@@ -163,7 +171,7 @@ Example: Offset count by a static value
     help: i18n.translate('xpack.lens.formula.subtractFunction.markdown', {
       defaultMessage: `
 Subtracts the first number from the second number.
-Also works with \`-\` symbol
+Also works with \`-\` symbol.
 
 Example: Calculate the range of a field
 \`subtract(max(bytes), min(bytes))\`
@@ -273,10 +281,12 @@ Example: Round up price to the next dollar
       {
         name: i18n.translate('xpack.lens.formula.min', { defaultMessage: 'min' }),
         type: getTypeI18n('number'),
+        alternativeWhenMissing: 'pick_max',
       },
       {
         name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }),
         type: getTypeI18n('number'),
+        alternativeWhenMissing: 'pick_min',
       },
     ],
     help: i18n.translate('xpack.lens.formula.clampFunction.markdown', {
@@ -478,6 +488,66 @@ Raise the value to the 2nd power
 
 Example: Calculate area based on side length
 \`square(last_value(length))\`
+    `,
+    }),
+  },
+  pick_max: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.maxFunction.markdown', {
+      defaultMessage: `
+Finds the maximum value between two numbers.
+
+Example: Find the maximum between two fields averages
+\`pick_max(average(bytes), average(memory))\`
+        `,
+    }),
+  },
+  pick_min: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.minFunction.markdown', {
+      defaultMessage: `
+Finds the minimum value between two numbers.
+
+Example: Find the minimum between two fields averages
+\`pick_min(average(bytes), average(memory))\`
+    `,
+    }),
+  },
+  defaults: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.defaultValue', { defaultMessage: 'default' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.defaultFunction.markdown', {
+      defaultMessage: `
+Returns a default numeric value when value is null.
+
+Example: Return -1 when a field has no data
+\`defaults(average(bytes), -1)\`
     `,
     }),
   },

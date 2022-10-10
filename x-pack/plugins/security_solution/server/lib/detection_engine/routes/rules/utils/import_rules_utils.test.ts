@@ -13,7 +13,7 @@ import {
   getFindResultWithSingleHit,
 } from '../../__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
-import { getImportRulesSchemaDecodedMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
 import { createRules } from '../../../rules/create_rules';
 import { patchRules } from '../../../rules/patch_rules';
 
@@ -81,7 +81,7 @@ describe('importRules', () => {
       ruleChunks: [
         [
           {
-            ...getImportRulesSchemaDecodedMock(),
+            ...getImportRulesSchemaMock(),
             rule_id: 'rule-1',
           },
         ],
@@ -108,7 +108,7 @@ describe('importRules', () => {
       ruleChunks: [
         [
           {
-            ...getImportRulesSchemaDecodedMock(),
+            ...getImportRulesSchemaMock(),
             rule_id: 'rule-1',
           },
         ],
@@ -140,7 +140,7 @@ describe('importRules', () => {
       ruleChunks: [
         [
           {
-            ...getImportRulesSchemaDecodedMock(),
+            ...getImportRulesSchemaMock(),
             rule_id: 'rule-1',
           },
         ],
@@ -167,7 +167,7 @@ describe('importRules', () => {
       ruleChunks: [
         [
           {
-            ...getImportRulesSchemaDecodedMock(),
+            ...getImportRulesSchemaMock(),
             rule_id: 'rule-1',
           },
         ],
@@ -202,7 +202,7 @@ describe('importRules', () => {
       ruleChunks: [
         [
           {
-            ...getImportRulesSchemaDecodedMock(),
+            ...getImportRulesSchemaMock(),
             rule_id: 'rule-1',
           },
         ],
@@ -236,7 +236,7 @@ describe('importRules', () => {
       ruleChunks: [
         [
           {
-            ...getImportRulesSchemaDecodedMock(),
+            ...getImportRulesSchemaMock(),
             rule_id: 'rule-1',
           },
         ],

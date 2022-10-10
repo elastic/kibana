@@ -8,8 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CertificatesResults } from '../../server/lib/requests/get_certs';
+import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {

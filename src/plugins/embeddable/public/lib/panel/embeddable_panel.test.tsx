@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -163,6 +163,106 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
   await nextTick();
   component.update();
   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
+});
+
+describe('HelloWorldContainer in error state', () => {
+  let component: ReactWrapper<unknown>;
+  let embeddable: ContactCardEmbeddable;
+
+  beforeEach(async () => {
+    const inspector = inspectorPluginMock.createStartContract();
+    const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+      getEmbeddableFactory,
+    } as any);
+
+    embeddable = (await container.addNewEmbeddable<
+      ContactCardEmbeddableInput,
+      ContactCardEmbeddableOutput,
+      ContactCardEmbeddable
+    >(CONTACT_CARD_EMBEDDABLE, {})) as ContactCardEmbeddable;
+
+    component = mount(
+      <I18nProvider>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={start.getEmbeddableFactories}
+          getEmbeddableFactory={start.getEmbeddableFactory}
+          notifications={{} as any}
+          application={applicationMock}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+          theme={theme}
+        />
+      </I18nProvider>
+    );
+
+    jest.spyOn(embeddable, 'renderError');
+  });
+
+  test('renders a custom error', () => {
+    embeddable.triggerError(new Error('something'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddable.renderError).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      new Error('something')
+    );
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('something');
+  });
+
+  test('renders a custom fatal error', () => {
+    embeddable.triggerError(new Error('something'), true);
+    component.update();
+    component.mount();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddable.renderError).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      new Error('something')
+    );
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('something');
+  });
+
+  test('destroys previous error', () => {
+    const { renderError } = embeddable as Required<typeof embeddable>;
+    let destroyError: jest.MockedFunction<ReturnType<typeof renderError>>;
+
+    (embeddable.renderError as jest.MockedFunction<typeof renderError>).mockImplementationOnce(
+      (...args) => {
+        destroyError = jest.fn(renderError(...args));
+
+        return destroyError;
+      }
+    );
+    embeddable.triggerError(new Error('something'));
+    component.update();
+    embeddable.triggerError(new Error('another error'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('another error');
+    expect(destroyError!).toHaveBeenCalledTimes(1);
+  });
+
+  test('renders a default error', async () => {
+    embeddable.renderError = undefined;
+    embeddable.triggerError(new Error('something'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.children.length).toBeGreaterThan(0);
+  });
 });
 
 const renderInEditModeAndOpenContextMenu = async (
@@ -472,6 +572,52 @@ test('Updates when hidePanelTitles is toggled', async () => {
 
   title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
   expect(title.length).toBe(1);
+});
+
+test('Respects options from SelfStyledEmbeddable', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const contactCardEmbeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Rob',
+    lastName: 'Stark',
+  });
+
+  const selfStyledEmbeddable = embeddablePluginMock.mockSelfStyledEmbeddable(
+    contactCardEmbeddable,
+    { hideTitle: true }
+  );
+
+  // make sure the title is being hidden because of the self styling, not the container
+  container.updateInput({ hidePanelTitles: false });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={selfStyledEmbeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+        theme={theme}
+      />
+    </I18nProvider>
+  );
+
+  const title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
+  expect(title.length).toBe(0);
 });
 
 test('Check when hide header option is false', async () => {

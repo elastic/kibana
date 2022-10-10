@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiLinkAnchorProps, EuiText } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { useAppUrl } from '../../../../../common/lib/kibana';
@@ -25,7 +26,7 @@ export const PolicyEndpointCount = memo<
     policyId: string;
     nonLinkCondition: boolean;
   }
->(({ policyId, nonLinkCondition, children, ...otherProps }) => {
+>(({ policyId, nonLinkCondition, 'data-test-subj': dataTestSubj, children, ...otherProps }) => {
   const filterByPolicyQuery = `(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -59,11 +60,15 @@ export const PolicyEndpointCount = memo<
   const clickHandler = useNavigateByRouterEventHandler(toRoutePathWithBackOptions);
 
   if (nonLinkCondition) {
-    return <EuiText size="s">{children}</EuiText>;
+    return (
+      <EuiText size="s" data-test-subj={`${dataTestSubj}_nonLink`}>
+        {children}
+      </EuiText>
+    );
   }
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={toRouteUrl} onClick={clickHandler} {...otherProps}>
+    <EuiLink href={toRouteUrl} data-test-subj={dataTestSubj} onClick={clickHandler} {...otherProps}>
       {children}
     </EuiLink>
   );

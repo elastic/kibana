@@ -20,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   const expectedData = [
     [
@@ -34,26 +33,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Last active',
       'Actions',
     ],
-    ['Host-9fafsc3tqe', 'x', 'x', 'Warning', 'Windows', '10.231.117.28', '7.17.12', 'x', ''],
     [
-      'Host-ku5jy6j0pw',
+      'Host-dpu1a2r2yi',
       'x',
       'x',
       'Warning',
-      'Windows',
-      '10.246.87.11, 10.145.117.106,10.109.242.136',
-      '7.0.13',
+      'Linux',
+      '10.2.17.24, 10.56.215.200,10.254.196.130',
+      '8.5.0',
       'x',
       '',
     ],
     [
-      'Host-o07wj6uaa5',
+      'Host-rs9wp4o6l9',
       'x',
       'x',
-      'Failure',
-      'Windows',
-      '10.82.134.220, 10.47.25.170',
-      '7.11.13',
+      'Success',
+      'Linux',
+      '10.138.79.131, 10.170.160.154',
+      '8.5.0',
+      'x',
+      '',
+    ],
+    [
+      'Host-u5jy6j0pwb',
+      'x',
+      'x',
+      'Warning',
+      'Linux',
+      '10.87.11.145, 10.117.106.109,10.242.136.97',
+      '8.5.0',
       'x',
       '',
     ],
@@ -82,16 +91,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteAllDocsFromMetadataUnitedIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
-
       it('finds no data in list and prompts onboarding to add policy', async () => {
         await testSubjects.exists('emptyPolicyTable');
       });
     });
 
-    describe('when there is data,', () => {
+    // Version specific: https://github.com/elastic/kibana/issues/141298
+    describe.skip('when there is data,', () => {
       before(async () => {
-        const endpointPackage = await policyTestResources.getEndpointPackage();
-        await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
@@ -99,7 +106,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await deleteAllDocsFromMetadataUnitedIndex(getService);
-        await endpointTestResources.unloadEndpointData(indexedData);
+        if (indexedData) {
+          await endpointTestResources.unloadEndpointData(indexedData);
+        }
       });
 
       it('finds page title', async () => {
@@ -185,38 +194,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(tableData).to.eql(expectedDataFromQuery);
         });
 
-        it('for the kql filtering for united.endpoint.host.hostname : "Host-ku5jy6j0pw", table shows 1 item', async () => {
+        it('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
+          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+          const hostName = expectedDataFromQuery[1][0];
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
-            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-ku5jy6j0pw" '
+            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
           const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            [
-              'Host-ku5jy6j0pw',
-              'x',
-              'x',
-              'Warning',
-              'Windows',
-              '10.246.87.11, 10.145.117.106,10.109.242.136',
-              '7.0.13',
-              'x',
-              '',
-            ],
-          ];
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
             1,

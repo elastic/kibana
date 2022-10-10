@@ -8,6 +8,7 @@
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './licensing';
 export type {
   AuthenticatedUser,
+  GetUserProfileResponse,
   AuthenticationProvider,
   PrivilegeDeprecationsService,
   PrivilegeDeprecationsRolesByFeatureIdRequest,
@@ -17,6 +18,15 @@ export type {
   RoleKibanaPrivilege,
   FeaturesPrivileges,
   User,
+  UserProfile,
+  UserProfileUserInfo,
+  UserProfileWithSecurity,
+  UserProfileData,
+  UserProfileLabels,
+  UserProfileAvatarData,
+  UserProfileUserInfoWithSecurity,
   ApiKey,
   UserRealm,
+  GetUserDisplayNameParams,
 } from './model';
+export { getUserDisplayName } from './model';

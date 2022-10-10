@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Moment } from 'moment';
 
 import { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
+import type { JobActionState } from '../../constants/job_actions';
 export type { Datafeed } from './datafeed';
 export type { DatafeedStats } from './datafeed_stats';
+
+export type SummaryJobState = estypes.MlJobState | JobActionState;
 
 /**
  * A summary of an anomaly detection job.
@@ -47,7 +51,7 @@ export interface MlSummaryJob {
   /**
    * The status of the job.
    */
-  jobState: string;
+  jobState: SummaryJobState;
 
   /**
    * An array of index names used by the datafeed. Wildcards are supported.

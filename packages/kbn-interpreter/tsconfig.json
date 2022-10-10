@@ -3,9 +3,9 @@
   "compilerOptions": {
     "allowJs": true,
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "./target_types",
-    "rootDir": "src",
     "stripInternal": true,
     "types": [
       "jest",
@@ -13,6 +13,7 @@
     ]
   },
   "include": [
-    "src/**/*",
+    "**/*.ts",
+    "**/*.js"
   ]
 }

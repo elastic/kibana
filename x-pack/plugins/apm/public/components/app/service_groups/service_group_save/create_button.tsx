@@ -33,6 +33,7 @@ export function CreateButton({ onClick }: Props) {
     >
       <EuiButton
         iconType="plusInCircle"
+        data-test-subj="apmCreateServiceGroupButton"
         onClick={() => {
           dismissTour();
           onClick();

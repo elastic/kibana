@@ -6,14 +6,15 @@
  */
 
 import { transformValidate, transformValidateBulkError } from './validate';
-import { BulkError } from '../utils';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { getRuleMock, getRuleExecutionSummarySucceeded } from '../__mocks__/request_responses';
+import type { BulkError } from '../utils';
+import { getRuleMock } from '../__mocks__/request_responses';
+import { ruleExecutionSummaryMock } from '../../../../../common/detection_engine/rule_monitoring/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
-export const ruleOutput = (): RulesSchema => ({
+export const ruleOutput = (): FullResponseSchema => ({
   actions: [],
   author: ['Elastic'],
   building_block_type: 'default',
@@ -63,6 +64,19 @@ export const ruleOutput = (): RulesSchema => ({
   note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
+  related_integrations: [],
+  required_fields: [],
+  response_actions: undefined,
+  setup: '',
+  outcome: undefined,
+  alias_target_id: undefined,
+  alias_purpose: undefined,
+  rule_name_override: undefined,
+  timestamp_override: undefined,
+  timestamp_override_fallback_disabled: undefined,
+  namespace: undefined,
+  data_view_id: undefined,
+  saved_id: undefined,
 });
 
 describe('validate', () => {
@@ -108,9 +122,9 @@ describe('validate', () => {
 
     test('it should do a validation correctly of a rule id with rule execution summary passed in', () => {
       const rule = getRuleMock(getQueryRuleParams());
-      const ruleExecutionSumary = getRuleExecutionSummarySucceeded();
+      const ruleExecutionSumary = ruleExecutionSummaryMock.getSummarySucceeded();
       const validatedOrError = transformValidateBulkError('rule-1', rule, ruleExecutionSumary);
-      const expected: RulesSchema = {
+      const expected: FullResponseSchema = {
         ...ruleOutput(),
         execution_summary: ruleExecutionSumary,
       };

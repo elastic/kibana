@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DurationDetails, DurationTypes } from '../types';
+import type { DurationDetails, DurationTypes } from '../types';
 
 /**
  * Given a time, it will convert it to a unix timestamp if not one already. If it is unable to do so, it will return NaN

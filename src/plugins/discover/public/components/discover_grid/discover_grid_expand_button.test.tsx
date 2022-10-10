@@ -11,24 +11,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridContext } from './discover_grid_context';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { esHits } from '../../__mocks__/es_hits';
-
-const baseContextMock = {
-  expanded: undefined,
-  setExpanded: jest.fn(),
-  rows: esHits,
-  onFilter: jest.fn(),
-  indexPattern: indexPatternMock,
-  isDarkMode: false,
-  selectedDocs: [],
-  setSelectedDocs: jest.fn(),
-};
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 
 describe('Discover grid view button ', function () {
   it('when no document is expanded, setExpanded is called with current document', async () => {
     const contextMock = {
-      ...baseContextMock,
+      ...discoverGridContextMock,
     };
 
     const component = mountWithIntl(
@@ -46,12 +34,12 @@ describe('Discover grid view button ', function () {
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
     await button.simulate('click');
-    expect(contextMock.setExpanded).toHaveBeenCalledWith(esHits[0]);
+    expect(contextMock.setExpanded).toHaveBeenCalledWith(discoverGridContextMock.rows[0]);
   });
   it('when the current document is expanded, setExpanded is called with undefined', async () => {
     const contextMock = {
-      ...baseContextMock,
-      expanded: esHits[0],
+      ...discoverGridContextMock,
+      expanded: discoverGridContextMock.rows[0],
     };
 
     const component = mountWithIntl(
@@ -73,8 +61,8 @@ describe('Discover grid view button ', function () {
   });
   it('when another document is expanded, setExpanded is called with the current document', async () => {
     const contextMock = {
-      ...baseContextMock,
-      expanded: esHits[0],
+      ...discoverGridContextMock,
+      expanded: discoverGridContextMock.rows[0],
     };
 
     const component = mountWithIntl(
@@ -92,6 +80,6 @@ describe('Discover grid view button ', function () {
     );
     const button = findTestSubject(component, 'docTableExpandToggleColumn');
     await button.simulate('click');
-    expect(contextMock.setExpanded).toHaveBeenCalledWith(esHits[1]);
+    expect(contextMock.setExpanded).toHaveBeenCalledWith(discoverGridContextMock.rows[1]);
   });
 });

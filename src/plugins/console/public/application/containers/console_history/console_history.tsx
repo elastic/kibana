@@ -102,7 +102,7 @@ export function ConsoleHistory({ close }: Props) {
     return () => done();
   }, [history]);
 
-  /* eslint-disable */
+  /* eslint-disable jsx-a11y/no-noninteractive-element-to-interactive-role,jsx-a11y/click-events-have-key-events */
   return (
     <>
       <div className="conHistory">

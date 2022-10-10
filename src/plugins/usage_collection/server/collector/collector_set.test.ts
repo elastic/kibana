@@ -102,6 +102,11 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
           },
         },
       ]);
@@ -132,6 +137,11 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 0, names: [] },
             failed: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
           },
         },
       ]);
@@ -161,6 +171,11 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
           },
         },
       ]);
@@ -189,6 +204,11 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
           },
         },
       ]);
@@ -354,39 +374,52 @@ describe('CollectorSet', () => {
       expect(mockIsNotReady).toBeCalledTimes(1);
       expect(mockNonReadyFetch).toBeCalledTimes(0);
 
-      expect(results).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "result": Object {},
-            "type": "ready_col",
-          },
-          Object {
-            "result": Object {
-              "failed": Object {
-                "count": 0,
-                "names": Array [],
-              },
-              "not_ready": Object {
-                "count": 1,
-                "names": Array [
-                  "not_ready_col",
-                ],
-              },
-              "not_ready_timeout": Object {
-                "count": 0,
-                "names": Array [],
-              },
-              "succeeded": Object {
-                "count": 1,
-                "names": Array [
-                  "ready_col",
-                ],
-              },
+      expect(results).toMatchSnapshot([
+        {
+          result: {},
+          type: 'ready_col',
+        },
+        {
+          result: {
+            failed: {
+              count: 0,
+              names: [],
             },
-            "type": "usage_collector_stats",
+            fetch_duration_breakdown: [
+              {
+                name: 'ready_col',
+                duration: 0,
+              },
+            ],
+            is_ready_duration_breakdown: [
+              {
+                name: 'ready_col',
+                duration: 0,
+              },
+              {
+                name: 'not_ready_col',
+                duration: 0,
+              },
+            ],
+            not_ready: {
+              count: 1,
+              names: ['not_ready_col'],
+            },
+            not_ready_timeout: {
+              count: 0,
+              names: [],
+            },
+            succeeded: {
+              count: 1,
+              names: ['ready_col'],
+            },
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
           },
-        ]
-      `);
+          type: 'usage_collector_stats',
+        },
+      ]);
     });
 
     it('skips collectors that have timed out', async () => {
@@ -428,39 +461,52 @@ describe('CollectorSet', () => {
       expect(mockTimedOutReady).toBeCalledTimes(1);
       expect(mockNonReadyFetch).toBeCalledTimes(0);
 
-      expect(results).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "result": Object {},
-            "type": "ready_col",
-          },
-          Object {
-            "result": Object {
-              "failed": Object {
-                "count": 0,
-                "names": Array [],
-              },
-              "not_ready": Object {
-                "count": 0,
-                "names": Array [],
-              },
-              "not_ready_timeout": Object {
-                "count": 1,
-                "names": Array [
-                  "timeout_col",
-                ],
-              },
-              "succeeded": Object {
-                "count": 1,
-                "names": Array [
-                  "ready_col",
-                ],
-              },
+      expect(results).toMatchSnapshot([
+        {
+          result: {},
+          type: 'ready_col',
+        },
+        {
+          result: {
+            failed: {
+              count: 0,
+              names: [],
             },
-            "type": "usage_collector_stats",
+            fetch_duration_breakdown: [
+              {
+                name: 'ready_col',
+                duration: 0,
+              },
+            ],
+            is_ready_duration_breakdown: [
+              {
+                name: 'ready_col',
+                duration: expect.any(Number),
+              },
+              {
+                name: 'timeout_col',
+                duration: expect.any(Number),
+              },
+            ],
+            not_ready: {
+              count: 0,
+              names: [],
+            },
+            not_ready_timeout: {
+              count: 1,
+              names: ['timeout_col'],
+            },
+            succeeded: {
+              count: 1,
+              names: ['ready_col'],
+            },
+            total_duration: expect.any(Number),
+            total_fetch_duration: 0,
+            total_is_ready_duration: expect.any(Number),
           },
-        ]
-      `);
+          type: 'usage_collector_stats',
+        },
+      ]);
     });
 
     it('passes context to fetch', async () => {

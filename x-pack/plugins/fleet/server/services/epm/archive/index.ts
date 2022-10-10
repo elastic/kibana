@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetParts, InstallSource } from '../../../../common/types';
+import type { AssetParts } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 
 import {
@@ -35,13 +35,11 @@ export async function unpackBufferToCache({
   version,
   contentType,
   archiveBuffer,
-  installSource,
 }: {
   name: string;
   version: string;
   contentType: string;
   archiveBuffer: Buffer;
-  installSource: InstallSource;
 }): Promise<string[]> {
   // Make sure any buffers from previous installations from registry or upload are deleted first
   clearPackageFileCache({ name, version });
@@ -122,6 +120,13 @@ export function getPathParts(path: string): AssetParts {
   if (service === 'NOTICE.txt') {
     file = service;
     type = 'notice';
+    service = '';
+  }
+
+  // To support the LICENSE asset at the root level
+  if (service === 'LICENSE.txt') {
+    file = service;
+    type = 'license';
     service = '';
   }
 

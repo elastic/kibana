@@ -10,7 +10,6 @@ import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const security = getService('security');
@@ -32,14 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         roles: ['kibana_admin'],
         full_name: 'Admin',
       });
-
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       await security.user.delete(testCredentials.username);
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     beforeEach(async () => {

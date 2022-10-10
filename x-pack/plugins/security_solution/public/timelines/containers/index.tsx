@@ -11,38 +11,40 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../../common/typed_json';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { ESQuery } from '../../../common/typed_json';
 
-import { inputsModel } from '../../common/store';
+import type { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
-import {
-  Direction,
+import type {
   PaginationInputPaginated,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
-  DocValueFields,
 } from '../../../common/search_strategy';
-import { InspectResponse } from '../../types';
+import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
+import type { InspectResponse } from '../../types';
 import * as i18n from './translations';
-import { KueryFilterQueryKind, TimelineId } from '../../../common/types/timeline';
+import type { KueryFilterQueryKind } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
-import {
+import type {
   EqlOptionsSelected,
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../common/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -75,7 +77,6 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
-  docValueFields?: DocValueFields[];
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
   fields: string[];
@@ -95,11 +96,12 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-export const initSortDefault = [
+export const initSortDefault: TimelineRequestSortField[] = [
   {
     field: '@timestamp',
     direction: Direction.asc,
-    type: 'number',
+    type: 'date',
+    esTypes: ['date'],
   },
 ];
 
@@ -128,7 +130,6 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 
 export const useTimelineEvents = ({
   dataViewId,
-  docValueFields,
   endDate,
   eqlOptions = undefined,
   id = ID,
@@ -157,6 +158,7 @@ export const useTimelineEvents = ({
     null
   );
   const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
+  const { startTracking } = useTrackHttpRequest();
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -220,6 +222,8 @@ export const useTimelineEvents = ({
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
+        const { endTracking } = startTracking({ name: `${APP_UI_ID} timeline events search` });
+
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
@@ -231,6 +235,7 @@ export const useTimelineEvents = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
+                endTracking('success');
                 setLoading(false);
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
@@ -258,12 +263,14 @@ export const useTimelineEvents = ({
                 });
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
+                endTracking('invalid');
                 setLoading(false);
                 addWarning(i18n.ERROR_TIMELINE_EVENTS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
+              endTracking(abortCtrl.current.signal.aborted ? 'aborted' : 'error');
               setLoading(false);
               data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
@@ -318,6 +325,7 @@ export const useTimelineEvents = ({
       pageName,
       skip,
       id,
+      startTracking,
       data.search,
       dataViewId,
       setUpdated,
@@ -364,10 +372,9 @@ export const useTimelineEvents = ({
 
       const currentRequest = {
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
-        fields: [],
+        fields,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
@@ -399,7 +406,6 @@ export const useTimelineEvents = ({
     dispatch,
     indexNames,
     activePage,
-    docValueFields,
     endDate,
     eqlOptions,
     filterQuery,

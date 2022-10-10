@@ -21,11 +21,27 @@ export function getNodeTypeClassLabel(
   node: ElasticsearchLegacySource['source_node'] | ElasticsearchMetricbeatNode,
   type: keyof typeof nodeTypeLabel
 ) {
-  const nodeType = node && 'master' in node ? 'master' : type;
+  let nodeType = null;
+  if (isElasticsearchMetricbeatNode(node)) {
+    nodeType = node.master ? 'master' : type;
+  } else {
+    nodeType = type;
+  }
+
   const returnObj = {
     nodeType,
     nodeTypeLabel: nodeTypeLabel[nodeType],
     nodeTypeClass: nodeTypeClass[nodeType],
   };
   return returnObj;
+}
+
+function isElasticsearchMetricbeatNode(
+  node: ElasticsearchLegacySource['source_node'] | ElasticsearchMetricbeatNode
+): node is ElasticsearchMetricbeatNode {
+  if (!node) {
+    return false;
+  }
+
+  return 'master' in node;
 }

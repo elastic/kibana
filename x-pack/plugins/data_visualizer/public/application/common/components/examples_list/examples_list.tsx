@@ -10,12 +10,19 @@ import React, { FC } from 'react';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { GeoPointExample } from '../../../../../common/types/field_request_config';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
+
 interface Props {
-  examples: Array<string | object>;
+  examples: Array<string | GeoPointExample | object>;
 }
 
+const EMPTY_EXAMPLE = i18n.translate(
+  'xpack.dataVisualizer.dataGrid.field.examplesList.emptyExampleMessage',
+  { defaultMessage: '(empty)' }
+);
 export const ExamplesList: FC<Props> = ({ examples }) => {
   if (examples === undefined || examples === null || !Array.isArray(examples)) {
     return null;
@@ -34,7 +41,13 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
         <EuiListGroupItem
           size="xs"
           key={`example_${i}`}
-          label={typeof example === 'string' ? example : JSON.stringify(example)}
+          label={
+            typeof example === 'string'
+              ? example === ''
+                ? EMPTY_EXAMPLE
+                : example
+              : JSON.stringify(example)
+          }
         />
       );
     });

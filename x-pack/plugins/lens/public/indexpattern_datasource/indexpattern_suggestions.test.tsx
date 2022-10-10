@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type {
+  Layer,
+  TermsColumn,
+  FiltersColumn,
+  FormulaColumn,
+  StaticValueColumn,
+  CountColumn,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import type { IndexPatternPrivateState } from './types';
@@ -149,6 +156,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    isPersisted: true,
+    spec: {},
   },
   2: {
     id: '2',
@@ -157,15 +166,14 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    isPersisted: true,
+    spec: {},
   },
 };
 
 function testInitialState(): IndexPatternPrivateState {
   return {
     currentIndexPatternId: '1',
-    indexPatternRefs: [],
-    existingFields: {},
-    indexPatterns: expectedIndexPatterns,
     layers: {
       first: {
         indexPatternId: '1',
@@ -189,7 +197,6 @@ function testInitialState(): IndexPatternPrivateState {
         },
       },
     },
-    isFirstExistenceFetch: false,
   };
 }
 
@@ -223,13 +230,18 @@ describe('IndexPattern Data Source suggestions', () => {
       }
 
       it('should apply a bucketed aggregation for a string field, using metric for sorting', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithoutLayer(), '1', {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithoutLayer(),
+          '1',
+          {
+            name: 'source',
+            displayName: 'source',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -272,13 +284,18 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithoutLayer(), '1', {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithoutLayer(),
+          '1',
+          {
+            name: 'timestamp',
+            displayName: 'timestampLabel',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -317,13 +334,18 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should select a metric for a number field', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithoutLayer(), '1', {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithoutLayer(),
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -364,35 +386,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
-          indexPatternRefs: [],
-          existingFields: {},
           currentIndexPatternId: '1',
-          isFirstExistenceFetch: false,
-          indexPatterns: {
-            1: {
-              id: '1',
-              title: 'no timefield',
-              hasRestrictions: false,
-              fields: [
-                {
-                  name: 'bytes',
-                  displayName: 'bytes',
-                  type: 'number',
-                  aggregatable: true,
-                  searchable: true,
-                },
-              ],
-              getFieldByName: getFieldByNameFactory([
-                {
-                  name: 'bytes',
-                  displayName: 'bytes',
-                  type: 'number',
-                  aggregatable: true,
-                  searchable: true,
-                },
-              ]),
-            },
-          },
           layers: {
             first: {
               indexPatternId: '1',
@@ -402,13 +396,46 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
 
-        const suggestions = getDatasourceSuggestionsForField(state, '1', {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const indexPatterns = {
+          1: {
+            id: '1',
+            title: 'no timefield',
+            hasRestrictions: false,
+            fields: [
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+            getFieldByName: getFieldByNameFactory([
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ]),
+            isPersisted: true,
+            spec: {},
+          },
+        };
+
+        const suggestions = getDatasourceSuggestionsForField(
+          state,
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          indexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -446,13 +473,18 @@ describe('IndexPattern Data Source suggestions', () => {
       }
 
       it('should apply a bucketed aggregation for a string field, using metric for sorting', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '1', {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithEmptyLayer(),
+          '1',
+          {
+            name: 'source',
+            displayName: 'source',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -495,13 +527,18 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '1', {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithEmptyLayer(),
+          '1',
+          {
+            name: 'timestamp',
+            displayName: 'timestampLabel',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -540,13 +577,18 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should select a metric for a number field', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '1', {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithEmptyLayer(),
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -587,36 +629,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
-          indexPatternRefs: [],
-          existingFields: {},
           currentIndexPatternId: '1',
-          isFirstExistenceFetch: false,
-          indexPatterns: {
-            1: {
-              id: '1',
-              title: 'no timefield',
-              hasRestrictions: false,
-              fields: [
-                {
-                  name: 'bytes',
-                  displayName: 'bytes',
-                  type: 'number',
-                  aggregatable: true,
-                  searchable: true,
-                },
-              ],
-
-              getFieldByName: getFieldByNameFactory([
-                {
-                  name: 'bytes',
-                  displayName: 'bytes',
-                  type: 'number',
-                  aggregatable: true,
-                  searchable: true,
-                },
-              ]),
-            },
-          },
           layers: {
             previousLayer: {
               indexPatternId: '1',
@@ -626,13 +639,47 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
 
-        const suggestions = getDatasourceSuggestionsForField(state, '1', {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const indexPatterns = {
+          1: {
+            id: '1',
+            title: 'no timefield',
+            hasRestrictions: false,
+            fields: [
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+
+            getFieldByName: getFieldByNameFactory([
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ]),
+            isPersisted: true,
+            spec: {},
+          },
+        };
+
+        const suggestions = getDatasourceSuggestionsForField(
+          state,
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          indexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -654,13 +701,18 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('creates a new layer and replaces layer if no match is found', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '2', {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithEmptyLayer(),
+          '2',
+          {
+            name: 'source',
+            displayName: 'source',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -794,7 +846,8 @@ describe('IndexPattern Data Source suggestions', () => {
             type: 'date',
             aggregatable: true,
             searchable: true,
-          }
+          },
+          expectedIndexPatterns
         );
 
         expect(suggestions).toContainEqual(
@@ -821,13 +874,18 @@ describe('IndexPattern Data Source suggestions', () => {
       it('puts a date histogram column after the last bucket column on date field', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '1',
+          {
+            name: 'timestamp',
+            displayName: 'timestampLabel',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             state: expect.objectContaining({
@@ -867,13 +925,18 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('does not use the same field for bucketing multiple times', () => {
-        const suggestions = getDatasourceSuggestionsForField(stateWithNonEmptyTables(), '1', {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          stateWithNonEmptyTables(),
+          '1',
+          {
+            name: 'source',
+            displayName: 'source',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toHaveLength(0);
       });
@@ -881,13 +944,18 @@ describe('IndexPattern Data Source suggestions', () => {
       it('appends a terms column with default size on string field', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'dest',
-          displayName: 'dest',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '1',
+          {
+            name: 'dest',
+            displayName: 'dest',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             state: expect.objectContaining({
@@ -913,13 +981,18 @@ describe('IndexPattern Data Source suggestions', () => {
       it('suggests both replacing and adding metric if only one other metric is set', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'memory',
-          displayName: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '1',
+          {
+            name: 'memory',
+            displayName: 'memory',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             state: expect.objectContaining({
@@ -988,13 +1061,18 @@ describe('IndexPattern Data Source suggestions', () => {
             },
           },
         };
-        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
-          name: 'memory',
-          displayName: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          modifiedState,
+          '1',
+          {
+            name: 'memory',
+            displayName: 'memory',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -1019,26 +1097,36 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('skips duplicates when the field is already in use', () => {
         const initialState = stateWithNonEmptyTables();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
       });
 
       it('skips metric only suggestion when the field is already in use', () => {
         const initialState = stateWithNonEmptyTables();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(
           suggestions.some(
@@ -1070,7 +1158,12 @@ describe('IndexPattern Data Source suggestions', () => {
             },
           },
         };
-        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', documentField);
+        const suggestions = getDatasourceSuggestionsForField(
+          modifiedState,
+          '1',
+          documentField,
+          expectedIndexPatterns
+        );
         expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
       });
 
@@ -1114,7 +1207,7 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
         const suggestions = getSuggestionSubset(
-          getDatasourceSuggestionsForField(modifiedState, '1', documentField)
+          getDatasourceSuggestionsForField(modifiedState, '1', documentField, expectedIndexPatterns)
         );
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -1174,7 +1267,7 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
         const suggestions = getSuggestionSubset(
-          getDatasourceSuggestionsForField(modifiedState, '1', documentField)
+          getDatasourceSuggestionsForField(modifiedState, '1', documentField, expectedIndexPatterns)
         );
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -1261,6 +1354,7 @@ describe('IndexPattern Data Source suggestions', () => {
             modifiedState,
             '1',
             documentField,
+            expectedIndexPatterns,
             (layerId) => layerId !== 'referenceLineLayer'
           )
         );
@@ -1323,21 +1417,26 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('suggests on the layer that matches by indexPatternId', () => {
         const initialState = stateWithCurrentIndexPattern();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '2', {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              fixed_interval: '1d',
-              delay: '7d',
-              time_zone: 'UTC',
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '2',
+          {
+            name: 'timestamp',
+            displayName: 'timestampLabel',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+            aggregationRestrictions: {
+              date_histogram: {
+                agg: 'date_histogram',
+                fixed_interval: '1d',
+                delay: '7d',
+                time_zone: 'UTC',
+              },
             },
           },
-        });
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -1378,13 +1477,18 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('suggests on the layer with the fewest columns that matches by indexPatternId', () => {
         const initialState = stateWithCurrentIndexPattern();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        });
+        const suggestions = getDatasourceSuggestionsForField(
+          initialState,
+          '1',
+          {
+            name: 'timestamp',
+            displayName: 'timestampLabel',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
 
         expect(suggestions).toContainEqual(
           expect.objectContaining({
@@ -1414,26 +1518,33 @@ describe('IndexPattern Data Source suggestions', () => {
   describe('#getDatasourceSuggestionsForVisualizeCharts', () => {
     const context = [
       {
-        indexPatternId: '1',
-        timeFieldName: 'timestamp',
-        chartType: 'area',
-        axisPosition: 'left',
-        palette: {
-          name: 'default',
-          type: 'palette',
-        },
-        metrics: [
+        layerId: 'test',
+        columnOrder: [],
+        columns: [
           {
-            agg: 'count',
-            isFullReference: false,
-            fieldName: 'document',
+            operationType: 'count',
+            dataType: 'number',
+            isBucketed: false,
+            columnId: 'column-id-1',
+            sourceField: 'document',
+            isSplit: false,
             params: {},
-            color: '#68BC00',
+          },
+          {
+            operationType: 'date_histogram',
+            isBucketed: true,
+            columnId: 'column-id-2',
+            dataType: 'date',
+            sourceField: 'timestamp',
+            isSplit: false,
+            params: {
+              interval: 'auto',
+            },
           },
         ],
-        timeInterval: 'auto',
+        indexPatternId: '1',
       },
-    ] as VisualizeEditorLayersContext[];
+    ] as Layer[];
     function stateWithoutLayer() {
       return {
         ...testInitialState(),
@@ -1450,27 +1561,32 @@ describe('IndexPattern Data Source suggestions', () => {
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toStrictEqual([]);
     });
 
     it('should apply a count metric, with a timeseries bucket', () => {
-      const suggestions = getDatasourceSuggestionsForVisualizeCharts(stateWithoutLayer(), context);
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        context,
+        expectedIndexPatterns
+      );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id3', 'id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-2', 'column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'count',
                     sourceField: '___records___',
                   }),
-                  id3: expect.objectContaining({
+                  'column-id-2': expect.objectContaining({
                     operationType: 'date_histogram',
                     sourceField: 'timestamp',
                   }),
@@ -1484,13 +1600,13 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'id3',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1500,27 +1616,34 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          label: 'testLabel',
+          columns: [
+            {
+              ...context[0].columns[0],
+              label: 'testLabel',
+            },
+            context[0].columns[1],
+          ],
         },
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id3', 'id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-2', 'column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'count',
                     sourceField: '___records___',
                     label: 'testLabel',
                   }),
-                  id3: expect.objectContaining({
+                  'column-id-2': expect.objectContaining({
                     operationType: 'date_histogram',
                     sourceField: 'timestamp',
                   }),
@@ -1534,13 +1657,13 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'id3',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1550,35 +1673,44 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          format: 'bytes',
+          columns: [
+            {
+              ...context[0].columns[0],
+              params: {
+                ...context[0].columns[0].params,
+                format: {
+                  id: 'bytes',
+                },
+              },
+            } as CountColumn,
+            context[0].columns[1],
+          ],
         },
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id3', 'id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-2', 'column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'count',
                     sourceField: '___records___',
                     label: 'Count of records',
                     params: expect.objectContaining({
                       format: {
                         id: 'bytes',
-                        params: {
-                          decimals: 0,
-                        },
                       },
                     }),
                   }),
-                  id3: expect.objectContaining({
+                  'column-id-2': expect.objectContaining({
                     operationType: 'date_histogram',
                     sourceField: 'timestamp',
                   }),
@@ -1592,13 +1724,13 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'id3',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1608,45 +1740,59 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          splitFields: ['source'],
-          splitMode: 'terms',
-          termsParams: {
-            size: 10,
-            otherBucket: false,
-            orderBy: {
-              type: 'column',
-            },
-          },
+          columns: [
+            ...context[0].columns,
+            {
+              operationType: 'terms',
+              label: 'Top 10 values of source',
+              isBucketed: true,
+              columnId: 'column-id-3',
+              dataType: 'string',
+              sourceField: 'source',
+              isSplit: true,
+              params: {
+                size: 10,
+                orderDirection: 'desc',
+                otherBucket: false,
+                orderBy: {
+                  type: 'column',
+                  columnId: 'column-id-1',
+                },
+              },
+            } as TermsColumn,
+          ],
         },
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id3', 'id4', 'id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-2', 'column-id-3', 'column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'count',
                     sourceField: '___records___',
                   }),
-                  id3: expect.objectContaining({
+                  'column-id-2': expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  'column-id-3': expect.objectContaining({
                     operationType: 'terms',
                     sourceField: 'source',
+                    label: 'Top 10 values of source',
                     params: expect.objectContaining({
                       size: 10,
                       otherBucket: false,
                       orderDirection: 'desc',
                     }),
-                  }),
-                  id4: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
                   }),
                 },
               }),
@@ -1658,16 +1804,16 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'id3',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'id4',
+                columnId: 'column-id-3',
               }),
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1677,46 +1823,57 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          splitMode: 'filters',
-          splitFilters: [
+          columns: [
+            ...context[0].columns,
             {
-              filter: {
-                query: 'category.keyword : "Men\'s Clothing" ',
-                language: 'kuery',
+              operationType: 'filters',
+              isBucketed: true,
+              columnId: 'column-id-3',
+              isSplit: true,
+              params: {
+                filters: [
+                  {
+                    input: {
+                      query: 'category.keyword : "Men\'s Clothing" ',
+                      language: 'kuery',
+                    },
+                    label: '',
+                  },
+                  {
+                    input: {
+                      query: 'category.keyword : "Women\'s Accessories" ',
+                      language: 'kuery',
+                    },
+                    label: '',
+                  },
+                ],
               },
-              label: '',
-              color: '#68BC00',
-              id: 'a8d92740-7de1-11ec-b443-27e8df79881f',
-            },
-            {
-              filter: {
-                query: 'category.keyword : "Women\'s Accessories" ',
-                language: 'kuery',
-              },
-              label: '',
-              color: '#68BC00',
-              id: 'ad5dc500-7de1-11ec-b443-27e8df79881f',
-            },
+            } as FiltersColumn,
           ],
         },
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id4', 'id3', 'id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-2', 'column-id-3', 'column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'count',
                     sourceField: '___records___',
                   }),
-                  id3: expect.objectContaining({
+                  'column-id-2': expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  'column-id-3': expect.objectContaining({
                     operationType: 'filters',
                     label: 'Filters',
                     params: expect.objectContaining({
@@ -1738,10 +1895,6 @@ describe('IndexPattern Data Source suggestions', () => {
                       ],
                     }),
                   }),
-                  id4: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
                 },
               }),
             },
@@ -1752,16 +1905,16 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'id4',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'id3',
+                columnId: 'column-id-3',
               }),
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1771,46 +1924,50 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          metrics: [
+          columns: [
             {
-              agg: 'formula',
-              isFullReference: true,
-              fieldName: 'document',
+              columnId: 'column-id-1',
+              operationType: 'formula',
+              references: [],
+              dataType: 'number',
+              isBucketed: false,
+              isSplit: false,
               params: {
                 formula: 'overall_sum(count())',
               },
-              color: '#68BC00',
-            },
+            } as FormulaColumn,
+            context[0].columns[1],
           ],
         },
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id3', 'id2X0', 'id2X1', 'id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-2', 'column-id-1X0', 'column-id-1X1', 'column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'formula',
                     params: expect.objectContaining({
                       formula: 'overall_sum(count())',
                     }),
                   }),
-                  id2X0: expect.objectContaining({
+                  'column-id-1X0': expect.objectContaining({
                     operationType: 'count',
                     label: 'Part of overall_sum(count())',
                   }),
-                  id2X1: expect.objectContaining({
+                  'column-id-1X1': expect.objectContaining({
                     operationType: 'overall_sum',
                     label: 'Part of overall_sum(count())',
                   }),
-                  id3: expect.objectContaining({
+                  'column-id-2': expect.objectContaining({
                     operationType: 'date_histogram',
                     sourceField: 'timestamp',
                   }),
@@ -1824,13 +1981,13 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: true,
             columns: [
               expect.objectContaining({
-                columnId: 'id3',
+                columnId: 'column-id-2',
               }),
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1840,32 +1997,35 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          metrics: [
+          columns: [
             {
-              agg: 'static_value',
-              isFullReference: true,
-              fieldName: 'document',
+              columnId: 'column-id-1',
+              operationType: 'static_value',
+              references: [],
+              dataType: 'number',
+              isBucketed: false,
+              isSplit: false,
               params: {
                 value: '10',
               },
-              color: '#68BC00',
-            },
+            } as StaticValueColumn,
           ],
         },
       ];
       const suggestions = getDatasourceSuggestionsForVisualizeCharts(
         stateWithoutLayer(),
-        updatedContext
+        updatedContext,
+        expectedIndexPatterns
       );
 
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           state: expect.objectContaining({
             layers: {
-              id1: expect.objectContaining({
-                columnOrder: ['id2'],
+              test: expect.objectContaining({
+                columnOrder: ['column-id-1'],
                 columns: {
-                  id2: expect.objectContaining({
+                  'column-id-1': expect.objectContaining({
                     operationType: 'static_value',
                     isStaticValue: true,
                     params: expect.objectContaining({
@@ -1882,10 +2042,10 @@ describe('IndexPattern Data Source suggestions', () => {
             isMultiRow: false,
             columns: [
               expect.objectContaining({
-                columnId: 'id2',
+                columnId: 'column-id-1',
               }),
             ],
-            layerId: 'id1',
+            layerId: 'test',
           },
         })
       );
@@ -1905,7 +2065,8 @@ describe('IndexPattern Data Source suggestions', () => {
         const suggestions = getDatasourceSuggestionsForVisualizeField(
           stateWithoutLayer(),
           '1',
-          'field_not_exist'
+          'field_not_exist',
+          expectedIndexPatterns
         );
 
         expect(suggestions).toEqual([]);
@@ -1915,7 +2076,8 @@ describe('IndexPattern Data Source suggestions', () => {
         const suggestions = getDatasourceSuggestionsForVisualizeField(
           stateWithoutLayer(),
           '1',
-          'source'
+          'source',
+          expectedIndexPatterns
         );
 
         expect(suggestions).toContainEqual(
@@ -1960,20 +2122,19 @@ describe('IndexPattern Data Source suggestions', () => {
   describe('#getDatasourceSuggestionsFromCurrentState', () => {
     it('returns no suggestions if there are no columns', () => {
       expect(
-        getDatasourceSuggestionsFromCurrentState({
-          isFirstExistenceFetch: false,
-          indexPatternRefs: [],
-          existingFields: {},
-          indexPatterns: expectedIndexPatterns,
-          layers: {
-            first: {
-              indexPatternId: '1',
-              columnOrder: [],
-              columns: {},
+        getDatasourceSuggestionsFromCurrentState(
+          {
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: [],
+                columns: {},
+              },
             },
+            currentIndexPatternId: '1',
           },
-          currentIndexPatternId: '1',
-        })
+          expectedIndexPatterns
+        )
       ).toEqual([]);
     });
 
@@ -2007,7 +2168,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const result = getDatasourceSuggestionsFromCurrentState(state);
+      const result = getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns);
 
       expect(result).toContainEqual(
         expect.objectContaining({
@@ -2093,7 +2254,9 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
+      expect(
+        getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns))
+      ).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
@@ -2109,6 +2272,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2120,6 +2284,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2166,7 +2331,9 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
+      expect(
+        getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns))
+      ).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
@@ -2182,6 +2349,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
               {
@@ -2193,6 +2361,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2204,6 +2373,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2267,7 +2437,11 @@ describe('IndexPattern Data Source suggestions', () => {
 
       expect(
         getSuggestionSubset(
-          getDatasourceSuggestionsFromCurrentState(state, (layerId) => layerId !== 'referenceLine')
+          getDatasourceSuggestionsFromCurrentState(
+            state,
+            expectedIndexPatterns,
+            (layerId) => layerId !== 'referenceLine'
+          )
         )
       ).toContainEqual(
         expect.objectContaining({
@@ -2285,6 +2459,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
               {
@@ -2296,6 +2471,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2307,6 +2483,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2351,7 +2528,9 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getDatasourceSuggestionsFromCurrentState(state)).not.toContainEqual(
+      expect(
+        getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns)
+      ).not.toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
@@ -2397,7 +2576,9 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
+      expect(
+        getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns))
+      ).toContainEqual(
         expect.objectContaining({
           table: {
             changeType: 'extended',
@@ -2411,6 +2592,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
               {
@@ -2422,6 +2604,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2433,6 +2616,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: undefined,
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2466,9 +2650,8 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         },
       };
-      const suggestions = getDatasourceSuggestionsFromCurrentState({
-        ...state,
-        indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state, {
+        1: { ...expectedIndexPatterns['1'], timeFieldName: undefined },
       });
       suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
     });
@@ -2476,9 +2659,8 @@ describe('IndexPattern Data Source suggestions', () => {
     it("should not propose an over time suggestion if there's a top values aggregation with an high size", () => {
       const initialState = testInitialState();
       (initialState.layers.first.columns.col1 as TermsIndexPatternColumn).params!.size = 6;
-      const suggestions = getDatasourceSuggestionsFromCurrentState({
-        ...initialState,
-        indexPatterns: { 1: { ...initialState.indexPatterns['1'], timeFieldName: undefined } },
+      const suggestions = getDatasourceSuggestionsFromCurrentState(initialState, {
+        1: { ...expectedIndexPatterns['1'], timeFieldName: undefined },
       });
       suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
     });
@@ -2521,9 +2703,8 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         },
       };
-      const suggestions = getDatasourceSuggestionsFromCurrentState({
-        ...state,
-        indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state, {
+        1: { ...expectedIndexPatterns['1'], timeFieldName: undefined },
       });
       suggestions.forEach((suggestion) => {
         const firstBucket = suggestion.table.columns.find(({ columnId }) => columnId === 'col1');
@@ -2571,19 +2752,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       ];
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
         currentIndexPatternId: '1',
-        indexPatterns: {
-          1: {
-            id: '1',
-            title: 'my-fake-index-pattern',
-            hasRestrictions: false,
-            fields,
-            getFieldByName: getFieldByNameFactory(fields),
-          },
-        },
-        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -2654,7 +2823,17 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const suggestions = getDatasourceSuggestionsFromCurrentState(state);
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state, {
+        1: {
+          id: '1',
+          title: 'my-fake-index-pattern',
+          hasRestrictions: false,
+          fields,
+          getFieldByName: getFieldByNameFactory(fields),
+          isPersisted: true,
+          spec: {},
+        },
+      });
 
       // 3 bucket cols, 2 metric cols
       isTableWithBucketColumns(suggestions[0], ['col1', 'col2', 'col3', 'col4', 'col5'], 3);
@@ -2680,50 +2859,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('returns an only metric version of a given table, but does not include current state as reduced', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
         currentIndexPatternId: '1',
-        indexPatterns: {
-          1: {
-            id: '1',
-            title: 'my-fake-index-pattern',
-            hasRestrictions: false,
-            fields: [
-              {
-                name: 'field1',
-                displayName: 'field1',
-                type: 'number',
-                aggregatable: true,
-                searchable: true,
-              },
-              {
-                name: 'field2',
-                displayName: 'field2',
-                type: 'date',
-                aggregatable: true,
-                searchable: true,
-              },
-            ],
-
-            getFieldByName: getFieldByNameFactory([
-              {
-                name: 'field1',
-                displayName: 'field1',
-                type: 'number',
-                aggregatable: true,
-                searchable: true,
-              },
-              {
-                name: 'field2',
-                displayName: 'field2',
-                type: 'date',
-                aggregatable: true,
-                searchable: true,
-              },
-            ]),
-          },
-        },
-        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -2753,7 +2889,52 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const suggestions = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+      const indexPatterns = {
+        1: {
+          id: '1',
+          title: 'my-fake-index-pattern',
+          hasRestrictions: false,
+          fields: [
+            {
+              name: 'field1',
+              displayName: 'field1',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+            {
+              name: 'field2',
+              displayName: 'field2',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'field1',
+              displayName: 'field1',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+            {
+              name: 'field2',
+              displayName: 'field2',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
+          isPersisted: true,
+          spec: {},
+        },
+      };
+
+      const suggestions = getSuggestionSubset(
+        getDatasourceSuggestionsFromCurrentState(state, indexPatterns)
+      );
       expect(suggestions).not.toContainEqual(
         expect.objectContaining({
           table: expect.objectContaining({
@@ -2786,35 +2967,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('returns an alternative metric for an only-metric table', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
         currentIndexPatternId: '1',
-        indexPatterns: {
-          1: {
-            id: '1',
-            title: 'my-fake-index-pattern',
-            hasRestrictions: false,
-            fields: [
-              {
-                name: 'field1',
-                displayName: 'field1',
-                type: 'number',
-                aggregatable: true,
-                searchable: true,
-              },
-            ],
-            getFieldByName: getFieldByNameFactory([
-              {
-                name: 'field1',
-                displayName: 'field1',
-                type: 'number',
-                aggregatable: true,
-                searchable: true,
-              },
-            ]),
-          },
-        },
-        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -2833,7 +2986,37 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const suggestions = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+      const indexPatterns = {
+        1: {
+          id: '1',
+          title: 'my-fake-index-pattern',
+          hasRestrictions: false,
+          fields: [
+            {
+              name: 'field1',
+              displayName: 'field1',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'field1',
+              displayName: 'field1',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
+          isPersisted: true,
+          spec: {},
+        },
+      };
+
+      const suggestions = getSuggestionSubset(
+        getDatasourceSuggestionsFromCurrentState(state, indexPatterns)
+      );
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           table: expect.objectContaining({
@@ -2850,11 +3033,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('contains a reordering suggestion when there are exactly 2 buckets', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
         currentIndexPatternId: '1',
-        indexPatterns: expectedIndexPatterns,
-        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -2893,7 +3072,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const suggestions = getDatasourceSuggestionsFromCurrentState(state);
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns);
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           table: expect.objectContaining({
@@ -2906,11 +3085,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('will generate suggestions even if there are errors from missing fields', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
         currentIndexPatternId: '1',
-        indexPatterns: expectedIndexPatterns,
-        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -2931,7 +3106,9 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const suggestions = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+      const suggestions = getSuggestionSubset(
+        getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns)
+      );
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           table: {
@@ -3005,7 +3182,9 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
 
-        const result = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+        const result = getSuggestionSubset(
+          getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns)
+        );
 
         expect(result).toContainEqual(
           expect.objectContaining({
@@ -3022,6 +3201,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: 'interval',
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: 'auto',
                   },
                 },
                 {
@@ -3029,10 +3209,11 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of Records label',
+                    label: 'Cumulative sum of Records',
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
                 {
@@ -3044,6 +3225,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
               ],
@@ -3090,7 +3272,9 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
 
-        const result = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+        const result = getSuggestionSubset(
+          getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns)
+        );
 
         expect(result).toContainEqual(
           expect.objectContaining({
@@ -3107,6 +3291,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: 'auto',
                   },
                 },
                 {
@@ -3118,6 +3303,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
                 {
@@ -3129,6 +3315,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
               ],
@@ -3234,7 +3421,7 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         };
 
-        const result = getDatasourceSuggestionsFromCurrentState(state);
+        const result = getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns);
 
         // only generate suggestions for top level metrics + only first metric with all buckets
         expect(
@@ -3315,7 +3502,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const result = getDatasourceSuggestionsFromCurrentState(state);
+      const result = getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns);
 
       // only generate suggestions for top level metrics
       expect(
@@ -3365,7 +3552,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      const result = getDatasourceSuggestionsFromCurrentState(state);
+      const result = getDatasourceSuggestionsFromCurrentState(state, expectedIndexPatterns);
 
       expect(
         result.filter((suggestion) => suggestion.table.changeType === 'unchanged').length

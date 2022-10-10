@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
-import path from 'path';
 import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
@@ -18,6 +18,7 @@ import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_a
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -29,6 +30,47 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
+
+export const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
+
+export const SUPPORTED_TRAINED_MODELS = {
+  TINY_FILL_MASK: {
+    name: 'pt_tiny_fill_mask',
+    description: 'Tiny/Dummy PyTorch model (fill_mask)',
+    modelTypes: ['pytorch', 'fill_mask'],
+  },
+  TINY_NER: {
+    name: 'pt_tiny_ner',
+    description: 'Tiny/Dummy PyTorch model (ner)',
+    modelTypes: ['pytorch', 'ner'],
+  },
+  TINY_PASS_THROUGH: {
+    name: 'pt_tiny_pass_through',
+    description: 'Tiny/Dummy PyTorch model (pass_through)',
+    modelTypes: ['pytorch', 'pass_through'],
+  },
+  TINY_TEXT_CLASSIFICATION: {
+    name: 'pt_tiny_text_classification',
+    description: 'Tiny/Dummy PyTorch model (text_classification)',
+    modelTypes: ['pytorch', 'text_classification'],
+  },
+  TINY_TEXT_EMBEDDING: {
+    name: 'pt_tiny_text_embedding',
+    description: 'Tiny/Dummy PyTorch model (text_embedding)',
+    modelTypes: ['pytorch', 'text_embedding'],
+  },
+  TINY_ZERO_SHOT: {
+    name: 'pt_tiny_zero_shot',
+    description: 'Tiny/Dummy PyTorch model (zero_shot)',
+    modelTypes: ['pytorch', 'zero_shot'],
+  },
+} as const;
+export type SupportedTrainedModelNamesType =
+  typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
+
+export interface TrainedModelVocabulary {
+  vocabulary: string[];
+}
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -233,6 +275,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
+    async getJobMemoryStatus(jobId: string): Promise<'hard_limit' | 'soft_limit' | 'ok'> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.length}')`
+      );
+      return jobStats.jobs[0].model_size_stats.memory_status;
+    },
+
     async getADJobStats(jobId: string): Promise<any> {
       log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
       const { body: jobStats, status } = await esSupertest.get(
@@ -257,6 +309,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
         }
       });
+    },
+
+    async waitForJobMemoryStatus(
+      jobId: string,
+      expectedMemoryStatus: 'hard_limit' | 'soft_limit' | 'ok',
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job memory status to be ${expectedMemoryStatus}`,
+        timeout,
+        async () => {
+          const memoryStatus = await this.getJobMemoryStatus(jobId);
+          if (memoryStatus === expectedMemoryStatus) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job memory status to be ${expectedMemoryStatus} but got ${memoryStatus}`
+            );
+          }
+        }
+      );
     },
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
@@ -536,6 +609,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async hasNotifications(query: object) {
+      const body = await es.search({
+        index: '.ml-notifications*',
+        body: {
+          size: 10000,
+          query,
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
     async adJobExist(jobId: string) {
       this.validateJobId(jobId);
       try {
@@ -564,6 +649,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
+    async waitForJobNotificationsToIndex(jobId: string, timeout: number = 60 * 1000) {
+      await retry.waitForWithTimeout(`Notifications for '${jobId}' to exist`, timeout, async () => {
+        if (
+          await this.hasNotifications({
+            term: {
+              job_id: {
+                value: jobId,
+              },
+            },
+          })
+        ) {
+          return true;
+        } else {
+          throw new Error(`expected '${jobId}' notifications to exist`);
         }
       });
     },
@@ -1135,13 +1238,89 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return model;
     },
 
-    async deleteTrainedModelES(modelId: string) {
-      log.debug(`Creating trained model with id "${modelId}"`);
-      const { body: model, status } = await esSupertest.delete(`/_ml/trained_models/${modelId}`);
-      this.assertResponseStatusCode(200, status, model);
+    async createTrainedModelVocabularyES(modelId: string, body: TrainedModelVocabulary) {
+      log.debug(`Creating vocabulary for trained model "${modelId}"`);
+      const { body: responseBody, status } = await esSupertest
+        .put(`/_ml/trained_models/${modelId}/vocabulary`)
+        .send(body);
+      this.assertResponseStatusCode(200, status, responseBody);
 
-      log.debug('> Trained model created');
-      return model;
+      log.debug('> Trained model vocabulary created');
+    },
+
+    /**
+     * For the purpose of the functional tests where we only deal with very
+     * small models, we assume that the model definition can be uploaded as
+     * one part.
+     */
+    async uploadTrainedModelDefinitionES(modelId: string, modelDefinitionPath: string) {
+      log.debug(`Uploading definition for trained model "${modelId}"`);
+
+      const body = {
+        total_definition_length: fs.statSync(modelDefinitionPath).size,
+        definition: fs.readFileSync(modelDefinitionPath).toString('base64'),
+        total_parts: 1,
+      };
+
+      const { body: responseBody, status } = await esSupertest
+        .put(`/_ml/trained_models/${modelId}/definition/0`)
+        .send(body);
+      this.assertResponseStatusCode(200, status, responseBody);
+
+      log.debug('> Trained model definition uploaded');
+    },
+
+    async getTrainedModelsES() {
+      log.debug(`Getting trained models`);
+      const { body, status } = await esSupertest.get(`/_ml/trained_models`);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained models fetched');
+      return body;
+    },
+
+    async deleteTrainedModelES(modelId: string) {
+      log.debug(`Deleting trained model with id "${modelId}"`);
+      const { body, status } = await esSupertest
+        .delete(`/_ml/trained_models/${modelId}`)
+        .query({ force: true });
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deleted');
+    },
+
+    async deleteAllTrainedModelsES() {
+      log.debug(`Deleting all trained models`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.deleteTrainedModelES(model.model_id);
+      }
+    },
+
+    async stopTrainedModelDeploymentES(modelId: string) {
+      log.debug(`Stopping trained model deployment with id "${modelId}"`);
+      const { body, status } = await esSupertest.post(
+        `/_ml/trained_models/${modelId}/deployment/_stop`
+      );
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deployment stopped');
+    },
+
+    async stopAllTrainedModelDeploymentsES() {
+      log.debug(`Stopping all trained model deployments`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.stopTrainedModelDeploymentES(model.model_id);
+      }
     },
 
     async createTestTrainedModels(
@@ -1149,24 +1328,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       count: number = 10,
       withIngestPipelines = false
     ) {
-      const compressedDefinition = this.getCompressedModelDefinition(modelType);
+      const modelIds = new Array(count).fill(null).map((_v, i) => `dfa_${modelType}_model_n_${i}`);
 
-      const modelIds = new Array(count).fill(null).map((v, i) => `dfa_${modelType}_model_n_${i}`);
-
-      const models = modelIds.map((id) => {
-        return {
-          model_id: id,
-          body: {
-            compressed_definition: compressedDefinition,
-            inference_config: {
-              [modelType]: {},
-            },
-            input: {
-              field_names: ['common_field'],
-            },
-          } as PutTrainedModelConfig,
-        };
-      });
+      const models = modelIds.map((id) => this.createTestTrainedModelConfig(id, modelType));
 
       for (const model of models) {
         await this.createTrainedModel(model.model_id, model.body);
@@ -1178,19 +1342,64 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return modelIds;
     },
 
+    createTestTrainedModelConfig(modelId: string, modelType: ModelType) {
+      const compressedDefinition = this.getCompressedModelDefinition(modelType);
+
+      return {
+        model_id: modelId,
+        body: {
+          compressed_definition: compressedDefinition,
+          inference_config: {
+            [modelType]: {},
+          },
+          input: {
+            field_names: ['common_field'],
+          },
+        } as PutTrainedModelConfig,
+      };
+    },
+
     /**
      * Retrieves compressed model definition from the test resources.
      * @param modelType
      */
     getCompressedModelDefinition(modelType: ModelType) {
       return fs.readFileSync(
-        path.resolve(
-          __dirname,
-          'resources',
-          'trained_model_definitions',
-          `minimum_valid_config_${modelType}.json.gz.b64`
+        require.resolve(
+          `./resources/trained_model_definitions/minimum_valid_config_${modelType}.json.gz.b64`
         ),
         'utf-8'
+      );
+    },
+
+    getTrainedModelConfig(modelName: SupportedTrainedModelNamesType) {
+      const configFileContent = fs.readFileSync(
+        require.resolve(`./resources/trained_model_definitions/${modelName}/config.json`),
+        'utf-8'
+      );
+      return JSON.parse(configFileContent) as PutTrainedModelConfig;
+    },
+
+    getTrainedModelVocabulary(modelName: SupportedTrainedModelNamesType) {
+      const vocabularyFileContent = fs.readFileSync(
+        require.resolve(`./resources/trained_model_definitions/${modelName}/vocabulary.json`),
+        'utf-8'
+      );
+      return JSON.parse(vocabularyFileContent) as TrainedModelVocabulary;
+    },
+
+    getTrainedModelDefinitionPath(modelName: SupportedTrainedModelNamesType) {
+      return require.resolve(
+        `./resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
+      );
+    },
+
+    async importTrainedModel(modelId: string, modelName: SupportedTrainedModelNamesType) {
+      await this.createTrainedModel(modelId, this.getTrainedModelConfig(modelName));
+      await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
+      await this.uploadTrainedModelDefinitionES(
+        modelId,
+        this.getTrainedModelDefinitionPath(modelName)
       );
     },
 
@@ -1202,6 +1411,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Model alias created');
+    },
+
+    isInternalModelId(modelId: string) {
+      return INTERNAL_MODEL_IDS.includes(modelId);
     },
 
     /**
@@ -1233,6 +1446,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async setupModule(
+      moduleId: string,
+      body: TypeOf<typeof setupModuleBodySchema>,
+      space?: string
+    ) {
+      log.debug(`Setting up module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/modules/setup/${moduleId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body);
+      this.assertResponseStatusCode(200, status, module);
+
+      log.debug('Module set up');
+      return module;
     },
   };
 }

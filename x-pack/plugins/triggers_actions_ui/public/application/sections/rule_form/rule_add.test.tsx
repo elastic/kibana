@@ -13,13 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import RuleAdd from './rule_add';
-import { createRule } from '../../lib/rule_api';
+import { createRule, alertingFrameworkHealth } from '../../lib/rule_api';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   Rule,
   RuleAddProps,
   RuleFlyoutCloseReason,
-  ConnectorValidationResult,
   GenericValidationResult,
   ValidationResult,
 } from '../../../types';
@@ -28,6 +27,8 @@ import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { triggersActionsUiHealth } from '../../../common/lib/health_api';
+import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -48,9 +49,13 @@ jest.mock('../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 
+jest.mock('../../lib/action_connector_api', () => ({
+  loadActionTypes: jest.fn(),
+  loadAllActions: jest.fn(),
+}));
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 export const TestExpression: FunctionComponent<any> = () => {
   return (
@@ -65,13 +70,23 @@ export const TestExpression: FunctionComponent<any> = () => {
 };
 
 describe('rule_add', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
   let wrapper: ReactWrapper<any>;
 
   async function setup(
     initialValues?: Partial<Rule>,
     onClose: RuleAddProps['onClose'] = jest.fn(),
-    defaultScheduleInterval?: string
+    defaultScheduleInterval?: string,
+    ruleTypeId?: string,
+    actionsShow: boolean = false
   ) {
+    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     const mocks = coreMock.createSetup();
     const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
     const ruleTypes = [
@@ -114,6 +129,9 @@ describe('rule_add', () => {
         save: true,
         delete: true,
       },
+      actions: {
+        show: actionsShow,
+      },
     };
 
     mocks.http.get.mockResolvedValue({
@@ -137,9 +155,6 @@ describe('rule_add', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
@@ -165,6 +180,7 @@ describe('rule_add', () => {
         actionTypeRegistry={actionTypeRegistry}
         ruleTypeRegistry={ruleTypeRegistry}
         metadata={{ test: 'some value', fields: ['test'] }}
+        ruleTypeId={ruleTypeId}
       />
     );
 
@@ -181,6 +197,11 @@ describe('rule_add', () => {
     });
     const onClose = jest.fn();
     await setup({}, onClose);
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
@@ -273,7 +294,7 @@ describe('rule_add', () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
-    await setup({ ruleTypeId: 'my-rule-type' }, jest.fn(), '3h');
+    await setup({ ruleTypeId: 'my-rule-type' }, jest.fn(), '3h', 'my-rule-type', true);
 
     // Wait for handlers to fire
     await act(async () => {
@@ -289,6 +310,39 @@ describe('rule_add', () => {
       .props.value;
     expect(intervalInputUnit).toBe('h');
     expect(intervalInput).toBe(3);
+  });
+
+  it('should load connectors and connector types when there is a pre-selected rule type', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+
+    await setup({}, jest.fn(), undefined, 'my-rule-type', true);
+
+    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
+    expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
+    expect(loadActionTypes).toHaveBeenCalledTimes(1);
+    expect(loadAllActions).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not load connectors and connector types when there is not an encryptionKey', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    (alertingFrameworkHealth as jest.Mock).mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: false,
+    });
+
+    await setup({}, jest.fn(), undefined, 'my-rule-type', true);
+
+    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
+    expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
+    expect(loadActionTypes).not.toHaveBeenCalled();
+    expect(loadAllActions).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="actionNeededEmptyPrompt"]').first().text()).toContain(
+      'You must configure an encryption key to use Alerting'
+    );
   });
 });
 

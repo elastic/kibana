@@ -13,15 +13,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'spaceSelector', 'home', 'header', 'security']);
   const a11y = getService('a11y');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
+
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Kibana spaces page meets a11y validations', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/137136
+  describe.skip('Kibana Spaces Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
+    });
+    after(async () => {
+      await spacesService.delete('space_a');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
@@ -79,7 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
-    it('a11y test for delete space button', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135341
+    it.skip('a11y test for delete space button', async () => {
       await PageObjects.spaceSelector.clickCreateSpace();
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_b');

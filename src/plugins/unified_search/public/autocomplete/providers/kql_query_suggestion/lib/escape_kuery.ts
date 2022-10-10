@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { escapeKuery } from '@kbn/es-query';
-
 /**
  * Escapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value
  * in a KQL expression. See the QuotedCharacter rule in kuery.peg.)
@@ -15,6 +13,3 @@ import { escapeKuery } from '@kbn/es-query';
 export function escapeQuotes(str: string) {
   return str.replace(/[\\"]/g, '\\$&');
 }
-
-// Re-export this function from the @kbn/es-query package to avoid refactoring
-export { escapeKuery };

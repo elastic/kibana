@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import React, { memo } from 'react';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
-import { UsersTabsProps } from './types';
+import type { UsersTabsProps } from './types';
 import { UsersTableType } from '../store/model';
 import { USERS_PATH } from '../../../common/constants';
 import { AllUsersQueryTabBody, AuthenticationsQueryTabBody } from './navigation';
 import { AnomaliesQueryTabBody } from '../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesUserTable } from '../../common/components/ml/tables/anomalies_user_table';
-import { Anomaly } from '../../common/components/ml/types';
-import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
-import { UpdateDateRange } from '../../common/components/charts/common';
 
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
-import { EventsQueryTabBody } from '../../common/components/events_tab/events_query_tab_body';
+import { EventsQueryTabBody } from '../../common/components/events_tab';
 import { TimelineId } from '../../../common/types';
-import { AlertsView } from '../../common/components/alerts_viewer';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -34,35 +31,7 @@ export const UsersTabs = memo<UsersTabsProps>(
     setQuery,
     to,
     type,
-    setAbsoluteRangeDatePicker,
   }) => {
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -72,8 +41,6 @@ export const UsersTabs = memo<UsersTabsProps>(
       setQuery,
       startDate: from,
       type,
-      narrowDateRange,
-      updateDateRange,
     };
 
     return (
@@ -93,16 +60,8 @@ export const UsersTabs = memo<UsersTabsProps>(
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
             {...tabProps}
-            timelineId={TimelineId.usersPageEvents}
             pageFilters={pageFilters}
-          />
-        </Route>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.alerts})`}>
-          <AlertsView
-            entityType="events"
-            timelineId={TimelineId.usersPageExternalAlerts}
-            pageFilters={pageFilters ?? []}
-            {...tabProps}
+            timelineId={TimelineId.usersPageEvents}
           />
         </Route>
       </Switch>

@@ -17,8 +17,12 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessDeps, ProcessTreeNode } from '.';
 import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
+import { useDateFormat } from '../../hooks';
 
 jest.useFakeTimers('modern');
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -39,12 +43,14 @@ describe('ProcessTreeNode component', () => {
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
     onShowAlertDetails: jest.fn(),
+    onJumpToOutput: jest.fn(),
     showTimestamp: true,
     verboseMode: false,
   };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTreeNode is mounted', () => {
@@ -57,7 +63,9 @@ describe('ProcessTreeNode component', () => {
     it('should have an alternate rendering for a session leader', async () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
+      expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
+        ' bash started by vagrant'
+      );
     });
 
     // commented out until we get new UX for orphans treatment aka disjointed tree
@@ -247,6 +255,23 @@ describe('ProcessTreeNode component', () => {
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
       });
     });
+
+    describe('Output', () => {
+      it('renders Output button when process has output', async () => {
+        const processMockWithOutput = {
+          ...sessionViewAlertProcessMock,
+          hasOutput: () => true,
+        };
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockWithOutput} />
+        );
+
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')?.textContent).toBe(
+          'Output'
+        );
+      });
+    });
     describe('Child processes', () => {
       it('renders Child processes button when process has Child processes', async () => {
         const processMockWithChildren: typeof processMock = {
@@ -287,14 +312,29 @@ describe('ProcessTreeNode component', () => {
     });
     describe('Search', () => {
       it('highlights text within the process node line item if it matches the searchQuery', () => {
+        const searchQuery = '/vagr';
         // set a mock search matched indicator for the process (typically done by ProcessTree/helpers.ts)
-        processMock.searchMatched = '/vagrant';
+        const processMockClone = { ...processMock, searchMatched: [5, 6, 7, 8, 9] };
 
-        renderResult = mockedContext.render(<ProcessTreeNode {...props} />);
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockClone} />
+        );
 
+        expect(renderResult.queryAllByTestId(`sessionView:splitTextIsHighlighted`)).toHaveLength(
+          searchQuery.length
+        );
         expect(
-          renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent
-        ).toEqual('/vagrant');
+          renderResult
+            .queryAllByTestId(`sessionView:splitTextIsHighlighted`)
+            .map(({ textContent }) => textContent)
+            .join('')
+        ).toEqual(searchQuery);
+
+        // ensures we are showing the rest of the info, and not replacing it with just the match.
+        const { process } = props.process.getDetails();
+        expect(renderResult.container.textContent).toContain(
+          process?.working_directory + '\xA0' + (process?.args && process.args.join(' '))
+        );
       });
     });
   });

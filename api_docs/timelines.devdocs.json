@@ -15,6 +15,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -28,6 +29,7 @@
             ],
             "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -47,6 +49,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -60,7 +63,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -74,7 +78,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -93,6 +98,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -106,6 +112,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -125,6 +132,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -138,7 +146,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -152,7 +161,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -170,6 +180,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -183,7 +194,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -197,7 +209,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -215,6 +228,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -228,7 +242,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -242,9 +257,248 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.combineQueries",
+        "type": "Function",
+        "tags": [],
+        "label": "combineQueries",
+        "description": [],
+        "signature": [
+          "({ config, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode, }: CombineQueries) => { filterQuery: string | undefined; kqlError: Error | undefined; } | null"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.combineQueries.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  config,\n  dataProviders,\n  indexPattern,\n  browserFields,\n  filters = [],\n  kqlQuery,\n  kqlMode,\n}",
+            "description": [],
+            "signature": [
+              "CombineQueries"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.convertKueryToDslFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "convertKueryToDslFilter",
+        "description": [],
+        "signature": [
+          "(kueryExpression: string, indexPattern: ",
+          "DataViewBase",
+          ") => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToDslFilter.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kueryExpression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToDslFilter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "DataViewBase"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.convertKueryToElasticSearchQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "convertKueryToElasticSearchQuery",
+        "description": [],
+        "signature": [
+          "(kueryExpression: string, indexPattern?: ",
+          "DataViewBase",
+          " | undefined) => string"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToElasticSearchQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kueryExpression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToElasticSearchQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "DataViewBase",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.convertToBuildEsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToBuildEsQuery",
+        "description": [],
+        "signature": [
+          "({ config, indexPattern, queries, filters, }: { config: ",
+          "EsQueryConfig",
+          "; indexPattern: ",
+          "DataViewBase",
+          " | undefined; queries: ",
+          "Query",
+          "[]; filters: ",
+          "Filter",
+          "[]; }) => [string, undefined] | [undefined, Error]"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertToBuildEsQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  config,\n  indexPattern,\n  queries,\n  filters,\n}",
+            "description": [],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.config",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "KueryQueryOptions",
+                  " & ",
+                  "EsQueryFiltersConfig",
+                  " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
+                  "SerializableRecord",
+                  " | undefined; }"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "DataViewBase",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.queries",
+                "type": "Array",
+                "tags": [],
+                "label": "queries",
+                "description": [],
+                "signature": [
+                  "Query",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.filters",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -261,6 +515,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -274,7 +529,73 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.escapeKuery",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeKuery",
+        "description": [],
+        "signature": [
+          "(val: string) => string"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.escapeKuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "A"
+            ],
+            "path": "node_modules/@types/lodash/ts3.1/fp.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.escapeQueryValue",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeQueryValue",
+        "description": [],
+        "signature": [
+          "(val?: string | number) => string | number"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.escapeQueryValue.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -294,6 +615,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -304,6 +626,7 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -313,7 +636,8 @@
                 "label": "colindexAttribute",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -326,7 +650,8 @@
                   "Element | null"
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -336,7 +661,8 @@
                 "label": "ariaColindex",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -346,7 +672,8 @@
                 "label": "ariaRowindex",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -356,7 +683,8 @@
                 "label": "rowindexAttribute",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -378,6 +706,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/components/t_grid/body/column_headers/helpers.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -391,6 +720,7 @@
             ],
             "path": "x-pack/plugins/timelines/public/components/t_grid/body/column_headers/helpers.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -411,6 +741,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -421,6 +752,7 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -433,7 +765,8 @@
                   "HTMLElement | null"
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -443,7 +776,8 @@
                 "label": "tableClassName",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -465,6 +799,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -475,6 +810,7 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -487,7 +823,8 @@
                   "HTMLElement | null"
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -497,7 +834,8 @@
                 "label": "tableClassName",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -513,11 +851,11 @@
         "label": "getManageTimelineById",
         "description": [],
         "signature": [
-          "() => Reselect.OutputParametricSelector<unknown, string, { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
+          "() => ((state: {}, params_0: string) => { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -527,7 +865,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
           {
@@ -537,7 +875,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }, (res: ",
+          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }) & ",
+          "OutputSelectorFields",
+          "<(args_0: ",
           {
             "pluginId": "timelines",
             "scope": "public",
@@ -549,7 +889,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -559,7 +899,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
           {
@@ -569,10 +909,11 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }>"
+          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; } & { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/selectors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -589,6 +930,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -602,6 +944,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -622,6 +965,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/pagination.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -635,6 +979,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/pagination.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -649,6 +994,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/pagination.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -667,6 +1013,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -680,6 +1027,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -703,6 +1051,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -713,6 +1062,7 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -725,7 +1075,8 @@
                   "HTMLElement | null"
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -739,6 +1090,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -752,7 +1104,8 @@
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -764,7 +1117,8 @@
                 "label": "shiftKey",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -778,6 +1132,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "timelines",
@@ -791,6 +1146,7 @@
                     ],
                     "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": false
                   }
                 ],
@@ -804,7 +1160,8 @@
                 "label": "tableClassName",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -824,6 +1181,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -837,6 +1195,7 @@
             ],
             "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -859,6 +1218,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -869,6 +1229,7 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -882,6 +1243,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [],
                 "returnComment": []
               },
@@ -897,6 +1259,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [],
                 "returnComment": []
               },
@@ -911,7 +1274,8 @@
                   "\"SKIP_FOCUS_BACKWARDS\" | \"SKIP_FOCUS_FORWARD\" | \"SKIP_FOCUS_NOOP\""
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -934,6 +1298,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -947,7 +1312,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -961,7 +1327,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -980,6 +1347,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -993,6 +1361,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1013,6 +1382,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -1026,6 +1396,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1046,6 +1417,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -1059,6 +1431,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1079,6 +1452,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -1092,6 +1466,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1114,6 +1489,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -1124,6 +1500,7 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -1133,7 +1510,8 @@
                 "label": "colindexAttribute",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -1146,7 +1524,8 @@
                   "HTMLDivElement | null"
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -1159,7 +1538,8 @@
                   "React.KeyboardEvent<Element>"
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -1169,7 +1549,8 @@
                 "label": "maxAriaColindex",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -1179,7 +1560,8 @@
                 "label": "maxAriaRowindex",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "timelines",
@@ -1193,6 +1575,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -1206,7 +1589,8 @@
                       "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1218,7 +1602,8 @@
                 "label": "rowindexAttribute",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1239,6 +1624,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1252,7 +1638,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1266,7 +1653,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1284,6 +1672,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1297,7 +1686,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1311,7 +1701,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1329,6 +1720,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1342,7 +1734,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1356,7 +1749,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1382,6 +1776,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1395,7 +1790,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1409,7 +1805,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1427,6 +1824,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1440,7 +1838,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1454,7 +1853,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1473,6 +1873,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -1486,6 +1887,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1521,6 +1923,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/reducer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1534,7 +1937,8 @@
               "PassedS"
             ],
             "path": "node_modules/typescript-fsa-reducers/dist/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1547,7 +1951,8 @@
               "{ type: any; }"
             ],
             "path": "node_modules/typescript-fsa-reducers/dist/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1567,6 +1972,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1580,7 +1986,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1594,7 +2001,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1612,6 +2020,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1625,7 +2034,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1639,7 +2049,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1665,6 +2076,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1678,7 +2090,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1692,7 +2105,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1710,6 +2124,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1723,7 +2138,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1737,7 +2153,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1755,6 +2172,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1768,7 +2186,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1782,7 +2201,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1800,6 +2220,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1813,7 +2234,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1827,7 +2249,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1845,6 +2268,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1858,7 +2282,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1872,7 +2297,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1892,6 +2318,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1905,7 +2332,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1919,7 +2347,8 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1945,6 +2374,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1958,7 +2388,8 @@
               "Payload"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -1972,38 +2403,41 @@
               " | undefined"
             ],
             "path": "node_modules/typescript-fsa/lib/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-public.useStatusBulkActionItems",
+        "id": "def-public.useBulkActionItems",
         "type": "Function",
         "tags": [],
-        "label": "useStatusBulkActionItems",
+        "label": "useBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, setEventsDeleted, onUpdateSuccess, onUpdateFailure, timelineId, }: ",
-          "StatusBulkActionsProps",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, timelineId, }: ",
+          "BulkActionsProps",
           ") => JSX.Element[]"
         ],
-        "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+        "path": "x-pack/plugins/timelines/public/hooks/use_bulk_action_items.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.useStatusBulkActionItems.$1",
+            "id": "def-public.useBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  timelineId,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n  timelineId,\n}",
             "description": [],
             "signature": [
-              "StatusBulkActionsProps"
+              "BulkActionsProps"
             ],
-            "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+            "path": "x-pack/plugins/timelines/public/hooks/use_bulk_action_items.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2012,6 +2446,116 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.AddToTimelineButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddToTimelineButtonProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "public",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-public.AddToTimelineButtonProps",
+            "text": "AddToTimelineButtonProps"
+          },
+          " extends ",
+          "HoverActionComponentProps"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.Component",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "`Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality"
+            ],
+            "signature": [
+              "React.FunctionComponent<(",
+              "DisambiguateSet",
+              "<EuiButtonEmptyPropsForAnchor, EuiButtonEmptyPropsForButton> & ",
+              "CommonEuiButtonEmptyProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
+              "DisambiguateSet",
+              "<EuiButtonEmptyPropsForButton, EuiButtonEmptyPropsForAnchor> & ",
+              "CommonEuiButtonEmptyProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>)> | React.FunctionComponent<(",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonIconPropsForAnchor",
+              ", ",
+              "EuiButtonIconPropsForButton",
+              "> & { type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
+              "EuiButtonIconProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonIconPropsForButton",
+              ", ",
+              "EuiButtonIconPropsForAnchor",
+              "> & { type?: string | undefined; } & ",
+              "EuiButtonIconProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | typeof ",
+              "EuiContextMenuItem",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.draggableId",
+            "type": "string",
+            "tags": [],
+            "label": "draggableId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.dataProvider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataProvider",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.DataProvider",
+                "text": "DataProvider"
+              },
+              " | ",
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.DataProvider",
+                "text": "DataProvider"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "timelines",
         "id": "def-public.TGridModel",
@@ -2032,6 +2576,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -2047,7 +2592,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+              ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
               "TGridCellAction",
               "[] | undefined; category?: string | undefined; columnHeaderType: ",
               {
@@ -2057,12 +2602,13 @@
                 "section": "def-common.ColumnHeaderType",
                 "text": "ColumnHeaderType"
               },
-              "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
               "IFieldSubType",
               " | undefined; type?: string | undefined; })[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2084,7 +2630,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2099,7 +2646,8 @@
               "{ start: string; end: string; }"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2114,7 +2662,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2129,7 +2678,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2146,7 +2696,8 @@
               " | undefined; }"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2160,7 +2711,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2175,7 +2727,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2192,7 +2745,8 @@
               " | null; }"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2204,7 +2758,8 @@
               "Uniquely identifies the timeline"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2217,7 +2772,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2227,7 +2783,8 @@
             "label": "isLoading",
             "description": [],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2239,7 +2796,8 @@
               "If selectAll checkbox in header is checked"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2251,7 +2809,8 @@
               "The number of items to show in a single page of results"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2266,7 +2825,8 @@
               "number[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2281,7 +2841,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2293,7 +2854,8 @@
               "When true, shows checkboxes enabling selection. Selected events store in selectedEventIds"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2309,7 +2871,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2332,7 +2895,8 @@
               "[]; }"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2345,7 +2909,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2358,7 +2923,8 @@
               "\"default\" | \"template\""
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2371,7 +2937,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -2384,7 +2951,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2400,6 +2968,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -2412,7 +2981,8 @@
               "TimelineById"
             ],
             "path": "x-pack/plugins/timelines/public/store/t_grid/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2434,6 +3004,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2450,6 +3021,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2466,6 +3038,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2482,6 +3055,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2495,6 +3069,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/components/t_grid/body/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2511,6 +3086,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2525,6 +3101,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -2538,7 +3115,8 @@
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2562,6 +3140,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2584,6 +3163,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2598,7 +3178,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -2608,11 +3188,11 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; title: string; id: string; filters?: ",
+          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
           "Filter",
-          "[] | undefined; dataViewId: string | null; sort: ",
+          "[] | undefined; dataViewId: string | null; savedObjectId: string | null; sort: ",
           "SortColumnTimeline",
           "[]; version: string | null; filterManager?: ",
           {
@@ -2626,7 +3206,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -2636,9 +3216,9 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; isLoading: boolean; dataProviders: ",
+          " | undefined; type?: string | undefined; })[]; isLoading: boolean; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -2664,6 +3244,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2678,6 +3259,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2696,6 +3278,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/components/stateful_event_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2710,6 +3293,7 @@
         ],
         "path": "x-pack/plugins/timelines/public/components/t_grid/shared/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2722,6 +3306,7 @@
       "description": [],
       "path": "x-pack/plugins/timelines/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "timelines",
@@ -2736,6 +3321,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2763,6 +3349,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "timelines",
@@ -2777,6 +3364,7 @@
               ],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2794,6 +3382,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2813,6 +3402,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "timelines",
@@ -2826,6 +3416,7 @@
               ],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2847,6 +3438,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "timelines",
@@ -2860,40 +3452,7 @@
               ],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "timelines",
-          "id": "def-public.TimelinesUIStart.getFieldBrowser",
-          "type": "Function",
-          "tags": [],
-          "label": "getFieldBrowser",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "FieldBrowserProps",
-            ") => React.ReactElement<",
-            "FieldBrowserProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "timelines",
-              "id": "def-public.TimelinesUIStart.getFieldBrowser.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "FieldBrowserProps"
-              ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
-              "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2914,6 +3473,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2931,6 +3491,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2949,6 +3510,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2968,6 +3530,7 @@
           ],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "timelines",
@@ -2984,6 +3547,7 @@
               ],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -3010,6 +3574,7 @@
       "description": [],
       "path": "x-pack/plugins/timelines/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3023,6 +3588,7 @@
       "description": [],
       "path": "x-pack/plugins/timelines/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -3041,6 +3607,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -3060,7 +3627,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3070,7 +3638,8 @@
             "label": "ariaRowindex",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3080,7 +3649,8 @@
             "label": "checked",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3090,7 +3660,8 @@
             "label": "columnId",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3100,7 +3671,8 @@
             "label": "columnValues",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3120,7 +3692,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3133,7 +3706,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3146,7 +3720,8 @@
               "Ecs"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3156,7 +3731,8 @@
             "label": "eventId",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3169,7 +3745,8 @@
               "Readonly<Record<string, string[]>> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3179,7 +3756,8 @@
             "label": "index",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3192,7 +3770,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3205,7 +3784,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3218,7 +3798,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3232,6 +3813,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3247,6 +3829,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3260,7 +3843,8 @@
                   "{ eventIds: string[]; isSelected: boolean; }"
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3276,6 +3860,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3291,6 +3876,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3302,7 +3888,8 @@
             "label": "rowIndex",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3316,6 +3903,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3329,7 +3917,8 @@
                   "{ eventIds: string[]; isDeleted: boolean; }"
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3345,6 +3934,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -3358,7 +3948,8 @@
                   "{ eventIds: string[]; isLoading: boolean; }"
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3370,7 +3961,8 @@
             "label": "showCheckboxes",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3383,7 +3975,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3397,7 +3990,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3407,7 +4001,8 @@
             "label": "timelineId",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3421,6 +4016,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3435,7 +4031,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3449,6 +4046,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -3458,7 +4056,8 @@
             "label": "aggregatable",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3468,7 +4067,8 @@
             "label": "category",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3481,7 +4081,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3494,7 +4095,8 @@
               "string | number | null"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3515,7 +4117,8 @@
               ">; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3525,7 +4128,8 @@
             "label": "format",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3538,7 +4142,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3548,7 +4153,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3558,7 +4164,8 @@
             "label": "searchable",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3568,7 +4175,22 @@
             "label": "type",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.BrowserField.esTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "esTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3582,7 +4204,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3592,7 +4215,8 @@
             "label": "readFromDocValues",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3612,7 +4236,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3626,6 +4251,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -3647,6 +4273,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -3660,6 +4287,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3681,6 +4309,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3706,6 +4335,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -3716,6 +4346,7 @@
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "timelines",
@@ -3725,7 +4356,8 @@
                     "label": "columnName",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -3735,7 +4367,8 @@
                     "label": "eventId",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -3747,7 +4380,7 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
                       "TGridCellAction",
                       "[] | undefined; category?: string | undefined; columnHeaderType: ",
                       {
@@ -3757,12 +4390,13 @@
                         "section": "def-common.ColumnHeaderType",
                         "text": "ColumnHeaderType"
                       },
-                      "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+                      "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
                       "IFieldSubType",
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -3772,7 +4406,8 @@
                     "label": "timelineId",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -3785,7 +4420,8 @@
                       "boolean | undefined"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -3798,7 +4434,8 @@
                       "string[] | null | undefined"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -3811,7 +4448,8 @@
                       "string[] | null | undefined"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -3830,6 +4468,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -3843,7 +4482,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3857,7 +4497,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3871,6 +4512,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -3882,7 +4524,8 @@
               "Uniquely identifies a data provider"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3894,7 +4537,8 @@
               "Human readable"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3906,7 +4550,8 @@
               "\nWhen `false`, a data provider is temporarily disabled, but not removed from\nthe timeline. default: `true`"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3918,7 +4563,8 @@
               "\nWhen `true`, a data provider is excluding the match, but not removed from\nthe timeline. default: `false`"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3930,7 +4576,8 @@
               "\nReturns the KQL query who have been added by user"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3951,7 +4598,8 @@
               }
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3973,7 +4621,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -3995,7 +4644,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4009,6 +4659,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4022,7 +4673,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4036,7 +4688,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4050,7 +4703,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4064,6 +4718,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4076,7 +4731,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4089,7 +4745,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4102,7 +4759,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4115,7 +4773,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4128,48 +4787,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.FieldBrowserOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldBrowserOptions",
-        "description": [],
-        "path": "x-pack/plugins/timelines/common/types/fields_browser/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.FieldBrowserOptions.createFieldButton",
-            "type": "Function",
-            "tags": [],
-            "label": "createFieldButton",
-            "description": [],
-            "signature": [
-              "CreateFieldComponent",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/fields_browser/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.FieldBrowserOptions.getFieldTableColumns",
-            "type": "Function",
-            "tags": [],
-            "label": "getFieldTableColumns",
-            "description": [],
-            "signature": [
-              "GetFieldTableColumns",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/fields_browser/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4183,6 +4802,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4192,7 +4812,8 @@
             "label": "category",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4205,7 +4826,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4218,7 +4840,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4231,7 +4854,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4241,7 +4865,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4254,7 +4879,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4268,6 +4894,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4277,7 +4904,8 @@
             "label": "width",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4298,7 +4926,8 @@
               ">; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4318,7 +4947,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4329,16 +4959,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.FieldBrowserOptions",
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.FieldBrowserOptions",
                 "text": "FieldBrowserOptions"
               },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4351,7 +4982,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4361,7 +4993,8 @@
             "label": "isSelectAllChecked",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4375,6 +5008,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -4385,6 +5019,7 @@
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "timelines",
@@ -4394,7 +5029,8 @@
                     "label": "isSelected",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -4409,7 +5045,8 @@
             "label": "showEventsSelect",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4419,7 +5056,8 @@
             "label": "showSelectAllCheckbox",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4433,7 +5071,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4446,7 +5085,8 @@
               "TimelineTabs"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4456,7 +5096,8 @@
             "label": "timelineId",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4488,6 +5129,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4499,7 +5141,8 @@
               "Where the field belong"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4515,7 +5158,8 @@
               "<string | number> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4531,7 +5175,8 @@
               "<string>[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4547,7 +5192,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4561,7 +5207,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4593,6 +5240,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4612,7 +5260,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4625,7 +5274,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4642,7 +5292,8 @@
               "[]; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4656,6 +5307,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4668,7 +5320,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4682,6 +5335,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4695,7 +5349,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4709,7 +5364,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4723,7 +5379,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4737,6 +5394,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4748,7 +5406,8 @@
               "The activePage parameter defines the page of results you want to fetch"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4760,7 +5419,8 @@
               "The cursorStart parameter defines the start of the results to be displayed"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4772,7 +5432,8 @@
               "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4784,7 +5445,8 @@
               "The querySize parameter is the number of items to be returned"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4798,6 +5460,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4807,7 +5470,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4820,7 +5484,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4833,7 +5498,8 @@
               "string | number"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4846,7 +5512,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4859,7 +5526,8 @@
               "\":\" | \":*\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4873,6 +5541,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -4885,7 +5554,8 @@
               "RowRendererId"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -4901,6 +5571,7 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
@@ -4914,6 +5585,7 @@
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4927,51 +5599,38 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ browserFields, data, isDraggable, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserField",
-                "text": "BrowserField"
-              },
-              ">>>; data: ",
+              "({ contextId, data, isDraggable, timelineId, }: { contextId?: string | undefined; data: ",
               "Ecs",
               "; isDraggable: boolean; timelineId: string; }) => React.ReactNode"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "timelines",
                 "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    browserFields,\n    data,\n    isDraggable,\n    timelineId,\n  }",
+                "label": "{\n    contextId,\n    data,\n    isDraggable,\n    timelineId,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFields",
-                    "type": "Object",
+                    "id": "def-common.RowRenderer.renderRow.$1.contextId",
+                    "type": "string",
                     "tags": [],
-                    "label": "browserFields",
+                    "label": "contextId",
                     "description": [],
                     "signature": [
-                      "{ readonly [x: string]: Partial<",
-                      {
-                        "pluginId": "timelines",
-                        "scope": "common",
-                        "docId": "kibTimelinesPluginApi",
-                        "section": "def-common.BrowserField",
-                        "text": "BrowserField"
-                      },
-                      ">; }"
+                      "string | undefined"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -4984,7 +5643,8 @@
                       "Ecs"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -4994,7 +5654,8 @@
                     "label": "isDraggable",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "timelines",
@@ -5004,7 +5665,8 @@
                     "label": "timelineId",
                     "description": [],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -5033,6 +5695,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5045,7 +5708,8 @@
               "Field"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5064,7 +5728,8 @@
               }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5078,6 +5743,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5096,7 +5762,8 @@
               }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5115,7 +5782,8 @@
               }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5155,6 +5823,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5167,7 +5836,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5180,7 +5850,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5193,7 +5864,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5206,7 +5878,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5240,6 +5913,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5259,7 +5933,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5269,7 +5944,8 @@
             "label": "totalCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5282,7 +5958,8 @@
               "{ activePage: number; querySize: number; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5302,7 +5979,8 @@
               " | null"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5328,6 +6006,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5341,7 +6020,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5354,7 +6034,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5367,7 +6048,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5380,7 +6062,8 @@
               "string[] | { field: string; include_unmapped: boolean; }[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5390,10 +6073,11 @@
             "label": "language",
             "description": [],
             "signature": [
-              "\"eql\" | \"kuery\" | \"lucene\""
+              "\"eql\" | \"lucene\" | \"kuery\""
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5410,7 +6094,8 @@
               "[]; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5442,6 +6127,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5454,7 +6140,8 @@
               "{ [x: string]: number; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5474,7 +6161,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5484,7 +6172,8 @@
             "label": "totalCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5497,7 +6186,8 @@
               "{ activePage: number; querySize: number; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5519,7 +6209,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5533,6 +6224,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5546,7 +6238,8 @@
               "<number> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5559,7 +6252,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5569,7 +6263,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5583,7 +6278,8 @@
               "<string[]> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5596,7 +6292,8 @@
               "any"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5606,7 +6303,8 @@
             "label": "isObjectArray",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5632,6 +6330,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5641,7 +6340,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5651,7 +6351,8 @@
             "label": "eventId",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5665,7 +6366,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5697,6 +6399,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5718,7 +6421,8 @@
               "[]> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5734,7 +6438,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5756,7 +6461,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5770,7 +6476,8 @@
               "<object> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5792,10 +6499,11 @@
           },
           " extends Omit<",
           "TimelineRequestBasicOptions",
-          ", \"timerange\" | \"filterQuery\" | \"runtimeMappings\">"
+          ", \"timerange\" | \"runtimeMappings\" | \"filterQuery\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5814,7 +6522,8 @@
               }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5833,7 +6542,8 @@
               }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5865,6 +6575,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5877,7 +6588,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5899,7 +6611,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5913,6 +6626,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -5922,7 +6636,8 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5936,7 +6651,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5956,7 +6672,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -5969,7 +6686,8 @@
               "Ecs"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6001,6 +6719,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -6010,7 +6729,8 @@
             "label": "destinationIpCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6032,7 +6752,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6042,7 +6763,8 @@
             "label": "hostCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6052,7 +6774,8 @@
             "label": "processCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6062,7 +6785,8 @@
             "label": "sourceIpCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6072,7 +6796,8 @@
             "label": "userCount",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6086,6 +6811,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -6095,7 +6821,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6109,7 +6836,8 @@
               "<string[]> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6123,6 +6851,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -6134,7 +6863,8 @@
               "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6146,7 +6876,8 @@
               "The end of the timerange"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6158,7 +6889,8 @@
               "The beginning of the timerange"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6172,6 +6904,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
@@ -6181,7 +6914,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
@@ -6191,7 +6925,8 @@
             "label": "relation",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6207,6 +6942,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6218,6 +6954,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6229,6 +6966,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6240,6 +6978,19 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TimelineType",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -6256,6 +7007,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6278,6 +7030,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6300,6 +7053,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6353,6 +7107,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6367,7 +7122,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -6377,12 +7132,13 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6397,6 +7153,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6413,6 +7170,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6429,6 +7187,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6439,7 +7198,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ name: string; type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6447,7 +7206,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6459,6 +7218,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6473,35 +7233,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/constants.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.DocValueFields",
-        "type": "Type",
-        "tags": [],
-        "label": "DocValueFields",
-        "description": [],
-        "signature": [
-          "QueryDslFieldAndFormat"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.EMPTY_DOCVALUE_FIELD",
-        "type": "Array",
-        "tags": [],
-        "label": "EMPTY_DOCVALUE_FIELD",
-        "description": [],
-        "signature": [
-          "QueryDslFieldAndFormat",
-          "[]"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6523,6 +7255,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6533,10 +7266,11 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"alerts\" | \"events\" | \"sessions\""
+          "\"sessions\" | \"alerts\" | \"events\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6553,6 +7287,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6574,6 +7309,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6588,6 +7324,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6610,6 +7347,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6627,6 +7365,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6643,6 +7382,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6659,6 +7399,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6705,6 +7446,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6719,6 +7461,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6732,7 +7475,8 @@
               "{ eventIds: string[]; isDeleted: boolean; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6749,6 +7493,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -6762,7 +7507,8 @@
               "{ eventIds: string[]; isLoading: boolean; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6775,7 +7521,7 @@
         "label": "TimelineKpiStrategyRequest",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; params?: ",
+          "{ params?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -6783,7 +7529,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; defaultIndex: string[]; timerange: ",
+          " | undefined; id?: string | undefined; timerange: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6791,11 +7537,9 @@
             "section": "def-common.TimerangeInput",
             "text": "TimerangeInput"
           },
-          "; filterQuery: string | ",
+          "; defaultIndex: string[]; filterQuery: string | ",
           "ESQuery",
-          " | undefined; docValueFields?: ",
-          "QueryDslFieldAndFormat",
-          "[] | undefined; factoryQueryType?: ",
+          " | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",
           " | undefined; entityType?: ",
           {
@@ -6809,6 +7553,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -6822,6 +7567,7 @@
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -6837,6 +7583,7 @@
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

@@ -9,7 +9,6 @@
 import { CoreSetup } from '@kbn/core/public';
 import { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
@@ -38,11 +37,12 @@ export const setupKqlQuerySuggestionProvider = (
     conjunction: setupGetConjunctionSuggestions(core),
   };
 
-  const getSuggestionsByType = (
+  const getSuggestionsByType = async (
     cursoredQuery: string,
     querySuggestionsArgs: QuerySuggestionGetFnArgs
-  ): Array<Promise<QuerySuggestion[]>> | [] => {
+  ): Promise<Array<Promise<QuerySuggestion[]>> | []> => {
     try {
+      const { fromKueryExpression } = await import('@kbn/es-query');
       const cursorNode = fromKueryExpression(cursoredQuery, {
         cursorSymbol,
         parseCursor: true,
@@ -56,13 +56,13 @@ export const setupKqlQuerySuggestionProvider = (
     }
   };
 
-  return (querySuggestionsArgs) => {
+  return async (querySuggestionsArgs): Promise<QuerySuggestion[]> => {
     const { query, selectionStart, selectionEnd } = querySuggestionsArgs;
     const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(
       selectionEnd
     )}`;
 
-    return Promise.all(getSuggestionsByType(cursoredQuery, querySuggestionsArgs)).then(
+    return Promise.all(await getSuggestionsByType(cursoredQuery, querySuggestionsArgs)).then(
       (suggestionsByType) => dedup(flatten(suggestionsByType))
     );
   };

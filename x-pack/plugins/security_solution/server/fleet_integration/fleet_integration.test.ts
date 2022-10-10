@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -22,28 +22,28 @@ import {
   getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
-import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
+import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
 import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
 import { Manifest } from '../endpoint/lib/artifacts';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common/types/models';
-import { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
-import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
+import type { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
@@ -82,6 +82,7 @@ describe('ingest_integration tests ', () => {
       enabled: true,
       streams: [],
       config: {
+        integration_config: {},
         policy: { value: policyFactory() },
         artifact_manifest: { value: manifest },
       },
@@ -247,8 +248,13 @@ describe('ingest_integration tests ', () => {
       expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
-  });
 
+    it.todo('should override policy config with endpoint settings');
+    it.todo('should override policy config with cloud settings');
+  });
+  describe('package policy post create callback', () => {
+    it.todo('should create Event Filters given valid parameter on integration config');
+  });
   describe('package policy update callback (when the license is below platinum)', () => {
     beforeEach(() => {
       licenseEmitter.next(Gold); // set license level to gold

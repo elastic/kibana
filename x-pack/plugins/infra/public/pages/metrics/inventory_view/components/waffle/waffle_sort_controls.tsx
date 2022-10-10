@@ -121,7 +121,7 @@ const SwitchContainer = withTheme(({ children, theme }: SwitchContainerProps) =>
   return (
     <div
       style={{
-        padding: theme?.eui.paddingSizes.m,
+        padding: theme?.eui.euiSizeM,
         borderTop: `1px solid ${theme?.eui.euiBorderColor}`,
       }}
     >

@@ -19,20 +19,6 @@ export const ADDED_TO_TIMELINE_TEMPLATE_MESSAGE = (fieldOrValue: string) =>
     defaultMessage: `Added {fieldOrValue} to timeline template`,
   });
 
-export const STATUS_CODE = i18n.translate(
-  'xpack.securitySolution.components.ml.api.errors.statusCodeFailureTitle',
-  {
-    defaultMessage: 'Status Code:',
-  }
-);
-
-export const NETWORK_ERROR = i18n.translate(
-  'xpack.securitySolution.components.ml.api.errors.networkErrorFailureTitle',
-  {
-    defaultMessage: 'Network Error:',
-  }
-);
-
 export const INDEX_PATTERN_FETCH_FAILURE = i18n.translate(
   'xpack.securitySolution.components.mlPopup.hooks.errors.indexPatternFetchFailureTitle',
   {

@@ -116,9 +116,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('pie charts', async () => {
-      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
-        await elasticChart.setNewChartUiDebugFlag();
-      }
+      await elasticChart.setNewChartUiDebugFlag();
       await pieChart.expectPieSliceCount(5);
     });
 

@@ -6,15 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import { CREATED, LAST_UPDATED } from './translations';
-import {
-  FormattedRelativePreferenceDate,
-  FormattedRelativePreferenceDateProps,
-} from '../../../../common/components/formatted_date';
+import type { FormattedRelativePreferenceDateProps } from '../../../../common/components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { TextValueDisplay } from './text_value_display';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   padding-top: 2px;

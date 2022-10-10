@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiHealth, EuiLink, EuiText } from '@elastic/eui';
-import { capitalize } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
 import React from 'react';
-import {
-  AggregateRuleExecutionEvent,
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type {
+  RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/schemas/common';
-import { getEmptyTagValue, getEmptyValue } from '../../../../../../common/components/empty_value';
+} from '../../../../../../../common/detection_engine/rule_monitoring';
+
+import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../../common/components/formatted_date';
-import { getStatusColor } from '../../../../../components/rules/rule_execution_status/utils';
+import { ExecutionStatusIndicator } from '../../../../../../detection_engine/rule_monitoring';
 import { PopoverTooltip } from '../../all/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../all/table_header_tooltip_cell';
-
-import * as i18n from './translations';
 import { RuleDurationFormat } from './rule_duration_format';
 
-export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> = [
+import * as i18n from './translations';
+
+export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResult>> = [
   {
     name: (
       <TableHeaderTooltipCell
@@ -32,12 +34,9 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
       />
     ),
     field: 'security_status',
-    render: (value: RuleExecutionStatus, data) =>
-      value ? (
-        <EuiHealth color={getStatusColor(value)}>{capitalize(value)}</EuiHealth>
-      ) : (
-        getEmptyTagValue()
-      ),
+    render: (value: RuleExecutionStatus) => (
+      <ExecutionStatusIndicator status={value} showTooltip={true} />
+    ),
     sortable: false,
     truncateText: false,
     width: '10%',
@@ -50,7 +49,7 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
         tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
       />
     ),
-    render: (value: string) => <FormattedDate value={value} fieldName="date" />,
+    render: (value: string) => <FormattedDate value={value} fieldName="timestamp" />,
     sortable: true,
     truncateText: false,
     width: '15%',
@@ -87,9 +86,9 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
 
 export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
   docLinks: DocLinksStart
-): Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> => [
+): Array<EuiBasicTableColumn<RuleExecutionResult>> => [
   {
-    field: 'gap_duration_ms',
+    field: 'gap_duration_s',
     name: (
       <TableHeaderTooltipCell
         title={i18n.COLUMN_GAP_DURATION}
@@ -117,7 +116,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
       />
     ),
     render: (value: number) => (
-      <>{value ? <RuleDurationFormat duration={value} isMillis={true} /> : getEmptyValue()}</>
+      <>{value ? <RuleDurationFormat duration={value} isSeconds={true} /> : getEmptyValue()}</>
     ),
     sortable: true,
     truncateText: false,

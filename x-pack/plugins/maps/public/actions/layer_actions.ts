@@ -7,7 +7,8 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -22,8 +23,8 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest } from '../reducers/non_serializable_instances';
-import { setDrawMode, updateFlyout } from './ui_actions';
+import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -49,7 +50,6 @@ import {
   syncDataForLayerId,
   updateStyleMeta,
 } from './data_request_actions';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -57,16 +57,24 @@ import {
   StyleDescriptor,
   TileMetaFeature,
   VectorLayerDescriptor,
+  VectorStyleDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE, SCALING_TYPES } from '../../common/constants';
+import {
+  DRAW_MODE,
+  LAYER_STYLE_TYPE,
+  LAYER_TYPE,
+  SCALING_TYPES,
+  STYLE_TYPE,
+} from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-import { getDrawMode } from '../selectors/ui_selectors';
+import type { IESSource } from '../classes/sources/es_source';
+import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -195,6 +203,15 @@ export function addPreviewLayers(layerDescriptors: LayerDescriptor[]) {
 
     layerDescriptors.forEach((layerDescriptor) => {
       dispatch(addLayer({ ...layerDescriptor, __isPreviewLayer: true }));
+
+      // Auto open layer legend to increase legend discoverability
+      if (
+        layerDescriptor.style &&
+        (hasByValueStyling(layerDescriptor.style) ||
+          layerDescriptor.style.type === LAYER_STYLE_TYPE.HEATMAP)
+      ) {
+        dispatch(showTOCDetails(layerDescriptor.id));
+      }
     });
   };
 }
@@ -241,10 +258,6 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       return;
     }
 
-    if (!makeVisible) {
-      dispatch(updateTooltipStateForLayer(layer));
-    }
-
     dispatch({
       type: SET_LAYER_VISIBILITY,
       layerId,
@@ -268,6 +281,32 @@ export function toggleLayerVisible(layerId: string) {
     const makeVisible = !layer.isVisible();
 
     dispatch(setLayerVisibility(layerId, makeVisible));
+  };
+}
+
+export function hideAllLayers() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (layer.isVisible() && !layer.isBasemap(index)) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
+  };
+}
+
+export function showAllLayers() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (!layer.isVisible()) {
+        dispatch(setLayerVisibility(layer.getId(), true));
+      }
+    });
   };
 }
 
@@ -451,6 +490,7 @@ function updateLayerType(layerId: string, newLayerType: string) {
       return;
     }
     dispatch(clearDataRequests(layer));
+    clearInspectorAdapters(layer, getInspectorAdapters(getState()));
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
@@ -466,6 +506,15 @@ export function updateLayerLabel(id: string, newLabel: string) {
     id,
     propName: 'label',
     newValue: newLabel,
+  };
+}
+
+export function updateLayerLocale(id: string, locale: string) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'locale',
+    newValue: locale,
   };
 }
 
@@ -531,6 +580,15 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   };
 }
 
+export function updateDisableTooltips(id: string, disableTooltips: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'disableTooltips',
+    newValue: disableTooltips,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
@@ -585,8 +643,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
-    layerGettingRemoved.destroy();
+    clearInspectorAdapters(layerGettingRemoved, getInspectorAdapters(getState()));
     dispatch({
       type: REMOVE_LAYER,
       id: layerId,
@@ -595,6 +652,10 @@ function removeLayerFromLayerList(layerId: string) {
     const editState = getEditState(getState());
     if (layerId === editState?.layerId) {
       dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
+    const openTOCDetails = getOpenTOCDetails(getState());
+    if (openTOCDetails.includes(layerId)) {
+      dispatch(hideTOCDetails(layerId));
     }
   };
 }
@@ -637,6 +698,11 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
         ...styleDescriptor,
       },
     });
+
+    // Auto open layer legend to increase legend discoverability
+    if (hasByValueStyling(styleDescriptor)) {
+      dispatch(showTOCDetails(layerId));
+    }
 
     // Ensure updateStyleMeta is triggered
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
@@ -717,4 +783,31 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
     });
     await dispatch(updateStyleMeta(layerId));
   };
+}
+
+function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
+  if (!layer.getSource().isESSource()) {
+    return;
+  }
+
+  if (adapters.vectorTiles) {
+    adapters.vectorTiles.removeLayer(layer.getId());
+  }
+
+  if (adapters.requests && 'getValidJoins' in layer) {
+    const vectorLayer = layer as IVectorLayer;
+    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
+    vectorLayer.getValidJoins().forEach((join) => {
+      adapters.requests!.resetRequest(join.getRightJoinSource().getId());
+    });
+  }
+}
+
+function hasByValueStyling(styleDescriptor: StyleDescriptor) {
+  return (
+    styleDescriptor.type === LAYER_STYLE_TYPE.VECTOR &&
+    Object.values((styleDescriptor as VectorStyleDescriptor).properties).some((styleProperty) => {
+      return (styleProperty as { type?: STYLE_TYPE })?.type === STYLE_TYPE.DYNAMIC;
+    })
+  );
 }

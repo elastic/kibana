@@ -24,10 +24,11 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./get_alert_state'));
     loadTestFile(require.resolve('./get_alert_summary'));
     loadTestFile(require.resolve('./get_execution_log'));
+    loadTestFile(require.resolve('./get_action_error_log'));
     loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./event_log'));
     loadTestFile(require.resolve('./execution_status'));
-    loadTestFile(require.resolve('./in_memory_metrics'));
+    loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./mute_all'));
     loadTestFile(require.resolve('./mute_instance'));
@@ -45,11 +46,14 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./ephemeral'));
     loadTestFile(require.resolve('./event_log_alerts'));
     loadTestFile(require.resolve('./snooze'));
+    loadTestFile(require.resolve('./bulk_edit'));
     loadTestFile(require.resolve('./capped_action_type'));
     loadTestFile(require.resolve('./scheduled_task_id'));
+    loadTestFile(require.resolve('./run_soon'));
     // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 
     // note that this test will destroy existing spaces
-    loadTestFile(require.resolve('./migrations'));
+    loadTestFile(require.resolve('./migrations.ts'));
+    loadTestFile(require.resolve('./migrations/index.ts'));
   });
 }

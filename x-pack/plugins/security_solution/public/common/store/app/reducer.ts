@@ -7,10 +7,10 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { Note } from '../../lib/note';
+import type { Note } from '../../lib/note';
 
 import { addError, addErrorHash, addNotes, removeError, updateNote } from './actions';
-import { AppModel, NotesById } from './model';
+import type { AppModel, NotesById } from './model';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 export type AppState = AppModel;

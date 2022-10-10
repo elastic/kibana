@@ -29,3 +29,63 @@ export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
     }
   });
 }
+
+export const makeSnapshotVersion = (version: string) => {
+  return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
+};
+
+export async function generateAgent(
+  providerContext: FtrProviderContext,
+  status: string,
+  id: string,
+  policyId: string,
+  version?: string
+) {
+  let data: any = {};
+  const { getService } = providerContext;
+  const es = getService('es');
+
+  switch (status) {
+    case 'error':
+      data = { policy_revision_idx: 1, last_checkin_status: 'error' };
+      break;
+    case 'degraded':
+      data = { policy_revision_idx: 1, last_checkin_status: 'degraded' };
+      break;
+    case 'offline':
+      data = { policy_revision_idx: 1, last_checkin: '2017-06-07T18:59:04.498Z' };
+      break;
+    // Agent with last checkin status as error and currently unenrolling => should displayd updating status
+    case 'error-unenrolling':
+      data = {
+        policy_revision_idx: 1,
+        last_checkin_status: 'error',
+        unenrollment_started_at: '2017-06-07T18:59:04.498Z',
+      };
+      break;
+    default:
+      data = { policy_revision_idx: 1, last_checkin: new Date().toISOString() };
+  }
+
+  await es.index({
+    index: '.fleet-agents',
+    id,
+    body: {
+      id,
+      active: true,
+      last_checkin: new Date().toISOString(),
+      policy_id: policyId,
+      policy_revision: 1,
+      local_metadata: {
+        elastic: {
+          agent: {
+            version,
+            upgradeable: true,
+          },
+        },
+      },
+      ...data,
+    },
+    refresh: 'wait_for',
+  });
+}

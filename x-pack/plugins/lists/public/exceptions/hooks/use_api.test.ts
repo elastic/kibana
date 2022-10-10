@@ -297,7 +297,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -313,7 +312,6 @@ describe('useApi', () => {
         });
 
         const expected: ApiCallByListIdProps = {
-          filterOptions: [],
           http: mockKibanaHttpService,
           listIds: ['list_id'],
           namespaceTypes: ['single'],
@@ -351,7 +349,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -389,7 +386,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],

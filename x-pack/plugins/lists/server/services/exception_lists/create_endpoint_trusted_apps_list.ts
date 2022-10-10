@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import uuid from 'uuid';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -72,7 +72,7 @@ export const createEndpointTrustedAppsList = async ({
     );
     return transformSavedObjectToExceptionList({ savedObject });
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       return null;
     } else {
       throw err;

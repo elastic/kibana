@@ -48,13 +48,14 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
       const { name } = req.params;
 
       try {
-        const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline({
-          id: name,
-        });
-
+        const pipelines = deserializePipelines(
+          await clusterClient.asCurrentUser.ingest.getPipeline({
+            id: name,
+          })
+        );
         return res.ok({
           body: {
-            ...pipelines[name],
+            ...pipelines!.find((pipeline) => pipeline.name),
             name,
           },
         });

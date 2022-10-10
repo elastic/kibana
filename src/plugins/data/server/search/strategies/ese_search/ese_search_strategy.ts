@@ -26,7 +26,7 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors';
+import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
   getDefaultSearchParams,
   getShardTimeout,
@@ -70,9 +70,10 @@ export const enhancedEsSearchStrategyProvider = (
       const { body, headers } = id
         ? await client.asyncSearch.get(
             { ...params, id },
-            { signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.asyncSearch.submit(params, {
+            ...options.transport,
             signal: options.abortSignal,
             meta: true,
           });

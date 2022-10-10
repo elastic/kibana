@@ -7,8 +7,12 @@
  */
 
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
-import { EventAnnotationArgs } from '../../common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 
 export interface EventAnnotationServiceType {
-  toExpression: (props: EventAnnotationArgs) => ExpressionAstExpression;
+  toExpression: (props: EventAnnotationConfig[]) => ExpressionAstExpression[];
+  toFetchExpression: (props: {
+    interval: string;
+    groups: EventAnnotationGroupConfig[];
+  }) => ExpressionAstExpression[];
 }

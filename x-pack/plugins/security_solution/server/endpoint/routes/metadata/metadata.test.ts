@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
@@ -18,7 +18,8 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { HostInfo, HostStatus, MetadataListResponse } from '../../../../common/endpoint/types';
+import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { registerEndpointRoutes } from '.';
 import {
@@ -26,18 +27,22 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import {
-  EndpointAppContextService,
-  EndpointAppContextServiceStartContract,
-} from '../../endpoint_app_context_services';
+import type { EndpointAppContextServiceStartContract } from '../../endpoint_app_context_services';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent, ElasticsearchAssetType } from '@kbn/fleet-plugin/common/types/models';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common/types/models';
 import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
 } from './support/test_support';
-import type { AgentClient, PackageService, PackageClient } from '@kbn/fleet-plugin/server';
+import type {
+  AgentClient,
+  PackageService,
+  PackageClient,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
@@ -48,17 +53,16 @@ import {
 } from '../../../../common/endpoint/constants';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { AgentNotFoundError, PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import {
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import type {
   ClusterClientMock,
   ScopedClusterClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import { createMockAgentClient, createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
-import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -108,7 +112,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>
+      startContract.packagePolicyService as jest.Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -142,6 +146,7 @@ describe('test endpoint routes', () => {
         },
       ],
       keep_policies_up_to_date: false,
+      verification_status: 'unknown',
     });
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
@@ -243,30 +248,6 @@ describe('test endpoint routes', () => {
             must: [
               {
                 bool: {
-                  filter: [
-                    {
-                      terms: {
-                        'united.agent.policy_id': [],
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.endpoint.agent.id',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.agent.agent.id',
-                      },
-                    },
-                    {
-                      term: {
-                        'united.agent.active': {
-                          value: true,
-                        },
-                      },
-                    },
-                  ],
                   must_not: {
                     terms: {
                       'agent.id': [
@@ -275,22 +256,58 @@ describe('test endpoint routes', () => {
                       ],
                     },
                   },
+                  filter: [
+                    { terms: { 'united.agent.policy_id': [] } },
+                    { exists: { field: 'united.endpoint.agent.id' } },
+                    { exists: { field: 'united.agent.agent.id' } },
+                    { term: { 'united.agent.active': { value: true } } },
+                  ],
                 },
               },
               {
                 bool: {
-                  should: [
+                  filter: [
                     {
                       bool: {
-                        filter: [
+                        should: [
+                          {
+                            bool: {
+                              filter: [
+                                {
+                                  bool: {
+                                    should: [
+                                      { exists: { field: 'united.agent.upgrade_started_at' } },
+                                    ],
+                                    minimum_should_match: 1,
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      bool: {
+                                        should: [{ exists: { field: 'united.agent.upgraded_at' } }],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            bool: {
+                              must_not: {
+                                bool: {
+                                  should: [{ exists: { field: 'united.agent.last_checkin' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            },
+                          },
                           {
                             bool: {
                               should: [
-                                {
-                                  exists: {
-                                    field: 'united.agent.upgrade_started_at',
-                                  },
-                                },
+                                { exists: { field: 'united.agent.unenrollment_started_at' } },
                               ],
                               minimum_should_match: 1,
                             },
@@ -300,11 +317,7 @@ describe('test endpoint routes', () => {
                               must_not: {
                                 bool: {
                                   should: [
-                                    {
-                                      exists: {
-                                        field: 'united.agent.upgraded_at',
-                                      },
-                                    },
+                                    { exists: { field: 'united.agent.policy_revision_idx' } },
                                   ],
                                   minimum_should_match: 1,
                                 },
@@ -312,6 +325,7 @@ describe('test endpoint routes', () => {
                             },
                           },
                         ],
+                        minimum_should_match: 1,
                       },
                     },
                     {
@@ -320,8 +334,86 @@ describe('test endpoint routes', () => {
                           bool: {
                             should: [
                               {
-                                exists: {
-                                  field: 'united.agent.last_checkin',
+                                bool: {
+                                  should: [
+                                    { range: { 'united.agent.last_checkin': { lt: 'now-300s' } } },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                              {
+                                bool: {
+                                  filter: [
+                                    {
+                                      bool: {
+                                        should: [
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'error',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'degraded',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                    {
+                                      bool: {
+                                        must_not: {
+                                          bool: {
+                                            should: [
+                                              {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      range: {
+                                                        'united.agent.last_checkin': {
+                                                          lt: 'now-300s',
+                                                        },
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                              {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      exists: {
+                                                        field:
+                                                          'united.agent.unenrollment_started_at',
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                            ],
+                                            minimum_should_match: 1,
+                                          },
+                                        },
+                                      },
+                                    },
+                                  ],
                                 },
                               },
                             ],
@@ -330,33 +422,14 @@ describe('test endpoint routes', () => {
                         },
                       },
                     },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'united.agent.unenrollment_started_at',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
                   ],
-                  minimum_should_match: 1,
                 },
               },
               {
                 bool: {
                   must_not: {
                     bool: {
-                      should: [
-                        {
-                          match: {
-                            'host.ip': '10.140.73.246',
-                          },
-                        },
-                      ],
+                      should: [{ match: { 'host.ip': '10.140.73.246' } }],
                       minimum_should_match: 1,
                     },
                   },

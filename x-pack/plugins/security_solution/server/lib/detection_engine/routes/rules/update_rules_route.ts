@@ -10,7 +10,7 @@ import { updateRulesSchema } from '../../../../../common/detection_engine/schema
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildSiemResponse } from '../utils';
@@ -21,6 +21,7 @@ import { updateRules } from '../../rules/update_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { legacyMigrate } from '../../rules/utils';
 import { readRules } from '../../rules/read_rules';
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 
 export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
@@ -44,7 +45,6 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
 
         const rulesClient = ctx.alerting.getRulesClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
-        const siemClient = ctx.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -53,6 +53,8 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
           savedObjectsClient,
         });
         throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+
+        checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
         const existingRule = await readRules({
           rulesClient,
@@ -66,7 +68,6 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
           rule: existingRule,
         });
         const rule = await updateRules({
-          defaultOutputIndex: siemClient.getSignalsIndex(),
           rulesClient,
           existingRule: migratedRule,
           ruleUpdate: request.body,

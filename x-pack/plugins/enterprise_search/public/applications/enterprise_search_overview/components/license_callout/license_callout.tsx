@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { LicensingLogic, ManageLicenseButton } from '../../../shared/licensing';
 
@@ -23,19 +23,18 @@ export const LicenseCallout: React.FC = () => {
   if (hasPlatinumLicense && !isTrial) return null;
 
   return (
-    <EuiPanel hasBorder color="transparent" paddingSize="l">
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={7}>
-          <EuiText>
-            <h3>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h3>
-          </EuiText>
-          <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={false}>
-          <ManageLicenseButton />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiFlexGroup gutterSize="s" direction="column">
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h3>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem />
+      <EuiFlexItem>
+        <ManageLicenseButton />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

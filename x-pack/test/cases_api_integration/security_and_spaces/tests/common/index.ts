@@ -37,12 +37,20 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./metrics/get_case_metrics_alerts'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_connectors'));
+    loadTestFile(require.resolve('./metrics/get_cases_metrics'));
 
     /**
      * Internal routes
      */
 
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
+
+    /**
+     * Attachments framework
+     */
+
+    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
+    loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those

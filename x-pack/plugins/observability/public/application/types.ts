@@ -45,4 +45,5 @@ export interface ObservabilityAppServices {
   timelines: TimelinesUIStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
+  isDev?: boolean;
 }

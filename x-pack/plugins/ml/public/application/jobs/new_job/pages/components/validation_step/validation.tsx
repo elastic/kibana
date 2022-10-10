@@ -12,6 +12,7 @@ import { JobCreatorContext } from '../job_creator_context';
 import { ml } from '../../../../../services/ml_api_service';
 import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
+import { SkipValidationButton } from './skip_validatoin';
 
 const idFilterList = [
   'job_id_valid',
@@ -48,6 +49,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     // force basic validation to run
     jobValidator.validate(() => {}, true);
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // keep a record of the advanced validation in the jobValidator
@@ -72,7 +74,9 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
             nextActive={nextActive}
-          />
+          >
+            <SkipValidationButton nextActive={nextActive} setCurrentStep={setCurrentStep} />
+          </WizardNav>
         </Fragment>
       )}
       {isCurrentStep === false && <Fragment />}

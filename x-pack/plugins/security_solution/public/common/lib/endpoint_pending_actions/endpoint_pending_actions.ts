@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   PendingActionsRequestQuery,
   PendingActionsResponse,
 } from '../../../../common/endpoint/types';

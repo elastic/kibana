@@ -13,7 +13,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
@@ -22,6 +22,8 @@ import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { VisualizationsPlugin } from './plugin';
 import { Schemas } from './vis_types';
 import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
@@ -50,14 +52,15 @@ const createInstance = async () => {
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
-    usageCollection: usageCollectionPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
     uiActions: uiActionsPluginMock.createSetupContract(),
   });
+
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
+      dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
@@ -72,6 +75,8 @@ const createInstance = async () => {
       presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       screenshotMode: screenshotModePluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     });
 
   return {

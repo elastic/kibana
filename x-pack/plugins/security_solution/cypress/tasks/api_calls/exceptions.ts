@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionList, ExceptionListItem } from '../../objects/exception';
+import type { ExceptionList, ExceptionListItem } from '../../objects/exception';
 
 export const createExceptionList = (
   exceptionList: ExceptionList,

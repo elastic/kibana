@@ -7,10 +7,10 @@
 
 import { services as kibanaFunctionalServices } from '../../functional/services';
 
-import { MachineLearningScreenshotsProvider } from './ml_screenshots';
+import { CommonScreenshotsProvider } from './common_screenshots';
 
 export const services = {
   ...kibanaFunctionalServices,
 
-  mlScreenshots: MachineLearningScreenshotsProvider,
+  commonScreenshots: CommonScreenshotsProvider,
 };

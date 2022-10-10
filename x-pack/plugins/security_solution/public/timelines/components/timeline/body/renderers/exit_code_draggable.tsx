@@ -42,6 +42,8 @@ export const ExitCodeDraggable = React.memo<Props>(
               field="process.exit_code"
               isDraggable={isDraggable}
               value={`${processExitCode}`}
+              fieldType="number"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -54,6 +56,8 @@ export const ExitCodeDraggable = React.memo<Props>(
               field="endgame.exit_code"
               isDraggable={isDraggable}
               value={endgameExitCode}
+              fieldType="number"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}

@@ -116,6 +116,7 @@ Object {
           "logs-elastic_agent.endpoint_security-testnamespace123",
           "logs-elastic_agent.auditbeat-testnamespace123",
           "logs-elastic_agent.heartbeat-testnamespace123",
+          "logs-elastic_agent.cloudbeat-testnamespace123",
           "metrics-elastic_agent-testnamespace123",
           "metrics-elastic_agent.elastic_agent-testnamespace123",
           "metrics-elastic_agent.apm_server-testnamespace123",
@@ -127,6 +128,7 @@ Object {
           "metrics-elastic_agent.endpoint_security-testnamespace123",
           "metrics-elastic_agent.auditbeat-testnamespace123",
           "metrics-elastic_agent.heartbeat-testnamespace123",
+          "metrics-elastic_agent.cloudbeat-testnamespace123",
         ],
         "privileges": Array [
           "auto_configure",
@@ -155,6 +157,7 @@ Object {
           "logs-elastic_agent.endpoint_security-testnamespace123",
           "logs-elastic_agent.auditbeat-testnamespace123",
           "logs-elastic_agent.heartbeat-testnamespace123",
+          "logs-elastic_agent.cloudbeat-testnamespace123",
         ],
         "privileges": Array [
           "auto_configure",
@@ -183,6 +186,7 @@ Object {
           "metrics-elastic_agent.endpoint_security-testnamespace123",
           "metrics-elastic_agent.auditbeat-testnamespace123",
           "metrics-elastic_agent.heartbeat-testnamespace123",
+          "metrics-elastic_agent.cloudbeat-testnamespace123",
         ],
         "privileges": Array [
           "auto_configure",

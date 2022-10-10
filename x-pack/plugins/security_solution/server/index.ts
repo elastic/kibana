@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { Plugin, PluginSetup, PluginStart } from './plugin';
-import { configSchema, ConfigSchema, ConfigType } from './config';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { PluginSetup, PluginStart } from './plugin';
+import { Plugin } from './plugin';
+import type { ConfigSchema, ConfigType } from './config';
+import { configSchema } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 

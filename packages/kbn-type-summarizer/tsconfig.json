@@ -3,14 +3,15 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "outDir": "target_types",
+    "stripInternal": false,
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ]
 }

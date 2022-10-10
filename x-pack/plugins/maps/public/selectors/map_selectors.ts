@@ -8,10 +8,9 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -23,10 +22,7 @@ import {
 import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { getTimeFilter } from '../kibana_services';
-import {
-  getChartsPaletteServiceGetColor,
-  getInspectorAdapters,
-} from '../reducers/non_serializable_instances';
+import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
@@ -46,21 +42,22 @@ import {
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
+  EMSVectorTileLayerDescriptor,
   EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
 import { ISource } from '../classes/sources/source';
-import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import { IRasterSource } from '../classes/sources/raster_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
@@ -75,16 +72,18 @@ function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, sourc
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
   customIcons: CustomIcon[],
-  inspectorAdapters?: Adapters,
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
-  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
+  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
 
   switch (layerDescriptor.type) {
     case LAYER_TYPE.RASTER_TILE:
-      return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
+      return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
-      return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
+      return new EmsVectorTileLayer({
+        layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
+        source: source as EMSTMSSource,
+      });
     case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
@@ -123,10 +122,7 @@ export function createLayerInstance(
   }
 }
 
-function createSourceInstance(
-  sourceDescriptor: AbstractSourceDescriptor | null,
-  inspectorAdapters?: Adapters
-): ISource {
+function createSourceInstance(sourceDescriptor: AbstractSourceDescriptor | null): ISource {
   if (sourceDescriptor === null) {
     throw new Error('Source-descriptor should be initialized');
   }
@@ -134,7 +130,7 @@ function createSourceInstance(
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor);
 }
 
 export const getMapSettings = ({ map }: MapStoreState): MapSettings => map.settings;
@@ -177,8 +173,6 @@ export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
-export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
-
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
@@ -203,6 +197,9 @@ export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
 export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
+
+export const getEmbeddableSearchContext = ({ map }: MapStoreState) =>
+  map.mapState.embeddableSearchContext;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
@@ -245,6 +242,7 @@ export const getDataFilters = createSelector(
   getTimeslice,
   getQuery,
   getFilters,
+  getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
@@ -256,6 +254,7 @@ export const getDataFilters = createSelector(
     timeslice,
     query,
     filters,
+    embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly
@@ -268,6 +267,7 @@ export const getDataFilters = createSelector(
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       isReadOnly,
     };
@@ -321,17 +321,11 @@ export const getSpatialFiltersLayer = createSelector(
 
 export const getLayerList = createSelector(
   getLayerListRaw,
-  getInspectorAdapters,
   getChartsPaletteServiceGetColor,
   getCustomIcons,
-  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor, customIcons) => {
+  (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(
-        layerDescriptor,
-        customIcons,
-        inspectorAdapters,
-        chartsPaletteServiceGetColor
-      )
+      createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
     );
   }
 );

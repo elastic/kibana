@@ -7,15 +7,16 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { Filter, FilterStateStore, KueryNode, fromKueryExpression } from '@kbn/es-query';
+import type { Filter, KueryNode } from '@kbn/es-query';
+import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineType } from '../../../../common/types/timeline';
-import {
+import type {
   DataProvider,
-  DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 interface FindValueToChangeInQuery {
   field: string;

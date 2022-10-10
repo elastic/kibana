@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export const logger = loggingSystemMock.create();
-jest.doMock('../logging/logging_system', () => ({
+jest.doMock('@kbn/core-logging-server-internal', () => ({
   LoggingSystem: jest.fn(() => logger),
 }));
 
 const realKbnConfig = jest.requireActual('@kbn/config');
 
-import { configServiceMock, rawConfigServiceMock } from '../config/mocks';
+import { configServiceMock, rawConfigServiceMock } from '@kbn/config-mocks';
 export const configService = configServiceMock.create();
 export const rawConfigService = rawConfigServiceMock.create();
 jest.doMock('@kbn/config', () => ({

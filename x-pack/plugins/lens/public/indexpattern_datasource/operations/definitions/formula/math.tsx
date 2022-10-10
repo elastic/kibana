@@ -8,7 +8,7 @@
 import type { TinymathAST } from '@kbn/tinymath';
 import { OperationDefinition } from '..';
 import { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../types';
+import { IndexPattern } from '../../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
@@ -67,9 +67,16 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
     // TODO has to check all children
     return true;
   },
-  createCopy: (layer) => {
-    return { ...layer };
+  createCopy: (layers) => {
+    return { ...layers };
   },
+};
+
+const optimizableFnsMap: Record<string, string> = {
+  add: '+',
+  subtract: '-',
+  multiply: '*',
+  divide: '/',
 };
 
 function astToString(ast: TinymathAST | string): string | number {
@@ -89,5 +96,21 @@ function astToString(ast: TinymathAST | string): string | number {
     }
     return `${ast.name}=${ast.value}`;
   }
-  return `${ast.name}(${ast.args.map(astToString).join(',')})`;
+  if (optimizableFnsMap[ast.name]) {
+    // make sure to preserve the right grouping here adding explicit brackets
+    return `(${ast.args.map(astToString).join(` ${optimizableFnsMap[ast.name]} `)})`;
+  }
+  return `${getUnprefixedName(ast.name)}(${ast.args.map(astToString).join(',')})`;
+}
+
+// Some function names have ES overlaps, hence a prefix has been added
+// for the tinymath version. This list of prefixes will be used to cleanup
+// the function name before passing it over to the tinymath expression
+const renamePrefixToRemove = ['pick_'];
+
+function getUnprefixedName(name: string) {
+  return renamePrefixToRemove.reduce(
+    (newName, wrapperPrefix) => newName.replace(wrapperPrefix, ''),
+    name
+  );
 }

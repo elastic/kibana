@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';

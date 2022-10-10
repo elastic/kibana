@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { HttpStart } from '@kbn/core/public';
-import { ConditionEntry } from '../../../../../common/endpoint/types';
+import type { HttpStart } from '@kbn/core/public';
+import type { ConditionEntry } from '../../../../../common/endpoint/types';
 import {
   conditionEntriesToEntries,
   entriesToConditionEntries,

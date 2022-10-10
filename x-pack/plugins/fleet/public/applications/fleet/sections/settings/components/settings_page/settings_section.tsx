@@ -6,20 +6,27 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiBasicTable, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiLink,
+  EuiText,
+  EuiSpacer,
+  EuiBasicTable,
+  EuiButtonEmpty,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { Settings } from '../../../../types';
 import { useLink, useStartServices } from '../../../../hooks';
 
 export interface SettingsSectionProps {
-  fleetServerHosts: string[];
+  settings: Settings;
 }
 
-export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
-  fleetServerHosts,
-}) => {
+export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({ settings }) => {
   const { docLinks } = useStartServices();
   const { getHref } = useLink();
 
@@ -34,10 +41,30 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
     ];
   }, []);
 
+  const isEditDisabled = settings.preconfigured_fields?.includes('fleet_server_hosts') ?? false;
+  const BtnWrapper = useMemo((): React.FunctionComponent => {
+    if (!isEditDisabled) {
+      return ({ children }) => <>{children}</>;
+    }
+
+    return ({ children }) => (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerHostsPreconfiguredTooltipContent"
+            defaultMessage="Fleet Server hosts are configured outside of Fleet. Refer to your kibana config for more details."
+          />
+        }
+      >
+        <>{children}</>
+      </EuiToolTip>
+    );
+  }, [isEditDisabled]);
+
   return (
     <>
       <EuiTitle size="s">
-        <h4>
+        <h4 data-test-subj="fleetServerHostHeader">
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostSectionTitle"
             defaultMessage="Fleet server hosts"
@@ -54,7 +81,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
               <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetUserGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),
@@ -62,18 +89,21 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiBasicTable columns={columns} items={fleetServerHosts} />
+      <EuiBasicTable columns={columns} items={settings.fleet_server_hosts} />
       <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        iconType="pencil"
-        href={getHref('settings_edit_fleet_server_hosts')}
-        data-test-subj="editHostsBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.settings.fleetServerHostEditButtonLabel"
-          defaultMessage="Edit hosts"
-        />
-      </EuiButtonEmpty>
+      <BtnWrapper>
+        <EuiButtonEmpty
+          iconType="pencil"
+          href={getHref('settings_edit_fleet_server_hosts')}
+          data-test-subj="editHostsBtn"
+          disabled={isEditDisabled}
+        >
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerHostEditButtonLabel"
+            defaultMessage="Edit hosts"
+          />
+        </EuiButtonEmpty>
+      </BtnWrapper>
       <EuiSpacer size="m" />
     </>
   );

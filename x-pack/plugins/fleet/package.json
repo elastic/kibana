@@ -5,9 +5,12 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
-    "cypress:open": "../../../node_modules/.bin/cypress open --config-file ./cypress/cypress.json",
+    "cypress": "../../../node_modules/.bin/cypress",
+    "cypress:open": "yarn cypress open --config-file ./cypress.config.ts",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/fleet_cypress/visual_config.ts",
-    "cypress:run": "../../../node_modules/.bin/cypress run --config-file ./cypress/cypress.json",
-    "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/fleet_cypress/cli_config.ts"
+    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/fleet_cypress/cli_config.ts",
+    "cypress:run:reporter": "yarn cypress run --config-file ./cypress.config.ts --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
+    "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-fleet/cypress/results/mochawesome*.json > ../../../target/kibana-fleet/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-fleet/cypress/results/output.json --reportDir ../../../target/kibana-fleet/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-fleet/cypress/results/*.xml ../../../target/junit/"
   }
 }

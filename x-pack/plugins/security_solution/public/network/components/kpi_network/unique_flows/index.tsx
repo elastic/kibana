@@ -7,11 +7,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueFlowIdsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_flow_ids';
 import { useNetworkKpiUniqueFlows, ID } from '../../../containers/kpi_network/unique_flows';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
-import { NetworkKpiProps } from '../types';
+import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
@@ -34,7 +34,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
@@ -60,7 +60,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
+      updateDateRange={updateDateRange}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}

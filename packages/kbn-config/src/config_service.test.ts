@@ -9,16 +9,21 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test.mocks';
-import { rawConfigServiceMock } from './raw/raw_config_service.mock';
+import {
+  mockApplyDeprecations,
+  mockedChangedPaths,
+  docLinksMock,
+  getDocLinksMock,
+} from './config_service.test.mocks';
+import { createRawConfigServiceMock } from './internal_mocks';
 
 import { schema } from '@kbn/config-schema';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
-import { ConfigService, Env, RawPackageInfo } from '.';
+import { ConfigService, Env, RawPackageInfo } from '..';
 
-import { getEnvOptions } from './__mocks__/env';
+import { getEnvOptions } from './internal_mocks';
 
 const packageInfos: RawPackageInfo = {
   branch: 'master',
@@ -34,11 +39,12 @@ const defaultEnv = new Env('/kibana', packageInfos, emptyArgv);
 let logger: MockedLogger;
 
 const getRawConfigProvider = (rawConfig: Record<string, any>) =>
-  rawConfigServiceMock.create({ rawConfig });
+  createRawConfigServiceMock({ rawConfig });
 
 beforeEach(() => {
   logger = loggerMock.create();
   mockApplyDeprecations.mockClear();
+  getDocLinksMock.mockClear();
 });
 
 test('returns config at path as observable', async () => {
@@ -82,7 +88,7 @@ test('throws if config at path does not match schema', async () => {
 
 test('re-validate config when updated', async () => {
   const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
 
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
   configService.setSchema('key', schema.string());
@@ -109,7 +115,7 @@ test('re-validate config when updated', async () => {
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
   const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
 
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
   await configService.setSchema('key', schema.string());
@@ -126,7 +132,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
 
 test('pushes new config when reloading and config at path has changed', async () => {
   const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
 
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
   await configService.setSchema('key', schema.string());
@@ -142,7 +148,7 @@ test('pushes new config when reloading and config at path has changed', async ()
 });
 
 test("throws error if 'schema' is not defined for a key", async () => {
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: { key: 'value' } });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: { key: 'value' } });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   const configs = configService.atPath('key');
@@ -153,7 +159,7 @@ test("throws error if 'schema' is not defined for a key", async () => {
 });
 
 test("throws error if 'setSchema' called several times for the same key", async () => {
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: { key: 'value' } });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: { key: 'value' } });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
   const addSchema = async () => await configService.setSchema('key', schema.string());
   await addSchema();
@@ -163,7 +169,7 @@ test("throws error if 'setSchema' called several times for the same key", async 
 });
 
 test('flags schema paths as handled when registering a schema', async () => {
-  const rawConfigProvider = rawConfigServiceMock.create({
+  const rawConfigProvider = createRawConfigServiceMock({
     rawConfig: {
       service: {
         string: 'str',
@@ -203,7 +209,7 @@ test('tracks unhandled paths', async () => {
     },
   };
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
   await configService.setSchema(
     'service',
@@ -236,7 +242,7 @@ test('correctly passes context', async () => {
   };
 
   const env = new Env('/kibana', mockPackage, getEnvOptions());
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: { foo: {} } });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: { foo: {} } });
 
   const schemaDefinition = schema.object({
     branchRef: schema.string({
@@ -269,7 +275,7 @@ test('handles disabled path and marks config as used', async () => {
     },
   };
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   configService.setSchema(
@@ -294,7 +300,7 @@ test('does not throw if schema does not define "enabled" schema', async () => {
     },
   };
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
   expect(
     configService.setSchema(
@@ -313,7 +319,7 @@ test('does not throw if schema does not define "enabled" schema', async () => {
 test('treats config as enabled if config path is not present in schema', async () => {
   const initialConfig = {};
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   const isEnabled = await configService.isEnabledAtPath('pid');
@@ -330,7 +336,7 @@ test('throws if reading "enabled" when it is not present in the schema', async (
     },
   };
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   configService.setSchema(
@@ -354,7 +360,7 @@ test('throws if reading "enabled" when no schema exists', async () => {
     },
   };
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   await expect(
@@ -369,7 +375,7 @@ test('throws if reading any config value when no schema exists', async () => {
     },
   };
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   await expect(
@@ -380,7 +386,7 @@ test('throws if reading any config value when no schema exists', async () => {
 test('allows plugins to specify "enabled" flag via validation schema', async () => {
   const initialConfig = {};
 
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
   await configService.setSchema(
@@ -469,6 +475,7 @@ test('calls `applyDeprecations` with the correct parameters', async () => {
   const context: ConfigDeprecationContext = {
     branch: defaultEnv.packageInfo.branch,
     version: defaultEnv.packageInfo.version,
+    docLinks: docLinksMock,
   };
 
   const deprecationA = jest.fn();
@@ -478,6 +485,8 @@ test('calls `applyDeprecations` with the correct parameters', async () => {
   configService.addDeprecationProvider('bar', () => [deprecationB]);
 
   await configService.validate();
+
+  expect(getDocLinksMock).toHaveBeenCalledTimes(1);
 
   expect(mockApplyDeprecations).toHaveBeenCalledTimes(1);
   expect(mockApplyDeprecations).toHaveBeenCalledWith(
@@ -582,7 +591,7 @@ describe('atPathSync', () => {
 
   test('returns the last config value', async () => {
     const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
-    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
 
     const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
     await configService.setSchema('key', schema.string());
@@ -648,7 +657,7 @@ describe('getHandledDeprecatedConfigs', () => {
 describe('getDeprecatedConfigPath$', () => {
   it('returns all config paths changes during deprecation', async () => {
     const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
-    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
 
     const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
     await configService.setSchema('key', schema.string());

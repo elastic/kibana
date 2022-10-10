@@ -16,37 +16,39 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { Dispatch } from 'redux';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { CellValueElementProps } from '../cell_rendering';
-import { TimelineItem } from '../../../../../common/search_strategy';
+import type { CellValueElementProps } from '../cell_rendering';
+import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import {
+import type {
   ControlColumnProps,
   RowRenderer,
-  TimelineId,
-  TimelineTabs,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import type { inputsModel, State } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
@@ -54,8 +56,9 @@ import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
 import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
-import { Sort } from '../body/sort';
+import type { Sort } from '../body/sort';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -130,7 +133,7 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
@@ -176,12 +179,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     loading: loadingSourcerer,
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const ACTION_BUTTON_COUNT = 6;
+
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -210,7 +214,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       dataViewId,
-      docValueFields,
       endDate: end,
       eqlOptions: restEqlOption,
       fields: getTimelineQueryFields(),
@@ -252,7 +255,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (
@@ -262,7 +265,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.eql}`}
-        inputId="timeline"
+        inputId={InputsModelId.timeline}
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -285,7 +288,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 />
               )}
               <DatePicker grow={10}>
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
+                <SuperDatePicker id={InputsModelId.timeline} timelineId={timelineId} />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
@@ -354,7 +357,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
                 browserFields={browserFields}
-                docValueFields={docValueFields}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
                 timelineId={timelineId}

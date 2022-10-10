@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { ManifestSchema } from '../schema/manifest';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
 export * from './os';
@@ -492,9 +492,11 @@ export type HostInfo = Immutable<{
   };
 }>;
 
-// HostMetadataDetails is now just HostMetadata
-// HostDetails is also just HostMetadata
-export type HostMetadata = Immutable<{
+// Host metadata document streamed up to ES by the Endpoint running on host machines.
+// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+//        work with metadata that is not mutable, use `HostMetadataInterface`
+export type HostMetadata = Immutable<HostMetadataInterface>;
+export interface HostMetadataInterface {
   '@timestamp': number;
   event: {
     created: number;
@@ -542,10 +544,11 @@ export type HostMetadata = Immutable<{
   agent: {
     id: string;
     version: string;
+    type: string;
   };
   host: Host;
   data_stream: DataStream;
-}>;
+}
 
 export type UnitedAgentMetadata = Immutable<{
   agent: {
@@ -698,6 +701,13 @@ export type SafeEndpointEvent = Partial<{
     id: ECSField<string>;
     kind: ECSField<string>;
     sequence: ECSField<number>;
+  }>;
+  kibana: Partial<{
+    alert: Partial<{
+      rule: Partial<{
+        name: ECSField<string>;
+      }>;
+    }>;
   }>;
   host: Partial<{
     id: ECSField<string>;
@@ -911,7 +921,17 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
-    advanced?: {};
+    advanced?: {
+      [key: string]: unknown;
+      alerts?: {
+        [key: string]: unknown;
+        rollback: {
+          self_healing: {
+            enabled: boolean;
+          };
+        };
+      };
+    };
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -949,6 +969,11 @@ export interface PolicyConfig {
     antivirus_registration: {
       enabled: boolean;
     };
+    attack_surface_reduction: {
+      credential_hardening: {
+        enabled: boolean;
+      };
+    };
   };
   mac: {
     advanced?: {};
@@ -985,6 +1010,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
       session_data: boolean;
+      tty_io: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
@@ -1026,6 +1052,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'memory_protection'
     | 'behavior_protection'
+    | 'attack_surface_reduction'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI

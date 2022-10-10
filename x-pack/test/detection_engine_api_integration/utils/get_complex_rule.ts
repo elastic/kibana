@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
+import type { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 /**
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
+export const getComplexRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
   actions: [],
   author: [],
   name: 'Complex Rule Query',
@@ -35,7 +35,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   enabled: false,
   index: ['auditbeat-*', 'filebeat-*'],
   interval: '5m',
-  output_index: '.siem-signals-default',
+  output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {
@@ -92,4 +92,6 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
+  throttle: 'no_actions',
+  exceptions_list: [],
 });

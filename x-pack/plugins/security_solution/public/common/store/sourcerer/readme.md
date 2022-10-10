@@ -69,7 +69,6 @@ interface SourcererDataView extends KibanaDataView {
    * indices the field is included in etc*/
   browserFields: BrowserFields;
   /** query DSL field and format */
-  docValueFields: DocValueFields[];
   /** comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
   /** set when data view fields are fetched */

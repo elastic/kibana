@@ -6,7 +6,6 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,
@@ -15,21 +14,13 @@ import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 export const getUpdateRulesOptionsMock = () => ({
-  spaceId: 'default',
   rulesClient: rulesClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  defaultOutputIndex: '.siem-signals-default',
   existingRule: getRuleMock(getQueryRuleParams()),
-  migratedRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateRulesSchemaMock(),
 });
 
 export const getUpdateMlRulesOptionsMock = () => ({
-  spaceId: 'default',
   rulesClient: rulesClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  defaultOutputIndex: '.siem-signals-default',
   existingRule: getRuleMock(getQueryRuleParams()),
-  migratedRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
 });

@@ -23,10 +23,8 @@ import {
 } from '../../saved_objects';
 import moment from 'moment';
 
-const { startES } = createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-});
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
+
 function createRawObject(date: moment.MomentInput) {
   const pid = Math.round(Math.random() * 10000);
   const instanceUuid = 'mock_instance';
@@ -56,21 +54,24 @@ const outdatedRawEventLoopDelaysDaily = [
   createRawObject(moment().subtract(7, 'days')),
 ];
 
-// FLAKY https://github.com/elastic/kibana/issues/111821
-describe.skip('daily rollups integration test', () => {
+describe(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
   let logger: Logger;
 
   beforeAll(async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+    });
+
     esServer = await startES();
     root = createRootWithCorePlugins();
 
     await root.preboot();
     await root.setup();
     const start = await root.start();
-    logger = root.logger.get('test dailt rollups');
+    logger = root.logger.get('test daily rollups');
     internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
 
     await internalRepository.bulkCreate<EventLoopDelaysDaily>(

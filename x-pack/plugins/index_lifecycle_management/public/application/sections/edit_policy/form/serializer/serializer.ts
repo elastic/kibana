@@ -76,6 +76,13 @@ export const createSerializer =
                 delete hotPhaseActions.rollover.max_primary_shard_size;
               }
 
+              if (
+                typeof updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_docs !==
+                'number'
+              ) {
+                delete hotPhaseActions.rollover.max_primary_shard_docs;
+              }
+
               if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
                 hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
               } else {
@@ -116,6 +123,19 @@ export const createSerializer =
               hotPhaseActions.shrink!.max_primary_shard_size = `${hotPhaseActions.shrink?.max_primary_shard_size}${_meta.hot?.shrink.maxPrimaryShardSizeUnits}`;
             } else {
               delete hotPhaseActions.shrink!.max_primary_shard_size;
+            }
+
+            /**
+             * HOT PHASE DOWNSAMPLE
+             */
+            if (_meta.hot?.downsample?.enabled) {
+              hotPhaseActions.downsample = {
+                ...hotPhaseActions.downsample,
+                fixed_interval: `${_meta.hot.downsample.fixedIntervalSize!}${_meta.hot.downsample
+                  .fixedIntervalUnits!}`,
+              };
+            } else {
+              delete hotPhaseActions.downsample;
             }
           } else {
             delete hotPhaseActions.rollover;
@@ -207,6 +227,19 @@ export const createSerializer =
         } else {
           delete warmPhase.actions.shrink!.max_primary_shard_size;
         }
+
+        /**
+         * WARM PHASE DOWNSAMPLE
+         */
+        if (_meta.warm?.downsample?.enabled) {
+          warmPhase.actions.downsample = {
+            ...warmPhase.actions.downsample,
+            fixed_interval: `${_meta.warm.downsample.fixedIntervalSize!}${_meta.warm.downsample
+              .fixedIntervalUnits!}`,
+          };
+        } else {
+          delete warmPhase.actions.downsample;
+        }
       } else {
         delete draft.phases.warm;
       }
@@ -270,6 +303,19 @@ export const createSerializer =
           };
         } else {
           delete coldPhase.actions.searchable_snapshot;
+        }
+
+        /**
+         * COLD PHASE DOWNSAMPLE
+         */
+        if (_meta.cold?.downsample?.enabled) {
+          coldPhase.actions.downsample = {
+            ...coldPhase.actions.downsample,
+            fixed_interval: `${_meta.cold.downsample.fixedIntervalSize!}${_meta.cold.downsample
+              .fixedIntervalUnits!}`,
+          };
+        } else {
+          delete coldPhase.actions.downsample;
         }
       } else {
         delete draft.phases.cold;

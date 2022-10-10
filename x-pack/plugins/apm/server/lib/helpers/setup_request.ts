@@ -39,7 +39,7 @@ export async function setupRequest({
   plugins,
   request,
   config,
-}: APMRouteHandlerResources) {
+}: APMRouteHandlerResources): Promise<Setup> {
   return withApmSpan('setup_request', async () => {
     const { query } = params;
     const coreContext = await context.core;
@@ -51,7 +51,9 @@ export async function setupRequest({
         config,
       }),
       withApmSpan('get_ui_settings', () =>
-        coreContext.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+        coreContext.uiSettings.client.get<boolean>(
+          UI_SETTINGS.SEARCH_INCLUDE_FROZEN
+        )
       ),
     ]);
 

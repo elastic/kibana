@@ -97,4 +97,5 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   allowEmbed: boolean;
   allowShortUrl: boolean;
   embedUrlParamExtensions?: UrlParamExtension[];
+  onClose?: () => void;
 }

@@ -7,15 +7,18 @@
 
 import React, { memo, useMemo } from 'react';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
-import { GenericIndexPatternColumn } from '../indexpattern';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
+import type { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
-import { IndexPatternPrivateState } from '../types';
+import type { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import { DateRange, layerTypes } from '../../../common';
+import type { DateRange } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 
@@ -32,7 +35,9 @@ export type IndexPatternDimensionEditorProps =
     layerId: string;
     http: HttpSetup;
     data: DataPublicPluginStart;
+    fieldFormats: FieldFormatsStart;
     unifiedSearch: UnifiedSearchPublicPluginStart;
+    dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;
   };
@@ -49,7 +54,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
 ) {
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
-  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
+  const currentIndexPattern = props.indexPatterns[layer.indexPatternId];
   const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
@@ -79,8 +84,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   props: IndexPatternDimensionEditorProps
 ) {
   const layerId = props.layerId;
-  const currentIndexPattern =
-    props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  const currentIndexPattern = props.indexPatterns[props.state.layers[layerId]?.indexPatternId];
   if (!currentIndexPattern) {
     return null;
   }
@@ -91,7 +95,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   return (
     <DimensionEditor
       {...props}
-      layerType={props.layerType || layerTypes.DATA}
+      layerType={props.layerType || LayerTypes.DATA}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
       operationSupportMatrix={operationSupportMatrix}

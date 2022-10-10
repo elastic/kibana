@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { datafeedConfigSchema } from './datafeeds_schema';
 
 const customRulesSchema = schema.maybe(
   schema.arrayOf(
@@ -121,7 +122,7 @@ export const anomalyDetectionJobSchema = {
   description: schema.maybe(schema.string()),
   established_model_memory: schema.maybe(schema.number()),
   finished_time: schema.maybe(schema.number()),
-  job_id: schema.string(),
+  job_id: schema.maybe(schema.string()),
   job_type: schema.maybe(schema.string()),
   job_version: schema.maybe(schema.string()),
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
@@ -136,6 +137,7 @@ export const anomalyDetectionJobSchema = {
   results_index_name: schema.maybe(schema.string()),
   results_retention_days: schema.maybe(schema.number()),
   state: schema.maybe(schema.string()),
+  datafeed_config: schema.maybe(datafeedConfigSchema),
 };
 
 export const jobIdSchema = schema.object({

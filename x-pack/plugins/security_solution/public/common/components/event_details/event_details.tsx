@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiHorizontalRule,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiSpacer,
   EuiLoadingContent,
   EuiNotificationBadge,
@@ -20,16 +20,19 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { AlertRawEventData } from './osquery_tab';
+import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
 import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
-import { BrowserFields } from '../../containers/source';
+import type { Ecs } from '../../../../common/ecs';
+import type { BrowserFields } from '../../containers/source';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
@@ -37,11 +40,15 @@ import {
   timelineDataToEnrichment,
 } from './cti_details/helpers';
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
-import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
-import { HostRisk } from '../../../risk_score/containers';
-import { RelatedCases } from './related_cases';
+import { Insights } from './insights/insights';
+import { useRiskScoreData } from './use_risk_score_data';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+
+export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -49,17 +56,21 @@ export type EventViewId =
   | EventsViewType.tableView
   | EventsViewType.jsonView
   | EventsViewType.summaryView
-  | EventsViewType.threatIntelView;
+  | EventsViewType.threatIntelView
+  | EventsViewType.osqueryView;
+
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
+  osqueryView = 'osquery-results-view',
 }
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
+  detailsEcsData: Ecs | null;
   id: string;
   indexName: string;
   isAlert: boolean;
@@ -67,15 +78,9 @@ interface Props {
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk: HostRisk | null;
   handleOnEventClosed: () => void;
   isReadOnly?: boolean;
 }
-
-export const Indent = styled.div`
-  padding: 0 8px;
-  word-break: break-word;
-`;
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
@@ -89,10 +94,12 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     flex-direction: column;
     overflow: hidden;
     overflow-y: auto;
+
     ::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 7px;
     }
+
     ::-webkit-scrollbar-thumb {
       border-radius: 4px;
       background-color: rgba(0, 0, 0, 0.5);
@@ -106,9 +113,19 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
+const RendererContainer = styled.div`
+  overflow-x: auto;
+  padding-right: ${(props) => props.theme.eui.euiSizeXS};
+
+  & .${DETAILS_CLASS_NAME} .euiFlexGroup {
+    justify-content: flex-start;
+  }
+`;
+
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
+  detailsEcsData,
   id,
   indexName,
   isAlert,
@@ -116,7 +133,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   rawEventData,
   timelineId,
   timelineTabType,
-  hostRisk,
   handleOnEventClosed,
   isReadOnly,
 }) => {
@@ -153,12 +169,23 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const enrichmentCount = allEnrichments.length;
 
+  const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
+
+  const renderer = useMemo(
+    () =>
+      detailsEcsData != null
+        ? getRowRenderer({ data: detailsEcsData, rowRenderers: defaultRowRenderers })
+        : null,
+    [detailsEcsData]
+  );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
         ? {
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
+            'data-test-subj': 'overviewTab',
             content: (
               <>
                 <EuiSpacer size="m" />
@@ -173,8 +200,20 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-                <Reason eventId={id} data={data} />
-                <RelatedCases eventId={id} />
+
+                {renderer != null && detailsEcsData != null && (
+                  <div>
+                    <RendererContainer data-test-subj="renderer">
+                      {renderer.renderRow({
+                        contextId: EVENT_DETAILS_CONTEXT_ID,
+                        data: detailsEcsData,
+                        isDraggable: isDraggable ?? false,
+                        timelineId,
+                      })}
+                    </RendererContainer>
+                  </div>
+                )}
+
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
@@ -189,17 +228,29 @@ const EventDetailsComponent: React.FC<Props> = ({
                   goToTable={goToTableTab}
                 />
 
-                {(enrichmentCount > 0 || hostRisk) && (
-                  <ThreatSummaryView
-                    isDraggable={isDraggable}
-                    hostRisk={hostRisk}
-                    browserFields={browserFields}
-                    data={data}
-                    eventId={id}
-                    timelineId={timelineId}
-                    enrichments={allEnrichments}
-                  />
-                )}
+                <EuiSpacer size="l" />
+                <Insights
+                  browserFields={browserFields}
+                  eventId={id}
+                  data={data}
+                  timelineId={timelineId}
+                  isReadOnly={isReadOnly}
+                />
+
+                {enrichmentCount > 0 ||
+                  (isLicenseValid && (hostRisk || userRisk) && (
+                    <ThreatSummaryView
+                      isDraggable={isDraggable}
+                      hostRisk={hostRisk}
+                      userRisk={userRisk}
+                      browserFields={browserFields}
+                      data={data}
+                      eventId={id}
+                      timelineId={timelineId}
+                      enrichments={allEnrichments}
+                      isReadOnly={isReadOnly}
+                    />
+                  ))}
 
                 {isEnrichmentsLoading && (
                   <>
@@ -213,20 +264,24 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
+      allEnrichments,
+      browserFields,
+      data,
+      detailsEcsData,
+      enrichmentCount,
+      goToTableTab,
+      handleOnEventClosed,
+      hostRisk,
       id,
       indexName,
       isAlert,
-      data,
-      browserFields,
       isDraggable,
-      timelineId,
-      enrichmentCount,
-      allEnrichments,
       isEnrichmentsLoading,
-      hostRisk,
-      goToTableTab,
-      handleOnEventClosed,
+      isLicenseValid,
       isReadOnly,
+      renderer,
+      timelineId,
+      userRisk,
     ]
   );
 
@@ -327,11 +382,15 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
+  const osqueryTab = useOsqueryTab({
+    rawEventData: rawEventData as AlertRawEventData,
+  });
+
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab].filter(
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
     );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
@@ -348,7 +407,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     />
   );
 };
-
 EventDetailsComponent.displayName = 'EventDetailsComponent';
 
 export const EventDetails = React.memo(EventDetailsComponent);

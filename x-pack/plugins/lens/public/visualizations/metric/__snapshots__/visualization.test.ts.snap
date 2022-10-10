@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric visualization dimension groups configuration generates configuration 1`] = `
+Object {
+  "groups": Array [
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "metric-col-id",
+          "palette": Array [],
+          "triggerIcon": "colorBy",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_primaryMetricDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": true,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "metric",
+      "groupLabel": "Primary metric",
+      "layerId": "first",
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "requiredMinDimensionCount": 1,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "secondary-metric-col-id",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_secondaryMetricDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": true,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "secondaryMetric",
+      "groupLabel": "Secondary metric",
+      "layerId": "first",
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "requiredMinDimensionCount": 0,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "max-metric-col-id",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_maxDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": false,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "max",
+      "groupLabel": "Maximum value",
+      "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
+      "layerId": "first",
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "prioritizedOperation": "max",
+      "requiredMinDimensionCount": 0,
+      "supportStaticValue": true,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "breakdown-col-id",
+          "triggerIcon": "aggregate",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_breakdownByDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": true,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "breakdownBy",
+      "groupLabel": "Break down by",
+      "layerId": "first",
+      "requiredMinDimensionCount": 0,
+      "supportsMoreColumns": false,
+    },
+  ],
+}
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering breakdownBy supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": true,
+  },
+  Object {
+    "dataType": "string",
+    "isBucketed": true,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering max supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering metric supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering secondaryMetric supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;

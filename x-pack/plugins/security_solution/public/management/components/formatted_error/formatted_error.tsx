@@ -7,11 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
-import type { HttpFetchError } from '@kbn/core/public';
-
-const isHttpFetchError = (error: Error | HttpFetchError): error is HttpFetchError => {
-  return 'body' in error && 'req' in error && 'res' in error && 'response' in error;
-};
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 
 export interface ObjectContentProps {
   data: object;
@@ -35,7 +31,7 @@ export const ObjectContent = memo<ObjectContentProps>(({ data }) => {
 ObjectContent.displayName = 'ObjectContent';
 
 export interface FormattedErrorProps {
-  error: Error;
+  error: Error | IHttpFetchError<Record<string, unknown>>;
   'data-test-subj'?: string;
 }
 

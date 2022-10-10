@@ -9,30 +9,27 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { ElasticSearchHit } from '../../../../../types';
+import { DataTableRecord } from '../../../../../types';
 
 export function getDetails(
   field: DataViewField,
-  hits: ElasticSearchHit[] | undefined,
-  columns: string[],
-  indexPattern?: DataView
+  hits: DataTableRecord[] | undefined,
+  dataView?: DataView
 ) {
-  if (!indexPattern || !hits) {
+  if (!dataView || !hits) {
     return {};
   }
   const details = {
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,
-      indexPattern,
       count: 5,
       grouped: false,
     }),
-    columns,
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {
-      bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
+      bucket.display = dataView.getFormatterForField(field).convert(bucket.value);
     }
   }
   return details;

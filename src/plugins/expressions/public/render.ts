@@ -11,6 +11,8 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+
 import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
@@ -28,8 +30,10 @@ export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+  executionContext?: KibanaExecutionContext;
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
@@ -54,8 +58,10 @@ export class ExpressionRenderHandler {
       onRenderError,
       renderMode,
       syncColors,
+      syncTooltips,
       interactive,
       hasCompatibleActions = async () => false,
+      executionContext,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -82,6 +88,9 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
+      getExecutionContext() {
+        return executionContext;
+      },
       update: (params: UpdateValue) => {
         this.updateSubject.next(params);
       },
@@ -93,6 +102,9 @@ export class ExpressionRenderHandler {
       },
       isSyncColorsEnabled: () => {
         return syncColors || false;
+      },
+      isSyncTooltipsEnabled: () => {
+        return syncTooltips || false;
       },
       isInteractive: () => {
         return interactive ?? true;

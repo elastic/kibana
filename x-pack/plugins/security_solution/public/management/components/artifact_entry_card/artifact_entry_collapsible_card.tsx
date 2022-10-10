@@ -7,12 +7,13 @@
 
 import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { CommonArtifactEntryCardProps } from './artifact_entry_card';
+import type { CommonArtifactEntryCardProps } from './artifact_entry_card';
 import { CardContainerPanel } from './components/card_container_panel';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { CardSectionPanel } from './components/card_section_panel';
-import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
+import { CriteriaConditions } from './components/criteria_conditions';
 import { CardCompressedHeader } from './components/card_compressed_header';
 
 export interface ArtifactEntryCollapsibleCardProps extends CommonArtifactEntryCardProps {

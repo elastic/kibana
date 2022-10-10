@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
@@ -33,11 +33,14 @@ interface TestConfig {
   calculateDisplayedPrivileges: boolean;
   canCustomizeSubFeaturePrivileges: boolean;
 }
+
 const setup = (config: TestConfig) => {
   const kibanaPrivileges = createKibanaPrivileges(config.features, {
     allowSubFeaturePrivileges: config.canCustomizeSubFeaturePrivileges,
   });
+
   const calculator = new PrivilegeFormCalculator(kibanaPrivileges, config.role);
+
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
   const wrapper = mountWithIntl(
@@ -120,6 +123,7 @@ describe('FeatureTable', () => {
             feature: {},
           },
         ]);
+
         const { displayedPrivileges } = setup({
           role,
           features: kibanaFeatures,
@@ -127,6 +131,7 @@ describe('FeatureTable', () => {
           calculateDisplayedPrivileges: true,
           canCustomizeSubFeaturePrivileges,
         });
+
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
             primaryFeaturePrivilege: 'none',
@@ -271,6 +276,7 @@ describe('FeatureTable', () => {
         },
       },
     ]);
+
     const { displayedPrivileges } = setup({
       role,
       features: kibanaFeatures,
@@ -312,6 +318,7 @@ describe('FeatureTable', () => {
         feature: {},
       },
     ]);
+
     const { wrapper } = setup({
       role,
       features: kibanaFeatures,
@@ -325,6 +332,7 @@ describe('FeatureTable', () => {
         .find(EuiAccordion)
         .filter(`#featurePrivilegeControls_${feature.id}`)
         .props();
+
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
         expect(arrowDisplay).toEqual('none');
       } else {
@@ -940,5 +948,335 @@ describe('FeatureTable', () => {
     expect(findTestSubject(barCategory, 'categoryLabel').text()).toMatchInlineSnapshot(
       `"2 / 2 features granted"`
     );
+  });
+
+  describe('Info Icon Tooltip for Customized Subfeature privileges', () => {
+    it('should render if there are custom privileges and the accordion is toggled open then toggled closed', () => {
+      const role = createRole([
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            unit_test: ['minimal_read', 'sub-toggle-1', 'sub-toggle-2'],
+          },
+        },
+      ]);
+
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                  {
+                    id: 'sub-toggle-2',
+                    name: 'Sub Toggle 2',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-2'],
+                  },
+                  {
+                    id: 'sub-toggle-3',
+                    name: 'Sub Toggle 3',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-3'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
+      categoryExpander.simulate('click');
+
+      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
+      featureExpander.simulate('click').simulate('click');
+
+      const { type } = wrapper.find(EuiIconTip).props();
+
+      expect(type).toBe('iInCircle');
+    });
+
+    it('should render if there are custom privileges and the accordion has not been toggled (i.e. on load)', () => {
+      const role = createRole([
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            unit_test: ['minimal_read', 'sub-toggle-1', 'sub-toggle-2'],
+          },
+        },
+      ]);
+
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                  {
+                    id: 'sub-toggle-2',
+                    name: 'Sub Toggle 2',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-2'],
+                  },
+                  {
+                    id: 'sub-toggle-3',
+                    name: 'Sub Toggle 3',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-3'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const { type } = wrapper.find(EuiIconTip).props();
+
+      expect(type).toBe('iInCircle');
+    });
+
+    it('should not render if there are custom privileges and the accordion is open', () => {
+      const role = createRole([
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            unit_test: ['minimal_read', 'sub-toggle-1', 'sub-toggle-2'],
+          },
+        },
+      ]);
+
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                  {
+                    id: 'sub-toggle-2',
+                    name: 'Sub Toggle 2',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-2'],
+                  },
+                  {
+                    id: 'sub-toggle-3',
+                    name: 'Sub Toggle 3',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-3'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
+      categoryExpander.simulate('click');
+
+      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
+      featureExpander.simulate('click');
+
+      const { type } = wrapper.find(EuiIconTip).props();
+
+      expect(type).toBe('empty');
+    });
+
+    it('should not render if there are NOT custom privileges and the accordion has not been toggled (i.e on load)', () => {
+      const role = createRole([
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            unit_test: ['all', 'sub-toggle-1', 'sub-toggle-2', 'sub-toggle-3'],
+          },
+        },
+      ]);
+
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                  {
+                    id: 'sub-toggle-2',
+                    name: 'Sub Toggle 2',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-2'],
+                  },
+                  {
+                    id: 'sub-toggle-3',
+                    name: 'Sub Toggle 3',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-3'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const { type } = wrapper.find(EuiIconTip).props();
+
+      expect(type).toBe('empty');
+    });
+
+    it('should not render if there are NOT custom privileges and the accordion has been toggled open then toggled closed', () => {
+      const role = createRole([
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            unit_test: ['all', 'sub-toggle-1', 'sub-toggle-2', 'sub-toggle-3'],
+          },
+        },
+      ]);
+
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                  {
+                    id: 'sub-toggle-2',
+                    name: 'Sub Toggle 2',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-2'],
+                  },
+                  {
+                    id: 'sub-toggle-3',
+                    name: 'Sub Toggle 3',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-3'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
+      categoryExpander.simulate('click');
+
+      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
+      featureExpander.simulate('click').simulate('click');
+
+      const { type } = wrapper.find(EuiIconTip).props();
+
+      expect(type).toBe('empty');
+    });
   });
 });

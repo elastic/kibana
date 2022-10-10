@@ -8,14 +8,16 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
 
 import { useHttp } from '../../../../common/lib/kibana';
-import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TrustedAppsApiClient } from '../service';
 import { TrustedAppsForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
@@ -23,7 +25,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.trustedApps.pageAboutInfo', {
     defaultMessage:
-      'Trusted applications improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.trustedApps.pageAddButtonTitle', {
     defaultMessage: 'Add trusted application',
@@ -91,7 +93,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.trustedApps.emptyStateInfo', {
     defaultMessage:
-      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.trustedApps.emptyStatePrimaryButtonLabel',
@@ -116,6 +118,7 @@ export const TrustedAppsList = memo(() => {
       labels={TRUSTED_APPS_PAGE_LABELS}
       data-test-subj="trustedAppsListPage"
       searchableFields={SEARCHABLE_FIELDS}
+      secondaryPageInfo={<TrustedAppsArtifactsDocsLink />}
     />
   );
 });

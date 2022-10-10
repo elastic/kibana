@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import styled from 'styled-components';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -13,16 +14,11 @@ import {
   EuiLink,
   EuiSpacer,
   EuiToolTip,
-  EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import {
-  getEnrichmentIdentifiers,
-  isInvestigationTimeEnrichment,
-  getFirstSeen,
-  ThreatDetailsRow,
-} from './helpers';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import type { ThreatDetailsRow } from './helpers';
+import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment, getFirstSeen } from './helpers';
 import { EnrichmentButtonContent } from './enrichment_button_content';
 import { ThreatSummaryTitle } from './threat_summary_title';
 import { InspectButton } from '../../inspect';
@@ -36,10 +32,10 @@ import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
     background: ${({ theme }) => theme.eui.euiColorLightestShade};
-    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
-    height: ${({ theme }) => theme.eui.paddingSizes.xl};
-    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
-    padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    border-radius: ${({ theme }) => theme.eui.euiSizeXS};
+    height: ${({ theme }) => theme.eui.euiSizeXL};
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+    padding-left: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 

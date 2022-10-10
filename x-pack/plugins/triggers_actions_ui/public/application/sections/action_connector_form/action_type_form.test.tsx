@@ -8,16 +8,9 @@ import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import {
-  ActionConnector,
-  ActionType,
-  RuleAction,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../types';
+import { ActionConnector, ActionType, RuleAction, GenericValidationResult } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
-import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -43,15 +36,16 @@ describe('action_type_form', () => {
       id: '.pagerduty',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
@@ -92,15 +86,16 @@ describe('action_type_form', () => {
       id: '.pagerduty',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
@@ -133,6 +128,68 @@ describe('action_type_form', () => {
       0
     );
   });
+
+  it('shows an error icon when there is a form error and the action accordion is closed ', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        // Add errors to the form
+        const validationResult = { errors: { message: ['test error'] } };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    const wrapper = mountWithIntl(
+      getActionTypeForm(1, undefined, {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        params: {
+          eventAction: 'recovered',
+          dedupKey: '232323',
+          summary: '2323',
+          source: 'source',
+          severity: '1',
+          timestamp: new Date().toISOString(),
+          component: 'test',
+          group: 'group',
+          class: 'test class',
+        },
+      })
+    );
+
+    // Wait for active space to resolve before requesting the component to update
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeFalsy();
+    wrapper.find('.euiAccordion__button').last().simulate('click');
+    // Make sure that the accordion is collapsed
+    expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
+    expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeTruthy();
+
+    // Verify that the tooltip renders
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
+    wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Action contains errors.');
+    // Clearing all mocks will also reset fake timers.
+    jest.clearAllMocks();
+  });
 });
 
 function getActionTypeForm(
@@ -142,7 +199,6 @@ function getActionTypeForm(
   defaultActionGroupId?: string,
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
   actionTypeIndex?: Record<string, ActionType>,
-  defaultParams?: DefaultActionParams,
   onAddConnector?: () => void,
   onDeleteAction?: () => void,
   onConnectorSelected?: (id: string) => void
@@ -200,6 +256,7 @@ function getActionTypeForm(
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
     },
     '.server-log': {
       id: '.server-log',
@@ -208,13 +265,10 @@ function getActionTypeForm(
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
     },
   };
 
-  const defaultParamsDefault = {
-    dedupKey: `test`,
-    eventAction: 'resolve',
-  };
   return (
     <ActionTypeForm
       actionConnector={actionConnector ?? actionConnectorDefault}
@@ -227,7 +281,6 @@ function getActionTypeForm(
       setActionParamsProperty={jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
-      defaultParams={defaultParams ?? defaultParamsDefault}
       actionTypeRegistry={actionTypeRegistry}
     />
   );

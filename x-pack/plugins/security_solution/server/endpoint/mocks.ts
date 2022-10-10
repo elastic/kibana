@@ -6,41 +6,36 @@
  */
 
 import type { AwaitedProperties } from '@kbn/utility-types';
-import {
-  loggingSystemMock,
-  savedObjectsServiceMock,
-  ScopedClusterClientMock,
-} from '@kbn/core/server/mocks';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { FleetStartContract, ExternalCallback } from '@kbn/fleet-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
-  createArtifactsClientMock,
   createMockPackageService,
 } from '@kbn/fleet-plugin/server/mocks';
 // A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
 // plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
 // file and not bundled with the application, adding a eslint disable below and using import from
 // a restricted path.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
-import {
+import type {
   EndpointAppContextService,
   EndpointAppContextServiceSetupContract,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
-import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
+import type { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
-import { EndpointAppContext } from './types';
-import { SecuritySolutionRequestHandlerContext } from '../types';
+import type { EndpointAppContext } from './types';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
@@ -50,7 +45,7 @@ import { createEndpointMetadataServiceTestContextMock } from './services/metadat
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
-import { createFeatureUsageServiceMock } from './services/feature_usage';
+import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -163,34 +158,13 @@ export const createMockEndpointAppContextServiceStartContract =
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
       featureUsageService: createFeatureUsageServiceMock(),
+      experimentalFeatures: createMockConfig().experimentalFeatures,
     };
   };
 
 export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['authz']> => {
   return {
     fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
-  };
-};
-
-/**
- * Creates the Fleet Start contract mock return by the Fleet Plugin
- *
- * @param indexPattern a string index pattern to return when called by a test
- * @returns the same value as `indexPattern` parameter
- */
-export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
-  return {
-    authz: createFleetAuthzServiceMock(),
-    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    esIndexPatternService: {
-      getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
-    },
-    agentService: createMockAgentService(),
-    packageService: createMockPackageService(),
-    agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packagePolicyService: createPackagePolicyServiceMock(),
-    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
 };
 

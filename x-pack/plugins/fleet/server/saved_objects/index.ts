@@ -17,6 +17,8 @@ import {
   ASSETS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -38,6 +40,14 @@ import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
 import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
 import { migratePackagePolicyToV820 } from './migrations/to_v8_2_0';
+import { migrateInstallationToV830, migratePackagePolicyToV830 } from './migrations/to_v8_3_0';
+import {
+  migrateInstallationToV840,
+  migrateAgentPolicyToV840,
+  migratePackagePolicyToV840,
+} from './migrations/to_v8_4_0';
+import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
+import { migrateSettingsToV860 } from './migrations/to_v8_6_0';
 
 /*
  * Saved object types and mappings
@@ -48,6 +58,7 @@ import { migratePackagePolicyToV820 } from './migrations/to_v8_2_0';
 const getSavedObjectTypes = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): { [key: string]: SavedObjectsType } => ({
+  // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -59,12 +70,12 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
-        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
       '7.13.0': migrateSettingsToV7130,
+      '8.6.0': migrateSettingsToV860,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -77,13 +88,13 @@ const getSavedObjectTypes = (
     mappings: {
       properties: {
         name: { type: 'keyword' },
+        schema_version: { type: 'version' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_managed: { type: 'boolean' },
         is_default: { type: 'boolean' },
         is_default_fleet_server: { type: 'boolean' },
         status: { type: 'keyword' },
-        package_policies: { type: 'keyword' },
         unenroll_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
@@ -92,11 +103,14 @@ const getSavedObjectTypes = (
         is_preconfigured: { type: 'keyword' },
         data_output_id: { type: 'keyword' },
         monitoring_output_id: { type: 'keyword' },
+        download_source_id: { type: 'keyword' },
       },
     },
     migrations: {
       '7.10.0': migrateAgentPolicyToV7100,
       '7.12.0': migrateAgentPolicyToV7120,
+      '8.4.0': migrateAgentPolicyToV840,
+      '8.5.0': migrateAgentPolicyToV850,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -140,8 +154,8 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         enabled: { type: 'boolean' },
+        is_managed: { type: 'boolean' },
         policy_id: { type: 'keyword' },
-        output_id: { type: 'keyword' },
         package: {
           properties: {
             name: { type: 'keyword' },
@@ -209,6 +223,9 @@ const getSavedObjectTypes = (
       '7.15.0': migratePackagePolicyToV7150,
       '7.16.0': migratePackagePolicyToV7160,
       '8.2.0': migratePackagePolicyToV820,
+      '8.3.0': migratePackagePolicyToV830,
+      '8.4.0': migratePackagePolicyToV840,
+      '8.5.0': migratePackagePolicyToV850,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -223,12 +240,13 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
-        removable: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
           enabled: false,
           type: 'object',
         },
+        verification_status: { type: 'keyword' },
+        verification_key_id: { type: 'keyword' },
         installed_es: {
           type: 'nested',
           properties: {
@@ -255,6 +273,19 @@ const getSavedObjectTypes = (
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
+        install_format_schema_version: { type: 'version' },
+        experimental_data_stream_features: {
+          type: 'nested',
+          properties: {
+            data_stream: { type: 'keyword' },
+            features: {
+              type: 'nested',
+              properties: {
+                synthetic_source: { type: 'boolean' },
+              },
+            },
+          },
+        },
       },
     },
     migrations: {
@@ -262,6 +293,8 @@ const getSavedObjectTypes = (
       '7.14.1': migrateInstallationToV7140,
       '7.16.0': migrateInstallationToV7160,
       '8.0.0': migrateInstallationToV800,
+      '8.3.0': migrateInstallationToV830,
+      '8.4.0': migrateInstallationToV840,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
@@ -293,6 +326,38 @@ const getSavedObjectTypes = (
     mappings: {
       properties: {
         id: { type: 'keyword' },
+      },
+    },
+  },
+  [DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE]: {
+    name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        source_id: { type: 'keyword', index: false },
+        name: { type: 'keyword' },
+        is_default: { type: 'boolean' },
+        host: { type: 'keyword' },
+      },
+    },
+  },
+  [FLEET_SERVER_HOST_SAVED_OBJECT_TYPE]: {
+    name: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+        is_default: { type: 'boolean' },
+        host_urls: { type: 'keyword', index: false },
+        is_preconfigured: { type: 'boolean' },
       },
     },
   },

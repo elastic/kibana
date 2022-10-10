@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const POLICY_ARTIFACT_DELETE_MODAL_LABELS = Object.freeze({
   deleteModalTitle: i18n.translate(

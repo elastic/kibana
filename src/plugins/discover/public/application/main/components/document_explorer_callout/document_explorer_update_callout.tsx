@@ -6,22 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import './document_explorer_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useDiscoverTourContext } from '../../../../components/discover_tour';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 
@@ -37,16 +36,9 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
  * The callout that's displayed when Document explorer is enabled
  */
 export const DocumentExplorerUpdateCallout = () => {
-  const { euiTheme } = useEuiTheme();
-  const { storage, capabilities, docLinks } = useDiscoverServices();
+  const { storage, capabilities } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
-
-  const semiBoldStyle = useMemo(
-    () => css`
-      font-weight: ${euiTheme.font.weight.semiBold};
-    `,
-    [euiTheme.font.weight.semiBold]
-  );
+  const { onStartTour } = useDiscoverTourContext();
 
   const onCloseCallout = useCallback(() => {
     updateStoredCalloutState(true, storage);
@@ -67,44 +59,37 @@ export const DocumentExplorerUpdateCallout = () => {
     >
       <p>
         <FormattedMessage
-          id="discover.docExplorerUpdateCallout.bodyMessage"
-          defaultMessage="Perform multi-column sorting, resize columns, set row height, and view data in fullscreen with the {documentExplorer}.
-          Learn more about the structure of your data with {fieldStatistics}."
-          values={{
-            fieldStatistics: (
-              <EuiLink href={docLinks.links.discover.fieldStatistics} target="_blank">
-                <span css={semiBoldStyle}>
-                  <FormattedMessage
-                    id="discover.docExplorerUpdateCallout.fieldStatistics"
-                    defaultMessage="field statistics"
-                  />
-                </span>
-              </EuiLink>
-            ),
-            documentExplorer: (
-              <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
-                <span css={semiBoldStyle}>
-                  <FormattedMessage
-                    id="discover.docExplorerUpdateCallout.documentExplorer"
-                    defaultMessage="new document table"
-                  />
-                </span>
-              </EuiLink>
-            ),
-          }}
+          id="discover.docExplorerUpdateCallout.description"
+          defaultMessage="Add relevant fields, reorder and sort columns, resize rows, and more in the document table."
         />
       </p>
-      <EuiButton
-        data-test-subj="document-explorer-update-callout-dismiss-button"
-        iconType="check"
-        size="s"
-        onClick={onCloseCallout}
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        responsive={false}
+        gutterSize="s"
       >
-        <FormattedMessage
-          id="discover.docExplorerUpdateCallout.dismissButtonLabel"
-          defaultMessage="Got it"
-        />
-      </EuiButton>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" onClick={onStartTour} data-test-subj="discoverTakeTourButton">
+            <FormattedMessage
+              id="discover.docExplorerUpdateCallout.takeTourButtonLabel"
+              defaultMessage="Take the tour"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={onCloseCallout}
+            data-test-subj="document-explorer-update-callout-dismiss-button"
+          >
+            <FormattedMessage
+              id="discover.docExplorerUpdateCallout.dismissButtonLabel"
+              defaultMessage="Dismiss"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiCallOut>
   );
 };
@@ -114,8 +99,8 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <FormattedMessage
-          id="discover.docExplorerUpdateCallout.headerMessage"
-          defaultMessage="Exploring your data just got better"
+          id="discover.docExplorerUpdateCallout.title"
+          defaultMessage="Get the best look at your search results"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

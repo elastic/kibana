@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import seedrandom from 'seedrandom';
-import semverLte from 'semver/functions/lte';
+import type seedrandom from 'seedrandom';
 import { assertNever } from '@kbn/std';
-import {
+import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   EsAssetReference,
   KibanaAssetReference,
-  agentPolicyStatuses,
 } from '@kbn/fleet-plugin/common';
-import {
+import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
+import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_generator';
+import type {
   AlertEvent,
   DataStream,
-  EndpointStatus,
-  Host,
   HostMetadata,
+  HostMetadataInterface,
   HostPolicyResponse,
-  HostPolicyResponseActionStatus,
-  OSFields,
   PolicyData,
   SafeEndpointEvent,
 } from './types';
+import { HostPolicyResponseActionStatus } from './types';
 import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
@@ -36,7 +34,7 @@ import {
   timestampSafeVersion,
 } from './models/event';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
-import { EventOptions } from './types/generator';
+import type { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -51,55 +49,6 @@ export type Event = AlertEvent | SafeEndpointEvent;
  */
 export const ANCESTRY_LIMIT: number = 2;
 
-const Windows: OSFields[] = [
-  {
-    name: 'Windows',
-    full: 'Windows 10',
-    version: '10.0',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Pro',
-    },
-  },
-  {
-    name: 'Windows',
-    full: 'Windows Server 2016',
-    version: '10.0',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Server',
-    },
-  },
-  {
-    name: 'Windows',
-    full: 'Windows Server 2012',
-    version: '6.2',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Server',
-    },
-  },
-  {
-    name: 'Windows',
-    full: 'Windows Server 2012R2',
-    version: '6.3',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Server Release 2',
-    },
-  },
-];
-
-const Linux: OSFields[] = [];
-
-const Mac: OSFields[] = [];
-
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
-
 const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.success,
   HostPolicyResponseActionStatus.failure,
@@ -107,13 +56,7 @@ const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.unsupported,
 ];
 
-const APPLIED_POLICIES: Array<{
-  name: string;
-  id: string;
-  status: HostPolicyResponseActionStatus;
-  endpoint_policy_version: number;
-  version: number;
-}> = [
+const APPLIED_POLICIES: Array<HostMetadataInterface['Endpoint']['policy']['applied']> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
@@ -233,38 +176,7 @@ const OTHER_EVENT_CATEGORIES: Record<
   },
 };
 
-interface HostInfo {
-  elastic: {
-    agent: {
-      id: string;
-    };
-  };
-  agent: {
-    version: string;
-    id: string;
-    type: string;
-  };
-  host: Host;
-  Endpoint: {
-    status: EndpointStatus;
-    policy: {
-      applied: {
-        id: string;
-        status: HostPolicyResponseActionStatus;
-        name: string;
-        endpoint_policy_version: number;
-        version: number;
-      };
-    };
-    configuration?: {
-      isolation: boolean;
-    };
-    state?: {
-      isolation: boolean;
-    };
-    capabilities?: string[];
-  };
-}
+type CommonHostInfo = Pick<HostMetadataInterface, 'elastic' | 'agent' | 'host' | 'Endpoint'>;
 
 interface NodeState {
   event: Event;
@@ -405,17 +317,32 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
+/**
+ * Generator to create various ElasticSearch documents that are normally streamed by the Endpoint.
+ *
+ * NOTE:  this generator currently reuses certain data (ex. `this.commonInfo`) across several
+ *        documents, thus use caution if manipulating/mutating value in the generated data
+ *        (ex. in tests). Individual standalone generators exist, whose generated data does not
+ *        contain shared data structures.
+ */
 export class EndpointDocGenerator extends BaseDataGenerator {
-  commonInfo: HostInfo;
+  commonInfo: CommonHostInfo;
   sequence: number = 0;
+
+  private readonly metadataGenerator: EndpointMetadataGenerator;
 
   /**
    * The EndpointDocGenerator parameters
    *
    * @param seed either a string to seed the random number generator or a random number generator function
+   * @param MetadataGenerator
    */
-  constructor(seed: string | seedrandom.prng = Math.random().toString()) {
+  constructor(
+    seed: string | seedrandom.prng = Math.random().toString(),
+    MetadataGenerator: typeof EndpointMetadataGenerator = EndpointMetadataGenerator
+  ) {
     super(seed);
+    this.metadataGenerator = new MetadataGenerator(seed);
     this.commonInfo = this.createHostData();
   }
 
@@ -458,47 +385,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
   }
 
-  private createHostData(): HostInfo {
-    const hostName = this.randomHostname();
-    const isIsolated = this.randomBoolean(0.3);
-    const agentVersion = this.randomVersion();
-    const minCapabilitiesVersion = '7.15.0';
-    const capabilities = ['isolation'];
+  private createHostData(): CommonHostInfo {
+    const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
+      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+    });
 
-    return {
-      agent: {
-        version: agentVersion,
-        id: this.seededUUIDv4(),
-        type: 'endpoint',
-      },
-      elastic: {
-        agent: {
-          id: this.seededUUIDv4(),
-        },
-      },
-      host: {
-        id: this.seededUUIDv4(),
-        hostname: hostName,
-        name: hostName,
-        architecture: this.randomString(10),
-        ip: this.randomArray(3, () => this.randomIP()),
-        mac: this.randomArray(3, () => this.randomMac()),
-        os: this.randomChoice(OS),
-      },
-      Endpoint: {
-        status: EndpointStatus.enrolled,
-        policy: {
-          applied: this.randomChoice(APPLIED_POLICIES),
-        },
-        configuration: {
-          isolation: isIsolated,
-        },
-        state: {
-          isolation: isIsolated,
-        },
-        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
-      },
-    };
+    return { agent, elastic, host, Endpoint };
   }
 
   /**
@@ -510,21 +402,11 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     ts = new Date().getTime(),
     metadataDataStream = metadataDefaultDataStream
   ): HostMetadata {
-    return {
+    return this.metadataGenerator.generate({
       '@timestamp': ts,
-      event: {
-        created: ts,
-        id: this.seededUUIDv4(),
-        kind: 'metric',
-        category: ['host'],
-        type: ['info'],
-        module: 'endpoint',
-        action: 'endpoint_metadata',
-        dataset: 'endpoint.metadata',
-      },
-      ...this.commonInfo,
       data_stream: metadataDataStream,
-    };
+      ...this.commonInfo,
+    });
   }
 
   /**
@@ -1630,7 +1512,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
-   * Generates an Ingest `package policy` that includes the Endpoint Policy data
+   * Generates a Fleet `package policy` that includes the Endpoint Policy data
    */
   public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
@@ -1645,7 +1527,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_by: 'elastic',
       policy_id: this.seededUUIDv4(),
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -1676,7 +1557,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
-   * Generate an Agent Policy (ingest)
+   * Generate an Agent Policy (Fleet)
    */
   public generateAgentPolicy(): GetAgentPoliciesResponseItem {
     // FIXME: remove and use new FleetPackagePolicyGenerator (#2262)
@@ -1691,13 +1572,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
-      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
       agents: 0,
     };
   }
 
   /**
-   * Generate an EPM Package for Endpoint
+   * Generate a Fleet EPM Package for Endpoint
    */
   public generateEpmPackage(): GetPackagesResponse['items'][0] {
     return {
@@ -1763,12 +1643,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           name: 'endpoint',
           version: '0.5.0',
           internal: false,
-          removable: false,
           install_version: '0.5.0',
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',
           install_source: 'registry',
           keep_policies_up_to_date: false,
+          verification_status: 'unknown',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

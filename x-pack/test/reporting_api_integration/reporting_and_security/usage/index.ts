@@ -21,5 +21,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./new_jobs'));
     loadTestFile(require.resolve('./error_codes'));
+    loadTestFile(require.resolve('./api_counters'));
   });
 }

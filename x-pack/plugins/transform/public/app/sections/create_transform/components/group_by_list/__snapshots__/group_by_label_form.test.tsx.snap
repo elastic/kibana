@@ -44,7 +44,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="transformIntervalFormPopover"
       isOpen={false}
@@ -126,7 +126,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="transformIntervalFormPopover"
       isOpen={false}
@@ -196,7 +196,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="transformIntervalFormPopover"
       isOpen={false}

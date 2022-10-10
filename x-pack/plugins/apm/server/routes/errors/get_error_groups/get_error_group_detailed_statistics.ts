@@ -5,14 +5,19 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  rangeQuery,
+  kqlQuery,
+  termQuery,
+  termsQuery,
+} from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -60,12 +65,13 @@ export async function getErrorGroupDetailedStatistics({
         events: [ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
             filter: [
-              { terms: { [ERROR_GROUP_ID]: groupIds } },
-              { term: { [SERVICE_NAME]: serviceName } },
+              ...termsQuery(ERROR_GROUP_ID, ...groupIds),
+              ...termQuery(SERVICE_NAME, serviceName),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),

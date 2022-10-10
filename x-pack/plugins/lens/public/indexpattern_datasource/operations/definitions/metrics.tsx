@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
@@ -24,12 +24,11 @@ import {
   BaseIndexPatternColumn,
   ValueFormatConfig,
 } from './column_types';
-import {
-  adjustTimeScaleLabelSuffix,
-  adjustTimeScaleOnOtherColumnChange,
-} from '../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -45,6 +44,7 @@ const typeToFn: Record<string, string> = {
   average: 'aggAvg',
   sum: 'aggSum',
   median: 'aggMedian',
+  standard_deviation: 'aggStdDeviation',
 };
 
 const supportedTypes = ['number', 'histogram'];
@@ -58,6 +58,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   optionalTimeScaling,
   supportsDate,
   hideZeroOption,
+  aggConfigParams,
+  documentationDescription,
+  quickFunctionDocumentation,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -67,6 +70,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   description?: string;
   supportsDate?: boolean;
   hideZeroOption?: boolean;
+  aggConfigParams?: Record<string, string | number | boolean>;
+  documentationDescription?: string;
+  quickFunctionDocumentation?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -75,12 +81,15 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       undefined,
       optionalTimeScaling ? column?.timeScale : undefined,
       undefined,
-      column?.timeShift
+      column?.timeShift,
+      undefined,
+      column?.reducedTimeRange
     );
   };
 
   return {
     type,
+    allowAsReference: true,
     priority,
     displayName,
     description,
@@ -108,10 +117,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
-      optionalTimeScaling
-        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId) as T)
-        : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
@@ -125,6 +130,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
+        reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
           emptyAsNull:
@@ -142,41 +148,44 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) => {
+    getAdvancedOptions: ({
+      layer,
+      columnId,
+      currentColumn,
+      paramEditorUpdater,
+    }: ParamEditorProps<T>) => {
       if (!hideZeroOption) return [];
       return [
         {
           dataTestSubj: 'hide-zero-values',
-          optionElement: (
-            <>
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                  defaultMessage: 'Hide zero values',
-                })}
-                labelProps={{
-                  style: {
-                    fontWeight: euiThemeVars.euiFontWeightMedium,
-                  },
-                }}
-                checked={Boolean(currentColumn.params?.emptyAsNull)}
-                onChange={() => {
-                  updateLayer(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'emptyAsNull',
-                      value: !currentColumn.params?.emptyAsNull,
-                    })
-                  );
-                }}
-                compressed
-              />
-            </>
+          inlineElement: (
+            <EuiSwitch
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.lens.indexPattern.hideZero', {
+                    defaultMessage: 'Hide zero values',
+                  })}
+                </EuiText>
+              }
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                paramEditorUpdater(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
           ),
-          title: '',
-          showInPopover: true,
-          inlineElement: null,
-          onClick: () => {},
         },
       ];
     },
@@ -189,8 +198,17 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
         emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
+        ...aggConfigParams,
       }).toAst();
     },
+    getGroupByKey: (agg) => {
+      return getGroupByKey(
+        agg,
+        [typeToFn[type]],
+        [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+      );
+    },
+
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
         getInvalidFieldMessage(
@@ -198,15 +216,19 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           indexPattern
         ),
         getDisallowedPreviousShiftMessage(layer, columnId),
+        getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
     filterable: true,
+    canReduceTimeRange: true,
     documentation: {
       section: 'elasticsearch',
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
         defaultMessage: 'field: string',
       }),
-      description: i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
-        defaultMessage: `
+      description:
+        documentationDescription ||
+        i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
+          defaultMessage: `
 Returns the {metric} of a field. This function only works for number fields.
 
 Example: Get the {metric} of price:
@@ -215,17 +237,19 @@ Example: Get the {metric} of price:
 Example: Get the {metric} of price for orders from the UK:
 \`{metric}(price, kql='location:UK')\`
       `,
-        values: {
-          metric: type,
-        },
-      }),
+          values: {
+            metric: type,
+          },
+        }),
     },
+    quickFunctionDocumentation,
     shiftable: true,
-  } as OperationDefinition<T, 'field'>;
+  } as OperationDefinition<T, 'field', {}, true>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
 export type AvgIndexPatternColumn = MetricColumn<'average'>;
+export type StandardDeviationIndexPatternColumn = MetricColumn<'standard_deviation'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
@@ -244,6 +268,12 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.min.quickFunctionDescription',
+    {
+      defaultMessage: 'The minimum value of a number field.',
+    }
+  ),
   supportsDate: true,
 });
 
@@ -261,6 +291,12 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.max.quickFunctionDescription',
+    {
+      defaultMessage: 'The maximum value of a number field.',
+    }
+  ),
   supportsDate: true,
 });
 
@@ -279,7 +315,55 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
     defaultMessage:
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.avg.quickFunctionDescription',
+    {
+      defaultMessage: 'The average value of a number field.',
+    }
+  ),
 });
+
+export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
+  {
+    type: 'standard_deviation',
+    displayName: i18n.translate('xpack.lens.indexPattern.standardDeviation', {
+      defaultMessage: 'Standard deviation',
+    }),
+    ofName: (name) =>
+      i18n.translate('xpack.lens.indexPattern.standardDeviationOf', {
+        defaultMessage: 'Standard deviation of {name}',
+        values: { name },
+      }),
+    description: i18n.translate('xpack.lens.indexPattern.standardDeviation.description', {
+      defaultMessage:
+        'A single-value metric aggregation that computes the standard deviation of numeric values that are extracted from the aggregated documents',
+    }),
+    aggConfigParams: {
+      showBounds: false,
+    },
+    documentationDescription: i18n.translate(
+      'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
+      {
+        defaultMessage: `
+Returns the amount of variation or dispersion of the field. The function works only for number fields.
+
+#### Examples
+
+To get the standard deviation of price, use \`standard_deviation(price)\`.
+
+To get the variance of price for orders from the UK, use \`square(standard_deviation(price, kql='location:UK'))\`.
+      `,
+      }
+    ),
+    quickFunctionDocumentation: i18n.translate(
+      'xpack.lens.indexPattern.standardDeviation.quickFunctionDescription',
+      {
+        defaultMessage:
+          'The standard deviation of the values of a number field which is the amount of variation of the fields values.',
+      }
+    ),
+  }
+);
 
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   type: 'sum',
@@ -298,6 +382,12 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
       'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
   }),
   hideZeroOption: true,
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.sum.quickFunctionDescription',
+    {
+      defaultMessage: 'The total amount of the values of a number field.',
+    }
+  ),
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
@@ -315,4 +405,10 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',
   }),
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.median.quickFunctionDescription',
+    {
+      defaultMessage: 'The median value of a number field.',
+    }
+  ),
 });

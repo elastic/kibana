@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiNetworkEventsLensAttributes: LensAttributes = {
   title: '[Network] Network events',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: 'eaadfec7-deaa-4aeb-a403-3b4e516416d2',

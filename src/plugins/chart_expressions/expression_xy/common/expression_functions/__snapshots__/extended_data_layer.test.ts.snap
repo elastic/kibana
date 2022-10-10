@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extendedDataLayerConfig throws the error if lineWidth is provided to the not line/area chart 1`] = `"\`lineWidth\` can be applied only for line or area charts"`;
+
+exports[`extendedDataLayerConfig throws the error if markSizeAccessor doesn't have the corresponding column in the table 1`] = `"Provided column name or index is invalid: nonsense"`;
+
+exports[`extendedDataLayerConfig throws the error if markSizeAccessor is provided to the not line/area chart 1`] = `"\`markSizeAccessor\` can't be used. Dots are applied only for line or area charts"`;
+
+exports[`extendedDataLayerConfig throws the error if pointsRadius is provided to the not line/area chart 1`] = `"\`pointsRadius\` can be applied only for line or area charts"`;
+
+exports[`extendedDataLayerConfig throws the error if showLines is provided to the not line/area chart 1`] = `"Lines visibility can be controlled only at line charts"`;
+
+exports[`extendedDataLayerConfig throws the error if showPoints is provided to the not line/area chart 1`] = `"\`showPoints\` can be applied only for line or area charts"`;

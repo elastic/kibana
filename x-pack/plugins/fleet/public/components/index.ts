@@ -24,3 +24,6 @@ export { EuiButtonWithTooltip } from './eui_button_with_tooltip';
 export * from './link_and_revision';
 export * from './agent_enrollment_flyout';
 export * from './platform_selector';
+export { ConfirmForceInstallModal } from './confirm_force_install_modal';
+export { DevtoolsRequestFlyoutButton } from './devtools_request_flyout';
+export { HeaderReleaseBadge, InlineReleaseBadge } from './release_badge';

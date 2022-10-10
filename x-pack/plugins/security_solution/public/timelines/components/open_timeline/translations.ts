@@ -165,10 +165,6 @@ export const PINNED_EVENTS = i18n.translate(
   }
 );
 
-export const POSTED = i18n.translate('xpack.securitySolution.open.timeline.postedLabel', {
-  defaultMessage: 'Posted:',
-});
-
 export const REFRESH = i18n.translate('xpack.securitySolution.open.timeline.refreshTitle', {
   defaultMessage: 'Refresh',
 });
@@ -227,34 +223,6 @@ export const ZERO_TIMELINE_TEMPLATES_MATCH = i18n.translate(
   'xpack.securitySolution.open.timeline.zeroTimelineTemplatesMatchLabel',
   {
     defaultMessage: '0 timeline templates match the search criteria',
-  }
-);
-
-export const SINGLE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.open.timeline.singleTimelineLabel',
-  {
-    defaultMessage: 'timeline',
-  }
-);
-
-export const PLURAL_TIMELINES = i18n.translate(
-  'xpack.securitySolution.open.timeline.pluralTimelinesLabel',
-  {
-    defaultMessage: 'timelines',
-  }
-);
-
-export const SINGLE_TEMPLATE = i18n.translate(
-  'xpack.securitySolution.open.timeline.singleTemplateLabel',
-  {
-    defaultMessage: 'template',
-  }
-);
-
-export const PLURAL_TEMPLATES = i18n.translate(
-  'xpack.securitySolution.open.timeline.pluralTemplatesLabel',
-  {
-    defaultMessage: 'templates',
   }
 );
 

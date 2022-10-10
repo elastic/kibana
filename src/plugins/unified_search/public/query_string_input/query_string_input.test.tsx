@@ -20,19 +20,15 @@ import { render } from '@testing-library/react';
 
 import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
-import { QueryLanguageSwitcher } from './language_switcher';
-import QueryStringInputUI from './query_string_input';
-
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
 
-import { setAutocomplete } from '../services';
+import { QueryLanguageSwitcher } from './language_switcher';
+import QueryStringInput from './query_string_input';
 import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers();
-
 const startMock = coreMock.createStart();
 
 const noop = () => {
@@ -66,26 +62,25 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-const QueryStringInput = withKibana(QueryStringInputUI);
-
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
-  const services = {
-    ...startMock,
-    data: dataPluginMock.createStartContract(),
-    appName: testProps.appName || 'test',
-    storage: storage || createMockStorage(),
-  };
-
   const defaultOptions = {
     screenTitle: 'Another Screen',
     intl: null as any,
+    deps: {
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
+      appName: testProps.appName || 'test',
+      storage: storage || createMockStorage(),
+      usageCollection: { reportUiCounter: () => {} },
+      uiSettings: startMock.uiSettings,
+      http: startMock.http,
+      docLinks: startMock.docLinks,
+    },
   };
 
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <QueryStringInput {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
+      <QueryStringInput {...defaultOptions} {...testProps} />
     </I18nProvider>
   );
 }
@@ -93,11 +88,6 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
 describe('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  beforeEach(() => {
-    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-    setAutocomplete(autocompleteStart.autocomplete);
   });
 
   it('Should render the given query', async () => {
@@ -110,7 +100,6 @@ describe('QueryStringInput', () => {
     );
 
     await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByText('KQL'));
   });
 
   it('Should pass the query language to the language switcher', () => {
@@ -208,7 +197,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -349,7 +338,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -387,7 +376,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     input!.value = 'foo\u00A0bar';

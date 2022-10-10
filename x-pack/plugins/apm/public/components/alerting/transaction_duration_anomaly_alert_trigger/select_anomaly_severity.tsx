@@ -46,10 +46,7 @@ export function SelectAnomalySeverity({ onChange, value }: Props) {
             <AnomalySeverity type={option.type} />
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
-              <p
-                className="euiTextColor--subdued"
-                data-test-subj="SelectAnomalySeverity option text"
-              >
+              <p data-test-subj="SelectAnomalySeverity option text">
                 <FormattedMessage
                   id="xpack.apm.alerts.anomalySeverity.scoreDetailsDescription"
                   defaultMessage="score {value} {value, select, critical {} other {and above}}"

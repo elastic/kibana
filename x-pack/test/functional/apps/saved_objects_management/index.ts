@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function savedObjectsManagementApp({ loadTestFile }: FtrProviderContext) {
   describe('Saved objects management', function savedObjectsManagementAppTestSuite() {
-    this.tags(['ciGroup2', 'skipFirefox']);
+    this.tags('skipFirefox');
 
     loadTestFile(require.resolve('./spaces_integration'));
     loadTestFile(require.resolve('./feature_controls/saved_objects_management_security'));

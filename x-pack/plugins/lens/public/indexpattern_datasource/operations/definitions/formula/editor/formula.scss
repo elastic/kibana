@@ -30,13 +30,19 @@
 
 .lnsFormula__editorHeader,
 .lnsFormula__editorFooter {
-  padding: $euiSizeS $euiSize;
+  padding: $euiSizeS;
+}
+
+.lnsFormula__docsHeader {
+  margin: 0;
 }
 
 .lnsFormula__editorFooter {
   // make sure docs are rendered in front of monaco
   z-index: 1;
   background-color: $euiColorLightestShade;
+  border-bottom-right-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
 }
 
 .lnsFormula__editorHeaderGroup,

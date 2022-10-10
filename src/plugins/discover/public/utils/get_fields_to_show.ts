@@ -8,13 +8,9 @@
 import { getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-export const getFieldsToShow = (
-  fields: string[],
-  indexPattern: DataView,
-  showMultiFields: boolean
-) => {
+export const getFieldsToShow = (fields: string[], dataView: DataView, showMultiFields: boolean) => {
   const childParentFieldsMap = {} as Record<string, string>;
-  const mapping = (name: string) => indexPattern.fields.getByName(name);
+  const mapping = (name: string) => dataView.fields.getByName(name);
   fields.forEach((key) => {
     const mapped = mapping(key);
     const subTypeMulti = mapped && getFieldSubtypeMulti(mapped.spec);

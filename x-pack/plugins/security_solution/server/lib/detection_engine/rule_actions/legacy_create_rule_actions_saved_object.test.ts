@@ -10,7 +10,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateRuleActionsSavedObject } from './legacy_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 describe('legacy_create_rule_actions_saved_object', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;

@@ -24,7 +24,7 @@ const testBedConfig = {
 export const setup = async (httpSetup, overrides) => {
   const initTestBed = registerTestBed(
     // ESlint cannot figure out that the hoc should start with a capital leter.
-    // eslint-disable-next-line
+    // eslint-disable-next-line new-cap
     WithAppDependencies(RemoteClusterList, httpSetup, overrides),
     testBedConfig
   );

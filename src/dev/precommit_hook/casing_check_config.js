@@ -53,13 +53,16 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-body.html',
   '**/preview-head.html',
 
-  // filename required by api-extractor
-  'api-documenter.json',
-
   // filename must match upstream filenames from lodash
-  'packages/elastic-safer-lodash-set/**/*',
+  'packages/kbn-safer-lodash-set/**/*',
+
+  // filename must match upstream filenames from handlebars
+  'packages/kbn-handlebars/src/upstream/**/*',
+  'packages/kbn-handlebars/.patches/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+
+  'x-pack/plugins/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -98,6 +101,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
+  'packages/core/*/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
@@ -146,10 +150,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/img/logo-grey.png',
+  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/assets/img/logo-grey.png',
 ];

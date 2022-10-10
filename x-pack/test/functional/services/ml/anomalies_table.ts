@@ -173,5 +173,10 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
     async scrollTableIntoView() {
       await testSubjects.scrollIntoView('mlAnomaliesTable');
     },
+
+    async scrollRowIntoView(rowIndex: number) {
+      const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+      await testSubjects.scrollIntoView(rowSubj);
+    },
   };
 }

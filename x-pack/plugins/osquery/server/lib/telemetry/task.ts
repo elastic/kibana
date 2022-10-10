@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TelemetryReceiver } from './receiver';
-import { TelemetryEventsSender } from './sender';
+import type { TelemetryReceiver } from './receiver';
+import type { TelemetryEventsSender } from './sender';
 
 export interface OsqueryTelemetryTaskConfig {
   type: string;
@@ -31,7 +31,7 @@ export type OsqueryTelemetryTaskRunner = (
   receiver: TelemetryReceiver,
   sender: TelemetryEventsSender,
   taskExecutionPeriod: TaskExecutionPeriod
-) => Promise<number>;
+) => Promise<void>;
 
 export interface TaskExecutionPeriod {
   last?: string;
@@ -131,13 +131,6 @@ export class OsqueryTelemetryTask {
     this.logger.debug(`[task ${taskId}]: attempting to run`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`[task ${taskId}]: outdated task`);
-
-      return 0;
-    }
-
-    const isOptedIn = await this.sender.isTelemetryOptedIn();
-    if (!isOptedIn) {
-      this.logger.debug(`[task ${taskId}]: telemetry is not opted-in`);
 
       return 0;
     }

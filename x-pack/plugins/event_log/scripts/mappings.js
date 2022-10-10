@@ -81,17 +81,18 @@ exports.EcsCustomPropertyMappings = {
                       number_of_generated_actions: {
                         type: 'long',
                       },
-                      number_of_new_alerts: {
-                        type: 'long',
-                      },
-                      number_of_active_alerts: {
-                        type: 'long',
-                      },
-                      number_of_recovered_alerts: {
-                        type: 'long',
-                      },
-                      total_number_of_alerts: {
-                        type: 'long',
+                      alert_counts: {
+                        properties: {
+                          active: {
+                            type: 'long',
+                          },
+                          new: {
+                            type: 'long',
+                          },
+                          recovered: {
+                            type: 'long',
+                          },
+                        },
                       },
                       number_of_searches: {
                         type: 'long',
@@ -106,6 +107,30 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       execution_gap_duration_s: {
+                        type: 'long',
+                      },
+                      rule_type_run_duration_ms: {
+                        type: 'long',
+                      },
+                      process_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      trigger_actions_duration_ms: {
+                        type: 'long',
+                      },
+                      process_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      claim_to_start_duration_ms: {
+                        type: 'long',
+                      },
+                      prepare_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      total_enrichment_duration_ms: {
                         type: 'long',
                       },
                     },

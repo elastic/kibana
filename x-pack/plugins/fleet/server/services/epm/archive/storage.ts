@@ -20,7 +20,7 @@ import type {
   InstallSource,
   PackageAssetReference,
   RegistryDataStream,
-} from '../../../../common';
+} from '../../../../common/types';
 import { pkgToPkgKey } from '../registry';
 
 import { appContextService } from '../../app_context';
@@ -123,7 +123,7 @@ export async function saveArchiveEntries(opts: {
     })
   );
 
-  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody);
+  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, { refresh: false });
   return results;
 }
 

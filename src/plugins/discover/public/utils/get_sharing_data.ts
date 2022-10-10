@@ -14,13 +14,13 @@ import type {
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { getSortForSearchSource } from './sorting';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import type { SavedSearch, SortOrder } from '../services/saved_searches';
-import { getSortForSearchSource } from '../components/doc_table';
 import { AppState, isEqualFilters } from '../application/main/services/discover_state';
 
 /**
@@ -96,7 +96,10 @@ export async function getSharingData(
        */
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi && columns.length) {
-        searchSource.setField('fields', columns);
+        searchSource.setField(
+          'fields',
+          columns.map((field) => ({ field, include_unmapped: 'true' }))
+        );
       }
       return searchSource.getSerializedFields(true);
     },

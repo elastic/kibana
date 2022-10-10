@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export { beatsOverviewRoute } from './overview';
-export { beatsListingRoute } from './beats';
-export { beatsDetailRoute } from './beat_detail';
+import { MonitoringCore } from '../../../../types';
+import { beatsListingRoute } from './beats';
+import { beatsDetailRoute } from './beat_detail';
+import { beatsOverviewRoute } from './overview';
+
+export function registerV1BeatsRoutes(server: MonitoringCore) {
+  beatsDetailRoute(server);
+  beatsListingRoute(server);
+  beatsOverviewRoute(server);
+}

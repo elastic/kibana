@@ -41,6 +41,11 @@ export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default'
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
+// File storage indexes supporting endpoint Upload/download
+export const FILE_STORAGE_METADATA_INDEX = '.fleet-files';
+export const FILE_STORAGE_DATA_INDEX = '.fleet-file_data';
+
+// Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;
@@ -54,11 +59,45 @@ export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
 export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
-/** Endpoint Actions Log Routes */
-export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
-export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
+const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
+
+/** Action Response Routes */
+export const ISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/isolate`;
+export const UNISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/unisolate`;
+export const GET_PROCESSES_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/running_procs`;
+export const KILL_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/kill_process`;
+export const SUSPEND_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/suspend_process`;
+
+/** Endpoint Actions Routes */
+export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
+export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
+export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
+export const ENDPOINTS_ACTION_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
 
 export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+
+/**
+ * The list of possible capabilities, reported by the endpoint in the metadata document
+ */
+export const RESPONDER_CAPABILITIES = [
+  'isolation',
+  'kill_process',
+  'suspend_process',
+  'running_processes',
+] as const;
+
+export type ResponderCapabilities = typeof RESPONDER_CAPABILITIES[number];
+
+/** The list of possible responder command names **/
+export const RESPONDER_COMMANDS = [
+  'isolate',
+  'release',
+  'kill-process',
+  'suspend-process',
+  'processes',
+] as const;
+
+export type ResponderCommands = typeof RESPONDER_COMMANDS[number];

@@ -56,7 +56,6 @@ describe('VegaVisualizations', () => {
 
   beforeEach(() => {
     setInjectedVars({
-      emsTileLayerId: {},
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
@@ -97,7 +96,6 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
-            injectedMetadata: coreStart.injectedMetadata,
           }),
           0,
           0,
@@ -130,7 +128,6 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
-            injectedMetadata: coreStart.injectedMetadata,
           }),
           0,
           0,

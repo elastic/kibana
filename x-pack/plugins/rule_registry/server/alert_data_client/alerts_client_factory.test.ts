@@ -8,7 +8,7 @@
 import { Request } from '@hapi/hapi';
 
 import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { ElasticsearchClient, KibanaRequest, CoreKibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -56,7 +56,7 @@ describe('AlertsClientFactory', () => {
   test('creates an alerts client with proper constructor arguments', async () => {
     const factory = new AlertsClientFactory();
     factory.initialize({ ...alertsClientFactoryParams });
-    const request = KibanaRequest.from(fakeRequest);
+    const request = CoreKibanaRequest.from(fakeRequest);
     await factory.create(request);
 
     expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({

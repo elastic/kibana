@@ -19,7 +19,7 @@ import {
   waitForSignalsToBePresent,
   waitForRuleSuccessOrStatus,
 } from '../../../../detection_engine_api_integration/utils';
-import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/tests/generating_signals';
+import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/group1/generating_signals';
 import {
   obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,
@@ -42,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACE1 = 'space1';
 
+  // Failing: See https://github.com/elastic/kibana/issues/129219
   // Failing: See https://github.com/elastic/kibana/issues/129219
   describe.skip('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
@@ -108,24 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
         const first = result.rawResponse.hits.hits[0].fields?.['kibana.alert.evaluation.value'];
         const second = result.rawResponse.hits.hits[1].fields?.['kibana.alert.evaluation.value'];
         expect(first > second).to.be(true);
-      });
-
-      it('should reject public requests', async () => {
-        const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
-          supertestWithoutAuth,
-          auth: {
-            username: logsOnlySpacesAll.username,
-            password: logsOnlySpacesAll.password,
-          },
-          options: {
-            featureIds: [AlertConsumers.LOGS],
-          },
-          strategy: 'privateRuleRegistryAlertsSearchStrategy',
-        });
-        expect(result.statusCode).to.be(500);
-        expect(result.message).to.be(
-          `The privateRuleRegistryAlertsSearchStrategy search strategy is currently only available for internal use.`
-        );
       });
     });
 

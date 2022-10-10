@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from '../translations';
 
 export const FILTER_OPEN: Status = 'open';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -14,7 +15,9 @@ import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
-import { TopN, Props as TopNProps } from './top_n';
+import type { Props as TopNProps } from './top_n';
+import { TopN } from './top_n';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -109,7 +112,7 @@ describe('TopN', () => {
     indexPattern: mockIndexPattern,
     options: defaultOptions,
     query,
-    setAbsoluteRangeDatePickerTarget: 'global',
+    setAbsoluteRangeDatePickerTarget: InputsModelId.global,
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
@@ -141,8 +144,7 @@ describe('TopN', () => {
 
     const nonDetectionAlertTables = [
       TimelineId.hostsPageEvents,
-      TimelineId.hostsPageExternalAlerts,
-      TimelineId.networkPageExternalAlerts,
+      TimelineId.networkPageEvents,
       TimelineId.casePage,
     ];
 

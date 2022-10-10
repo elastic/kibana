@@ -8,11 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
 import { OptionsMenu } from './options';
-import { KibanaThemeProvider } from '../../services/kibana_react';
+import { pluginServices } from '../../services/plugin_services';
 
 let isOpen = false;
 
@@ -29,9 +31,10 @@ export interface ShowOptionsPopoverProps {
   onUseMarginsChange: (useMargins: boolean) => void;
   syncColors: boolean;
   onSyncColorsChange: (syncColors: boolean) => void;
+  syncTooltips: boolean;
+  onSyncTooltipsChange: (syncTooltips: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
-  theme$: CoreStart['theme']['theme$'];
 }
 
 export function showOptionsPopover({
@@ -42,8 +45,15 @@ export function showOptionsPopover({
   onHidePanelTitlesChange,
   syncColors,
   onSyncColorsChange,
-  theme$,
+  syncTooltips,
+  onSyncTooltipsChange,
 }: ShowOptionsPopoverProps) {
+  const {
+    settings: {
+      theme: { theme$ },
+    },
+  } = pluginServices.getServices();
+
   if (isOpen) {
     onClose();
     return;
@@ -68,6 +78,8 @@ export function showOptionsPopover({
             onHidePanelTitlesChange={onHidePanelTitlesChange}
             syncColors={syncColors}
             onSyncColorsChange={onSyncColorsChange}
+            syncTooltips={syncTooltips}
+            onSyncTooltipsChange={onSyncTooltipsChange}
           />
         </EuiWrappingPopover>
       </KibanaThemeProvider>

@@ -15,11 +15,13 @@ export interface LinkPanelListItem {
 }
 
 export interface LinkPanelViewProps {
+  allIntegrationsInstalled?: boolean;
   buttonHref?: string;
+  from?: string;
   isInspectEnabled?: boolean;
   isPluginDisabled?: boolean;
   listItems: LinkPanelListItem[];
   splitPanel?: JSX.Element;
+  to?: string;
   totalCount?: number;
-  allIntegrationsInstalled?: boolean;
 }

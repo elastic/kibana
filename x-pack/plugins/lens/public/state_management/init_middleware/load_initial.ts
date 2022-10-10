@@ -12,8 +12,8 @@ import { setState, initEmpty, LensStoreDeps } from '..';
 import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
-import { getInitialDatasourceId } from '../../utils';
-import { initializeDatasources } from '../../editor_frame_service/editor_frame';
+import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
+import { initializeSources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document } from '../../persistence';
@@ -97,26 +97,57 @@ export function loadInitial(
   },
   autoApplyDisabled: boolean
 ) {
-  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const {
+    lensServices,
+    datasourceMap,
+    embeddableEditorIncomingState,
+    initialContext,
+    visualizationMap,
+  } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
   const { lens } = store.getState();
+
+  const loaderSharedArgs = {
+    dataViews: lensServices.dataViews,
+    storage: lensServices.storage,
+    defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+  };
+
+  let activeDatasourceId: string | undefined;
+  if (initialContext && 'query' in initialContext) {
+    activeDatasourceId = 'textBasedLanguages';
+  }
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
-    return initializeDatasources(datasourceMap, lens.datasourceStates, undefined, initialContext, {
-      isFullEditor: true,
-    })
-      .then((result) => {
+    return initializeSources(
+      {
+        datasourceMap,
+        visualizationMap,
+        visualizationState: lens.visualization,
+        datasourceStates: lens.datasourceStates,
+        initialContext,
+        adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
+        ...loaderSharedArgs,
+      },
+      {
+        isFullEditor: true,
+      }
+    )
+      .then(({ datasourceStates, indexPatterns, indexPatternRefs }) => {
         store.dispatch(
           initEmpty({
             newState: {
               ...emptyState,
+              dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
-              datasourceStates: Object.entries(result).reduce(
+              ...(activeDatasourceId && { activeDatasourceId }),
+              datasourceStates: Object.entries(datasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
                   [datasourceId]: {
@@ -143,7 +174,7 @@ export function loadInitial(
       });
   }
 
-  getPersisted({ initialInput, lensServices, history })
+  return getPersisted({ initialInput, lensServices, history })
     .then(
       (persisted) => {
         if (persisted) {
@@ -171,16 +202,26 @@ export function loadInitial(
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
 
-          initializeDatasources(
-            datasourceMap,
-            docDatasourceStates,
-            doc.references,
-            initialContext,
+          const docVisualizationState = {
+            activeId: doc.visualizationType,
+            state: doc.state.visualization,
+          };
+          return initializeSources(
             {
-              isFullEditor: true,
-            }
+              datasourceMap,
+              visualizationMap,
+              visualizationState: docVisualizationState,
+              datasourceStates: docDatasourceStates,
+              references: [...doc.references, ...(doc.state.internalReferences || [])],
+              initialContext,
+              dataViews: lensServices.dataViews,
+              storage: lensServices.storage,
+              adHocDataViews: doc.state.adHocDataViews,
+              defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+            },
+            { isFullEditor: true }
           )
-            .then((result) => {
+            .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
               const currentSessionId = data.search.session.getSessionId();
               store.dispatch(
                 setState({
@@ -199,9 +240,10 @@ export function loadInitial(
                   activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
-                    state: doc.state.visualization,
+                    state: visualizationState,
                   },
-                  datasourceStates: Object.entries(result).reduce(
+                  dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                  datasourceStates: Object.entries(datasourceStates).reduce(
                     (state, [datasourceId, datasourceState]) => ({
                       ...state,
                       [datasourceId]: {

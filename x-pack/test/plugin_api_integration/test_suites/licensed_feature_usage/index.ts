@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Licensed feature usage APIs', function () {
-    this.tags('ciGroup13');
     loadTestFile(require.resolve('./feature_usage'));
   });
 }

@@ -5,72 +5,89 @@
  * 2.0.
  */
 
-import { castArray } from 'lodash';
+import { castArray, isEmpty, pickBy } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryIcon } from '../components/osquery_icon';
+import type { AgentSelection } from '../agents/types';
 
 interface LiveQueryProps {
   agentId?: string;
   agentIds?: string[];
+  alertIds?: string[];
   agentPolicyIds?: string[];
   onSuccess?: () => void;
   query?: string;
   savedQueryId?: string;
-  ecs_mapping?: unknown;
+  ecs_mapping?: ECSMapping;
   agentsField?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
   enabled?: boolean;
   formType?: 'steps' | 'simple';
-  isExternal?: true;
+  hideAgentsField?: boolean;
+  packId?: string;
+  agentSelection?: AgentSelection;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   agentId,
   agentIds,
+  alertIds,
   agentPolicyIds,
   onSuccess,
   query,
   savedQueryId,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
-  agentsField,
   queryField,
   ecsMappingField,
   formType,
   enabled,
-  isExternal,
+  hideAgentsField,
+  packId,
+  agentSelection,
+  addToTimeline,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
-  const defaultValue = useMemo(() => {
-    if (agentId || agentPolicyIds?.length || query?.length) {
-      const agentSelection =
-        agentId || agentPolicyIds?.length
-          ? {
-              allAgentsSelected: false,
-              agents: castArray(agentId ?? agentIds ?? []),
-              platformsSelected: [],
-              policiesSelected: agentPolicyIds ?? [],
-            }
-          : null;
+  const initialAgentSelection = useMemo(() => {
+    if (agentSelection) {
+      return agentSelection;
+    }
 
+    if (agentId || agentPolicyIds?.length) {
       return {
-        ...(agentSelection ? { agentSelection } : {}),
-        query,
-        savedQueryId,
-        ecs_mapping,
+        allAgentsSelected: false,
+        agents: castArray(agentId ?? agentIds ?? []),
+        platformsSelected: [],
+        policiesSelected: agentPolicyIds ?? [],
       };
     }
 
-    return undefined;
-  }, [agentId, agentIds, agentPolicyIds, ecs_mapping, query, savedQueryId]);
+    return null;
+  }, [agentId, agentIds, agentPolicyIds, agentSelection]);
+
+  const defaultValue = useMemo(() => {
+    const initialValue = {
+      ...(initialAgentSelection ? { agentSelection: initialAgentSelection } : {}),
+      alertIds,
+      query,
+      savedQueryId,
+      ecs_mapping,
+      packId,
+    };
+
+    return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
+  }, [alertIds, ecs_mapping, initialAgentSelection, packId, query, savedQueryId]);
 
   if (isLoading) {
     return <EuiLoadingContent lines={10} />;
@@ -108,14 +125,14 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
   return (
     <LiveQueryForm
-      agentsField={agentId ? !agentId : agentsField}
       queryField={queryField}
       ecsMappingField={ecsMappingField}
       defaultValue={defaultValue}
       onSuccess={onSuccess}
       formType={formType}
       enabled={enabled}
-      isExternal={isExternal}
+      hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
     />
   );
 };

@@ -11,10 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
   EuiEmptyPrompt,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -22,10 +23,30 @@ import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_i
 
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
+import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 interface MatchParams {
   name: string;
 }
+
+const ManagedPipelineCallout = () => (
+  <EuiCallOut
+    color="danger"
+    iconType="alert"
+    data-test-subj="managedPipelineCallout"
+    title={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.managedCalloutTitle"
+        defaultMessage="Editing a managed pipeline can break Kibana."
+      />
+    }
+  >
+    <FormattedMessage
+      id="xpack.ingestPipelines.edit.managedCalloutDescription"
+      defaultMessage="Managed pipelines are critical for internal operations."
+    />
+  </EuiCallOut>
+);
 
 export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -37,6 +58,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   const decodedPipelineName = attemptToURIDecode(name)!;
 
@@ -60,11 +82,11 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(getListPath({ inspectedPipelineName: updatedPipeline.name }));
+    redirectToPathOrRedirectPath(getListPath({ inspectedPipelineName: updatedPipeline.name }));
   };
 
   const onCancel = () => {
-    history.push(getListPath());
+    redirectToPathOrRedirectPath(getListPath());
   };
 
   useEffect(() => {
@@ -148,6 +170,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       />
 
       <EuiSpacer size="l" />
+      {pipeline?.isManaged && (
+        <>
+          <ManagedPipelineCallout />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <PipelineForm
         onSave={onSave}

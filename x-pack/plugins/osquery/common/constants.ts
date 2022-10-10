@@ -9,3 +9,7 @@ export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_DARK_MODE = 'theme:darkMode';
 export const OSQUERY_INTEGRATION_NAME = 'osquery_manager';
 export const BASE_PATH = '/app/osquery';
+export const ACTIONS_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.actions`;
+export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
+
+export const DEFAULT_PLATFORM = 'linux,windows,darwin';

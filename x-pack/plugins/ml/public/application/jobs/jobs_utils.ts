@@ -6,7 +6,7 @@
  */
 
 import { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import { isPopulatedObject } from '../../../common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { MlSummaryJob } from '../../../common/types/anomaly_detection_jobs';
 
 export const isManagedJob = (job: MlSummaryJob | MlJob) => {

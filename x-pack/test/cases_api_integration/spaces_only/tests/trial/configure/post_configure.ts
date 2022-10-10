@@ -28,6 +28,7 @@ import { nullUser } from '../../../../common/lib/mock';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
   const space = getActionsSpace(authSpace1.space);
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should create a configuration with a mapping in space1', async () => {
       const connector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: serviceNowSimulatorURL },
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       actionsRemover.add(space, connector.id, 'action', 'actions');
 
       const postRes = await createConfiguration(
-        supertest,
+        supertestWithoutAuth,
         getConfigurationRequest({
           id: connector.id,
           name: connector.name,

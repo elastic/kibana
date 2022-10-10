@@ -22,28 +22,34 @@ export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
 
+const configSchema = schema.object({
+  annotations: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    index: schema.string({ defaultValue: 'observability-annotations' }),
+  }),
+  unsafe: schema.object({
+    slo: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+    alertDetails: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
+});
+
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
   },
-  schema: schema.object({
-    annotations: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      index: schema.string({ defaultValue: 'observability-annotations' }),
-    }),
-    unsafe: schema.object({
-      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      rules: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    }),
-  }),
+  schema: configSchema,
 };
 
-export type ObservabilityConfig = TypeOf<typeof config.schema>;
+export type ObservabilityConfig = TypeOf<typeof configSchema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
 export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };
+
+export { uiSettings } from './ui_settings';

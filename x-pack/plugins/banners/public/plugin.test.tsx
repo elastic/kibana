@@ -40,11 +40,15 @@ describe('BannersPlugin', () => {
     });
   });
 
-  const startPlugin = async () => {
+  const startPlugin = async ({
+    screenshotPluginPresent = true,
+  }: { screenshotPluginPresent?: boolean } = {}) => {
     pluginInitContext = coreMock.createPluginInitializerContext();
     plugin = new BannersPlugin(pluginInitContext);
     plugin.setup(coreSetup);
-    plugin.start(coreStart, { screenshotMode: screenshotModeStart });
+    plugin.start(coreStart, {
+      screenshotMode: screenshotPluginPresent ? screenshotModeStart : undefined,
+    });
     // await for the `getBannerInfo` promise to resolve
     await nextTick();
   };
@@ -84,11 +88,31 @@ describe('BannersPlugin', () => {
     });
 
     it('does not register the banner in screenshot mode', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'top',
+        }),
+      });
+
       screenshotModeStart.isScreenshotMode.mockReturnValue(true);
 
       await startPlugin();
 
       expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
+    });
+
+    it('registers the banner if screenshotMode plugin not present', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'top',
+        }),
+      });
+
+      await startPlugin({ screenshotPluginPresent: false });
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalled();
     });
   });
 
@@ -116,7 +140,7 @@ describe('BannersPlugin', () => {
 
       await startPlugin();
 
-      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
+      expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
     });
 
     it('does not register the banner in screenshot mode', async () => {

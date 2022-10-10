@@ -26,6 +26,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "canNavigateToLens": false,
     "params": Object {
       "listenOnChange": true,
     },
@@ -112,7 +113,7 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
-      "legendSize": undefined,
+      "legendSize": "small",
       "maxLegendLines": 2,
       "metric": Object {
         "accessor": 0,
@@ -160,6 +161,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "canNavigateToLens": false,
     "params": Object {
       "listenOnChange": true,
     },
@@ -246,7 +248,7 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
-      "legendSize": undefined,
+      "legendSize": "small",
       "maxLegendLines": 2,
       "metric": Object {
         "accessor": 0,

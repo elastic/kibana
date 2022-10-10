@@ -20,6 +20,7 @@ import { delay } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
+import type { APIEndpoint } from '../../../../server';
 
 function wrapper({
   children,
@@ -28,53 +29,56 @@ function wrapper({
   children?: ReactNode;
   error: boolean;
 }) {
-  const httpMethodMock = jest.fn().mockImplementation(async (endpoint) => {
-    await delay(100);
-    if (error) {
-      throw new Error('Something went wrong');
-    }
-    switch (endpoint) {
-      case '/internal/apm/latency/overall_distribution':
-        return {
-          overallHistogram: [{ key: 'the-key', doc_count: 1234 }],
-          percentileThresholdValue: 1.234,
-        };
-      case '/internal/apm/correlations/field_candidates':
-        return { fieldCandidates: ['field-1', 'field2'] };
-      case '/internal/apm/correlations/field_value_pairs':
-        return {
-          fieldValuePairs: [
-            { fieldName: 'field-name-1', fieldValue: 'field-value-1' },
-          ],
-        };
-      case '/internal/apm/correlations/p_values':
-        return {
-          failedTransactionsCorrelations: [
-            {
-              fieldName: 'field-name-1',
-              fieldValue: 'field-value-1',
-              doc_count: 123,
-              bg_count: 1234,
-              score: 0.66,
-              pValue: 0.01,
-              normalizedScore: 0.85,
-              failurePercentage: 30,
-              successPercentage: 70,
-              histogram: [{ key: 'the-key', doc_count: 123 }],
-            },
-          ],
-        };
-      case '/internal/apm/correlations/field_stats':
-        return {
-          stats: [
-            { fieldName: 'field-name-1', count: 123 },
-            { fieldName: 'field-name-2', count: 1111 },
-          ],
-        };
-      default:
-        return {};
-    }
-  });
+  const getHttpMethodMock = (method: 'GET' | 'POST') =>
+    jest.fn().mockImplementation(async (pathname) => {
+      await delay(100);
+      if (error) {
+        throw new Error('Something went wrong');
+      }
+      const endpoint = `${method} ${pathname}` as APIEndpoint;
+
+      switch (endpoint) {
+        case 'POST /internal/apm/latency/overall_distribution/transactions':
+          return {
+            overallHistogram: [{ key: 'the-key', doc_count: 1234 }],
+            percentileThresholdValue: 1.234,
+          };
+        case 'GET /internal/apm/correlations/field_candidates/transactions':
+          return { fieldCandidates: ['field-1', 'field2'] };
+        case 'POST /internal/apm/correlations/field_value_pairs/transactions':
+          return {
+            fieldValuePairs: [
+              { fieldName: 'field-name-1', fieldValue: 'field-value-1' },
+            ],
+          };
+        case 'POST /internal/apm/correlations/p_values/transactions':
+          return {
+            failedTransactionsCorrelations: [
+              {
+                fieldName: 'field-name-1',
+                fieldValue: 'field-value-1',
+                doc_count: 123,
+                bg_count: 1234,
+                score: 0.66,
+                pValue: 0.01,
+                normalizedScore: 0.85,
+                failurePercentage: 30,
+                successPercentage: 70,
+                histogram: [{ key: 'the-key', doc_count: 123 }],
+              },
+            ],
+          };
+        case 'POST /internal/apm/correlations/field_stats/transactions':
+          return {
+            stats: [
+              { fieldName: 'field-name-1', count: 123 },
+              { fieldName: 'field-name-2', count: 1111 },
+            ],
+          };
+        default:
+          return {};
+      }
+    });
 
   const history = createMemoryHistory();
   jest.spyOn(history, 'push');
@@ -90,7 +94,9 @@ function wrapper({
   });
 
   const mockPluginContext = merge({}, mockApmPluginContextValue, {
-    core: { http: { get: httpMethodMock, post: httpMethodMock } },
+    core: {
+      http: { get: getHttpMethodMock('GET'), post: getHttpMethodMock('POST') },
+    },
   }) as unknown as ApmPluginContextValue;
 
   return (
@@ -162,9 +168,10 @@ describe('useFailedTransactionsCorrelations', () => {
       );
 
       try {
+        // Each simulated request takes 100ms. After an inital 50ms
+        // we track the internal requests the hook is running and
+        // check the expected progress after these requests.
         jest.advanceTimersByTime(50);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0));
-        jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
         jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
@@ -173,6 +180,28 @@ describe('useFailedTransactionsCorrelations', () => {
           error: undefined,
           isRunning: true,
           loaded: 0.05,
+        });
+        expect(result.current.response).toEqual({
+          ccsWarning: false,
+          fieldStats: undefined,
+          errorHistogram: undefined,
+          failedTransactionsCorrelations: undefined,
+          overallHistogram: [
+            {
+              doc_count: 1234,
+              key: 'the-key',
+            },
+          ],
+          percentileThresholdValue: 1.234,
+        });
+
+        jest.advanceTimersByTime(100);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
+
+        expect(result.current.progress).toEqual({
+          error: undefined,
+          isRunning: true,
+          loaded: 0.1,
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
@@ -194,23 +223,23 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.15));
 
         // field candidates are an implementation detail and
-        // will not be exposed, it will just set loaded to 0.1.
+        // will not be exposed, it will just set loaded to 0.15.
         expect(result.current.progress).toEqual({
           error: undefined,
           isRunning: true,
-          loaded: 0.1,
+          loaded: 0.15,
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(1));
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.9));
 
         expect(result.current.progress).toEqual({
           error: undefined,
           isRunning: true,
-          loaded: 1,
+          loaded: 0.9,
         });
 
         expect(result.current.response).toEqual({
@@ -246,9 +275,7 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() =>
-          expect(result.current.response.fieldStats).toBeDefined()
-        );
+        await waitFor(() => expect(result.current.progress.loaded).toBe(1));
 
         expect(result.current.progress).toEqual({
           error: undefined,

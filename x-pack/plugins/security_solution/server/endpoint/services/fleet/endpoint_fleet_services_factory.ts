@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -14,7 +14,7 @@ import type {
   AgentClient,
   AgentPolicyServiceInterface,
   FleetStartContract,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
@@ -79,7 +79,7 @@ export interface EndpointFleetServicesInterface {
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
-  packagePolicy: PackagePolicyServiceInterface;
+  packagePolicy: PackagePolicyClient;
 }
 
 export interface EndpointScopedFleetServicesInterface extends EndpointFleetServicesInterface {

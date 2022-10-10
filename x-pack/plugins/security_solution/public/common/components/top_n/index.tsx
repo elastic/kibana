@@ -6,23 +6,26 @@
  */
 
 import React, { useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
-import { BrowserFields } from '../../containers/source';
+import type { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import { inputsModel, inputsSelectors, State } from '../../store';
+import { combineQueries } from '../../lib/kuery';
+import type { inputsModel, State } from '../../store';
+import { inputsSelectors } from '../../store';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -163,7 +166,9 @@ const StatefulTopNComponent: React.FC<Props> = ({
       paddingSize={paddingSize}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
       showLegend={showLegend}
-      setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
+      setAbsoluteRangeDatePickerTarget={
+        timelineId === TimelineId.active ? InputsModelId.timeline : InputsModelId.global
+      }
       setQuery={setQuery}
       timelineId={timelineId}
       to={timelineId === TimelineId.active ? activeTimelineTo : to}

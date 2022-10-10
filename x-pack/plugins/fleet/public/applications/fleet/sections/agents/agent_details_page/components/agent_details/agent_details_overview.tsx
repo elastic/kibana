@@ -25,6 +25,7 @@ import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
+import { Tags } from '../../../agent_list_page/components/tags';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -45,7 +46,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
               defaultMessage: 'Status',
             }),
-            description: <AgentHealth agent={agent} />,
+            description: <AgentHealth agent={agent} showOfflinePreviousStatus={true} />,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
@@ -58,6 +59,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             ),
           },
           {
+            title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
+              defaultMessage: 'Last checkin message',
+            }),
+            description: agent.last_checkin_message ? agent.last_checkin_message : '-',
+          },
+          {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
               defaultMessage: 'Agent ID',
             }),
@@ -68,7 +75,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent policy',
             }),
             description: agentPolicy ? (
-              <AgentPolicySummaryLine policy={agentPolicy} />
+              <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
             ) : (
               agent.policy_id || '-'
             ),
@@ -142,7 +149,8 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
               defaultMessage: 'Monitor logs',
             }),
-            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+            description:
+              Array.isArray(agentPolicy?.monitoring_enabled) &&
               agentPolicy?.monitoring_enabled?.includes('logs') ? (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorLogsEnabledText"
@@ -153,14 +161,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   id="xpack.fleet.agentList.monitorLogsDisabledText"
                   defaultMessage="Disabled"
                 />
-              )
-            ) : null,
+              ),
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
               defaultMessage: 'Monitor metrics',
             }),
-            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+            description:
+              Array.isArray(agentPolicy?.monitoring_enabled) &&
               agentPolicy?.monitoring_enabled?.includes('metrics') ? (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorMetricsEnabledText"
@@ -171,8 +179,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   id="xpack.fleet.agentList.monitorMetricsDisabledText"
                   defaultMessage="Disabled"
                 />
-              )
-            ) : null,
+              ),
+          },
+          {
+            title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
+              defaultMessage: 'Tags',
+            }),
+            description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
           },
         ].map(({ title, description }) => {
           return (

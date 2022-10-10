@@ -201,7 +201,7 @@ describe('VisLegend Component', () => {
       });
 
       expect(fireEvent).toHaveBeenCalledWith({
-        name: 'filterBucket',
+        name: 'filter',
         data: { data: ['valuesA'], negate: false },
       });
       expect(fireEvent).toHaveBeenCalledTimes(1);
@@ -216,7 +216,7 @@ describe('VisLegend Component', () => {
       });
 
       expect(fireEvent).toHaveBeenCalledWith({
-        name: 'filterBucket',
+        name: 'filter',
         data: { data: ['valuesA'], negate: true },
       });
       expect(fireEvent).toHaveBeenCalledTimes(1);

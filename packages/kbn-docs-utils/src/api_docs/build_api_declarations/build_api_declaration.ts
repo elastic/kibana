@@ -65,12 +65,17 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
     Node.isMethodSignature(node) ||
     Node.isFunctionDeclaration(node) ||
     Node.isMethodDeclaration(node) ||
+    Node.isConstructSignatureDeclaration(node) ||
     Node.isConstructorDeclaration(node)
   ) {
     return buildFunctionDec(node, {
       ...opts,
       // Use "Constructor" if applicable, instead of the default "Unnamed"
-      name: Node.isConstructorDeclaration(node) ? 'Constructor' : node.getName() || 'Unnamed',
+      name: Node.isConstructSignatureDeclaration(node)
+        ? 'new'
+        : Node.isConstructorDeclaration(node)
+        ? 'Constructor'
+        : node.getName() || 'Unnamed',
     });
   } else if (
     Node.isPropertySignature(node) ||

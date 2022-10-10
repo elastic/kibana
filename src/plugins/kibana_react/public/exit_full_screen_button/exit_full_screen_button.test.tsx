@@ -26,7 +26,7 @@ describe('<ExitFullScreenButton />', () => {
       <ExitFullScreenButton onExitFullScreenMode={jest.fn()} chrome={MockChrome} />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   test('passing `false` to toggleChrome does not toggle chrome', () => {

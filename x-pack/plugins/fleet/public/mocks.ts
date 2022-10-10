@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { RecursivePartial } from '@elastic/eui/src/components/common';
+
 import { createStartMock } from './mock';
+
+export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
+  partialTheme as EuiTheme;
 
 export const fleetMock = {
   createStartMock,

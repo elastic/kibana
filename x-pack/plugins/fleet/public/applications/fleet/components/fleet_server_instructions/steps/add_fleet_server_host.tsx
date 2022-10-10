@@ -104,8 +104,12 @@ export const AddFleetServerHostStepContent = ({
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem
+          css={`
+            max-width: 100%;
+          `}
+        >
           <FleetServerHostComboBox
             fleetServerHost={fleetServerHost}
             fleetServerHostSettings={fleetServerHostSettings}

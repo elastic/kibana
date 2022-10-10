@@ -22,7 +22,6 @@ import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams, VislibChartType } from './types';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst = async <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,
@@ -95,7 +94,7 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
     }
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeVislib]);
+  const ast = buildExpression([visTypeVislib]);
 
   return ast.toAst();
 };

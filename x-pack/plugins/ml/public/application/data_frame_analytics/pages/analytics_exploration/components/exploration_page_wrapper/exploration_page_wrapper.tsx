@@ -170,7 +170,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
                     indexPattern={indexPattern}
                     setSearchQuery={searchQueryUpdateHandler}
                     query={query}
-                    filters={getFilters(jobConfig.dest.results_field)}
+                    filters={getFilters(jobConfig.dest.results_field!)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

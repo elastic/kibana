@@ -5,35 +5,39 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
+import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
-import { PaginatedContent, PaginatedContentProps } from '../paginated_content';
+import type { PaginatedContentProps } from '../paginated_content';
+import { PaginatedContent } from '../paginated_content';
 
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
-import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import type { ArtifactListPageLabels } from './translations';
+import { artifactListPageLabels } from './translations';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
-import { SearchExceptions, SearchExceptionsProps } from '../search_exceptions';
-import {
-  useArtifactCardPropsProvider,
-  UseArtifactCardPropsProviderProps,
-} from './hooks/use_artifact_card_props_provider';
+import type { SearchExceptionsProps } from '../search_exceptions';
+import { SearchExceptions } from '../search_exceptions';
+import type { UseArtifactCardPropsProviderProps } from './hooks/use_artifact_card_props_provider';
+import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
 import { NoDataEmptyState } from './components/no_data_empty_state';
-import { ArtifactFlyoutProps, ArtifactFlyout } from './components/artifact_flyout';
+import type { ArtifactFlyoutProps } from './components/artifact_flyout';
+import { ArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-import { ArtifactListPageUrlParams } from './types';
-import { useUrlParams } from '../hooks/use_url_params';
-import { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { ArtifactListPageUrlParams } from './types';
+import { useUrlParams } from '../../hooks/use_url_params';
+import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useGetEndpointSpecificPolicies } from '../../services/policies/hooks';
@@ -42,7 +46,6 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
-import { useIsMounted } from '../hooks/use_is_mounted';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -71,6 +74,7 @@ export interface ArtifactListPageProps {
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
+  secondaryPageInfo?: React.ReactNode;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
@@ -79,6 +83,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     ArtifactFormComponent,
     searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
     labels: _labels = {},
+    secondaryPageInfo,
     onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
@@ -105,6 +110,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       error,
       refetch: refetchListData,
     } = useWithArtifactListData(apiClient, searchableFields);
+
+    useEffect(() => {
+      if (!isLoading && error) {
+        toasts.addDanger((error?.body as ServerApiError)?.message || error.message);
+      }
+    }, [error, toasts, isLoading]);
 
     const items = useMemo(() => {
       return listDataResponse?.data ?? [];
@@ -212,7 +223,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
-      if (isMounted) {
+      if (isMounted()) {
         setSelectedItemForDelete(undefined);
         refetchListData();
       }
@@ -231,6 +242,24 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForEdit(undefined);
     }, []);
 
+    const description = useMemo(() => {
+      const subtitleText = labels.pageAboutInfo ? (
+        <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
+      ) : undefined;
+      const detailedPageInfoElement = secondaryPageInfo ? (
+        <>
+          <EuiSpacer size="m" />
+          {secondaryPageInfo}
+        </>
+      ) : undefined;
+      return (
+        <>
+          {subtitleText}
+          {detailedPageInfoElement}
+        </>
+      );
+    }, [labels.pageAboutInfo, secondaryPageInfo]);
+
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
@@ -240,7 +269,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         headerBackComponent={backButtonHeaderComponent}
         hideHeader={!doesDataExist}
         title={labels.pageTitle}
-        subtitle={labels.pageAboutInfo}
+        subtitle={description}
         actions={
           allowCardCreateAction && (
             <EuiButton
@@ -254,6 +283,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             </EuiButton>
           )
         }
+        data-test-subj={getTestId('container')}
       >
         {isFlyoutOpened && (
           <ArtifactFlyout
@@ -290,6 +320,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
+            secondaryAboutInfo={secondaryPageInfo}
           />
         ) : (
           <>

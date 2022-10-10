@@ -18,6 +18,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -34,7 +35,11 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
@@ -47,13 +52,13 @@ import {
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition, HistoryLocationState } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { useDiscoverServices } from './utils/use_discover_services';
+import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
 const DocViewerLegacyTable = React.lazy(
@@ -151,6 +156,7 @@ export interface DiscoverSetupPlugins {
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
+  expressions: ExpressionsSetup;
 }
 
 /**
@@ -172,6 +178,10 @@ export interface DiscoverStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  expressions: ExpressionsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -190,7 +200,7 @@ export class DiscoverPlugin
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-
+    const isDev = this.initializerContext.env.mode.dev;
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({
@@ -231,7 +241,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, indexPattern }) => (
+      component: ({ hit, dataView }) => (
         <React.Suspense
           fallback={
             <DeferredSpinner>
@@ -240,24 +250,30 @@ export class DiscoverPlugin
           }
         >
           <SourceViewer
-            index={hit._index}
-            id={hit._id}
-            indexPattern={indexPattern}
+            index={hit.raw._index}
+            id={hit.raw._id}
+            dataView={dataView}
             hasLineNumbers
           />
         </React.Suspense>
       ),
     });
 
-    const { setTrackedUrl, restorePreviousUrl, stopUrlTracker, appMounted, appUnMounted } =
-      initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
+    const {
+      setTrackedUrl,
+      restorePreviousUrl,
+      stopUrlTracker,
+      appMounted,
+      appUnMounted,
+      setTrackingEnabled,
+    } = initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl, setTrackingEnabled });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
 
     core.application.register({
-      id: 'discover',
+      id: PLUGIN_ID,
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
@@ -270,6 +286,10 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+        const historyLocationState = params.history.location.state as
+          | HistoryLocationState
+          | undefined;
+
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = params.history.listen(() => {
@@ -283,14 +303,14 @@ export class DiscoverPlugin
           this.locator!
         );
 
-        // make sure the index pattern list is up to date
+        // make sure the data view list is up to date
         await discoverStartPlugins.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services);
+        const unmount = renderApp(params.element, services, isDev, historyLocationState);
         return () => {
           unlistenParentHistory();
           unmount();

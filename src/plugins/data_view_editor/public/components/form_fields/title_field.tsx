@@ -9,20 +9,16 @@
 import React, { ChangeEvent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { MatchedItem } from '@kbn/data-views-plugin/public';
 import {
   UseField,
   getFieldValidityAndErrorMessage,
   ValidationConfig,
   FieldConfig,
 } from '../../shared_imports';
-import { canAppendWildcard } from '../../lib';
+import { canAppendWildcard, removeSpaces } from '../../lib';
 import { schema } from '../form_schema';
-import {
-  MatchedItem,
-  RollupIndicesCapsResponse,
-  IndexPatternConfig,
-  MatchedIndicesSet,
-} from '../../types';
+import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
 
 interface RefreshMatchedIndicesResult {
   matchedIndicesResult: MatchedIndicesSet;
@@ -30,7 +26,6 @@ interface RefreshMatchedIndicesResult {
 }
 
 interface TitleFieldProps {
-  existingIndexPatterns: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
@@ -55,20 +50,6 @@ const mustMatchError = {
   }),
 };
 
-const createTitlesNoDupesValidator = (
-  namesNotAllowed: string[]
-): ValidationConfig<{}, string, string> => ({
-  validator: ({ value }) => {
-    if (namesNotAllowed.includes(value)) {
-      return {
-        message: i18n.translate('indexPatternEditor.dataViewExists.ValidationErrorMessage', {
-          defaultMessage: 'A data view with this title already exists.',
-        }),
-      };
-    }
-  },
-});
-
 interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
   refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
@@ -81,7 +62,9 @@ const createMatchesIndicesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
-    const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(value);
+    const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(
+      removeSpaces(value)
+    );
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
     if (matchedIndicesResult.exactMatchedIndices.length === 0) {
@@ -120,7 +103,6 @@ const createMatchesIndicesValidator = ({
 });
 
 interface GetTitleConfigArgs {
-  namesNotAllowed: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
@@ -128,7 +110,6 @@ interface GetTitleConfigArgs {
 }
 
 const getTitleConfig = ({
-  namesNotAllowed,
   isRollup,
   rollupIndicesCapabilities,
   refreshMatchedIndices,
@@ -143,7 +124,6 @@ const getTitleConfig = ({
       refreshMatchedIndices,
       isRollup,
     }),
-    createTitlesNoDupesValidator(namesNotAllowed),
   ];
 
   return {
@@ -153,7 +133,6 @@ const getTitleConfig = ({
 };
 
 export const TitleField = ({
-  existingIndexPatterns,
   isRollup,
   matchedIndices,
   rollupIndicesCapabilities,
@@ -164,19 +143,12 @@ export const TitleField = ({
   const fieldConfig = useMemo(
     () =>
       getTitleConfig({
-        namesNotAllowed: existingIndexPatterns,
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
         refreshMatchedIndices,
       }),
-    [
-      existingIndexPatterns,
-      isRollup,
-      matchedIndices,
-      rollupIndicesCapabilities,
-      refreshMatchedIndices,
-    ]
+    [isRollup, matchedIndices, rollupIndicesCapabilities, refreshMatchedIndices]
   );
 
   return (
@@ -186,7 +158,7 @@ export const TitleField = ({
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
-            defaultMessage: 'Title field',
+            defaultMessage: 'Index pattern field',
           }),
         },
       }}
@@ -206,7 +178,6 @@ export const TitleField = ({
               isInvalid={isInvalid}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                e.persist();
                 let query = e.target.value;
                 if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
                   query += '*';
@@ -222,7 +193,7 @@ export const TitleField = ({
               }}
               isLoading={field.isValidating}
               fullWidth
-              data-test-subj="createIndexPatternNameInput"
+              data-test-subj="createIndexPatternTitleInput"
             />
           </EuiFormRow>
         );

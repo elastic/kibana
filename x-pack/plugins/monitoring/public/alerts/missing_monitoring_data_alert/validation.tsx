@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export function validate(opts: any): ValidationResult {

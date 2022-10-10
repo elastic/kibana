@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { dataPluginMock, Start as DataPublicStartMock } from '@kbn/data-plugin/public/mocks';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { Start as DataPublicStartMock } from '@kbn/data-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';

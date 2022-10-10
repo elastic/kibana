@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
 import styled from 'styled-components';
@@ -26,6 +27,8 @@ interface BaseProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   value: string | number | undefined | null;
 }
@@ -37,6 +40,8 @@ const RuleStatusComponent: React.FC<Props> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   value,
   onClick,
@@ -61,6 +66,8 @@ const RuleStatusComponent: React.FC<Props> = ({
     <DefaultDraggable
       field={fieldName}
       id={`alert-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       isDraggable={false}
       value={`${value}`}
       tooltipContent={fieldName}

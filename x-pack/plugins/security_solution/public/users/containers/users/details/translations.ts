@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_USER_DETAILS = i18n.translate(
-  'xpack.securitySolution.userDetails.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on user details search`,
-  }
-);
-
 export const FAIL_USER_DETAILS = i18n.translate(
   'xpack.securitySolution.userDetails.failSearchDescription',
   {

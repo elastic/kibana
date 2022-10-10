@@ -34,6 +34,7 @@ interface ExplorerAnomaliesContainerProps {
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
   showSelectedInterval?: boolean;
   chartsService: ChartsPluginStart;
+  timeRange: { from: string; to: string } | undefined;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -56,6 +57,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   onSelectEntity,
   showSelectedInterval,
   chartsService,
+  timeRange,
 }) => {
   return (
     <>
@@ -78,23 +80,23 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             </h4>
           </EuiText>
         )}
-      <div className="euiText explorer-charts">
-        {showCharts && (
-          <ExplorerChartsContainer
-            {...{
-              ...chartsData,
-              severity: severity.val,
-              mlLocator,
-              timeBuckets,
-              timefilter,
-              onSelectEntity,
-              tooManyBucketsCalloutMsg,
-              showSelectedInterval,
-              chartsService,
-            }}
-          />
-        )}
-      </div>
+
+      {showCharts && (
+        <ExplorerChartsContainer
+          {...{
+            ...chartsData,
+            severity: severity.val,
+            mlLocator,
+            timeBuckets,
+            timefilter,
+            timeRange,
+            onSelectEntity,
+            tooManyBucketsCalloutMsg,
+            showSelectedInterval,
+            chartsService,
+          }}
+        />
+      )}
     </>
   );
 };

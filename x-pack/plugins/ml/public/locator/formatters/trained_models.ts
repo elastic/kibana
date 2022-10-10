@@ -17,7 +17,28 @@ export function formatTrainedModelsManagementUrl(
   appBasePath: string,
   mlUrlGeneratorState: TrainedModelsUrlState['pageState']
 ): string {
-  return `${appBasePath}/${ML_PAGES.TRAINED_MODELS_MANAGE}`;
+  let url = `${appBasePath}/${ML_PAGES.TRAINED_MODELS_MANAGE}`;
+  if (mlUrlGeneratorState) {
+    const { modelId } = mlUrlGeneratorState;
+
+    if (modelId) {
+      const modelsListState: Partial<ListingPageUrlState> = {
+        queryText: `model_id:(${modelId})`,
+      };
+
+      const queryState: AppPageState<ListingPageUrlState> = {
+        [ML_PAGES.TRAINED_MODELS_MANAGE]: modelsListState,
+      };
+
+      url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(
+        '_a',
+        queryState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
+  }
+  return url;
 }
 
 export function formatTrainedModelsNodesManagementUrl(

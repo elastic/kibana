@@ -31,9 +31,8 @@ $panelWidthL:     #{'max(40%, 450px)'};
     }
 
     .euiTableRow > .euiTableRowCell {
-      border-bottom: 0;
-      border-top: $euiBorderThin;
-
+      border-top: 0;
+      border-bottom: $euiBorderThin;
     }
 
     .euiTableCellContent {

@@ -7,7 +7,7 @@
  */
 
 import { tap } from 'rxjs/operators';
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { pipeClosure } from '../common';
 import { OptimizerUpdate$ } from '../run_optimizer';

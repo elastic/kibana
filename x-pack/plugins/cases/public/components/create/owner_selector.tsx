@@ -19,7 +19,7 @@ import {
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
+import { OWNER_INFO } from '../../../common/constants';
 
 import { FieldHook, getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
 import * as i18n from './translations';
@@ -35,7 +35,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const DEFAULT_SELECTABLE_OWNERS = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER] as const;
+const DEFAULT_SELECTABLE_OWNERS = Object.keys(OWNER_INFO) as Array<keyof typeof OWNER_INFO>;
 
 const FIELD_NAME = 'selectedOwner';
 

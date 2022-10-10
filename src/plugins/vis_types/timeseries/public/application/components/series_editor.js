@@ -16,6 +16,8 @@ import { newSeriesFn } from './lib/new_series_fn';
 import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { reorder } from './lib/reorder';
 
+import './_series_editor.scss';
+
 const DROPPABLE_ID = 'series_editor_dnd';
 
 export class SeriesEditor extends Component {

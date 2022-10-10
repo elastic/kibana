@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { RowRenderer } from '../../../../../../../common/types';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { RowRenderer } from '../../../../../../../common/types';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {

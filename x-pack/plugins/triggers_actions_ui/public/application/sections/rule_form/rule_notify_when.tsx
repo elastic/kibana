@@ -28,13 +28,13 @@ import { RuleNotifyWhenType } from '../../../types';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
 
-const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
+export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
     value: 'onActionGroupChange',
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.display',
       {
-        defaultMessage: 'Only on status change',
+        defaultMessage: 'On status changes',
       }
     ),
     'data-test-subj': 'onActionGroupChange',
@@ -42,14 +42,14 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="Only on status change"
+            defaultMessage="On status changes"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run when the rule status changes."
+              defaultMessage="Actions run if the alert status changes."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.description"
             />
           </p>
@@ -62,7 +62,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time rule is active',
+        defaultMessage: 'On check intervals',
       }
     ),
     'data-test-subj': 'onActiveAlert',
@@ -70,14 +70,14 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="Every time rule is active"
+            defaultMessage="On check intervals"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions repeat at the rule interval when the rule is active."
+              defaultMessage="Actions run if rule conditions are met."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -90,7 +90,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.display',
       {
-        defaultMessage: 'On a custom action interval',
+        defaultMessage: 'On custom action intervals',
       }
     ),
     'data-test-subj': 'onThrottleInterval',
@@ -98,14 +98,14 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="On a custom action interval"
+            defaultMessage="On custom action intervals"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run using the interval you set."
+              defaultMessage="Actions run if rule conditions are met."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.description"
             />
           </p>
@@ -165,7 +165,7 @@ export const RuleNotifyWhen = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the rule is active.',
+          defaultMessage: 'Define how often alerts generate actions.',
         })}
       />
     </>

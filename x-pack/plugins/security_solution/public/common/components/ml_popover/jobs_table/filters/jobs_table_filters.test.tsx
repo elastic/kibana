@@ -8,7 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
-import { SecurityJob } from '../../types';
+import type { SecurityJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
 import { mockSecurityJobs } from '../../api.mock';
 

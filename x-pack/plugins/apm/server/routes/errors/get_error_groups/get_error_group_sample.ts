@@ -6,13 +6,13 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getTransaction } from '../../transactions/get_transaction';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -41,6 +41,7 @@ export async function getErrorGroupSample({
       events: [ProcessorEvent.error as const],
     },
     body: {
+      track_total_hits: true,
       size: 1,
       query: {
         bool: {

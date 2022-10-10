@@ -15,10 +15,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Prompt } from '@kbn/observability-plugin/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Source } from '../../../containers/metrics_source';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
@@ -48,7 +48,7 @@ export const SourceConfigurationSettings = ({
     isLoading,
     isUninitialized,
     updateSourceConfiguration,
-  } = useContext(Source.Context);
+  } = useSourceContext();
 
   const {
     indicesConfigurationProps,

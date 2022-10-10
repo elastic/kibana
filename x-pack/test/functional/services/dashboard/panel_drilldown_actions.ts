@@ -29,7 +29,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
     async clickCreateDrilldown() {
       log.debug('clickCreateDrilldown');
       await this.expectExistsCreateDrilldownAction();
-      await testSubjects.clickWhenNotDisabled(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectExistsManageDrilldownsAction() {
@@ -45,7 +45,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
     async clickManageDrilldowns() {
       log.debug('clickManageDrilldowns');
       await this.expectExistsManageDrilldownsAction();
-      await testSubjects.clickWhenNotDisabled(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async expectMultipleActionsMenuOpened() {

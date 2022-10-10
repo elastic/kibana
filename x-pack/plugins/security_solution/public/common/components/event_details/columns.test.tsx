@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { getColumns } from './columns';
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { EventFieldsData } from './types';
+import type { EventFieldsData } from './types';
 import { get } from 'lodash/fp';
 
 jest.mock('../../lib/kibana');

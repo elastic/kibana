@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import styled, { AnyStyledComponent } from 'styled-components';
+import type { AnyStyledComponent } from 'styled-components';
+import styled from 'styled-components';
 import { EuiInMemoryTable } from '@elastic/eui';
 
 export const SummaryTable = styled(EuiInMemoryTable as unknown as AnyStyledComponent)`

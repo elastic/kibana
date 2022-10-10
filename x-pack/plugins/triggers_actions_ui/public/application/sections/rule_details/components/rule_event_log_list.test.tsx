@@ -10,119 +10,62 @@ import uuid from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-
+import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
-import { Rule } from '../../../../types';
+import {
+  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+} from '../../../constants';
+import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
+import { RuleType } from '../../../../types';
+import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
+  loadActionErrorLog: jest.fn(),
+}));
 
-const mockLogResponse: any = {
-  data: [
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-20T07:40:44-07:00',
-      duration: 5000000,
-      status: 'success',
-      message: 'rule execution #1',
-      num_active_alerts: 2,
-      num_new_alerts: 4,
-      num_recovered_alerts: 3,
-      num_triggered_actions: 10,
-      num_succeeded_actions: 0,
-      num_errored_actions: 4,
-      total_search_duration: 1000000,
-      es_search_duration: 1400000,
-      schedule_delay: 2000000,
-      timed_out: false,
-    },
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-20T07:40:45-07:00',
-      duration: 6000000,
-      status: 'success',
-      message: 'rule execution #2',
-      num_active_alerts: 4,
-      num_new_alerts: 2,
-      num_recovered_alerts: 4,
-      num_triggered_actions: 5,
-      num_succeeded_actions: 3,
-      num_errored_actions: 0,
-      total_search_duration: 300000,
-      es_search_duration: 300000,
-      schedule_delay: 300000,
-      timed_out: false,
-    },
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-20T07:40:46-07:00',
-      duration: 340000,
-      status: 'failure',
-      message: 'rule execution #3',
-      num_active_alerts: 8,
-      num_new_alerts: 5,
-      num_recovered_alerts: 0,
-      num_triggered_actions: 1,
-      num_succeeded_actions: 1,
-      num_errored_actions: 4,
-      total_search_duration: 2300000,
-      es_search_duration: 2300000,
-      schedule_delay: 2300000,
-      timed_out: false,
-    },
-    {
-      id: uuid.v4(),
-      timestamp: '2022-03-21T07:40:46-07:00',
-      duration: 3000000,
-      status: 'unknown',
-      message: 'rule execution #4',
-      num_active_alerts: 4,
-      num_new_alerts: 4,
-      num_recovered_alerts: 4,
-      num_triggered_actions: 4,
-      num_succeeded_actions: 4,
-      num_errored_actions: 4,
-      total_search_duration: 400000,
-      es_search_duration: 400000,
-      schedule_delay: 400000,
-      timed_out: false,
-    },
-  ],
-  total: 4,
-};
-
-const mockRule: Rule = {
-  id: uuid.v4(),
-  enabled: true,
-  name: `rule-${uuid.v4()}`,
-  tags: [],
-  ruleTypeId: '.noop',
-  consumer: 'consumer',
-  schedule: { interval: '1m' },
-  actions: [],
-  params: {},
-  createdBy: null,
-  updatedBy: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  apiKeyOwner: null,
-  throttle: null,
-  notifyWhen: null,
-  muteAll: false,
-  mutedInstanceIds: [],
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-};
+const loadActionErrorLogMock = loadActionErrorLog as unknown as jest.MockedFunction<
+  typeof loadActionErrorLog
+>;
 
 const loadExecutionLogAggregationsMock = jest.fn();
 
-describe('rule_event_log_list', () => {
+const onChangeDurationMock = jest.fn();
+
+const ruleMock = mockRule();
+
+const authorizedConsumers = {
+  [ALERTS_FEATURE_ID]: { read: true, all: true },
+};
+
+const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
+
+const ruleType: RuleType = mockRuleType({
+  producer: ALERTS_FEATURE_ID,
+  authorizedConsumers,
+  recoveryActionGroup,
+});
+
+const mockErrorLogResponse = {
+  totalErrors: 1,
+  errors: [
+    {
+      id: '66b9c04a-d5d3-4ed4-aa7c-94ddaca3ac1d',
+      timestamp: '2022-03-31T18:03:33.133Z',
+      type: 'alerting',
+      message:
+        "rule execution failure: .es-query:d87fcbd0-b11b-11ec-88f6-293354dba871: 'Mine' - x_content_parse_exception: [parsing_exception] Reason: unknown query [match_allxxxx] did you mean [match_all]?",
+    },
+  ],
+};
+
+// FLAKY: https://github.com/elastic/kibana/issues/139062
+describe.skip('rule_event_log_list', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
@@ -136,13 +79,18 @@ describe('rule_event_log_list', () => {
         ];
       }
     });
+    loadActionErrorLogMock.mockResolvedValue(mockErrorLogResponse);
     loadExecutionLogAggregationsMock.mockResolvedValue(mockLogResponse);
   });
 
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -152,9 +100,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -163,18 +111,15 @@ describe('rule_event_log_list', () => {
     // Loading
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeTruthy();
 
-    // Verify the initial columns are rendered
-    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
-      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
-    });
-
-    // No data initially
-    expect(wrapper.find('[data-gridcell-column-id="timestamp"]').length).toEqual(1);
-
     // Let the load resolve
     await act(async () => {
       await nextTick();
       wrapper.update();
+    });
+
+    // Verify the initial columns are rendered
+    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
+      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
     });
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
@@ -187,7 +132,11 @@ describe('rule_event_log_list', () => {
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -215,17 +164,12 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
-        sort: [
-          {
-            timestamp: {
-              order: 'asc',
-            },
-          },
-        ],
-        filter: [],
+        id: ruleMock.id,
+        message: '',
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -244,15 +188,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
-        sort: [
-          {
-            timestamp: {
-              order: 'desc',
-            },
-          },
-        ],
-        filter: [],
+        id: ruleMock.id,
+        sort: [{ timestamp: { order: 'desc' } }],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -280,16 +218,16 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [
           {
             timestamp: { order: 'desc' },
           },
           {
-            execution_duration: { order: 'asc' },
+            execution_duration: { order: 'desc' },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -299,7 +237,11 @@ describe('rule_event_log_list', () => {
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -321,9 +263,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: ['success'],
+        outcomeFilter: ['success'],
         page: 0,
         perPage: 10,
       })
@@ -341,9 +283,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: ['success', 'failure'],
+        outcomeFilter: ['success', 'failure'],
         page: 0,
         perPage: 10,
       })
@@ -358,7 +300,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -380,9 +326,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 1,
         perPage: 10,
       })
@@ -400,9 +346,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 50,
       })
@@ -414,7 +360,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -426,9 +376,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
         dateStart: '1969-12-30T19:00:00-05:00',
@@ -451,9 +401,9 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
         dateStart: '1969-12-31T18:45:00-05:00',
@@ -467,7 +417,11 @@ describe('rule_event_log_list', () => {
   it('can save display columns to localStorage', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -481,7 +435,7 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual(RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
+    ).toEqual(GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
 
     wrapper.find('[data-test-subj="dataGridColumnSelectorButton"] button').simulate('click');
 
@@ -500,13 +454,17 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual([...RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
+    ).toEqual(['timestamp', 'execution_duration', 'status', 'message', 'num_errored_actions']);
   });
 
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -516,18 +474,22 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(RefineSearchPrompt).text()).toBeFalsy();
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
   });
 
   it('shows the refine search prompt when our queries return too much data', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
-      ...mockLogResponse,
-      total: 1000,
+      data: [],
+      total: 1100,
     });
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -537,8 +499,297 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
+    // Initially do not show the prompt
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+
+    // Go to the last page
+    wrapper.find('[data-test-subj="pagination-button-99"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Prompt is shown
     expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
-      'These are the first 1000 matching your search, refine your search to see others. Back to top.'
+      'These are the first 1000 documents matching your search, refine your search to see others. Back to top.'
     );
+
+    // Go to the second last page
+    wrapper.find('[data-test-subj="pagination-button-98"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Prompt is not shown
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+  });
+
+  it('shows the correct pagination results when results are 0', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 0,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 0 of 0 log entries'
+    );
+  });
+
+  it('shows the correct pagination result when result is 1', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 1,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 1 of 1 log entry'
+    );
+  });
+
+  it('shows the correct pagination result when paginated', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 10 of 85 log entries'
+    );
+
+    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 11 - 20 of 85 log entries'
+    );
+
+    wrapper.find('[data-test-subj="pagination-button-8"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 81 - 85 of 85 log entries'
+    );
+  });
+
+  it('renders errored action badges in message rows', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      data: [
+        {
+          id: uuid.v4(),
+          timestamp: '2022-03-20T07:40:44-07:00',
+          duration: 5000000,
+          status: 'success',
+          message: 'rule execution #1',
+          version: '8.2.0',
+          num_active_alerts: 2,
+          num_new_alerts: 4,
+          num_recovered_alerts: 3,
+          num_triggered_actions: 10,
+          num_succeeded_actions: 0,
+          num_errored_actions: 4,
+          total_search_duration: 1000000,
+          es_search_duration: 1400000,
+          schedule_delay: 2000000,
+          timed_out: false,
+        },
+      ],
+      total: 1,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleActionErrorBadge"]').first().text()).toEqual('4');
+
+    // Click to open flyout
+    wrapper
+      .find('[data-test-subj="ruleEventLogDataGridErroredActionBadge"]')
+      .first()
+      .simulate('click');
+    expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
+  });
+
+  it('shows rule summary and execution duration chart', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        fetchRuleSummary={false}
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration00:00:00.100'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+
+    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="avgExecutionDurationPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
+      '00:00:00.100'
+    );
+  });
+
+  it('renders average execution duration', async () => {
+    const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
+    const ruleSummary = mockRuleSummary({
+      executionDuration: { average: 60284, valuesWithTimestamp: {} },
+      ruleTypeId: ruleMock.ruleTypeId,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        fetchRuleSummary={false}
+        ruleId={ruleMock.id}
+        ruleType={ruleTypeCustom}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration00:01:00.284'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+  });
+
+  it('renders warning when average execution duration exceeds rule timeout', async () => {
+    const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
+    const ruleSummary = mockRuleSummary({
+      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
+      ruleTypeId: ruleMock.ruleTypeId,
+    });
+
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        fetchRuleSummary={false}
+        ruleId={ruleMock.id}
+        ruleType={ruleTypeCustom}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
+
+    const avgExecutionDurationStat = wrapper
+      .find('EuiStat[data-test-subj="avgExecutionDurationStat"]')
+      .text()
+      .replaceAll('Info', '');
+    expect(avgExecutionDurationStat).toEqual('Average duration16:44:44.345');
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
   });
 });

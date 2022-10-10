@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useMemo, useEffect } from 'react';
+import React, { FunctionComponent } from 'react';
 
-import { FieldHook, FieldConfig, FormData, FieldValidationData } from '../types';
-import { useField, InternalFieldConfig } from '../hooks';
-import { useFormContext } from '../form_context';
+import { FieldHook, FieldConfig, FormData } from '../types';
+import { useFieldFromProps } from '../hooks';
 
 export interface Props<T, FormType = FormData, I = T> {
   path: string;
@@ -49,104 +48,13 @@ export interface Props<T, FormType = FormData, I = T> {
 }
 
 function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, FormType, I>) {
-  const form = useFormContext<FormType>();
-  const { getFieldDefaultValue, __readFieldConfigFromSchema, __updateDefaultValueAt } = form;
+  const { field, propsToForward } = useFieldFromProps<T, FormType, I>(props);
 
-  const {
-    path,
-    config = __readFieldConfigFromSchema<T, FormType, I>(props.path),
-    defaultValue,
-    component,
-    componentProps,
-    readDefaultValueOnForm = true,
-    onChange,
-    onError,
-    children,
-    validationData,
-    validationDataProvider,
-    ...rest
-  } = props;
-
-  const ComponentToRender = component ?? 'input';
-  const propsToForward = { ...componentProps, ...rest };
-
-  const initialValue = useMemo<T>(() => {
-    // The initial value of the field.
-    // Order in which we'll determine this value:
-    // 1. The "defaultValue" passed through prop
-    //    --> <UseField path="foo" defaultValue="bar" />
-    // 2. A value declared in the "defaultValue" object passed to the form when initiating
-    //    --> const { form } = useForm({ defaultValue: { foo: 'bar' } }))
-    // 3. The "defaultValue" declared on the field "config". Either passed through prop or on the form schema
-    //    a. --> <UseField path="foo" config={{ defaultValue: 'bar' }} />
-    //    b. --> const formSchema = { foo: { defaultValue: 'bar' } }
-    // 4. An empty string ("")
-
-    if (defaultValue !== undefined) {
-      return defaultValue; // defaultValue passed through props
-    }
-
-    let value: T | undefined;
-
-    if (readDefaultValueOnForm) {
-      // Check the "defaultValue" object passed to the form
-      value = getFieldDefaultValue<T>(path);
-    }
-
-    if (value === undefined) {
-      // Check the field "config" object (passed through prop or declared on the form schema)
-      value = config?.defaultValue;
-    }
-
-    // If still undefined return an empty string
-    return value === undefined ? ('' as unknown as T) : value;
-  }, [defaultValue, path, config, readDefaultValueOnForm, getFieldDefaultValue]);
-
-  const fieldConfig = useMemo<FieldConfig<T, FormType, I> & InternalFieldConfig<T>>(
-    () => ({
-      ...config,
-      initialValue,
-    }),
-    [config, initialValue]
-  );
-
-  const fieldValidationData = useMemo<FieldValidationData>(
-    () => ({
-      validationData,
-      validationDataProvider,
-    }),
-    [validationData, validationDataProvider]
-  );
-
-  const field = useField<T, FormType, I>(
-    form,
-    path,
-    fieldConfig,
-    onChange,
-    onError,
-    fieldValidationData
-  );
-
-  useEffect(() => {
-    let needsCleanUp = false;
-
-    if (defaultValue !== undefined) {
-      needsCleanUp = true;
-      // Update the form "defaultValue" ref object.
-      // This allows us to reset the form and put back the defaultValue of each field
-      __updateDefaultValueAt(path, defaultValue);
-    }
-
-    return () => {
-      if (needsCleanUp) {
-        __updateDefaultValueAt(path, undefined);
-      }
-    };
-  }, [path, defaultValue, __updateDefaultValueAt]);
+  const ComponentToRender = props.component ?? 'input';
 
   // Children prevails over anything else provided.
-  if (children) {
-    return children(field);
+  if (props.children) {
+    return props.children(field);
   }
 
   if (ComponentToRender === 'input') {

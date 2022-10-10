@@ -6,11 +6,9 @@
  */
 
 import { mean } from 'lodash';
-import { IEvent } from '@kbn/event-log-plugin/server';
+import { IEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
-
-const Millis2Nanos = 1000 * 1000;
 
 export interface AlertSummaryFromEventLogParams {
   rule: SanitizedRule<{ bar: boolean }>;
@@ -89,14 +87,12 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       case EVENT_LOG_ACTIONS.activeInstance:
         status.status = 'Active';
         status.actionGroupId = event?.kibana?.alerting?.action_group_id;
-        status.actionSubgroup = event?.kibana?.alerting?.action_subgroup;
         break;
       case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
       case EVENT_LOG_ACTIONS.recoveredInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
-        status.actionSubgroup = undefined;
     }
   }
 
@@ -111,7 +107,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     }
 
     if (event?.event?.duration) {
-      const eventDirationMillis = event.event.duration / Millis2Nanos;
+      const eventDirationMillis = nanosToMillis(event.event.duration);
       eventDurations.push(eventDirationMillis);
       eventDurationsWithTimestamp[event['@timestamp']!] = eventDirationMillis;
     }
@@ -155,7 +151,6 @@ function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): Aler
     status: 'OK',
     muted: false,
     actionGroupId: undefined,
-    actionSubgroup: undefined,
     activeStartDate: undefined,
   };
   alerts.set(alertId, status);

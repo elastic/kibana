@@ -6,9 +6,10 @@
  */
 
 import { EnhancedStore } from '@reduxjs/toolkit';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,
+  switchAndCleanDatasource,
   switchVisualization,
   setState,
   updateState,
@@ -20,7 +21,7 @@ import {
   selectTriggerApplyChanges,
   selectChangesApplied,
 } from '.';
-import { layerTypes } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
 import { DatasourceMap, VisualizationMap } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
@@ -210,6 +211,57 @@ describe('lensSlice', () => {
       );
     });
 
+    describe('switching to a new datasource and modify the state', () => {
+      it('should switch active datasource and initialize new state', () => {
+        store.dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'testDatasource2',
+            visualizationId: 'testVis',
+            currentIndexPatternId: 'testIndexPatternId',
+          })
+        );
+        expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
+        expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
+        expect(store.getState().lens.visualization.activeId).toEqual('testVis');
+      });
+
+      it('should should switch active datasource and clean the datasource state', () => {
+        const datasource2State = {
+          layers: {},
+        };
+        const { store: customStore } = makeLensStore({
+          preloadedState: {
+            datasourceStates: {
+              testDatasource: {
+                state: {},
+                isLoading: false,
+              },
+              testDatasource2: {
+                state: datasource2State,
+                isLoading: false,
+              },
+            },
+          },
+        });
+
+        customStore.dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'testDatasource2',
+            visualizationId: 'testVis',
+            currentIndexPatternId: 'testIndexPatternId',
+          })
+        );
+
+        expect(customStore.getState().lens.activeDatasourceId).toEqual('testDatasource2');
+        expect(customStore.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(
+          false
+        );
+        expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual(
+          {}
+        );
+      });
+    });
+
     describe('adding or removing layer', () => {
       const testDatasource = (datasourceId: string) => {
         return {
@@ -227,6 +279,7 @@ describe('lensSlice', () => {
           removeLayer: (layerIds: unknown, layerId: string) =>
             (layerIds as string[]).filter((id: string) => id !== layerId),
           insertLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
+          getUsedDataView: jest.fn(() => 'indexPattern1'),
         };
       };
       const datasourceStates = {
@@ -253,7 +306,7 @@ describe('lensSlice', () => {
             (layerIds as string[]).filter((id: string) => id !== layerId),
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
-          getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+          getSupportedLayers: jest.fn(() => [{ type: LayerTypes.DATA, label: 'Data Layer' }]),
         },
       };
 
@@ -286,7 +339,7 @@ describe('lensSlice', () => {
         customStore.dispatch(
           addLayer({
             layerId: 'foo',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           })
         );
         const state = customStore.getState().lens;

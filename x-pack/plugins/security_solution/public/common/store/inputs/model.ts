@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import { InputsModelId } from './constants';
-import { CONSTANTS } from '../../components/url_state/constants';
+import type { InputsModelId } from './constants';
+import type { URL_PARAM_KEY } from '../../hooks/use_url_state';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -44,10 +44,6 @@ export interface Policy {
   duration: number; // in ms
 }
 
-interface InspectVariables {
-  inspect: boolean;
-}
-export type RefetchWithParams = ({ inspect }: InspectVariables) => void;
 export type RefetchKql = (dispatch: Dispatch) => boolean;
 export type Refetch = () => void;
 
@@ -64,16 +60,12 @@ export interface GlobalGenericQuery {
   invalidKqlQuery?: Error;
 }
 
-export interface GlobalGraphqlQuery extends GlobalGenericQuery {
-  id: string;
-  refetch: null | Refetch | RefetchWithParams;
-}
 export interface GlobalKqlQuery extends GlobalGenericQuery {
   id: 'kql';
-  refetch: RefetchKql;
+  refetch: Refetch | RefetchKql | null;
 }
 
-export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
+export type GlobalQuery = GlobalKqlQuery;
 
 export interface InputsRange {
   timerange: TimeRange;
@@ -89,16 +81,23 @@ export interface InputsRange {
 export interface LinkTo {
   linkTo: InputsModelId[];
 }
+export type InputsRangeTimeOnly = Pick<InputsRange, 'timerange' | 'linkTo' | 'policy'>;
+
+export type Inputs = InputsRange | InputsRangeTimeOnly;
 
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
+  socTrends?: InputsRangeTimeOnly;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];
-  [CONSTANTS.timerange]: TimeRange;
+  [URL_PARAM_KEY.timerange]: TimeRange;
 }
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
+  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
+  socTrends?: UrlInputsModelInputs;
 }

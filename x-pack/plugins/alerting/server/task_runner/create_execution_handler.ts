@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import { chunk } from 'lodash';
 import { transformActionParams } from './transform_action_params';
-import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
   ActionsCompletion,
@@ -17,9 +16,6 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '../types';
-
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
@@ -47,7 +43,7 @@ export function createExecutionHandler<
   apiKey,
   ruleType,
   kibanaBaseUrl,
-  eventLogger,
+  alertingEventLogger,
   request,
   ruleParams,
   supportsEphemeralTasks,
@@ -65,10 +61,10 @@ export function createExecutionHandler<
   const ruleTypeActionGroups = new Map(
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
+  const CHUNK_SIZE = 1000;
 
   return async ({
     actionGroup,
-    actionSubgroup,
     context,
     state,
     ruleRunMetricsStore,
@@ -95,7 +91,6 @@ export function createExecutionHandler<
             alertInstanceId: alertId,
             alertActionGroup: actionGroup,
             alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             actionId: action.id,
@@ -117,11 +112,11 @@ export function createExecutionHandler<
 
     ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
 
-    const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
-
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
+    const bulkActions = [];
+    const logActions = [];
     for (const action of actions) {
       const { actionTypeId } = action;
 
@@ -189,54 +184,32 @@ export function createExecutionHandler<
         ],
       };
 
-      // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
         try {
           await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
         } catch (err) {
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-            await actionsClient.enqueueExecution(enqueueOptions);
+            bulkActions.push(enqueueOptions);
           }
         }
       } else {
-        await actionsClient.enqueueExecution(enqueueOptions);
+        bulkActions.push(enqueueOptions);
       }
-
-      const event = createAlertEventLogRecordObject({
-        ruleId,
-        ruleType: ruleType as UntypedNormalizedRuleType,
-        consumer: ruleConsumer,
-        action: EVENT_LOG_ACTIONS.executeAction,
-        executionId,
-        spaceId,
-        instanceId: alertId,
-        group: actionGroup,
-        subgroup: actionSubgroup,
-        ruleName,
-        savedObjects: [
-          {
-            type: 'alert',
-            id: ruleId,
-            typeId: ruleType.id,
-            relation: SAVED_OBJECT_REL_PRIMARY,
-          },
-          {
-            type: 'action',
-            id: action.id,
-            typeId: actionTypeId,
-          },
-        ],
-        ...namespace,
-        message: `alert: ${ruleLabel} instanceId: '${alertId}' scheduled ${
-          actionSubgroup
-            ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-            : `actionGroup: '${actionGroup}'`
-        } action: ${actionLabel}`,
+      logActions.push({
+        id: action.id,
+        typeId: actionTypeId,
+        alertId,
+        alertGroup: actionGroup,
       });
+    }
 
-      eventLogger.logEvent(event);
+    for (const c of chunk(bulkActions, CHUNK_SIZE)) {
+      await actionsClient.bulkEnqueueExecution(c);
+    }
+
+    for (const action of logActions) {
+      alertingEventLogger.logAction(action);
     }
   };
 }

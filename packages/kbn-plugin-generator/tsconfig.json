@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "target": "ES2019",
@@ -11,9 +12,9 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ],
   "exclude": [
-    "src/template/*"
+    "template/*"
   ],
 }

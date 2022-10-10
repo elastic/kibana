@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
-import { LayerType, layerTypes } from '../../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { IndexPattern } from '../../../../types';
+import type { LayerType } from '../../../../../common';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
@@ -20,11 +22,19 @@ export const buildLabelFunction =
   (ofName: (name?: string) => string) =>
   (name?: string, timeScale?: TimeScaleUnit, timeShift?: string) => {
     const rawLabel = ofName(name);
-    return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
+    return adjustTimeScaleLabelSuffix(
+      rawLabel,
+      undefined,
+      timeScale,
+      undefined,
+      timeShift,
+      undefined,
+      undefined
+    );
   };
 
 export function checkForDataLayerType(layerType: LayerType, name: string) {
-  if (layerType === layerTypes.REFERENCELINE) {
+  if (layerType === LayerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
         defaultMessage: '{name} is disabled for this type of layer.',

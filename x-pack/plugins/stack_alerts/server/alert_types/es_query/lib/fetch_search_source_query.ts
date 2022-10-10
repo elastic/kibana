@@ -12,20 +12,20 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
-import { OnlySearchSourceAlertParams } from '../types';
+import { OnlySearchSourceRuleParams } from '../types';
 
 export async function fetchSearchSourceQuery(
-  alertId: string,
-  params: OnlySearchSourceAlertParams,
+  ruleId: string,
+  params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   services: {
     logger: Logger;
-    searchSourceClient: Promise<ISearchStartSearchSource>;
+    searchSourceClient: ISearchStartSearchSource;
   }
 ) {
   const { logger, searchSourceClient } = services;
-  const client = await searchSourceClient;
-  const initialSearchSource = await client.create(params.searchConfiguration);
+
+  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
@@ -34,7 +34,7 @@ export async function fetchSearchSourceQuery(
   );
 
   logger.debug(
-    `search source query alert (${alertId}) query: ${JSON.stringify(
+    `search source query rule (${ruleId}) query: ${JSON.stringify(
       searchSource.getSearchRequestBody()
     )}`
   );
@@ -51,7 +51,7 @@ export async function fetchSearchSourceQuery(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  params: OnlySearchSourceAlertParams,
+  params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined
 ) {
   const index = searchSource.getField('index');
@@ -71,13 +71,16 @@ export function updateSearchSource(
   const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
   const filters = [timerangeFilter];
 
-  if (latestTimestamp && latestTimestamp > dateStart) {
-    // add additional filter for documents with a timestamp greater then
-    // the timestamp of the previous run, so that those documents are not counted twice
-    const field = index.fields.find((f) => f.name === timeFieldName);
-    const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
-    filters.push(addTimeRangeField);
+  if (params.excludeHitsFromPreviousRun) {
+    if (latestTimestamp && latestTimestamp > dateStart) {
+      // add additional filter for documents with a timestamp greater then
+      // the timestamp of the previous run, so that those documents are not counted twice
+      const field = index.fields.find((f) => f.name === timeFieldName);
+      const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
+      filters.push(addTimeRangeField);
+    }
   }
+
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);

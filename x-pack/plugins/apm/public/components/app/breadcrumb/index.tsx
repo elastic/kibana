@@ -18,7 +18,10 @@ export const Breadcrumb = ({
   children: React.ReactElement;
 }) => {
   const { core } = useApmPluginContext();
-  useBreadcrumb({ title, href: core.http.basePath.prepend('/app/apm' + href) });
+  useBreadcrumb(
+    () => ({ title, href: core.http.basePath.prepend('/app/apm' + href) }),
+    [core.http.basePath, href, title]
+  );
 
   return children;
 };

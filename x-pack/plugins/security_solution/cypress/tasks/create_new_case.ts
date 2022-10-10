@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IbmResilientConnectorOptions,
   JiraConnectorOptions,
   ServiceNowconnectorOptions,
@@ -14,6 +14,7 @@ import {
 } from '../objects/case';
 import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 
+import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
   BACK_TO_CASES_BTN,
   DESCRIPTION_INPUT,
@@ -21,7 +22,6 @@ import {
   INSERT_TIMELINE_BTN,
   LOADING_SPINNER,
   TAGS_INPUT,
-  TIMELINE_SEARCHBOX,
   TITLE_INPUT,
 } from '../screens/create_new_case';
 import {

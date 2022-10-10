@@ -19,13 +19,15 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
-import { State, createStore } from '../../common/store';
+import type { State } from '../../common/store';
+import { createStore } from '../../common/store';
 import { inputsActions } from '../../common/store/inputs';
 
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { InputsModelId } from '../../common/store/inputs/constants';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -106,6 +108,7 @@ jest.mock('../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      remove: jest.fn(),
     }),
   };
 });
@@ -238,7 +241,9 @@ describe('Network page - rendering', () => {
     await waitFor(() => {
       wrapper.update();
 
-      myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+      myStore.dispatch(
+        inputsActions.setSearchBarFilter({ id: InputsModelId.global, filters: newFilters })
+      );
       wrapper.update();
       expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'

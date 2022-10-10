@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiDnsQueriesLensAttributes: LensAttributes = {
   title: '[Network] DNS metric',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: 'cea37c70-8f91-43bf-b9fe-72d8c049f6a3',

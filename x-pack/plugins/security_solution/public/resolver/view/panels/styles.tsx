@@ -26,13 +26,6 @@ export const StyledTitle = styled('h4')`
 `;
 
 /**
- * Used for a 'BETA' badge in the breadcrumbs of each panel.
- */
-export const BetaHeader = styled(`header`)`
-  margin-bottom: 1em;
-`;
-
-/**
  * Styled version of EuiBreadcrumbs that is used by the breadcrumbs in each panel.
  */
 export const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`

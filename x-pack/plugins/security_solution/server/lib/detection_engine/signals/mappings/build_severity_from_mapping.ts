@@ -7,15 +7,15 @@
 
 import { get } from 'lodash/fp';
 
-import {
+import type {
   Severity,
   SeverityMappingItem,
-  severity as SeverityIOTS,
   SeverityMappingOrUndefined,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Meta } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { SearchTypes } from '../../../../../common/detection_engine/types';
-import { SignalSource } from '../types';
+import { severity as SeverityIOTS } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Meta } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { SearchTypes } from '../../../../../common/detection_engine/types';
+import type { SignalSource } from '../types';
 
 export interface BuildSeverityFromMappingProps {
   eventSource: SignalSource;

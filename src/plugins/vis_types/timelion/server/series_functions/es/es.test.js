@@ -16,7 +16,7 @@ import esResponse from '../fixtures/es_response';
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import invoke from '../helpers/invoke_series_fn';
+import invoke from '../test_helpers/invoke_series_fn';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 describe('es', () => {
@@ -27,6 +27,12 @@ describe('es', () => {
       context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
       getIndexPatternsService: () => ({
         find: async () => [],
+        create: async () => ({
+          getFieldByName: () => {
+            return;
+          },
+          getComputedFields: () => [],
+        }),
       }),
       request: {
         events: {
@@ -196,6 +202,30 @@ describe('es', () => {
         expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
       });
+    });
+  });
+
+  describe('createDateAgg for rollup', () => {
+    let tlConfig;
+    let config;
+    let agg;
+    beforeEach(() => {
+      tlConfig = tlConfigFn();
+      config = {
+        timefield: 'rolled_up_timestamp',
+        forceFixedInterval: true,
+        timezone: 'UTC',
+        interval: '1w',
+      };
+      agg = createDateAgg(config, tlConfig);
+    });
+
+    test('sets the timezone', () => {
+      expect(agg.time_buckets.date_histogram.time_zone).toEqual('UTC');
+    });
+
+    test('sets the interval for fixed_interval correctly', () => {
+      expect(agg.time_buckets.date_histogram).toHaveProperty('fixed_interval', '7d');
     });
   });
 

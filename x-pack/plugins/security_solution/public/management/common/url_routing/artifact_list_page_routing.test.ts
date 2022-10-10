@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ArtifactListPageUrlParams } from '../../components/artifact_list_page';
+import type { ArtifactListPageUrlParams } from '../../components/artifact_list_page';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../constants';
 import {
   getArtifactListPageUrlPath,

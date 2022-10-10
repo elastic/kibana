@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { MlClient } from '../../lib/ml_client';
-import { isPopulatedObject, isRuntimeMappings } from '../../../common';
+import { isRuntimeMappings } from '../../../common';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -271,7 +272,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     }
 
-    const resp = await client?.asCurrentUser.search(esSearchRequest);
+    const resp = await client?.asCurrentUser.search(esSearchRequest, { maxRetries: 0 });
 
     const obj: MetricData = { success: true, results: {} };
     // @ts-ignore
@@ -1551,7 +1552,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
     }
 
-    const resp = await client!.asCurrentUser.search(body);
+    const resp = await client!.asCurrentUser.search(body, { maxRetries: 0 });
 
     // Because of the sampling, results of metricFunctions which use sum or count
     // can be significantly skewed. Taking into account totalHits we calculate a
@@ -1642,7 +1643,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     criteria = criteria.concat(config.entityFields);
 
     try {
-      return await getRecordsForCriteria([config.jobId], criteria, 0, range.min, range.max, 500);
+      return await getRecordsForCriteria(
+        [config.jobId],
+        criteria,
+        0,
+        range.min,
+        range.max,
+        config.interval
+      );
     } catch (error) {
       handleError(
         i18n.translate('xpack.ml.timeSeriesJob.recordsForCriteriaErrorMessage', {
@@ -1655,33 +1663,36 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   /**
-   * TODO make an endpoint
+   * Fetches anomaly records aggregating on the chart interval.
+   *
    * @param jobIds
    * @param criteriaFields
    * @param threshold
    * @param earliestMs
    * @param latestMs
-   * @param maxResults
+   * @param interval
    * @param functionDescription
    */
   async function getRecordsForCriteria(
     jobIds: string[],
     criteriaFields: CriteriaField[],
-    threshold: any,
+    threshold: number,
     earliestMs: number | null,
     latestMs: number | null,
-    maxResults: number | undefined,
+    interval: string,
     functionDescription?: string
   ): Promise<RecordsForCriteria> {
     const obj: RecordsForCriteria = { success: true, records: [] };
 
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, record score, plus any specified job IDs.
-    const boolCriteria: any[] = [
+    const boolCriteria: estypes.QueryDslQueryContainer[] = [
       {
         range: {
           timestamp: {
+            // @ts-ignore
             gte: earliestMs,
+            // @ts-ignore
             lte: latestMs,
             format: 'epoch_millis',
           },
@@ -1736,14 +1747,13 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const searchRequest: estypes.SearchRequest = {
-      size: maxResults !== undefined ? maxResults : 100,
+      size: 0,
       query: {
         bool: {
           filter: [
             {
-              query_string: {
-                query: 'result_type:record',
-                analyze_wildcard: false,
+              term: {
+                result_type: 'record',
               },
             },
             {
@@ -1754,18 +1764,42 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           ],
         },
       },
-      // @ts-ignore check score request
-      sort: [{ record_score: { order: 'desc' } }],
+      aggs: {
+        anomalies_over_time: {
+          date_histogram: {
+            field: 'timestamp',
+            fixed_interval: interval,
+            // Ignore empty buckets
+            min_doc_count: 1,
+          },
+          aggs: {
+            top_records: {
+              top_hits: {
+                size: 1,
+                sort: [{ record_score: { order: 'desc' } }],
+              },
+            },
+          },
+        },
+      },
     };
 
     const resp = await mlClient.anomalySearch(searchRequest, jobIds);
 
-    // @ts-ignore
-    if (resp.hits.total.value > 0) {
-      each(resp.hits.hits, (hit: any) => {
-        obj.records.push(hit._source);
-      });
-    }
+    const records = (
+      (
+        resp.aggregations!.anomalies_over_time as estypes.AggregationsMultiBucketAggregateBase<{
+          top_records: estypes.AggregationsTopHitsAggregate;
+        }>
+      ).buckets as Array<{ top_records: estypes.AggregationsTopHitsAggregate }>
+    )
+      .map((b) => {
+        return b.top_records.hits.hits[0]?._source;
+      })
+      .filter(isDefined);
+
+    obj.records = records;
+
     return obj;
   }
 
@@ -1942,5 +1976,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     return chartData;
   }
 
-  return getAnomalyChartsData;
+  return {
+    getAnomalyChartsData,
+    getRecordsForCriteria,
+  };
 }

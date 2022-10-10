@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import { IndexPatternsContract } from '../..';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
@@ -58,7 +58,7 @@ describe('brushEvent', () => {
     setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => indexPattern,
-    } as unknown as IndexPatternsContract);
+    } as unknown as DataViewsContract);
 
     baseEvent = {
       column: 0,

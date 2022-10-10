@@ -26,6 +26,7 @@ export class LifecyclePhase<Args extends readonly any[]> {
   public readonly after$: Rx.Observable<void>;
 
   constructor(
+    sub: Rx.Subscription,
     private readonly options: {
       singular?: boolean;
     } = {}
@@ -35,6 +36,12 @@ export class LifecyclePhase<Args extends readonly any[]> {
 
     this.afterSubj = this.options.singular ? new Rx.ReplaySubject<void>(1) : new Rx.Subject<void>();
     this.after$ = this.afterSubj.asObservable();
+
+    sub.add(() => {
+      this.beforeSubj.complete();
+      this.afterSubj.complete();
+      this.handlers.length = 0;
+    });
   }
 
   public add(fn: (...args: Args) => Promise<void> | void) {

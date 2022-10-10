@@ -36,13 +36,17 @@ import {
 } from '@kbn/es-query';
 
 import {
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  isNotOneOfOperator,
+  isInListOperator,
+  isNotInListOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -134,13 +138,13 @@ export const getNewExceptionItem = ({
   namespaceType,
   ruleName,
 }: {
-  listId: string;
-  namespaceType: NamespaceType;
+  listId: string | undefined;
+  namespaceType: NamespaceType | undefined;
   ruleName: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `${ruleName} - exception list item`,
+    description: 'Exception list item',
     entries: addIdToEntries([
       {
         field: '',
@@ -192,7 +196,7 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+    const foundOperator = ALL_OPERATORS.find((operatorOption) => {
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
@@ -667,6 +671,10 @@ export const getEntryOnOperatorChange = (
   }
 };
 
+const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.type === 'string';
+};
+
 /**
  * Determines which operators to make available
  *
@@ -687,12 +695,34 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
+  } else if (isBoolean) {
+    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+  } else if (!includeValueListOperators) {
+    return fieldSupportsMatches(item.field)
+      ? EXCEPTION_OPERATORS_SANS_LISTS
+      : [
+          isOperator,
+          isNotOperator,
+          isOneOfOperator,
+          isNotOneOfOperator,
+          existsOperator,
+          doesNotExistOperator,
+        ];
   } else {
-    return isBoolean
-      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
-      : includeValueListOperators
-      ? EXCEPTION_OPERATORS
-      : EXCEPTION_OPERATORS_SANS_LISTS;
+    return listType === 'detection'
+      ? fieldSupportsMatches(item.field)
+        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
+        : [
+            isOperator,
+            isNotOperator,
+            isOneOfOperator,
+            isNotOneOfOperator,
+            existsOperator,
+            doesNotExistOperator,
+            isInListOperator,
+            isNotInListOperator,
+          ]
+      : ALL_OPERATORS;
   }
 };
 

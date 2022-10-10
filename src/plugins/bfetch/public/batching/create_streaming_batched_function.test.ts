@@ -196,6 +196,33 @@ describe('createStreamingBatchedFunction()', () => {
       });
     });
 
+    test("doesn't send batch request if all items have been aborted", async () => {
+      const { fetchStreaming } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+        getIsCompressionDisabled: () => true,
+      });
+
+      const abortController = new AbortController();
+      abortController.abort();
+
+      expect.assertions(3);
+      const req1 = fn({ foo: 'bar' }, abortController.signal).catch((e) =>
+        expect(e).toBeInstanceOf(AbortError)
+      );
+      const req2 = fn({ baz: 'quix' }, abortController.signal).catch((e) =>
+        expect(e).toBeInstanceOf(AbortError)
+      );
+
+      jest.advanceTimersByTime(6);
+      expect(fetchStreaming).not.toBeCalled();
+
+      await Promise.all([req1, req2]);
+    });
+
     test('sends POST request to correct endpoint with items in array batched sorted in call order', async () => {
       const { fetchStreaming } = setup();
       const fn = createStreamingBatchedFunction({

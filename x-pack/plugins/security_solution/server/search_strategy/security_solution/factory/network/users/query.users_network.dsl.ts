@@ -6,12 +6,12 @@
  */
 
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
+import type {
   Direction,
   SortField,
   NetworkUsersRequestOptions,
-  NetworkUsersFields,
 } from '../../../../../../common/search_strategy';
+import { NetworkUsersFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildUsersQuery = ({

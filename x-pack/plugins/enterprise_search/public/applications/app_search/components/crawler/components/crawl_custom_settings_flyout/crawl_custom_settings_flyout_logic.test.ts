@@ -48,8 +48,16 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
     describe('fetchDomainConfigData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlCustomSettingsFlyoutLogic.actions, 'onRecieveDomainConfigData');
+
         http.get.mockReturnValueOnce(
           Promise.resolve({
+            meta: {
+              page: {
+                current: 1,
+                size: 1,
+                total_pages: 2,
+              },
+            },
             results: [
               {
                 id: '1234',
@@ -61,18 +69,62 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           })
         );
 
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            meta: {
+              page: {
+                current: 2,
+                size: 1,
+                total_pages: 2,
+              },
+            },
+            results: [
+              {
+                id: '5678',
+                name: 'https://www.swiftype.com',
+                seed_urls: [],
+                sitemap_urls: [],
+              },
+            ],
+          })
+        );
+
         CrawlCustomSettingsFlyoutLogic.actions.fetchDomainConfigData();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/crawler/domain_configs'
+        expect(http.get).toHaveBeenNthCalledWith(
+          1,
+          '/internal/app_search/engines/some-engine/crawler/domain_configs',
+          {
+            query: {
+              'page[current]': 1,
+              'page[size]': 100,
+            },
+          }
         );
+        expect(http.get).toHaveBeenNthCalledWith(
+          2,
+          '/internal/app_search/engines/some-engine/crawler/domain_configs',
+          {
+            query: {
+              'page[current]': 2,
+              'page[size]': 1,
+            },
+          }
+        );
+
         expect(
           CrawlCustomSettingsFlyoutLogic.actions.onRecieveDomainConfigData
         ).toHaveBeenCalledWith([
           {
             id: '1234',
             name: 'https://www.elastic.co',
+            seedUrls: [],
+            sitemapUrls: [],
+          },
+          {
+            id: '5678',
+            name: 'https://www.swiftype.com',
             seedUrls: [],
             sitemapUrls: [],
           },

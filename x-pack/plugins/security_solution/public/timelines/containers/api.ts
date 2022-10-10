@@ -11,21 +11,23 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
 import { throwErrors } from '@kbn/cases-plugin/common';
-import {
+import type {
   TimelineResponse,
-  TimelineResponseType,
-  TimelineStatus,
-  TimelineErrorResponseType,
   TimelineErrorResponse,
   ImportTimelineResultSchema,
-  importTimelineResultSchema,
   ResponseFavoriteTimeline,
   AllTimelinesResponse,
   SingleTimelineResponse,
   SingleTimelineResolveResponse,
+  GetTimelinesArgs,
+} from '../../../common/types/timeline';
+import {
+  TimelineResponseType,
+  TimelineStatus,
+  TimelineErrorResponseType,
+  importTimelineResultSchema,
   allTimelinesResponse,
   responseFavoriteTimeline,
-  GetTimelinesArgs,
   SingleTimelineResponseType,
   TimelineType,
   ResolvedSingleTimelineResponseType,
@@ -43,12 +45,12 @@ import {
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { ToasterError } from '../../common/components/toasters';
-import {
+import type {
   ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
 } from '../../detections/containers/detection_engine/rules';
-import { TimelineInput } from '../../../common/search_strategy';
+import type { TimelineInput } from '../../../common/search_strategy';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;

@@ -102,14 +102,12 @@ describe('comments', () => {
             {
               type: 'literal',
               value: 'cases-comments.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'user',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

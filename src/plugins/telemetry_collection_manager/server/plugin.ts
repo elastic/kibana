@@ -17,8 +17,10 @@ import type {
   SavedObjectsServiceStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  CoreStatus,
 } from '@kbn/core/server';
 
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
@@ -49,6 +51,7 @@ export class TelemetryCollectionManagerPlugin
   private readonly logger: Logger;
   private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;
+  private coreStatus$ = new ReplaySubject<CoreStatus>(1);
   private usageCollection?: UsageCollectionSetup;
   private elasticsearchClient?: IClusterClient;
   private savedObjectsService?: SavedObjectsServiceStart;
@@ -65,10 +68,13 @@ export class TelemetryCollectionManagerPlugin
   public setup(core: CoreSetup, { usageCollection }: TelemetryCollectionPluginsDepsSetup) {
     this.usageCollection = usageCollection;
 
+    core.status.core$.subscribe(this.coreStatus$);
+
     return {
       setCollectionStrategy: this.setCollectionStrategy.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      shouldGetTelemetry: this.shouldGetTelemetry.bind(this),
     };
   }
 
@@ -79,10 +85,27 @@ export class TelemetryCollectionManagerPlugin
     return {
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      shouldGetTelemetry: this.shouldGetTelemetry.bind(this),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.coreStatus$.complete();
+  }
+
+  /**
+   * Checks if Kibana is in a healthy state to attempt the Telemetry report generation:
+   * - Elasticsearch is active.
+   * - SavedObjects client is active.
+   * @private
+   */
+  private async shouldGetTelemetry() {
+    const { elasticsearch, savedObjects } = await firstValueFrom(this.coreStatus$);
+    return (
+      elasticsearch.level.toString() === 'available' &&
+      savedObjects.level.toString() === 'available'
+    );
+  }
 
   private setCollectionStrategy<T extends BasicStatsPayload>(
     collectionConfig: CollectionStrategyConfig<T>

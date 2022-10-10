@@ -11,25 +11,20 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { filter, map, tap, toArray } from 'rxjs/operators';
 import { getFlattenedObject } from '@kbn/std';
 
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginName } from '@kbn/core-base-common';
+import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
+import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import {
-  DiscoveredPlugin,
-  InternalPluginInfo,
-  PluginConfigDescriptor,
-  PluginDependencies,
-  PluginName,
-  PluginType,
-} from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginDependencies, PluginType } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { IConfigService } from '../config';
-import { InternalEnvironmentServicePreboot } from '../environment';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -46,25 +41,6 @@ export interface PluginsServiceSetup {
   initialized: boolean;
   /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
-}
-
-/** @internal */
-export interface UiPlugins {
-  /**
-   * Paths to all discovered ui plugin entrypoints on the filesystem, even if
-   * disabled.
-   */
-  internal: Map<PluginName, InternalPluginInfo>;
-
-  /**
-   * Information needed by client-side to load plugins and wire dependencies.
-   */
-  public: Map<PluginName, DiscoveredPlugin>;
-
-  /**
-   * Configuration for plugins to be exposed to the client-side.
-   */
-  browserConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @internal */
@@ -85,6 +61,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 /** @internal */
 export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
+  node: InternalNodeServicePreboot;
 }
 
 /** @internal */
@@ -110,11 +87,21 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
-  public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
+  public async discover({
+    environment,
+    node,
+  }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
-    const { error$, plugin$ } = discover(config, this.coreContext, {
-      uuid: environment.instanceUuid,
+    const { error$, plugin$ } = discover({
+      config,
+      coreContext: this.coreContext,
+      instanceInfo: {
+        uuid: environment.instanceUuid,
+      },
+      nodeInfo: {
+        roles: node.roles,
+      },
     });
 
     await this.handleDiscoveryErrors(error$);

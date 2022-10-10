@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
-import type { PreconfiguredOutput } from '../../../common';
+import type { PreconfiguredOutput } from '../../../common/types';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
@@ -83,6 +83,16 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     defaultValue: [],
     validate: validatePreconfiguredOutputs,
   }
+);
+
+export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+  }),
+  { defaultValue: [] }
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(

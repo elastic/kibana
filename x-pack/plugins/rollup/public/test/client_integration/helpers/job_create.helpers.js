@@ -112,7 +112,11 @@ export const setup = (props) => {
   };
 
   // Misc
-  const getEuiStepsHorizontalActive = () => component.find('.euiStepHorizontal-isSelected').text();
+  const getEuiStepsHorizontalActive = () =>
+    component
+      .findWhere((c) => c.prop('status') === 'selected')
+      .first()
+      .text();
 
   return {
     ...testBed,

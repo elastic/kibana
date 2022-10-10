@@ -159,7 +159,7 @@ export interface PersistableStateService<P extends Serializable = Serializable> 
    * @param version Current semver version of the `state`.
    * @returns A serializable state object migrated to the latest state.
    */
-  migrateToLatest?: (state: VersionedState) => P;
+  migrateToLatest?: (state: VersionedState<P>) => P;
 
   /**
    * returns all registered migrations

@@ -2,9 +2,9 @@
   "extends": "<%- relativePathTo("tsconfig.bazel.json") %>",
   "compilerOptions": {
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": "src",
     "stripInternal": false,
     "types": [
     <%_ if (pkg.web) { _%>
@@ -18,6 +18,9 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+    <%_ if (pkg.web) { _%>
+      "**/*.tsx",
+    <%_ } _%>
   ]
 }

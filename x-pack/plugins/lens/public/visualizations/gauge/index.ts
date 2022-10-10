@@ -20,7 +20,7 @@ export class GaugeVisualization {
     editorFrame.registerVisualization(async () => {
       const { getGaugeVisualization } = await import('../../async_services');
       const palettes = transparentizePalettes(await charts.palettes.getPalettes());
-      return getGaugeVisualization({ paletteService: palettes });
+      return getGaugeVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/142083
+  describe.skip('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
@@ -108,7 +109,8 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/142083
+      describe.skip(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
           await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
@@ -160,12 +162,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-
-          await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+          await ml.dataFrameAnalyticsCreation.enableAndAssertSourceDataPreviewHistogramCharts(
             testData.expected.histogramCharts
           );
 

@@ -43,6 +43,7 @@ export type { AgentClient, AgentService } from './agents';
 export { agentPolicyService } from './agent_policy';
 export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
+export { downloadSourceService } from './download_source';
 export { settingsService };
 
 // Plugin services
@@ -58,3 +59,6 @@ export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 // Package Services
 export { PackageServiceImpl } from './epm';
 export type { PackageService, PackageClient } from './epm';
+
+// Fleet server policy config
+export { migrateSettingsToFleetServerHost } from './fleet_server_host';

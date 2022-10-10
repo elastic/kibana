@@ -12,6 +12,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
+  ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
@@ -73,6 +74,10 @@ function createRule(shouldWriteAlerts: boolean = true) {
         scheduleActions,
       } as any;
     },
+    alertLimit: {
+      getValue: () => 1000,
+      setLimitReached: () => {},
+    },
     done: () => ({ getRecoveredAlerts: () => [] }),
   };
 
@@ -118,7 +123,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
-          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
+          searchSourceClient: {} as ISearchStartSearchSource,
         },
         spaceId: 'spaceId',
         state,
@@ -158,7 +163,7 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -178,7 +183,7 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -200,10 +205,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
       });
 
-      it('writes the correct alerts', () => {
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(1);
+      it('writes the correct alerts', async () => {
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(1);
 
-        const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[0][0].body!;
+        const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[0][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
 
@@ -241,6 +246,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
+              "kibana.alert.time_range": Object {
+                "gte": "2021-06-16T09:01:00.000Z",
+              },
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
@@ -269,6 +277,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
+              "kibana.alert.time_range": Object {
+                "gte": "2021-06-16T09:01:00.000Z",
+              },
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
@@ -302,9 +313,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
 
         // TODO mock the resolved value before calling alertWithLifecycle again
-        const lastOpbeansNodeDoc = helpers.ruleDataClientMock
-          .getWriter()
-          .bulk.mock.calls[0][0].body?.concat()
+        const lastOpbeansNodeDoc = (
+          await helpers.ruleDataClientMock.getWriter()
+        ).bulk.mock.calls[0][0].body
+          ?.concat()
           .reverse()
           .find(
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
@@ -345,9 +357,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
       });
 
-      it('writes the correct alerts', () => {
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(2);
-        const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[1][0].body!;
+      it('writes the correct alerts', async () => {
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(2);
+        const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[1][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
 
@@ -383,9 +395,10 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
-        const lastOpbeansNodeDoc = helpers.ruleDataClientMock
-          .getWriter()
-          .bulk.mock.calls[0][0].body?.concat()
+        const lastOpbeansNodeDoc = (
+          await helpers.ruleDataClientMock.getWriter()
+        ).bulk.mock.calls[0][0].body
+          ?.concat()
           .reverse()
           .find(
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
@@ -418,10 +431,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
       });
 
-      it('writes the correct alerts', () => {
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(2);
+      it('writes the correct alerts', async () => {
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(2);
 
-        const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[1][0].body!;
+        const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[1][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
 
@@ -437,6 +450,10 @@ describe('createLifecycleRuleTypeFactory', () => {
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
         expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_RECOVERED);
+        expect(opbeansNodeAlertDoc[ALERT_TIME_RANGE]).toEqual({
+          gte: '2021-06-16T09:01:00.000Z',
+          lte: '2021-06-16T09:02:00.000Z',
+        });
       });
     });
   });

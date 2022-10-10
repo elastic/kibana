@@ -19,16 +19,20 @@ import {
   CaseAttributes,
   CasePostRequest,
   CaseResponse,
+  CaseSeverity,
   CasesFindResponse,
   CaseStatuses,
   CommentAttributes,
   CommentRequest,
+  CommentRequestActionsType,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceSOType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
   CommentType,
   ConnectorTypes,
+  ExternalReferenceStorageType,
   User,
 } from '../../common/api';
 import { UpdateAlertRequest } from '../client/alerts/types';
@@ -36,6 +40,7 @@ import {
   parseCommentString,
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
+import { dedupAssignees } from '../client/cases/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -56,6 +61,7 @@ export const transformNewCase = ({
 }): CaseAttributes => ({
   ...newCase,
   duration: null,
+  severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),
@@ -64,6 +70,7 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
+  assignees: dedupAssignees(newCase.assignees) ?? [],
 });
 
 export const transformCases = ({
@@ -182,6 +189,7 @@ type NewCommentArgs = CommentRequest & {
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
+  profile_uid?: string;
 };
 
 export const transformNewComment = ({
@@ -190,12 +198,13 @@ export const transformNewComment = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
+  profile_uid: profileUid,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
   return {
     ...comment,
     created_at: createdDate,
-    created_by: { email, full_name, username },
+    created_by: { email, full_name, username, profile_uid: profileUid },
     pushed_at: null,
     pushed_by: null,
     updated_at: null,
@@ -204,7 +213,7 @@ export const transformNewComment = ({
 };
 
 /**
- * A type narrowing function for user comments. Exporting so integration tests can use it.
+ * A type narrowing function for user comments.
  */
 export const isCommentRequestTypeUser = (
   context: CommentRequest
@@ -213,21 +222,33 @@ export const isCommentRequestTypeUser = (
 };
 
 /**
- * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ * A type narrowing function for actions comments.
  */
 export const isCommentRequestTypeActions = (
   context: CommentRequest
-): context is CommentRequestUserType => {
+): context is CommentRequestActionsType => {
   return context.type === CommentType.actions;
 };
 
 /**
- * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ * A type narrowing function for alert comments.
  */
 export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
+};
+
+/**
+ * A type narrowing function for external reference so attachments.
+ */
+export const isCommentRequestTypeExternalReferenceSO = (
+  context: Partial<CommentRequest>
+): context is CommentRequestExternalReferenceSOType => {
+  return (
+    context.type === CommentType.externalReference &&
+    context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
+  );
 };
 
 /**
@@ -368,4 +389,8 @@ export const asArray = <T>(field?: T | T[] | null): T[] => {
   }
 
   return Array.isArray(field) ? field : [field];
+};
+
+export const assertUnreachable = (x: never): never => {
+  throw new Error('You should not reach this part of code');
 };

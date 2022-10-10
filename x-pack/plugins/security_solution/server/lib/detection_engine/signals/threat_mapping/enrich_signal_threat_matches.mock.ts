@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SignalSearchResponse, SignalSourceHit } from '../types';
-import { ThreatMatchNamedQuery } from './types';
+import type { SignalSourceHit } from '../types';
+import type { ThreatMatchNamedQuery } from './types';
 
 export const getNamedQueryMock = (
   overrides: Partial<ThreatMatchNamedQuery> = {}
@@ -26,11 +26,4 @@ export const getSignalHitMock = (overrides: Partial<SignalSourceHit> = {}): Sign
   },
   _score: 0,
   ...overrides,
-});
-
-export const getSignalsResponseMock = (signals: SignalSourceHit[] = []): SignalSearchResponse => ({
-  took: 1,
-  timed_out: false,
-  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: { total: { value: signals.length, relation: 'eq' }, max_score: 0, hits: signals },
 });

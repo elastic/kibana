@@ -36,13 +36,6 @@ export const drag = (subject: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-/** Drags the subject being dragged on the specified drop target, but does not drop it  */
-export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
-  cy.wrap(dropTarget).trigger('mousemove', 'center', {
-    button: primaryButton,
-  });
-};
-
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   const targetLocation = dropTarget[0].getBoundingClientRect();
@@ -70,6 +63,7 @@ export const cleanKibana = () => {
 };
 
 export const deleteAlertsAndRules = () => {
+  cy.log('Delete all alerts and rules');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   cy.request({
@@ -81,6 +75,7 @@ export const deleteAlertsAndRules = () => {
     },
     failOnStatusCode: false,
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    timeout: 300000,
   });
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
@@ -144,19 +139,63 @@ export const deleteCases = () => {
   });
 };
 
-export const postDataView = (indexPattern: string) => {
+export const deleteConnectors = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'action',
+            },
+          },
+        ],
+      },
+    },
+  });
+};
+
+export const deleteSavedQueries = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'query',
+            },
+          },
+        ],
+      },
+    },
+  });
+};
+
+export const postDataView = (dataSource: string) => {
   cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
+        id: dataSource,
         fieldAttrs: '{}',
-        title: indexPattern,
+        title: dataSource,
         timeFieldName: '@timestamp',
         fields: '{}',
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
+export const deleteDataView = (dataSource: string) => {
+  cy.request({
+    method: 'DELETE',
+    url: `api/data_views/data_view/${dataSource}`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
   });
 };
 

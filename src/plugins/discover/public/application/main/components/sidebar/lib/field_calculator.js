@@ -8,12 +8,11 @@
 
 import { map, sortBy, without, each, defaults, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { flattenHit } from '@kbn/data-plugin/public';
 
-function getFieldValues(hits, field, indexPattern) {
+function getFieldValues(hits, field) {
   const name = field.name;
   return map(hits, function (hit) {
-    return flattenHit(hit, indexPattern, { includeIgnoredValues: true })[name];
+    return hit.flattened[name];
   });
 }
 
@@ -38,7 +37,7 @@ function getFieldValueCounts(params) {
     };
   }
 
-  const allValues = getFieldValues(params.hits, params.field, params.indexPattern);
+  const allValues = getFieldValues(params.hits, params.field);
   let counts;
   const missing = _countMissing(allValues);
 

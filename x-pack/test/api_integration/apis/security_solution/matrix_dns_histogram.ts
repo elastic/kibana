@@ -20,8 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/130692
-  describe.skip('Matrix DNS Histogram', () => {
+  describe('Matrix DNS Histogram', () => {
     describe('Large data set', () => {
       before(
         async () =>
@@ -45,7 +44,6 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             defaultIndex: ['large_volume_dns_data'],
-            docValueFields: [],
             factoryQueryType: MatrixHistogramQuery,
             histogramType: MatrixHistogramType.dns,
             filterQuery:

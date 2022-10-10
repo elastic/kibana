@@ -14,9 +14,10 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from '.';
+import type { Props as QueryTabContentComponentProps } from '.';
+import { QueryTabContentComponent } from '.';
 import { defaultRowRenderers } from '../body/renderers';
-import { Sort } from '../body/sort';
+import type { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
@@ -25,8 +26,8 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
-import * as helpers from '../helpers';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import * as helpers from '../../../../common/lib/kuery';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -45,6 +46,8 @@ jest.mock('../../../../common/containers/sourcerer');
 jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
+
+jest.mock('../../../../common/lib/kuery');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -74,10 +77,12 @@ jest.mock('../../../../common/lib/kibana', () => {
         savedObjects: {
           client: {},
         },
+        triggersActionsUi: {
+          getFieldBrowser: jest.fn(),
+        },
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () =>
             jest.fn().mockReturnValue({
               onBlur: jest.fn(),
@@ -95,7 +100,8 @@ describe('Timeline', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];
@@ -131,6 +137,7 @@ describe('Timeline', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: ' ',
+      kqlQueryLanguage: 'kuery',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -202,7 +209,6 @@ describe('Timeline', () => {
     test('it does render the timeline table when the source is loading with no events', () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
-        docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],

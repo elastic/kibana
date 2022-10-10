@@ -28,6 +28,7 @@ const mockCore = merge({}, coreStart, {
     capabilities: {
       apm: {},
       ml: {},
+      savedObjectsManagement: { edit: true },
     },
   },
   uiSettings: {
@@ -65,7 +66,6 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
-  profilingEnabled: false,
 };
 
 const urlService = new UrlService({
@@ -85,9 +85,6 @@ const mockPlugin = {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
-  },
-  observability: {
-    isAlertingExperienceEnabled: () => false,
   },
 };
 

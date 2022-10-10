@@ -11,8 +11,8 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../plugin';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
 
@@ -59,15 +59,6 @@ describe('renderApp', () => {
       theme: themeServiceMock.createStartContract(),
     } as unknown as CoreStart;
 
-    const config = {
-      unsafe: {
-        alertingExperience: { enabled: true },
-        cases: { enabled: true },
-        overviewNext: { enabled: false },
-        rules: { enabled: true },
-      },
-    };
-
     const params = {
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
@@ -75,15 +66,26 @@ describe('renderApp', () => {
       theme$: themeServiceMock.createTheme$(),
     } as unknown as AppMountParameters;
 
+    const config = {
+      unsafe: {
+        alertDetails: { enabled: false },
+      },
+    } as ConfigSchema;
+
     expect(() => {
       const unmount = renderApp({
-        config,
         core,
+        config,
         plugins,
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
-        kibanaFeatures: [],
+        usageCollection: {
+          components: {
+            ApplicationUsageTrackingProvider: (props) => null,
+          },
+          reportUiCounter: jest.fn(),
+        },
       });
       unmount();
     }).not.toThrowError();

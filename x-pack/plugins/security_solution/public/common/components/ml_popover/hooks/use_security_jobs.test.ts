@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
 import { checkRecognizer, getModules } from '../api';
-import { SecurityJob } from '../types';
+import type { SecurityJob } from '../types';
 import {
   mockJobsSummaryResponse,
   mockGetModuleResponse,

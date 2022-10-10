@@ -19,6 +19,7 @@ import {
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
 import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
+import { DOCUMENT_FIELD_NAME } from '../../../../../common';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -53,7 +54,11 @@ export const cumulativeSumOperation: OperationDefinition<
     {
       input: ['field', 'managedReference'],
       specificOperations: ['count', 'sum'],
-      validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
+      validateMetadata: (meta, operationType, fieldName) =>
+        meta.dataType === 'number' &&
+        !meta.isBucketed &&
+        // exclude value counts
+        !(operationType === 'count' && fieldName !== DOCUMENT_FIELD_NAME),
     },
   ],
   getPossibleOperation: (indexPattern) => {
@@ -142,5 +147,13 @@ Example: Visualize the received bytes accumulated over time:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.cumulativeSum.documentation.quick',
+    {
+      defaultMessage: `
+      The sum of all values as they grow over time.
+      `,
+    }
+  ),
   shiftable: true,
 };

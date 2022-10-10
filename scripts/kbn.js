@@ -8,4 +8,7 @@
 
 require('../src/setup_node_env/ensure_node_preserve_symlinks');
 require('../src/setup_node_env/node_version_validator');
-require('../packages/kbn-pm/dist').run(process.argv.slice(2));
+import('../kbn_pm/src/cli.mjs').catch(function (error) {
+  console.error('UNHANDLED EXCEPTION:', error.stack);
+  process.exit(1);
+});

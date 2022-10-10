@@ -104,42 +104,51 @@ Run the following commands from the `x-pack` directory and use separate terminal
 for test server and test runner. The test server command starts an Elasticsearch
 and Kibana instance that the tests will be run against.
 
-1.  Functional UI tests with `Trial` license (default config):
+Functional tests are broken up into independent groups with their own configuration.
+Test server and runner need to be pointed to the configuration to run. The basic
+commands are
 
-        node scripts/functional_tests_server.js
-        node scripts/functional_test_runner.js --include-tag mlqa
+    node scripts/functional_tests_server.js --config PATH_TO_CONFIG
+    node scripts/functional_test_runner.js --config PATH_TO_CONFIG
 
-    ML functional `Trial` license tests are located in `x-pack/test/functional/apps/ml`.
+With PATH_TO_CONFIG and other options as follows.
 
+1. Functional UI tests with `Trial` license:
+
+    Group | PATH_TO_CONFIG
+    ----- | --------------
+    anomaly detection jobs | `test/functional/apps/ml/anomaly_detection_jobs/config.ts`
+    anomaly detection result views | `test/functional/apps/ml/anomaly_detection_result_views/config.ts`
+    anomaly detection integrations | `test/functional/apps/ml/anomaly_detection_integrations/config.ts`
+    data frame analytics | `test/functional/apps/ml/data_frame_analytics/config.ts`
+    data visualizer | `test/functional/apps/ml/data_visualizer/config.ts`
+    permissions | `test/functional/apps/ml/permissions/config.ts`
+    stack management jobs | `test/functional/apps/ml/stack_management_jobs/config.ts`
+    short tests | `test/functional/apps/ml/short_tests/config.ts`
+
+    The `short tests` group contains tests for page navigation, model management,
+    feature controls, settings and embeddables. Test files for each group are located
+    in the directory of their configuration file.
+  
 1.  Functional UI tests with `Basic` license:
 
-        node scripts/functional_tests_server.js --config test/functional_basic/config.ts
-        node scripts/functional_test_runner.js --config test/functional_basic/config.ts --include-tag mlqa
-
-    ML functional `Basic` license tests are located in `x-pack/test/functional_basic/apps/ml`.
+    - PATH_TO_CONFIG: `test/functional_basic/config.ts`
+    - Add `--include-tag ml` to the test runner command
+    - Tests are located in `x-pack/test/functional_basic/apps/ml`
 
 1.  API integration tests with `Trial` license:
 
-         node scripts/functional_tests_server.js
-         node scripts/functional_test_runner.js --config test/api_integration/config.ts --include-tag mlqa
-
-    ML API integration `Trial` license tests are located in `x-pack/test/api_integration/apis/ml`.
-
-1.  API integration tests with `Basic` license:
-
-         node scripts/functional_tests_server.js --config test/api_integration_basic/config.ts
-         node scripts/functional_test_runner.js --config test/api_integration_basic/config.ts --include-tag mlqa
-
-    ML API integration `Basic` license tests are located in `x-pack/test/api_integration_basic/apis/ml`.
+    - PATH_TO_CONFIG: `test/api_integration/config.ts`
+    - Add `--include-tag ml` to the test runner command
+    - Tests are located in `x-pack/test/api_integration/apis/ml`
 
 1.  Accessibility tests:
 
     We maintain a suite of accessibility tests (you may see them referred to elsewhere as `a11y` tests). These tests render each of our pages and ensure that the inputs and other elements contain the attributes necessary to ensure all users are able to make use of ML (for example, users relying on screen readers).
 
-         node scripts/functional_tests_server --config test/accessibility/config.ts
-         node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=ml
-
-    ML accessibility tests are located in `x-pack/test/accessibility/apps`.
+    - PATH_TO_CONFIG: `test/accessibility/config.ts`
+    - Add `--grep=ml` to the test runner command
+    - Tests are located in `x-pack/test/accessibility/apps`
 
 ## Generating docs screenshots
 
@@ -151,7 +160,7 @@ for test server and test runner. The test server command starts an Elasticsearch
 and Kibana instance that the tests will be run against.
 
     node scripts/functional_tests_server.js --config test/screenshot_creation/config.ts
-    node scripts/functional_test_runner.js --config test/screenshot_creation/config.ts --include-tag mlqa
+    node scripts/functional_test_runner.js --config test/screenshot_creation/config.ts --include-tag ml
 
 The generated screenshots are stored in `x-pack/test/functional/screenshots/session/ml_docs`.
 ML screenshot generation tests are located in `x-pack/test/screenshot_creation/apps/ml_docs`.

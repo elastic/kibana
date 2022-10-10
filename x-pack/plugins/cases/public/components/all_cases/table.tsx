@@ -19,57 +19,51 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import { AllCases, Case, FilterOptions } from '../../../common/ui/types';
+import { Cases, Case } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns'];
-  data: AllCases;
-  filterOptions: FilterOptions;
+  data: Cases;
   goToCreateCase?: () => void;
-  handleIsLoading: (a: boolean) => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
   isDataEmpty: boolean;
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<Case>['onChange'];
   pagination: Pagination;
-  refreshCases: (a?: boolean) => void;
   selectedCases: Case[];
   selection: EuiTableSelectionType<Case>;
-  showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
-  userCanCrud: boolean;
+  deselectCases: () => void;
 }
 
 const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
   data,
-  filterOptions,
   goToCreateCase,
-  handleIsLoading,
   isCasesLoading,
   isCommentUpdating,
   isDataEmpty,
   isSelectorView,
   onChange,
   pagination,
-  refreshCases,
   selectedCases,
   selection,
-  showActions,
   sorting,
   tableRef,
   tableRowProps,
-  userCanCrud,
+  deselectCases,
 }) => {
+  const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const navigateToCreateCaseClick = useCallback(
     (ev) => {
@@ -88,20 +82,18 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
   ) : (
-    <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
+    <>
       <CasesTableUtilityBar
-        data={data}
-        enableBulkActions={showActions}
-        filterOptions={filterOptions}
-        handleIsLoading={handleIsLoading}
+        isSelectorView={isSelectorView}
+        totalCases={data.total ?? 0}
         selectedCases={selectedCases}
-        refreshCases={refreshCases}
+        deselectCases={deselectCases}
       />
       <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
-        isSelectable={showActions}
+        isSelectable={!isSelectorView}
         itemId="id"
         items={data.cases}
         loading={isCommentUpdating}
@@ -109,11 +101,11 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
             titleSize="xs"
-            body={userCanCrud ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
+            body={permissions.create ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
             actions={
-              userCanCrud && (
+              permissions.create && (
                 <LinkButton
-                  isDisabled={!userCanCrud}
+                  isDisabled={!permissions.create}
                   fill
                   size="s"
                   onClick={navigateToCreateCaseClick}
@@ -131,10 +123,11 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         pagination={pagination}
         ref={tableRef}
         rowProps={tableRowProps}
-        selection={showActions ? selection : undefined}
+        selection={!isSelectorView ? selection : undefined}
         sorting={sorting}
+        hasActions={false}
       />
-    </Div>
+    </>
   );
 };
 CasesTable.displayName = 'CasesTable';
