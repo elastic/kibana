@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { getTinesConnectorType, TINES_CONNECTOR_ID as TinesConnectorTypeId } from './tines';
+import type { EuiIconProps } from '@elastic/eui';
+
+export type LogoProps = Omit<EuiIconProps, 'type'>;

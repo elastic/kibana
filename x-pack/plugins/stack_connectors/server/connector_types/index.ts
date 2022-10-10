@@ -26,6 +26,7 @@ import {
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
 } from './cases';
+import { getTinesConnectorType } from './security';
 
 export type {
   EmailActionParams,
@@ -62,6 +63,8 @@ export {
   ServiceNowSIRConnectorTypeId,
 } from './cases';
 
+export { TinesConnectorTypeId } from './security';
+
 export function registerConnectorTypes({
   actions,
   logger,
@@ -86,4 +89,6 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType({ logger }));
   actions.registerType(getResilientConnectorType({ logger }));
   actions.registerType(getTeamsConnectorType({ logger }));
+
+  actions.registerSubActionConnectorType(getTinesConnectorType());
 }

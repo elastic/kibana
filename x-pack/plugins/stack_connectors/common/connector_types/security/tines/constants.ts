@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { getTinesConnectorType, TINES_CONNECTOR_ID as TinesConnectorTypeId } from './tines';
+export const TINES_CONNECTOR_ID = '.tines';
+export const enum SUB_ACTION {
+  STORIES = 'stories',
+  WEBHOOKS = 'webhooks',
+  RUN = 'run',
+  TEST = 'test',
+}
