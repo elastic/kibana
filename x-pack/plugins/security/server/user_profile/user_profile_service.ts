@@ -155,7 +155,19 @@ export interface UserProfileSuggestParams {
    * Query string used to match name-related fields in user profiles. The following fields are treated as
    * name-related: username, full_name and email.
    */
-  name: string;
+  name?: string;
+
+  /**
+   * Extra search criteria to improve relevance of the suggestion result. A profile matching the
+   * specified hint is ranked higher in the response. But not-matching the hint does not exclude a
+   * profile from the response as long as it matches the `name` field query.
+   */
+  hint?: {
+    /**
+     * A list of Profile UIDs to match against.
+     */
+    uids: string[];
+  };
 
   /**
    * Desired number of suggestion to return. The default value is 10.
@@ -324,7 +336,7 @@ export class UserProfileService {
       // @ts-expect-error Invalid response format.
       body = (await clusterClient.asInternalUser.security.getUserProfile({
         uid: userSession.userProfileId,
-        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       })) as { profiles: SecurityUserProfileWithMetadata[] };
     } catch (error) {
       this.logger.error(
@@ -362,7 +374,7 @@ export class UserProfileService {
       // @ts-expect-error Invalid response format.
       const body = (await clusterClient.asInternalUser.security.getUserProfile({
         uid: [...uids].join(','),
-        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       })) as { profiles: SecurityUserProfileWithMetadata[] };
 
       return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
@@ -404,7 +416,7 @@ export class UserProfileService {
       throw Error("Current license doesn't support user profile collaboration APIs.");
     }
 
-    const { name, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
+    const { name, hint, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
     if (size > MAX_SUGGESTIONS_COUNT) {
       throw Error(
         `Can return up to ${MAX_SUGGESTIONS_COUNT} suggestions, but ${size} suggestions were requested.`
@@ -424,9 +436,11 @@ export class UserProfileService {
       const body = await clusterClient.asInternalUser.security.suggestUserProfiles({
         name,
         size: numberOfResultsToRequest,
+        // @ts-expect-error: This will complain until elasticsearch-js types have been updated to ES 8.5 API
+        hint,
         // If fetching data turns out to be a performance bottleneck, we can try to fetch data
         // only for the profiles that pass privileges check as a separate bulkGet request.
-        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
 
       const filteredProfiles =
@@ -505,4 +519,22 @@ export class UserProfileService {
 
     return filteredProfiles;
   }
+}
+
+/**
+ * Returns string of comma separated values prefixed with `prefix`.
+ * @param str String of comma separated values
+ * @param prefix Prefix to use prepend to each value
+ */
+export function prefixCommaSeparatedValues(str: string, prefix: string) {
+  return str
+    .split(',')
+    .reduce<string[]>((accumulator, value) => {
+      const trimmedValue = value.trim();
+      if (trimmedValue) {
+        accumulator.push(`${prefix}.${trimmedValue}`);
+      }
+      return accumulator;
+    }, [])
+    .join(',');
 }
