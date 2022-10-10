@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pie'));
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./gauge'));
+    loadTestFile(require.resolve('./goal'));
   });
 }
