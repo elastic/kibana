@@ -7,41 +7,50 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CANCEL = i18n.translate('xpack.securitySolution.exceptions.editException.cancel', {
+export const CANCEL = i18n.translate('xpack.securitySolution.ruleExceptions.editException.cancel', {
   defaultMessage: 'Cancel',
 });
 
 export const EDIT_EXCEPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.editException.editExceptionTitle',
+  'xpack.securitySolution.ruleExceptions.editException.editExceptionTitle',
   {
     defaultMessage: 'Edit rule exception',
   }
 );
 
 export const EDIT_ENDPOINT_EXCEPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.editException.editEndpointExceptionTitle',
+  'xpack.securitySolution.ruleExceptions.editException.editEndpointExceptionTitle',
   {
     defaultMessage: 'Edit endpoint exception',
   }
 );
 
 export const EDIT_RULE_EXCEPTION_SUCCESS_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.editRuleExceptionToastSuccessTitle',
+  'xpack.securitySolution.ruleExceptions.editException.editRuleExceptionToastSuccessTitle',
   {
     defaultMessage: 'Rule exception updated',
   }
 );
 
 export const EDIT_RULE_EXCEPTION_SUCCESS_TEXT = (exceptionItemName: string, numItems: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.editRuleExceptionToastSuccessText', {
-    values: { exceptionItemName, numItems },
-    defaultMessage:
-      '{numItems, plural, =1 {Exception} other {Exceptions}} - {exceptionItemName} - {numItems, plural, =1 {has} other {have}} been updated.',
-  });
+  i18n.translate(
+    'xpack.securitySolution.ruleExceptions.editException.editRuleExceptionToastSuccessText',
+    {
+      values: { exceptionItemName, numItems },
+      defaultMessage:
+        '{numItems, plural, =1 {Exception} other {Exceptions}} - {exceptionItemName} - {numItems, plural, =1 {has} other {have}} been updated.',
+    }
+  );
 
 export const EDIT_RULE_EXCEPTION_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.editRuleExceptionToastSuccessTitle',
+  'xpack.securitySolution.ruleExceptions.editException.editRuleExceptionToastSuccessTitle',
   {
     defaultMessage: 'Error updating exception',
   }
 );
+
+export const COMMENTS_SECTION_TITLE = (comments: number) =>
+  i18n.translate('xpack.securitySolution.ruleExceptions.editExceptionFlyout.commentsTitle', {
+    values: { comments },
+    defaultMessage: 'Add comments ({comments})',
+  });

@@ -82,6 +82,7 @@ export const exceptionsBuilderReducer =
         const containsValueList = action.exceptions.some(
           ({ entries }) => entries.filter(({ type }) => type === OperatorTypeEnum.LIST).length > 0
         );
+
         return {
           ...state,
           addNested: isAddNested,

@@ -120,37 +120,6 @@ export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
       ]
     : [];
 
-/**
- * Builds Kuery filter for fetching alerts for a specific rule. Takes the rule's
- * static id, i.e. `rule.ruleId` (not rule.id), so that alerts for _all
- * historical instances_ of the rule are returned.
- *
- * @param ruleStaticIds Rules' static id: `rule.ruleId`
- */
-export const buildMultiRuleAlertsFilter = (ruleStaticIds: string[] | null): Filter[] =>
-  ruleStaticIds
-    ? [
-        {
-          meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: ALERT_RULE_RULE_ID,
-            params: {
-              query: ruleStaticIds.join(', '),
-            },
-          },
-          query: {
-            match_phrase: {
-              [ALERT_RULE_RULE_ID]: ruleStaticIds.join(', '),
-              default_operator: 'or',
-            },
-          },
-        },
-      ]
-    : [];
-
 export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
   showBuildingBlockAlerts
     ? []

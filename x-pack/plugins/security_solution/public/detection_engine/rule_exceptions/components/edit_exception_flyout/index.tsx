@@ -82,6 +82,12 @@ const FlyoutFooterGroup = styled(EuiFlexGroup)`
   `}
 `;
 
+const SectionHeader = styled(EuiTitle)`
+  ${() => css`
+    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  `}
+`;
+
 const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   list,
   itemToEdit,
@@ -347,6 +353,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         )}
         <EuiHorizontalRule />
         <ExceptionItemComments
+          accordionTitle={
+            <SectionHeader size="xs">
+              <h3>{i18n.COMMENTS_SECTION_TITLE(itemToEdit.comments.length ?? 0)}</h3>
+            </SectionHeader>
+          }
           exceptionItemComments={itemToEdit.comments}
           newCommentValue={newComment}
           newCommentOnChange={setComment}

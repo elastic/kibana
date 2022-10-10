@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const CLOSE_ALERTS_SUCCESS = (numAlerts: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.logic.closeAlerts.success', {
+  i18n.translate('xpack.securitySolution.ruleExceptions.logic.closeAlerts.success', {
     values: { numAlerts },
     defaultMessage:
       'Successfully updated {numAlerts} {numAlerts, plural, =1 {alert} other {alerts}}',
   });
 
 export const CLOSE_ALERTS_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.logic.closeAlerts.error',
+  'xpack.securitySolution.ruleExceptions.logic.closeAlerts.error',
   {
     defaultMessage: 'Failed to close alerts',
   }

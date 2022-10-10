@@ -26,15 +26,17 @@ import {
 } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  addExceptionConditions,
-  addExceptionFlyoutItemName,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
-  selectCloseSingleAlerts,
-  submitNewExceptionItem,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  selectCloseSingleAlerts,
+  submitNewExceptionItem,
+} from '../../../tasks/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
