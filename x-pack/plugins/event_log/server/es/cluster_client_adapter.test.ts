@@ -686,7 +686,6 @@ describe('aggregateEventsBySavedObject', () => {
       type: 'saved-object-type',
       ids: ['saved-object-id'],
       aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
-      runtimeMappings: {},
     };
     const result = await clusterClientAdapter.aggregateEventsBySavedObjects(options);
 
@@ -786,7 +785,6 @@ describe('aggregateEventsWithAuthFilter', () => {
       type: 'saved-object-type',
       aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
       authFilter: fromKueryExpression('test:test'),
-      runtimeMappings: {},
     };
     const result = await clusterClientAdapter.aggregateEventsWithAuthFilter(options);
 

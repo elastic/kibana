@@ -116,8 +116,7 @@ export class EventLogClient implements IEventLogClient {
     type: string,
     ids: string[],
     options?: AggregateOptionsType,
-    legacyIds?: string[],
-    runtimeMappings?: estypes.MappingRuntimeFields
+    legacyIds?: string[]
   ) {
     const aggs = options?.aggs;
     if (!aggs) {
@@ -136,7 +135,6 @@ export class EventLogClient implements IEventLogClient {
       type,
       ids,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
-      runtimeMappings: runtimeMappings ? runtimeMappings : {},
       legacyIds,
     });
   }
@@ -144,8 +142,7 @@ export class EventLogClient implements IEventLogClient {
   public async aggregateEventsWithAuthFilter(
     type: string,
     authFilter: KueryNode,
-    options?: AggregateOptionsType,
-    runtimeMappings?: estypes.MappingRuntimeFields
+    options?: AggregateOptionsType
   ) {
     if (!authFilter) {
       throw new Error('No authorization filter defined!');
@@ -165,7 +162,6 @@ export class EventLogClient implements IEventLogClient {
       type,
       authFilter,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
-      runtimeMappings: runtimeMappings ? runtimeMappings : {},
     });
   }
 

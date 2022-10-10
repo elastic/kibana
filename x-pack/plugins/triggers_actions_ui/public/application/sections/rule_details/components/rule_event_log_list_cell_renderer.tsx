@@ -8,10 +8,11 @@
 import React, { useCallback } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
+import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { routeToRuleDetails } from '../../../constants';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
-import { KibanaAlertingOutcome, RuleEventLogListStatus } from './rule_event_log_list_status';
+import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import {
   RULE_EXECUTION_LOG_COLUMN_IDS,
@@ -45,7 +46,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'status') {
-    return <RuleEventLogListStatus status={value as KibanaAlertingOutcome} />;
+    return <RuleEventLogListStatus status={value as RuleAlertingOutcome} />;
   }
 
   if (columnId === 'timestamp') {

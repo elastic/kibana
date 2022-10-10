@@ -7,10 +7,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
-import { KibanaAlertingOutcome, RuleEventLogListStatus } from './rule_event_log_list_status';
+import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
-const statusFilters: KibanaAlertingOutcome[] = ['success', 'failure', 'warning'];
+const statusFilters: RuleAlertingOutcome[] = ['success', 'failure', 'warning'];
 
 interface RuleEventLogListStatusFilterProps {
   selectedOptions: string[];

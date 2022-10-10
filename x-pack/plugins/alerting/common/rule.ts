@@ -48,6 +48,8 @@ export enum RuleExecutionStatusWarningReasons {
   MAX_ALERTS = 'maxAlerts',
 }
 
+export type RuleAlertingOutcome = 'failure' | 'success' | 'warning';
+
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
   lastExecutionDate: Date;

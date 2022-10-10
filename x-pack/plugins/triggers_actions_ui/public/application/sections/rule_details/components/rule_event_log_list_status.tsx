@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-
-export type KibanaAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
+import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 
 interface RuleEventLogListStatusProps {
-  status: KibanaAlertingOutcome;
+  status: RuleAlertingOutcome;
 }
 
 const statusContainerStyles = {
@@ -24,10 +23,9 @@ const iconStyles = {
   marginRight: '8px',
 };
 
-const STATUS_TO_COLOR: Record<KibanaAlertingOutcome, string> = {
+const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
   success: 'success',
   failure: 'danger',
-  unknown: 'gray',
   warning: 'warning',
 };
 

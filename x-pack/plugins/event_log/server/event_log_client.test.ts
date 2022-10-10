@@ -238,7 +238,6 @@ describe('EventLogStart', () => {
           ],
         },
         legacyIds: undefined,
-        runtimeMappings: {},
       });
     });
   });
@@ -271,7 +270,6 @@ describe('EventLogStart', () => {
             },
           ],
         },
-        runtimeMappings: {},
       });
     });
   });

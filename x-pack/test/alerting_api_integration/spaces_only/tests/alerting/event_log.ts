@@ -665,12 +665,16 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.event?.outcome).to.equal(outcome);
-  expect(event?.kibana?.alerting?.outcome).to.equal(outcome);
 
   for (const savedObject of savedObjects) {
     expect(
       isSavedObjectInEvent(event, spaceId, savedObject.type, savedObject.id, savedObject.rel)
     ).to.be(true);
+
+    // event?.kibana?.alerting?.outcome is only populated for alerts
+    if (savedObject.type === 'alert') {
+      expect(event?.kibana?.alerting?.outcome).to.equal(outcome);
+    }
   }
 
   expect(event?.message).to.eql(message);

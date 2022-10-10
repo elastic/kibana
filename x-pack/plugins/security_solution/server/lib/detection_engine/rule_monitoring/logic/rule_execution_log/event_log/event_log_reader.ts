@@ -97,9 +97,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
       if (statusFilters.length > 0 && statusFilters.length < 3) {
         const outcomes = mapRuleExecutionStatusToPlatformStatus(statusFilters);
-        const outcomeFilter = outcomes.length
-          ? `OR kibana.alerting.outcome:(${outcomes.join(' OR ')})`
-          : '';
+        const outcomeFilter = outcomes.length ? `OR event.outcome:(${outcomes.join(' OR ')})` : '';
         const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start,
           end,
