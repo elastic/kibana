@@ -71,7 +71,7 @@ export const FlyoutFooterComponent = React.memo(
           ?.values,
       [detailsData]
     );
-    const ruleDataViewId = useMemo(
+    const ruleDataViewIdRaw = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.data_view_id' }, detailsData)?.values ??
         find(
@@ -79,6 +79,11 @@ export const FlyoutFooterComponent = React.memo(
           detailsData
         )?.values,
       [detailsData]
+    );
+    const ruleDataViewId = useMemo(
+      (): string | undefined =>
+        Array.isArray(ruleDataViewIdRaw) ? ruleDataViewIdRaw[0] : undefined,
+      [ruleDataViewIdRaw]
     );
 
     const addExceptionModalWrapperData = useMemo(

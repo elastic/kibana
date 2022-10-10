@@ -43,7 +43,7 @@ export const EDIT_RULE_EXCEPTION_SUCCESS_TEXT = (exceptionItemName: string, numI
   );
 
 export const EDIT_RULE_EXCEPTION_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.ruleExceptions.editException.editRuleExceptionToastSuccessTitle',
+  'xpack.securitySolution.ruleExceptions.editException.editRuleExceptionToastErrorTitle',
   {
     defaultMessage: 'Error updating exception',
   }

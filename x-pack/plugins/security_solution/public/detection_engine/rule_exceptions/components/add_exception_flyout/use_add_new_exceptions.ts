@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import type {
+  CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  createExceptionListItemSchema,
+  exceptionListItemSchema,
+  ExceptionListTypeEnum,
+  createRuleExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import * as i18n from './translations';
@@ -46,6 +53,26 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
   const [isLoading, setIsLoading] = useState(false);
   const addNewExceptionsRef = useRef<AddNewExceptionItemHookFuncProps | null>(null);
 
+  const areRuleDefaultItems = useCallback(
+    (
+      items: ExceptionsBuilderReturnExceptionItem[]
+    ): items is CreateRuleExceptionListItemSchema[] => {
+      return items.every((item) => createRuleExceptionListItemSchema.is(item));
+    },
+    []
+  );
+
+  const areSharedListItems = useCallback(
+    (
+      items: ExceptionsBuilderReturnExceptionItem[]
+    ): items is Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+      return items.every(
+        (item) => exceptionListItemSchema.is(item) || createExceptionListItemSchema.is(item)
+      );
+    },
+    []
+  );
+
   useEffect(() => {
     const abortCtrl = new AbortController();
 
@@ -64,7 +91,8 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
         if (
           addToRules &&
           addRuleExceptions != null &&
-          listType !== ExceptionListTypeEnum.ENDPOINT
+          listType !== ExceptionListTypeEnum.ENDPOINT &&
+          areRuleDefaultItems(itemsToAdd)
         ) {
           result = await addRuleExceptions(itemsToAdd, selectedRulesToAddTo);
 
@@ -76,7 +104,8 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           });
         } else if (
           (listType === ExceptionListTypeEnum.ENDPOINT || addToSharedLists) &&
-          addSharedExceptions != null
+          addSharedExceptions != null &&
+          areSharedListItems(itemsToAdd)
         ) {
           result = await addSharedExceptions(itemsToAdd);
 
@@ -102,7 +131,15 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
     return (): void => {
       abortCtrl.abort();
     };
-  }, [addSuccess, addError, addWarning, addRuleExceptions, addSharedExceptions]);
+  }, [
+    addSuccess,
+    addError,
+    addWarning,
+    addRuleExceptions,
+    addSharedExceptions,
+    areRuleDefaultItems,
+    areSharedListItems,
+  ]);
 
   return [
     isLoading || isAddingExceptions || isAddRuleExceptionLoading,
