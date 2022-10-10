@@ -217,11 +217,11 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                     size: 3,
                     terms: [
                       {
-                        field: 'kibana.alerting.outcome',
+                        field: ALERTING_OUTCOME_FIELD,
                         missing: '',
                       },
                       {
-                        field: 'event.outcome',
+                        field: OUTCOME_FIELD,
                       },
                     ],
                   },

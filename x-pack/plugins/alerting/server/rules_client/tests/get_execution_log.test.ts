@@ -143,7 +143,10 @@ const aggregateResults = {
                       _id: 'S4wIZX8B8TGQpG7XQZns',
                       _score: 1.0,
                       _source: {
-                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule-name' },
+                        rule: {
+                          id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+                          name: 'rule-name',
+                        },
                         event: {
                           outcome: 'success',
                         },
