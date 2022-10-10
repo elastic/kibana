@@ -16,14 +16,9 @@ import {
   EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
-
-const titleStyles = css`
-  text-transform: none;
-`;
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
@@ -83,9 +78,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={true}>
         <EuiTitle size="xxs">
-          <h5 className="eui-textBreakWord" css={titleStyles}>
-            {field.displayName}
-          </h5>
+          <h5 className="eui-textBreakWord">{field.displayName}</h5>
         </EuiTitle>
       </EuiFlexItem>
       {onAddFieldToWorkspace && (
