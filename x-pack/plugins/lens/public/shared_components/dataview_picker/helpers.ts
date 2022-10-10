@@ -19,12 +19,3 @@ export function fieldContainsData(
   const field = indexPattern.getFieldByName(fieldName);
   return field?.type === 'document' || hasFieldData(indexPattern.id, fieldName);
 }
-
-// TODO: deprecate
-/**
- * Performs an existence check on the existingFields data structure for the provided field.
- * Does not work for meta fields.
- */
-export function fieldExists(existingFields: Record<string, boolean>, fieldName: string) {
-  return existingFields[fieldName];
-}

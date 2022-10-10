@@ -579,7 +579,6 @@ export function LayerPanel(
                                       invalid: group.invalid,
                                       invalidMessage: group.invalidMessage,
                                       indexPatterns: dataViews.indexPatterns,
-                                      existingFields: dataViews.existingFields,
                                     }}
                                   />
                                 ) : (
@@ -704,7 +703,6 @@ export function LayerPanel(
                   formatSelectorOptions: activeGroup.formatSelectorOptions,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                   indexPatterns: dataViews.indexPatterns,
-                  existingFields: dataViews.existingFields,
                   activeData: layerVisualizationConfigProps.activeData,
                 }}
               />
