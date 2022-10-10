@@ -6,23 +6,31 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import { AppState } from '../../services/discover_app_state_container';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { SavedSearchContainer } from '../../services/discover_saved_search_container';
+import { AppState, AppStateContainer } from '../../services/discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/addLog';
 import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
+import { DataStateContainer } from '../../services/discover_data_state_container';
+import { DiscoverInternalState } from '../../services/discover_internal_state_container';
 
 export const buildStateSubscribe =
   ({
-    stateContainer,
+    appStateContainer,
+    savedSearchContainer,
+    dataStateContainer,
+    internalStateContainer,
     services,
   }: {
-    stateContainer: DiscoverStateContainer;
+    appStateContainer: AppStateContainer;
+    savedSearchContainer: SavedSearchContainer;
+    dataStateContainer: DataStateContainer;
+    internalStateContainer: DiscoverInternalState;
     services: DiscoverServices;
   }) =>
   async (nextState: AppState) => {
-    const prevState = stateContainer.appStateContainer.getPrevious();
+    const prevState = appStateContainer.getPrevious();
 
     addLog('📦 AppStateContainer.subscribe update', nextState);
     const { hideChart, interval, sort, index } = prevState;
@@ -51,28 +59,25 @@ export const buildStateSubscribe =
       if (!nextDataViewObj.stateValFound) {
         resolveDataView(
           nextDataViewObj,
-          stateContainer.savedSearchContainer.get().searchSource,
+          savedSearchContainer.get().searchSource,
           services.toastNotifications
         );
-        stateContainer.setAppState({ index }, true);
+        await appStateContainer.replace({ index }, true);
         return;
       }
       nextDataView = nextDataViewObj.loaded;
-      stateContainer.dataStateContainer.reset();
-      stateContainer.internalStateContainer.transitions.setDataView(nextDataView);
+      dataStateContainer.reset();
+      internalStateContainer.transitions.setDataView(nextDataView);
     }
 
-    stateContainer.savedSearchContainer.update(nextDataView, nextState);
+    savedSearchContainer.update(nextDataView, nextState);
 
-    if (
-      dataViewChanged &&
-      stateContainer.dataStateContainer.initialFetchStatus === FetchStatus.UNINITIALIZED
-    ) {
+    if (dataViewChanged && dataStateContainer.initialFetchStatus === FetchStatus.UNINITIALIZED) {
       return;
     }
 
     if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged || dataViewChanged) {
       addLog('📦 AppStateContainer update triggers data fetching');
-      stateContainer.actions.fetch();
+      dataStateContainer.refetch$.next(undefined);
     }
   };

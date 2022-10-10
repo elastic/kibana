@@ -8,8 +8,9 @@
 
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/public';
+import { AppStateContainer } from '../services/discover_app_state_container';
+import { DiscoverInternalState } from '../services/discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { DiscoverStateContainer } from '../services/discover_state';
 import { loadDataViewBySavedSearch } from '../load_data_view_by_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 
@@ -17,12 +18,14 @@ export const loadSavedSearch = async (
   id: string,
   {
     services,
-    stateContainer,
+    appStateContainer,
+    internalStateContainer,
     setError,
     dataViewSpec,
   }: {
     services: DiscoverServices;
-    stateContainer: DiscoverStateContainer;
+    appStateContainer: AppStateContainer;
+    internalStateContainer: DiscoverInternalState;
     setError: (e: Error) => void;
     dataViewSpec?: DataViewSpec;
   }
@@ -36,7 +39,9 @@ export const loadSavedSearch = async (
 
   const currentDataView = await loadDataViewBySavedSearch(
     currentSavedSearch,
-    stateContainer,
+    appStateContainer,
+    internalStateContainer,
+
     services,
     setError,
     dataViewSpec
@@ -48,7 +53,7 @@ export const loadSavedSearch = async (
   if (!currentSavedSearch.searchSource.getField('index')) {
     currentSavedSearch.searchSource.setField('index', currentDataView);
   }
-  stateContainer.internalStateContainer.transitions.setDataView(currentDataView);
+  internalStateContainer.transitions.setDataView(currentDataView);
 
   restoreStateFromSavedSearch({
     savedSearch: currentSavedSearch,

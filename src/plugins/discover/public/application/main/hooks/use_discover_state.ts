@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { buildStateSubscribe } from './utiles/build_state_subscribe';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
@@ -60,14 +59,8 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, inspectorAdapters, subscribe } = stateContainer.dataStateContainer;
+  const { data$, inspectorAdapters } = stateContainer.dataStateContainer;
 
-  useEffect(() => {
-    const unsubscribe = subscribe();
-    return () => {
-      return unsubscribe();
-    };
-  }, [subscribe]);
   /**
    * State changes (data view, columns), when a text base query result is returned
    */
@@ -79,29 +72,8 @@ export function useDiscoverState({
     savedSearch,
   });
 
-  /**
-   * Reset to display loading spinner when savedSearch is changing
-   */
-  useEffect(() => stateContainer.dataStateContainer.reset(), [savedSearch.id, stateContainer]);
-
-  /**
-   * Sync URL state with local app state on saved search load
-   * or dataView / savedSearch switch
-   */
   useEffect(() => {
-    const stopSync = stateContainer.appStateContainer.initAndSync(
-      stateContainer.savedSearchContainer.get()
-    );
-    return () => stopSync();
-  }, [stateContainer]);
-
-  /**
-   * Track state changes that should trigger a fetch
-   */
-  useEffect(() => {
-    const unsubscribe = stateContainer.appStateContainer.subscribe(
-      buildStateSubscribe({ stateContainer, services })
-    );
+    const unsubscribe = stateContainer.actions.initSyncSubscribe();
     return () => unsubscribe();
   }, [services, stateContainer]);
 
