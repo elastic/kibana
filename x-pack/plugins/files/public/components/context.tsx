@@ -7,9 +7,11 @@
 
 import React, { createContext, useContext, type FunctionComponent } from 'react';
 import { FileKindsRegistry, getFileKindsRegistry } from '../../common/file_kinds_registry';
+import type { FilesClient } from '../types';
 
 export interface FilesContextValue {
   registry: FileKindsRegistry;
+  client: FilesClient<any>;
 }
 
 const FilesContextObject = createContext<FilesContextValue>(null as unknown as FilesContextValue);
@@ -21,10 +23,14 @@ export const useFilesContext = () => {
   }
   return ctx;
 };
-export const FilesContext: FunctionComponent = ({ children }) => {
+export const FilesContext: FunctionComponent<{ client: FilesClient<any> }> = ({
+  client,
+  children,
+}) => {
   return (
     <FilesContextObject.Provider
       value={{
+        client,
         registry: getFileKindsRegistry(),
       }}
     >
