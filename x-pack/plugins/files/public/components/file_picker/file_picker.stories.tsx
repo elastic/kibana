@@ -9,6 +9,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { FilesContext } from '../context';
 import { FilePicker } from './file_picker';
+import { FilesClient } from '../../types';
 
 export default {
   title: 'components/FilePicker',
@@ -16,17 +17,13 @@ export default {
   args: {},
   decorators: [
     (Story) => (
-      <FilesContext>
+      <FilesContext client={{} as unknown as FilesClient}>
         <Story />
       </FilesContext>
     ),
   ],
 } as ComponentMeta<typeof FilePicker>;
 
-const Template: ComponentStory<typeof FilePicker> = (props) => (
-  <FilesContext client={{} as any}>
-    <FilePicker />
-  </FilesContext>
-);
+const Template: ComponentStory<typeof FilePicker> = (props) => <FilePicker {...props} />;
 
 export const Basic = Template.bind({});
