@@ -28,6 +28,16 @@ import {
 import { FieldSelect } from './field_select';
 import { IndexPatternLayer } from '../types';
 
+jest.mock('@kbn/unified-field-list-plugin/public', () => ({
+  useExistingFieldsReader: jest.fn(() => {
+    return {
+      hasFieldData: (dataViewId: string, fieldName: string) => {
+        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+      },
+    };
+  }),
+}));
+
 jest.mock('../operations');
 
 describe('reference editor', () => {
