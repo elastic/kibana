@@ -9,12 +9,11 @@ import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export interface GetMlModelsArgs {
-  size?: number;
-}
+export type GetMlModelsArgs = number | undefined;
+
 export type GetMlModelsResponse = TrainedModelConfigResponse[];
 
-export const getMLModels = async ({ size = 1000 }: GetMlModelsArgs) => {
+export const getMLModels = async (size: GetMlModelsArgs = 1000) => {
   return await HttpLogic.values.http.get<TrainedModelConfigResponse[]>('/api/ml/trained_models', {
     query: { size, with_pipelines: true },
   });

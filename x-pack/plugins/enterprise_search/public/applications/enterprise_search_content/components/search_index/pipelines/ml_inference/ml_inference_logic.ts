@@ -213,7 +213,7 @@ export const MLInferenceLogic = kea<
     },
     makeCreatePipelineRequest: () => actions.setCreateErrors([]),
     setIndexName: ({ indexName }) => {
-      actions.makeMLModelsRequest({ size: undefined });
+      actions.makeMLModelsRequest(undefined);
       actions.makeMappingRequest({ indexName });
     },
     simulatePipeline: () => {
