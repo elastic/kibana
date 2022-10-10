@@ -22,6 +22,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { ContextHistoryLocationState } from './services/locator';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
@@ -64,11 +65,14 @@ describe('ContextApp test', () => {
     filterManager: mockFilterManager,
     uiSettings: uiSettingsMock,
     storage: new LocalStorageMock({}),
+    locator: { getUrl: jest.fn() },
+    chrome: { setBreadcrumbs: jest.fn() },
   } as unknown as DiscoverServices;
 
   const defaultProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
+    locationState: {} as ContextHistoryLocationState,
   };
 
   const topNavProps = {
