@@ -59,7 +59,6 @@ import {
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
   QUERY_BAR,
-  QUERY_PREVIEW_BUTTON,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
   RISK_MAPPING_OVERRIDE_OPTION,
@@ -340,29 +339,6 @@ export const fillRuleAction = (rule: CustomRule) => {
   }
 };
 
-const fillDefineThresholdRule = (rule: ThresholdRule) => {
-  const thresholdField = 0;
-  const threshold = 1;
-
-  fillCustomQuery(rule);
-  cy.get(COMBO_BOX_CLEAR_BTN).first().click();
-
-  if (rule.dataSource.type === 'indexPatterns') {
-    rule.dataSource.index.forEach((index) => {
-      cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
-    });
-  }
-
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-  cy.get(THRESHOLD_INPUT_AREA)
-    .find(INPUT)
-    .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
-      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
-      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
-    });
-};
-
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
@@ -629,10 +605,6 @@ export const selectThresholdRuleType = () => {
 
 export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
-};
-
-const previewResults = () => {
-  cy.get(QUERY_PREVIEW_BUTTON).click();
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
