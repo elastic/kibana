@@ -54,8 +54,8 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   };
 });
 
-jest.mock('../sidebar/lib/visualize_trigger_utils', () => {
-  const originalModule = jest.requireActual('../sidebar/lib/visualize_trigger_utils');
+jest.mock('@kbn/unified-field-list-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/unified-field-list-plugin/public');
   return {
     ...originalModule,
     getVisualizeInformation: jest.fn(() => Promise.resolve(mockCanVisualize)),

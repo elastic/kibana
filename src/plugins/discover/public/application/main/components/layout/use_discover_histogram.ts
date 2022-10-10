@@ -8,16 +8,18 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  getVisualizeInformation,
+  triggerVisualizeActions,
+} from '@kbn/unified-field-list-plugin/public';
 import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getUiActions } from '../../../../kibana_services';
+import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import type { SavedSearchData } from '../../hooks/use_saved_search';
 import type { AppState, GetStateReturn } from '../../services/discover_state';
-import {
-  getVisualizeInformation,
-  triggerVisualizeActions,
-} from '../sidebar/lib/visualize_trigger_utils';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
@@ -52,7 +54,13 @@ export const useDiscoverHistogram = ({
     if (!timeField) {
       return;
     }
-    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
+    getVisualizeInformation(
+      getUiActions(),
+      timeField,
+      dataView,
+      savedSearch.columns || [],
+      []
+    ).then((info) => {
       setCanVisualize(Boolean(info));
     });
   }, [dataView, savedSearch.columns, timeField]);
@@ -61,7 +69,13 @@ export const useDiscoverHistogram = ({
     if (!timeField) {
       return;
     }
-    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
+    triggerVisualizeActions(
+      getUiActions(),
+      timeField,
+      savedSearch.columns || [],
+      PLUGIN_ID,
+      dataView
+    );
   }, [dataView, savedSearch.columns, timeField]);
 
   /**
