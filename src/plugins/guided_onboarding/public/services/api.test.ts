@@ -72,11 +72,17 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
-  describe('deleteGuide', () => {
-    it('sends a request to the delete API', async () => {
-      await apiService.deleteGuide(searchGuide);
-      expect(httpClient.delete).toHaveBeenCalledTimes(1);
-      expect(httpClient.delete).toHaveBeenCalledWith(`${API_BASE_PATH}/state/${searchGuide}`);
+  describe('deactivateGuide', () => {
+    it('deactivates an existing guide', async () => {
+      await apiService.deactivateGuide(searchAddDataActiveState);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({
+          ...searchAddDataActiveState,
+          isActive: false,
+        }),
+      });
     });
   });
 

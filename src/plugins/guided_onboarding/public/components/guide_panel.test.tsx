@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
 
 import { guidesConfig } from '../constants/guides_config';
@@ -20,7 +20,6 @@ import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 const applicationMock = applicationServiceMock.createStartContract();
-const notificationsMock = notificationServiceMock.createSetupContract();
 
 const mockActiveSearchGuideState: GuideState = {
   guideId: 'search',
@@ -43,9 +42,7 @@ const mockActiveSearchGuideState: GuideState = {
 };
 
 const getGuidePanel = () => () => {
-  return (
-    <GuidePanel application={applicationMock} api={apiService} notifications={notificationsMock} />
-  );
+  return <GuidePanel application={applicationMock} api={apiService} />;
 };
 
 describe('Guided setup', () => {
@@ -58,7 +55,6 @@ describe('Guided setup', () => {
     httpClient.get.mockResolvedValue({
       state: [],
     });
-    httpClient.delete.mockResolvedValue({});
     apiService.setup(httpClient);
 
     await act(async () => {

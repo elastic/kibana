@@ -161,42 +161,4 @@ export function defineRoutes(router: IRouter) {
       }
     }
   );
-
-  // Delete SO for selected guide
-  router.delete(
-    {
-      path: `${API_BASE_PATH}/state/{guideId}`,
-      validate: {
-        params: schema.object({
-          guideId: schema.string(),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      const coreContext = await context.core;
-      const { guideId } = request.params;
-      const soClient = coreContext.savedObjects.client as SavedObjectsClient;
-
-      const existingGuideSO = await findGuideById(soClient, guideId);
-
-      if (existingGuideSO.total > 0) {
-        const existingGuide = existingGuideSO.saved_objects[0];
-
-        await soClient.delete(guidedSetupSavedObjectsType, existingGuide.id);
-
-        return response.ok({
-          body: {
-            deletedGuide: guideId,
-          },
-        });
-      } else {
-        // In the case that the SO doesn't exist (unlikely), return successful response
-        return response.ok({
-          body: {
-            deletedGuide: guideId,
-          },
-        });
-      }
-    }
-  );
 }

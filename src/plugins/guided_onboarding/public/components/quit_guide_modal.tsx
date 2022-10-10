@@ -9,35 +9,20 @@ import React, { useState } from 'react';
 
 import { EuiText, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import { GuideId } from '../../common/types';
+import { GuideState } from '../../common/types';
 import { apiService } from '../services/api';
 
 interface QuitGuideModalProps {
   closeModal: () => void;
-  currentGuide: GuideId;
-  notifications: NotificationsSetup;
+  currentGuide: GuideState;
 }
 
-export const QuitGuideModal = ({
-  closeModal,
-  currentGuide,
-  notifications,
-}: QuitGuideModalProps) => {
+export const QuitGuideModal = ({ closeModal, currentGuide }: QuitGuideModalProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const deleteGuide = async () => {
     setIsDeleting(true);
-    const { error } = await apiService.deleteGuide(currentGuide);
-
-    if (error) {
-      setIsDeleting(false);
-      notifications.toasts.addError(error, {
-        title: i18n.translate('guidedOnboarding.quitGuideModal.errorToastTitle', {
-          defaultMessage: 'There was an error quitting the guide. Please try again.',
-        }),
-      });
-    }
+    await apiService.deactivateGuide(currentGuide);
     closeModal();
   };
 
@@ -45,7 +30,7 @@ export const QuitGuideModal = ({
     <EuiConfirmModal
       maxWidth={448}
       title={i18n.translate('guidedOnboarding.quitGuideModal.modalTitle', {
-        defaultMessage: 'Quit this guide and discard progress?',
+        defaultMessage: 'Quit this guide?',
       })}
       onCancel={closeModal}
       onConfirm={deleteGuide}
