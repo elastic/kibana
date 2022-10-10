@@ -83,6 +83,9 @@ export class QuickJobCreator {
       layerIndex
     );
 
+    const datafeedId = createDatafeedId(jobId);
+    const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
+
     const job: estypes.MlJob = {
       ...jobConfig,
       job_id: jobId,
@@ -91,12 +94,9 @@ export class QuickJobCreator {
           jobType === JOB_TYPE.SINGLE_METRIC
             ? CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS
             : CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS,
-        ...(await this.getCustomUrls(dashboard, datafeedConfig)),
+        ...(await this.getCustomUrls(dashboard, datafeed)),
       },
     };
-
-    const datafeedId = createDatafeedId(jobId);
-    const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
 
     const result: CreateState = {
       jobCreated: { success: false },
@@ -355,13 +355,27 @@ export class QuickJobCreator {
       filters: getFiltersForDSLQuery(
         datafeedConfig.query,
         undefined,
-        undefined,
+        datafeedConfig.job_id,
         FilterStateStore.GLOBAL_STATE
       ),
     };
     const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
-    const url = dashboardLocator ? await dashboardLocator.getUrl(params) : '';
-    return { url_name: 'Original dashboard', url_value: url };
+    const encodedUrl = dashboardLocator ? await dashboardLocator.getUrl(params) : '';
+    const url = decodeURIComponent(encodedUrl);
+
+    const dashboardName = dashboard.getOutput().title;
+
+    const urlName =
+      dashboardName === undefined
+        ? i18n.translate('xpack.ml.newJob.fromLens.createJob.defaultUrlDashboard', {
+            defaultMessage: 'Original dashboard',
+          })
+        : i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
+            defaultMessage: 'Open {dashboardName}',
+            values: { dashboardName },
+          });
+
+    return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
   private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
