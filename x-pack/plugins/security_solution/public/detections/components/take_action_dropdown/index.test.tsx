@@ -369,7 +369,6 @@ describe('take action dropdown', () => {
 
     describe('should correctly enable/disable the "Isolate Host" button', () => {
       let wrapper: ReactWrapper;
-      let apiMocks: ReturnType<typeof endpointMetadataHttpMocks>;
 
       const render = (): ReactWrapper => {
         wrapper = mount(
@@ -388,7 +387,6 @@ describe('take action dropdown', () => {
 
       beforeEach(() => {
         setTypeOnEcsDataWithAgentType();
-        apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
       });
 
       it('should show Isolate host button if user has "Host isolation" privileges set to all', async () => {
