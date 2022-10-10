@@ -90,7 +90,7 @@ export interface RuleExecutorOptions<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > {
-  alertId: string; // Why is this still called `alertId`? It is actually the rule id
+  alertId: string; // Is actually the Rule ID. Will be updated as part of https://github.com/elastic/kibana/issues/100115
   executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
