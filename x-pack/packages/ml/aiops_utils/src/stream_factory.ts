@@ -119,7 +119,7 @@ export function streamFactory<T = unknown>(
       return;
     }
 
-    if (backPressureBuffer.length > 0 && drain === false) {
+    if (waitForDrain) {
       logger.info('BACKPRESSURE!!');
       backPressureBuffer.push(d);
       return;
@@ -149,21 +149,17 @@ export function streamFactory<T = unknown>(
       logger.info(`writeResult: ${writeResult}`);
 
       if (!writeResult) {
-        if (drain) {
-          backPressureBuffer.unshift(d);
-        } else {
-          backPressureBuffer.push(d);
-        }
-
         logger.info(`ADD DRAIN?: ${!waitForDrain}`);
         if (!waitForDrain) {
           waitForDrain = true;
           stream.once('drain', () => {
             logger.info('DRAIN!!!');
             waitForDrain = false;
-            const el = backPressureBuffer.shift();
-            if (el !== undefined) {
-              push(el, true);
+            if (backPressureBuffer.length > 0) {
+              const el = backPressureBuffer.shift();
+              if (el !== undefined) {
+                push(el, true);
+              }
             }
           });
         }
