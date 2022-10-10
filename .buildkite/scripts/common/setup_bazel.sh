@@ -11,12 +11,18 @@ cat <<EOF > $KIBANA_DIR/.bazelrc
   build --build_metadata=ROLE=CI
 EOF
 
-BAZEL_CACHE_MODE=none
+BAZEL_CACHE_MODE=${BAZEL_CACHE_MODE:-gcs}
 
 if [[ "$BAZEL_CACHE_MODE" == "gcs" ]]; then
   echo "[bazel] enabling caching with GCS buckets"
 
   BAZEL_REGION="${BUILDKITE_AGENT_GCP_REGION:-us-central1}"
+
+  if ! [[ "$BAZEL_REGION" =~ ^(us-central1|northamerica-northeast2|europe-west2|southamerica-east1|asia-south2)$ ]]; then
+    echo "unsupported bazel cache region $BAZEL_REGION"
+    exit 1
+  fi
+
   BAZEL_BUCKET="kibana-ci-bazel_$BAZEL_REGION"
 
   echo "[bazel] using GCS bucket: $BAZEL_BUCKET"
