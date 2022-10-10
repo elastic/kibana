@@ -17,8 +17,8 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { LayerType, layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LayerType } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {
@@ -29,7 +29,7 @@ interface AddLayerButtonProps {
 }
 
 export function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
-  return visualization.getLayerType(layerId, state) || layerTypes.DATA;
+  return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
 }
 
 export function AddLayerButton({
@@ -120,7 +120,7 @@ export function AddLayerButton({
                 toolTipContent,
                 disabled,
                 name:
-                  type === layerTypes.ANNOTATIONS ? (
+                  type === LayerTypes.ANNOTATIONS ? (
                     <EuiFlexGroup gutterSize="m">
                       <EuiFlexItem>
                         <span className="lnsLayerAddButton__label">{label}</span>

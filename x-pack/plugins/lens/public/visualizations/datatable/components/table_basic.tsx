@@ -52,7 +52,8 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getOriginalId, getFinalSummaryConfiguration } from '../../../../common/expressions';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 export const DataContext = React.createContext<DataContextType>({});
 

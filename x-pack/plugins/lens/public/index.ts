@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { LensPlugin } from './plugin';
 
 export type {
@@ -101,9 +102,11 @@ export type {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
+
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
-export { layerTypes } from '../common';
+/** @deprecated  Please use LayerTypes from @kbn/expression-xy-plugin **/
+export const layerTypes = LayerTypes;
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

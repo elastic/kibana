@@ -43,7 +43,7 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import { DataType } from '../..';
+import type { DataType } from '../..';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;

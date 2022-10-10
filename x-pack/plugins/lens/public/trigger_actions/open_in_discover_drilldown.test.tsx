@@ -48,14 +48,16 @@ describe('open in discover drilldown', () => {
     instance.find('EuiSwitch').prop('onChange')!({} as unknown as FormEvent<{}>);
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
-  it('calls through to isCompatible helper', () => {
+
+  it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.isCompatible(
+    await drilldown.isCompatible(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
+
   it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
     await drilldown.execute(

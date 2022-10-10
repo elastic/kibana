@@ -31,7 +31,7 @@ import {
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { css } from '@emotion/react';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { isNumericFieldForDatatable } from '../../../common/expressions';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import {
   applyPaletteParams,
   PalettePanelContainer,

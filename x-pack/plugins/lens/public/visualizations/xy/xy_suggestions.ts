@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import {
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type {
   SuggestionRequest,
   VisualizationSuggestion,
   TableSuggestionColumn,
@@ -24,7 +25,6 @@ import {
   XYDataLayerConfig,
   SeriesType,
 } from './types';
-import { layerTypes } from '../../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
@@ -526,7 +526,7 @@ function buildSuggestion({
       existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
   };
 
   const hasDateHistogramDomain =
@@ -539,7 +539,7 @@ function buildSuggestion({
         .filter(
           (layer) =>
             keptLayerIds.includes(layer.layerId) ||
-            (hasDateHistogramDomain && layer.layerType === layerTypes.ANNOTATIONS)
+            (hasDateHistogramDomain && layer.layerType === LayerTypes.ANNOTATIONS)
         )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))

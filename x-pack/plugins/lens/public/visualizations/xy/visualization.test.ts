@@ -16,7 +16,7 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -61,7 +61,7 @@ function exampleState(): XYState {
     layers: [
       {
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         splitAccessor: 'd',
         xAccessor: 'a',
@@ -221,7 +221,7 @@ describe('xy_visualization', () => {
           ...exampleState().layers,
           {
             layerId: 'second',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'e',
             xAccessor: 'f',
@@ -239,7 +239,7 @@ describe('xy_visualization', () => {
       const layers = xyVisualization.appendLayer!(
         exampleState(),
         'foo',
-        layerTypes.DATA,
+        LayerTypes.DATA,
         'indexPattern1'
       ).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
@@ -328,7 +328,7 @@ describe('xy_visualization', () => {
 
   describe('#getLayerType', () => {
     it('should return the type only if the layer is in the state', () => {
-      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(layerTypes.DATA);
+      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(LayerTypes.DATA);
       expect(xyVisualization.getLayerType('foo', exampleState())).toBeUndefined();
     });
   });
@@ -377,7 +377,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
@@ -390,7 +390,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -406,7 +406,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -419,7 +419,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -435,7 +435,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'referenceLine',
-                layerType: layerTypes.REFERENCELINE,
+                layerType: LayerTypes.REFERENCELINE,
                 accessors: [],
               },
             ],
@@ -446,7 +446,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'referenceLine',
-        layerType: layerTypes.REFERENCELINE,
+        layerType: LayerTypes.REFERENCELINE,
         accessors: ['newCol'],
         yConfig: [
           {
@@ -467,7 +467,7 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'annotation',
-                  layerType: layerTypes.ANNOTATIONS,
+                  layerType: LayerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                   ignoreGlobalFilters: true,
@@ -480,7 +480,7 @@ describe('xy_visualization', () => {
           }).layers[0]
         ).toEqual({
           layerId: 'annotation',
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
           ignoreGlobalFilters: true,
           annotations: [
@@ -716,7 +716,7 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'annotation',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
@@ -745,7 +745,7 @@ describe('xy_visualization', () => {
             }).layers[0]
           ).toEqual({
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [
               exampleAnnotation2,
@@ -776,7 +776,7 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'annotation',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
@@ -805,7 +805,7 @@ describe('xy_visualization', () => {
             }).layers[0]
           ).toEqual({
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [
               {
@@ -836,7 +836,7 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'annotation',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
@@ -862,7 +862,7 @@ describe('xy_visualization', () => {
             }).layers[0]
           ).toEqual({
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
             ignoreGlobalFilters: true,
@@ -877,7 +877,7 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'annotation',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation, exampleAnnotation2],
                     ignoreGlobalFilters: true,
@@ -904,7 +904,7 @@ describe('xy_visualization', () => {
             }).layers[0]
           ).toEqual({
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2, exampleAnnotation],
             ignoreGlobalFilters: true,
@@ -920,14 +920,14 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'first',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
                   },
                   {
                     layerId: 'second',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
@@ -955,14 +955,14 @@ describe('xy_visualization', () => {
           ).toEqual([
             {
               layerId: 'first',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
             },
             {
               layerId: 'second',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [{ ...exampleAnnotation, id: 'an2' }],
               ignoreGlobalFilters: true,
@@ -978,14 +978,14 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'first',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
                   },
                   {
                     layerId: 'second',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
@@ -1013,14 +1013,14 @@ describe('xy_visualization', () => {
           ).toEqual([
             {
               layerId: 'first',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation2],
               ignoreGlobalFilters: true,
             },
             {
               layerId: 'second',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
@@ -1036,14 +1036,14 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'first',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
                   },
                   {
                     layerId: 'second',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation2],
                     ignoreGlobalFilters: true,
@@ -1070,14 +1070,14 @@ describe('xy_visualization', () => {
           ).toEqual([
             {
               layerId: 'first',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [],
               ignoreGlobalFilters: true,
             },
             {
               layerId: 'second',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
@@ -1093,14 +1093,14 @@ describe('xy_visualization', () => {
                 layers: [
                   {
                     layerId: 'first',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [exampleAnnotation],
                     ignoreGlobalFilters: true,
                   },
                   {
                     layerId: 'second',
-                    layerType: layerTypes.ANNOTATIONS,
+                    layerType: LayerTypes.ANNOTATIONS,
                     indexPatternId: 'indexPattern1',
                     annotations: [],
                     ignoreGlobalFilters: true,
@@ -1128,14 +1128,14 @@ describe('xy_visualization', () => {
           ).toEqual([
             {
               layerId: 'first',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [],
               ignoreGlobalFilters: true,
             },
             {
               layerId: 'second',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
@@ -1183,7 +1183,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -1195,7 +1195,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         xAccessor: undefined,
         accessors: [],
@@ -1210,14 +1210,14 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
               },
               {
                 layerId: 'ann',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
                 ignoreGlobalFilters: true,
@@ -1230,14 +1230,14 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'area',
           xAccessor: 'a',
           accessors: [],
         },
         {
           layerId: 'ann',
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
           ignoreGlobalFilters: true,
@@ -1533,7 +1533,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              layerType: layerTypes.REFERENCELINE,
+              layerType: LayerTypes.REFERENCELINE,
             },
           ],
         ],
@@ -1600,7 +1600,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               splitAccessor: undefined,
               xAccessor: undefined,
@@ -1608,7 +1608,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'referenceLine',
-              layerType: layerTypes.REFERENCELINE,
+              layerType: LayerTypes.REFERENCELINE,
               accessors: [],
               yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
             },
@@ -1950,7 +1950,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               splitAccessor: undefined,
               xAccessor: 'a',
@@ -1958,7 +1958,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'annotations',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
@@ -2182,7 +2182,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -2198,14 +2198,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -2221,14 +2221,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -2245,7 +2245,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2261,7 +2261,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2269,7 +2269,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2286,14 +2286,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -2314,14 +2314,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2329,7 +2329,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'third',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2351,21 +2351,21 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'third',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
@@ -2388,7 +2388,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -2436,7 +2436,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -2444,7 +2444,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -2492,7 +2492,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -2500,7 +2500,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -2669,7 +2669,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['b'],
@@ -2789,7 +2789,7 @@ describe('xy_visualization', () => {
               ...baseState.layers,
               {
                 layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
                 ignoreGlobalFilters: true,
               },
@@ -2809,7 +2809,7 @@ describe('xy_visualization', () => {
           ...baseState.layers,
           {
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
@@ -2828,7 +2828,7 @@ describe('xy_visualization', () => {
               ...baseState.layers,
               {
                 layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
                 ignoreGlobalFilters: true,
               },
@@ -2848,7 +2848,7 @@ describe('xy_visualization', () => {
           ...baseState.layers,
           {
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
@@ -2876,7 +2876,7 @@ describe('xy_visualization', () => {
               ...baseState.layers,
               {
                 layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
                 ignoreGlobalFilters: true,
                 indexPatternId: 'myIndexPattern',
@@ -2908,7 +2908,7 @@ describe('xy_visualization', () => {
             ...baseState.layers,
             {
               layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               annotations: [exampleAnnotation2],
               ignoreGlobalFilters: true,
               indexPatternId: 'myIndexPattern',
@@ -2924,7 +2924,7 @@ describe('xy_visualization', () => {
           layers: expect.arrayContaining([
             {
               layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               annotations: [exampleAnnotation2],
               ignoreGlobalFilters: false,
               indexPatternId: 'myIndexPattern',

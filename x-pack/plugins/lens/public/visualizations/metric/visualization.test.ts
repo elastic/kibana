@@ -9,7 +9,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
-import { layerTypes } from '../..';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import {
   DatasourceLayers,
@@ -61,7 +61,7 @@ describe('metric visualization', () => {
     test('returns a default state', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       });
     });
 
