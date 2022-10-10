@@ -31,18 +31,30 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
       const maxTimeoutMs = request.body.timeout ?? 250;
       const simulateError = request.body.simulateErrors ?? false;
 
+      let logMessageCounter = 1;
+
+      function logInfoMessage(msg: string) {
+        logger.info(`Response Stream Example #${logMessageCounter}: ${msg}`);
+        logMessageCounter++;
+      }
+
+      logInfoMessage('Starting stream.');
+
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
+        logInfoMessage('aborted$ subscription trigger.');
         shouldStop = true;
       });
       request.events.completed$.subscribe(() => {
+        logInfoMessage('completed$ subscription trigger.');
         shouldStop = true;
       });
 
       const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
         request.headers,
         logger,
-        request.body.compressResponse
+        request.body.compressResponse,
+        true
       );
 
       const entities = [
@@ -63,12 +75,18 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         actions.push('emit-error');
       }
 
-      let progress = 0;
+      // let progress = 0;
+
+      const start = Date.now();
 
       async function pushStreamUpdate() {
         setTimeout(() => {
           try {
-            progress++;
+            const now = Date.now();
+            const delta = now - start;
+            const runningTime = 60 * 60 * 1000;
+
+            const progress = Math.round((delta / runningTime) * 100);
 
             if (progress > 100 || shouldStop) {
               end();
