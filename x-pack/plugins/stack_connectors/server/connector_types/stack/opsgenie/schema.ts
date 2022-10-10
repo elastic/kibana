@@ -26,8 +26,8 @@ const responderTypes = schema.oneOf([
 const validateDetails = (details: Record<string, string>): string | void => {
   let totalChars = 0;
 
-  for (const [key, value] of Object.entries(details)) {
-    totalChars += key.length + value.length;
+  for (const value of Object.values(details)) {
+    totalChars += value.length;
 
     if (totalChars > 8000) {
       return i18n.translate('xpack.stackConnectors.opsgenie.invalidDetails', {
@@ -39,6 +39,10 @@ const validateDetails = (details: Record<string, string>): string | void => {
 
 export const CreateAlertParamsSchema = schema.object({
   message: schema.string({ maxLength: 130 }),
+  /**
+   * The max length here should be 512 according to Opsgenie's docs but we will sha256 hash the alias if it is longer than 512
+   * so we'll not impose a limit on the schema otherwise it'll get rejected prematurely.
+   */
   alias: schema.maybe(schema.string()),
   description: schema.maybe(schema.string({ maxLength: 15000 })),
   responders: schema.maybe(

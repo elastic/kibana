@@ -38,14 +38,17 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
   public getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
     return `Message: ${
-      error.response?.data.errors?.message ?? error.response?.data.message ?? i18n.UNKNOWN_ERROR
-    }.`;
+      error.response?.data.errors?.message ??
+      error.response?.data.message ??
+      error.message ??
+      i18n.UNKNOWN_ERROR
+    }`;
   }
 
   public async createAlert(params: CreateAlertParams) {
     const res = await this.request({
       method: 'post',
-      url: this.concatPathToURL('v2/alerts'),
+      url: this.concatPathToURL('v2/alerts').toString(),
       data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
       headers: this.createHeaders(),
       responseSchema: Response,
@@ -73,11 +76,11 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private createHeaders() {
-    return { Authorization: `GenieKey ${this.secrets.apiKey}`, 'Content-Type': 'application/json' };
+    return { Authorization: `GenieKey ${this.secrets.apiKey}` };
   }
 
   public async closeAlert(params: CloseAlertParams) {
-    const fullURL = new URL(`v2/alerts/${params.alias}/close`, this.config.apiUrl);
+    const fullURL = this.concatPathToURL(`v2/alerts/${params.alias}/close`);
     fullURL.searchParams.set('identifierType', 'alias');
 
     const { alias, ...paramsWithoutAlias } = params;
@@ -96,6 +99,6 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   private concatPathToURL(path: string) {
     const fullURL = new URL(path, this.config.apiUrl);
 
-    return fullURL.toString();
+    return fullURL;
   }
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -13,8 +14,24 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { OpsgenieConnectorTypeId } from '.';
 import { OpsgenieConnector } from './connector';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+
+jest.mock('axios');
+
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+  };
+});
+
+const axiosMock = axios as jest.Mocked<typeof axios>;
+const requestMock = utils.request as jest.Mock;
 
 describe('OpsgenieConnector', () => {
+  const axiosInstanceMock = jest.fn();
+
   let connector: OpsgenieConnector;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let logger: MockedLogger;
@@ -24,17 +41,28 @@ describe('OpsgenieConnector', () => {
     method: 'post',
     url: 'https://example.com/v2/alerts',
     headers: { Authorization: 'GenieKey 123', 'Content-Type': 'application/json' },
-    responseSchema: expect.anything(),
   };
 
   const createCloseAlertExpect = (alias: string) => ({
     method: 'post',
     url: `https://example.com/v2/alerts/${alias}/close?identifierType=alias`,
     headers: { Authorization: 'GenieKey 123', 'Content-Type': 'application/json' },
-    responseSchema: expect.anything(),
   });
 
+  const ignoredRequestFields = {
+    axios: expect.anything(),
+    configurationUtilities: expect.anything(),
+    logger: expect.anything(),
+  };
+
   beforeEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+    requestMock.mockReturnValue({ data: { took: 5, requestId: '123', result: 'ok' } });
+    axiosMock.create.mockImplementation(() => {
+      return axiosInstanceMock as unknown as AxiosInstance;
+    });
+
     logger = loggingSystemMock.createLogger();
     services = actionsMock.createServices();
     mockedActionsConfig = actionsConfigMock.create();
@@ -50,52 +78,37 @@ describe('OpsgenieConnector', () => {
   });
 
   it('calls request with the correct arguments for creating an alert', async () => {
-    const connectorSpy = jest
-      // @ts-expect-error it's complaining because request is a protected method
-      .spyOn(connector, 'request')
-      .mockImplementation(async () => ({}));
     await connector.createAlert({ message: 'hello' });
 
-    expect(connectorSpy).toBeCalledWith({
-      ...defaultCreateAlertExpect,
+    expect(requestMock.mock.calls[0][0]).toEqual({
       data: { message: 'hello' },
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
     });
   });
 
   it('calls request without modifying the alias when it is less than 512 characters when creating an alert', async () => {
-    const connectorSpy = jest
-      // @ts-expect-error it's complaining because request is a protected method
-      .spyOn(connector, 'request')
-      .mockImplementation(async () => ({}));
     await connector.createAlert({ message: 'hello', alias: '111' });
 
-    expect(connectorSpy).toBeCalledWith({
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
       data: { message: 'hello', alias: '111' },
     });
   });
 
   it('calls request without modifying the alias when it is equal to 512 characters when creating an alert', async () => {
-    const connectorSpy = jest
-      // @ts-expect-error it's complaining because request is a protected method
-      .spyOn(connector, 'request')
-      .mockImplementation(async () => ({}));
-
     const alias = 'a'.repeat(512);
     await connector.createAlert({ message: 'hello', alias });
 
-    expect(connectorSpy).toBeCalledWith({
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
       data: { message: 'hello', alias },
     });
   });
 
   it('calls request with the sha256 hash of the alias when it is greater than 512 characters when creating an alert', async () => {
-    const connectorSpy = jest
-      // @ts-expect-error it's complaining because request is a protected method
-      .spyOn(connector, 'request')
-      .mockImplementation(async () => ({}));
-
     const alias = 'a'.repeat(513);
 
     const hasher = crypto.createHash('sha256');
@@ -103,20 +116,18 @@ describe('OpsgenieConnector', () => {
 
     await connector.createAlert({ message: 'hello', alias });
 
-    expect(connectorSpy).toBeCalledWith({
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
       data: { message: 'hello', alias: sha256Hash.digest('hex') },
     });
   });
 
   it('calls request with the correct arguments for closing an alert', async () => {
-    const connectorSpy = jest
-      // @ts-expect-error it's complaining because request is a protected method
-      .spyOn(connector, 'request')
-      .mockImplementation(async () => ({}));
     await connector.closeAlert({ user: 'sam', alias: '111' });
 
-    expect(connectorSpy).toBeCalledWith({
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
       ...createCloseAlertExpect('111'),
       data: { user: 'sam' },
     });
