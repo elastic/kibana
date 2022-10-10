@@ -77,11 +77,11 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // However, since the file ID is base64-encoded using 21.33 bytes
   // (16 * 4 / 3), then the 22 bytes have an extra 4 bits from the
   // address (see diagram in definition of EncodedStackTrace).
-  for (let i = 0; i < countsFrameIDs; i++) {
-    const pos = i * BASE64_FRAME_ID_LENGTH;
-    frameIDs[i] = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
-    fileIDs[i] = getFileIDFromStackFrameID(frameIDs[i]);
-    addressOrLines[i] = getAddressFromStackFrameID(frameIDs[i]);
+  for (let i = 0, pos = 0; i < countsFrameIDs; i++, pos += BASE64_FRAME_ID_LENGTH) {
+    const frameID = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
+    frameIDs[i] = frameID;
+    fileIDs[i] = getFileIDFromStackFrameID(frameID);
+    addressOrLines[i] = getAddressFromStackFrameID(frameID);
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
