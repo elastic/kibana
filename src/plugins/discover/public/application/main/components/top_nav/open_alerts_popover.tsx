@@ -43,7 +43,7 @@ interface AlertsPopoverProps {
   services: DiscoverServices;
   discoverAlertServices: DiscoverAlertServices;
   addAdHocDataView: (dataView: DataView) => void;
-  updateAdHocDataViewId: (dataView: DataView, updateState?: boolean) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }
 
 export function AlertsPopover({
@@ -231,7 +231,7 @@ export function openAlertsPopover({
   adHocDataViews: DataView[];
   savedQueryId?: string;
   addAdHocDataView: (dataView: DataView) => void;
-  updateAdHocDataViewId: (dataView: DataView, updateState?: boolean) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }) {
   const discoverAlertServices: DiscoverAlertServices = {
     ...pick(services, [

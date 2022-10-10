@@ -375,11 +375,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
-      sourceAdHocDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // create an alert
       await defineSearchSourceAlert('test-adhoc-alert');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      sourceAdHocDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // navigate to discover using view in app link
       await openAlertRuleInManagement('test-adhoc-alert');

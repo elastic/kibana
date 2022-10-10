@@ -50,7 +50,7 @@ export const getTopNavLinks = ({
   adHocDataViews: DataView[];
   addAdHocDataView: (dataView: DataView) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateAdHocDataViewId: (dataView: DataView, updateState?: boolean) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',

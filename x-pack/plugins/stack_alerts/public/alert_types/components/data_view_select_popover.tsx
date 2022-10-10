@@ -131,9 +131,6 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
         newDataView.timeFieldName = '@timestamp';
       }
-      // else if (newDataView.fields.getByName('timestamp')?.type === 'date') {
-      //   newDataView.timeFieldName = 'timestamp';
-      // }
 
       onAdHocDataView(newDataView);
       onChangeDataView(newDataView.id!);

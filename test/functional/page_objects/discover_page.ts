@@ -687,7 +687,6 @@ export class DiscoverPageObject extends FtrService {
 
   public async getCurrentDataViewId() {
     const currentUrl = await this.browser.getCurrentUrl();
-    this.log.info('getting data view id from url', currentUrl);
     const matchResult = currentUrl.match(/index:[^,]*/);
     const indexSubstring = matchResult ? matchResult[0] : '';
     const dataViewId = decodeURIComponent(indexSubstring).replace('index:', '').replaceAll("'", '');
