@@ -25,6 +25,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
 
+  const alertLimit = alertFactory.alertLimit.getValue();
+
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
@@ -87,6 +89,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     if (firstValidTimefieldSort) {
       latestTimestamp = firstValidTimefieldSort;
     }
+
+    // we only create one alert if the condition is met, so we would only ever
+    // reach the alert limit if the limit is less than 1
+    alertFactory.alertLimit.setLimitReached(alertLimit < 1);
+  } else {
+    alertFactory.alertLimit.setLimitReached(false);
   }
 
   const { getRecoveredAlerts } = alertFactory.done();

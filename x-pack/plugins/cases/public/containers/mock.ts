@@ -399,7 +399,7 @@ const basicAction = {
 
 export const cases: Case[] = [
   basicCase,
-  { ...pushedCase, id: '1', totalComment: 0, comments: [] },
+  { ...pushedCase, id: '1', totalComment: 0, comments: [], status: CaseStatuses['in-progress'] },
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
@@ -557,7 +557,13 @@ export const pushedCaseSnake = {
 
 export const casesSnake: CasesResponse = [
   basicCaseSnake,
-  { ...pushedCaseSnake, id: '1', totalComment: 0, comments: [] },
+  {
+    ...pushedCaseSnake,
+    id: '1',
+    totalComment: 0,
+    comments: [],
+    status: CaseStatuses['in-progress'],
+  },
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },

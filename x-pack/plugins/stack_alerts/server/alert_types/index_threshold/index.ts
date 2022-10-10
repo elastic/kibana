@@ -6,7 +6,7 @@
  */
 
 import { AlertingSetup, StackAlertsStartDeps } from '../../types';
-import { getAlertType } from './alert_type';
+import { getRuleType } from './rule_type';
 
 // future enhancement: make these configurable?
 export const MAX_INTERVALS = 1000;
@@ -20,5 +20,5 @@ interface RegisterParams {
 
 export function register(params: RegisterParams) {
   const { data, alerting } = params;
-  alerting.registerType(getAlertType(data));
+  alerting.registerType(getRuleType(data));
 }

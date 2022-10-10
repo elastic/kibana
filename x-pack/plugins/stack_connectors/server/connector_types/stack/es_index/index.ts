@@ -143,7 +143,7 @@ async function executor(
 function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>,
-  actionId: string
+  actionId?: string
 ): ActionParamsType {
   const { documents, indexOverride } = renderMustacheObject<ActionParamsType>(params, variables);
 
