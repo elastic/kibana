@@ -6,13 +6,10 @@
  */
 import type { Readable } from 'stream';
 
-import mime from 'mime';
-
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { createEsFileClient } from '@kbn/files-plugin/server';
-import type { File } from '@kbn/files-plugin/common';
 
 import type { ResponseHeaders } from '@kbn/core-http-server';
 
@@ -125,7 +122,7 @@ export async function getAgentUploadFile(
 
     return {
       body: await file.downloadContent(),
-      headers: getDownloadHeadersForFile(file, fileName),
+      headers: getDownloadHeadersForFile(fileName),
     };
   } catch (error) {
     appContextService.getLogger().error(error);
@@ -133,11 +130,9 @@ export async function getAgentUploadFile(
   }
 }
 
-// copied from https://github.com/elastic/kibana/blob/main/x-pack/plugins/files/server/routes/common.ts
-export function getDownloadHeadersForFile(file: File, fileName: string): ResponseHeaders {
+export function getDownloadHeadersForFile(fileName: string): ResponseHeaders {
   return {
-    'content-type':
-      (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
+    'content-type': 'application/octet-stream',
     // Note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
     'content-disposition': `attachment; filename="${fileName}"`,
     'cache-control': 'max-age=31536000, immutable',

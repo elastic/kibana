@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(header['content-type']).to.eql('application/zip');
+      expect(header['content-type']).to.eql('application/octet-stream');
       expect(header['content-disposition']).to.eql(
         'attachment; filename="elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip"'
       );
