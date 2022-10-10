@@ -19,8 +19,8 @@ import {
   NumberDisplay,
   PieChartTypes,
   PieVisualizationState,
-  isPartitionShape,
 } from '../../../common';
+import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 
