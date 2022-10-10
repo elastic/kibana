@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { WithGuidedOnboardingTour } from '../../../../../../integrations/sections/epm/screens/detail/components/with_guided_onboarding_tour';
+import { WithGuidedOnboardingTour } from '../../../../../../../components';
 import { useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 
