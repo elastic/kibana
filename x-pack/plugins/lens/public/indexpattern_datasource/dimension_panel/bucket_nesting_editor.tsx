@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
-import { IndexPatternLayer } from '../types';
+import type { IndexPatternLayer } from '../types';
 import { hasField } from '../pure_utils';
-import { GenericIndexPatternColumn } from '../operations';
-import { IndexPatternField } from '../../types';
+import type { GenericIndexPatternColumn } from '../operations';
+import type { IndexPatternField, VisualizationDimensionGroupConfig } from '../../types';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -36,11 +36,13 @@ export function BucketNestingEditor({
   layer,
   setColumns,
   getFieldByName,
+  visualizationGroup,
 }: {
   columnId: string;
   layer: IndexPatternLayer;
   setColumns: (columns: string[]) => void;
   getFieldByName: (name: string) => IndexPatternField | undefined;
+  visualizationGroup?: VisualizationDimensionGroupConfig;
 }) {
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
@@ -53,7 +55,11 @@ export function BucketNestingEditor({
       operationType: c.operationType,
     }));
 
-  if (!column || !column.isBucketed || !aggColumns.length) {
+  const groupHandlesMultipleColumns = Boolean(
+    visualizationGroup?.supportsMoreColumns || visualizationGroup?.accessors.length
+  );
+
+  if (!column || !column.isBucketed || !aggColumns.length || groupHandlesMultipleColumns) {
     return null;
   }
 
