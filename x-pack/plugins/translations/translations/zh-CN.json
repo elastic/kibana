@@ -17348,8 +17348,6 @@
     "xpack.lens.xyVisualization.dataFailureSplitShort": "缺少 {axis}。",
     "xpack.lens.xyVisualization.dataFailureYLong": "{layers, plural, other {图层}} {layersList} {layers, plural, other {需要}}一个针对{axis}的字段。",
     "xpack.lens.xyVisualization.dataFailureYShort": "缺少 {axis}。",
-    "xpack.lens.xyVisualization.dataTypeFailureXLong": "{axis} 的数据类型不匹配无法混合日期和数字间隔类型。",
-    "xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong": "{axis} 的数据类型不匹配，请使用其他函数。",
     "xpack.lens.xyVisualization.dataTypeFailureXShort": "{axis} 的数据类型错误。",
     "xpack.lens.xyVisualization.dataTypeFailureYLong": "为 {axis} 提供的维度 {label} 具有错误的数据类型。应为数字，但却为 {dataType}",
     "xpack.lens.xyVisualization.dataTypeFailureYShort": "{axis} 的数据类型错误。",
