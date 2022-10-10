@@ -22,6 +22,8 @@ import {
   emptyStackFrame,
   Executable,
   FileID,
+  getAddressFromStackFrameID,
+  getFileIDFromStackFrameID,
   StackFrame,
   StackFrameID,
   StackTrace,
@@ -157,12 +159,9 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // address (see diagram in definition of EncodedStackTrace).
   for (let i = 0; i < countsFrameIDs; i++) {
     const pos = i * BASE64_FRAME_ID_LENGTH;
-    const frameID = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
-    const buf = Buffer.from(frameID, 'base64url');
-
-    fileIDs[i] = buf.toString('base64url', 0, 16);
-    addressOrLines[i] = Number(buf.readBigUInt64BE(16));
-    frameIDs[i] = frameID;
+    frameIDs[i] = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
+    fileIDs[i] = getFileIDFromStackFrameID(frameIDs[i]);
+    addressOrLines[i] = getAddressFromStackFrameID(frameIDs[i]);
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.

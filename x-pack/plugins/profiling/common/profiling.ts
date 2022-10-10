@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { safeBase64Decoder, safeBase64Encoder } from './base64';
+
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
@@ -14,6 +16,37 @@ export function createStackFrameID(fileID: FileID, addressOrLine: number): Stack
   Buffer.from(fileID, 'base64url').copy(buf);
   buf.writeBigUInt64BE(BigInt(addressOrLine), 16);
   return buf.toString('base64url');
+}
+
+/* eslint no-bitwise: ["error", { "allow": ["&"] }] */
+export function getFileIDFromStackFrameID(frameID: StackFrameID): FileID {
+  return frameID.slice(0, 21) + safeBase64Encoder[frameID.charCodeAt(21) & 0x30];
+}
+
+/* eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }] */
+export function getAddressFromStackFrameID(frameID: StackFrameID): number {
+  let address = safeBase64Decoder[frameID.charCodeAt(21) & 0x7f] & 0xf;
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(22) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(23) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(24) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(25) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(26) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(27) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(28) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(29) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(30) & 0x7f];
+  address <<= 6;
+  address += safeBase64Decoder[frameID.charCodeAt(31) & 0x7f];
+  return address;
 }
 
 export enum FrameType {
