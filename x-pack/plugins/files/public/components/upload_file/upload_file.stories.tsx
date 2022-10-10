@@ -8,7 +8,7 @@ import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { fileKindsRegistry } from '../stories_shared';
+import { register } from '../stories_shared';
 import { FilesClient } from '../../types';
 import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
@@ -42,14 +42,14 @@ export default {
   ],
 } as ComponentMeta<typeof UploadFile>;
 
-fileKindsRegistry.register({
+register({
   id: kind,
   http: {},
   allowedMimeTypes: ['*'],
 });
 
 const miniFile = 'miniFile';
-fileKindsRegistry.register({
+register({
   id: miniFile,
   http: {},
   maxSizeBytes: 1,
@@ -57,7 +57,7 @@ fileKindsRegistry.register({
 });
 
 const zipOnly = 'zipOnly';
-fileKindsRegistry.register({
+register({
   id: zipOnly,
   http: {},
   allowedMimeTypes: ['application/zip'],

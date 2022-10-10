@@ -7,12 +7,12 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { FilesClient, FilesClientResponses } from '../../types';
-import { fileKindsRegistry } from '../stories_shared';
+import { register } from '../stories_shared';
 import { FilesContext } from '../context';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
 
 const kind = 'filepicker';
-fileKindsRegistry.register({
+register({
   id: kind,
   http: {},
   allowedMimeTypes: ['*'],

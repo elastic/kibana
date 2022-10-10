@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FileKind } from '../../common';
 import {
   setFileKindsRegistry,
   getFileKindsRegistry,
@@ -12,4 +13,9 @@ import {
 } from '../../common/file_kinds_registry';
 
 setFileKindsRegistry(new FileKindsRegistryImpl());
-export const fileKindsRegistry = getFileKindsRegistry();
+const fileKindsRegistry = getFileKindsRegistry();
+export const register: FileKindsRegistryImpl['register'] = (fileKind: FileKind) => {
+  if (!fileKindsRegistry.getAll().find((kind) => kind.id === fileKind.id)) {
+    getFileKindsRegistry().register(fileKind);
+  }
+};
