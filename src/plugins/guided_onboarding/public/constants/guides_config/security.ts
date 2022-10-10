@@ -28,16 +28,20 @@ export const securityConfig: GuideConfig = {
     {
       id: 'rules',
       title: 'Turn on rules',
-      descriptionList: ['Load prebuilt rules.', 'Select rules relevant to you.'],
-      manualCompletion: {
-        title: 'Continue with the tour',
-        description: 'When you’ve enabled the rules you want continue...',
-      },
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
     {
       id: 'alertsCases',
       title: 'Alerts and cases',
-      descriptionList: ['View and triage alerts.', 'Create cases.'],
+      descriptionList: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      ],
     },
   ],
 };

@@ -52,6 +52,7 @@ export interface GuidedOnboardingApi {
   completeGuidedOnboardingForIntegration: (
     integration?: string
   ) => Promise<{ state: GuideState } | undefined>;
+  isGuidePanelOpen$: Observable<boolean>;
 }
 
 export interface StepConfig {
