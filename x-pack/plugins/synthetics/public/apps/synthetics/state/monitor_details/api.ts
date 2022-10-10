@@ -51,8 +51,8 @@ export const fetchSyntheticsMonitor = async ({
   )) as SavedObject<SyntheticsMonitor>;
 
   return {
-    id: savedObject.id,
     ...savedObject.attributes,
+    id: savedObject.id,
     updated_at: savedObject.updated_at,
   } as EncryptedSyntheticsSavedMonitor;
 };

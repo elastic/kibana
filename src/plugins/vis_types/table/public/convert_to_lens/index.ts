@@ -54,7 +54,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
       buckets: ['bucket'],
       splits: ['split_row', 'split_column'],
     },
-    { dropEmptyRowsInDateHistogram: true }
+    { dropEmptyRowsInDateHistogram: true, isPercentageMode: false }
   );
 
   if (result === null) {

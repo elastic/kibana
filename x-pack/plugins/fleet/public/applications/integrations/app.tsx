@@ -14,7 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Chat } from '@kbn/cloud-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 

@@ -23,9 +23,9 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { FieldStats, FieldVisualizeButton } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 import { LensFieldIcon } from '../shared_components';
 
@@ -54,6 +54,11 @@ const mockedServices = {
       getRedirectUrl: jest.fn(() => 'discover_url'),
     },
   } as unknown as DiscoverStart,
+  application: {
+    capabilities: {
+      discover: { save: true, saveQuery: true, show: true },
+    },
+  },
 };
 
 const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
@@ -63,6 +68,14 @@ const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
     </KibanaContextProvider>
   );
 };
+
+async function getComponent(props: FieldItemProps) {
+  const instance = await mountWithIntl(<InnerFieldItemWrapper {...props} />);
+  // wait for lazy modules
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await instance.update();
+  return instance;
+}
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
@@ -117,6 +130,13 @@ describe('IndexPattern Field Item', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'geo.coordinates',
+          displayName: 'geo.coordinates',
+          type: 'geo_shape',
+          aggregatable: true,
+          searchable: true,
+        },
         documentField,
       ],
     } as IndexPattern;
@@ -168,8 +188,8 @@ describe('IndexPattern Field Item', () => {
     (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
-  it('should display displayName of a field', () => {
-    const wrapper = mountWithIntl(<InnerFieldItemWrapper {...defaultProps} />);
+  it('should display displayName of a field', async () => {
+    const wrapper = await getComponent(defaultProps);
 
     // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
     // which can't be seen, but shows in the text content
@@ -178,13 +198,11 @@ describe('IndexPattern Field Item', () => {
     );
   });
 
-  it('should show gauge icon for gauge fields', () => {
-    const wrapper = mountWithIntl(
-      <InnerFieldItemWrapper
-        {...defaultProps}
-        field={{ ...defaultProps.field, timeSeriesMetricType: 'gauge' }}
-      />
-    );
+  it('should show gauge icon for gauge fields', async () => {
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field: { ...defaultProps.field, timeSeriesMetricType: 'gauge' },
+    });
 
     // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
     // which can't be seen, but shows in the text content
@@ -193,9 +211,11 @@ describe('IndexPattern Field Item', () => {
 
   it('should render edit field button if callback is set', async () => {
     const editFieldSpy = jest.fn();
-    const wrapper = mountWithIntl(
-      <InnerFieldItemWrapper {...defaultProps} editField={editFieldSpy} hideDetails />
-    );
+    const wrapper = await getComponent({
+      ...defaultProps,
+      editField: editFieldSpy,
+      hideDetails: true,
+    });
     await clickField(wrapper, 'bytes');
     await wrapper.update();
     const popoverContent = wrapper.find(EuiPopover).prop('children');
@@ -205,7 +225,7 @@ describe('IndexPattern Field Item', () => {
           {popoverContent as ReactElement}
         </KibanaContextProvider>
       )
-        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .find('[data-test-subj="fieldPopoverHeader_editField-bytes"]')
         .first()
         .simulate('click');
     });
@@ -214,14 +234,12 @@ describe('IndexPattern Field Item', () => {
 
   it('should not render edit field button for document field', async () => {
     const editFieldSpy = jest.fn();
-    const wrapper = mountWithIntl(
-      <InnerFieldItemWrapper
-        {...defaultProps}
-        field={documentField}
-        editField={editFieldSpy}
-        hideDetails
-      />
-    );
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field: documentField,
+      editField: editFieldSpy,
+      hideDetails: true,
+    });
     await clickField(wrapper, documentField.name);
     await wrapper.update();
     const popoverContent = wrapper.find(EuiPopover).prop('children');
@@ -231,12 +249,20 @@ describe('IndexPattern Field Item', () => {
           {popoverContent as ReactElement}
         </KibanaContextProvider>
       )
-        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .find('[data-test-subj="fieldPopoverHeader_editField-bytes"]')
         .exists()
     ).toBeFalsy();
   });
 
   it('should pass add filter callback and pass result to filter manager', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
     const field = {
       name: 'test',
       displayName: 'testLabel',
@@ -247,25 +273,37 @@ describe('IndexPattern Field Item', () => {
     };
 
     const editFieldSpy = jest.fn();
-    const wrapper = mountWithIntl(
-      <InnerFieldItemWrapper {...defaultProps} field={field} editField={editFieldSpy} />
-    );
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field,
+      editField: editFieldSpy,
+    });
+
     await clickField(wrapper, field.name);
     await wrapper.update();
-    const popoverContent = wrapper.find(EuiPopover).prop('children');
-    const instance = mountWithIntl(
-      <KibanaContextProvider services={mockedServices}>
-        {popoverContent as ReactElement}
-      </KibanaContextProvider>
-    );
-    const onAddFilter = instance.find(FieldStats).prop('onAddFilter');
-    onAddFilter!(field as DataViewField, 'abc', '+');
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 4633,
+        sampledDocuments: 4633,
+        sampledValues: 4633,
+        topValues: {
+          buckets: [{ count: 147, key: 'abc' }],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    wrapper.find(`[data-test-subj="plus-${field.name}-abc"]`).first().simulate('click');
+
     expect(mockedServices.data.query.filterManager.addFilters).toHaveBeenCalledWith([
       expect.objectContaining({ query: { match_phrase: { test: 'abc' } } }),
     ]);
   });
 
   it('should request field stats every time the button is clicked', async () => {
+    const dataViewField = new DataViewField(defaultProps.field);
     let resolveFunction: (arg: unknown) => void;
 
     (loadFieldStats as jest.Mock).mockImplementation(() => {
@@ -274,7 +312,7 @@ describe('IndexPattern Field Item', () => {
       });
     });
 
-    const wrapper = mountWithIntl(<InnerFieldItemWrapper {...defaultProps} />);
+    const wrapper = await getComponent(defaultProps);
 
     await clickField(wrapper, 'bytes');
 
@@ -294,7 +332,7 @@ describe('IndexPattern Field Item', () => {
       },
       fromDate: 'now-7d',
       toDate: 'now',
-      field: defaultProps.field,
+      field: dataViewField,
     });
 
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
@@ -379,14 +417,15 @@ describe('IndexPattern Field Item', () => {
       },
       fromDate: 'now-14d',
       toDate: 'now-7d',
-      field: defaultProps.field,
+      field: dataViewField,
     });
   });
 
   it('should not request field stats for document field', async () => {
-    const wrapper = await mountWithIntl(
-      <InnerFieldItemWrapper {...defaultProps} field={documentField} />
-    );
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field: documentField,
+    });
 
     await clickField(wrapper, DOCUMENT_FIELD_NAME);
 
@@ -399,18 +438,16 @@ describe('IndexPattern Field Item', () => {
   });
 
   it('should not request field stats for range fields', async () => {
-    const wrapper = await mountWithIntl(
-      <InnerFieldItemWrapper
-        {...defaultProps}
-        field={{
-          name: 'ip_range',
-          displayName: 'ip_range',
-          type: 'ip_range',
-          aggregatable: true,
-          searchable: true,
-        }}
-      />
-    );
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field: {
+        name: 'ip_range',
+        displayName: 'ip_range',
+        type: 'ip_range',
+        aggregatable: true,
+        searchable: true,
+      },
+    });
 
     await clickField(wrapper, 'ip_range');
 
@@ -420,6 +457,30 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.find(FieldVisualizeButton).exists()).toBeFalsy();
+  });
+
+  it('should not request field stats for geo fields but render Visualize button', async () => {
+    const wrapper = await getComponent({
+      ...defaultProps,
+      field: {
+        name: 'geo.coordinates',
+        displayName: 'geo.coordinates',
+        type: 'geo_shape',
+        aggregatable: true,
+        searchable: true,
+      },
+    });
+
+    await clickField(wrapper, 'geo.coordinates');
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.find(FieldVisualizeButton).exists()).toBeTruthy();
   });
 
   it('should display Explore in discover button', async () => {
@@ -457,6 +518,32 @@ describe('IndexPattern Field Item', () => {
     const exploreInDiscoverBtn = findTestSubject(
       wrapper,
       'lnsFieldListPanel-exploreInDiscover-geo_point'
+    );
+    expect(exploreInDiscoverBtn.length).toBe(0);
+  });
+
+  it('should not display Explore in discover button if discover capabilities show is false', async () => {
+    const services = {
+      ...mockedServices,
+      application: {
+        capabilities: {
+          discover: { save: false, saveQuery: false, show: false },
+        },
+      },
+    };
+    const wrapper = await mountWithIntl(
+      <KibanaContextProvider services={services}>
+        <InnerFieldItem {...defaultProps} />
+      </KibanaContextProvider>
+    );
+
+    await clickField(wrapper, 'bytes');
+
+    await wrapper.update();
+
+    const exploreInDiscoverBtn = findTestSubject(
+      wrapper,
+      'lnsFieldListPanel-exploreInDiscover-bytes'
     );
     expect(exploreInDiscoverBtn.length).toBe(0);
   });
