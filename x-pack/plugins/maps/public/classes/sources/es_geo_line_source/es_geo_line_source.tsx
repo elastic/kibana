@@ -152,11 +152,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   async getFields(): Promise<IField[]> {
-    return [
-      ...this.getMetricFields(),
-      this._createSplitField(),
-      this._createSortField(),
-    ];
+    return [...this.getMetricFields(), this._createSplitField(), this._createSortField()];
   }
 
   getFieldByName(name: string): IField | null {
@@ -318,7 +314,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,
       this._descriptor.splitField,
-      this._descriptor.sortField,
+      this._descriptor.sortField
     );
     console.log(featureCollection);
 

@@ -11,7 +11,11 @@ import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_ut
 
 const KEYS_TO_IGNORE = ['key', 'path'];
 
-export function convertToGeoJson(esResponse: any, entitySplitFieldName: string, sortFieldName: string) {
+export function convertToGeoJson(
+  esResponse: any,
+  entitySplitFieldName: string,
+  sortFieldName: string
+) {
   const features: Feature[] = [];
   let numTrimmedTracks = 0;
 
@@ -24,7 +28,7 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string, 
     if (!trackFeature.properties!.complete) {
       numTrimmedTracks++;
     }
-    
+
     // Create feature for each segment in track (LineString)
     for (let i = 1; i < trackFeature.geometry.coordinates.length; i++) {
       features.push({
@@ -33,7 +37,7 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string, 
         geometry: {
           type: 'LineString',
           coordinates: [
-            trackFeature.geometry.coordinates[i-1],
+            trackFeature.geometry.coordinates[i - 1],
             trackFeature.geometry.coordinates[i],
           ],
         },

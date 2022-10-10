@@ -24,10 +24,7 @@ const esResponse = {
             },
             properties: {
               complete: true,
-              sort_values: [
-                1665381987801,
-                1665385805491,
-              ]
+              sort_values: [1665381987801, 1665385805491],
             },
           },
         },
@@ -44,10 +41,7 @@ const esResponse = {
             },
             properties: {
               complete: false,
-              sort_values: [
-                1665360000000,
-                1665375849240,
-              ]
+              sort_values: [1665360000000, 1665375849240],
             },
           },
         },
@@ -62,9 +56,7 @@ it('Should convert elasticsearch aggregation response into feature collection', 
   expect(geoJson.featureCollection.features.length).toBe(4);
   expect(geoJson.featureCollection.features[0]).toEqual({
     geometry: {
-      coordinates: [
-        [-95.339639, 41.584389],
-      ],
+      coordinates: [[-95.339639, 41.584389]],
       type: 'LineString',
     },
     id: 'ios_0',
