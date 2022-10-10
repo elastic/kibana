@@ -43,6 +43,7 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
+  featuredList?: JSX.Element | null;
   initialSearch?: string;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
@@ -64,6 +65,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   setSelectedCategory,
   categories,
   showMissingIntegrationMessage = false,
+  featuredList = null,
   callout,
   showCardLabels = true,
 }) => {
@@ -129,6 +131,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
+      {featuredList}
       <div ref={menuRef}>
         <EuiFlexGroup
           alignItems="flexStart"
