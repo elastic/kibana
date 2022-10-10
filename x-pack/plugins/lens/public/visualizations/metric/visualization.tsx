@@ -16,7 +16,7 @@ import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { LayerType } from '../../../common';
+import { LayerType, layerTypes } from '../../../common';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
@@ -26,7 +26,6 @@ import {
   VisualizationDimensionGroupConfig,
   Suggestion,
 } from '../../types';
-import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';

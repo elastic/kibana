@@ -8,9 +8,10 @@
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../../types';
-import { DatasourcePublicAPI, layerTypes } from '../../../..';
+import { DatasourcePublicAPI } from '../../../..';
 import { createMockFramePublicAPI } from '../../../../mocks';
 import { State } from '../../types';
 import { Position } from '@elastic/charts';
@@ -59,7 +60,7 @@ describe('AnnotationsPanel', () => {
       preferredSeriesType: 'bar',
       layers: [
         {
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           layerId: 'annotation',
           indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],

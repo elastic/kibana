@@ -101,9 +101,10 @@ export type {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
+
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
-export { layerTypes } from '../common';
+export { layerTypes } from '../common/constants';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

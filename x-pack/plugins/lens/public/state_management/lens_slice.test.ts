@@ -22,7 +22,7 @@ import {
   selectChangesApplied,
   removeDimension,
 } from '.';
-import { layerTypes } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
 import {
   Datasource,
@@ -33,6 +33,7 @@ import {
 } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
 import { DataViewsState, LensAppState } from './types';
+import { layerTypes } from '../../common';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
@@ -354,7 +355,7 @@ describe('lensSlice', () => {
         customStore.dispatch(
           addLayer({
             layerId: 'foo',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           })
         );
         const state = customStore.getState().lens;

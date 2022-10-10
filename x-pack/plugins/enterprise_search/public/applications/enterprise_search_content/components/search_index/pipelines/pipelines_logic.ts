@@ -90,6 +90,10 @@ type PipelinesActions = Pick<
     FetchCustomPipelineApiLogicArgs,
     FetchCustomPipelineApiLogicResponse
   >['makeRequest'];
+  fetchCustomPipelineSuccess: Actions<
+    FetchCustomPipelineApiLogicArgs,
+    FetchCustomPipelineApiLogicResponse
+  >['apiSuccess'];
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
   fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
@@ -143,7 +147,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       FetchDefaultPipelineApiLogic,
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
       FetchCustomPipelineApiLogic,
-      ['makeRequest as fetchCustomPipeline'],
+      ['apiSuccess as fetchCustomPipelineSuccess', 'makeRequest as fetchCustomPipeline'],
       FetchMlInferencePipelineProcessorsApiLogic,
       [
         'makeRequest as fetchMlInferenceProcessors',
@@ -303,16 +307,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       (index: ElasticsearchIndexWithIngestion) => !isApiIndex(index),
     ],
     canUseMlInferencePipeline: [
-      () => [
-        selectors.canSetPipeline,
-        selectors.hasIndexIngestionPipeline,
-        selectors.pipelineState,
-      ],
+      () => [selectors.hasIndexIngestionPipeline, selectors.pipelineState, selectors.index],
       (
-        canSetPipeline: boolean,
         hasIndexIngestionPipeline: boolean,
-        pipelineState: IngestPipelineParams
-      ) => canSetPipeline && hasIndexIngestionPipeline && pipelineState.run_ml_inference,
+        pipelineState: IngestPipelineParams,
+        index: ElasticsearchIndexWithIngestion
+      ) => hasIndexIngestionPipeline && (pipelineState.run_ml_inference || isApiIndex(index)),
     ],
     defaultPipelineValues: [
       () => [selectors.defaultPipelineValuesData],
