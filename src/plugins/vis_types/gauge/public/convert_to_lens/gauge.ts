@@ -83,9 +83,9 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
   const indexPatternId = dataView.id!;
 
   const metricAccessor = result.metrics[0];
-  const { min, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
-  const minColumn = createStaticValueColumn(min);
-  const maxColumn = createStaticValueColumn(max);
+  const { min, max, isPercentageMode } = percentageModeConfig as PercentageModeConfigWithMinMax;
+  const minColumn = createStaticValueColumn(isPercentageMode ? 0 : min);
+  const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
   const columns = [...result.columns, minColumn, maxColumn];
 
   return {
