@@ -21,7 +21,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { generateId } from '../../id_generator';
 import {
-  isDraggedField,
+  isDraggedDataViewField,
   isOperationFromCompatibleGroup,
   isOperationFromTheSameGroup,
   renewIDs,
@@ -32,13 +32,13 @@ import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
 import {
-  State,
+  type State,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type SeriesType,
+  type XYSuggestion,
+  type PersistedState,
   visualizationTypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  SeriesType,
-  XYSuggestion,
-  PersistedState,
 } from './types';
 import { layerTypes } from '../../../common';
 import {
@@ -84,12 +84,13 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState } from './types';
+import type { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { createAnnotationActions } from './annotations/actions';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -240,6 +241,16 @@ export const getXyVisualization = ({
     ];
   },
 
+  getSupportedActionsForLayer(layerId, state, setState) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    const actions = [];
+    if (isAnnotationsLayer(layer)) {
+      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
+    }
+    return actions;
+  },
+
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -381,7 +392,7 @@ export const getXyVisualization = ({
       return;
     }
 
-    if (isDraggedField(dropProps.source)) {
+    if (isDraggedDataViewField(dropProps.source)) {
       if (dropProps.source.field.type === 'document') {
         return;
       }

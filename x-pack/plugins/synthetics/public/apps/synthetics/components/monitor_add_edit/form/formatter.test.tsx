@@ -136,6 +136,7 @@ describe('format', () => {
       urls: 'sample url',
       'url.port': null,
       username: '',
+      id: '',
     });
   });
 
@@ -284,6 +285,7 @@ describe('format', () => {
         type: 'browser',
         'url.port': null,
         urls: '',
+        id: '',
       });
     }
   );
@@ -350,6 +352,7 @@ describe('format', () => {
       urls: 'sample url',
       'url.port': null,
       username: '',
+      id: '',
     });
   });
 });

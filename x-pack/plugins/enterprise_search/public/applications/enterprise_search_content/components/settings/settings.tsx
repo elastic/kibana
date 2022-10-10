@@ -31,9 +31,6 @@ export const Settings: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
-          defaultMessage: 'Content',
-        }),
         i18n.translate('xpack.enterpriseSearch.content.settings.breadcrumb', {
           defaultMessage: 'Settings',
         }),

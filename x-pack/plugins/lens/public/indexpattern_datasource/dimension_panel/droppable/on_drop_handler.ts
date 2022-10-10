@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isDraggedField } from '../../../utils';
+import { isDraggedDataViewField } from '../../../utils';
 import {
   DatasourceDimensionDropHandlerProps,
   DragDropOperation,
@@ -49,7 +49,7 @@ interface DropHandlerProps<T = DataViewDragDropOperation> {
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const { target, source, dropType, state, indexPatterns } = props;
 
-  if (isDraggedField(source) && isFieldDropType(dropType)) {
+  if (isDraggedDataViewField(source) && isFieldDropType(dropType)) {
     return onFieldDrop(
       {
         ...props,
@@ -143,7 +143,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
       );
 
   if (
-    !isDraggedField(source) ||
+    !isDraggedDataViewField(source) ||
     !newOperation ||
     (shouldAddField &&
       !hasOperationSupportForMultipleFields(indexPattern, targetColumn, undefined, source.field))

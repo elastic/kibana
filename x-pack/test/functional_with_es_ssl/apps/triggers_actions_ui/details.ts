@@ -168,9 +168,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
         expect(owner).to.be('elastic');
-
-        const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
-        expect(connectorType).to.be(`Slack`);
       });
 
       it('renders toast when schedule is less than configured minimum', async () => {
@@ -238,7 +235,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should snooze the rule', async () => {
-        const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
 
         const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
@@ -247,18 +244,64 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
         });
-      });
 
-      it('should unsnooze the rule', async () => {
-        const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
         await snoozeBadge.click();
 
         const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
         await snoozeCancel.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should snooze the rule for a set duration', async () => {
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const snooze8h = await testSubjects.find('linkSnooze8h');
+        await snooze8h.click();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('rulesListNotifyBadge-unsnoozed');
+          await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
         });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozed');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
+        await snoozeCancel.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should add snooze schedule', async () => {
+        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+        await snoozeBadge.click();
+
+        const addScheduleButton = await testSubjects.find('ruleAddSchedule');
+        await addScheduleButton.click();
+
+        const saveScheduleButton = await testSubjects.find('scheduler-saveSchedule');
+        await saveScheduleButton.click();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+        });
+
+        // Unsnooze the rule for the next test
+        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-scheduled');
+        await snoozeBadge.click();
+
+        const snoozeCancel = await testSubjects.find('ruleRemoveAllSchedules');
+        await snoozeCancel.click();
+
+        const confirmButton = await testSubjects.find('confirmModalConfirmButton');
+        await confirmButton.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
     });
 

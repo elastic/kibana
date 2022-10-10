@@ -6,15 +6,23 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { ldClientMock } from './plugin.test.mock';
 import { CloudExperimentsPlugin } from './plugin';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { FEATURE_FLAG_NAMES } from '../common/constants';
 
 describe('Cloud Experiments server plugin', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
+
+  const ldUser = {
+    key: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+    custom: {
+      kibanaVersion: coreMock.createPluginInitializerContext().env.packageInfo.version,
+    },
+  };
 
   describe('constructor', () => {
     test('successfully creates a new plugin if provided an empty configuration', () => {
@@ -68,17 +76,19 @@ describe('Cloud Experiments server plugin', () => {
     });
 
     test('returns the contract', () => {
-      const setupContract = plugin.setup(coreMock.createSetup(), {});
-      expect(setupContract).toStrictEqual(
-        expect.objectContaining({
-          identifyUser: expect.any(Function),
+      expect(
+        plugin.setup(coreMock.createSetup(), {
+          cloud: cloudMock.createSetup(),
         })
-      );
+      ).toBeUndefined();
     });
 
     test('registers the usage collector when available', () => {
       const usageCollection = usageCollectionPluginMock.createSetupContract();
-      plugin.setup(coreMock.createSetup(), { usageCollection });
+      plugin.setup(coreMock.createSetup(), {
+        cloud: cloudMock.createSetup(),
+        usageCollection,
+      });
       expect(usageCollection.makeUsageCollector).toHaveBeenCalledTimes(1);
       expect(usageCollection.registerCollector).toHaveBeenCalledTimes(1);
     });
@@ -86,9 +96,9 @@ describe('Cloud Experiments server plugin', () => {
     describe('identifyUser', () => {
       test('sets launchDarklyUser and calls identify', () => {
         expect(plugin).toHaveProperty('launchDarklyUser', undefined);
-        const setupContract = plugin.setup(coreMock.createSetup(), {});
-        setupContract.identifyUser('user-id', {});
-        const ldUser = { key: 'user-id', custom: {} };
+        plugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+        });
         expect(plugin).toHaveProperty('launchDarklyUser', ldUser);
         expect(ldClientMock.identify).toHaveBeenCalledWith(ldUser);
       });
@@ -110,7 +120,7 @@ describe('Cloud Experiments server plugin', () => {
     });
 
     test('returns the contract', () => {
-      plugin.setup(coreMock.createSetup(), {});
+      plugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
       const startContract = plugin.start(coreMock.createStart());
       expect(startContract).toStrictEqual(
         expect.objectContaining({
@@ -123,8 +133,9 @@ describe('Cloud Experiments server plugin', () => {
     describe('getVariation', () => {
       describe('with the user identified', () => {
         beforeEach(() => {
-          const setupContract = plugin.setup(coreMock.createSetup(), {});
-          setupContract.identifyUser('user-id', {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+          });
         });
 
         test('uses the flag overrides to respond early', async () => {
@@ -146,7 +157,7 @@ describe('Cloud Experiments server plugin', () => {
           ).resolves.toStrictEqual('12345');
           expect(ldClientMock.variation).toHaveBeenCalledWith(
             undefined, // it couldn't find it in FEATURE_FLAG_NAMES
-            { key: 'user-id', custom: {} },
+            ldUser,
             123
           );
         });
@@ -154,7 +165,9 @@ describe('Cloud Experiments server plugin', () => {
 
       describe('with the user not identified', () => {
         beforeEach(() => {
-          plugin.setup(coreMock.createSetup(), {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
+          });
         });
 
         test('uses the flag overrides to respond early', async () => {
@@ -181,8 +194,9 @@ describe('Cloud Experiments server plugin', () => {
     describe('reportMetric', () => {
       describe('with the user identified', () => {
         beforeEach(() => {
-          const setupContract = plugin.setup(coreMock.createSetup(), {});
-          setupContract.identifyUser('user-id', {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+          });
         });
 
         test('calls the track API', () => {
@@ -195,7 +209,7 @@ describe('Cloud Experiments server plugin', () => {
           });
           expect(ldClientMock.track).toHaveBeenCalledWith(
             undefined, // it couldn't find it in METRIC_NAMES
-            { key: 'user-id', custom: {} },
+            ldUser,
             {},
             1
           );
@@ -204,7 +218,9 @@ describe('Cloud Experiments server plugin', () => {
 
       describe('with the user not identified', () => {
         beforeEach(() => {
-          plugin.setup(coreMock.createSetup(), {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
+          });
         });
 
         test('calls the track API', () => {
@@ -231,7 +247,9 @@ describe('Cloud Experiments server plugin', () => {
       });
       ldClientMock.waitForInitialization.mockResolvedValue(ldClientMock);
       plugin = new CloudExperimentsPlugin(initializerContext);
-      plugin.setup(coreMock.createSetup(), {});
+      plugin.setup(coreMock.createSetup(), {
+        cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+      });
       plugin.start(coreMock.createStart());
     });
 

@@ -14,7 +14,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -36,7 +36,7 @@ import type {
   TextBasedLanguageField,
 } from './types';
 import { FieldSelect } from './field_select';
-import { Datasource } from '../types';
+import type { Datasource, IndexPatternMap } from '../types';
 import { LayerPanel } from './layerpanel';
 
 function getLayerReferenceName(layerId: string) {
@@ -81,6 +81,77 @@ export function getTextBasedLanguagesDatasource({
         keptLayerIds: [id],
       };
     });
+  };
+  const getSuggestionsForVisualizeField = (
+    state: TextBasedLanguagesPrivateState,
+    indexPatternId: string,
+    fieldName: string,
+    indexPatterns: IndexPatternMap
+  ) => {
+    const context = state.initialContext;
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
+      const newLayerId = generateId();
+      const indexPattern = indexPatterns[indexPatternId];
+
+      const contextualFields = context.contextualFields;
+      const newColumns = contextualFields?.map((c) => {
+        let field = indexPattern?.getFieldByName(c);
+        if (!field) {
+          field = indexPattern?.fields.find((f) => f.name.includes(c));
+        }
+        const newId = generateId();
+        const type = field?.type ?? 'number';
+        return {
+          columnId: newId,
+          fieldName: c,
+          meta: {
+            type: type as DatatableColumnType,
+          },
+        };
+      });
+
+      const index = context.dataViewSpec.title;
+      const query = context.query;
+      const updatedState = {
+        ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            index,
+            query,
+            columns: newColumns ?? [],
+            allColumns: newColumns ?? [],
+          },
+        },
+      };
+
+      return [
+        {
+          state: {
+            ...updatedState,
+          },
+          table: {
+            changeType: 'initial' as TableChangeType,
+            isMultiRow: false,
+            layerId: newLayerId,
+            columns:
+              newColumns?.map((f) => {
+                return {
+                  columnId: f.columnId,
+                  operation: {
+                    dataType: f?.meta?.type as DataType,
+                    label: f.fieldName,
+                    isBucketed: Boolean(f?.meta?.type !== 'number'),
+                  },
+                };
+              }) ?? [],
+          },
+          keptLayerIds: [newLayerId],
+        },
+      ];
+    }
+
+    return [];
   };
   const TextBasedLanguagesDatasource: Datasource<
     TextBasedLanguagesPrivateState,
@@ -137,6 +208,7 @@ export function getTextBasedLanguagesDatasource({
         ...initState,
         fieldList: [],
         indexPatternRefs: refs,
+        initialContext: context,
       };
     },
     onRefreshIndexPattern() {},
@@ -288,10 +360,14 @@ export function getTextBasedLanguagesDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === selectedField?.fieldName);
+      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
 
       render(
-        <EuiButtonEmpty color={columnExists ? 'primary' : 'danger'} onClick={() => {}}>
+        <EuiButtonEmpty
+          color={columnExists ? 'primary' : 'danger'}
+          onClick={() => {}}
+          data-test-subj="lns-dimensionTrigger-textBased"
+        >
           {customLabel ??
             i18n.translate('xpack.lens.textBasedLanguages.missingField', {
               defaultMessage: 'Missing field',
@@ -465,8 +541,12 @@ export function getTextBasedLanguagesDatasource({
         datasourceId: 'textBasedLanguages',
 
         getTableSpec: () => {
+          const columns = state.layers[layerId]?.columns.filter((c) => {
+            const columnExists = state?.fieldList?.some((f) => f.name === c?.fieldName);
+            if (columnExists) return c;
+          });
           return (
-            state.layers[layerId]?.columns?.map((column) => ({
+            columns.map((column) => ({
               columnId: column.columnId,
               fields: [column.fieldName],
             })) || []
@@ -564,7 +644,7 @@ export function getTextBasedLanguagesDatasource({
       });
       return [];
     },
-    getDatasourceSuggestionsForVisualizeField: getSuggestionsForState,
+    getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,

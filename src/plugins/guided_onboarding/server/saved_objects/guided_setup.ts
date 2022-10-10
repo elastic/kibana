@@ -8,12 +8,8 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 
-export const guidedSetupSavedObjectsType = 'guided-setup-state';
-export const guidedSetupSavedObjectsId = 'guided-setup-state-id';
-export const guidedSetupDefaultState = {
-  activeGuide: 'unset',
-  activeStep: 'unset',
-};
+export const guidedSetupSavedObjectsType = 'guided-onboarding-guide-state';
+
 export const guidedSetupSavedObjects: SavedObjectsType = {
   name: guidedSetupSavedObjectsType,
   hidden: false,
@@ -22,11 +18,11 @@ export const guidedSetupSavedObjects: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      activeGuide: {
+      guideId: {
         type: 'keyword',
       },
-      activeStep: {
-        type: 'keyword',
+      isActive: {
+        type: 'boolean',
       },
     },
   },

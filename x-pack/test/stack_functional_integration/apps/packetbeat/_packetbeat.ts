@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await appsMenu.clickLink('Discover');
       }
       await PageObjects.discover.selectIndexPattern('packetbeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('Today');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
       await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
