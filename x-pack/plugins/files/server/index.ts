@@ -43,6 +43,8 @@ export type {
 } from './file_service';
 export type { FileServiceFactory } from './file_service/file_service_factory';
 
+export { getDownloadHeadersForFile, getDownloadNameForFile } from './routes/common';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new FilesPlugin(initializerContext);
 }
