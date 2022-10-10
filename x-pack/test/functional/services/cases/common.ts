@@ -39,7 +39,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       this.openCaseSetStatusDropdown();
       await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail(`status-badge-${status}`);
+      await testSubjects.existOrFail(`case-status-badge-popover-button-${status}`);
     },
 
     async openCaseSetStatusDropdown() {
