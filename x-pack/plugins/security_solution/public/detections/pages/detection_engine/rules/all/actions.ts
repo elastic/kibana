@@ -18,9 +18,9 @@ import { downloadBlob } from '../../../../../common/utils/download_blob';
 import {
   BulkActionSummary,
   BulkActionResponse,
+  performBulkAction,
   performBulkExportAction,
 } from '../../../../containers/detection_engine/rules';
-import { performBulkAction } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
 import { getExportedRulesCounts } from './helpers';
 
