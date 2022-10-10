@@ -11,7 +11,7 @@ import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_ut
 
 const KEYS_TO_IGNORE = ['key', 'path'];
 
-export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) {
+export function convertToGeoJson(esResponse: any, entitySplitFieldName: string, sortFieldName: string) {
   const features: Feature[] = [];
   let numTrimmedTracks = 0;
 
@@ -20,17 +20,31 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
   for (let i = 0; i < entityKeys.length; i++) {
     const entityKey = entityKeys[i];
     const bucket = buckets[entityKey];
-    const feature = bucket.path as Feature;
-    if (!feature.properties!.complete) {
+    const trackFeature = bucket.path as Feature;
+    if (!trackFeature.properties!.complete) {
       numTrimmedTracks++;
     }
-    feature.id = entityKey;
-    feature.properties = {
-      [entitySplitFieldName]: entityKey,
-      ...feature.properties,
-      ...extractPropertiesFromBucket(bucket, KEYS_TO_IGNORE),
-    };
-    features.push(feature);
+    
+    // Create feature for each segment in track (LineString)
+    for (let i = 1; i < trackFeature.geometry.coordinates.length; i++) {
+      features.push({
+        id: `${entityKey}_${i}`,
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            trackFeature.geometry.coordinates[i-1],
+            trackFeature.geometry.coordinates[i],
+          ],
+        },
+        properties: {
+          [entitySplitFieldName]: entityKey,
+          [sortFieldName]: trackFeature.properties.sort_values[i],
+          complete: trackFeature.properties.complete,
+          ...extractPropertiesFromBucket(bucket, KEYS_TO_IGNORE),
+        },
+      });
+    }
   }
 
   return {

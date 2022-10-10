@@ -24,6 +24,10 @@ const esResponse = {
             },
             properties: {
               complete: true,
+              sort_values: [
+                1665381987801,
+                1665385805491,
+              ]
             },
           },
         },
@@ -40,6 +44,10 @@ const esResponse = {
             },
             properties: {
               complete: false,
+              sort_values: [
+                1665360000000,
+                1665375849240,
+              ]
             },
           },
         },
@@ -49,22 +57,22 @@ const esResponse = {
 };
 
 it('Should convert elasticsearch aggregation response into feature collection', () => {
-  const geoJson = convertToGeoJson(esResponse, 'machine.os.keyword');
+  const geoJson = convertToGeoJson(esResponse, 'machine.os.keyword', 'timestamp');
   expect(geoJson.numTrimmedTracks).toBe(1);
-  expect(geoJson.featureCollection.features.length).toBe(2);
+  expect(geoJson.featureCollection.features.length).toBe(4);
   expect(geoJson.featureCollection.features[0]).toEqual({
     geometry: {
       coordinates: [
         [-95.339639, 41.584389],
-        [-95.339639, 41.0],
       ],
       type: 'LineString',
     },
-    id: 'ios',
+    id: 'ios_0',
     properties: {
       complete: true,
       doc_count: 1,
       ['machine.os.keyword']: 'ios',
+      ['timestamp']: 1665381987801,
     },
     type: 'Feature',
   });

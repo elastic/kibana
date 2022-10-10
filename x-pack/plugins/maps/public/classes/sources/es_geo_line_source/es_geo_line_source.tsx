@@ -135,6 +135,14 @@ export class ESGeoLineSource extends AbstractESAggSource {
     });
   }
 
+  _createSortField(): IField {
+    return new ESDocField({
+      fieldName: this._descriptor.sortField,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+    });
+  }
+
   getFieldNames() {
     return [
       ...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
@@ -144,13 +152,23 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   async getFields(): Promise<IField[]> {
-    return [...this.getMetricFields(), this._createSplitField()];
+    return [
+      ...this.getMetricFields(),
+      this._createSplitField(),
+      this._createSortField(),
+    ];
   }
 
   getFieldByName(name: string): IField | null {
-    return name === this._descriptor.splitField
-      ? this._createSplitField()
-      : this.getMetricFieldForName(name);
+    if (name === this._descriptor.splitField) {
+      return this._createSplitField();
+    }
+
+    if (name === this._descriptor.sortField) {
+      return this._createSortField();
+    }
+
+    return this.getMetricFieldForName(name);
   }
 
   isGeoGridPrecisionAware() {
@@ -171,6 +189,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
     if (!getIsGoldPlus()) {
       throw new Error(REQUIRES_GOLD_LICENSE_MSG);
     }
+
+    console.log(searchFilters);
 
     const indexPattern = await this.getIndexPattern();
 
@@ -270,6 +290,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
               sort: {
                 field: this._descriptor.sortField,
               },
+              include_sort: true,
             },
           },
           ...this.getValueAggsDsl(indexPattern),
@@ -296,8 +317,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,
-      this._descriptor.splitField
+      this._descriptor.splitField,
+      this._descriptor.sortField,
     );
+    console.log(featureCollection);
 
     return {
       data: featureCollection,
