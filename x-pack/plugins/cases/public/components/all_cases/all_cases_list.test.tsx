@@ -475,7 +475,7 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="status-badge-in-progress"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="case-status-badge-in-progress"]').exists()).toBeTruthy();
   });
 
   it('shows Solution column if there are no set owners', async () => {

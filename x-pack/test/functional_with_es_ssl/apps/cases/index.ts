@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Cases', function () {
+  describe.only('Cases', function () {
     loadTestFile(require.resolve('./create_case_form'));
     loadTestFile(require.resolve('./view_case'));
     loadTestFile(require.resolve('./list_view'));

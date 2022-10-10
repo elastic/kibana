@@ -17,17 +17,13 @@ describe('StatusPopoverButton', () => {
   it('renders', async () => {
     const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
-    expect(wrapper.find(`[data-test-subj="status-badge-open"]`).exists()).toBeTruthy();
     expect(
-      wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).exists()
-    ).toBeFalsy();
-  });
-
-  it('it renders with arrow', async () => {
-    const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
-
+      wrapper.find(`[data-test-subj="case-status-badge-popover-button-open"]`).exists()
+    ).toBeTruthy();
     expect(
-      wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).exists()
+      wrapper
+        .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
+        .exists()
     ).toBeTruthy();
   });
 
@@ -36,26 +32,31 @@ describe('StatusPopoverButton', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`)
+        .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
         .first()
         .prop('disabled')
     ).toBe(false);
   });
 
-  it('renders without the arrow and is not clickable when initialized disabled', async () => {
+  it('disables the button correctly', async () => {
     const wrapper = mount(
       <StatusPopoverButton disabled={true} status={CaseStatuses.open} onClick={onClick} />
     );
 
     expect(
-      wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).exists()
-    ).toBeFalsy();
+      wrapper
+        .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
+        .first()
+        .prop('disabled')
+    ).toBe(true);
   });
 
   it('calls onClick when pressing the badge', async () => {
     const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
-    wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).simulate('click');
+    wrapper
+      .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
+      .simulate('click');
     expect(onClick).toHaveBeenCalled();
   });
 
@@ -63,9 +64,12 @@ describe('StatusPopoverButton', () => {
     it('shows the correct color when status is open', async () => {
       const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);
 
-      expect(wrapper.find(`[data-test-subj="status-badge-open"]`).first().prop('color')).toBe(
-        'primary'
-      );
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-status-badge-popover-button-open"]`)
+          .first()
+          .prop('color')
+      ).toBe('primary');
     });
 
     it('shows the correct color when status is in-progress', async () => {
@@ -74,16 +78,22 @@ describe('StatusPopoverButton', () => {
       );
 
       expect(
-        wrapper.find(`[data-test-subj="status-badge-in-progress"]`).first().prop('color')
+        wrapper
+          .find(`[data-test-subj="case-status-badge-popover-button-in-progress"]`)
+          .first()
+          .prop('color')
       ).toBe('warning');
     });
 
     it('shows the correct color when status is closed', async () => {
       const wrapper = mount(<StatusPopoverButton status={CaseStatuses.closed} onClick={onClick} />);
 
-      expect(wrapper.find(`[data-test-subj="status-badge-closed"]`).first().prop('color')).toBe(
-        'default'
-      );
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-status-badge-popover-button-closed"]`)
+          .first()
+          .prop('color')
+      ).toBe('default');
     });
   });
 });

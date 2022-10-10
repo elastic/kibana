@@ -90,10 +90,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
         // validate user action
         await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
         );
         // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-in-progress');
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+        );
       });
 
       it('changes a case status to closed via dropdown-menu', async () => {
@@ -101,10 +103,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-closed"]'
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
         );
         // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-closed');
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown > case-status-badge-popover-button-closed'
+        );
       });
 
       it("reopens a case from the 'reopen case' button", async () => {
@@ -113,16 +117,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('header-page-supplements > status-badge-open', {
+        await testSubjects.existOrFail('header-page-supplements > case-status-badge-open', {
           timeout: 5000,
         });
 
         // validate user action
         await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-open"]'
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-open"]'
         );
         // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-open');
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown > case-status-badge-popover-button-open'
+        );
       });
 
       it("marks in progress a case from the 'mark in progress' button", async () => {
@@ -131,16 +137,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('header-page-supplements > status-badge-in-progress', {
+        await testSubjects.existOrFail('header-page-supplements > case-status-badge-in-progress', {
           timeout: 5000,
         });
 
         // validate user action
         await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
         );
         // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-in-progress');
+        await testSubjects.existOrFail('case-view-status-dropdown > case-status-badge-in-progress');
       });
 
       it("closes a case from the 'close case' button", async () => {
@@ -149,16 +155,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('header-page-supplements > status-badge-closed', {
+        await testSubjects.existOrFail('header-page-supplements > case-status-badge-closed', {
           timeout: 5000,
         });
 
         // validate user action
         await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-closed"]'
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
         );
         // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-closed');
+        await testSubjects.existOrFail('case-view-status-dropdown > case-status-badge-closed');
       });
     });
 

@@ -25,7 +25,7 @@ const StatusPopoverButtonComponent: React.FC<Props> = ({ status, disabled = fals
       iconSide="right"
       iconOnClick={onClick}
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
-      data-test-subj={`status-badge-${status}`}
+      data-test-subj={`case-status-badge-popover-button-${status}`}
       isDisabled={disabled}
       color={statuses[status].color}
     >
