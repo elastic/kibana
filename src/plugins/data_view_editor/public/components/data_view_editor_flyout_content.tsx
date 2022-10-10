@@ -115,7 +115,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isAdHoc: false,
       ...(editData
         ? {
-            title: editData.title,
+            title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
             ...(editData.timeFieldName
@@ -152,7 +152,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.title !== formData.title) {
+      if (editData && editData.getIndexPattern() !== formData.title) {
         editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
