@@ -63,24 +63,52 @@ describe('POST /diagnose/screenshot', () => {
 
   it('returns a 200 by default', async () => {
     registerDiagnoseScreenshot(core, mockLogger);
-    setScreenshotResponse({ warnings: [] });
+    setScreenshotResponse({ buffer: '8fsthiy78tshiy78', warnings: [] });
     await server.start();
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {
-        expect(body).toMatchObject({
-          help: [],
-          logs: '',
-          success: true,
-        });
+        expect(body).toMatchInlineSnapshot(`
+          Object {
+            "capture": "8fsthiy78tshiy78",
+            "help": Array [],
+            "logs": Array [],
+            "success": true,
+          }
+        `);
       });
   });
 
   it('returns a 200 when it fails and sets success to false', async () => {
     registerDiagnoseScreenshot(core, mockLogger);
-    setScreenshotResponse({ warnings: [`Timeout waiting for .dank to load`] });
+    setScreenshotResponse({
+      buffer: '8fsthiy78tshiy78',
+      warnings: [`Timeout waiting for .dank to load`],
+    });
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/diagnose/screenshot')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchInlineSnapshot(`
+          Object {
+            "capture": "8fsthiy78tshiy78",
+            "help": Array [],
+            "logs": Array [
+              "Timeout waiting for .dank to load",
+            ],
+            "success": false,
+          }
+        `);
+      });
+  });
+
+  it('logs warning if test buffer is not captured', async () => {
+    registerDiagnoseScreenshot(core, mockLogger);
+    setScreenshotResponse({});
     await server.start();
 
     await supertest(httpSetup.server.listener)
@@ -88,8 +116,8 @@ describe('POST /diagnose/screenshot', () => {
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchObject({
-          help: [],
-          logs: 'Timeout waiting for .dank to load',
+          help: ["We couldn't screenshot your Kibana install."],
+          logs: ['PNG result buffer is undefined'],
           success: false,
         });
       });
@@ -106,7 +134,7 @@ describe('POST /diagnose/screenshot', () => {
       .then(({ body }) => {
         expect(body).toMatchObject({
           help: ["We couldn't screenshot your Kibana install."],
-          logs: 'Failure to start chromium!',
+          logs: ['Failure to start chromium!'],
           success: false,
         });
       });

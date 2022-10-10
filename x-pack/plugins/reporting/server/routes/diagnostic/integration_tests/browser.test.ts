@@ -106,7 +106,9 @@ describe('POST /diagnose/browser', () => {
             "help": Array [
               "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages to fix this issue.",
             ],
-            "logs": "Could not find the default font",
+            "logs": Array [
+              "Could not find the default font",
+            ],
             "success": false,
           }
         `);
@@ -128,8 +130,10 @@ describe('POST /diagnose/browser', () => {
             "help": Array [
               "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages to fix this issue.",
             ],
-            "logs": "DevTools listening on (ws://localhost:4000)
+            "logs": Array [
+              "DevTools listening on (ws://localhost:4000)
           Could not find the default font",
+            ],
             "success": false,
           }
         `);

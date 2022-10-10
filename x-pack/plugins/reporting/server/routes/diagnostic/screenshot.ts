@@ -71,8 +71,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             .pipe()
         );
 
-        assert(result);
-        assert(result.buffer);
+        assert(result, 'PNG result is undefined');
+        assert(result.buffer, 'PNG result buffer is undefined');
 
         if (result.warnings.length) {
           response.success = false;
@@ -88,7 +88,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
               defaultMessage: `We couldn't screenshot your Kibana install.`,
             }),
           ],
-          logs: err.message,
+          logs: [err.message],
         };
       }
 
