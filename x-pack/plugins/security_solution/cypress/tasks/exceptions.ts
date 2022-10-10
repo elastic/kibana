@@ -15,7 +15,6 @@ import {
   VALUES_INPUT,
   VALUES_MATCH_ANY_INPUT,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
-  LOADING_SPINNER,
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
   EXCEPTION_ITEM_NAME_INPUT,
@@ -69,21 +68,6 @@ export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 
   addExceptionEntryFieldValueValue('foo', itemIndex);
 };
 
-export const addsException = (exception: Exception) => {
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('exist');
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-  cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.exist');
-};
-
 export const addExceptionFlyoutItemName = (name: string) => {
   cy.root()
     .pipe(($el) => {
@@ -133,7 +117,7 @@ export const submitEditedExceptionItem = () => {
   cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('not.exist');
 };
 
-export const selectAddToRuleRadio = (numListsToCheck = 1) => {
+export const selectAddToRuleRadio = () => {
   cy.get(ADD_TO_RULE_RADIO_LABEL).click();
 };
 
@@ -148,11 +132,6 @@ export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
 };
 
 export const selectOs = (os: string) => {
-  cy.get(OS_SELECTION_SECTION).should('exist');
-  cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
-};
-
-export const addDefaultExceptionItem = (os: string) => {
   cy.get(OS_SELECTION_SECTION).should('exist');
   cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
 };

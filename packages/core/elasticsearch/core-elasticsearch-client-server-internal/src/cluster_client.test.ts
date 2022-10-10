@@ -18,6 +18,7 @@ import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
 import { DEFAULT_HEADERS, getDefaultHeaders } from './headers';
 import { AgentManager } from './agent_manager';
+import { duration } from 'moment';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -27,6 +28,8 @@ const createConfig = (
     sniffOnConnectionFault: false,
     sniffInterval: false,
     maxSockets: Infinity,
+    maxIdleSockets: 200,
+    idleSocketTimeout: duration('30s'),
     compression: false,
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},

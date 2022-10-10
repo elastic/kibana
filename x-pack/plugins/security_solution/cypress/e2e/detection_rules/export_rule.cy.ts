@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectedExportedRule, getNewRule, totalNumberOfPrebuiltRules } from '../../objects/rule';
+import { expectedExportedRule, getNewRule } from '../../objects/rule';
 
 import {
   TOASTER_BODY,
@@ -28,6 +28,7 @@ import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 
 const exceptionList = getExceptionList();
 
@@ -69,26 +70,31 @@ describe('Export rules', () => {
 
   it('exports only custom rules', function () {
     const expectedNumberCustomRulesToBeExported = 1;
-    const totalNumberOfRules = expectedNumberCustomRulesToBeExported + totalNumberOfPrebuiltRules;
 
     loadPrebuiltDetectionRulesFromHeaderBtn();
 
     selectAllRules();
     bulkExportRules();
 
-    cy.get(MODAL_CONFIRMATION_BODY).contains(
-      `${totalNumberOfPrebuiltRules} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
-    );
+    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      cy.get(MODAL_CONFIRMATION_BODY).contains(
+        `${availablePrebuiltRulesCount} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
+      );
+    });
 
     // proceed with exporting only custom rules
     cy.get(MODAL_CONFIRMATION_BTN)
       .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rule`)
       .click();
 
-    cy.get(TOASTER_BODY).should(
-      'contain',
-      `Successfully exported ${expectedNumberCustomRulesToBeExported} of ${totalNumberOfRules} rules. Prebuilt rules were excluded from the resulting file.`
-    );
+    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      const totalNumberOfRules =
+        expectedNumberCustomRulesToBeExported + availablePrebuiltRulesCount;
+      cy.get(TOASTER_BODY).should(
+        'contain',
+        `Successfully exported ${expectedNumberCustomRulesToBeExported} of ${totalNumberOfRules} rules. Prebuilt rules were excluded from the resulting file.`
+      );
+    });
   });
 
   context('rules with exceptions', () => {
