@@ -36,3 +36,17 @@ export const UPGRADE_ENDPOINT_FOR_RESPONDER = i18n.translate(
       'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
   }
 );
+
+export const UNSAVED_TIMELINE_SAVE_PROMPT = i18n.translate(
+  'xpack.securitySolution.timeline.unsavedWorkMessage',
+  {
+    defaultMessage: 'Leave Timeline with unsaved work?',
+  }
+);
+
+export const UNSAVED_TIMELINE_SAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.unsavedWorkTitle',
+  {
+    defaultMessage: 'Unsaved changes',
+  }
+);

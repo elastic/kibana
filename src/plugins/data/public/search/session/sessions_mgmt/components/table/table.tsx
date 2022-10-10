@@ -12,7 +12,6 @@ import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
@@ -47,6 +46,7 @@ export function SearchSessionsMgmtTable({
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
   const showLatestResultsHandler = useRef<Function>();
+  const refreshTimeoutRef = useRef<number | null>(null);
   const refreshInterval = useMemo(
     () => moment.duration(config.management.refreshInterval).asMilliseconds(),
     [config.management.refreshInterval]
@@ -63,29 +63,43 @@ export function SearchSessionsMgmtTable({
 
   // refresh behavior
   const doRefresh = useCallback(async () => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
+    }
+
     setIsLoading(true);
     const renderResults = (results: UISession[]) => {
       setTableData(results);
     };
     showLatestResultsHandler.current = renderResults;
-    let results: UISession[] = [];
-    try {
-      results = await api.fetchTableData();
-    } catch (e) {} // eslint-disable-line no-empty
 
-    if (showLatestResultsHandler.current === renderResults) {
-      renderResults(results);
-      setIsLoading(false);
+    if (document.visibilityState !== 'hidden') {
+      let results: UISession[] = [];
+      try {
+        results = await api.fetchTableData();
+      } catch (e) {} // eslint-disable-line no-empty
+
+      if (showLatestResultsHandler.current === renderResults) {
+        renderResults(results);
+        setIsLoading(false);
+      }
     }
-  }, [api]);
+
+    if (showLatestResultsHandler.current === renderResults && refreshInterval > 0) {
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
+    }
+  }, [api, refreshInterval]);
 
   // initial data load
   useEffect(() => {
     doRefresh();
     searchUsageCollector.trackSessionsListLoaded();
+    return () => {
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+    };
   }, [doRefresh, searchUsageCollector]);
-
-  useInterval(doRefresh, refreshInterval);
 
   const onActionComplete: OnActionComplete = () => {
     doRefresh();

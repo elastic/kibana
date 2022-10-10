@@ -2001,7 +2001,9 @@
           "TypeC",
           "<{ dependencyName: ",
           "StringC",
-          "; }>]>; }>, ",
+          "; searchServiceDestinationMetrics: ",
+          "Type",
+          "<boolean, unknown, unknown>; }>]>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
