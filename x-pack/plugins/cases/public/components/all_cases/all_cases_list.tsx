@@ -21,7 +21,7 @@ import {
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useCasesColumns } from './columns';
+import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
@@ -37,7 +37,7 @@ import {
 } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
 
 const ProgressLoader = styled(EuiProgress)`
@@ -196,13 +196,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, hasOwner, availableSolutions, owner]
     );
 
-    /**
-     * At the time of changing this from all to delete the only bulk action we have is to delete. When we add more
-     * actions we'll need to revisit this to allow more granular checks around the bulk actions.
-     */
-    const showActions = permissions.delete && !isSelectorView;
-
-    const columns = useCasesColumns({
+    const { columns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
       currentUserProfile,
@@ -210,6 +204,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       connectors,
       onRowClick,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
+      disableActions: selectedCases.length > 0,
     });
 
     const pagination = useMemo(
@@ -226,8 +221,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       () => ({
         onSelectionChange: setSelectedCases,
         initialSelected: selectedCases,
+        selectable: () => !isReadOnlyPermissions(permissions),
       }),
-      [selectedCases, setSelectedCases]
+      [permissions, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
@@ -272,7 +268,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         <CasesTable
           columns={columns}
           data={data}
-          filterOptions={filterOptions}
           goToCreateCase={onRowClick}
           isCasesLoading={isLoadingCases}
           isCommentUpdating={isLoadingCases}
@@ -282,7 +277,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           pagination={pagination}
           selectedCases={selectedCases}
           selection={euiBasicTableSelectionProps}
-          showActions={showActions}
           sorting={sorting}
           tableRef={tableRef}
           tableRowProps={tableRowProps}
