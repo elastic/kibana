@@ -24,11 +24,6 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async getAPIKeyOwner() {
       return await testSubjects.getVisibleText('apiKeyOwnerLabel');
     },
-    async getActionsLabels() {
-      return {
-        connectorType: await testSubjects.getVisibleText('actionTypeLabel'),
-      };
-    },
     async getAlertsList() {
       const table = await find.byCssSelector(
         '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
