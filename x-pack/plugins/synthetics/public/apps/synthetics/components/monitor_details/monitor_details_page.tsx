@@ -27,7 +27,7 @@ export const MonitorDetailsPage = () => {
     dispatch(getMonitorAction.get({ monitorId }));
 
     if (selectedLocation) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: selectedLocation.id }));
+      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: selectedLocation.label }));
     }
   }, [dispatch, monitorId, selectedLocation]);
 
