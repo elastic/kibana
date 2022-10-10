@@ -6,8 +6,8 @@
  */
 
 import { fromEvent, merge, Observable } from 'rxjs';
-import { take, share, mapTo, delay, tap } from 'rxjs/operators';
-import type { Logger } from '@kbn/core/server';
+import { take, share, map, delay, tap } from 'rxjs/operators';
+import { InternalLogger } from './chromium/driver_factory';
 
 interface IChild {
   kill(signal: string): Promise<unknown>;
@@ -16,34 +16,34 @@ interface IChild {
 // Our process can get sent various signals, and when these occur we wish to
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
 export function safeChildProcess(
-  logger: Logger,
+  logger: InternalLogger,
   childProcess: IChild
 ): { terminate$: Observable<string> } {
   const ownTerminateSignal$ = merge(
-    fromEvent(process as NodeJS.EventEmitter, 'SIGTERM').pipe(mapTo('SIGTERM')),
-    fromEvent(process as NodeJS.EventEmitter, 'SIGINT').pipe(mapTo('SIGINT')),
-    fromEvent(process as NodeJS.EventEmitter, 'SIGBREAK').pipe(mapTo('SIGBREAK'))
+    fromEvent(process as NodeJS.EventEmitter, 'SIGTERM').pipe(map(() => 'SIGTERM')),
+    fromEvent(process as NodeJS.EventEmitter, 'SIGINT').pipe(map(() => 'SIGINT')),
+    fromEvent(process as NodeJS.EventEmitter, 'SIGBREAK').pipe(map(() => 'SIGBREAK'))
   ).pipe(take(1), share());
 
   const ownTerminateMapToKill$ = ownTerminateSignal$.pipe(
     tap((signal) => {
-      logger.debug(`Kibana process received terminate signal: ${signal}`);
+      logger(`Kibana process received terminate signal: ${signal}`);
     }),
-    mapTo('SIGKILL')
+    map(() => 'SIGKILL')
   );
 
   const kibanaForceExit$ = fromEvent(process as NodeJS.EventEmitter, 'exit').pipe(
     take(1),
     tap((signal) => {
-      logger.debug(`Kibana process forcefully exited with signal: ${signal}`);
+      logger(`Kibana process forcefully exited with signal: ${signal}`);
     }),
-    mapTo('SIGKILL')
+    map(() => 'SIGKILL')
   );
 
   const signalForChildProcess$ = merge(ownTerminateMapToKill$, kibanaForceExit$);
 
   const logAndKillChildProcess = tap((signal: string) => {
-    logger.debug(`Child process terminate signal was: ${signal}. Closing the browser...`);
+    logger(`Child process terminate signal was: ${signal}. Closing the browser...`);
     return childProcess.kill(signal);
   });
 
@@ -54,7 +54,7 @@ export function safeChildProcess(
     ownTerminateSignal$.pipe(
       delay(1),
       tap((signal) => {
-        logger.debug(`Kibana process terminate signal was: ${signal}. Closing the browser...`);
+        logger(`Kibana process terminate signal was: ${signal}. Closing the browser...`);
         return process.kill(process.pid, signal);
       })
     )

@@ -20,8 +20,8 @@ import {
   catchError,
   concatMap,
   ignoreElements,
-  mergeMap,
   map,
+  mergeMap,
   reduce,
   takeUntil,
   tap,
@@ -29,6 +29,7 @@ import {
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
 import { ConfigType } from '../../../config';
+// import { getDefaultChromiumSandboxDisabled } from '../../../config/default_chromium_sandbox_disabled';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -51,11 +52,22 @@ interface CreatePageResult {
    * to reclaim resources like memory.
    */
   close: () => Rx.Observable<ClosePageResult>;
+
+  /**
+   * Observable for gathering logs
+   */
+  logs$: Rx.Observable<string>;
 }
 
 interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
+
+export type InternalLogger = (
+  message: string | Error,
+  level?: 'info' | 'debug' | 'warn' | 'error',
+  context?: string
+) => void;
 
 /**
  * Size of the desired initial viewport. This is needed to render the app before elements load into their
@@ -125,19 +137,38 @@ export class HeadlessChromiumDriverFactory {
     });
   }
 
+  private createInternalLogger(logger: Logger, logs$: Rx.ReplaySubject<string>) {
+    const log: InternalLogger = (message, level = 'debug') => {
+      if (level === 'error' && typeof message === 'object') {
+        logger.error(message);
+      } else if (typeof message === 'object') {
+        logger[level](message.toString());
+      } else {
+        logger[level](message);
+      }
+      logs$.next(`${message}`);
+    };
+    return log;
+  }
+
   /*
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
     { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
-    pLogger = this.logger
+    logger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
-      const logger = pLogger.get('browser-driver');
-      logger.info(`Creating browser page driver`);
+      const logs$ = new Rx.ReplaySubject<string>();
+      const log = this.createInternalLogger(logger.get('browser-driver'), logs$);
+
+      // TODO log the CPU
+      // TODO log the OS
+      log(`Sandbox is enabled: ${this.config.browser.chromium.disableSandbox ?? `true`}`);
 
       const chromiumArgs = this.getChromiumArgs();
-      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
+      log(`Chromium launch args set to: ${chromiumArgs}`);
+      log(`Creating browser page driver...`, 'info');
 
       // We set the viewport width using the client-side layout info to reduce the chances of
       // browser reflow. Only the window height is expected to be adjusted dramatically
@@ -147,8 +178,9 @@ export class HeadlessChromiumDriverFactory {
         width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
       };
 
-      logger.debug(
-        `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
+      log(
+        `Launching with viewport:` +
+          ` width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
       );
 
       (async () => {
@@ -181,15 +213,15 @@ export class HeadlessChromiumDriverFactory {
 
         // Log version info for debugging / maintenance
         const versionInfo = await devTools.send('Browser.getVersion');
-        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+        log(`Browser version: ${JSON.stringify(versionInfo)}`);
 
+        log(`Setting browser timezone to ${browserTimezone}...`);
         await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout
         // All waitFor methods have their own timeout config passed in to them
         page.setDefaultTimeout(openUrlTimeout);
-
-        logger.debug(`Browser page driver created`);
+        log(`Browser page driver created`);
 
         const childProcess = {
           async kill(): Promise<ClosePageResult> {
@@ -205,32 +237,29 @@ export class HeadlessChromiumDriverFactory {
                 metrics = getMetrics(startMetrics, endMetrics);
                 const { cpuInPercentage, memoryInMegabytes } = metrics;
 
-                logger.debug(
-                  `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
-                );
+                log(`Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`);
               }
             } catch (error) {
-              logger.error(error);
+              log(error);
             }
 
             try {
-              logger.debug('Attempting to close browser...');
+              log('Attempting to close browser...');
               await browser?.close();
-              logger.debug('Browser closed.');
+              log('Browser closed.');
             } catch (err) {
               // do not throw
-              logger.error(err);
+              log(err);
             }
 
             return { metrics };
           },
         };
-        const { terminate$ } = safeChildProcess(logger, childProcess);
+        const { terminate$ } = safeChildProcess(log, childProcess);
 
         // Ensure that the browser is closed once the observable completes.
         observer.add(() => {
           if (page.isClosed()) return; // avoid emitting a log unnecessarily
-          logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
           childProcess.kill(); // ignore async
         });
 
@@ -239,7 +268,7 @@ export class HeadlessChromiumDriverFactory {
           terminate$
             .pipe(
               tap((signal) => {
-                logger.debug(`Termination signal received: ${signal}`);
+                log(`Termination signal received: ${signal}`);
               }),
               ignoreElements()
             )
@@ -247,8 +276,8 @@ export class HeadlessChromiumDriverFactory {
         );
 
         // taps the browser log streams and combine them to Kibana logs
-        this.getBrowserLogger(page, logger).subscribe();
-        this.getProcessLogger(browser, logger).subscribe();
+        this.getBrowserLogger(page, log).subscribe();
+        this.getProcessLogger(browser, log).subscribe();
 
         // HeadlessChromiumDriver: object to "drive" a browser page
         const driver = new HeadlessChromiumDriver(
@@ -258,25 +287,24 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
-          mergeMap((err) => Rx.throwError(err))
-        );
-
-        const close = () => Rx.from(childProcess.kill());
-
-        observer.next({ driver, error$, close });
-
         // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
         observer.add(() => {
           const userDataDir = this.userDataDir;
-          logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
+          log(`Deleting chromium user data directory at [${userDataDir}]`);
           // the unsubscribe function isn't `async` so we're going to make our best effort at
           // deleting the userDataDir and if it fails log an error.
           del(userDataDir, { force: true }).catch((error) => {
-            logger.error(`error deleting user data directory at [${userDataDir}]!`);
-            logger.error(error);
+            log(new Error(`error deleting user data directory at [${userDataDir}]: ${error}`));
           });
+
+          logs$.complete();
         });
+
+        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
+          mergeMap((err) => Rx.throwError(() => err))
+        );
+        const close = () => Rx.from(childProcess.kill());
+        observer.next({ driver, error$, close, logs$ });
       })();
     });
   }
@@ -309,34 +337,36 @@ export class HeadlessChromiumDriverFactory {
     }
   }
 
-  getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
+  getBrowserLogger(page: Page, logger: InternalLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
       concatMap(async (line) => {
         if (line.type() === 'error') {
-          logger
-            .get('headless-browser-console')
-            .error(
-              `Error in browser console: { message: "${
-                (await this.getErrorMessage(line)) ?? line.text()
-              }", url: "${line.location()?.url}" }`
-            );
+          const message = await this.getErrorMessage(line);
+          logger(
+            new Error(
+              `Error in browser console:` +
+                ` { message: "${message ?? line.text()}", url: "${line.location()?.url}" }`
+            ),
+            undefined,
+            'headless-browser-console'
+          );
           return;
         }
 
-        logger
-          .get(`headless-browser-console:${line.type()}`)
-          .debug(
-            `Message in browser console: { text: "${line.text()?.trim()}", url: ${
-              line.location()?.url
-            } }`
-          );
+        logger(
+          `Message in browser console:` +
+            ` { text: "${line.text()?.trim()}", url: ${line.location()?.url} }`,
+          undefined,
+          `headless-browser-console:${line.type()}`
+        );
       })
     );
 
     const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
       map((err) => {
-        logger.warn(
-          `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
+        logger(
+          `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`,
+          'warn'
         );
       })
     );
@@ -345,8 +375,9 @@ export class HeadlessChromiumDriverFactory {
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
-          logger.warn(
-            `Request to [${req.url()}] failed! [${failure.errorText}]. This error will be ignored.`
+          logger(
+            `Request to [${req.url()}] failed! [${failure.errorText}]. This error will be ignored.`,
+            'warn'
           );
         }
       })
@@ -355,7 +386,7 @@ export class HeadlessChromiumDriverFactory {
     return Rx.merge(consoleMessages$, uncaughtExceptionPageError$, pageRequestFailed$);
   }
 
-  getProcessLogger(browser: Browser, logger: Logger): Rx.Observable<void> {
+  getProcessLogger(browser: Browser, logger: InternalLogger): Rx.Observable<void> {
     const childProcess = browser.process();
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object
@@ -368,7 +399,7 @@ export class HeadlessChromiumDriverFactory {
     // just log closing of the process
     const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(
       tap(() => {
-        logger.get('headless-browser-process').debug('child process closed');
+        logger('Child browser process closed', 'debug', 'headless-browser-process');
       })
     );
 
@@ -418,10 +449,9 @@ export class HeadlessChromiumDriverFactory {
 
     const browserProcessLogger = this.logger.get('chromium-stderr');
     const log$ = Rx.fromEvent(rl, 'line').pipe(
-      tap((message: unknown) => {
-        if (typeof message === 'string') {
-          browserProcessLogger.info(message);
-        }
+      map((message) => (typeof message === 'string' ? message : (message as object).toString())),
+      tap((message) => {
+        browserProcessLogger.info(message);
       })
     );
 
@@ -430,7 +460,7 @@ export class HeadlessChromiumDriverFactory {
     // a log indicative of an issue (for example, no default font found).
     return Rx.merge(exit$, error$, log$).pipe(
       takeUntil(Rx.timer(DIAGNOSTIC_TIME)),
-      reduce((acc, curr) => `${acc}${curr}\n`, ''),
+      reduce<unknown, string>((acc, curr) => `${acc}${curr}\n`, ''),
       tap(() => {
         if (browserProcess && browserProcess.pid && !browserProcess.killed) {
           browserProcess.kill('SIGKILL');

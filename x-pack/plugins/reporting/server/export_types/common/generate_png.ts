@@ -18,6 +18,7 @@ interface PngResult {
   buffer: Buffer;
   metrics?: PngMetrics;
   warnings: string[];
+  logs$: Rx.Observable<string>;
 }
 
 export function generatePngObservable(
@@ -48,10 +49,9 @@ export function generatePngObservable(
         apmScreenshots?.end();
         apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
       }),
-      map(({ metrics, results }) => ({
-        metrics,
+      map(({ results, ...rest }) => ({
         buffer: results[0].screenshots[0].data,
-        warnings: results.reduce((found, current) => {
+        warnings: results.reduce<string[]>((found, current) => {
           if (current.error) {
             found.push(current.error.message);
           }
@@ -59,7 +59,8 @@ export function generatePngObservable(
             found.push(...current.renderErrors);
           }
           return found;
-        }, [] as string[]),
+        }, []),
+        ...rest,
       })),
       tap(({ buffer }) => {
         logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);

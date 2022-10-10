@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import assert from 'assert';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom, mergeMap, toArray } from 'rxjs';
 import { DiagnosticResponse } from '.';
 import { incrementApiUsageCounter } from '..';
 import { ReportingCore } from '../..';
@@ -45,6 +45,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         dimensions: {
           width: 1440,
           height: 2024,
+          deviceScaleFactor: 2,
         },
         selectors: {
           screenshot: `.${APP_WRAPPER_CLASS}`,
@@ -66,9 +67,12 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             request: req,
             browserTimezone: 'America/Los_Angeles',
             urls: [hashUrl],
-          })
-            // Pipe is required to ensure that we can subscribe to it
-            .pipe()
+          }).pipe(
+            mergeMap(async ({ logs$, ...rest }) => ({
+              logs: await firstValueFrom(logs$.pipe(toArray())),
+              ...rest,
+            }))
+          )
         );
 
         assert(result, 'PNG result is undefined');
@@ -76,7 +80,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
 
         if (result.warnings.length) {
           response.success = false;
-          response.logs = result.warnings;
+          response.logs = result.warnings.concat(result.logs);
+        } else {
+          response.logs = result.logs;
         }
 
         response.capture = result.buffer.toString('base64');

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Rx from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -165,11 +166,13 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     it('observes page exit', async () => {
+      const logs$ = new Rx.Subject<string>().asObservable();
       driverFactory.createPage.mockReturnValue(
         of({
           driver,
           error$: throwError(() => 'Instant timeout has fired!'),
           close: () => of({}),
+          logs$,
         })
       );
 

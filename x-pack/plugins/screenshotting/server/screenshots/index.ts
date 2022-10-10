@@ -84,6 +84,20 @@ export interface CaptureResult {
    * Screenshotting results.
    */
   results: ScreenshotObservableResult[];
+
+  /**
+   * Log messages of a screenshotting run
+   * - is sandbox enabled
+   * - type of OS
+   * - type of CPU architecture
+   * - puppeteer launch args
+   * - page URL
+   * - browser revision & user-agent
+   * - timings of browser launch and other events
+   * - logs from the page console
+   * - errors and warnings from the browser process stderr
+   */
+  logs$: Observable<string>;
 }
 
 export type ScreenshotOptions = PdfScreenshotOptions | PngScreenshotOptions;
@@ -126,7 +140,7 @@ export class Screenshots {
       )
       .pipe(
         this.semaphore.acquire(),
-        mergeMap(({ driver, error$, close }) => {
+        mergeMap(({ driver, error$, logs$, close }) => {
           const screen: ScreenshotObservableHandler = new ScreenshotObservableHandler(
             driver,
             this.config,
@@ -153,7 +167,7 @@ export class Screenshots {
             toArray(),
             mergeMap((results) =>
               // At this point we no longer need the page, close it and send out the results
-              close().pipe(map(({ metrics }) => ({ metrics, results })))
+              close().pipe(map(({ metrics }) => ({ metrics, results, logs$ })))
             )
           );
         }),
