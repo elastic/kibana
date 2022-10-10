@@ -6,10 +6,8 @@
  */
 
 import React, { memo, useState } from 'react';
-import styled from 'styled-components';
 
 import {
-  EuiBadge,
   EuiLink,
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -24,11 +22,7 @@ import {
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListInfo } from './use_all_exception_lists';
-
-const StyledFlexItem = styled(EuiFlexItem)`
-  border-right: 1px solid #d3dae6;
-  padding: 4px 12px 4px 0;
-`;
+import { TitleBadge } from './title_badge';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -84,36 +78,8 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiFlexItem style={{ flex: '1 1 auto' }}>
-                        <EuiFlexGroup gutterSize="xs" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText>{'created by: '}</EuiText>
-                          </EuiFlexItem>
-                          <StyledFlexItem grow={false}>
-                            <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
-                          </StyledFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem style={{ flex: '1 1 auto' }}>
-                        <EuiFlexGroup gutterSize="xs" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText>{'created by: '}</EuiText>
-                          </EuiFlexItem>
-                          <StyledFlexItem grow={false}>
-                            <EuiBadge>{exceptionsList.created_by}</EuiBadge>{' '}
-                          </StyledFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem style={{ flex: '1 1 auto' }}>
-                        <EuiFlexGroup gutterSize="xs" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText>{'created on: '}</EuiText>
-                          </EuiFlexItem>
-                          <StyledFlexItem grow={false}>
-                            <EuiBadge>{exceptionsList.created_at}</EuiBadge>
-                          </StyledFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
+                      <TitleBadge title={'created by: '} badgeString={exceptionsList.created_by} />
+                      <TitleBadge title={'created at: '} badgeString={exceptionsList.created_at} />
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
