@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterItem, isOrFilter } from '../filters';
+import { Filter, FilterItem, isCombinedFilter } from '../filters';
 import { DataViewBase } from './types';
 import { buildQueryFromFilters, EsQueryFiltersConfig } from './from_filters';
 
 /** @internal */
-export const handleOrFilter = (
+export const handleCombinedFilter = (
   filter: Filter,
   inputDataViews?: DataViewBase | DataViewBase[],
   options: EsQueryFiltersConfig = {}
 ): Filter => {
-  if (!isOrFilter(filter)) return filter;
+  if (!isCombinedFilter(filter)) return filter;
   const { params } = filter.meta;
   const should = params.map((subFilter) => {
     const subFilters = Array.isArray(subFilter) ? subFilter : [subFilter];
