@@ -13,7 +13,7 @@ import { useSelectedMonitor } from './use_selected_monitor';
 
 interface UseMonitorLatestPingParams {
   monitorId?: string;
-  locationId?: string;
+  locationLabel?: string;
 }
 
 export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
@@ -23,18 +23,23 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const location = useSelectedLocation();
 
   const monitorId = params?.monitorId ?? monitor?.id;
-  const locationId = params?.locationId ?? location?.id;
+  const locationLabel = params?.locationLabel ?? location?.label;
 
   const latestPing = useSelector(selectLatestPing);
   const pingsLoading = useSelector(selectPingsLoading);
 
-  useEffect(() => {
-    if (monitorId && locationId) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId }));
-    }
-  }, [dispatch, monitorId, locationId]);
+  const isUpToDate =
+    latestPing &&
+    latestPing.monitor.id === monitorId &&
+    latestPing.observer?.geo?.name === locationLabel;
 
-  if (!monitorId || !locationId) {
+  useEffect(() => {
+    if (monitorId && locationLabel && !isUpToDate) {
+      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: locationLabel }));
+    }
+  }, [dispatch, monitorId, locationLabel, isUpToDate]);
+
+  if (!monitorId || !locationLabel) {
     return { loading: pingsLoading, latestPing: null };
   }
 
@@ -42,7 +47,7 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
     return { loading: pingsLoading, latestPing: null };
   }
 
-  if (latestPing.monitor.id !== monitorId) {
+  if (latestPing.monitor.id !== monitorId || latestPing.observer?.geo?.name !== locationLabel) {
     return { loading: pingsLoading, latestPing: null };
   }
 
