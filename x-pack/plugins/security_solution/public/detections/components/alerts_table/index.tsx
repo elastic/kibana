@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
@@ -60,6 +60,8 @@ interface OwnProps {
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
+let renderCount = 0;
+
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   defaultFilters,
   from,
@@ -79,6 +81,25 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   to,
   filterGroup = 'open',
 }) => {
+  console.log({
+    defaultFilters,
+    from,
+    globalFilters,
+    globalQuery,
+    hasIndexMaintenance,
+    hasIndexWrite,
+    isSelectAllChecked,
+    loading,
+    loadingEventIds,
+    onRuleChange,
+    onShowBuildingBlockAlertsChanged,
+    onShowOnlyThreatIndicatorAlertsChanged,
+    showBuildingBlockAlerts,
+    showOnlyThreatIndicatorAlerts,
+    timelineId,
+    to,
+    filterGroup,
+  });
   const dispatch = useDispatch();
 
   const { globalQueries } = useSelector((state: State) => eventsViewerSelector(state, tableId));
@@ -92,6 +113,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const license = useLicense();
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+
+  useEffect(() => {
+    renderCount++;
+
+    if (renderCount >= 10) {
+      console.log({ renderCount });
+      throw Error('too many renders ');
+    }
+  });
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -168,8 +198,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const { filterManager } = useKibana().services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const filterManagerRef = useRef(filterManager);
 
+  console.log('rendering AlertTable');
   useEffect(() => {
+    console.log(filterManager, filterManagerRef.current, filterManager == filterManagerRef.current);
     dispatch(
       dataTableActions.initializeTGridSettings({
         defaultColumns: getColumns(license).map((c) =>

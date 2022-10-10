@@ -118,6 +118,14 @@ const store = createStore(
   storage
 );
 
+jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline', () => ({
+  useAddBulkToTimelineAction: jest.fn(() => {}),
+}));
+
+jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions', () => ({
+  useBulkAddToCaseActions: jest.fn(() => []),
+}));
+
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
