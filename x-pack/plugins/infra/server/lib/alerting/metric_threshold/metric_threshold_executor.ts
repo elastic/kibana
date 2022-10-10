@@ -72,11 +72,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
+    const startTime = Date.now();
+
     const { services, params, state, startedAt, alertId, executionId } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-    const startTime = Date.now();
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
 
     const esClient = services.scopedClusterClient.asCurrentUser;

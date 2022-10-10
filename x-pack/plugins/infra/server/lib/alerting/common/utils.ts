@@ -116,7 +116,7 @@ export const getViewInAppUrlInventory = (
 export const getAlertUuidFromExecutionId = async (
   esClient: ElasticsearchClient,
   executionId: string
-) => {
+): Promise<string | undefined> => {
   const { hits } = await esClient.search({
     _source: false,
     fields: [ALERT_UUID],

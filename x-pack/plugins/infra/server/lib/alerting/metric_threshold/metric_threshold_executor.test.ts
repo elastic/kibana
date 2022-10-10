@@ -36,6 +36,16 @@ import type { LogMeta, Logger } from '@kbn/logging';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
+const mockAlertUuid = '123';
+
+jest.mock('../common/utils', () => {
+  const original = jest.requireActual('../common/utils'); // Step 2.
+  return {
+    ...original,
+    getAlertUuidFromExecutionId: () => mockAlertUuid,
+  };
+});
+
 interface AlertTestInstance {
   instance: AlertInstanceMock;
   actionQueue: any[];
