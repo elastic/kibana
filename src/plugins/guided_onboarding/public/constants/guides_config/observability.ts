@@ -39,10 +39,12 @@ export const observabilityConfig: GuideConfig = {
       id: 'tour_observability',
       title: 'Tour Elastic Observability',
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        'Take a look at the capabilities of our Observability solution and be inspired to add more integrations.',
       ],
+      location: {
+        appID: 'observability',
+        path: '/overview',
+      },
     },
   ],
 };
