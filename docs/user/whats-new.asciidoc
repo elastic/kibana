@@ -16,7 +16,7 @@ Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8
 // tag::notable-highlights[]
 
 [discrete]
-==== Data views &mdash; use before saving
+==== Data views &mdash; use without saving
 
 What if you could use explore your data or create a visualization without first creating a {data-source}?
 Now you can do just that with by selecting *Use without saving* in the *Create {data-source}* form.
@@ -36,26 +36,25 @@ image::images/highlights-data-view.png[Create data view form showing Use without
 [discrete]
 ==== Re-sizable date histogram
 
-In addition to toggling the display of the histogram, you can also change its height.
+In addition to toggling the display of the histogram, you can now change its height.
 Your preferences are saved locally in your browser.
 
 [role="screenshot"]
-image::images/highlights-histogram.gif[The histogram includes a resize handle to change its height]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltad9e5527c8cc0ece/63445400d7dfe71371560635/highlights-histogram.gif[The histogram includes a resize handle to change its height]
 
 [discrete]
-==== More insights in field list
+==== More insights in fields list
 
 The field popover in the *Available fields* list now shows
-more and better data, making it similar to the field popovers in *Lens* and *Fields Statistics*:
+more data, making it similar to the field popovers in *Lens* and *Fields Statistics*:
 
 * Statistics are based on a sample of 5000 records per shard. Previously the sample size was 500 records.
 * The popover shows up to top 10 values, instead of just 5.
 * The “exist” filter appears at the top of the pop-over for better visibility.
 * The distribution of values is available for aggregatable fields.
 
-
 [role="screenshot"]
-image::images/highlights-discover-insights.gif[Statistics, top values, exist filter, and distribution of values in the field list popover]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltdab342886b2fbe00/634453ffb8e4f9110c2ef4aa/highlights-discover-insights.gif[Statistics, top values, exist filter, and distribution of values in the field list popover]
 
 [discrete]
 [[highlights-8.5-dashboard]]
@@ -106,7 +105,7 @@ With the Table visualization in *Lens*, you can now enable *Directly filter on c
 any column value into a link that filters the data, or drills down into the data.
 
 [role="screenshot"]
-image::images/highlights-vis-lens-table.png[Table visualization showing links in the top 5 values column]
+image::images/highlights-vis-lens-table.png[Table visualization showing links in the top 5 values column, width="75%"]
 
 [discrete]
 ==== Clone visualization layers
@@ -116,7 +115,7 @@ You can now duplicate layers, making it easy to adjust the filters and data opti
 from a common starting point.
 
 [role="screenshot"]
-image::images/highlights-vis-duplicate-layer.png[Actions menu for visualizations open to shoe the Duplicate layer item]
+image::images/highlights-vis-duplicate-layer.png[Actions menu for visualizations open to shoe the Duplicate layer item, width="50%"]
 
 [discrete]
 ==== Normalize by unit
@@ -136,7 +135,7 @@ events on visualizations. With the new *Show current time marker* axis option,
 you can add a red line to signify where “now” is on time series visualizations.
 
 [role="screenshot"]
-image::images/highlights-vis-time.png[Visualization showing a red line that indicates the current time]
+image::images/highlights-vis-time.png[Visualization showing a red line that indicates the current time, width="75%"]
 
 [discrete]
 ==== Collapse by option
@@ -147,18 +146,18 @@ You can now use the new *Collapse by* option to break down and summarize the
 result of each last value from hosts without displaying the detailed reporting dimension.
 
 [role="screenshot"]
-image::images/highlights-vis-time.png[Visualization showing a red line that indicates the current time]
+image::images/highlights-vis-collapse.png[Collapse by option for breaking down and summarizing the last value, width="75%"]
 
 [discrete]
 [[highlights-8.5-maps]]
-=== Maps
+=== Maps &mdash; hide tooltips
 
 Tooltips display when you hover over a document or cluster in a map.
 Don't want to show them? Turn them off with
-the new *Show tooltips* in *Layer settings*.
+the new *Show tooltips* toggle in *Layer settings*.
 
 [role="screenshot"]
-image::images/highlights-maps.png[Show tooltips control in Layer settings]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt553f1d51649d508d/63445a7f2a8d0a11633dbb8f/highlights-maps.gif[Show tooltips control in Layer settings]
 
 
 [discrete]
@@ -169,7 +168,7 @@ image::images/highlights-maps.png[Show tooltips control in Layer settings]
 ==== Anomaly detection jobs from Lens
 
 You can now create anomaly detection jobs from the flyout of a Lens visualization.
-Enter a job ID before creating the job so it starts automatically after saving.
+Enter a job ID before creating the job, so it starts automatically after saving.
 For a more advanced configuration, follow the link that takes you to the ML job wizard.
 
 [role="screenshot"]
@@ -192,15 +191,15 @@ image::images/highlights-ml-log-analysis.png[Chart showing the distribution of d
 [discrete]
 ==== Locations of anomalous results in Maps
 
-In 8.5, we added a link to *Maps* in the *Anomaly Explorer* and *Single Metric Viewer*
+This release adds a link to *Maps* in the *Anomaly Explorer* and *Single Metric Viewer*
 for any anomalies where the source data contains geo fields,
 even if the analysis does not use the location field directly.
-You can view the anomaly on the map by following the link.
-For example, you can view the location of a client making an unusually high number of
+View the anomaly on the map by following the link.
+For example, view the location of a client making an unusually high number of
 requests that failed with a ‘page not found’ 404 error.
 
 [role="screenshot"]
-image::images/highlights-ml-maps.gif[Viewing anomalies on a map]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6af384c924ab4f13/634453fe4a80ba11acd3c9c1/highlights-ml-lens.gif[Viewing anomalies on a map]
 
 [discrete]
 [[highlights-8.5-security]]
@@ -221,7 +220,7 @@ for which you do not specify an access agreement.
 
 This release adds the ability to assign a {kibana-ref}/cases.html[case] to users.
 You can do so either while creating a case or in an existing case by using
-the “assignees” UI in Observability, Elastic Security, and Stack Management.
+the “assignees” UI in *Observability*, *Elastic Security*, and *Stack Management*.
 
 [role="screenshot"]
 image::images/highlights-cases-assignees.png[Collaborate with Cases UI]
@@ -232,7 +231,7 @@ to customize their avatars by selecting an image or color.
 Avatars add visual help in easily identifying and disambiguating users.
 
 The assignees and their avatars show up in each case.
-They also now appear in the central Cases view that lists all existing
+They also now appear in the central *Cases* view that lists all existing
 cases in Observability, Elastic Security, and Stack Management.
 On this view, you can easily filter through the cases assigned to you and all other users.
 
@@ -243,7 +242,7 @@ image::images/highlights-cases-view.png[Cases view listing that lists all assign
 ==== User search
 
 You can now search for users by their full name,
-username, or email as part of the Case assignment flow.
+username, or email as part of the case assignment flow.
 {kib} users from all authentication realms are searchable, if
 they accessed {kib} at least once. On first access,
 {kib} creates a user profile and surfaces it in the user search results.
@@ -251,9 +250,9 @@ they accessed {kib} at least once. On first access,
 The user search UI includes auto-complete and search highlights.
 
 [role="screenshot"]
-image::images/highlights-cases-user-search.png[User search view with auto-complete, highlights, user avatars, user email]
+image::images/highlights-cases-user-search.png[User search view with auto-complete, highlights, user avatars, user email, width="75%"]
 
-User search adheres to {kib} RBAC. Users who do not have access to Cases within the
-Space will not surface in the results.
+User search adheres to {kib} RBAC. Users who do not have access to *Cases* within the
+space will not surface in the results.
 
 // end::notable-highlights[]
