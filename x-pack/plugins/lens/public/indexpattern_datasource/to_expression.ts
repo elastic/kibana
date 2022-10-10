@@ -132,19 +132,25 @@ function getExpressionForLayer(
       }
     });
 
-    aggs.push(
-      buildExpression({
-        type: 'expression',
-        chain: [
-          buildExpressionFunction('aggRandomSampler', {
-            id: 'the-sampling',
-            enabled: true,
-            schema: 'bucket',
-            probability: 0.5,
-          }).toAst(),
-        ],
-      })
-    );
+    const doSample = layer.sampling && layer.sampling !== 1;
+    const bucketOffset = doSample ? 1 : 0;
+    const metricOffset = bucketOffset + (window.ELASTIC_LENS_DELAY_SECONDS ? 1 : 0);
+
+    if (doSample) {
+      aggs.push(
+        buildExpression({
+          type: 'expression',
+          chain: [
+            buildExpressionFunction('aggRandomSampler', {
+              id: 'the-sampling',
+              enabled: true,
+              schema: 'bucket',
+              probability: layer.sampling,
+            }).toAst(),
+          ],
+        })
+      );
+    }
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     let esAggsIdMap: Record<string, OriginalColumn[]> = {};
@@ -198,10 +204,9 @@ function getExpressionForLayer(
         });
         aggs.push(expressionBuilder);
 
-        const esAggsId =
-          window.ELASTIC_LENS_DELAY_SECONDS || true
-            ? `col-${index + (col.isBucketed ? 1 : 1)}-${aggId}`
-            : `col-${index}-${aggId}`;
+        const esAggsId = `col-${
+          index + (col.isBucketed && doSample ? bucketOffset : metricOffset)
+        }-${aggId}`;
 
         esAggsIdMap[esAggsId] = [
           {
@@ -285,9 +290,7 @@ function getExpressionForLayer(
 
       matchingEsAggColumnIds.forEach((currentId) => {
         const currentColumn = esAggsIdMap[currentId][0];
-        const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS || true
-          ? counter + (currentColumn.isBucketed ? 1 : 1)
-          : counter;
+        const aggIndex = counter + (currentColumn.isBucketed ? bucketOffset : metricOffset);
         const newId = updatePositionIndex(currentId, aggIndex);
         updatedEsAggsIdMap[newId] = esAggsIdMap[currentId];
 

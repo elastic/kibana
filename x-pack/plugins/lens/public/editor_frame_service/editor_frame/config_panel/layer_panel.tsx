@@ -319,6 +319,11 @@ export function LayerPanel(
           visualizationState,
           updateVisualization
         ) || []),
+        ...(layerDatasource?.getSupportedActionsForLayer?.(
+          layerId,
+          layerDatasourceState,
+          (newState) => updateDatasource(datasourceId, newState)
+        ) || []),
         ...getSharedActions({
           activeVisualization,
           core,
@@ -333,12 +338,16 @@ export function LayerPanel(
     [
       activeVisualization,
       core,
+      datasourceId,
       isOnlyLayer,
       isTextBasedLanguage,
+      layerDatasource,
+      layerDatasourceState,
       layerId,
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
+      updateDatasource,
       updateVisualization,
       visualizationState,
     ]

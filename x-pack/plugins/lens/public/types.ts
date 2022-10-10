@@ -439,6 +439,15 @@ export interface Datasource<T = unknown, P = unknown> {
    * Get all the used DataViews from state
    */
   getUsedDataViews: (state: T) => string[];
+  /**
+   * returns a list of custom actions supported by the datasource layer.
+   * Default actions like delete/clear are not included in this list and are managed by the editor frame
+   * */
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>
+  ) => LayerAction[];
 }
 
 export interface DatasourceFixAction<T> {

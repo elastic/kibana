@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
@@ -17,14 +17,27 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+} from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiRadioGroup,
+} from '@elastic/eui';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -743,6 +756,70 @@ export function getIndexPatternDatasource({
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !indexPatterns[id]);
+    },
+    getSupportedActionsForLayer(layerId, state, setState) {
+      const layer = state.layers[layerId];
+      return [
+        {
+          displayName:
+            layer.sampling && layer.sampling !== 1
+              ? `Change random sampling (${layer.sampling}) - tech preview`
+              : `Enable random sampling - tech preview`,
+          icon: 'empty',
+          isCompatible: true,
+          execute: () => {
+            const SamplingModal = () => {
+              const [rate, setRate] = useState(layer.sampling || 1);
+              return (
+                <>
+                  <EuiModalHeader>
+                    <EuiModalHeaderTitle>
+                      <h2>
+                        Random Sampling <EuiBadge>Tech preview</EuiBadge>
+                      </h2>
+                    </EuiModalHeaderTitle>
+                  </EuiModalHeader>
+                  <EuiModalBody>
+                    <p>Change the sampling probability to see how your chart is affected</p>
+                    <EuiRadioGroup
+                      idSelected={String(rate)}
+                      onChange={(e) => {
+                        setState({
+                          ...state,
+                          layers: {
+                            ...state.layers,
+                            [layerId]: {
+                              ...layer,
+                              sampling: Number(e),
+                            },
+                          },
+                        });
+                        setRate(Number(e));
+                      }}
+                      options={[
+                        { label: '0.0001', id: '0.0001' },
+                        { label: '0.001', id: '0.001' },
+                        { label: '0.01', id: '0.01' },
+                        { label: '0.1', id: '0.1' },
+                        { label: '1 (No sampling)', id: '1' },
+                      ]}
+                    />
+                    <EuiButton
+                      onClick={() => {
+                        overlayRef.close();
+                      }}
+                    >
+                      Done
+                    </EuiButton>
+                  </EuiModalBody>
+                </>
+              );
+            };
+
+            const overlayRef = core.overlays.openModal(toMountPoint(<SamplingModal />));
+          },
+        },
+      ];
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
