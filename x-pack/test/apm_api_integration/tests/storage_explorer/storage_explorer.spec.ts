@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       APIClientRequestParamsOf<'GET /internal/apm/storage_explorer'>['params']
     >
   ) {
-    return await apmApiClient.monitorIndicesUser({
+    return await apmApiClient.monitorClusterAndIndicesUser({
       endpoint: 'GET /internal/apm/storage_explorer',
       params: {
         query: {

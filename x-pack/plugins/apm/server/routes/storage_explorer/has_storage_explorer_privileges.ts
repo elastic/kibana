@@ -28,17 +28,19 @@ export async function hasStorageExplorerPrivileges({
   );
 
   const esClient = (await context.core).elasticsearch.client;
-  const { index } = await esClient.asCurrentUser.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names,
-          privileges: ['monitor'],
-        },
-      ],
-    },
-  });
+  const { index, cluster } =
+    await esClient.asCurrentUser.security.hasPrivileges({
+      body: {
+        index: [
+          {
+            names,
+            privileges: ['monitor'],
+          },
+        ],
+        cluster: ['monitor'],
+      },
+    });
 
-  const hasPrivileges = every(index, 'monitor');
+  const hasPrivileges = cluster.monitor && every(index, 'monitor');
   return hasPrivileges;
 }

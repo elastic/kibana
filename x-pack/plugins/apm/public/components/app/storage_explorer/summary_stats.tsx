@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { asDynamicBytes } from '../../../../common/utils/formatters';
+import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -29,6 +29,7 @@ import { asTransactionRate } from '../../../../common/utils/formatters';
 
 const INITIAL_DATA = {
   totalSize: 0,
+  diskSpaceUsedPct: 0,
   estimatedIncrementalSize: 0,
   dailyDataGeneration: 0,
   tracesPerMinute: 0,
@@ -102,7 +103,17 @@ export function SummaryStats() {
                   }
                 )}
                 value={asDynamicBytes(data?.totalSize)}
-                color={euiTheme.colors.primary}
+                color={euiTheme.colors.text}
+              />
+              <SummaryMetric
+                label={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.diskSpaceUsedPct',
+                  {
+                    defaultMessage: 'Disk space used',
+                  }
+                )}
+                value={asPercent(data?.diskSpaceUsedPct, 1)}
+                color={euiTheme.colors.warning}
               />
               <SummaryMetric
                 label={i18n.translate(

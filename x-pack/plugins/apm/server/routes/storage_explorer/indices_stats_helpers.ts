@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { uniq } from 'lodash';
+import { uniq, values, sumBy } from 'lodash';
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { Setup } from '../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../typings';
@@ -43,4 +43,21 @@ export function getEstimatedSizeForDocumentsInIndex({
     : 0;
 
   return estimatedSize;
+}
+
+export async function getApmDiskSpacedUsedPct(
+  context: ApmPluginRequestHandlerContext
+) {
+  const esClient = (await context.core).elasticsearch.client;
+  const { nodes: diskSpacePerNode } = await esClient.asCurrentUser.nodes.stats({
+    metric: 'fs',
+    filter_path: 'nodes.*.fs.total.total_in_bytes',
+  });
+
+  const totalDiskSpace = sumBy(
+    values(diskSpacePerNode),
+    (node) => node?.fs?.total?.total_in_bytes ?? 0
+  );
+
+  return totalDiskSpace;
 }
