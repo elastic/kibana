@@ -7,7 +7,6 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
-import { FilesClient } from '../../types';
 
 import { useFilesContext } from '../context';
 
@@ -37,10 +36,6 @@ export interface Props<Kind extends string = string> {
    * A file kind that should be registered during plugin startup. See {@link FileServiceStart}.
    */
   kind: Kind;
-  /**
-   * A files client that will be used process uploads.
-   */
-  client: FilesClient<any>;
   /**
    * Allow users to clear a file after uploading.
    *
@@ -82,7 +77,6 @@ export interface Props<Kind extends string = string> {
  */
 export const UploadFile = <Kind extends string = string>({
   meta,
-  client,
   onDone,
   onError,
   allowClear,
@@ -90,7 +84,7 @@ export const UploadFile = <Kind extends string = string>({
   immediate = false,
   allowRepeatedUploads = false,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
-  const { registry } = useFilesContext();
+  const { registry, client } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
   const fileKind = registry.get(kindId);
   const uploadState = useMemo(
