@@ -13,6 +13,7 @@ import { FilesContext } from '../context';
 import { getImageMetadata } from '../util';
 import { Image, Props } from './image';
 import { getImageData as getBlob, base64dLogo } from './image.constants.stories';
+import { FilesClient } from '../../types';
 
 const defaultArgs: Props = { alt: 'test', src: `data:image/png;base64,${base64dLogo}` };
 
@@ -22,7 +23,7 @@ export default {
   args: defaultArgs,
   decorators: [
     (Story) => (
-      <FilesContext>
+      <FilesContext client={{} as unknown as FilesClient}>
         <Story />
       </FilesContext>
     ),

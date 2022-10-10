@@ -60,7 +60,7 @@ getFileKindsRegistry().register({
 });
 
 const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
-  <FilesContext>
+  <FilesContext client={{} as unknown as FilesClient}>
     <UploadFile {...props} />
   </FilesContext>
 );

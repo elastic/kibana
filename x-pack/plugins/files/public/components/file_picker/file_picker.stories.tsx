@@ -24,7 +24,7 @@ export default {
 } as ComponentMeta<typeof FilePicker>;
 
 const Template: ComponentStory<typeof FilePicker> = (props) => (
-  <FilesContext>
+  <FilesContext client={{} as any}>
     <FilePicker />
   </FilesContext>
 );
