@@ -22,6 +22,8 @@ import {
 } from '@kbn/data-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataViewSpec, TimeRange } from '@kbn/data-plugin/common';
+import React, { useContext } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { buildStateSubscribe } from '../hooks/utiles/build_state_subscribe';
 import { loadDataViewBySavedSearch } from '../load_data_view_by_saved_search';
 import { addLog } from '../../../utils/addLog';
@@ -269,6 +271,11 @@ export function getDiscoverStateContainer({
         onError: (e: Error) => void
       ) => {
         const nextSavedSearch = await savedSearchContainer.new();
+        await savedSearchContainer.update(
+          nextSavedSearch.searchSource.getField('index'),
+          appStateContainer.getState(),
+          appStateContainer.isEmptyURL()
+        );
         const nextDataView = await loadDataViewBySavedSearch(
           nextSavedSearch,
           appStateContainer,
@@ -306,6 +313,24 @@ export function getDiscoverStateContainer({
     },
   };
 }
+
+function createStateHelpers() {
+  const context = React.createContext<DiscoverStateContainer | null>(null);
+  const useContainer = () => useContext(context);
+  const useSavedSearch = () => {
+    const container = useContainer();
+    return useObservable<SavedSearch>(
+      container!.savedSearchContainer.savedSearch$,
+      container!.savedSearchContainer.savedSearch$.getValue()
+    );
+  };
+  return {
+    Provider: context.Provider,
+    useSavedSearch,
+  };
+}
+
+export const { Provider: DiscoverStateProvider, useSavedSearch } = createStateHelpers();
 
 /**
  * Helper function to merge a given new state with the existing state and to set the given state

@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { DiscoverStateContainer } from './discover_state';
+import { DiscoverStateContainer, DiscoverStateProvider } from './discover_state';
 import { AppStateProvider } from './discover_app_state_container';
 import { InternalStateProvider } from './discover_internal_state_container';
 
-export const DiscoverStateProvider = ({
+export const DiscoverMainProvider = ({
   value,
   children,
 }: {
@@ -19,8 +19,12 @@ export const DiscoverStateProvider = ({
   children: React.ReactElement;
 }) => {
   return (
-    <AppStateProvider value={value.appStateContainer}>
-      <InternalStateProvider value={value.internalStateContainer}>{children}</InternalStateProvider>
-    </AppStateProvider>
+    <DiscoverStateProvider value={value}>
+      <AppStateProvider value={value.appStateContainer}>
+        <InternalStateProvider value={value.internalStateContainer}>
+          {children}
+        </InternalStateProvider>
+      </AppStateProvider>
+    </DiscoverStateProvider>
   );
 };

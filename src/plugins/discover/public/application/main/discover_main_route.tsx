@@ -15,7 +15,7 @@ import {
   AnalyticsNoDataPageKibanaProvider,
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { addLog } from '../../utils/addLog';
-import { DiscoverStateProvider } from './services/discover_state_react';
+import { DiscoverMainProvider } from './services/discover_state_react';
 import { useSingleton } from './hooks/use_singleton';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
@@ -195,8 +195,8 @@ export function DiscoverMainRoute(props: Props) {
   }
 
   return (
-    <DiscoverStateProvider value={stateContainer}>
+    <DiscoverMainProvider value={stateContainer}>
       <DiscoverMainAppMemoized stateContainer={stateContainer} />
-    </DiscoverStateProvider>
+    </DiscoverMainProvider>
   );
 }

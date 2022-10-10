@@ -202,7 +202,7 @@ export const DiscoverTopNav = ({
   );
   const badges = useMemo(() => {
     if (hasChanged) {
-      return [{ badgeText: 'Has changed', primary: 'primary' }];
+      return [{ badgeText: 'Unsaved changes', color: 'success' }];
     }
 
     return [];
