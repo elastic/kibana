@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { DataViewBase } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { TimeHistory } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { translations } from '../../../config';
+import { useAlertDataView } from '../../../hooks/use_alert_data_view';
 
 type QueryLanguageType = 'lucene' | 'kuery';
 
 export function AlertsSearchBar({
-  dynamicIndexPatterns,
+  featureIds,
   onQueryChange,
   query,
   rangeFrom,
   rangeTo,
 }: {
-  dynamicIndexPatterns: DataViewBase[];
+  featureIds: ValidFeatureId[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
@@ -35,20 +35,11 @@ export function AlertsSearchBar({
     return new TimeHistory(new Storage(localStorage));
   }, []);
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-
-  const compatibleIndexPatterns = useMemo(
-    () =>
-      dynamicIndexPatterns.map((dynamicIndexPattern) => ({
-        title: dynamicIndexPattern.title ?? '',
-        id: dynamicIndexPattern.id ?? '',
-        fields: dynamicIndexPattern.fields,
-      })),
-    [dynamicIndexPatterns]
-  );
+  const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
   return (
     <SearchBar
-      indexPatterns={compatibleIndexPatterns as DataView[]}
+      indexPatterns={loading || error ? [] : [dataView!]}
       placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}

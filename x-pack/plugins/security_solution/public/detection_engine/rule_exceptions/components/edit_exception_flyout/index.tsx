@@ -38,6 +38,7 @@ import type {
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../../common/containers/source';
@@ -127,7 +128,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
-    Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+    ExceptionsBuilderReturnExceptionItem[]
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
@@ -254,7 +255,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
       exceptionItems,
       errorExists,
     }: {
-      exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      exceptionItems: ExceptionsBuilderReturnExceptionItem[];
       errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
@@ -279,7 +280,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
 
   const enrichExceptionItems = useCallback(() => {
     const [exceptionItemToEdit] = exceptionItemsToAdd;
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [
+    let enriched: ExceptionsBuilderReturnExceptionItem[] = [
       {
         ...enrichExistingExceptionItemWithComments(exceptionItemToEdit, [
           ...exceptionItem.comments,
@@ -299,7 +300,9 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(
         maybeRule?.rule_id ?? '',
-        enrichExceptionItems(),
+        // This is being rewritten in https://github.com/elastic/kibana/pull/140643
+        // As of now, flyout cannot yet create item of type CreateRuleExceptionListItemSchema
+        enrichExceptionItems() as Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
         undefined,
         bulkCloseIndex
       );

@@ -21,7 +21,7 @@ import {
   selectTriggerApplyChanges,
   selectChangesApplied,
 } from '.';
-import { layerTypes } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
 import { DatasourceMap, VisualizationMap } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
@@ -306,7 +306,7 @@ describe('lensSlice', () => {
             (layerIds as string[]).filter((id: string) => id !== layerId),
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
-          getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+          getSupportedLayers: jest.fn(() => [{ type: LayerTypes.DATA, label: 'Data Layer' }]),
         },
       };
 
@@ -339,7 +339,7 @@ describe('lensSlice', () => {
         customStore.dispatch(
           addLayer({
             layerId: 'foo',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           })
         );
         const state = customStore.getState().lens;

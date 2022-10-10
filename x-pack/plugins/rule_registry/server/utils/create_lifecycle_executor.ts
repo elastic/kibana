@@ -22,6 +22,7 @@ import {
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
+  ALERT_TIME_RANGE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -235,7 +236,12 @@ export const createLifecycleExecutor =
           ...commonRuleFields,
           ...currentAlertData,
           [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
-
+          [ALERT_TIME_RANGE]: isRecovered
+            ? {
+                gte: started,
+                lte: commonRuleFields[TIMESTAMP],
+              }
+            : { gte: started },
           [ALERT_INSTANCE_ID]: alertId,
           [ALERT_START]: started,
           [ALERT_UUID]: alertUuid,
