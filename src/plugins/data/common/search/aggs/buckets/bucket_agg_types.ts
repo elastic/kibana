@@ -22,5 +22,6 @@ export enum BUCKET_TYPES {
   GEOTILE_GRID = 'geotile_grid',
   DATE_HISTOGRAM = 'date_histogram',
   SAMPLER = 'sampler',
+  RANDOM_SAMPLER = 'random_sampler',
   DIVERSIFIED_SAMPLER = 'diversified_sampler',
 }
