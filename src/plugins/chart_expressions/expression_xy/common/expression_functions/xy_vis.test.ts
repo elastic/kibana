@@ -38,6 +38,7 @@ describe('xyVis', () => {
             },
           ],
         },
+        canNavigateToLens: false,
       },
     });
   });
@@ -344,6 +345,7 @@ describe('xyVis', () => {
             },
           ],
         },
+        canNavigateToLens: false,
       },
     });
   });

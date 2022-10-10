@@ -12,10 +12,9 @@ import {
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
-import { getConfiguration } from './configurations';
 import { ConvertXYToLensVisualization } from './types';
 
 export interface Layer {
@@ -55,7 +54,10 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     return null;
   }
 
-  const { getColumnsFromVis, createStaticValueColumn } = await convertToLensModule;
+  const [{ getColumnsFromVis, createStaticValueColumn }, { getConfiguration }] = await Promise.all([
+    convertToLensModule,
+    import('./configurations'),
+  ]);
   const result = getColumnsFromVis(
     vis,
     timefilter,

@@ -193,7 +193,7 @@ export const getXyChartRenderer = ({
         const uiEvents = extractCounterEvents(
           visualizationType,
           config.args,
-          config.canNavigateToLens,
+          Boolean(config.canNavigateToLens),
           {
             getDataLayers,
           }

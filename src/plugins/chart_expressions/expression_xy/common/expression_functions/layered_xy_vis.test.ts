@@ -24,7 +24,7 @@ describe('layeredXyVis', () => {
     expect(result).toEqual({
       type: 'render',
       as: XY_VIS,
-      value: { args: { ...rest, layers: [sampleExtendedLayer] } },
+      value: { args: { ...rest, layers: [sampleExtendedLayer] }, canNavigateToLens: false },
     });
   });
 

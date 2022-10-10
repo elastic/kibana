@@ -16,7 +16,7 @@ import {
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { Layer } from '..';
-import { ChartType } from '../..';
+import { ChartType } from '../../../common';
 import {
   CategoryAxis,
   ChartMode,
