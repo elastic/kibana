@@ -82,6 +82,8 @@ async function mountDoc(update = false) {
         }
       },
     },
+    locator: { getUrl: jest.fn() },
+    chrome: { setBreadcrumbs: jest.fn() },
   };
   await act(async () => {
     comp = mountWithIntl(
