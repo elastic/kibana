@@ -152,9 +152,11 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
           )}
           <ul>
             {fieldGroupsToCollapse.flatMap(([, { fields }]) =>
-              fields.map((field, index) =>
-                renderFieldItem({ field, itemIndex: index, groupIndex: 0, hideDetails: true })
-              )
+              fields.map((field, index) => (
+                <Fragment key={field.name}>
+                  {renderFieldItem({ field, itemIndex: index, groupIndex: 0, hideDetails: true })}
+                </Fragment>
+              ))
             )}
           </ul>
           <EuiSpacer size="s" />
@@ -162,7 +164,6 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
             <Fragment key={key}>
               <FieldsAccordion
                 initialIsOpen={Boolean(accordionState[key])}
-                key={key}
                 id={`fieldListGrouped${key}`}
                 label={fieldGroup.title}
                 helpTooltip={fieldGroup.helpText}

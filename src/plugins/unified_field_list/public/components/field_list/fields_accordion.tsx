@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -140,9 +140,11 @@ export const FieldsAccordion: React.FC<FieldsAccordionProps> = memo(function Inn
         (!!fieldsCount ? (
           <ul className="unifiedFieldList__fieldsAccordion__fieldItems">
             {paginatedFields &&
-              paginatedFields.map((field, index) =>
-                renderFieldItem({ field, itemIndex: index, groupIndex, hideDetails })
-              )}
+              paginatedFields.map((field, index) => (
+                <Fragment key={field.name}>
+                  {renderFieldItem({ field, itemIndex: index, groupIndex, hideDetails })}
+                </Fragment>
+              ))}
           </ul>
         ) : (
           renderCallout()

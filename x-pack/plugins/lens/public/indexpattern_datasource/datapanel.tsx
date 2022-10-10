@@ -547,7 +547,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const renderFieldItem: FieldListProps['renderFieldItem'] = useCallback(
     ({ field, itemIndex, groupIndex, hideDetails }) => (
       <FieldItem
-        key={field.name}
         field={field}
         exists={fieldContainsData(field.name, currentIndexPattern, hasFieldData)}
         hideDetails={hideDetails}
