@@ -55,7 +55,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
 // a given category. Integrations are displayed in the order of the array.
 export const FEATURED_INTEGRATIONS_BY_CATEGORY = {
   security: ['endpoint', 'cloud_security_posture', 'network_traffic'],
-  '': ['web_crawler', 'apm', 'endpoint'], // no category selected
+  '': ['apm', 'endpoint', 'web_crawler'], // no category selected
 };
 
 /**
