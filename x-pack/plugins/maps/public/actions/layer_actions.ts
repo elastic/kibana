@@ -163,6 +163,9 @@ export function cloneLayer(layerId: string) {
 
     (await layer.cloneDescriptor()).forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
+      if (layer.getParent()) {
+        dispatch(moveLayerToLeftOfTarget(layerDescriptor.id, layerId));
+      }
     });
   };
 }

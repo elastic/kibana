@@ -223,7 +223,7 @@ export class LayerTOC extends Component<Props> {
         <EuiDroppable
           droppableId="mapLayerTOC"
           spacing="none"
-          isCombineEnabled={!this.props.isReadOnly && !this.state.isOwnAncestor}
+          isCombineEnabled={!this.state.isOwnAncestor}
           className={this._getDroppableClass()}
         >
           {(droppableProvided, droppableSnapshot) => {
