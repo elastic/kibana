@@ -10,13 +10,12 @@
  * of the anomalies table.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component, Fragment } from 'react';
+import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { capitalize } from 'lodash';
 
 import {
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -29,66 +28,47 @@ import {
 
 import { getSeverity } from '../../../../common/util/anomaly_utils';
 import { MAX_CHARS } from './anomalies_table_constants';
+import type { CategoryDefinition } from '../../services/ml_api_service/results';
+import { AnomaliesTableRecordExtended } from '../../../../common/types/anomalies';
+import { EntityCellFilter } from '../entity_cell';
+import { ExplorerJob } from '../../explorer/explorer_utils';
 
-import { getDetailsItems, getInfluencersItems } from './anomaly_details_utils';
+import {
+  getInfluencersItems,
+  AnomalyExplanationDetails,
+  DetailsItems,
+} from './anomaly_details_utils';
 
-export class AnomalyDetails extends Component {
-  static propTypes = {
-    anomaly: PropTypes.object.isRequired,
-    examples: PropTypes.array,
-    definition: PropTypes.object,
-    isAggregatedData: PropTypes.bool,
-    filter: PropTypes.func,
-    influencersLimit: PropTypes.number,
-    influencerFilter: PropTypes.func,
-    tabIndex: PropTypes.number.isRequired,
+interface Props {
+  anomaly: AnomaliesTableRecordExtended;
+  examples: string[];
+  definition: CategoryDefinition;
+  isAggregatedData: boolean;
+  filter: EntityCellFilter;
+  influencersLimit: number;
+  influencerFilter: EntityCellFilter;
+  tabIndex: number;
+  job: ExplorerJob;
+}
+
+export const AnomalyDetails: FC<Props> = ({
+  anomaly,
+  examples,
+  definition,
+  isAggregatedData,
+  filter,
+  influencersLimit,
+  influencerFilter,
+  tabIndex,
+  job,
+}) => {
+  const [showAllInfluencers, setShowAllInfluencers] = useState(false);
+
+  const toggleAllInfluencers = () => {
+    setShowAllInfluencers(!showAllInfluencers);
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      showAllInfluencers: false,
-    };
-
-    if (this.props.examples !== undefined && this.props.examples.length > 0) {
-      this.tabs = [
-        {
-          id: 'Details',
-          name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detailsTitle', {
-            defaultMessage: 'Details',
-          }),
-          content: (
-            <Fragment>
-              <div
-                className="ml-anomalies-table-details"
-                data-test-subj="mlAnomaliesListRowDetails"
-              >
-                {this.renderDescription()}
-                <EuiSpacer size="m" />
-                {this.renderDetails()}
-                {this.renderInfluencers()}
-              </div>
-            </Fragment>
-          ),
-        },
-        {
-          id: 'category-examples',
-          name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
-            defaultMessage: 'Category examples',
-          }),
-          content: <Fragment>{this.renderCategoryExamples()}</Fragment>,
-        },
-      ];
-    }
-  }
-
-  toggleAllInfluencers() {
-    this.setState({ showAllInfluencers: !this.state.showAllInfluencers });
-  }
-
-  renderCategoryExamples() {
-    const { examples, definition } = this.props;
-
+  const renderCategoryExamples = () => {
     return (
       <EuiFlexGroup
         direction="column"
@@ -97,7 +77,7 @@ export class AnomalyDetails extends Component {
         className="mlAnomalyCategoryExamples"
       >
         {definition !== undefined && definition.terms && (
-          <Fragment>
+          <>
             <EuiFlexItem key={`example-terms`}>
               <EuiText size="xs">
                 <h4 className="mlAnomalyCategoryExamples__header">
@@ -129,10 +109,10 @@ export class AnomalyDetails extends Component {
               <EuiText size="xs">{definition.terms}</EuiText>
             </EuiFlexItem>
             <EuiSpacer size="xs" />
-          </Fragment>
+          </>
         )}
         {definition !== undefined && definition.regex && (
-          <Fragment>
+          <>
             <EuiFlexItem key={`example-regex`}>
               <EuiText size="xs">
                 <h4 className="mlAnomalyCategoryExamples__header">
@@ -164,7 +144,7 @@ export class AnomalyDetails extends Component {
               <EuiText size="xs">{definition.regex}</EuiText>
             </EuiFlexItem>
             <EuiSpacer size="xs" />
-          </Fragment>
+          </>
         )}
 
         {examples.map((example, i) => {
@@ -185,10 +165,9 @@ export class AnomalyDetails extends Component {
         })}
       </EuiFlexGroup>
     );
-  }
+  };
 
-  renderDescription() {
-    const anomaly = this.props.anomaly;
+  const renderDescription = () => {
     const source = anomaly.source;
 
     let anomalyDescription = i18n.translate(
@@ -196,7 +175,7 @@ export class AnomalyDetails extends Component {
       {
         defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
         values: {
-          anomalySeverity: getSeverity(anomaly.severity).label,
+          anomalySeverity: capitalize(getSeverity(anomaly.severity).label),
           anomalyDetector: anomaly.detector,
         },
       }
@@ -229,7 +208,7 @@ export class AnomalyDetails extends Component {
 
     // Check for a correlatedByFieldValue in the source which will be present for multivariate analyses
     // where the record is anomalous due to relationship with another 'by' field value.
-    let mvDescription = undefined;
+    let mvDescription;
     if (source.correlated_by_field_value !== undefined) {
       mvDescription = i18n.translate(
         'xpack.ml.anomaliesTable.anomalyDetails.multivariateDescription',
@@ -247,7 +226,7 @@ export class AnomalyDetails extends Component {
     }
 
     return (
-      <React.Fragment>
+      <>
         <EuiText size="xs">
           <h4>
             <FormattedMessage
@@ -258,17 +237,16 @@ export class AnomalyDetails extends Component {
           {anomalyDescription}
         </EuiText>
         {mvDescription !== undefined && <EuiText size="xs">{mvDescription}</EuiText>}
-      </React.Fragment>
+      </>
     );
-  }
+  };
 
-  renderDetails() {
-    const detailItems = getDetailsItems(this.props.anomaly, this.props.filter);
-    const isInterimResult = this.props.anomaly.source?.is_interim ?? false;
+  const renderDetails = () => {
+    const isInterimResult = anomaly.source?.is_interim ?? false;
     return (
-      <React.Fragment>
+      <>
         <EuiText size="xs">
-          {this.props.isAggregatedData === true ? (
+          {isAggregatedData === true ? (
             <h4>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
@@ -284,7 +262,7 @@ export class AnomalyDetails extends Component {
             </h4>
           )}
           {isInterimResult === true && (
-            <React.Fragment>
+            <>
               <EuiIcon type="alert" />
               <span className="interim-result">
                 <FormattedMessage
@@ -292,28 +270,27 @@ export class AnomalyDetails extends Component {
                   defaultMessage="Interim result"
                 />
               </span>
-            </React.Fragment>
+            </>
           )}
         </EuiText>
-        <EuiDescriptionList
-          type="column"
-          listItems={detailItems}
-          className="anomaly-description-list"
-        />
-      </React.Fragment>
-    );
-  }
 
-  renderInfluencers() {
-    const anomalyInfluencers = this.props.anomaly.influencers;
-    let listItems = [];
+        <EuiSpacer size="xs" />
+
+        <DetailsItems anomaly={anomaly} filter={filter} modelPlotEnabled={job.modelPlotEnabled} />
+      </>
+    );
+  };
+
+  const renderInfluencers = () => {
+    const anomalyInfluencers = anomaly.influencers;
+    let listItems: Array<{ title: string; description: React.ReactElement }> = [];
     let othersCount = 0;
     let numToDisplay = 0;
     if (anomalyInfluencers !== undefined) {
       numToDisplay =
-        this.state.showAllInfluencers === true
+        showAllInfluencers === true
           ? anomalyInfluencers.length
-          : Math.min(this.props.influencersLimit, anomalyInfluencers.length);
+          : Math.min(influencersLimit, anomalyInfluencers.length);
       othersCount = Math.max(anomalyInfluencers.length - numToDisplay, 0);
 
       if (othersCount === 1) {
@@ -322,16 +299,12 @@ export class AnomalyDetails extends Component {
         othersCount = 0;
       }
 
-      listItems = getInfluencersItems(
-        anomalyInfluencers,
-        this.props.influencerFilter,
-        numToDisplay
-      );
+      listItems = getInfluencersItems(anomalyInfluencers, influencerFilter, numToDisplay);
     }
 
     if (listItems.length > 0) {
       return (
-        <React.Fragment>
+        <>
           <EuiSpacer size="m" />
           <EuiText size="xs">
             <h4>
@@ -341,13 +314,20 @@ export class AnomalyDetails extends Component {
               />
             </h4>
           </EuiText>
-          <EuiDescriptionList
-            type="column"
-            listItems={listItems}
-            className="anomaly-description-list"
-          />
+
+          {listItems.map(({ title, description }) => (
+            <>
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem style={{ width: '180px' }} grow={false}>
+                  {title}
+                </EuiFlexItem>
+                <EuiFlexItem>{description}</EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+            </>
+          ))}
           {othersCount > 0 && (
-            <EuiLink onClick={() => this.toggleAllInfluencers()}>
+            <EuiLink onClick={() => toggleAllInfluencers()}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionListMoreLinkText"
                 defaultMessage="and {othersCount} more"
@@ -355,40 +335,73 @@ export class AnomalyDetails extends Component {
               />
             </EuiLink>
           )}
-          {numToDisplay > this.props.influencersLimit + 1 && (
-            <EuiLink onClick={() => this.toggleAllInfluencers()}>
+          {numToDisplay > influencersLimit + 1 && (
+            <EuiLink onClick={() => toggleAllInfluencers()}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionShowLessLinkText"
                 defaultMessage="Show less"
               />
             </EuiLink>
           )}
-        </React.Fragment>
+        </>
       );
     }
+  };
+
+  const renderContents = () => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
+            {renderDescription()}
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup gutterSize="l">
+              <EuiFlexItem style={{ borderRight: '1px solid #ccc' }}>
+                {renderDetails()}
+                {renderInfluencers()}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AnomalyExplanationDetails anomaly={anomaly} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  if (examples !== undefined && examples.length > 0) {
+    const tabs = [
+      {
+        id: 'Details',
+        name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detailsTitle', {
+          defaultMessage: 'Details',
+        }),
+        content: renderContents(),
+      },
+      {
+        id: 'category-examples',
+        name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
+          defaultMessage: 'Category examples',
+        }),
+        content: <>{renderCategoryExamples()}</>,
+      },
+    ];
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTabbedContent
+            tabs={tabs}
+            size="s"
+            initialSelectedTab={tabs[tabIndex]}
+            onTabClick={() => {}}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
-  render() {
-    const { tabIndex } = this.props;
-
-    if (this.tabs !== undefined) {
-      return (
-        <EuiTabbedContent
-          tabs={this.tabs}
-          size="s"
-          initialSelectedTab={this.tabs[tabIndex]}
-          onTabClick={() => {}}
-        />
-      );
-    } else {
-      return (
-        <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
-          {this.renderDescription()}
-          <EuiSpacer size="m" />
-          {this.renderDetails()}
-          {this.renderInfluencers()}
-        </div>
-      );
-    }
-  }
-}
+  return renderContents();
+};

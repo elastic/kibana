@@ -183,6 +183,22 @@ export interface AnomalyRecordDoc {
    * purely single bucket and +5.0 means the anomaly is purely multi bucket.
    */
   multi_bucket_impact?: number;
+
+  /**
+   * An explanation for the anomaly score
+   */
+  anomaly_score_explanation?: {
+    anomaly_type?: 'dip' | 'spike';
+    anomaly_length?: number;
+    single_bucket_impact?: number;
+    multi_bucket_impact?: number;
+    anomaly_characteristics_impact?: number;
+    lower_confidence_bound?: number;
+    typical_value?: number;
+    upper_confidence_bound?: number;
+    high_variance_penalty?: boolean;
+    incomplete_bucket_penalty?: boolean;
+  };
 }
 
 /**
@@ -283,6 +299,21 @@ export interface AnomaliesTableRecord {
    * Returns true if the anomaly record represented by the table row can be shown in the maps plugin
    */
   isGeoRecord?: boolean;
+
+  /**
+   * Returns true if the job has the model plot enabled
+   */
+  modelPlotEnabled: boolean;
+}
+
+/**
+ * Customized version of AnomaliesTableRecord which inserts the detector description
+ * and rules length.
+ * Used by the AnomaliesTable component
+ */
+export interface AnomaliesTableRecordExtended extends AnomaliesTableRecord {
+  detector: string;
+  rulesLength?: number;
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];

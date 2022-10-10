@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
@@ -225,11 +226,25 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       anomalies: [],
       interval: 'second',
     };
-    // @ts-expect-error incorrect search response type
-    if (body.hits.total.value > 0) {
+
+    if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
       let records: AnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
-        records.push(hit._source);
+        records.push({
+          ...hit._source,
+          anomaly_score_explanation: {
+            anomaly_type: 'dip',
+            anomaly_length: 7,
+            single_bucket_impact: 12,
+            multi_bucket_impact: 2,
+            anomaly_characteristics_impact: 8,
+            lower_confidence_bound: 0.12,
+            typical_value: 42.0,
+            upper_confidence_bound: 83.12,
+            high_variance_penalty: true,
+            incomplete_bucket_penalty: false,
+          },
+        });
       });
 
       // Sort anomalies in ascending time order.

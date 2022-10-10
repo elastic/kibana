@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  // EuiFlexGrid,
+  useEuiTheme,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import {
@@ -16,9 +26,10 @@ import {
   showTypicalForFunction,
 } from '../../../../common/util/anomaly_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
-import { AnomaliesTableRecord } from '../../../../common/types/anomalies';
+import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import { formatValue } from '../../formatters/format_value';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -54,7 +65,11 @@ export function getInfluencersItems(
   return items;
 }
 
-export function getDetailsItems(anomaly: AnomaliesTableRecord, filter: EntityCellFilter) {
+export const DetailsItems: FC<{
+  anomaly: AnomaliesTableRecord;
+  filter: EntityCellFilter;
+  modelPlotEnabled: boolean;
+}> = ({ anomaly, filter, modelPlotEnabled }) => {
   const source = anomaly.source;
 
   // TODO - when multivariate analyses are more common,
@@ -172,6 +187,31 @@ export function getDetailsItems(anomaly: AnomaliesTableRecord, filter: EntityCel
       }),
       description: formatValue(anomaly.typical, source.function, undefined, source),
     });
+
+    if (
+      modelPlotEnabled === false &&
+      anomaly.source.anomaly_score_explanation?.lower_confidence_bound !== undefined &&
+      anomaly.source.anomaly_score_explanation?.upper_confidence_bound !== undefined
+    ) {
+      items.push({
+        title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
+          defaultMessage: 'Upper bounds',
+        }),
+        description: formatValue(anomaly.typical, source.function, undefined, source),
+      });
+
+      items.push({
+        title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
+          defaultMessage: 'Lower bounds',
+        }),
+        description: formatValue(
+          anomaly.source.anomaly_score_explanation?.lower_confidence_bound,
+          source.function,
+          undefined,
+          source
+        ),
+      });
+    }
   }
 
   items.push({
@@ -276,5 +316,336 @@ export function getDetailsItems(anomaly: AnomaliesTableRecord, filter: EntityCel
     });
   }
 
-  return items;
+  return (
+    <>
+      {items.map(({ title, description }) => (
+        <>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem style={{ width: '180px' }} grow={false}>
+              {title}
+            </EuiFlexItem>
+            <EuiFlexItem>{description}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+        </>
+      ))}
+    </>
+  );
+};
+
+export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+  const explanation = anomaly.source.anomaly_score_explanation;
+  if (explanation === undefined) {
+    return null;
+  }
+  const initialScore = Math.floor(1000 * anomaly.source.initial_record_score) / 1000;
+  const finalScore = Math.floor(1000 * (anomaly.source.record_score - 25)) / 1000; // remove the 25!!!!!!!!!!!!!!!!!!!!!
+  const scoreDifference = initialScore - finalScore;
+
+  const yes = i18n.translate('xpack.ml.anomaliesTable.anomalyExplanationDetails.yes', {
+    defaultMessage: 'Yes',
+  });
+  const no = i18n.translate('xpack.ml.anomaliesTable.anomalyExplanationDetails.no', {
+    defaultMessage: 'No',
+  });
+
+  const explanationDetails = [];
+  const anomalyType = getAnomalyType(explanation);
+  if (anomalyType !== null) {
+    explanationDetails.push({
+      title: (
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyType"
+          defaultMessage="Anomaly type"
+        />
+      ),
+      description: <>{anomalyType}</>,
+    });
+  }
+
+  if (scoreDifference > 10) {
+    explanationDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
+            {
+              defaultMessage: 'Record score normalized blah blah blah',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucket"
+              defaultMessage="Record score normalized"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <RecordScore score={initialScore} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{` -> `}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <RecordScore score={finalScore} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    });
+  }
+
+  const impactDetails = [];
+  if (explanation.anomaly_characteristics_impact !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip',
+            {
+              defaultMessage: 'Anomaly characteristics impact blah blah blah',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristics"
+              defaultMessage="Anomaly characteristics impact"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: <ImpactVisual score={explanation.anomaly_characteristics_impact} />,
+    });
+  }
+
+  if (explanation.single_bucket_impact !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip',
+            {
+              defaultMessage: 'Single bucket impact blah blah blah',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucket"
+              defaultMessage="Single bucket impact"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: <ImpactVisual score={explanation.single_bucket_impact} />,
+    });
+  }
+  if (explanation.multi_bucket_impact !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip',
+            {
+              defaultMessage: 'Multi bucket impact blah blah blah',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucket"
+              defaultMessage="Multi bucket impact"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: <ImpactVisual score={explanation.multi_bucket_impact} />,
+    });
+  }
+  if (explanation.high_variance_penalty !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVarianceTooltip',
+            {
+              defaultMessage: 'High variance interval blah blah blah',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVariance"
+              defaultMessage="High variance interval"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: explanation.high_variance_penalty ? yes : no,
+    });
+  }
+  if (explanation.incomplete_bucket_penalty !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
+            {
+              defaultMessage: 'Incomplete bucket blah blah blah',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucket"
+              defaultMessage="Incomplete bucket"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: explanation.incomplete_bucket_penalty ? yes : no,
+    });
+  }
+
+  return (
+    <div>
+      <EuiText size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDetailsTitle"
+            defaultMessage="Anomaly explanation"
+          />
+        </h4>
+      </EuiText>
+      <EuiSpacer size="s" />
+
+      {explanationDetails.map(({ title, description }) => (
+        <>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem style={{ width: '220px' }} grow={false}>
+              {title}
+            </EuiFlexItem>
+            <EuiFlexItem>{description}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+        </>
+      ))}
+
+      <EuiSpacer size="s" />
+      {impactDetails.length ? (
+        <>
+          <EuiText size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDetailsTitle"
+                defaultMessage="Impact on initial score"
+              />
+            </h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+
+          {impactDetails.map(({ title, description }) => (
+            <>
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem style={{ width: '220px' }} grow={false}>
+                  {title}
+                </EuiFlexItem>
+                <EuiFlexItem>{description}</EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+            </>
+          ))}
+        </>
+      ) : null}
+    </div>
+  );
+};
+
+const RecordScore: FC<{ score: number }> = ({ score }) => {
+  return (
+    <div
+      style={{
+        borderBottom: '2px solid',
+        borderBottomColor: getSeverityColor(score),
+      }}
+    >
+      {score}
+    </div>
+  );
+};
+
+function getAnomalyType(explanation: MLAnomalyDoc['anomaly_score_explanation']) {
+  if (
+    explanation === undefined ||
+    explanation.anomaly_length === undefined ||
+    explanation.anomaly_type === undefined
+  ) {
+    return null;
+  }
+
+  const dip = i18n.translate('xpack.ml.anomaliesTable.anomalyExplanationDetails.anomalyType.dip', {
+    defaultMessage: 'Dip over {anomalyLength, plural, one {# bucket} other {# buckets}}',
+    values: { anomalyLength: explanation.anomaly_length },
+  });
+  const spike = i18n.translate(
+    'xpack.ml.anomaliesTable.anomalyExplanationDetails.anomalyType.spike',
+    {
+      defaultMessage: 'Spike over {anomalyLength, plural, one {# bucket} other {# buckets}}',
+      values: { anomalyLength: explanation.anomaly_length },
+    }
+  );
+
+  return explanation.anomaly_type === 'dip' ? dip : spike;
 }
+
+function getImpactValue(score: number) {
+  if (score < 1) return 1;
+  if (score < 3) return 2;
+  if (score < 6) return 3;
+  if (score < 12) return 4;
+  return 5;
+}
+
+const ImpactVisual: FC<{ score: number }> = ({ score }) => {
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
+
+  const impact = getImpactValue(score);
+  const boxPx = '10px';
+  const emptyBox = colors.lightShade;
+  const fullBox = colors.primary;
+  return (
+    <EuiFlexGroup gutterSize="xs">
+      {Array(5)
+        .fill(null)
+        .map((v, i) => {
+          return (
+            <EuiFlexItem grow={false}>
+              <div
+                style={{
+                  height: boxPx,
+                  width: boxPx,
+                  backgroundColor: impact > i ? fullBox : emptyBox,
+                }}
+              />
+            </EuiFlexItem>
+          );
+        })}
+    </EuiFlexGroup>
+  );
+};
