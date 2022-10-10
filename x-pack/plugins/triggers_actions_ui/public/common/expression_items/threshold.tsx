@@ -146,7 +146,7 @@ export const ThresholdExpression = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
-                    isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
+                    isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
                     error={errors[`threshold${i}`]}
                   >
                     <EuiFieldNumber
