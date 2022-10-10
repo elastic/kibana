@@ -9,15 +9,17 @@
 import type { GuideConfig } from '../../types';
 
 export const securityConfig: GuideConfig = {
-  title: 'Elastic Security guided setup',
-  description: `We'll help you set up quickly, using Elastic's out-of-the-box integrations.`,
+  title: 'Get started with SIEM',
+  description:
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
   steps: [
     {
       id: 'add_data',
-      title: 'Add data with Elastic Defend',
+      title: 'Add and view your data',
       descriptionList: [
-        'Select your integrations & start sending data.',
-        'Make sure your data looks good.',
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
+        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
       integration: 'endpoint',
       location: {
@@ -33,6 +35,11 @@ export const securityConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      manualCompletion: {
+        title: 'Manual completion step title',
+        description:
+          'Mark the step complete by opening the panel and clicking the button "Mark done"',
+      },
     },
     {
       id: 'alertsCases',
