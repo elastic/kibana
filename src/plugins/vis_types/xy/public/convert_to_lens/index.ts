@@ -12,7 +12,6 @@ import {
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid/v4';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
 import { ConvertXYToLensVisualization } from './types';
@@ -131,8 +130,10 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const indexPatternId = dataView.id!;
 
+  const uuid = await import('uuid/v4');
+
   const layers = dataLayers.reduce<Layer[]>((accLayers, l) => {
-    const layerId = uuid();
+    const layerId = uuid.default();
     const series = visibleSeries.find((s) =>
       l.columns.some((c) => c.meta.aggId.split('.')[0] === s.data.id)
     );
@@ -154,7 +155,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
   if (vis.params.thresholdLine.show) {
     layers.push({
       indexPatternId,
-      layerId: uuid(),
+      layerId: uuid.default(),
       columns: [createStaticValueColumn(vis.params.thresholdLine.value || 0)],
       columnOrder: [],
       isReferenceLineLayer: true,

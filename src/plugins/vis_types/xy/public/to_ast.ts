@@ -18,8 +18,8 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
 import {
   Dimensions,
   Dimension,
@@ -35,7 +35,7 @@ import {
 import { ChartType } from '../common';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
-import { Bounds, getCurveType, getMode, getYAxisPosition } from './utils/common';
+import { Bounds, getCurveType, getLineStyle, getMode, getYAxisPosition } from './utils/common';
 
 type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
 
@@ -233,16 +233,6 @@ const prepareYAxis = (data: ValueAxis, showGridLines?: boolean) => {
   });
 
   return buildExpression([yAxisConfig]);
-};
-
-const getLineStyle = (style: ThresholdLine['style']) => {
-  switch (style) {
-    case 'full':
-      return 'solid';
-    case 'dashed':
-    case 'dot-dashed':
-      return style;
-  }
 };
 
 const prepareReferenceLine = (thresholdLine: ThresholdLine, axisId: string) => {
