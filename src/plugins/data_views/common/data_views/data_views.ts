@@ -512,7 +512,7 @@ export class DataViewsService {
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: dataView.allowNoIndex,
-      pattern: dataView.title as string,
+      pattern: dataView.getIndexPattern(),
       metaFields,
     });
   };
@@ -556,7 +556,7 @@ export class DataViewsService {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
           { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${indexPattern.title}`
+          `refreshFields:${indexPattern.getIndexPattern()}`
         );
       }
 
@@ -565,10 +565,10 @@ export class DataViewsService {
         {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: indexPattern.id, title: indexPattern.title },
+            values: { id: indexPattern.id, title: indexPattern.getIndexPattern() },
           }),
         },
-        indexPattern.title
+        indexPattern.getIndexPattern()
       );
     }
   };
@@ -1000,7 +1000,7 @@ export class DataViewsService {
 
             this.onNotification(
               { title, color: 'danger' },
-              `updateSavedObject:${indexPattern.title}`
+              `updateSavedObject:${indexPattern.getIndexPattern()}`
             );
             throw err;
           }

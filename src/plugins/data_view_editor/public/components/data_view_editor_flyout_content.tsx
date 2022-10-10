@@ -108,7 +108,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isAdHoc: false,
       ...(editData
         ? {
-            title: editData.title,
+            title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
             ...(editData.timeFieldName
@@ -142,7 +142,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.title !== formData.title) {
+      if (editData && editData.getIndexPattern() !== formData.title) {
         editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
@@ -324,7 +324,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     if (editData) {
       loadSources();
-      reloadMatchedIndices(removeSpaces(editData.title));
+      reloadMatchedIndices(removeSpaces(editData.getIndexPattern()));
     }
     // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -31,7 +31,7 @@ const IndexPatternFlyoutContentContainer = ({
       let saveResponse;
       if (editData) {
         const { name = '', timeFieldName, title = '' } = dataViewSpec;
-        editData.title = title;
+        editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
         saveResponse = editData.isPersisted()
