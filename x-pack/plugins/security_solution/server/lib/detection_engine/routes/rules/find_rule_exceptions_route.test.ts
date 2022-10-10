@@ -14,10 +14,18 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRuleExceptionReferencesRoute } from './find_rule_exceptions_route';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 describe('findRuleExceptionReferencesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  const mockList = {
+    ...getExceptionListSchemaMock(),
+    type: 'detection',
+    id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+    list_id: 'my_default_list',
+    namespace_type: 'single',
+  };
 
   beforeEach(() => {
     server = serverMock.create();
@@ -42,6 +50,10 @@ describe('findRuleExceptionReferencesRoute', () => {
       ],
     });
 
+    (clients.lists.exceptionListClient.findExceptionList as jest.Mock).mockResolvedValue({
+      data: [mockList],
+    });
+
     findRuleExceptionReferencesRoute(server.router);
   });
 
@@ -62,21 +74,24 @@ describe('findRuleExceptionReferencesRoute', () => {
       expect(response.body).toEqual({
         references: [
           {
-            my_default_list: [
-              {
-                exception_lists: [
-                  {
-                    id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-                    list_id: 'my_default_list',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                ],
-                id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-                name: 'Detect Root/Admin Users',
-                rule_id: 'rule-1',
-              },
-            ],
+            my_default_list: {
+              ...mockList,
+              referenced_rules: [
+                {
+                  exception_lists: [
+                    {
+                      id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+                      list_id: 'my_default_list',
+                      namespace_type: 'single',
+                      type: 'detection',
+                    },
+                  ],
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                  rule_id: 'rule-1',
+                },
+              ],
+            },
           },
         ],
       });
@@ -101,7 +116,10 @@ describe('findRuleExceptionReferencesRoute', () => {
       expect(response.body).toEqual({
         references: [
           {
-            my_default_list: [],
+            my_default_list: {
+              ...mockList,
+              referenced_rules: [],
+            },
           },
         ],
       });

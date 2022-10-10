@@ -216,12 +216,16 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
       agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
     }
     if (agent.outputs) {
-      agent.outputs.forEach((output) => {
+      Object.values(agent.outputs).forEach((output) => {
         if (output.api_key_id) {
           keys.push(output.api_key_id);
         }
         if (output.to_retire_api_key_ids) {
-          output.to_retire_api_key_ids.forEach((apiKey) => keys.push(apiKey.id));
+          Object.values(output.to_retire_api_key_ids).forEach((apiKey) => {
+            if (apiKey?.id) {
+              keys.push(apiKey.id);
+            }
+          });
         }
       });
     }
