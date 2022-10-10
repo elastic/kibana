@@ -8,6 +8,7 @@
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
+import { isEqual } from 'lodash';
 import { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
@@ -15,22 +16,26 @@ import { MonitorFields } from '../../../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../../../common/types/saved_objects';
 
 export const useRecentlyViewedMonitors = () => {
-  const [recentlyViewed, setRecentlyViewed] = useLocalStorage('recentlyViewedMonitors', '[]');
-
+  const [recentlyViewed, setRecentlyViewed] = useLocalStorage<string[]>(
+    'xpack.synthetics.recentlyViewedMonitors',
+    []
+  );
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { savedObjects } = useKibana().services;
 
   useEffect(() => {
-    if (recentlyViewed) {
-      setRecentlyViewed(JSON.stringify([...new Set([monitorId, ...JSON.parse(recentlyViewed)])]));
-    } else {
-      setRecentlyViewed(JSON.stringify(monitorId ? [monitorId] : []));
+    const newRecentlyViewed = [
+      ...new Set([...(monitorId ? [monitorId] : []), ...(recentlyViewed ?? [])]),
+    ].slice(0, 5);
+
+    if (!isEqual(newRecentlyViewed.sort(), recentlyViewed?.sort())) {
+      setRecentlyViewed(newRecentlyViewed);
     }
   }, [monitorId, recentlyViewed, setRecentlyViewed]);
 
   const { data } = useFetcher(async () => {
-    const monitorsList = JSON.parse(recentlyViewed ?? '[]') as string[];
+    const monitorsList = recentlyViewed ?? [];
 
     const { resolved_objects: monitorObjects } = await savedObjects!.client.bulkResolve(
       monitorsList.map((monId) => ({
@@ -44,9 +49,7 @@ export const useRecentlyViewedMonitors = () => {
       .map((mon) => mon.saved_object.id);
 
     if (missingMonitors.length > 0) {
-      setRecentlyViewed(
-        JSON.stringify(monitorsList.filter((monId) => !missingMonitors.includes(monId)))
-      );
+      setRecentlyViewed(monitorsList.filter((monId) => !missingMonitors.includes(monId)));
     }
 
     return monitorObjects
