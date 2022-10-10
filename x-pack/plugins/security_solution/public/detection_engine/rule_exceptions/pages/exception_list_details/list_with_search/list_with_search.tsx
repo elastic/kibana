@@ -69,6 +69,8 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
           onSearch={onSearch}
           onAddExceptionClick={onAddExceptionClick}
           isSearching={viewerStatus === ViewerStatus.SEARCHING}
+          isButtonFilled={false}
+          buttonIconType="plusInCircle"
         />
         <ExceptionItems
           viewerStatus={viewerStatus as ViewerStatus}
@@ -80,13 +82,21 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
           emptyViewerBody={emptyViewerBody}
           pagination={pagination}
           lastUpdated={lastUpdated}
+          editActionLabel={i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL}
+          deleteActionLabel={i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL}
           onPaginationChange={onPaginationChange}
           onEditExceptionItem={onEditExceptionItem}
           onDeleteException={onDeleteException}
           getFormattedComments={getFormattedComments}
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           formattedDateComponent={FormattedDate}
-          exceptionsUtilityComponent={ExceptionsUtility}
+          exceptionsUtilityComponent={() => (
+            <ExceptionsUtility
+              exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
+              pagination={pagination}
+              lastUpdated={lastUpdated}
+            />
+          )}
         />
       </>
     </EuiPanel>

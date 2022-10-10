@@ -41,13 +41,13 @@ interface HeaderMenuComponentProps {
 const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   text,
   dataTestSubj,
-  iconType,
-  iconSide,
   actions,
   disableActions,
   emptyButton,
   useCustomActions,
-  anchorPosition,
+  iconType = 'boxesHorizontal',
+  iconSide = 'left',
+  anchorPosition = 'downCenter',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -79,8 +79,8 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonEmpty
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType || 'boxesHorizontal'}
-              iconSide={iconSide || 'left'}
+              iconType={iconType}
+              iconSide={iconSide}
               data-test-subj={`${dataTestSubj || ''}EmptyButton`}
               aria-label="Header menu Button Empty"
             >
@@ -90,7 +90,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonIcon
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType || 'boxesHorizontal'}
+              iconType={iconType}
               data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
               aria-label="Header menu Button Icon"
             >
@@ -98,10 +98,10 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             </EuiButtonIcon>
           )
         }
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
-        anchorPosition={anchorPosition || 'downCenter'}
+        anchorPosition={anchorPosition}
         data-test-subj={`${dataTestSubj || ''}Items`}
       >
         <EuiContextMenuPanel

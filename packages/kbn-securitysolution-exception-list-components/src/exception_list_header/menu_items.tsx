@@ -13,23 +13,26 @@ import * as i18n from '../translations';
 
 interface MenuItemsProps {
   isReadonly: boolean;
+  dataTestSubj?: string;
   // linkedRules:[]
   onExportList: () => void;
   onDeleteList: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = memo(
-  ({ isReadonly, onExportList, onDeleteList }) => {
+  ({ isReadonly, onExportList, dataTestSubj, onDeleteList }) => {
     return (
       <EuiFlexGroup
         direction="row"
         alignItems="baseline"
         justifyContent="center"
-        gutterSize="m"
         responsive
+        data-test-subj={`${dataTestSubj || ''}MenuItems`}
+        gutterSize="l"
       >
         <EuiFlexItem css={headerMenuCss}>
           <HeaderMenu
+            data-test-subj={`${dataTestSubj || ''}LinkedRulesMenu`}
             emptyButton
             text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(4)} // TODO add reference no.
             actions={[]}
@@ -40,7 +43,9 @@ const MenuItemsComponent: FC<MenuItemsProps> = memo(
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiButton>{i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}</EuiButton>
+          <EuiButton data-test-subj={`${dataTestSubj || ''}ManageRulesButton`} fill>
+            {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
+          </EuiButton>
         </EuiFlexItem>
 
         <EuiFlexItem>

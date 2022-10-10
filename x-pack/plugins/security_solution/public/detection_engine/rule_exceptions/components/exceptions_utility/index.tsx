@@ -22,6 +22,7 @@ import {
 
 const StyledText = styled.span`
   font-weight: bold;
+  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
 `;
 
 const MyUtilities = styled(EuiFlexGroup)`
@@ -66,9 +67,9 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
                 />
               </UtilityBarText>
               {exceptionsTitle && (
-                <UtilityBarText dataTestSubj={`${dataTestSubj}exceptionsTitle`}>
+                <StyledText data-test-subj={`${dataTestSubj}exceptionsTitle`}>
                   {exceptionsTitle}
-                </UtilityBarText>
+                </StyledText>
               )}
             </UtilityBarGroup>
           </UtilityBarSection>

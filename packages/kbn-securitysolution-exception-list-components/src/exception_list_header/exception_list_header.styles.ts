@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 export const headerMenuCss = css`
   border-right: 1px solid #d3dae6;
-  padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXS} 0;
+  padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeXS} 0;
 `;
 export const textWithEditContainerCss = css`
   display: flex;
