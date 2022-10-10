@@ -37,6 +37,8 @@ export const configSchema = schema.object({
     defaultValue: 'http://localhost:9200',
   }),
   maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
+  idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
@@ -305,6 +307,16 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly maxSockets: number;
 
   /**
+   * The maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed.
+   */
+  public readonly maxIdleSockets: number;
+
+  /**
+   * The timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed.
+   */
+  public readonly idleSocketTimeout: Duration;
+
+  /**
    * Whether to use compression for communications with elasticsearch.
    */
   public readonly compression: boolean;
@@ -409,6 +421,8 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
     this.maxSockets = rawConfig.maxSockets;
+    this.maxIdleSockets = rawConfig.maxIdleSockets;
+    this.idleSocketTimeout = rawConfig.idleSocketTimeout;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
