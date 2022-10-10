@@ -17,29 +17,29 @@ import {
 
 import type { UserContentCommonSchema } from '../table_list_view';
 
-type SortItem<T extends UserContentCommonSchema> = EuiSelectableOption & {
-  column: keyof T;
+type SortItem = EuiSelectableOption & {
+  column: SortColumnField;
   direction: Direction;
 };
 
-export type SortColumn = 'updatedAt' | 'attributes.title';
+export type SortColumnField = 'updatedAt' | 'attributes.title';
 
 interface Props<T> {
-  onChange?: (column: keyof T, direction: Direction) => void;
+  onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
 export function TableSortSelect<T extends UserContentCommonSchema>({ onChange }: Props<T>) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [options, setOptions] = useState<Array<SortItem<T>>>([
+  const [options, setOptions] = useState<SortItem[]>([
     {
       label: 'Title A-Z',
-      column: 'attributes.title' as keyof T,
+      column: 'attributes.title',
       direction: 'asc',
       append: <EuiIcon type="sortUp" />,
     },
     {
       label: 'Title Z-A',
-      column: 'attributes.title' as keyof T,
+      column: 'attributes.title',
       direction: 'desc',
       append: <EuiIcon type="sortDown" />,
     },
@@ -71,7 +71,7 @@ export function TableSortSelect<T extends UserContentCommonSchema>({ onChange }:
     </EuiFilterButton>
   );
 
-  const onSelectChange = (updatedOptions: Array<SortItem<T>>) => {
+  const onSelectChange = (updatedOptions: SortItem[]) => {
     setOptions(updatedOptions);
 
     if (onChange) {
@@ -89,7 +89,7 @@ export function TableSortSelect<T extends UserContentCommonSchema>({ onChange }:
       anchorPosition="downCenter"
       panelClassName="euiFilterGroup__popoverPanel"
     >
-      <EuiSelectable<SortItem<T>>
+      <EuiSelectable<SortItem>
         singleSelection
         aria-label="some aria label"
         options={options}

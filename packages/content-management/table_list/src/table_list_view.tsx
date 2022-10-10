@@ -36,6 +36,7 @@ import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
 import { getReducer } from './reducer';
+import type { SortColumnField } from './components';
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -309,7 +310,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, searchQuery, findItems]);
 
-  const onSortChange = useCallback((field: keyof T, direction: Direction) => {
+  const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
     dispatch({
       type: 'onTableSortChange',
       data: { field, direction },

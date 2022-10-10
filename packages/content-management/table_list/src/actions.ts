@@ -8,6 +8,8 @@
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { CriteriaWithPagination, Direction } from '@elastic/eui';
 
+import type { SortColumnField } from './components';
+
 /** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {
   type: 'onFetchItems';
@@ -56,7 +58,7 @@ export interface OnTableChangeAction<T> {
 export interface OnTableSortChangeAction<T> {
   type: 'onTableSortChange';
   data: {
-    field: keyof T;
+    field: SortColumnField;
     direction: Direction;
   };
 }

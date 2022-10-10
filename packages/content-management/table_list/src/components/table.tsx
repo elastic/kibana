@@ -26,6 +26,7 @@ import type {
   UserContentCommonSchema,
 } from '../table_list_view';
 import { TableSortSelect } from './table_sort_select';
+import type { SortColumnField } from './table_sort_select';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -40,7 +41,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T> {
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   deleteItems: TableListViewProps<T>['deleteItems'];
-  onSortChange: (column: keyof T, direction: Direction) => void;
+  onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
 }
 
