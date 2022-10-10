@@ -19,6 +19,7 @@ import { waitFor } from '@testing-library/react';
 import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
 import { getDeferred } from '../../../mocks/utils';
+import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
 
 describe('When using isolate action from response actions console', () => {
   let render: (
@@ -45,6 +46,11 @@ describe('When using isolate action from response actions console', () => {
                 commands: getEndpointResponseActionsConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
+                  endpointPrivileges: {
+                    ...getEndpointAuthzInitialState(),
+                    loading: false,
+                    canIsolateHost: true,
+                  },
                 }),
               },
             };

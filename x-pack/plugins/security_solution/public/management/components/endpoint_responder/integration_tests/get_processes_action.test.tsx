@@ -18,6 +18,7 @@ import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
 
 describe('When using processes action from response actions console', () => {
   let render: (
@@ -44,6 +45,13 @@ describe('When using processes action from response actions console', () => {
                 commands: getEndpointResponseActionsConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
+                  endpointPrivileges: {
+                    ...getEndpointAuthzInitialState(),
+                    loading: false,
+                    canKillProcess: true,
+                    canSuspendProcess: true,
+                    canGetRunningProcesses: true,
+                  },
                 }),
               },
             };
