@@ -102,7 +102,11 @@ export function Table<T extends UserContentCommonSchema>({
       type: 'custom_component',
       component: () => {
         return (
-          <TableSortSelect hasUpdatedAtMetadata={hasUpdatedAtMetadata} onChange={onSortChange} />
+          <TableSortSelect
+            tableSort={tableSort}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            onChange={onSortChange}
+          />
         );
       },
     };
@@ -110,7 +114,7 @@ export function Table<T extends UserContentCommonSchema>({
     return getSearchBarFilters
       ? [tableSortSelectFilter, ...getSearchBarFilters()]
       : [tableSortSelectFilter];
-  }, [onSortChange, hasUpdatedAtMetadata, getSearchBarFilters]);
+  }, [onSortChange, hasUpdatedAtMetadata, tableSort, getSearchBarFilters]);
 
   const search = useMemo(() => {
     return {

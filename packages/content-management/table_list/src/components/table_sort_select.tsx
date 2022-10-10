@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiSelectable,
   EuiPopover,
@@ -14,6 +14,8 @@ import {
   EuiIcon,
   Direction,
 } from '@elastic/eui';
+
+import { State } from '../table_list_view';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;
@@ -24,10 +26,11 @@ export type SortColumnField = 'updatedAt' | 'attributes.title';
 
 interface Props {
   hasUpdatedAtMetadata: boolean;
+  tableSort: State['tableSort'];
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
-export function TableSortSelect({ hasUpdatedAtMetadata, onChange }: Props) {
+export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<SortItem[]>(() => {
     let opts: SortItem[] = [
@@ -48,13 +51,13 @@ export function TableSortSelect({ hasUpdatedAtMetadata, onChange }: Props) {
     if (hasUpdatedAtMetadata) {
       opts = opts.concat([
         {
-          label: 'Recently updated',
+          label: 'Least recently updated',
           column: 'updatedAt',
           direction: 'asc',
           append: <EuiIcon type="sortUp" />,
         },
         {
-          label: 'Least recently updated',
+          label: 'Recently updated',
           column: 'updatedAt',
           direction: 'desc',
           append: <EuiIcon type="sortDown" />,
@@ -64,6 +67,7 @@ export function TableSortSelect({ hasUpdatedAtMetadata, onChange }: Props) {
 
     return opts;
   });
+  const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
 
   const togglePopOver = () => {
     setIsPopoverOpen((prev) => !prev);
@@ -75,7 +79,7 @@ export function TableSortSelect({ hasUpdatedAtMetadata, onChange }: Props) {
 
   const button = (
     <EuiFilterButton iconType="arrowDown" iconSide="right" onClick={togglePopOver} grow>
-      Recently updated
+      {selectedOptionLabel}
     </EuiFilterButton>
   );
 
@@ -87,6 +91,22 @@ export function TableSortSelect({ hasUpdatedAtMetadata, onChange }: Props) {
       onChange(selectedOption!.column, selectedOption!.direction);
     }
   };
+
+  useEffect(() => {
+    setOptions((prev) => {
+      return prev.map((option) => {
+        const checked =
+          option.column === tableSort.field && option.direction === tableSort.direction
+            ? 'on'
+            : undefined;
+
+        return {
+          ...option,
+          checked,
+        };
+      });
+    });
+  }, [tableSort]);
 
   return (
     <EuiPopover
