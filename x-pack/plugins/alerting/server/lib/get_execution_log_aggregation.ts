@@ -397,7 +397,7 @@ export function getExecutionLogAggregation({
                   top_hits: {
                     size: 1,
                     _source: {
-                      include: [
+                      includes: [
                         OUTCOME_FIELD,
                         MESSAGE_FIELD,
                         ERROR_MESSAGE_FIELD,

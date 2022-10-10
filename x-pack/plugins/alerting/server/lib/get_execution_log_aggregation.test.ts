@@ -274,7 +274,7 @@ describe('getExecutionLogAggregation', () => {
                     top_hits: {
                       size: 1,
                       _source: {
-                        include: [
+                        includes: [
                           'event.outcome',
                           'message',
                           'error.message',
@@ -480,7 +480,7 @@ describe('getExecutionLogAggregation', () => {
                     top_hits: {
                       size: 1,
                       _source: {
-                        include: [
+                        includes: [
                           'event.outcome',
                           'message',
                           'error.message',
@@ -686,7 +686,7 @@ describe('getExecutionLogAggregation', () => {
                     top_hits: {
                       size: 1,
                       _source: {
-                        include: [
+                        includes: [
                           'event.outcome',
                           'message',
                           'error.message',

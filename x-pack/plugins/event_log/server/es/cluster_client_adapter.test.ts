@@ -610,7 +610,6 @@ describe('queryEventsBySavedObject', () => {
           { sort_field: 'event.end', sort_order: 'desc' },
         ],
       },
-      runtimeMappings: {},
     };
     const result = await clusterClientAdapter.queryEventsBySavedObjects(options);
 
@@ -694,7 +693,6 @@ describe('aggregateEventsBySavedObject', () => {
       index: 'index-name',
       body: {
         size: 0,
-        runtime_mappings: {},
         query: getQueryBody(
           logger,
           options,
@@ -793,7 +791,6 @@ describe('aggregateEventsWithAuthFilter', () => {
       index: 'index-name',
       body: {
         size: 0,
-        runtime_mappings: {},
         query: getQueryBodyWithAuthFilter(
           logger,
           options,
