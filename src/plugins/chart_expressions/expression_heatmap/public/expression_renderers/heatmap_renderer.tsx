@@ -71,7 +71,7 @@ export const heatmapRenderer: (
 
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
-    const { isInteractive, isSyncTooltipsEnabled } = handlers;
+    const { isInteractive } = handlers;
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -89,7 +89,7 @@ export const heatmapRenderer: (
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
             chartsActiveCursorService={plugins.charts.activeCursor}
-            syncTooltips={isSyncTooltipsEnabled()}
+            syncTooltips={config.syncTooltips}
           />
         </div>
       </KibanaThemeProvider>,
