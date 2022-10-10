@@ -13,7 +13,7 @@ import { mapToColumns } from '../common/expressions/map_to_columns/map_to_column
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
-import { collapse } from '../common/expressions';
+import { collapse } from '../common/expressions/collapse';
 
 type TimeScaleArguments = Parameters<typeof getTimeScale>;
 

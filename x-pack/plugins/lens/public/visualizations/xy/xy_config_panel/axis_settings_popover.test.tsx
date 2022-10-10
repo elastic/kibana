@@ -9,7 +9,7 @@ import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../../shared_components';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ShallowWrapper } from 'enzyme';
 
 function getRangeInputComponent(component: ShallowWrapper) {
@@ -29,7 +29,7 @@ describe('Axes Settings', () => {
       layers: [
         {
           seriesType: 'bar',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
