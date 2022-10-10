@@ -31,10 +31,11 @@ export const GuideButtonPopover = ({
   }, [isGuidePanelOpen]);
   return (
     <EuiPopover
+      data-test-subj="manualCompletionPopover"
       button={button}
       isOpen={isPopoverShown.current && !isGuidePanelOpen}
       closePopover={() => {
-        /* do nothing */
+        /* do nothing, the popover is closed once when the panel is opened */
       }}
     >
       {title && <EuiPopoverTitle>{title}</EuiPopoverTitle>}

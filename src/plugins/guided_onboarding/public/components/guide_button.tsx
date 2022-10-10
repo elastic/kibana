@@ -23,7 +23,7 @@ const getStepNumber = (state?: GuideState): number | undefined => {
   let stepNumber: number | undefined;
 
   state?.steps.forEach((step, stepIndex) => {
-    // If the step is in_progress, show that step number
+    // If the step is in_progress or ready_to_complete, show that step number
     if (step.status === 'in_progress' || step.status === 'ready_to_complete') {
       stepNumber = stepIndex + 1;
     }
