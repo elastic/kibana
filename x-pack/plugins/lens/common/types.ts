@@ -12,13 +12,8 @@ import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
-import {
-  CategoryDisplay,
-  layerTypes,
-  LegendDisplay,
-  NumberDisplay,
-  PieChartTypes,
-} from './constants';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+import { layerTypes } from './layer_types';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 

@@ -16,7 +16,8 @@ import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { LayerType, layerTypes } from '../../../common';
+import type { LayerType } from '../../../common';
+import { layerTypes } from '../../../common/layer_types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,

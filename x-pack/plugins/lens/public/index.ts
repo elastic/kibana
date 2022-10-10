@@ -104,7 +104,7 @@ export type {
 
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
-export { layerTypes } from '../common/constants';
+export { layerTypes } from '../common/layer_types';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

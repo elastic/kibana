@@ -44,13 +44,6 @@ export const LegendDisplay = {
   HIDE: 'hide',
 } as const;
 
-export const layerTypes = {
-  DATA: 'data',
-  REFERENCELINE: 'referenceLine',
-  ANNOTATIONS: 'annotations',
-  METRIC_TRENDLINE: 'metricTrendline',
-} as const;
-
 // might collide with user-supplied field names, try to make as unique as possible
 export const DOCUMENT_FIELD_NAME = '___records___';
 

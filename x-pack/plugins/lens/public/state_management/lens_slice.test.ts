@@ -33,7 +33,7 @@ import {
 } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
 import { DataViewsState, LensAppState } from './types';
-import { layerTypes } from '../../common';
+import { layerTypes } from '../../common/layer_types';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
