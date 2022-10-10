@@ -112,10 +112,10 @@ export class AutocompleteInfo {
 
         if (isMappingResponseExceededError) {
           this.notifications.toasts.addWarning({
-            title: i18n.translate('devTools.autocomplete.mappingResponseExceededTitle', {
+            title: i18n.translate('console.autocomplete.mappingResponseExceededTitle', {
               defaultMessage: 'Maximum size of mappings response exceeded',
             }),
-            text: i18n.translate('devTools.autocomplete.mappingResponseExceededText', {
+            text: i18n.translate('console.autocomplete.mappingResponseExceededText', {
               defaultMessage:
                 'Some autocomplete suggestions may be missing. Disable autocomplete suggestions for fields in Settings to optimize performance.',
             }),
@@ -196,32 +196,32 @@ export class AutocompleteInfo {
   }
 
   private async retrieveTemplates(settingsToRetrieve: SettingsToRetrieve) {
-    const [legacyTemplates, indexTemplates, componentTemplates] = await Promise.all([
+    return Promise.allSettled([
       this.retrieveSettings<IndicesGetTemplateResponse>(
         ENTITIES.LEGACY_TEMPLATES,
         settingsToRetrieve
-      ),
+      ).then((legacyTemplates) => {
+        if (legacyTemplates) {
+          this.legacyTemplate.loadTemplates(legacyTemplates);
+        }
+      }),
       this.retrieveSettings<IndicesGetIndexTemplateResponse>(
         ENTITIES.INDEX_TEMPLATES,
         settingsToRetrieve
-      ),
+      ).then((indexTemplates) => {
+        if (indexTemplates && 'index_templates' in indexTemplates) {
+          this.indexTemplate.loadTemplates(indexTemplates);
+        }
+      }),
       this.retrieveSettings<ClusterGetComponentTemplateResponse>(
         ENTITIES.COMPONENT_TEMPLATES,
         settingsToRetrieve
-      ),
+      ).then((componentTemplates) => {
+        if (componentTemplates && 'component_templates' in componentTemplates) {
+          this.componentTemplate.loadTemplates(componentTemplates);
+        }
+      }),
     ]);
-
-    if (legacyTemplates) {
-      this.legacyTemplate.loadTemplates(legacyTemplates);
-    }
-
-    if (indexTemplates && 'index_templates' in indexTemplates) {
-      this.indexTemplate.loadTemplates(indexTemplates);
-    }
-
-    if (componentTemplates && 'component_templates' in componentTemplates) {
-      this.componentTemplate.loadTemplates(componentTemplates);
-    }
   }
 
   public clearSubscriptions() {
