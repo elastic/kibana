@@ -10,7 +10,7 @@ import { Filter, FilterMeta, FILTERS } from './types';
 import { buildEmptyFilter } from './build_empty_filter';
 
 /**
- * Each item in an OR filter may represent either one filter (to be ORed) or an array of filters (ANDed together before
+ * Each item in an COMBINED filter may represent either one filter (to be ORed) or an array of filters (ANDed together before
  * becoming part of the OR clause).
  * @public
  */
@@ -19,38 +19,38 @@ export type FilterItem = Filter | FilterItem[];
 /**
  * @public
  */
-export interface OrFilterMeta extends FilterMeta {
-  type: typeof FILTERS.OR;
+export interface CombinedFilterMeta extends FilterMeta {
+  type: typeof FILTERS.COMBINED;
   params: FilterItem[];
 }
 
 /**
  * @public
  */
-export interface OrFilter extends Filter {
-  meta: OrFilterMeta;
+export interface CombinedFilter extends Filter {
+  meta: CombinedFilterMeta;
 }
 
 /**
  * @public
  */
-export function isOrFilter(filter: Filter): filter is OrFilter {
-  return filter?.meta?.type === FILTERS.OR;
+export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
+  return filter?.meta?.type === FILTERS.COMBINED;
 }
 
 /**
- * Builds an OR filter. An OR filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a
+ * Builds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a
  * condition.
- * @param filters An array of OrFilterItem
+ * @param filters An array of CombinedFilterItem
  * @public
  */
-export function buildOrFilter(filters: FilterItem[]): OrFilter {
+export function buildCombinedFilter(filters: FilterItem[]): CombinedFilter {
   const filter = buildEmptyFilter(false);
   return {
     ...filter,
     meta: {
       ...filter.meta,
-      type: FILTERS.OR,
+      type: FILTERS.COMBINED,
       params: filters,
     },
   };

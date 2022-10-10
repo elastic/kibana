@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EmailConnector, IndexConnector } from '../objects/connector';
-import { getIndexConnector, getEmailConnector } from '../objects/connector';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -30,7 +28,6 @@ import {
   AT_LEAST_ONE_VALID_MATCH,
   BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
-  COMBO_BOX_INPUT,
   CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
@@ -92,13 +89,6 @@ import {
   THREAT_MATCH_QUERY_INPUT,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  CONNECTOR_NAME_INPUT,
-  EMAIL_CONNECTOR_FROM_INPUT,
-  EMAIL_CONNECTOR_HOST_INPUT,
-  EMAIL_CONNECTOR_PORT_INPUT,
-  EMAIL_CONNECTOR_USER_INPUT,
-  EMAIL_CONNECTOR_PASSWORD_INPUT,
-  EMAIL_CONNECTOR_SERVICE_SELECTOR,
   PREVIEW_HISTOGRAM,
   DATA_VIEW_COMBO_BOX,
   DATA_VIEW_OPTION,
@@ -107,19 +97,18 @@ import {
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
   ACTIONS_THROTTLE_INPUT,
+} from '../screens/create_new_rule';
+import {
   INDEX_SELECTOR,
-  CREATE_CONNECTOR_BTN,
-  SAVE_ACTION_CONNECTOR_BTN,
-  JSON_EDITOR,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
-  COMBO_BOX_SELECTION,
-} from '../screens/create_new_rule';
+} from '../screens/common/rule_actions';
+import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
+import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -326,7 +315,7 @@ export const fillRuleAction = (rule: CustomRule) => {
       switch (connector.type) {
         case 'index':
           cy.get(INDEX_SELECTOR).click();
-          cy.get(CREATE_CONNECTOR_BTN).click();
+          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
           fillIndexConnectorForm(connector);
           break;
         case 'email':
@@ -461,31 +450,6 @@ export const fillIndexAndIndicatorIndexPattern = (
 
   getIndicatorIndex().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
-};
-
-export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
-  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
-  cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
-  cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
-  cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
-  cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
-  cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
-};
-
-const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
-  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(COMBO_BOX_INPUT).type(connector.index);
-
-  cy.get(COMBO_BOX_SELECTION).click({ force: true });
-
-  cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
-  cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
-  cy.get(JSON_EDITOR).should('be.visible');
-  cy.get(JSON_EDITOR).click();
-  cy.get(JSON_EDITOR).type(connector.document, {
-    parseSpecialCharSequences: false,
-  });
 };
 
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
