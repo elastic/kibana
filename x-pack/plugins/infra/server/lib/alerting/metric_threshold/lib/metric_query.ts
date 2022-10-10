@@ -80,6 +80,18 @@ export const getElasticsearchMetricQuery = (
 
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
+  const additionalContextAgg = {
+    additionalContext: {
+      top_hits: {
+        size: 1,
+        _source: {
+          includes: ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*', 'container.*'],
+          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+        },
+      },
+    },
+  };
+
   const aggs: any = groupBy
     ? {
         groupings: {
@@ -105,6 +117,7 @@ export const getElasticsearchMetricQuery = (
             ...currentPeriod,
             ...rateAggBucketScript,
             ...bucketSelectorAggregations,
+            ...additionalContextAgg
           },
         },
       }
@@ -121,6 +134,7 @@ export const getElasticsearchMetricQuery = (
             ...currentPeriod,
             ...rateAggBucketScript,
             ...bucketSelectorAggregations,
+            ...additionalContextAgg
           },
         },
       };

@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
   Aggregators,
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
+import { AdditionalContext } from './evaluate_rule';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
   string,
-  { warn: boolean; trigger: boolean; value: number | null }
+  { warn: boolean; trigger: boolean; value: number | null } & AdditionalContext
 >;
 
 type BucketKey = Record<string, string>;
@@ -40,6 +43,7 @@ interface Aggs {
   missingGroup?: {
     value: number;
   };
+  additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 interface Bucket extends Aggs {
   key: BucketKey;
@@ -107,11 +111,17 @@ export const getData = async (
           currentPeriod: { aggregatedValue, doc_count: docCount },
           aggregatedValue: aggregatedValueForRate,
         } = bucket;
+
+        const bucketHits = bucket.additionalContext?.hits?.hits;
+        const additionalContextSource =
+          bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
             warn: false,
             value: null,
+            ...additionalContextSource,
           };
         } else {
           const value =
@@ -122,10 +132,12 @@ export const getData = async (
               : aggregatedValue != null
               ? getValue(aggregatedValue, params)
               : null;
+
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
+            ...additionalContextSource,
           };
         }
       }
@@ -153,7 +165,13 @@ export const getData = async (
         aggregatedValue: aggregatedValueForRate,
         shouldWarn,
         shouldTrigger,
+        additionalContext
       } = aggs.all.buckets.all;
+
+      const bucketHits = additionalContext.hits?.hits;
+      const additionalContextSource =
+        bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+
       const value =
         params.aggType === Aggregators.COUNT
           ? docCount
@@ -177,6 +195,7 @@ export const getData = async (
             value,
             warn,
             trigger,
+            ...additionalContextSource
           },
         };
       }
@@ -185,6 +204,7 @@ export const getData = async (
           value,
           warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
+          ...additionalContextSource
         },
       };
     } else {
