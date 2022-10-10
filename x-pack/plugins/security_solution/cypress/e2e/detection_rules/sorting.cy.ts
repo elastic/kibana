@@ -21,7 +21,7 @@ import {
   goToPage,
   sortByEnabledRules,
   waitForRulesTableToBeLoaded,
-  waitForRuleToChangeStatus,
+  waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import { login, visit } from '../../tasks/login';
 
@@ -50,9 +50,9 @@ describe('Alerts detection rules', () => {
     waitForRulesTableToBeLoaded();
 
     enableRule(SECOND_RULE);
-    waitForRuleToChangeStatus();
+    waitForRuleToUpdate();
     enableRule(FOURTH_RULE);
-    waitForRuleToChangeStatus();
+    waitForRuleToUpdate();
 
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
