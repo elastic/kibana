@@ -26,6 +26,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { asTransactionRate } from '../../../../common/utils/formatters';
+import { getIndexManagementHref } from './get_storage_explorer_links';
 
 const INITIAL_DATA = {
   totalSize: 0,
@@ -171,11 +172,7 @@ export function SummaryStats() {
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiLink
-                  href={core.http.basePath.prepend(
-                    '/app/management/data/index_management/data_streams'
-                  )}
-                >
+                <EuiLink href={getIndexManagementHref(core)}>
                   {i18n.translate(
                     'xpack.apm.storageExplorer.summary.indexManagementLink',
                     {

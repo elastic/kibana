@@ -22,6 +22,7 @@ import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
+import { TipsAndResources } from './resources/tips_and_resources';
 
 const INITIAL_DATA = { hasPrivileges: false };
 
@@ -72,6 +73,8 @@ export function StorageExplorer() {
       <StorageChart />
       <EuiSpacer />
       <ServicesTable />
+      <EuiSpacer />
+      <TipsAndResources />
     </>
   );
 }
