@@ -301,7 +301,7 @@ describe('GuidedOnboarding ApiService', () => {
       });
     });
 
-    it.only(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
+    it(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
       const securityRulesInProgressState = {
         ...securityRulesActiveState,
         steps: [
