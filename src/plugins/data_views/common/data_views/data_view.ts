@@ -206,7 +206,9 @@ export class DataView implements DataViewBase {
    * @param string index pattern string
    */
 
-  setIndexPattern = (indexPattern: string) => (this.title = indexPattern);
+  setIndexPattern = (indexPattern: string) => {
+    this.title = indexPattern;
+  };
 
   /**
    * Get last saved saved object fields
