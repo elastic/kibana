@@ -253,27 +253,35 @@ export const AvailablePackages: React.FC<{
   );
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
+  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
+    useGetAppendCustomIntegrations();
+
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
       preference === 'beats' ? [] : eprIntegrationList,
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
+  const cards: IntegrationCardItem[] = useMemo(() => {
+    const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+    return eprAndCustomPackages
+      .map((item) => {
+        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
 
-  const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
-    ...mergedEprPackages,
-    ...(appendCustomIntegrations || []),
-  ];
+  const filteredCards = useMemo(
+    () =>
+      cards.filter((c) => {
+        if (category === '') {
+          return true;
+        }
 
-  const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
-  });
-
-  cards.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
+        return c.categories.includes(category);
+      }),
+    [cards, category]
+  );
 
   const {
     data: eprCategories,
@@ -330,14 +338,6 @@ export const AvailablePackages: React.FC<{
       ...controls,
     ];
   }
-
-  const filteredCards = cards.filter((c) => {
-    if (category === '') {
-      return true;
-    }
-
-    return c.categories.includes(category);
-  });
 
   // TODO: Remove this hard coded list of integrations with a suggestion service
   const featuredList = (
