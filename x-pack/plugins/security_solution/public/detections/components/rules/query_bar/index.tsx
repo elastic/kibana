@@ -232,6 +232,7 @@ export const QueryBarDefineRule = ({
     onCloseTimelineSearch();
   }, [onCloseTimelineSearch]);
 
+  // Steph note: sets timeline query to rule query
   const onOpenTimeline = useCallback(
     (timeline: TimelineModel) => {
       setLoadingTimeline(false);

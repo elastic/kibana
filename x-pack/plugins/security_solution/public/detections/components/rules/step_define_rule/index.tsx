@@ -26,6 +26,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useFromTimelineId } from '../../../pages/detection_engine/rules/create/use_from_timeline_id';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -137,7 +138,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
 
-  const { getFields, getFormData, reset, submit } = form;
+  const { getFields, getFormData, reset, setFieldValue, submit } = form;
   const [formData] = useFormData<DefineStepRule>({
     form,
     watch: [
@@ -168,6 +169,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     },
   });
+  const fromTimelineData = useFromTimelineId({
+    index: initialState.index,
+    queryBar: initialState.queryBar,
+  });
+
+  useEffect(() => {
+    if (fromTimelineData.updated) {
+      if (fromTimelineData.index.length > 0) {
+        setFieldValue('index', fromTimelineData.index);
+      }
+      setFieldValue('queryBar', fromTimelineData.queryBar);
+    }
+  }, [fromTimelineData, setFieldValue]);
+
+  // useEffect(() => {
+  //   console.log('UE', { index: initialState.index, queryBar: initialState.queryBar });
+  //   if (initialState.index.length > 0) {
+  //     setFieldValue('index', initialState.index);
+  //   }
+  //   setFieldValue('queryBar', initialState.queryBar);
+  // }, [initialState.index, initialState.queryBar, setFieldValue]);
   const {
     index: formIndex,
     ruleType: formRuleType,

@@ -8,6 +8,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useNavigation } from '../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { SortFieldTimeline } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -40,6 +42,7 @@ import type {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
+  OnCreateRuleFromTimeline,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
@@ -273,6 +276,18 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       },
       []
     );
+    const { navigateTo } = useNavigation();
+    const onCreateRule: OnCreateRuleFromTimeline = useCallback(
+      (savedObjectId) => {
+        navigateTo({
+          deepLinkId: SecurityPageName.rulesCreate,
+          path: `?createRuleFromTimelineId=${savedObjectId}`,
+        });
+        // redirect to rules page
+        // set url param with selectedTimeline.savedObjectId
+      },
+      [navigateTo]
+    );
 
     /** Resets the selection state such that all timelines are unselected */
     const resetSelectionState = useCallback(() => {
@@ -324,6 +339,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
         importDataModalToggle={importDataModalToggle}
         onAddTimelinesToFavorites={undefined}
+        onCreateRule={onCreateRule}
         onDeleteSelected={onDeleteSelected}
         onlyFavorites={onlyFavorites}
         onOpenTimeline={openTimeline}
