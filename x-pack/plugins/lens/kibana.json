@@ -25,12 +25,12 @@
     "expressionGauge",
     "expressionMetricVis",
     "expressionHeatmap",
+    "expressionXY",
     "eventAnnotation",
     "unifiedSearch",
     "unifiedFieldList"
   ],
   "optionalPlugins": [
-    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",
