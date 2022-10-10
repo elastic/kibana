@@ -26,7 +26,10 @@ export function RedirectWithDefaultEnvironment({
   }
 
   const normalizedPathname = location.pathname.replace(/\/$/, '');
-  if (normalizedPathname === '/services') {
+  if (
+    normalizedPathname === '/services' ||
+    normalizedPathname === '/agent-explorer'
+  ) {
     return (
       <Redirect
         to={qs.stringifyUrl({

@@ -139,6 +139,13 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
+const apmAgentsExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.apmAgentExplorerTitle',
+  {
+    defaultMessage: 'Agent Explorer',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -218,6 +225,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                           path: '/service-map',
                         },
                       ]),
+                  { label: apmAgentsExplorerTitle, app: 'apm', path: '/agent-explorer' },
                 ],
               },
             ];
@@ -325,6 +333,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
         },
+        { id:'agents', title: apmAgentsExplorerTitle, path: '/agent-explorer' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
