@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('toggleFieldFilterButton')).to.be(true);
         expect(await testSubjects.exists('fieldTypesHelpButton')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
-        expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(true);
+        expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
         await PageObjects.discover.selectTextBaseLang('SQL');
 

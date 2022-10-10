@@ -18,6 +18,7 @@
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../data_views/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
-    { "path": "../charts/tsconfig.json" }
+    { "path": "../charts/tsconfig.json" },
+    { "path": "../ui_actions/tsconfig.json" }
   ]
 }

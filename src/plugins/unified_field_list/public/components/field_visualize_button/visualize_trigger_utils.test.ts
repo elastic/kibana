@@ -7,7 +7,7 @@
  */
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getVisualizeInformation } from './visualize_trigger_utils';
 
 const field = {
@@ -26,11 +26,9 @@ const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldN
   () => Promise.resolve([])
 );
 
-jest.mock('../../../../../kibana_services', () => ({
-  getUiActions: () => ({
-    getTriggerCompatibleActions: mockGetActions,
-  }),
-}));
+const uiActions = {
+  getTriggerCompatibleActions: mockGetActions,
+} as unknown as UiActionsStart;
 
 const action: Action = {
   id: 'action',
@@ -51,7 +49,13 @@ describe('visualize_trigger_utils', () => {
   describe('getVisualizeInformation', () => {
     it('should return for a visualizeable field with an action', async () => {
       mockGetActions.mockResolvedValue([action]);
-      const information = await getVisualizeInformation(field, dataViewMock, [], undefined);
+      const information = await getVisualizeInformation(
+        uiActions,
+        field,
+        dataViewMock,
+        [],
+        undefined
+      );
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'fieldName');
       expect(information?.href).toBeUndefined();
@@ -59,7 +63,13 @@ describe('visualize_trigger_utils', () => {
 
     it('should return field and href from the action', async () => {
       mockGetActions.mockResolvedValue([{ ...action, getHref: () => Promise.resolve('hreflink') }]);
-      const information = await getVisualizeInformation(field, dataViewMock, [], undefined);
+      const information = await getVisualizeInformation(
+        uiActions,
+        field,
+        dataViewMock,
+        [],
+        undefined
+      );
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'fieldName');
       expect(information).toHaveProperty('href', 'hreflink');
@@ -68,6 +78,7 @@ describe('visualize_trigger_utils', () => {
     it('should return undefined if no field has a compatible action', async () => {
       mockGetActions.mockResolvedValue([]);
       const information = await getVisualizeInformation(
+        uiActions,
         { ...field, name: 'rootField' } as DataViewField,
         dataViewMock,
         [],
@@ -82,6 +93,7 @@ describe('visualize_trigger_utils', () => {
     it('should return information for the root field, when multi fields and root are having actions', async () => {
       mockGetActions.mockResolvedValue([action]);
       const information = await getVisualizeInformation(
+        uiActions,
         { ...field, name: 'rootField' } as DataViewField,
         dataViewMock,
         [],
@@ -102,6 +114,7 @@ describe('visualize_trigger_utils', () => {
         return [];
       });
       const information = await getVisualizeInformation(
+        uiActions,
         { ...field, name: 'rootField' } as DataViewField,
         dataViewMock,
         [],

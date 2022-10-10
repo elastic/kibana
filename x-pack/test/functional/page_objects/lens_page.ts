@@ -290,17 +290,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsFieldListPanelField-${field}`);
     },
 
-    async editField() {
+    async editField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelEdit');
-        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+        await testSubjects.click(`fieldPopoverHeader_editField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_editField-${field}`);
       });
     },
 
-    async removeField() {
+    async removeField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelRemove');
-        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+        await testSubjects.click(`fieldPopoverHeader_deleteField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_deleteField-${field}`);
       });
     },
 
