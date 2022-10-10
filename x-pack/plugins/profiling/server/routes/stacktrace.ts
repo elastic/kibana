@@ -29,7 +29,7 @@ import {
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
-import { runLengthDecode } from '../../common/run_length_encoding';
+import { runLengthDecodeBase64Url } from '../../common/run_length_encoding';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { DownsampledEventsIndex } from './downsampling';
@@ -85,8 +85,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
-  const types = Buffer.from(inputFrameTypes, 'base64url');
-  const typeIDs = runLengthDecode(types, countsFrameIDs);
+  const typeIDs = runLengthDecodeBase64Url(inputFrameTypes, inputFrameTypes.length, countsFrameIDs);
 
   return {
     AddressOrLines: addressOrLines,

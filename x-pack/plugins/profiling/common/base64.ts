@@ -15,3 +15,8 @@ export const safeBase64Decoder = [
 
 export const safeBase64Encoder =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234456789-_';
+
+/* eslint no-bitwise: ["error", { "allow": ["&"] }] */
+export function charCodeAt(input: string, i: number): number {
+  return safeBase64Decoder[input.charCodeAt(i) & 0x7f];
+}

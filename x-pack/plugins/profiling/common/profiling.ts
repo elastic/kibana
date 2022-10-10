@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeBase64Decoder, safeBase64Encoder } from './base64';
+import { charCodeAt, safeBase64Encoder } from './base64';
 
 export type StackTraceID = string;
 export type StackFrameID = string;
@@ -25,27 +25,27 @@ export function getFileIDFromStackFrameID(frameID: StackFrameID): FileID {
 
 /* eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }] */
 export function getAddressFromStackFrameID(frameID: StackFrameID): number {
-  let address = safeBase64Decoder[frameID.charCodeAt(21) & 0x7f] & 0xf;
+  let address = charCodeAt(frameID, 21) & 0xf;
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(22) & 0x7f];
+  address += charCodeAt(frameID, 22);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(23) & 0x7f];
+  address += charCodeAt(frameID, 23);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(24) & 0x7f];
+  address += charCodeAt(frameID, 24);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(25) & 0x7f];
+  address += charCodeAt(frameID, 25);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(26) & 0x7f];
+  address += charCodeAt(frameID, 26);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(27) & 0x7f];
+  address += charCodeAt(frameID, 27);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(28) & 0x7f];
+  address += charCodeAt(frameID, 28);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(29) & 0x7f];
+  address += charCodeAt(frameID, 29);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(30) & 0x7f];
+  address += charCodeAt(frameID, 30);
   address <<= 6;
-  address += safeBase64Decoder[frameID.charCodeAt(31) & 0x7f];
+  address += charCodeAt(frameID, 31);
   return address;
 }
 

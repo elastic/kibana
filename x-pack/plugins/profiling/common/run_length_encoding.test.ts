@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { runLengthDecode, runLengthEncode } from './run_length_encoding';
+import { runLengthDecode, runLengthDecodeBase64Url, runLengthEncode } from './run_length_encoding';
 
 describe('Run-length encoding operations', () => {
   test('run length is fully reversible', () => {
@@ -101,6 +101,66 @@ describe('Run-length encoding operations', () => {
 
     for (const t of tests) {
       expect(runLengthEncode(t.numbers)).toEqual(t.expected);
+    }
+  });
+
+  test('runLengthDecodeBase64Url', () => {
+    const tests: Array<{
+      data: string;
+      expected: number[];
+    }> = [
+      {
+        data: 'CQM',
+        expected: [3, 3, 3, 3, 3, 3, 3, 3, 3],
+      },
+      {
+        data: 'EgMHBA',
+        expected: Array(18).fill(3).concat(Array(7).fill(4)),
+      },
+      {
+        data: 'CAMfBQIDEAQ',
+        expected: Array(8)
+          .fill(3)
+          .concat(Array(31).fill(5))
+          .concat([3, 3])
+          .concat(Array(16).fill(4)),
+      },
+    ];
+
+    for (const t of tests) {
+      expect(runLengthDecodeBase64Url(t.data, t.data.length, t.expected.length)).toEqual(
+        t.expected
+      );
+    }
+  });
+
+  test('runLengthDecodeBase64Url with larger output than available input', () => {
+    const data = Buffer.from([0x5, 0x0, 0x3, 0x2]).toString('base64url');
+    const decoded = [0, 0, 0, 0, 0, 2, 2, 2];
+    const expected = decoded.concat(Array(decoded.length).fill(0));
+
+    expect(runLengthDecodeBase64Url(data, data.length, expected.length)).toEqual(expected);
+  });
+
+  test('runLengthDecodeBase64Url works for very long runs', () => {
+    const tests: Array<{
+      data: string;
+      expected: number[];
+    }> = [
+      {
+        data: Buffer.from([0x5, 0x2, 0xff, 0x0]).toString('base64url'),
+        expected: [2, 2, 2, 2, 2].concat(Array(255).fill(0)),
+      },
+      {
+        data: Buffer.from([0xff, 0x2, 0x1, 0x2]).toString('base64url'),
+        expected: Array(256).fill(2),
+      },
+    ];
+
+    for (const t of tests) {
+      expect(runLengthDecodeBase64Url(t.data, t.data.length, t.expected.length)).toEqual(
+        t.expected
+      );
     }
   });
 });
