@@ -67,6 +67,10 @@ const getAggResultBuckets = (
         const aggKey = keys(responseAgg)[aggId];
         const aggConfig = find(aggConfigs.aggs, (agg) => agg.id === aggKey);
         if (aggConfig) {
+          if (keyParts[i] === '_no_bucket_') {
+            responseAgg = aggById;
+            break;
+          }
           const aggResultBucket = find(aggById.buckets, (bucket, bucketObjKey) => {
             const bucketKey = aggConfig
               .getKey(bucket, isNumber(bucketObjKey) ? undefined : bucketObjKey)
@@ -172,16 +176,27 @@ export const buildOtherBucketAgg = (
     filters: any[],
     key: string
   ) => {
-    // make sure there are actually results for the buckets
-    if (aggregations[aggId]?.buckets.length < 1) {
-      noAggBucketResults = true;
-      return;
-    }
-
     const agg = aggregations[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
+    if (agg && !Array.isArray(agg?.buckets)) {
+      // there is no buckets array, assum an agg which is not reflected in the response and recurse
+      walkBucketTree(
+        newAggIndex,
+        agg,
+        newAgg.id,
+        filters,
+        `${key}${OTHER_BUCKET_SEPARATOR}_no_bucket_`
+      );
+      return;
+    }
+    // make sure there are actually results for the buckets
+    if (agg?.buckets.length < 1) {
+      noAggBucketResults = true;
+      return;
+    }
+
     if (aggIndex === index && agg && agg.sum_other_doc_count > 0) {
       exhaustiveBuckets = false;
     }
