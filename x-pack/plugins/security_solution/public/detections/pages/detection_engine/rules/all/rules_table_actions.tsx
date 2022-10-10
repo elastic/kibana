@@ -14,7 +14,13 @@ import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import type { Rule } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
-import { executeRulesBulkAction, goToRuleEditPage, bulkExportRules } from './actions';
+import {
+  goToRuleEditPage,
+  bulkExportRules,
+  performTrackableBulkAction,
+  showBulkSuccessToast,
+  showBulkErrorToast,
+} from './actions';
 import type { RulesTableActions } from './rules_table/rules_table_context';
 import type { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -67,20 +73,27 @@ export const getRulesTableActions = ({
     ),
     enabled: (rule: Rule) => canEditRuleWithActions(rule, actionsPrivileges),
     onClick: async (rule: Rule) => {
+      const action = BulkAction.duplicate;
+
       startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
-      const result = await executeRulesBulkAction({
-        action: BulkAction.duplicate,
-        setLoadingRules,
-        visibleRuleIds: [rule.id],
-        toasts,
-        search: { ids: [rule.id] },
-      });
+      setLoadingRules({ ids: [rule.id], action });
+
+      try {
+        const response = await performTrackableBulkAction(action, [rule.id]);
+        const createdRules = response.attributes.results.created;
+
+        if (createdRules.length > 0) {
+          goToRuleEditPage(createdRules[0].id, navigateToApp);
+        }
+
+        showBulkSuccessToast(toasts, action, response.attributes.summary);
+      } catch (e) {
+        showBulkErrorToast(toasts, action, e);
+      }
+
+      setLoadingRules({ ids: [], action: null });
       invalidateRules();
       invalidatePrePackagedRulesStatus();
-      const createdRules = result?.attributes.results.created;
-      if (createdRules?.length) {
-        goToRuleEditPage(createdRules[0].id, navigateToApp);
-      }
     },
   },
   {
@@ -91,13 +104,11 @@ export const getRulesTableActions = ({
     name: i18n.EXPORT_RULE,
     onClick: async (rule: Rule) => {
       startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
-      await bulkExportRules({
-        action: BulkAction.export,
-        setLoadingRules,
-        visibleRuleIds: [rule.id],
-        toasts,
-        search: { ids: [rule.id] },
-      });
+      setLoadingRules({ ids: [rule.id], action: BulkAction.export });
+
+      await bulkExportRules([rule.id], toasts);
+
+      setLoadingRules({ ids: [], action: null });
     },
     enabled: (rule: Rule) => !rule.immutable,
   },
@@ -108,14 +119,20 @@ export const getRulesTableActions = ({
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: async (rule: Rule) => {
+      const action = BulkAction.delete;
+
       startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
-      await executeRulesBulkAction({
-        action: BulkAction.delete,
-        setLoadingRules,
-        visibleRuleIds: [rule.id],
-        toasts,
-        search: { ids: [rule.id] },
-      });
+      setLoadingRules({ ids: [rule.id], action });
+
+      try {
+        const response = await performTrackableBulkAction(action, [rule.id]);
+
+        showBulkSuccessToast(toasts, action, response.attributes.summary);
+      } catch (e) {
+        showBulkErrorToast(toasts, action, e);
+      }
+
+      setLoadingRules({ ids: [], action: null });
       invalidateRules();
       invalidatePrePackagedRulesStatus();
     },

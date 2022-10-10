@@ -11,7 +11,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-
+import { performBulkExportAction } from '@kbn/security-solution-plugin/public/detections/containers/detection_engine/rules';
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -24,8 +24,13 @@ import { canEditRuleWithActions } from '../../../../../../common/utils/privilege
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
-import { executeRulesBulkAction, downloadExportedRules } from '../actions';
-import { getExportedRulesDetails } from '../helpers';
+import {
+  showBulkSuccessToast,
+  showBulkErrorToast,
+  downloadRules,
+  performTrackableBulkAction,
+} from '../actions';
+import { getExportedRulesCounts, getExportedRulesDetails } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
@@ -124,15 +129,24 @@ export const useBulkActions = ({
         const ruleIds = hasMlPermissions
           ? disabledRules.map(({ id }) => id)
           : disabledRulesNoML.map(({ id }) => id);
+        const action = BulkAction.enable;
 
-        const res = await executeRulesBulkAction({
-          visibleRuleIds: ruleIds,
-          action: BulkAction.enable,
-          setLoadingRules,
-          toasts,
-          search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
-        });
-        updateRulesCache(res?.attributes?.results?.updated ?? []);
+        setLoadingRules({ ids: ruleIds, action });
+
+        try {
+          const response = await performTrackableBulkAction(
+            action,
+            isAllSelected ? filterQuery : ruleIds
+          );
+
+          updateRulesCache(response.attributes.results.updated);
+          showBulkSuccessToast(toasts, action, response.attributes.summary);
+        } catch (e) {
+          updateRulesCache([]);
+          showBulkErrorToast(toasts, action, e);
+        }
+
+        setLoadingRules({ ids: [], action: null });
       };
 
       const handleDisableActions = async () => {
@@ -140,34 +154,51 @@ export const useBulkActions = ({
         closePopover();
 
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+        const action = BulkAction.disable;
 
-        const res = await executeRulesBulkAction({
-          visibleRuleIds: enabledIds,
-          action: BulkAction.disable,
-          setLoadingRules,
-          toasts,
-          search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
-        });
-        updateRulesCache(res?.attributes?.results?.updated ?? []);
+        setLoadingRules({ ids: enabledIds, action });
+
+        try {
+          const response = await performTrackableBulkAction(
+            action,
+            isAllSelected ? filterQuery : enabledIds
+          );
+
+          updateRulesCache(response.attributes.results.updated);
+          showBulkSuccessToast(toasts, action, response.attributes.summary);
+        } catch (e) {
+          updateRulesCache([]);
+          showBulkErrorToast(toasts, action, e);
+        }
+
+        setLoadingRules({ ids: [], action: null });
       };
 
       const handleDuplicateAction = async () => {
+        const action = BulkAction.duplicate;
+
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
+        setLoadingRules({ ids: selectedRuleIds, action });
 
-        await executeRulesBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.duplicate,
-          setLoadingRules,
-          toasts,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
-        });
-        invalidateRules();
-        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
-        // counters, so we need to invalidate it when the total number of rules
-        // changes.
-        invalidatePrePackagedRulesStatus();
-        clearRulesSelection();
+        try {
+          const response = await performTrackableBulkAction(
+            action,
+            isAllSelected ? filterQuery : selectedRuleIds
+          );
+
+          invalidateRules();
+          // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+          // counters, so we need to invalidate it when the total number of rules
+          // changes.
+          invalidatePrePackagedRulesStatus();
+          clearRulesSelection();
+          showBulkSuccessToast(toasts, action, response.attributes.summary);
+        } catch (e) {
+          showBulkErrorToast(toasts, action, e);
+        }
+
+        setLoadingRules({ ids: [], action: null });
       };
 
       const handleDeleteAction = async () => {
@@ -180,52 +211,63 @@ export const useBulkActions = ({
           }
         }
 
-        startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
+        const action = BulkAction.delete;
 
-        await executeRulesBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.delete,
-          setLoadingRules,
-          toasts,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
-        });
-        invalidateRules();
-        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
-        // counters, so we need to invalidate it when the total number of rules
-        // changes.
-        invalidatePrePackagedRulesStatus();
+        startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
+        setLoadingRules({ ids: selectedRuleIds, action });
+
+        try {
+          const response = await performTrackableBulkAction(
+            action,
+            isAllSelected ? filterQuery : selectedRuleIds
+          );
+
+          invalidateRules();
+          // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+          // counters, so we need to invalidate it when the total number of rules
+          // changes.
+          invalidatePrePackagedRulesStatus();
+          showBulkSuccessToast(toasts, action, response.attributes.summary);
+        } catch (e) {
+          showBulkErrorToast(toasts, action, e);
+        }
+
+        setLoadingRules({ ids: [], action: null });
       };
 
       const handleExportAction = async () => {
+        const action = BulkAction.export;
+
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
+        setLoadingRules({ ids: selectedRuleIds, action });
 
-        const response = await executeRulesBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.export,
-          setLoadingRules,
-          toasts,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
-        });
+        try {
+          const rulesBlob = await performBulkExportAction(
+            isAllSelected ? filterQuery : selectedRuleIds
+          );
 
-        // if response null, likely network error happened and export rules haven't been received
-        if (!response) {
-          return;
+          const details = await getExportedRulesDetails(rulesBlob);
+
+          // if there are failed exported rules, show modal window to users.
+          // they can either cancel action or proceed with export of succeeded rules
+          const hasActionBeenConfirmed = await showBulkActionConfirmation(
+            transformExportDetailsToDryRunResult(details),
+            BulkAction.export
+          );
+
+          if (hasActionBeenConfirmed === false) {
+            return;
+          }
+
+          downloadRules(rulesBlob);
+
+          showBulkSuccessToast(toasts, action, await getExportedRulesCounts(rulesBlob));
+        } catch (e) {
+          showBulkErrorToast(toasts, action, e);
         }
 
-        const details = await getExportedRulesDetails(response);
-
-        // if there are failed exported rules, show modal window to users.
-        // they can either cancel action or proceed with export of succeeded rules
-        const hasActionBeenConfirmed = await showBulkActionConfirmation(
-          transformExportDetailsToDryRunResult(details),
-          BulkAction.export
-        );
-        if (hasActionBeenConfirmed === false) {
-          return;
-        }
-
-        await downloadExportedRules({ response, toasts });
+        setLoadingRules({ ids: [], action: null });
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -237,10 +279,8 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           action: BulkAction.edit,
+          queryOrIds: isAllSelected ? convertRulesFilterToKQL(filterOptions) : selectedRuleIds,
           editAction: bulkEditActionType,
-          searchParams: isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds },
         });
 
         // User has cancelled edit action or there are no custom rules to proceed
@@ -296,24 +336,37 @@ export const useBulkActions = ({
           );
         }, 5 * 1000);
 
-        const res = await executeRulesBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.edit,
-          setLoadingRules,
-          toasts,
-          payload: { edit: [editPayload] },
-          onFinish: () => hideWarningToast(),
-          search: prepareSearchParams({
+        const action = BulkAction.edit;
+
+        setLoadingRules({ ids: selectedRuleIds, action });
+
+        try {
+          const preparedSearchParams = prepareSearchParams({
             ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
             dryRunResult,
-          }),
-        });
+          });
+
+          const response = await performTrackableBulkAction(
+            action,
+            preparedSearchParams.query ?? preparedSearchParams.ids,
+            [editPayload]
+          );
+
+          updateRulesCache(response.attributes.results.updated);
+          showBulkSuccessToast(toasts, action, response.attributes.summary);
+        } catch (e) {
+          updateRulesCache([]);
+          showBulkErrorToast(toasts, action, e);
+        }
 
         isBulkEditFinished = true;
-        updateRulesCache(res?.attributes?.results?.updated ?? []);
+        hideWarningToast();
+
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
+
+        setLoadingRules({ ids: [], action: null });
       };
 
       const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;

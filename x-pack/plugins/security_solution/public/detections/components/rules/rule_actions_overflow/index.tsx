@@ -12,8 +12,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -26,9 +25,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getToolTipContent } from '../../../../common/utils/privileges';
 import type { Rule } from '../../../containers/detection_engine/rules';
 import {
-  executeRulesBulkAction,
   goToRuleEditPage,
   bulkExportRules,
+  showBulkErrorToast,
+  performTrackableBulkAction,
 } from '../../../pages/detection_engine/rules/all/actions';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
@@ -62,14 +62,6 @@ const RuleActionsOverflowComponent = ({
   const { navigateToApp } = useKibana().services.application;
   const toasts = useAppToasts();
   const { startTransaction } = useStartTransaction();
-
-  const onRuleDeletedCallback = useCallback(() => {
-    navigateToApp(APP_UI_ID, {
-      deepLinkId: SecurityPageName.rules,
-      path: getRulesUrl(),
-    });
-  }, [navigateToApp]);
-
   const actions = useMemo(
     () =>
       rule != null
@@ -82,15 +74,18 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const result = await executeRulesBulkAction({
-                  action: BulkAction.duplicate,
-                  onSuccess: noop,
-                  search: { ids: [rule.id] },
-                  toasts,
-                });
-                const createdRules = result?.attributes.results.created;
-                if (createdRules?.length) {
-                  goToRuleEditPage(createdRules[0].id, navigateToApp);
+
+                try {
+                  const response = await performTrackableBulkAction(BulkAction.duplicate, [
+                    rule.id,
+                  ]);
+                  const createdRules = response.attributes.results.created;
+
+                  if (createdRules.length > 0) {
+                    goToRuleEditPage(createdRules[0].id, navigateToApp);
+                  }
+                } catch (e) {
+                  showBulkErrorToast(toasts, BulkAction.duplicate, e);
                 }
               }}
             >
@@ -109,11 +104,7 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                await bulkExportRules({
-                  action: BulkAction.export,
-                  search: { ids: [rule.id] },
-                  toasts,
-                });
+                await bulkExportRules([rule.id], toasts);
               }}
             >
               {i18nActions.EXPORT_RULE}
@@ -126,12 +117,17 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
-                await executeRulesBulkAction({
-                  action: BulkAction.delete,
-                  onSuccess: onRuleDeletedCallback,
-                  search: { ids: [rule.id] },
-                  toasts,
-                });
+
+                try {
+                  await performTrackableBulkAction(BulkAction.delete, [rule.id]);
+
+                  navigateToApp(APP_UI_ID, {
+                    deepLinkId: SecurityPageName.rules,
+                    path: getRulesUrl(),
+                  });
+                } catch (e) {
+                  showBulkErrorToast(toasts, BulkAction.delete, e);
+                }
               }}
             >
               {i18nActions.DELETE_RULE}
@@ -142,7 +138,6 @@ const RuleActionsOverflowComponent = ({
       canDuplicateRuleWithActions,
       closePopover,
       navigateToApp,
-      onRuleDeletedCallback,
       rule,
       startTransaction,
       toasts,

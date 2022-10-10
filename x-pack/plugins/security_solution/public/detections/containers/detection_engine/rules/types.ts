@@ -233,14 +233,6 @@ export interface FetchRuleProps {
   signal: AbortSignal;
 }
 
-export interface BulkActionProps<Action extends BulkAction> {
-  action: Action;
-  query?: string;
-  ids?: string[];
-  edit?: BulkActionEditPayload[];
-  isDryRun?: boolean;
-}
-
 export interface BulkActionSummary {
   failed: number;
   succeeded: number;
@@ -269,15 +261,6 @@ export interface BulkActionResponse {
     errors?: BulkActionAggregatedError[];
   };
 }
-
-export type BulkActionResponseMap<Action extends BulkAction> = {
-  [BulkAction.delete]: BulkActionResponse;
-  [BulkAction.disable]: BulkActionResponse;
-  [BulkAction.enable]: BulkActionResponse;
-  [BulkAction.duplicate]: BulkActionResponse;
-  [BulkAction.export]: Blob;
-  [BulkAction.edit]: BulkActionResponse;
-}[Action];
 
 export interface BasicFetchProps {
   signal: AbortSignal;

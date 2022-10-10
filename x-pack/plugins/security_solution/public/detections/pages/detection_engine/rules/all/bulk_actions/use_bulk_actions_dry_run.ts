@@ -13,11 +13,11 @@ import type {
   BulkActionEditType,
 } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { BulkActionResponse } from '../../../../../containers/detection_engine/rules';
-import { performBulkAction } from '../../../../../containers/detection_engine/rules';
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 import { processDryRunResult } from './utils/dry_run_result';
 
 import type { DryRunResult } from './types';
+import { performTrackableBulkAction } from '../actions';
 
 const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
 
@@ -34,9 +34,9 @@ export type UseBulkActionsDryRun = () => {
 };
 
 interface BulkActionsDryRunVariables {
-  action?: Exclude<BulkAction, BulkAction.export>;
+  action: Exclude<BulkAction, BulkAction.export>;
+  queryOrIds: string | string[];
   editAction?: BulkActionEditType;
-  searchParams: { query?: string } | { ids?: string[] };
 }
 
 export const useBulkActionsDryRun: UseBulkActionsDryRun = () => {
@@ -44,19 +44,15 @@ export const useBulkActionsDryRun: UseBulkActionsDryRun = () => {
     DryRunResult | undefined,
     unknown,
     BulkActionsDryRunVariables
-  >([BULK_ACTIONS_DRY_RUN_QUERY_KEY], async ({ searchParams, action, editAction }) => {
-    if (!action) {
-      return undefined;
-    }
-
+  >([BULK_ACTIONS_DRY_RUN_QUERY_KEY], async ({ action, queryOrIds, editAction }) => {
     let result: BulkActionResponse;
     try {
-      result = await performBulkAction({
-        ...searchParams,
+      result = await performTrackableBulkAction(
         action,
-        edit: computeDryRunPayload(action, editAction),
-        isDryRun: true,
-      });
+        queryOrIds,
+        computeDryRunPayload(action, editAction),
+        true
+      );
     } catch (err) {
       // if body doesn't have summary data, action failed altogether and no data available for dry run
       if ((err.body as BulkActionResponse)?.attributes?.summary?.total === undefined) {

@@ -19,7 +19,10 @@ import {
   DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '../../../../../common/constants';
-import type { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import {
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type {
   FullResponseSchema,
   PreviewResponse,
@@ -41,10 +44,9 @@ import type {
   ImportDataResponse,
   PrePackagedRulesStatusResponse,
   PatchRuleProps,
-  BulkActionProps,
-  BulkActionResponseMap,
   PreviewRulesProps,
   FindRulesReferencedByExceptionsProps,
+  BulkActionResponse,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -198,36 +200,55 @@ export const pureFetchRuleById = async ({
 /**
  * Perform bulk action with rules selected by a filter query
  *
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
- * @param edit BulkEditActionPayload edit action payload
  * @param action bulk action to perform
+ * @param queryOrIds filter query to select rules to perform bulk action with or rule ids to select rules to perform bulk action with
+ * @param editPayload BulkEditActionPayload edit action payload
  * @param isDryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
-export const performBulkAction = async <Action extends BulkAction>({
-  action,
-  query,
-  edit,
-  ids,
-  isDryRun,
-}: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
-  KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
-    DETECTION_ENGINE_RULES_BULK_ACTION,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        action,
-        ...(edit ? { edit } : {}),
-        ...(ids ? { ids } : {}),
-        ...(query !== undefined ? { query } : {}),
-      }),
-      query: {
-        ...(isDryRun ? { dry_run: isDryRun } : {}),
-      },
-    }
-  );
+export const performBulkAction = async (
+  action: Omit<BulkAction, BulkAction.export>,
+  queryOrIds: string | string[],
+  editPayload?: BulkActionEditPayload[],
+  isDryRun = false
+): Promise<BulkActionResponse> =>
+  KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+    method: 'POST',
+    body: JSON.stringify({
+      action,
+      ...(editPayload ? { edit: editPayload } : {}),
+      ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
+      ...(typeof queryOrIds === 'string' ? { query: queryOrIds } : {}),
+    }),
+    query: {
+      ...(isDryRun ? { dry_run: isDryRun } : {}),
+    },
+  });
+
+/**
+ * Perform bulk export action with rules selected by a filter query
+ *
+ * @param queryOrIds filter query to select rules to perform bulk action with or rule ids to select rules to perform bulk action with
+ * @param isDryRun enables dry run mode for bulk actions
+ *
+ * @throws An error if response is not OK
+ */
+export const performBulkExportAction = async (
+  queryOrIds: string | string[],
+  isDryRun = false
+): Promise<Blob> =>
+  KibanaServices.get().http.fetch<Blob>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: BulkAction.export,
+      ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
+      ...(typeof queryOrIds === 'string' ? { query: queryOrIds } : {}),
+    }),
+    query: {
+      ...(isDryRun ? { dry_run: isDryRun } : {}),
+    },
+  });
 
 /**
  * Create Prepackaged Rules

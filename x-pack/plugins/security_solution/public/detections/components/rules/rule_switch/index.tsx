@@ -7,7 +7,6 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -15,7 +14,11 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useUpdateRulesCache } from '../../../containers/detection_engine/rules/use_find_rules_query';
-import { executeRulesBulkAction } from '../../../pages/detection_engine/rules/all/actions';
+import {
+  performTrackableBulkAction,
+  showBulkErrorToast,
+  showBulkSuccessToast,
+} from '../../../pages/detection_engine/rules/all/actions';
 import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
 
 const StaticSwitch = styled(EuiSwitch)`
@@ -57,19 +60,28 @@ export const RuleSwitchComponent = ({
       startTransaction({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
-      const bulkActionResponse = await executeRulesBulkAction({
-        setLoadingRules: rulesTableContext?.actions.setLoadingRules,
-        toasts,
-        onSuccess: rulesTableContext ? undefined : noop,
-        action: event.target.checked ? BulkAction.enable : BulkAction.disable,
-        search: { ids: [id] },
-        visibleRuleIds: [],
-      });
-      if (bulkActionResponse?.attributes.results.updated.length) {
-        // The rule was successfully updated
-        updateRulesCache(bulkActionResponse.attributes.results.updated);
-        onChange?.(bulkActionResponse.attributes.results.updated[0].enabled);
+
+      const action = event.target.checked ? BulkAction.enable : BulkAction.disable;
+
+      rulesTableContext?.actions.setLoadingRules({ ids: [], action });
+
+      try {
+        const response = await performTrackableBulkAction(action, [id]);
+
+        if (rulesTableContext) {
+          showBulkSuccessToast(toasts, action, response.attributes.summary);
+        }
+
+        if (response.attributes.results.updated.length > 0) {
+          // The rule was successfully updated
+          updateRulesCache(response.attributes.results.updated);
+          onChange?.(response.attributes.results.updated[0].enabled);
+        }
+      } catch (e) {
+        showBulkErrorToast(toasts, action, e);
       }
+
+      rulesTableContext?.actions.setLoadingRules({ ids: [], action: null });
       setMyIsLoading(false);
     },
     [enabled, id, onChange, rulesTableContext, startTransaction, toasts, updateRulesCache]
