@@ -14,9 +14,12 @@ import {
   EuiSelectableOption,
   EuiIcon,
   Direction,
+  EuiText,
 } from '@elastic/eui';
 
 import { State } from '../table_list_view';
+
+import './table_sort_select.scss';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;
@@ -47,6 +50,9 @@ const i18nText = {
       defaultMessage: 'Recently updated',
     }
   ),
+  headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {
+    defaultMessage: 'Sort by',
+  }),
 };
 
 interface Props {
@@ -142,6 +148,10 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
       anchorPosition="downCenter"
       panelClassName="euiFilterGroup__popoverPanel"
     >
+      <>
+        <EuiText className="contentManagementTableList__sortSelect__header">
+          {i18nText.headerSort}
+        </EuiText>
       <EuiSelectable<SortItem>
         singleSelection
         aria-label="some aria label"
@@ -150,6 +160,7 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
       >
         {(list) => list}
       </EuiSelectable>
+      </>
     </EuiPopover>
   );
 }

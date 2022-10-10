@@ -9,6 +9,7 @@ SOURCE_FILES = glob(
   [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.scss",
   ],
   exclude = [
     "**/*.config.js",
@@ -86,6 +87,8 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/react",
+  "@npm//@emotion/css",
+  "@npm//@emotion/react",
   "@npm//@elastic/eui",
   "@npm//react-use",
   "@npm//rxjs",
@@ -102,6 +105,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
