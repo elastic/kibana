@@ -15,7 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('jobs cloning supported by UI form', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/142118
+  // Failing: See https://github.com/elastic/kibana/issues/142118
+  describe.skip('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -135,7 +137,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/142118
+      describe.skip(`${testData.suiteTitle}`, function () {
         const cloneJobId = `${testData.job.id}_clone`;
         const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
 

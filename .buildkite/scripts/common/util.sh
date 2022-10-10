@@ -39,6 +39,7 @@ check_for_changed_files() {
   C_RESET='\033[0m' # Reset color
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
+  CUSTOM_FIX_MESSAGE="${3:-}"
   GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
 
   if [ "$GIT_CHANGES" ]; then
@@ -75,7 +76,11 @@ check_for_changed_files() {
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
       echo -e "$GIT_CHANGES\n"
-      echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
+      if [ "$CUSTOM_FIX_MESSAGE" ]; then
+        echo "$CUSTOM_FIX_MESSAGE"
+      else
+        echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
+      fi
       exit 1
     fi
   fi

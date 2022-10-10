@@ -1829,6 +1829,42 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(setIndexRule.data_view_id).to.eql(undefined);
       });
 
+      it('should return error when set an empty index pattern to a rule and overwrite the data view when overwrite_data_views is true', async () => {
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        const rule = await createRule(supertest, log, simpleRule);
+
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: [],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Index patterns can't be empty",
+          status_code: 500,
+          rules: [
+            {
+              id: rule.id,
+              name: rule.name,
+            },
+          ],
+        });
+      });
+
       it('should NOT set an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {
         const ruleId = 'ruleId';
         const dataViewId = 'index1-*';

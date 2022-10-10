@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { getSampleDashboardInput } from '../test_helpers';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-
-import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ErrorEmbeddable,
   IContainer,
@@ -25,7 +20,13 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+
+import { getSampleDashboardInput } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { LibraryNotificationAction } from './library_notification_action';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest

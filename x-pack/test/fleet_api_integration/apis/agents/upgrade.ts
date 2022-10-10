@@ -608,7 +608,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             agents: 'active:true',
             version: fleetServerVersion,
-            batchSize: 2,
+            batchSize: 3,
           })
           .expect(200);
 
@@ -626,7 +626,7 @@ export default function (providerContext: FtrProviderContext) {
         await new Promise((resolve, reject) => {
           let attempts = 0;
           const intervalId = setInterval(async () => {
-            if (attempts > 2) {
+            if (attempts > 4) {
               clearInterval(intervalId);
               reject('action timed out');
             }
@@ -636,7 +636,7 @@ export default function (providerContext: FtrProviderContext) {
             } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
             const action = actionStatuses.find((a: any) => a.actionId === actionId);
             // 2 upgradeable
-            if (action && action.nbAgentsActionCreated === 2) {
+            if (action && action.nbAgentsActionCreated === 2 && action.nbAgentsFailed === 3) {
               clearInterval(intervalId);
               await verifyActionResult();
               resolve({});
@@ -1032,6 +1032,13 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
 
       it('enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {

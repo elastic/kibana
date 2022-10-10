@@ -9,7 +9,7 @@ import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/typesW
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  getSLOIngestPipelineName,
+  SLO_INGEST_PIPELINE_NAME,
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
@@ -17,17 +17,12 @@ import {
 } from '../../assets/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
-const SPACE_ID = 'space-id';
 describe('resourceInstaller', () => {
   describe("when the common resources don't exist", () => {
     it('installs the common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
-      const installer = new DefaultResourceInstaller(
-        mockClusterClient,
-        loggerMock.create(),
-        SPACE_ID
-      );
+      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 
@@ -44,7 +39,7 @@ describe('resourceInstaller', () => {
         expect.objectContaining({ name: SLO_INDEX_TEMPLATE_NAME })
       );
       expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledWith(
-        expect.objectContaining({ id: getSLOIngestPipelineName(SPACE_ID) })
+        expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })
       );
     });
   });
@@ -55,13 +50,9 @@ describe('resourceInstaller', () => {
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(true);
       mockClusterClient.ingest.getPipeline.mockResponseOnce({
         // @ts-ignore _meta not typed properly
-        [getSLOIngestPipelineName(SPACE_ID)]: { _meta: { version: SLO_RESOURCES_VERSION } },
+        [SLO_INGEST_PIPELINE_NAME]: { _meta: { version: SLO_RESOURCES_VERSION } },
       } as IngestGetPipelineResponse);
-      const installer = new DefaultResourceInstaller(
-        mockClusterClient,
-        loggerMock.create(),
-        SPACE_ID
-      );
+      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 

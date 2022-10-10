@@ -953,6 +953,7 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -973,6 +974,7 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1291,6 +1293,7 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType();
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1306,6 +1309,7 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override all values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
+        enrichmentTimes: [],
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
@@ -1317,6 +1321,7 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
+        enrichmentTimes: [],
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
@@ -1337,6 +1342,7 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
@@ -1355,6 +1361,7 @@ describe('utils', () => {
       const merged = mergeReturns([createSearchAfterReturnType(), createSearchAfterReturnType()]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1411,6 +1418,7 @@ describe('utils', () => {
       const merged = mergeReturns([
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
+          enrichmentTimes: [],
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
@@ -1421,6 +1429,7 @@ describe('utils', () => {
         }),
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
+          enrichmentTimes: [],
           createdSignalsCount: 2,
           createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
@@ -1433,6 +1442,7 @@ describe('utils', () => {
       ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        enrichmentTimes: [],
         createdSignalsCount: 5, // Adds the 3 and 2 together
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
@@ -1452,6 +1462,7 @@ describe('utils', () => {
       const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
         success: false,
         bulkCreateDuration: '100',
+        enrichmentDuration: '0',
         createdItemsCount: 1,
         createdItems: [],
         errors: ['new error'],
@@ -1469,6 +1480,7 @@ describe('utils', () => {
       const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
         success: true,
         bulkCreateDuration: '0',
+        enrichmentDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
         errors: ['error 1'],
@@ -1484,6 +1496,7 @@ describe('utils', () => {
       const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
         success: true,
         bulkCreateDuration: '0',
+        enrichmentDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
         errors: ['error 2'],

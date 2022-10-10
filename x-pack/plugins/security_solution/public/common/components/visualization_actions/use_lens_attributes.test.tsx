@@ -6,21 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import { cloneDeep } from 'lodash/fp';
 
-import {
-  TestProviders,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../mock';
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
 import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
-import type { State } from '../../store';
-import { createStore } from '../../store';
+
+import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
 
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -40,51 +31,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 }));
 
 describe('useLensAttributes', () => {
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-  const queryFromSearchBar = {
-    query: 'host.name: *',
-    language: 'kql',
-  };
-
-  const filterFromSearchBar = [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'phrase',
-        key: 'host.id',
-        params: {
-          query: '123',
-        },
-      },
-      query: {
-        match_phrase: {
-          'host.id': '123',
-        },
-      },
-    },
-  ];
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-  beforeEach(() => {
-    const myState = cloneDeep(state);
-    myState.inputs = {
-      ...myState.inputs,
-      global: {
-        ...myState.inputs.global,
-        query: queryFromSearchBar,
-        filters: filterFromSearchBar,
-      },
-    };
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
   it('should add query', () => {
-    const wrapper = ({ children }: { children: React.ReactElement }) => (
-      <TestProviders store={store}>{children}</TestProviders>
-    );
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -94,13 +41,10 @@ describe('useLensAttributes', () => {
       { wrapper }
     );
 
-    expect(result?.current?.state.query).toEqual({ query: 'host.name: *', language: 'kql' });
+    expect(result?.current?.state.query).toEqual(queryFromSearchBar);
   });
 
   it('should add filters', () => {
-    const wrapper = ({ children }: { children: React.ReactElement }) => (
-      <TestProviders store={store}>{children}</TestProviders>
-    );
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -120,9 +64,6 @@ describe('useLensAttributes', () => {
   });
 
   it('should add data view id to references', () => {
-    const wrapper = ({ children }: { children: React.ReactElement }) => (
-      <TestProviders store={store}>{children}</TestProviders>
-    );
     const { result } = renderHook(
       () =>
         useLensAttributes({

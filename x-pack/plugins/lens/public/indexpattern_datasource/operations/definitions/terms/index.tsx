@@ -557,6 +557,11 @@ export const termsOperation: OperationDefinition<
       </EuiFormRow>
     );
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.terms.documentation.quick', {
+    defaultMessage: `
+The top values of a specified field ranked by the chosen metric.
+      `,
+  }),
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,

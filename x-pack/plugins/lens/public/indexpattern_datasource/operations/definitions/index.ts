@@ -364,6 +364,7 @@ interface BaseOperationDefinitionProps<
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
+  quickFunctionDocumentation?: string;
   /**
    * React component for operation field specific behaviour
    */

@@ -161,11 +161,19 @@ export const getDatatableVisualization = ({
             },
           });
 
+    const changeType = table.changeType;
+    const changeFactor =
+      changeType === 'reduced' || changeType === 'layers'
+        ? 0.3
+        : changeType === 'unchanged'
+        ? 0.5
+        : 1;
+
     return [
       {
         title,
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
-        score: (Math.min(table.columns.length, 10) / 10) * 0.4,
+        score: (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
           ...(state || {}),
           layerId: table.layerId,
@@ -292,7 +300,7 @@ export const getDatatableVisualization = ({
             }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
         },

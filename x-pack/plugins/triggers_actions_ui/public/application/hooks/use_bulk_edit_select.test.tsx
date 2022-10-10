@@ -86,6 +86,22 @@ describe('useBulkEditSelectTest', () => {
     expect(result.current.getFilter()).toEqual(null);
   });
 
+  it('getFilter should return rule list filter when selecting all with excluded ids', async () => {
+    const { result } = renderHook(() =>
+      useBulkEditSelect({
+        items,
+        totalItemCount: 4,
+      })
+    );
+
+    act(() => {
+      result.current.onSelectAll();
+      result.current.onSelectRow(items[0]);
+    });
+
+    expect(result.current.getFilter()?.arguments.length).toEqual(1);
+  });
+
   it('getFilter should return rule list filter when selecting all', async () => {
     const { result } = renderHook(() =>
       useBulkEditSelect({

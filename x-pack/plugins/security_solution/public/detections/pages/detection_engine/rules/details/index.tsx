@@ -871,6 +871,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     rule={rule}
                     listType={ExceptionListTypeEnum.DETECTION}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="exceptionTab"
                   />
                 </Route>
@@ -881,6 +882,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     rule={rule}
                     listType={ExceptionListTypeEnum.ENDPOINT}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>

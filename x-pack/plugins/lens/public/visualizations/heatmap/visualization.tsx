@@ -181,7 +181,7 @@ export const getHeatmapVisualization = ({
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.xAccessor,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsHeatmap_xDimensionPanel',
         },
         {
@@ -191,7 +191,7 @@ export const getHeatmapVisualization = ({
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.yAccessor,
-          required: false,
+          requiredMinDimensionCount: 0,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
         },
         {
@@ -224,7 +224,7 @@ export const getHeatmapVisualization = ({
           filterOperations: isCellValueSupported,
           supportsMoreColumns: !state.valueAccessor,
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsHeatmap_cellPanel',
         },
       ],

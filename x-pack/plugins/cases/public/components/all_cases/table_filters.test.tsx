@@ -134,15 +134,6 @@ describe('CasesTableFilters ', () => {
     expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
 
-  it('should call on load setFilterRefetch', () => {
-    mount(
-      <TestProviders>
-        <CasesTableFilters {...props} />
-      </TestProviders>
-    );
-    expect(setFilterRefetch).toHaveBeenCalled();
-  });
-
   it('should remove tag from selected tags when tag no longer exists', () => {
     const ourProps = {
       ...props,

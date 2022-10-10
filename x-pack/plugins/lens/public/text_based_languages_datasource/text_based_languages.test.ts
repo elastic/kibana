@@ -12,6 +12,7 @@ import { TextBasedLanguagesPersistedState, TextBasedLanguagesPrivateState } from
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedLanguagesDatasource } from './text_based_languages';
+import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, Datasource } from '../types';
 
 jest.mock('../id_generator');
@@ -117,6 +118,15 @@ describe('IndexPattern Data Source', () => {
           query: { sql: 'SELECT * FROM foo' },
         },
       },
+      fieldList: [
+        {
+          id: 'col1',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
     } as unknown as TextBasedLanguagesPrivateState;
   });
 
@@ -158,7 +168,9 @@ describe('IndexPattern Data Source', () => {
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
       expect(textBasedLanguagesDatasource.getPersistableState(baseState)).toEqual({
-        state: baseState,
+        state: {
+          layers: baseState.layers,
+        },
         savedObjectReferences: [
           { name: 'textBasedLanguages-datasource-layer-a', type: 'index-pattern', id: 'foo' },
         ],
@@ -269,6 +281,97 @@ describe('IndexPattern Data Source', () => {
           },
         } as unknown as TextBasedLanguagesPrivateState)
       ).toEqual(['a']);
+    });
+  });
+
+  describe('#getDatasourceSuggestionsForVisualizeField', () => {
+    (generateId as jest.Mock).mockReturnValue(`newid`);
+    it('should create the correct layers', () => {
+      const state = {
+        layers: {},
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          query: { sql: 'SELECT * FROM "foo"' },
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedLanguagesPrivateState;
+      const suggestions = textBasedLanguagesDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions[0].state).toEqual({
+        ...state,
+        layers: {
+          newid: {
+            allColumns: [
+              {
+                columnId: 'newid',
+                fieldName: 'bytes',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                columnId: 'newid',
+                fieldName: 'dest',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            columns: [
+              {
+                columnId: 'newid',
+                fieldName: 'bytes',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                columnId: 'newid',
+                fieldName: 'dest',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            index: 'foo',
+            query: {
+              sql: 'SELECT * FROM "foo"',
+            },
+          },
+        },
+      });
+
+      expect(suggestions[0].table).toEqual({
+        changeType: 'initial',
+        columns: [
+          {
+            columnId: 'newid',
+            operation: {
+              dataType: 'number',
+              isBucketed: false,
+              label: 'bytes',
+            },
+          },
+          {
+            columnId: 'newid',
+            operation: {
+              dataType: 'string',
+              isBucketed: true,
+              label: 'dest',
+            },
+          },
+        ],
+        isMultiRow: false,
+        layerId: 'newid',
+      });
     });
   });
 
@@ -557,6 +660,22 @@ describe('IndexPattern Data Source', () => {
               index: 'foo',
             },
           },
+          fieldList: [
+            {
+              id: 'col1',
+              name: 'Test 1',
+              meta: {
+                type: 'number',
+              },
+            },
+            {
+              id: 'col2',
+              name: 'Test 2',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
         } as unknown as TextBasedLanguagesPrivateState;
 
         publicAPI = textBasedLanguagesDatasource.getPublicAPI({
@@ -568,6 +687,28 @@ describe('IndexPattern Data Source', () => {
           { columnId: 'col1', fields: ['Test 1'] },
           { columnId: 'col2', fields: ['Test 2'] },
         ]);
+      });
+
+      it('should return only the columns that exist on the query', () => {
+        const state = {
+          ...baseState,
+          fieldList: [
+            {
+              id: 'col2',
+              name: 'Test 2',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+        } as unknown as TextBasedLanguagesPrivateState;
+
+        publicAPI = textBasedLanguagesDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+        });
+        expect(publicAPI.getTableSpec()).toEqual([]);
       });
     });
 
