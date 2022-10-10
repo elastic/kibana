@@ -21,6 +21,7 @@ export type {
   FileSavedObject,
   BaseFileMetadata,
   FileShareOptions,
+  FileImageMetadata,
   FileUnshareOptions,
   BlobStorageSettings,
   UpdatableFileMetadata,
