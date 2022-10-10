@@ -17341,8 +17341,6 @@
     "xpack.lens.xyVisualization.dataFailureSplitShort": "{axis} manquant.",
     "xpack.lens.xyVisualization.dataFailureYLong": "{layers, plural, one {Le calque} other {Les calques}} {layersList} {layers, plural, one {requiert} other {requièrent}} un champ pour {axis}.",
     "xpack.lens.xyVisualization.dataFailureYShort": "{axis} manquant.",
-    "xpack.lens.xyVisualization.dataTypeFailureXLong": "Non-correspondance des types de données pour {axis}. Impossible de mélanger les types d'intervalle date et nombre.",
-    "xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong": "Non-correspondance de type de données pour {axis}, utilisez une autre fonction.",
     "xpack.lens.xyVisualization.dataTypeFailureXShort": "Type de données incorrect pour {axis}.",
     "xpack.lens.xyVisualization.dataTypeFailureYLong": "La dimension {label} fournie pour {axis} possède un type de données incorrect. Nombre attendu mais possède {dataType}",
     "xpack.lens.xyVisualization.dataTypeFailureYShort": "Type de données incorrect pour {axis}.",

@@ -2458,7 +2458,7 @@ describe('xy_visualization', () => {
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
           longMessage:
-            'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });
@@ -2513,7 +2513,8 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
+          longMessage:
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });

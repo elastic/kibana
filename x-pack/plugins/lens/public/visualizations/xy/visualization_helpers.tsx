@@ -64,46 +64,41 @@ export function getAxisName(
 export function checkXAccessorCompatibility(state: XYState, datasourceLayers: DatasourceLayers) {
   const dataLayers = getDataLayers(state.layers);
   const errors = [];
-  const hasDateHistogramSet = dataLayers.some(
+  const hasDateHistogramSetIndex = dataLayers.findIndex(
     checkScaleOperation('interval', 'date', datasourceLayers)
   );
-  const hasNumberHistogram = dataLayers.some(
+  const hasNumberHistogramIndex = dataLayers.findIndex(
     checkScaleOperation('interval', 'number', datasourceLayers)
   );
-  const hasOrdinalAxis = dataLayers.some(
+  const hasOrdinalAxisIndex = dataLayers.findIndex(
     checkScaleOperation('ordinal', undefined, datasourceLayers)
   );
-  if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
-        defaultMessage: `Data type mismatch for the {axis}. Cannot mix date and number interval types.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
-  }
-  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
-        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
+  if (state.layers.length > 1) {
+    const erroredLayers = [hasDateHistogramSetIndex, hasNumberHistogramIndex, hasOrdinalAxisIndex]
+      .filter((v) => v >= 0)
+      .sort((a, b) => a - b);
+    if (erroredLayers.length > 1) {
+      const [firstLayer, ...otherLayers] = erroredLayers;
+      const axis = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
+      for (const otherLayer of otherLayers) {
+        errors.push({
+          shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
+            defaultMessage: `Wrong data type for {axis}.`,
+            values: {
+              axis,
+            },
+          }),
+          longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
+            defaultMessage: `The {axis} data in layer {firstLayer} is incompatible with the data in layer {secondLayer}. Select a new function for the {axis}.`,
+            values: {
+              axis,
+              firstLayer: firstLayer + 1,
+              secondLayer: otherLayer + 1,
+            },
+          }),
+        });
+      }
+    }
   }
   return errors;
 }
