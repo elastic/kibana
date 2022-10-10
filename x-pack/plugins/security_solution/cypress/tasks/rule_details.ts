@@ -85,7 +85,7 @@ export const searchForExceptionItem = (query: string) => {
   });
 };
 
-export const addExceptionFlyoutFromViewerHeader = () => {
+const addExceptionFlyoutFromViewerHeader = () => {
   cy.root()
     .pipe(($el) => {
       $el.find(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).trigger('click');

@@ -161,11 +161,11 @@ export const fillAboutRule = (
   }
 };
 
-export const fillNote = (note: string) => {
+const fillNote = (note: string) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
 };
 
-export const fillMitre = (mitreAttacks: Mitre[]) => {
+const fillMitre = (mitreAttacks: Mitre[]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
   mitreAttacks.forEach((mitre, tacticIndex) => {
@@ -192,7 +192,7 @@ export const fillMitre = (mitreAttacks: Mitre[]) => {
   });
 };
 
-export const fillFalsePositiveExamples = (falsePositives: string[]) => {
+const fillFalsePositiveExamples = (falsePositives: string[]) => {
   falsePositives.forEach((falsePositive, index) => {
     cy.get(FALSE_POSITIVES_INPUT)
       .eq(index)
@@ -202,22 +202,22 @@ export const fillFalsePositiveExamples = (falsePositives: string[]) => {
   });
 };
 
-export const fillSeverity = (severity: string) => {
+const fillSeverity = (severity: string) => {
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${severity.toLowerCase()}`).click();
 };
 
-export const fillRiskScore = (riskScore: string) => {
+const fillRiskScore = (riskScore: string) => {
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
 };
 
-export const fillRuleTags = (tags: string[]) => {
+const fillRuleTags = (tags: string[]) => {
   tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
 };
 
-export const fillReferenceUrls = (referenceUrls: string[]) => {
+const fillReferenceUrls = (referenceUrls: string[]) => {
   referenceUrls.forEach((url, index) => {
     cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
@@ -286,7 +286,7 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
+const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
   if (rule.timeline?.id) {
     cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
     cy.get(TIMELINE(rule.timeline.id)).click();
@@ -340,7 +340,7 @@ export const fillRuleAction = (rule: CustomRule) => {
   }
 };
 
-export const fillDefineThresholdRule = (rule: ThresholdRule) => {
+const fillDefineThresholdRule = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
@@ -497,7 +497,7 @@ export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConne
   cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
 };
 
-export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
+const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
   cy.get(COMBO_BOX_INPUT).type(connector.index);
 
@@ -540,7 +540,7 @@ export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST
 export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
-export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
@@ -631,7 +631,7 @@ export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
-export const previewResults = () => {
+const previewResults = () => {
   cy.get(QUERY_PREVIEW_BUTTON).click();
 };
 
