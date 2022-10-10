@@ -183,13 +183,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [fromTimelineData, setFieldValue]);
 
-  // useEffect(() => {
-  //   console.log('UE', { index: initialState.index, queryBar: initialState.queryBar });
-  //   if (initialState.index.length > 0) {
-  //     setFieldValue('index', initialState.index);
-  //   }
-  //   setFieldValue('queryBar', initialState.queryBar);
-  // }, [initialState.index, initialState.queryBar, setFieldValue]);
   const {
     index: formIndex,
     ruleType: formRuleType,

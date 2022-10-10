@@ -6,12 +6,18 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getOr } from 'lodash/fp';
-import { convertKueryToElasticSearchQuery } from '@kbn/timelines-plugin/public';
+import {
+  convertKueryToElasticSearchQuery,
+  updateIsLoading as dispatchUpdateIsLoading,
+} from '@kbn/timelines-plugin/public';
+import { useDispatch } from 'react-redux';
+import type { TimelineModel } from '../../../../..';
+import {
+  dispatchUpdateTimeline,
+  queryTimelineById,
+} from '../../../../../timelines/components/open_timeline/helpers';
 import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
 import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
-import { REQUEST_NAMES, useFetch } from '../../../../../common/hooks/use_fetch';
-import { getTimeline } from '../../../../../timelines/containers/api';
 import { buildGlobalQuery } from '../../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../../timelines/components/timeline/query_bar';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
@@ -27,7 +33,7 @@ export const useFromTimelineId = (initialState: {
     () => getInitialUrlParamValue(),
     [getInitialUrlParamValue]
   );
-  const { fetch, data: timelineData } = useFetch(REQUEST_NAMES.GET_TIMELINE_BY_ID, getTimeline);
+
   const [ruleData, setRuleData] = useState<{
     index: string[];
     queryBar: FieldValueQueryBar;
@@ -38,44 +44,54 @@ export const useFromTimelineId = (initialState: {
   });
   const { browserFields } = useSourcererDataView(SourcererScopeName.default);
 
-  useEffect(() => {
-    if (timelineData != null) {
-      const indexPattern = getOr([], 'data.getOneTimeline.indexNames', timelineData);
-      const dataProviders = getOr([], 'data.getOneTimeline.dataProviders', timelineData);
-      const kqlQuery = getOr({}, 'data.getOneTimeline.kqlQuery', timelineData);
-      const filters = getOr([], 'data.getOneTimeline.filters', timelineData);
+  const dispatch = useDispatch();
+  const onOpenTimeline = useCallback(
+    (timeline: TimelineModel) => {
+      const indexPattern = timeline.indexNames;
       const newQuery = {
-        query: kqlQuery?.filterQuery?.kuery?.expression ?? '',
-        language: kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
+        query: timeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
+        language: timeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
       };
-
       const dataProvidersDsl =
-        dataProviders.length > 0
+        timeline.dataProviders != null && timeline.dataProviders.length > 0
           ? convertKueryToElasticSearchQuery(
-              buildGlobalQuery(dataProviders, browserFields),
-              indexPattern.join(',')
+              buildGlobalQuery(timeline.dataProviders, browserFields),
+              { fields: [], title: indexPattern.join(',') }
             )
           : '';
+      const newFilters = timeline.filters ?? [];
+
       setRuleData({
         index: indexPattern,
         queryBar: {
           filters:
             dataProvidersDsl !== ''
-              ? [...filters, getDataProviderFilter(dataProvidersDsl)]
-              : filters,
+              ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
+              : newFilters,
           query: newQuery,
           saved_id: null,
         },
         updated: true,
       });
-    }
-  }, [browserFields, timelineData]);
+    },
+    [browserFields]
+  );
 
   const getTimelineById = useCallback(
-    (savedObjectId: string) => {
-      fetch(savedObjectId);
-    },
-    [fetch]
+    (timelineId: string) =>
+      queryTimelineById({
+        timelineId,
+        onOpenTimeline,
+        updateIsLoading: ({
+          id: currentTimelineId,
+          isLoading,
+        }: {
+          id: string;
+          isLoading: boolean;
+        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
+        updateTimeline: dispatchUpdateTimeline(dispatch),
+      }),
+    [dispatch, onOpenTimeline]
   );
 
   useEffect(() => {
