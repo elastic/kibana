@@ -8,14 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const OPEN = i18n.translate('casesComponents.status.open', {
+export const OPEN = i18n.translate('cases.components.status.open', {
   defaultMessage: 'Open',
 });
 
-export const IN_PROGRESS = i18n.translate('casesComponents.status.inProgress', {
+export const IN_PROGRESS = i18n.translate('cases.components.status.inProgress', {
   defaultMessage: 'In progress',
 });
 
-export const CLOSED = i18n.translate('casesComponents.status.closed', {
+export const CLOSED = i18n.translate('cases.components.status.closed', {
   defaultMessage: 'Closed',
 });
