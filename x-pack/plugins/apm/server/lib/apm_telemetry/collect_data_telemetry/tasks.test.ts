@@ -450,38 +450,91 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'service_groups');
     const savedObjectsClient = savedObjectsClientMock.create();
 
-    savedObjectsClient.find.mockResolvedValue({
-      page: 1,
-      per_page: 500,
-      total: 2,
-      saved_objects: [
-        {
-          type: 'apm-service-group',
-          id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
-          namespaces: ['default'],
-          attributes: {
-            color: '#5094C4',
-            kuery: 'service.environment: production',
-            groupName: 'production',
-          },
-          references: [],
-          score: 1,
-        },
-        {
-          type: 'apm-service-group',
-          id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
-          namespaces: ['default'],
-          attributes: {
-            color: '#5094C4',
-            kuery: 'agent.name: go',
-            groupName: 'agent',
-          },
-          references: [],
-          score: 0,
-        },
-      ],
-    });
     it('returns service group stats', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'service.environment: production',
+              groupName: 'production',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['space-1'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'agent.name: go',
+              groupName: 'agent',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      expect(await task?.executor({ savedObjectsClient } as any)).toEqual({
+        service_groups: {
+          kuery_fields: ['service.environment', 'agent.name'],
+          total: 2,
+        },
+      });
+    });
+
+    it('should return stats from all spaces', () => {
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'apm-service-group',
+        page: 1,
+        perPage: 500,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+    });
+
+    it('returns unique fields', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'service.environment: production',
+              groupName: 'production',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'service.environment: production and agent.name: go',
+              groupName: 'agent',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
       expect(await task?.executor({ savedObjectsClient } as any)).toEqual({
         service_groups: {
           kuery_fields: ['service.environment', 'agent.name'],
