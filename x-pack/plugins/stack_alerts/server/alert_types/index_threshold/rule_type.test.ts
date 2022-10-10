@@ -416,6 +416,7 @@ describe('ruleType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(
