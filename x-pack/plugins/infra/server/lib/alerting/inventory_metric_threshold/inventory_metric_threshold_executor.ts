@@ -32,7 +32,6 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  getAlertUuidFromExecutionId,
   getViewInAppUrlInventory,
   getViewInAppUrl,
   LINK_TO_ALERT_DETAIL,
@@ -68,15 +67,15 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
   >(async ({ services, params, alertId, executionId, startedAt }) => {
+    const startTime = Date.now();
+
     const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
 
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-    const startTime = Date.now();
     const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const alertInstanceId = await getAlertUuidFromExecutionId(esClient, executionId);
 
     const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
@@ -107,10 +106,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getViewInAppUrl(
-            libs.basePath,
-            `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
-          ),
+          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: '*',
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -219,10 +215,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         scheduledActionsCount++;
 
         const context = {
-          alertDetailsUrl: getViewInAppUrl(
-            libs.basePath,
-            `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
-          ),
+          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[nextState],
           group,
           reason,
@@ -252,10 +245,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       );
 
       const context = {
-        alertDetailsUrl: getViewInAppUrl(
-          libs.basePath,
-          `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
-        ),
+        alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),

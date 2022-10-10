@@ -22,10 +22,7 @@ import {
 import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
-import {
-  alertDetailUrlActionVariableDescription,
-  alertStateActionVariableDescription,
-} from '../common/messages';
+import { alertStateActionVariableDescription } from '../common/messages';
 
 export type MetricAnomalyAllowedActionGroups = typeof FIRED_ACTIONS_ID;
 
@@ -73,7 +70,6 @@ export const registerMetricAnomalyRuleType = (
   actionVariables: {
     context: [
       { name: 'alertState', description: alertStateActionVariableDescription },
-      { name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription },
       {
         name: 'metric',
         description: i18n.translate('xpack.infra.metrics.alerting.anomalyMetricDescription', {

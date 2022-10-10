@@ -28,7 +28,6 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  getAlertUuidFromExecutionId,
   getViewInAppUrl,
   LINK_TO_ALERT_DETAIL,
   UNGROUPED_FACTORY_KEY,
@@ -80,10 +79,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
 
-    const esClient = services.scopedClusterClient.asCurrentUser;
-    const alertInstanceId = await getAlertUuidFromExecutionId(esClient, executionId);
+    const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
+    const alertUuid = getAlertUuid(alertId);
 
-    const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
         id,
@@ -114,10 +112,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getViewInAppUrl(
-            libs.basePath,
-            `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
-          ),
+          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -248,10 +243,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getViewInAppUrl(
-            libs.basePath,
-            `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
-          ),
+          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[nextState],
           group,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -276,10 +268,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const recoveredAlertId = alert.getId();
       const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
       const context = {
-        alertDetailsUrl: getViewInAppUrl(
-          libs.basePath,
-          `${LINK_TO_ALERT_DETAIL}/${alertInstanceId}`
-        ),
+        alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
