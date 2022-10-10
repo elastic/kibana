@@ -549,6 +549,7 @@ const payloadData = [
     type: 'browser',
     'url.port': null,
     urls: '',
+    id: '',
   },
   {
     __ui: {
@@ -607,6 +608,7 @@ const payloadData = [
     type: 'browser',
     'url.port': null,
     urls: '',
+    id: '',
   },
 ];
 

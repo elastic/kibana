@@ -406,6 +406,19 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('getIndexPattern', () => {
+    test('should return the index pattern, labeled title on the data view spec', () => {
+      expect(indexPattern.getIndexPattern()).toBe(
+        stubbedSavedObjectIndexPattern().attributes.title
+      );
+    });
+
+    test('setIndexPattern', () => {
+      indexPattern.setIndexPattern('test');
+      expect(indexPattern.getIndexPattern()).toBe('test');
+    });
+  });
+
   describe('getFormatterForField', () => {
     test('should return the default one for empty objects', () => {
       indexPattern.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
@@ -452,7 +465,7 @@ describe('IndexPattern', () => {
         metaFields: [],
       });
       expect(restoredPattern.id).toEqual(indexPattern.id);
-      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
     });

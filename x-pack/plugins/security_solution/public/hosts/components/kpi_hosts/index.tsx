@@ -13,7 +13,7 @@ import { HostsKpiUniqueIps } from './unique_ips';
 import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
-import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreDocLink } from '../../../risk_score/components/risk_score_onboarding/risk_score_doc_link';
 import { getHostRiskIndex, RiskScoreEntity } from '../../../../common/search_strategy';
 import { useRiskScoreFeatureStatus } from '../../../risk_score/containers/feature_status';
 import { useSpaceId } from '../../../common/hooks/use_space_id';

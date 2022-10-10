@@ -48,7 +48,7 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
     {
       body: statusCountBody(await context.dateAndCustomFilters(), context),
     },
-    'geSnapshotCount'
+    'getSnapshotCount'
   );
 
   return (
