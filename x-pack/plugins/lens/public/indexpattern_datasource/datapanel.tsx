@@ -287,7 +287,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ...localState.typeFilter,
   ]);
 
-  const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
+  const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
     const fieldInfoUnavailable =

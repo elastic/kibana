@@ -604,7 +604,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...services,
   };
 
-  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="documentation" />;
+  const helpButton = (
+    <EuiButtonIcon
+      onClick={onHelpClick}
+      iconType="documentation"
+      aria-label={i18n.translate('xpack.lens.indexPattern.quickFunctions.tableTitle', {
+        defaultMessage: 'Description of functions',
+      })}
+    />
+  );
 
   const columnsSidebar = [
     {

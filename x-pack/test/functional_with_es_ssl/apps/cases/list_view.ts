@@ -20,7 +20,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const retry = getService('retry');
   const browser = getService('browser');
 
   describe('cases list', () => {
@@ -56,33 +55,44 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('deleting', () => {
-      before(async () => {
-        await cases.api.createNthRandomCases(8);
-        await cases.api.createCase({ title: 'delete me', tags: ['one'] });
-        await header.waitUntilLoadingHasFinished();
-        await cases.casesTable.waitForCasesToBeListed();
-      });
+    describe('bulk actions', () => {
+      describe('delete', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(8);
+          await cases.api.createCase({ title: 'delete me', tags: ['one'] });
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
 
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
-      });
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
 
-      it('deletes a case correctly from the list', async () => {
-        await cases.casesTable.deleteFirstListedCase();
-        await cases.casesTable.waitForTableToFinishLoading();
-
-        await retry.tryForTime(2000, async () => {
-          const firstRow = await testSubjects.find('case-details-link');
-          expect(await firstRow.getVisibleText()).not.to.be('delete me');
+        it('bulk delete cases from the list', async () => {
+          await cases.casesTable.selectAndDeleteAllCases();
+          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.validateCasesTableHasNthRows(0);
         });
       });
 
-      it('bulk delete cases from the list', async () => {
-        await cases.casesTable.selectAndDeleteAllCases();
-        await cases.casesTable.waitForTableToFinishLoading();
-        await cases.casesTable.validateCasesTableHasNthRows(0);
+      describe('status', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(2);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('change the status of cases to in-progress correctly', async () => {
+          await cases.casesTable.selectAndChangeStatusOfAllCases(CaseStatuses['in-progress']);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await testSubjects.missingOrFail('status-badge-open');
+        });
       });
     });
 
@@ -193,7 +203,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('filters cases by status', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await testSubjects.existOrFail(`status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
@@ -277,28 +288,52 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('changes status from the list', () => {
-      before(async () => {
-        await cases.api.createNthRandomCases(1);
-        await header.waitUntilLoadingHasFinished();
-        await cases.casesTable.waitForCasesToBeListed();
+    describe('row actions', () => {
+      describe('Status', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('to in progress', async () => {
+          await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+          await testSubjects.existOrFail(`status-badge-${CaseStatuses['in-progress']}`);
+        });
+
+        it('to closed', async () => {
+          await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
+          await testSubjects.existOrFail(`status-badge-${CaseStatuses.closed}`);
+        });
+
+        it('to open', async () => {
+          await cases.casesTable.changeStatus(CaseStatuses.open, 0);
+          await testSubjects.existOrFail(`status-badge-${CaseStatuses.open}`);
+        });
       });
 
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
-      });
+      describe('Delete', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
 
-      it('to in progress', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-      });
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
 
-      it('to closed', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
-      });
-
-      it('to open', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
+        it('deletes a case correctly', async () => {
+          await cases.casesTable.deleteCase(0);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.validateCasesTableHasNthRows(0);
+        });
       });
     });
   });
