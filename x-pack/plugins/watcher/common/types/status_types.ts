@@ -14,7 +14,7 @@ export interface ActionStatusModelEs {
   id: string;
   actionStatusJson: estypes.WatcherActionStatus;
   errors?: any; // TODO: Type this more strictly.
-  lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
+  lastCheckedRawFormat?: estypes.DateTime; // Date e.g. '2017-03-01T20:55:49.679Z'
 }
 
 export interface ServerActionStatusModel {
