@@ -75,6 +75,7 @@ export class DataView implements DataViewBase {
   public id?: string;
   /**
    * Title of data view
+   * @deprecated use getIndexPattern instead
    */
   public title: string = '';
   /**
@@ -194,6 +195,22 @@ export class DataView implements DataViewBase {
   getName = () => (this.name ? this.name : this.title);
 
   /**
+   * Get index pattern
+   * @returns index pattern string
+   */
+
+  getIndexPattern = () => this.title;
+
+  /**
+   * Set index pattern
+   * @param string index pattern string
+   */
+
+  setIndexPattern = (indexPattern: string) => {
+    this.title = indexPattern;
+  };
+
+  /**
    * Get last saved saved object fields
    */
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
@@ -298,7 +315,7 @@ export class DataView implements DataViewBase {
     const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-      title: this.title,
+      title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: [...(this.sourceFilters || [])],
       fields,
@@ -412,7 +429,7 @@ export class DataView implements DataViewBase {
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
-      title: this.title,
+      title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
