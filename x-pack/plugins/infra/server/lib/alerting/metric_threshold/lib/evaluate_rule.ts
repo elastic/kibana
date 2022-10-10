@@ -42,7 +42,7 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   shouldFire: boolean;
   shouldWarn: boolean;
   isNoData: boolean;
-  context: AdditionalContext;
+  context?: AdditionalContext;
 };
 
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
