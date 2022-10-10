@@ -431,19 +431,33 @@ export const ExceptionListsTable = React.memo(() => {
             )}
           </>
         )}
-        <EuiPopover
-          button={rowSizeButton}
-          isOpen={isRowSizePopoverOpen}
-          closePopover={closeRowSizePopover}
-        >
-          <EuiContextMenuPanel items={rowSizeItems} />
-        </EuiPopover>
-        <EuiPagination
-          aria-label={'Custom pagination example'}
-          pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
-          activePage={activePage}
-          onPageClick={goToPage}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem style={{ flex: '1 1 auto' }}>
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem>
+                <EuiPopover
+                  button={rowSizeButton}
+                  isOpen={isRowSizePopoverOpen}
+                  closePopover={closeRowSizePopover}
+                >
+                  <EuiContextMenuPanel items={rowSizeItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+            <EuiFlexGroup alignItems="flexEnd">
+              <EuiFlexItem>
+                <EuiPagination
+                  aria-label={'Custom pagination example'}
+                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                  activePage={activePage}
+                  onPageClick={goToPage}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <AutoDownload
           blob={exportDownload.blob}
