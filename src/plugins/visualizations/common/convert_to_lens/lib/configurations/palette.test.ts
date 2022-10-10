@@ -26,11 +26,11 @@ describe('getPalette', () => {
       ...params,
       colorsRange: [],
     };
-    expect(getPalette(paramsWithNoneMetricColorMode)).toBeUndefined();
+    expect(getPalette(paramsWithNoneMetricColorMode, { isPercentageMode: false })).toBeUndefined();
   });
 
   test('should return correct palette', () => {
-    expect(getPalette(params)).toEqual({
+    expect(getPalette(params, { isPercentageMode: false, min: 0, max: 300 })).toEqual({
       name: 'custom',
       params: {
         colorStops: [

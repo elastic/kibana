@@ -10,6 +10,7 @@ import color from 'color';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
 import { PaletteParams } from './types';
+import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
 
 type ColorStopsWithMinMax = Pick<
   CustomPaletteParams,
@@ -34,7 +35,8 @@ const buildPaletteParams = ({ color: colors, stop }: PaletteConfig): ColorStopsW
 };
 
 const buildCustomPalette = (
-  colorStopsWithMinMax: ColorStopsWithMinMax
+  colorStopsWithMinMax: ColorStopsWithMinMax,
+  isPercentRangeType: boolean = false
 ): PaletteOutput<CustomPaletteParams> => {
   return {
     name: 'custom',
@@ -44,7 +46,7 @@ const buildCustomPalette = (
       progression: 'fixed',
       rangeMax: Infinity,
       rangeMin: -Infinity,
-      rangeType: 'number',
+      rangeType: isPercentRangeType ? 'percent' : 'number',
       reverse: false,
       ...colorStopsWithMinMax,
     },
@@ -52,8 +54,30 @@ const buildCustomPalette = (
   };
 };
 
+const convertToPercents = (
+  value: number,
+  { min, max }: PercentageModeConfigWithMinMax,
+  isPercentPaletteSupported: boolean
+) => {
+  const percent = (value - min) / (max - min);
+  return isPercentPaletteSupported ? percent * 100 : percent;
+};
+
+const convertToPercentColorStops = (
+  colorStops: PaletteConfig,
+  percentageModeConfig: PercentageModeConfigWithMinMax,
+  isPercentPaletteSupported: boolean = false
+) => {
+  const stop = colorStops.stop.map((stopValue) =>
+    convertToPercents(stopValue, percentageModeConfig, isPercentPaletteSupported)
+  );
+  return { ...colorStops, stop };
+};
+
 export const getPalette = (
-  params: PaletteParams
+  params: PaletteParams,
+  percentageModeConfig: PercentageModeConfig,
+  isPercentPaletteSupported: boolean = false
 ): PaletteOutput<CustomPaletteParams> | undefined => {
   const { colorSchema, colorsRange, invertColors } = params;
 
@@ -62,5 +86,12 @@ export const getPalette = (
   }
 
   const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
-  return buildCustomPalette(buildPaletteParams(stopsWithColors));
+  const percentStopsWithColors = percentageModeConfig.isPercentageMode
+    ? convertToPercentColorStops(stopsWithColors, percentageModeConfig, isPercentPaletteSupported)
+    : stopsWithColors;
+
+  return buildCustomPalette(
+    buildPaletteParams(percentStopsWithColors),
+    isPercentPaletteSupported && percentageModeConfig.isPercentageMode
+  );
 };

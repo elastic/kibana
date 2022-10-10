@@ -7,13 +7,17 @@
  */
 
 import uuid from 'uuid';
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import {
+  Column,
+  ColumnWithMeta,
+  PercentageModeConfigWithMinMax,
+} from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { getDataViewsStart } from '../services';
-import { ConvertMetricVisToLensVisualization } from './types';
+import { ConvertGaugeVisToLensVisualization } from './types';
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
@@ -30,7 +34,7 @@ export const excludeMetaFromColumn = (column: Column) => {
   return column;
 };
 
-export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, timefilter) => {
+export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
     return null;
   }
@@ -42,16 +46,19 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const [{ getColumnsFromVis, getPalette, getPercentageModeConfig }, { getConfiguration }] =
-    await Promise.all([convertToLensModule, import('./configurations')]);
+  const [
+    { getColumnsFromVis, createStaticValueColumn, getPalette, getPercentageModeConfig },
+    { getConfiguration },
+  ] = await Promise.all([convertToLensModule, import('./configurations/gauge')]);
 
-  const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
+  const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
+
   const result = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
     {
-      splits: ['group'],
+      unsupported: ['group'],
     },
     { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
@@ -61,7 +68,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
   }
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length > 1) {
+  if (result.metrics.length > 1) {
     return null;
   }
 
@@ -75,21 +82,31 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
   const layerId = uuid();
   const indexPatternId = dataView.id!;
 
+  const metricAccessor = result.metrics[0];
+  const { min, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
+  const minColumn = createStaticValueColumn(min);
+  const maxColumn = createStaticValueColumn(max);
+  const columns = [...result.columns, minColumn, maxColumn];
+
   return {
-    type: 'lnsMetric',
+    type: 'lnsGauge',
     layers: [
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
     configuration: getConfiguration(
       layerId,
       vis.params,
-      getPalette(vis.params.metric, percentageModeConfig),
-      result
+      getPalette(vis.params.gauge, percentageModeConfig, true),
+      {
+        metricAccessor,
+        minAccessor: minColumn.columnId,
+        maxAccessor: maxColumn.columnId,
+      }
     ),
     indexPatternIds: [indexPatternId],
   };

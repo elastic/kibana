@@ -8,12 +8,12 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { convertToLens } from '.';
+import { convertToLens } from './gauge';
 import { GaugeVisParams } from '../types';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetPercentageColumnFormulaColumn = jest.fn();
-const mockGetConfigurationForGauge = jest.fn().mockReturnValue({});
+const mockGetConfiguration = jest.fn().mockReturnValue({});
 const mockGetPercentageModeConfig = jest.fn();
 const mockGetPalette = jest.fn();
 const mockCreateStaticValueColumn = jest.fn();
@@ -33,8 +33,8 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
   getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
 }));
 
-jest.mock('./configurations', () => ({
-  getConfigurationForGauge: jest.fn(() => mockGetConfigurationForGauge()),
+jest.mock('./configurations/gauge', () => ({
+  getConfiguration: jest.fn(() => mockGetConfiguration()),
 }));
 
 const params: GaugeVisParams = {
@@ -135,11 +135,11 @@ describe('convertToLens', () => {
         { columnId: '2', meta: { aggId: 'agg-2' } },
       ],
     });
-    mockGetConfigurationForGauge.mockReturnValue(config);
+    mockGetConfiguration.mockReturnValue(config);
 
     const result = await convertToLens(vis, timefilter);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfigurationForGauge).toBeCalledTimes(1);
+    expect(mockGetConfiguration).toBeCalledTimes(1);
     expect(mockGetPalette).toBeCalledTimes(1);
     expect(mockCreateStaticValueColumn).toBeCalledTimes(2);
     expect(result?.type).toEqual('lnsGauge');

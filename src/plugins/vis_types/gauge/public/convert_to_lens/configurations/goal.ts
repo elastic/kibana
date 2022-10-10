@@ -7,35 +7,34 @@
  */
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { GaugeVisParams } from '../../types';
+import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 
 export const getConfiguration = (
   layerId: string,
-  params: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
   {
-    metricAccessor,
-    minAccessor,
+    metrics,
+    buckets,
     maxAccessor,
+    columnsWithoutReferenced,
+    bucketCollapseFn,
   }: {
-    metricAccessor: string;
-    minAccessor: string;
+    metrics: string[];
+    buckets: string[];
     maxAccessor: string;
+    columnsWithoutReferenced: Column[];
+    bucketCollapseFn?: Record<string, string | undefined>;
   }
-): GaugeVisConfiguration => {
-  const showLabels = Boolean(params.gauge.labels.show);
+): MetricVisConfiguration => {
+  const [metricAccessor] = metrics;
+  const [breakdownByAccessor] = buckets;
   return {
     layerId,
     layerType: 'data',
     palette,
     metricAccessor,
-    minAccessor,
+    breakdownByAccessor,
     maxAccessor,
-    shape: 'horizontalBullet',
-    ticksPosition: 'bands',
-    labelMajorMode: showLabels ? 'auto' : 'none',
-    colorMode: palette ? 'palette' : 'none',
-    labelMinor: showLabels ? params.gauge.style.subText : undefined,
+    collapseFn: Object.values(bucketCollapseFn ?? {})[0],
   };
 };

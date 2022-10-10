@@ -51,10 +51,14 @@ export interface MinMax {
   max: number;
 }
 
-export interface BasicPercentageModeConfig {
+export interface BasicFullPercentageModeConfig {
   isPercentageMode: boolean;
 }
 
-export type PercentageModeConfigWithMinMax = BasicPercentageModeConfig & MinMax;
+export interface BasicPercentageModeConfig {
+  isPercentageMode: false;
+}
+
+export type PercentageModeConfigWithMinMax = BasicFullPercentageModeConfig & MinMax;
 
 export type PercentageModeConfig = BasicPercentageModeConfig | PercentageModeConfigWithMinMax;

@@ -8,7 +8,7 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { getConfigurationForGauge } from '.';
+import { getConfiguration } from './gauge';
 import { GaugeVisParams } from '../../types';
 
 const params: GaugeVisParams = {
@@ -61,7 +61,7 @@ describe('getConfiguration', () => {
     const minAccessor = 'min-accessor';
     const maxAccessor = 'max-accessor';
     expect(
-      getConfigurationForGauge(layerId, params, palette, {
+      getConfiguration(layerId, params, palette, {
         metricAccessor,
         minAccessor,
         maxAccessor,

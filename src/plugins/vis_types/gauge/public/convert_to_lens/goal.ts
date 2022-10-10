@@ -7,13 +7,17 @@
  */
 
 import uuid from 'uuid';
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import {
+  Column,
+  ColumnWithMeta,
+  PercentageModeConfigWithMinMax,
+} from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { getDataViewsStart } from '../services';
-import { ConvertMetricVisToLensVisualization } from './types';
+import { ConvertGoalVisToLensVisualization } from './types';
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
@@ -30,7 +34,7 @@ export const excludeMetaFromColumn = (column: Column) => {
   return column;
 };
 
-export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, timefilter) => {
+export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
     return null;
   }
@@ -42,10 +46,13 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const [{ getColumnsFromVis, getPalette, getPercentageModeConfig }, { getConfiguration }] =
-    await Promise.all([convertToLensModule, import('./configurations')]);
+  const [
+    { getColumnsFromVis, getPalette, getPercentageModeConfig, createStaticValueColumn },
+    { getConfiguration },
+  ] = await Promise.all([convertToLensModule, import('./configurations/goal')]);
 
-  const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
+  const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
+
   const result = getColumnsFromVis(
     vis,
     timefilter,
@@ -71,25 +78,29 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
       return null;
     }
   }
+  const { isPercentageMode, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
+  const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
 
+  const columns = [...result.columns, maxColumn];
   const layerId = uuid();
   const indexPatternId = dataView.id!;
-
   return {
     type: 'lnsMetric',
     layers: [
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
     configuration: getConfiguration(
       layerId,
-      vis.params,
-      getPalette(vis.params.metric, percentageModeConfig),
-      result
+      getPalette(vis.params.gauge, percentageModeConfig, true),
+      {
+        ...result,
+        maxAccessor: maxColumn.columnId,
+      }
     ),
     indexPatternIds: [indexPatternId],
   };

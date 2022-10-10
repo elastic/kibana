@@ -7,7 +7,11 @@
  */
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { NavigateToLensContext, GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  NavigateToLensContext,
+  GaugeVisConfiguration,
+  MetricVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { GaugeVisParams } from '../types';
 
@@ -15,3 +19,8 @@ export type ConvertGaugeVisToLensVisualization = (
   vis: Vis<GaugeVisParams>,
   timefilter?: TimefilterContract
 ) => Promise<NavigateToLensContext<GaugeVisConfiguration> | null>;
+
+export type ConvertGoalVisToLensVisualization = (
+  vis: Vis<GaugeVisParams>,
+  timefilter?: TimefilterContract
+) => Promise<NavigateToLensContext<MetricVisConfiguration> | null>;
