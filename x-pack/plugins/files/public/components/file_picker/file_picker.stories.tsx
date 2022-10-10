@@ -6,18 +6,37 @@
  */
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-
+import { FilesClient, FilesClientResponses } from '../../types';
+import { fileKindsRegistry } from '../stories_shared';
 import { FilesContext } from '../context';
-import { FilePicker } from './file_picker';
-import { FilesClient } from '../../types';
+import { FilePicker, Props as FilePickerProps } from './file_picker';
+
+const kind = 'filepicker';
+fileKindsRegistry.register({
+  id: kind,
+  http: {},
+  allowedMimeTypes: ['*'],
+});
+
+const defaultProps: FilePickerProps = {
+  kind,
+};
 
 export default {
   title: 'components/FilePicker',
   component: FilePicker,
-  args: {},
+  args: defaultProps,
   decorators: [
     (Story) => (
-      <FilesContext client={{} as unknown as FilesClient}>
+      <FilesContext
+        client={
+          {
+            list: async (): Promise<FilesClientResponses['list']> => ({
+              files: [],
+            }),
+          } as unknown as FilesClient
+        }
+      >
         <Story />
       </FilesContext>
     ),
