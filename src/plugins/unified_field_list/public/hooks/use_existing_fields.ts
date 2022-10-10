@@ -32,8 +32,7 @@ export interface ExistingFieldsInfo {
 }
 
 export interface FetchExistenceInfoParams {
-  dataViewId: string; // TODO: switch to data view list?
-  dataViewHash: string;
+  dataViews: DataView[];
   fromDate: string;
   toDate: string;
   query: Query | AggregateQuery;
@@ -43,7 +42,7 @@ export interface FetchExistenceInfoParams {
     data: DataPublicPluginStart;
     dataViews: DataViewsContract;
   };
-  onNoData?: () => unknown;
+  onNoData?: (dataViewId: string) => unknown;
 }
 
 type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
@@ -66,7 +65,7 @@ const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData)
 export const useExistingFieldsFetcher = (
   params: FetchExistenceInfoParams
 ): {
-  refetchFieldsExistenceInfo: () => Promise<void>;
+  refetchFieldsExistenceInfo: (dataViewId?: string) => Promise<void>;
 } => {
   const mountedRef = useRef<boolean>(true);
 
@@ -79,14 +78,13 @@ export const useExistingFieldsFetcher = (
       toDate,
       services: { dataViews, data, core },
       onNoData,
-    }: FetchExistenceInfoParams): Promise<void> => {
+    }: FetchExistenceInfoParams & { dataViewId: string | undefined }): Promise<void> => {
       if (!dataViewId) {
         return;
       }
 
-      const globalMap = globalMap$.getValue() ?? initialData;
-      // console.log('fetching', globalMap);
-      const currentInfo = globalMap[dataViewId];
+      // console.log('fetching', dataViewId);
+      const currentInfo = globalMap$.getValue()?.[dataViewId];
 
       if (!mountedRef.current) {
         return;
@@ -118,8 +116,12 @@ export const useExistingFieldsFetcher = (
 
           const existingFieldNames = result?.existingFieldNames || [];
 
-          if (!existingFieldNames.length && numberOfFetches === 1 && onNoData) {
-            onNoData();
+          if (
+            !existingFieldNames.length &&
+            numberOfFetches === 1 &&
+            typeof onNoData === 'function'
+          ) {
+            onNoData(dataViewId);
           }
 
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
@@ -132,32 +134,46 @@ export const useExistingFieldsFetcher = (
       }
 
       if (mountedRef.current) {
-        const newState = {
-          ...globalMap,
-          [dataViewId]: info, // TODO: switch to map by title instead of id?
-        };
-
-        globalMap$.next(newState);
+        globalMap$.next({
+          ...globalMap$.getValue(),
+          [dataViewId]: info,
+        });
       }
     },
     [mountedRef]
   );
 
-  // TODO: accept dataViewId as a parameter here
-  const refetchFieldsExistenceInfo = useCallback(async () => {
-    return await fetchFieldsExistenceInfo(params);
+  const dataViewsHash = getDataViewsHash(params.dataViews);
+  const refetchFieldsExistenceInfo = useCallback(
+    async (dataViewId?: string) => {
+      // refetch only for the specified data view
+      if (dataViewId) {
+        await fetchFieldsExistenceInfo({
+          dataViewId,
+          ...params,
+        });
+        return;
+      }
+      // refetch for all mentioned data views
+      await Promise.all(
+        params.dataViews.map((dataView) =>
+          fetchFieldsExistenceInfo({
+            dataViewId: dataView.id,
+            ...params,
+          })
+        )
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    fetchFieldsExistenceInfo,
-    params.dataViewHash,
-    params.query,
-    params.filters,
-    params.fromDate,
-    params.toDate,
-    params.services.core,
-    params.services.data,
-    params.services.dataViews,
-  ]);
+    [
+      fetchFieldsExistenceInfo,
+      dataViewsHash,
+      params.query,
+      params.filters,
+      params.fromDate,
+      params.toDate,
+    ]
+  );
 
   useEffect(() => {
     refetchFieldsExistenceInfo();
@@ -165,7 +181,9 @@ export const useExistingFieldsFetcher = (
 
   useEffect(() => {
     return () => {
+      // console.log('resetting the cache');
       mountedRef.current = false;
+      globalMap$.next({}); // reset the cache (readers will continue using their own data slice until they are unmounted too)
     };
   }, [mountedRef]);
 
@@ -179,12 +197,15 @@ export const useExistingFieldsFetcher = (
 
 export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
-    useState<ExistingFieldsByDataViewMap>(initialData);
+    useState<ExistingFieldsByDataViewMap>(globalMap$.getValue());
 
   useEffect(() => {
     const subscription = globalMap$.subscribe((data) => {
       // console.log('received', data);
-      setExistingFieldsByDataViewMap(data);
+      setExistingFieldsByDataViewMap((savedData) => ({
+        ...savedData,
+        ...data,
+      }));
     });
 
     return () => {
@@ -228,8 +249,11 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   );
 };
 
-export const getDataViewHash = (dataView: DataView) =>
-  `${dataView.id}-${dataView.title}-${dataView.timeFieldName}`;
+function getDataViewsHash(dataViews: DataView[]): string {
+  return dataViews
+    .map((dataView) => `${dataView.id}:${dataView.title}:${dataView.timeFieldName}`)
+    .join(',');
+}
 
 // Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything

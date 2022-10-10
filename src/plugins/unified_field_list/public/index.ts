@@ -50,7 +50,6 @@ export type {
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
-  getDataViewHash,
   ExistenceFetchStatus,
   type ExistingFieldsInfo,
   type FetchExistenceInfoParams,

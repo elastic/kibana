@@ -36,13 +36,13 @@ import {
   type FieldListProps,
   useExistingFieldsReader,
   useExistingFieldsFetcher,
-  getDataViewHash,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
   DataType,
   FramePublicAPI,
+  IndexPattern,
   IndexPatternField,
 } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
@@ -126,9 +126,21 @@ export function IndexPatternDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
+  usedIndexPatterns,
 }: Props) {
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
+
+  const activeIndexPatterns = useMemo(() => {
+    return uniq(
+      (
+        usedIndexPatterns ?? Object.values(state.layers).map(({ indexPatternId }) => indexPatternId)
+      ).concat(currentIndexPatternId)
+    )
+      .filter((id) => !!indexPatterns[id])
+      .sort()
+      .map((id) => indexPatterns[id]);
+  }, [usedIndexPatterns, indexPatterns, state.layers, currentIndexPatternId]);
 
   return (
     <>
@@ -177,6 +189,7 @@ export function IndexPatternDataPanel({
           onIndexPatternRefresh={onIndexPatternRefresh}
           frame={frame}
           showNoDataPopover={showNoDataPopover}
+          activeIndexPatterns={activeIndexPatterns}
         />
       )}
     </>
@@ -226,6 +239,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   frame,
   onIndexPatternRefresh,
   showNoDataPopover,
+  activeIndexPatterns,
 }: Omit<
   DatasourceDataPanelProps,
   'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
@@ -240,6 +254,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   onIndexPatternRefresh: () => void;
+  activeIndexPatterns: IndexPattern[];
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -253,8 +268,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
   const { refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    dataViewId: currentIndexPatternId,
-    dataViewHash: getDataViewHash(currentIndexPattern as unknown as DataView),
+    dataViews: activeIndexPatterns as unknown as DataView[],
     query,
     filters,
     fromDate: dateRange.fromDate,
@@ -264,11 +278,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       dataViews,
       core,
     },
-    onNoData: showNoDataPopover,
+    onNoData: (dataViewId) => {
+      if (dataViewId === currentIndexPatternId) {
+        showNoDataPopover();
+      }
+    }, // TODO: show only for the current data view
   });
   const { getFieldsExistenceStatus, hasFieldData } = useExistingFieldsReader();
   // TODO: add a loading indicator while info is loading
   const fieldsExistenceStatus = getFieldsExistenceStatus(currentIndexPatternId);
+
+  // console.log(currentIndexPatternId, fieldsExistenceStatus);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -493,7 +513,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onSave: () => {
                 if (indexPatternInstance.isPersisted()) {
                   refreshFieldList();
-                  refetchFieldsExistenceInfo();
+                  refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
                 }
@@ -525,7 +545,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onDelete: () => {
                 if (indexPatternInstance.isPersisted()) {
                   refreshFieldList();
-                  refetchFieldsExistenceInfo();
+                  refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
                 }
