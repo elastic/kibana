@@ -29,7 +29,6 @@ import {
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { css } from '@emotion/react';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import {
@@ -406,9 +405,6 @@ function PrimaryMetricEditor(props: SubProps) {
         label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
           defaultMessage: 'Color mode',
         })}
-        css={css`
-          align-items: center;
-        `}
       >
         <EuiButtonGroup
           isFullWidth
@@ -461,62 +457,60 @@ function PrimaryMetricEditor(props: SubProps) {
       </EuiFormRow>
       {!hasDynamicColoring && <StaticColorControls {...props} />}
       {hasDynamicColoring && (
-        <>
-          <EuiFormRow
-            display="columnCompressed"
-            fullWidth
-            label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
-              defaultMessage: 'Color',
-            })}
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
+            defaultMessage: 'Color',
+          })}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            className="lnsDynamicColoringClickable"
           >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-              className="lnsDynamicColoringClickable"
-            >
-              <EuiFlexItem>
-                <EuiColorPaletteDisplay
-                  data-test-subj="lnsMetric_dynamicColoring_palette"
-                  palette={displayStops.map(({ color }) => color)}
-                  type={FIXED_PROGRESSION}
-                  onClick={togglePalette}
+            <EuiFlexItem>
+              <EuiColorPaletteDisplay
+                data-test-subj="lnsMetric_dynamicColoring_palette"
+                palette={displayStops.map(({ color }) => color)}
+                type={FIXED_PROGRESSION}
+                onClick={togglePalette}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="lnsMetric_dynamicColoring_trigger"
+                iconType="controlsHorizontal"
+                onClick={togglePalette}
+                size="xs"
+                flush="both"
+              >
+                {i18n.translate('xpack.lens.paletteTableGradient.customize', {
+                  defaultMessage: 'Edit',
+                })}
+              </EuiButtonEmpty>
+              <PalettePanelContainer
+                siblingRef={props.panelRef}
+                isOpen={isPaletteOpen}
+                handleClose={togglePalette}
+              >
+                <CustomizablePalette
+                  palettes={props.paletteService}
+                  activePalette={activePalette}
+                  dataBounds={currentMinMax}
+                  showRangeTypeSelector={supportsPercentPalette}
+                  setPalette={(newPalette) => {
+                    setState({
+                      ...state,
+                      palette: newPalette,
+                    });
+                  }}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="lnsMetric_dynamicColoring_trigger"
-                  iconType="controlsHorizontal"
-                  onClick={togglePalette}
-                  size="xs"
-                  flush="both"
-                >
-                  {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                    defaultMessage: 'Edit',
-                  })}
-                </EuiButtonEmpty>
-                <PalettePanelContainer
-                  siblingRef={props.panelRef}
-                  isOpen={isPaletteOpen}
-                  handleClose={togglePalette}
-                >
-                  <CustomizablePalette
-                    palettes={props.paletteService}
-                    activePalette={activePalette}
-                    dataBounds={currentMinMax}
-                    showRangeTypeSelector={supportsPercentPalette}
-                    setPalette={(newPalette) => {
-                      setState({
-                        ...state,
-                        palette: newPalette,
-                      });
-                    }}
-                  />
-                </PalettePanelContainer>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </>
+              </PalettePanelContainer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       )}
     </>
   );
