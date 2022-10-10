@@ -15,6 +15,8 @@ import {
   useEuiFontSize,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -103,6 +105,12 @@ export function SummaryStats() {
                     defaultMessage: 'Total APM size',
                   }
                 )}
+                tooltipContent={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.totalSize.tooltip',
+                  {
+                    defaultMessage: 'The storage size used by the APM indices.',
+                  }
+                )}
                 value={asDynamicBytes(data?.totalSize)}
                 color={euiTheme.colors.text}
               />
@@ -113,6 +121,13 @@ export function SummaryStats() {
                     defaultMessage: 'Disk space used',
                   }
                 )}
+                tooltipContent={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.diskSpaceUsedPct.tooltip',
+                  {
+                    defaultMessage:
+                      'The percentage of storage size used by the APM indices compared to the overall storage configured for Elasticsearch.',
+                  }
+                )}
                 value={asPercent(data?.diskSpaceUsedPct, 1)}
                 color={euiTheme.colors.warning}
               />
@@ -121,6 +136,13 @@ export function SummaryStats() {
                   'xpack.apm.storageExplorer.summary.incrementalSize',
                   {
                     defaultMessage: 'Incremental APM size',
+                  }
+                )}
+                tooltipContent={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.incrementalSize.tooltip',
+                  {
+                    defaultMessage:
+                      'The estimated storage size used by the APM indices based on the filters selected.',
                   }
                 )}
                 value={asDynamicBytes(data?.estimatedIncrementalSize)}
@@ -193,19 +215,35 @@ function SummaryMetric({
   label,
   value,
   color,
+  tooltipContent,
 }: {
   label: string;
   value: string;
   color: string;
+  tooltipContent?: string;
 }) {
   const xxlFontSize = useEuiFontSize('xxl', { measurement: 'px' });
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiText size="s" color="subdued">
-        {label}
-      </EuiText>
+      {tooltipContent ? (
+        <EuiToolTip content={tooltipContent}>
+          <EuiText size="s" color="subdued">
+            {label}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </EuiText>
+        </EuiToolTip>
+      ) : (
+        <EuiText size="s" color="subdued">
+          {label}
+        </EuiText>
+      )}
       <EuiText
         css={css`
           ${xxlFontSize}
