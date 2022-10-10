@@ -135,11 +135,13 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
   const layers = dataLayers.reduce<Layer[]>((accLayers, l) => {
     const layerId = uuid.default();
     const series = visibleSeries.find((s) =>
-      l.columns.some((c) => c.meta.aggId.split('.')[0] === s.data.id)
+      l.columns.some((c) => !c.isBucketed && c.meta.aggId.split('.')[0] === s.data.id)
     );
-    const collapseFn = Object.keys(l.bucketCollapseFn).find((key) =>
-      l.bucketCollapseFn[key].includes(l.buckets.customBuckets[l.metrics[0]])
-    );
+    const collapseFn = l.bucketCollapseFn
+      ? Object.keys(l.bucketCollapseFn).find((key) =>
+          l.bucketCollapseFn[key].includes(l.buckets.customBuckets[l.metrics[0]])
+        )
+      : undefined;
     accLayers.push({
       indexPatternId,
       layerId,
