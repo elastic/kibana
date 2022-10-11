@@ -7,7 +7,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NodeService, InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
+import type {
+  NodeService,
+  InternalNodeServicePreboot,
+  InternalNodeServiceStart,
+} from '@kbn/core-node-server-internal';
 
 const createInternalPrebootContractMock = () => {
   const prebootContract: jest.Mocked<InternalNodeServicePreboot> = {
@@ -19,13 +23,25 @@ const createInternalPrebootContractMock = () => {
   return prebootContract;
 };
 
+const createInternalStartContractMock = () => {
+  const startContract: jest.Mocked<InternalNodeServiceStart> = {
+    roles: {
+      backgroundTasks: true,
+      ui: true,
+    },
+  };
+  return startContract;
+};
+
 type NodeServiceContract = PublicMethodsOf<NodeService>;
 const createMock = () => {
   const mocked: jest.Mocked<NodeServiceContract> = {
     preboot: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
   mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
+  mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };
 

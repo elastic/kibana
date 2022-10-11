@@ -33,6 +33,13 @@ export interface InternalNodeServicePreboot {
   roles: NodeRoles;
 }
 
+export interface InternalNodeServiceStart {
+  /**
+   * Retrieve the Kibana instance uuid.
+   */
+  roles: NodeRoles;
+}
+
 interface PrebootDeps {
   loggingSystem: ILoggingSystem;
 }
@@ -41,6 +48,7 @@ interface PrebootDeps {
 export class NodeService {
   private readonly configService: IConfigService;
   private readonly log: Logger;
+  private roles: NodeRoles | undefined;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -52,11 +60,20 @@ export class NodeService {
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
+    this.roles = NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
+      return { ...acc, [camelCase(curr)]: roles.includes(curr) };
+    }, {} as NodeRoles);
+
     return {
-      roles: NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-        return { ...acc, [camelCase(curr)]: roles.includes(curr) };
-      }, {} as NodeRoles),
+      roles: this.roles,
     };
+  }
+
+  public async start(): Promise<InternalNodeServiceStart> {
+    if (this.roles == null) {
+      throw new Error('Roles are not available before preboot');
+    }
+    return { roles: this.roles };
   }
 
   public stop() {

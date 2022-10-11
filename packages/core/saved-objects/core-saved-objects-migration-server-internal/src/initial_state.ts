@@ -23,6 +23,7 @@ import { excludeUnusedTypesQuery } from './core';
  */
 export const createInitialState = ({
   kibanaVersion,
+  waitForMigrationCompletion,
   targetMappings,
   preMigrationScript,
   migrationVersionPerType,
@@ -33,6 +34,7 @@ export const createInitialState = ({
   logger,
 }: {
   kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -95,6 +97,7 @@ export const createInitialState = ({
 
   return {
     controlState: 'INIT',
+    waitForMigrationCompletion,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
