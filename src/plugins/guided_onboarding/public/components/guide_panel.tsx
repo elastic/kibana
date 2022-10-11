@@ -29,6 +29,7 @@ import {
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { guidesConfig } from '../constants/guides_config';
 import type { GuideState, GuideStepIds } from '../../common/types';
 import type { GuideConfig, StepConfig } from '../types';
@@ -36,6 +37,7 @@ import type { GuideConfig, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 
 import { GuideStep } from './guide_panel_step';
+import { QuitGuideModal } from './quit_guide_modal';
 import { getGuidePanelStyles } from './guide_panel.styles';
 
 interface GuidePanelProps {
@@ -84,6 +86,7 @@ const getProgress = (state?: GuideState): number => {
 export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
   const [guideState, setGuideState] = useState<GuideState | undefined>(undefined);
 
   const styles = getGuidePanelStyles(euiTheme);
@@ -108,11 +111,20 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     await api.completeGuide(guideState!.guideId);
   };
 
+  const openQuitGuideModal = () => {
+    // Close the dropdown panel
+    setIsGuideOpen(false);
+    // Open the confirmation modal
+    setIsQuitGuideModalOpen(true);
+  };
+
+  const closeQuitGuideModal = () => {
+    setIsQuitGuideModalOpen(false);
+  };
+
   useEffect(() => {
     const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      if (newGuideState) {
-        setGuideState(newGuideState);
-      }
+      setGuideState(newGuideState);
     });
     return () => subscription.unsubscribe();
   }, [api]);
@@ -236,7 +248,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
               <EuiHorizontalRule />
 
-              {guideConfig?.steps.map((step, index, steps) => {
+              {guideConfig?.steps.map((step, index) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
                 const stepState = guideState?.steps[index];
 
@@ -271,10 +283,9 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
               <EuiFlexItem>
-                {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}
-                <EuiButtonEmpty onClick={() => {}}>
+                <EuiButtonEmpty onClick={openQuitGuideModal} data-test-subj="quitGuideButton">
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
-                    defaultMessage: 'Exit setup guide',
+                    defaultMessage: 'Quit setup guide',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -324,6 +335,10 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </EuiFlyout>
+      )}
+
+      {isQuitGuideModalOpen && (
+        <QuitGuideModal closeModal={closeQuitGuideModal} currentGuide={guideState!} />
       )}
     </>
   );

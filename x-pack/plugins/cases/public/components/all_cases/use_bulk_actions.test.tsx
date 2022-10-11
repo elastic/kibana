@@ -58,6 +58,13 @@ describe('useBulkActions', () => {
                   "panel": 1,
                 },
                 Object {
+                  "data-test-subj": "case-bulk-action-severity",
+                  "disabled": false,
+                  "key": "case-bulk-action-severity",
+                  "name": "Severity",
+                  "panel": 2,
+                },
+                Object {
                   "data-test-subj": "bulk-actions-separator",
                   "isSeparator": true,
                   "key": "bulk-actions-separator",
@@ -111,6 +118,44 @@ describe('useBulkActions', () => {
               ],
               "title": "Status",
             },
+            Object {
+              "id": 2,
+              "items": Array [
+                Object {
+                  "data-test-subj": "cases-bulk-action-severity-low",
+                  "disabled": true,
+                  "icon": "empty",
+                  "key": "cases-bulk-action-severity-low",
+                  "name": "Low",
+                  "onClick": [Function],
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-severity-medium",
+                  "disabled": false,
+                  "icon": "empty",
+                  "key": "cases-bulk-action-severity-medium",
+                  "name": "Medium",
+                  "onClick": [Function],
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-severity-high",
+                  "disabled": false,
+                  "icon": "empty",
+                  "key": "cases-bulk-action-severity-high",
+                  "name": "High",
+                  "onClick": [Function],
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-severity-critical",
+                  "disabled": false,
+                  "icon": "empty",
+                  "key": "cases-bulk-action-severity-critical",
+                  "name": "Critical",
+                  "onClick": [Function],
+                },
+              ],
+              "title": "Severity",
+            },
           ],
         }
       `);
@@ -148,6 +193,46 @@ describe('useBulkActions', () => {
 
       act(() => {
         userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
+      });
+
+      await waitForHook(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
+      });
+    });
+
+    it('change the severity of cases', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      act(() => {
+        userEvent.click(res.getByTestId('case-bulk-action-severity'));
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
+        expect(res.getByTestId('cases-bulk-action-severity-medium')).toBeInTheDocument();
+        expect(res.getByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
+        expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
       });
 
       await waitForHook(() => {
