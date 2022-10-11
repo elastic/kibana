@@ -59,7 +59,14 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
   });
 
   return (
-    <EuiModal className="filesFilePicker" onClose={onClose}>
+    <EuiModal
+      className="filesFilePicker"
+      css={css`
+        width: 75vw;
+      `}
+      maxWidth="75vw"
+      onClose={onClose}
+    >
       <EuiModalHeader>
         <Title />
       </EuiModalHeader>

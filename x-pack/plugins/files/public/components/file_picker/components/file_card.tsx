@@ -26,6 +26,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
   const isSelected = state.hasFileId(file.id);
+  const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
   return (
     <EuiCard
       title=""
@@ -42,12 +43,15 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
           css={css`
             display: grid;
             place-items: center;
-            height: calc(${euiTheme.size.xxxxl} * 2);
+            height: ${imageHeight};
           `}
         >
           {displayImage ? (
             <Image
               alt={file.alt ?? ''}
+              css={css`
+                max-height: ${imageHeight};
+              `}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
             />
           ) : (
