@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Create Follower Index', async () => {
         await pageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
         await pageObjects.crossClusterReplication.createFollowerIndex('my-index', 'my-follower');
-      })
+      });
     });
     describe('Index Management', function () {
       before(async () => {
@@ -71,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await remoteEs.index({
           target: 'my-index',
-          field: {"a": "b"}
+          field: { a: 'b' },
         });
         await pageObjects.common.navigateToApp('indexManagement');
       });
@@ -88,4 +88,4 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await security.testUser.restoreDefaults();
     });
   });
-}
+};
