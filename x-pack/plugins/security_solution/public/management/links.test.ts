@@ -86,7 +86,7 @@ describe('links', () => {
       coreMockStarted,
       getPlugins(['superuser'])
     );
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
     expect(filteredLinks).toEqual({
       ...links,
       links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
