@@ -116,7 +116,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import { RuleDetailsContextProvider } from './rule_details_context';
-import { useGetSavedQuery } from './use_get_saved_query';
+import { useGetSavedQuery } from '../use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -306,11 +306,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
-  // load saved query only if rule type === 'saved_query', as other rule types still can have saved_id property that is not used
-  // Rule schema allows to save any rule with saved_id property, but it only used for saved_query rule type
-  // In future we might look in possibility to restrict rule schema (breaking change!) and remove saved_id from the rest of rules through migration
-  const savedQueryId = rule?.type === 'saved_query' ? rule?.saved_id : undefined;
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(savedQueryId);
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
+    ruleType: rule?.type,
+  });
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -616,6 +614,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
     return (
       <LinkButton
+        data-test-subj="editRuleSettingsLink"
         onClick={goToEditRule}
         iconType="controlsHorizontal"
         isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
