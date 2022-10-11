@@ -218,6 +218,7 @@ export class ActionExecutor {
             },
             { configurationUtilities }
           );
+          const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
 
           rawResult = await actionType.executor({
             actionId,
@@ -228,7 +229,7 @@ export class ActionExecutor {
             isEphemeral,
             taskInfo,
             configurationUtilities,
-            logger: logger.get(actionTypeId.substring(1)),
+            logger: logger.get(loggerId),
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {

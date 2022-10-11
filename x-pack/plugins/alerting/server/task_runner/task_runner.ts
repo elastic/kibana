@@ -351,6 +351,9 @@ export class TaskRunner<
           const savedObjectsClient = this.context.savedObjects.getScopedClient(fakeRequest, {
             includedHiddenTypes: ['alert', 'action'],
           });
+          const loggerId = rule.alertTypeId.startsWith('.')
+            ? rule.alertTypeId.substring(1)
+            : rule.alertTypeId;
 
           updatedState = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
@@ -392,7 +395,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
               },
-              logger: this.logger.get(rule.alertTypeId.substring(1)),
+              logger: this.logger.get(loggerId),
             })
           );
 
