@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getStopsWithColorsFromRanges } from './palette';
+export { convertToLens as convertGaugeToLens } from './gauge';
+export { convertToLens as convertGoalToLens } from './goal';
