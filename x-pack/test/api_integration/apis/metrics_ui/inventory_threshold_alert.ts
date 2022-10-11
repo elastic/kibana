@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-0', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-0', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -201,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -258,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -295,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -316,7 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -369,7 +369,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-0', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'custom',
@@ -397,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-1', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -446,7 +446,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-0', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'custom',
@@ -474,7 +474,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-1', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -514,7 +514,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-0', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'logRate',
@@ -535,7 +535,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-1', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -572,7 +572,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-0', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
           'host-1': {
             metric: 'logRate',
@@ -593,7 +593,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: { eventId: 'event-1', groupId: 'group-0' },
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -634,7 +634,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
           'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
             metric: 'rx',
@@ -655,7 +655,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
         });
       });
@@ -693,7 +693,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
           'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
             metric: 'rx',
@@ -714,7 +714,7 @@ export default function ({ getService }: FtrProviderContext) {
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
-            }
+            },
           },
         });
       });
