@@ -13,15 +13,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const remoteEs = getService('remoteEs' as 'es');
+  const remoteEs = getService('remoteEs');
+  const localEs = getService('es');
 
   describe('CCS Remote Clusters > Index Management', function () {
     before(async () => {
-      await security.testUser.setRoles(['global_ccr_role']);
-    });
-
-    after(async () => {
-      await security.testUser.restoreDefaults();
+      await security.testUser.setRoles(['global_ccr_role', 'follower_index_user', 'superuser']);
     });
 
     describe('Remote Clusters', function () {
@@ -50,27 +47,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           body: {
             settings: { number_of_shards: 1, soft_deletes: { enabled: true } }
           }
-        })
+        });
         await pageObjects.common.navigateToApp('crossClusterReplication');
         await retry.waitFor('indices table to be visible', async () => {
           return await testSubjects.isDisplayed('createFollowerIndexButton');
         });
       });
-
-      after(async () => {
-        await remoteEs.indices.delete({
-          index: 'my-index'
-        });
-      })
-
       it('Create Follower Index', async () => {
         await pageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
         await pageObjects.crossClusterReplication.createFollowerIndex('my-index', 'my-follower');
       })
+    });
+    describe('Index Management', function () {
+      before(async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
+          return await testSubjects.isDisplayed('indicesList');
+        });
+        await remoteEs.index({
+          target: 'my-index',
+          field: {"a": "b"}
+        });
+        await pageObjects.common.navigateToApp('indexManagement');
+      });
+      it('Made it this far', async () => {
+        //
+      });
+    });
 
-      // await retry.waitFor('indices table to be visible', async () => {
-      //   return await testSubjects.isDisplayed('indicesList');
+    after(async () => {
+      // await localEs.ccr.forgetFollower()
+      // await remoteEs.indices.delete({
+      //   index: 'my-index'
       // });
+      await security.testUser.restoreDefaults();
     });
   });
-};
+}
