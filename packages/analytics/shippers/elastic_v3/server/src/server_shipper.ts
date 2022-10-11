@@ -311,12 +311,12 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    const performance_events = events.filter(e => {
-      return e.event_type === 'performance_metric'
-    })
+    const performanceEvents = events.filter((e) => {
+      return e.event_type === 'performance_metric';
+    });
 
-    if (performance_events.length > 0) {
-      const eventNames = performance_events.map(e => e.properties.eventName)
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
       this.initContext.logger.debug(
         `[Server shipper]: sending ${events.length} performance events - ${eventNames.join(',')}`
       );
@@ -329,7 +329,7 @@ export class ElasticV3ServerShipper implements IShipper {
       ...(this.options.debug && { query: { debug: true } }),
     });
 
-    if (performance_events.length > 0) {
+    if (performanceEvents.length > 0) {
       this.initContext.logger.debug(`${response.status} - ${await response.text()}`);
     }
 
