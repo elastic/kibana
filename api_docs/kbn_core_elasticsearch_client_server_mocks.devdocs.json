@@ -10,7 +10,46 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
+        "id": "def-server.createAgentStoreMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createAgentStoreMock",
+        "description": [],
+        "signature": [
+          "(agents?: Set<",
+          "NetworkAgent",
+          ">) => ",
+          "AgentStore"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
+            "id": "def-server.createAgentStoreMock.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "Set<",
+              "NetworkAgent",
+              ">"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
