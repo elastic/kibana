@@ -56,7 +56,6 @@ import {
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
   QUERY_BAR,
-  QUERY_PREVIEW_BUTTON,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
   RISK_MAPPING_OVERRIDE_OPTION,
@@ -150,11 +149,11 @@ export const fillAboutRule = (
   }
 };
 
-export const fillNote = (note: string) => {
+const fillNote = (note: string) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
 };
 
-export const fillMitre = (mitreAttacks: Mitre[]) => {
+const fillMitre = (mitreAttacks: Mitre[]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
   mitreAttacks.forEach((mitre, tacticIndex) => {
@@ -181,7 +180,7 @@ export const fillMitre = (mitreAttacks: Mitre[]) => {
   });
 };
 
-export const fillFalsePositiveExamples = (falsePositives: string[]) => {
+const fillFalsePositiveExamples = (falsePositives: string[]) => {
   falsePositives.forEach((falsePositive, index) => {
     cy.get(FALSE_POSITIVES_INPUT)
       .eq(index)
@@ -191,22 +190,22 @@ export const fillFalsePositiveExamples = (falsePositives: string[]) => {
   });
 };
 
-export const fillSeverity = (severity: string) => {
+const fillSeverity = (severity: string) => {
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${severity.toLowerCase()}`).click();
 };
 
-export const fillRiskScore = (riskScore: string) => {
+const fillRiskScore = (riskScore: string) => {
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
 };
 
-export const fillRuleTags = (tags: string[]) => {
+const fillRuleTags = (tags: string[]) => {
   tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
 };
 
-export const fillReferenceUrls = (referenceUrls: string[]) => {
+const fillReferenceUrls = (referenceUrls: string[]) => {
   referenceUrls.forEach((url, index) => {
     cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
@@ -275,7 +274,7 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
+const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
   if (rule.timeline?.id) {
     cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
     cy.get(TIMELINE(rule.timeline.id)).click();
@@ -327,29 +326,6 @@ export const fillRuleAction = (rule: CustomRule) => {
       }
     });
   }
-};
-
-export const fillDefineThresholdRule = (rule: ThresholdRule) => {
-  const thresholdField = 0;
-  const threshold = 1;
-
-  fillCustomQuery(rule);
-  cy.get(COMBO_BOX_CLEAR_BTN).first().click();
-
-  if (rule.dataSource.type === 'indexPatterns') {
-    rule.dataSource.index.forEach((index) => {
-      cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
-    });
-  }
-
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-  cy.get(THRESHOLD_INPUT_AREA)
-    .find(INPUT)
-    .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
-      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
-      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
-    });
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
@@ -504,7 +480,7 @@ export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST
 export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
-export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
@@ -593,10 +569,6 @@ export const selectThresholdRuleType = () => {
 
 export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
-};
-
-export const previewResults = () => {
-  cy.get(QUERY_PREVIEW_BUTTON).click();
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
