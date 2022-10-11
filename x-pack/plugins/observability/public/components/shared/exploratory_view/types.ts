@@ -69,6 +69,7 @@ export interface MetricOption {
   formula?: string;
   metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
   palette?: PaletteOutput;
+  format?: 'percent' | 'number';
 }
 
 export interface SeriesConfig {
