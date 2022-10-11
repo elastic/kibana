@@ -388,6 +388,12 @@ export class Authenticator {
                 providerNameSuggestedByHint
               )}`
             : ''
+        }${
+          existingSessionValueRaw instanceof SessionExpiredError
+            ? `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                existingSessionValueRaw.code
+              )}`
+            : ''
         }`
       );
     }
@@ -424,7 +430,9 @@ export class Authenticator {
             )
           ) {
             // FIXME: Clean session storage client side!!!
-            authenticationResult.redirectURL += '&msg=SESSION_EXPIRED';
+            authenticationResult.redirectURL += `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+              existingSessionValueRaw.code
+            )}`;
           }
           return enrichWithUserProfileId(
             this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult),
