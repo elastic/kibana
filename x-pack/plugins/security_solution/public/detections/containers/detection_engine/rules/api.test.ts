@@ -21,6 +21,8 @@ import {
   getPrePackagedRulesStatus,
   previewRule,
   findRuleExceptionReferences,
+  performBulkAction,
+  performBulkExportAction,
 } from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
@@ -697,6 +699,132 @@ describe('Detections Rules API', () => {
         method: 'GET',
         signal: abortCtrl.signal,
       });
+    });
+  });
+
+  describe('performBulkAction', () => {
+    const fetchMockResult = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(fetchMockResult);
+    });
+
+    test('passes a query', async () => {
+      await performBulkAction('enable', 'some query');
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'enable',
+          query: 'some query',
+        }),
+        query: {},
+      });
+    });
+
+    test('passes ids', async () => {
+      await performBulkAction('disable', ['ruleId1', 'ruleId2']);
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'disable',
+          ids: ['ruleId1', 'ruleId2'],
+        }),
+        query: {},
+      });
+    });
+
+    test('passes edit payload', async () => {
+      await performBulkAction(
+        'edit',
+        ['ruleId1'],
+        [{ type: 'add_index_patterns', value: ['some-index-pattern'] }]
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'edit',
+          ids: ['ruleId1'],
+          edit: [{ type: 'add_index_patterns', value: ['some-index-pattern'] }],
+        }),
+        query: {},
+      });
+    });
+
+    test('executes dry run', async () => {
+      await performBulkAction('disable', 'some query', undefined, true);
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'disable',
+          query: 'some query',
+        }),
+        query: { dry_run: true },
+      });
+    });
+
+    test('returns result', async () => {
+      const result = await performBulkAction('disable', 'some query');
+
+      expect(result).toBe(fetchMockResult);
+    });
+  });
+
+  describe('performBulkExportAction', () => {
+    const fetchMockResult = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(fetchMockResult);
+    });
+
+    test('passes a query', async () => {
+      await performBulkExportAction('some query');
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'export',
+          query: 'some query',
+        }),
+        query: {},
+      });
+    });
+
+    test('passes ids', async () => {
+      await performBulkExportAction(['ruleId1', 'ruleId2']);
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'export',
+          ids: ['ruleId1', 'ruleId2'],
+        }),
+        query: {},
+      });
+    });
+
+    test('executes dry run', async () => {
+      await performBulkExportAction('some query', true);
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'export',
+          query: 'some query',
+        }),
+        query: { dry_run: true },
+      });
+    });
+
+    test('returns result', async () => {
+      const result = await performBulkExportAction('some query');
+
+      expect(result).toBe(fetchMockResult);
     });
   });
 });

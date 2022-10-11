@@ -215,13 +215,11 @@ export const performBulkAction = async (
     method: 'POST',
     body: JSON.stringify({
       action,
-      ...(editPayload ? { edit: editPayload } : {}),
-      ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
       ...(typeof queryOrIds === 'string' ? { query: queryOrIds } : {}),
+      ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
+      ...(editPayload ? { edit: editPayload } : {}),
     }),
-    query: {
-      ...(isDryRun ? { dry_run: isDryRun } : {}),
-    },
+    query: isDryRun ? { dry_run: true } : {},
   });
 
 /**
@@ -240,12 +238,10 @@ export const performBulkExportAction = async (
     method: 'POST',
     body: JSON.stringify({
       action: BulkAction.export,
-      ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
       ...(typeof queryOrIds === 'string' ? { query: queryOrIds } : {}),
+      ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
     }),
-    query: {
-      ...(isDryRun ? { dry_run: isDryRun } : {}),
-    },
+    query: isDryRun ? { dry_run: true } : {},
   });
 
 /**
