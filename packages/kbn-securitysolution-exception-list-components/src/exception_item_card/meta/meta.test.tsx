@@ -10,7 +10,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
 
-import { ExceptionItemCardMetaInfo } from './meta';
+import { ExceptionItemCardMetaInfo } from '.';
 import { RuleReference } from '../../types';
 
 const ruleReferences = [
@@ -91,12 +91,10 @@ describe('ExceptionItemCardMetaInfo', () => {
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemMetaAffectedRulesButton')).toHaveTextContent(
-      'Affects 1 rule'
-    );
+    expect(wrapper.getByTestId('exceptionItemMetaEmptyButton')).toHaveTextContent('Affects 1 rule');
   });
 
-  it('it renders references info when multiple references exist', () => {
+  it('it should render references info when multiple references exist', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
@@ -148,7 +146,7 @@ describe('ExceptionItemCardMetaInfo', () => {
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemMetaAffectedRulesButton')).toHaveTextContent(
+    expect(wrapper.getByTestId('exceptionItemMetaEmptyButton')).toHaveTextContent(
       'Affects 2 rules'
     );
   });

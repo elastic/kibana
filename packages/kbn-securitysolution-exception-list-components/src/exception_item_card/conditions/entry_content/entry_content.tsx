@@ -40,6 +40,7 @@ export const EntryContent = memo(
         <div css={expressionContainerCss}>
           {isNestedEntry ? (
             <EuiFlexGroup
+              responsive
               css={nestedGroupSpaceCss}
               direction="row"
               alignItems="center"

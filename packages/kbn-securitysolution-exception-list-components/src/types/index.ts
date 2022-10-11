@@ -42,7 +42,7 @@ export interface ExceptionListSummaryProps {
 export type ViewerFlyoutName = 'addException' | 'editException' | null;
 
 export interface RuleReferences {
-  [key: string]: any[]; // TODO fix
+  [key: string]: RuleReference[];
 }
 
 export interface ExceptionListItemIdentifiers {
