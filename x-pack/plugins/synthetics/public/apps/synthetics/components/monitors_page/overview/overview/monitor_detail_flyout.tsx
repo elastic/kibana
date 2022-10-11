@@ -156,6 +156,7 @@ function LocationSelect({
   const [isOpen, setIsOpen] = useState(false);
   const { locations } = locationData;
   const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
+  console.log('current location', currentLocation);
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={2}>
@@ -175,7 +176,7 @@ function LocationSelect({
               button={
                 <EuiButtonIcon
                   aria-label={LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL}
-                  onClick={() => setIsOpen(true)}
+                  onClick={() => setIsOpen(!isOpen)}
                   color="primary"
                   iconType="arrowDown"
                 />
@@ -191,15 +192,18 @@ function LocationSelect({
                   {
                     id: 0,
                     title: GO_TO_LOCATIONS_LABEL,
-                    items: locations.map((l) => ({
-                      name: l.observer?.geo?.name,
-                      icon: <EuiHealth color={isDown ? 'danger' : 'success'} />,
-                      disabled: !!l.observer?.geo?.name,
-                      onClick: () => {
-                        if (l.observer?.geo?.name && currentLocation !== l.observer.geo.name)
-                          setCurrentLocation(l.observer?.geo?.name);
-                      },
-                    })),
+                    items: locations.map((l) => {
+                      console.log(l);
+                      return {
+                        name: l.observer?.geo?.name,
+                        icon: <EuiHealth color={!!l.summary?.down ? 'danger' : 'success'} />,
+                        disabled: !l.observer?.geo?.name || l.observer.geo.name === currentLocation,
+                        onClick: () => {
+                          if (l.observer?.geo?.name && currentLocation !== l.observer.geo.name)
+                            setCurrentLocation(l.observer?.geo?.name);
+                        },
+                      };
+                    }),
                   },
                 ]}
               />
