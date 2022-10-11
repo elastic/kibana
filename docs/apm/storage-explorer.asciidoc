@@ -71,6 +71,12 @@ To reduce the number of errors a service generate,
 work with your developers to change how exceptions are handled in your code.
 
 [float]
+==== Privileges
+
+Storage explorer requires expanded privileges to view.
+See <<apm-app-storage-explorer-user-create>> for more information.
+
+[float]
 ==== Limitations
 
 Multi-cluster deployments are not supported.
