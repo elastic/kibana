@@ -8,29 +8,44 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { getConfiguration } from '.';
-import { VisParams } from '../../types';
+import { getConfiguration } from './gauge';
+import { GaugeVisParams } from '../../types';
 
-const params: VisParams = {
+const params: GaugeVisParams = {
   addTooltip: false,
   addLegend: false,
-  dimensions: {} as VisParams['dimensions'],
-  metric: {
+  isDisplayWarning: true,
+  gauge: {
+    type: 'meter',
+    orientation: 'vertical',
+    alignment: 'automatic',
+    gaugeType: 'Arc',
+    scale: {
+      color: 'rgba(105,112,125,0.2)',
+      labels: false,
+      show: false,
+    },
+    gaugeStyle: 'Full',
+    extendRange: false,
+    backStyle: 'Full',
     percentageMode: false,
     percentageFormatPattern: '',
-    useRanges: true,
     colorSchema: ColorSchemas.Greys,
-    metricColorMode: 'Labels',
     colorsRange: [
       { type: 'range', from: 0, to: 100 },
       { type: 'range', from: 100, to: 200 },
-      { type: 'range', from: 200, to: 300 },
     ],
     labels: {},
     invertColors: false,
-    style: {} as VisParams['metric']['style'],
+    style: {
+      bgFill: '',
+      bgColor: false,
+      labelColor: false,
+      subText: '',
+      fontSize: 10,
+    },
   },
-  type: 'metric',
+  type: 'gauge',
 };
 
 describe('getConfiguration', () => {
@@ -42,23 +57,27 @@ describe('getConfiguration', () => {
 
   test('shourd return correct configuration', () => {
     const layerId = 'layer-id';
-    const metric = 'metric-id';
-    const bucket = 'bucket-id';
-    const collapseFn = 'sum';
+    const metricAccessor = 'metric-id';
+    const minAccessor = 'min-accessor';
+    const maxAccessor = 'max-accessor';
     expect(
       getConfiguration(layerId, params, palette, {
-        metrics: [metric],
-        buckets: [bucket],
-        columnsWithoutReferenced: [],
-        bucketCollapseFn: { [metric]: collapseFn },
+        metricAccessor,
+        minAccessor,
+        maxAccessor,
       })
     ).toEqual({
-      breakdownByAccessor: bucket,
-      collapseFn,
-      layerId,
+      colorMode: 'palette',
+      labelMajorMode: 'none',
+      labelMinor: undefined,
+      layerId: 'layer-id',
       layerType: 'data',
-      metricAccessor: metric,
-      palette,
+      maxAccessor: 'max-accessor',
+      metricAccessor: 'metric-id',
+      minAccessor: 'min-accessor',
+      palette: { name: 'custom', params: { name: 'custom' }, type: 'palette' },
+      shape: 'horizontalBullet',
+      ticksPosition: 'bands',
     });
   });
 });

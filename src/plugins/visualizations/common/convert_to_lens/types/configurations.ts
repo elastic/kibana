@@ -21,6 +21,11 @@ import {
   YAxisModes,
   XYCurveTypes,
   LayerTypes,
+  GaugeShapes,
+  GaugeTicksPositions,
+  GaugeLabelMajorModes,
+  GaugeColorModes,
+  GaugeCentralMajorModes,
 } from '../constants';
 
 export type FillType = $Values<typeof FillTypes>;
@@ -32,6 +37,11 @@ export type CategoryDisplayType = $Values<typeof CategoryDisplayTypes>;
 export type NumberDisplayType = $Values<typeof NumberDisplayTypes>;
 export type LegendDisplayType = $Values<typeof LegendDisplayTypes>;
 export type LayerType = $Values<typeof LayerTypes>;
+export type GaugeColorMode = $Values<typeof GaugeColorModes>;
+export type GaugeShape = $Values<typeof GaugeShapes>;
+export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
+export type GaugeCentralMajorMode = $Values<typeof GaugeCentralMajorModes>;
+export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
@@ -226,6 +236,40 @@ export interface PartitionVisConfiguration {
   layers: PartitionLayerState[];
   palette?: PaletteOutput;
 }
+
+export const LENS_GAUGE_ID = 'lnsGauge';
+
+export const GROUP_ID = {
+  METRIC: 'metric',
+  MIN: 'min',
+  MAX: 'max',
+  GOAL: 'goal',
+} as const;
+
+interface GaugeState {
+  metricAccessor?: string;
+  minAccessor?: string;
+  maxAccessor?: string;
+  goalAccessor?: string;
+  ticksPosition: GaugeTicksPosition;
+  labelMajorMode: GaugeLabelMajorMode;
+  labelMajor?: string;
+  labelMinor?: string;
+  centralMajorMode?: GaugeCentralMajorMode;
+  centralMajor?: string;
+  colorMode?: GaugeColorMode;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  shape: GaugeShape;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  percentageMode?: boolean;
+  respectRanges?: boolean;
+  commonLabel?: string;
+}
+
+export type GaugeVisConfiguration = GaugeState & {
+  layerId: string;
+  layerType: typeof LayerTypes.DATA;
+};
 
 export type Configuration =
   | XYConfiguration

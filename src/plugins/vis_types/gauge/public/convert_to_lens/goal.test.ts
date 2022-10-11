@@ -8,14 +8,15 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { convertToLens } from '.';
-import { VisParams } from '../types';
+import { convertToLens } from './goal';
+import { GaugeVisParams } from '../types';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetPercentageColumnFormulaColumn = jest.fn();
 const mockGetConfiguration = jest.fn().mockReturnValue({});
 const mockGetPercentageModeConfig = jest.fn();
 const mockGetPalette = jest.fn();
+const mockCreateStaticValueColumn = jest.fn();
 
 jest.mock('../services', () => ({
   getDataViewsStart: jest.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
@@ -27,24 +28,35 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
     getPercentageColumnFormulaColumn: jest.fn(() => mockGetPercentageColumnFormulaColumn()),
     getPercentageModeConfig: jest.fn(() => mockGetPercentageModeConfig()),
     getPalette: jest.fn(() => mockGetPalette()),
+    createStaticValueColumn: jest.fn(() => mockCreateStaticValueColumn()),
   }),
   getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
 }));
 
-jest.mock('./configurations', () => ({
+jest.mock('./configurations/goal', () => ({
   getConfiguration: jest.fn(() => mockGetConfiguration()),
 }));
 
-const params: VisParams = {
+const params: GaugeVisParams = {
   addTooltip: false,
   addLegend: false,
-  dimensions: {} as VisParams['dimensions'],
-  metric: {
+  isDisplayWarning: true,
+  gauge: {
+    type: 'meter',
+    orientation: 'vertical',
+    alignment: 'automatic',
+    gaugeType: 'Arc',
+    scale: {
+      color: 'rgba(105,112,125,0.2)',
+      labels: false,
+      show: false,
+    },
+    gaugeStyle: 'Full',
+    extendRange: false,
+    backStyle: 'Full',
     percentageMode: false,
     percentageFormatPattern: '',
-    useRanges: false,
     colorSchema: ColorSchemas.Greys,
-    metricColorMode: 'None',
     colorsRange: [],
     labels: {},
     invertColors: false,
@@ -56,7 +68,7 @@ const params: VisParams = {
       fontSize: 10,
     },
   },
-  type: 'metric',
+  type: 'gauge',
 };
 
 const vis = {
@@ -64,13 +76,22 @@ const vis = {
   type: {},
   params,
   data: {},
-} as unknown as Vis<VisParams>;
+} as unknown as Vis<GaugeVisParams>;
 
 const timefilter = {
   getAbsoluteTime: () => {},
 } as any;
 
 describe('convertToLens', () => {
+  beforeEach(() => {
+    mockGetPercentageModeConfig.mockReturnValue({
+      isPercentageMode: false,
+      min: 0,
+      max: 100,
+    });
+    mockCreateStaticValueColumn.mockReturnValue({});
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -138,7 +159,8 @@ describe('convertToLens', () => {
     expect(result?.layers[0]).toEqual(
       expect.objectContaining({
         columnOrder: [],
-        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
+        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }, {}],
+        indexPatternId: 'index-pattern',
       })
     );
     expect(result?.configuration).toEqual(config);

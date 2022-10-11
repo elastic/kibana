@@ -41,7 +41,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   if (
     hasLayerMismatch(keptLayerIds, table) ||
     isNotNumericMetric(table) ||
-    (!isGauge && table.columns.length > 1) ||
+    (state && !isGauge && table.columns.length > 1) ||
     (isGauge && (numberOfAccessors !== table.columns.length || table.changeType === 'initial'))
   ) {
     return [];

@@ -8,14 +8,15 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { convertToLens } from '.';
-import { VisParams } from '../types';
+import { convertToLens } from './gauge';
+import { GaugeVisParams } from '../types';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetPercentageColumnFormulaColumn = jest.fn();
 const mockGetConfiguration = jest.fn().mockReturnValue({});
 const mockGetPercentageModeConfig = jest.fn();
 const mockGetPalette = jest.fn();
+const mockCreateStaticValueColumn = jest.fn();
 
 jest.mock('../services', () => ({
   getDataViewsStart: jest.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
@@ -27,24 +28,35 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
     getPercentageColumnFormulaColumn: jest.fn(() => mockGetPercentageColumnFormulaColumn()),
     getPercentageModeConfig: jest.fn(() => mockGetPercentageModeConfig()),
     getPalette: jest.fn(() => mockGetPalette()),
+    createStaticValueColumn: jest.fn(() => mockCreateStaticValueColumn()),
   }),
   getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
 }));
 
-jest.mock('./configurations', () => ({
+jest.mock('./configurations/gauge', () => ({
   getConfiguration: jest.fn(() => mockGetConfiguration()),
 }));
 
-const params: VisParams = {
+const params: GaugeVisParams = {
   addTooltip: false,
   addLegend: false,
-  dimensions: {} as VisParams['dimensions'],
-  metric: {
+  isDisplayWarning: true,
+  gauge: {
+    type: 'meter',
+    orientation: 'vertical',
+    alignment: 'automatic',
+    gaugeType: 'Arc',
+    scale: {
+      color: 'rgba(105,112,125,0.2)',
+      labels: false,
+      show: false,
+    },
+    gaugeStyle: 'Full',
+    extendRange: false,
+    backStyle: 'Full',
     percentageMode: false,
     percentageFormatPattern: '',
-    useRanges: false,
     colorSchema: ColorSchemas.Greys,
-    metricColorMode: 'None',
     colorsRange: [],
     labels: {},
     invertColors: false,
@@ -56,7 +68,7 @@ const params: VisParams = {
       fontSize: 10,
     },
   },
-  type: 'metric',
+  type: 'gauge',
 };
 
 const vis = {
@@ -64,13 +76,22 @@ const vis = {
   type: {},
   params,
   data: {},
-} as unknown as Vis<VisParams>;
+} as unknown as Vis<GaugeVisParams>;
 
 const timefilter = {
   getAbsoluteTime: () => {},
 } as any;
 
 describe('convertToLens', () => {
+  beforeEach(() => {
+    mockGetPercentageModeConfig.mockReturnValue({
+      isPercentageMode: false,
+      min: 0,
+      max: 1000,
+    });
+    mockCreateStaticValueColumn.mockReturnValue({});
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -85,16 +106,7 @@ describe('convertToLens', () => {
   test('should return null if metrics count is more than 1', async () => {
     mockGetColumnsFromVis.mockReturnValue({
       metrics: ['1', '2'],
-      columns: [{ columnId: '2' }, { columnId: '1' }],
-    });
-    const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(result).toBeNull();
-  });
-  test('should return null if buckets count is more than 1', async () => {
-    mockGetColumnsFromVis.mockReturnValue({
-      metrics: [],
-      buckets: ['1', '2'],
+      buckets: [],
       columns: [{ columnId: '2' }, { columnId: '1' }],
     });
     const result = await convertToLens(vis, timefilter);
@@ -105,7 +117,7 @@ describe('convertToLens', () => {
   test('should return null if metric column data type is different from number', async () => {
     mockGetColumnsFromVis.mockReturnValue({
       metrics: ['1'],
-      buckets: ['2'],
+      buckets: [],
       columns: [{ columnId: '2' }, { columnId: '1', dataType: 'string' }],
     });
     const result = await convertToLens(vis, timefilter);
@@ -115,13 +127,12 @@ describe('convertToLens', () => {
   test('should return correct state for valid vis', async () => {
     const config = {
       layerType: 'data',
-      metricAccessor: '1',
     };
 
     mockGetColumnsFromVis.mockReturnValue({
       metrics: ['1'],
-      buckets: ['2'],
-      columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
+      buckets: [],
+      columns: [{ columnId: '1', dataType: 'number' }],
       columnsWithoutReferenced: [
         { columnId: '1', meta: { aggId: 'agg-1' } },
         { columnId: '2', meta: { aggId: 'agg-2' } },
@@ -133,12 +144,14 @@ describe('convertToLens', () => {
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
     expect(mockGetConfiguration).toBeCalledTimes(1);
     expect(mockGetPalette).toBeCalledTimes(1);
-    expect(result?.type).toEqual('lnsMetric');
+    expect(mockCreateStaticValueColumn).toBeCalledTimes(2);
+    expect(result?.type).toEqual('lnsGauge');
     expect(result?.layers.length).toEqual(1);
     expect(result?.layers[0]).toEqual(
       expect.objectContaining({
         columnOrder: [],
-        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
+        columns: [{ columnId: '1', dataType: 'number' }, {}, {}],
+        indexPatternId: 'index-pattern',
       })
     );
     expect(result?.configuration).toEqual(config);

@@ -24,7 +24,7 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
+import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -37,6 +37,7 @@ import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
+import { IndexPatternLayer } from '../..';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -45,6 +46,16 @@ const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
+}
+
+interface GaugeDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface GaugeSuggestion extends Suggestion {
+  datasourceState: GaugeDatasourceState;
+  visualizationState: GaugeVisualizationState;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>
@@ -542,5 +553,26 @@ export const getGaugeVisualization = ({
     }
 
     return warnings;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as GaugeSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 });

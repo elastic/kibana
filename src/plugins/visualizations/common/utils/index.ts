@@ -17,3 +17,5 @@ export {
   getAccessor,
   getFormatByAccessor,
 } from './accessors';
+export { getStopsWithColorsFromRanges } from './palette';
+export type { PaletteConfig } from './palette';

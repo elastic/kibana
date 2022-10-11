@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './buckets';
-export * from './metrics';
-export * from './convert';
-export * from './configurations';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+export const [getDataViewsStart, setDataViewsStart] =
+  createGetterSetter<DataViewsPublicPluginStart>('dataViews');
