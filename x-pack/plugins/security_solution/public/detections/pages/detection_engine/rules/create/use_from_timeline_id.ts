@@ -57,9 +57,11 @@ export const useFromTimelineId = (initialState: {
       const dataProvidersDsl =
         timeline.dataProviders != null && timeline.dataProviders.length > 0
           ? convertKueryToElasticSearchQuery(
-              buildGlobalQuery(timeline.dataProviders, browserFields),
-              { fields: [], title: indexPattern.join(',') }
-            )
+          ? // empty browserFields/fields arguments because they are not part of the final query anyways
+            convertKueryToElasticSearchQuery(buildGlobalQuery(timeline.dataProviders, {}), {
+              fields: [],
+              title: indexPattern.join(','),
+            })
           : '';
 
       const newFilters = timeline.filters ?? [];
