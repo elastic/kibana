@@ -318,12 +318,6 @@ export enum TimelineId {
   test = 'timeline-test', // Reserved for testing purposes
 }
 
-export const TimelineIdLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineId.active),
-  runtimeTypes.literal(TimelineId.test),
-  runtimeTypes.literal(TimelineId.casePage),
-]);
-
 export enum TableId {
   usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
@@ -349,8 +343,6 @@ export const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.kubernetesPageSessions),
 ]);
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
-
-export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,

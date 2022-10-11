@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TableById, TableState } from '@kbn/timelines-plugin/public/types';
-
-export interface TableEpicDependencies<State> {
-  tableByIdSelector: (state: State) => TableById;
-  storage: Storage;
-}
+import type { TableState } from '@kbn/timelines-plugin/public/types';
 
 /** The state of all timelines is stored here */
 export interface DataTableState {

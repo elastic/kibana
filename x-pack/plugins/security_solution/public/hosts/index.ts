@@ -14,7 +14,7 @@ import { routes } from './routes';
 import type { HostsState } from './store';
 import { initialHostsState, hostsReducer } from './store';
 
-const HOST_TIMELINE_IDS: TableIdLiteral[] = [TableId.hostsPageEvents, TableId.hostsPageSessions];
+const HOST_TABLE_IDS: TableIdLiteral[] = [TableId.hostsPageEvents, TableId.hostsPageSessions];
 
 export class Hosts {
   public setup() {}
@@ -23,7 +23,7 @@ export class Hosts {
     return {
       routes,
       storageDataTables: {
-        tableById: getDataTablesInStorageByIds(storage, HOST_TIMELINE_IDS),
+        tableById: getDataTablesInStorageByIds(storage, HOST_TABLE_IDS),
       },
       store: {
         initialState: { hosts: initialHostsState },
