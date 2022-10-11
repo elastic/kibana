@@ -16,8 +16,6 @@ import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { FieldStats } from '@kbn/unified-field-list-plugin/public';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
 import {
   FieldStats,
   FieldPopover,
@@ -25,12 +23,11 @@ import {
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
-import { DiscoverFieldVisualize } from './discover_field_visualize';
-import type { AppState } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
