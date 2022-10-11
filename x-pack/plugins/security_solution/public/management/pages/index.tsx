@@ -30,7 +30,6 @@ import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
-import { NoPermissions } from '../components/no_permissons';
 import { ResponseActionsContainer } from './response_actions';
 
 const EndpointTelemetry = () => (
@@ -76,43 +75,53 @@ const ResponseActionsTelemetry = () => (
 );
 
 export const ManagementContainer = memo(() => {
-  const { loading, canAccessEndpointManagement, canReadActionsLogManagement } =
-    useUserPrivileges().endpointPrivileges;
+  const {
+    loading,
+    canAccessEndpointManagement,
+    canReadPolicyManagement,
+    canReadBlocklist,
+    canReadTrustedApplications,
+    canReadEventFilters,
+    canReadActionsLogManagement,
+  } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
   if (loading) {
     return <EuiLoadingSpinner />;
   }
 
-  if (!canAccessEndpointManagement) {
-    return (
-      <>
-        <Route path="*" component={NoPermissions} />
-        <SpyRoute pageName={SecurityPageName.administration} />
-      </>
-    );
-  }
-
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
+      {canAccessEndpointManagement && (
+        <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
+      )}
+      {canReadPolicyManagement && (
+        <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
+      )}
+      {canReadTrustedApplications && (
+        <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
+      )}
+      {canReadEventFilters && (
+        <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
+      )}
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
       />
-      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
+      {canReadBlocklist && (
+        <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
+      )}
       {canReadActionsLogManagement && (
         <Route
           path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
           component={ResponseActionsTelemetry}
         />
       )}
-      <Route path={MANAGEMENT_PATH} exact>
-        <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
-      </Route>
+      {canAccessEndpointManagement && (
+        <Route path={MANAGEMENT_PATH} exact>
+          <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
+        </Route>
+      )}
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

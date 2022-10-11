@@ -251,12 +251,24 @@ export const getManagementFilteredLinks = async (
           endpointPermissions
         )
       : getEndpointAuthzInitialState();
-    if (!privileges.canAccessEndpointManagement) {
-      return excludeLinks([
-        SecurityPageName.hostIsolationExceptions,
-        SecurityPageName.responseActionsHistory,
-      ]);
+
+    // exclude links based on privileges
+    if (!privileges.canAccessEndpointManagement || !privileges.canReadActionsLogManagement) {
+      if (!privileges.canAccessEndpointManagement) {
+        return excludeLinks([SecurityPageName.hostIsolationExceptions]);
+      } else if (!privileges.canReadActionsLogManagement) {
+        return excludeLinks([SecurityPageName.responseActionsHistory]);
+      } else if (
+        !privileges.canAccessEndpointManagement &&
+        !privileges.canReadActionsLogManagement
+      ) {
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
+      }
     }
+
     if (!privileges.canIsolateHost || !privileges.canReadActionsLogManagement) {
       const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
         core.http

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useMemo } from 'react';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { useSummaryArtifact } from '../../../hooks/artifacts';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
@@ -16,7 +16,7 @@ import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_a
  */
 export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const http = useHttp();
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
   const apiQuery = useSummaryArtifact(
     HostIsolationExceptionsApiClient.getInstance(http),
     undefined,

@@ -117,6 +117,9 @@ export const calculateEndpointAuthz = (
       hasEndpointManagementAccess,
       'readTrustedApplications'
     );
+
+  // TODO: ensure HIE privileges is used in the UI to hide/show security nav item
+  // similar to #useCanSeeHostIsolationExceptionsMenu
   const canWriteHostIsolationExceptions = hasPermission(
     fleetAuthz,
     isEndpointRbacEnabled,
