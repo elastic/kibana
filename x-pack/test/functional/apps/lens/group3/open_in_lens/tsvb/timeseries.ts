@@ -27,11 +27,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.initTests();
     });
 
-    it('should show the "Edit Visualization in Lens" menu item for a count aggregation', async () => {
+    beforeEach(async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
       await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
+    });
+
+    it('should show the "Edit Visualization in Lens" menu item for a count aggregation', async () => {
       const isMenuItemVisible = await find.existsByCssSelector(
         '[data-test-subj="visualizeEditInLensButton"]'
       );
@@ -51,6 +54,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates back to TSVB when the Back button is clicked', async () => {
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('xyVisChart');
+
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       goBackBtn.click();
       await visualBuilder.checkVisualBuilderIsPresent();
@@ -71,9 +78,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve query in lens', async () => {
-      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
-      goBackBtn.click();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
       await header.waitUntilLoadingHasFinished();
@@ -85,11 +89,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should draw a reference line', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
-      await visualBuilder.resetPage();
-
       await visualBuilder.createNewAggSeries();
       await visualBuilder.selectAggType('Static Value');
       await visualBuilder.setStaticValue(10);
