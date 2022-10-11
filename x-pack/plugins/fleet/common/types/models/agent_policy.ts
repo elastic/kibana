@@ -29,6 +29,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  fleet_server_host_id?: string | null;
   schema_version?: string;
 }
 
