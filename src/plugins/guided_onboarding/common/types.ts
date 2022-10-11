@@ -9,7 +9,7 @@
 export type GuideId = 'observability' | 'security' | 'search';
 
 export type ObservabilityStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
-export type SecurityStepIds = 'add_data' | 'rules' | 'alerts' | 'cases';
+export type SecurityStepIds = 'add_data' | 'rules' | 'alertsCases';
 export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
 
 export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
