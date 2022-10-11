@@ -6,8 +6,15 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
+import { BulkActionEditType } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { KibanaServices } from '../../../../common/lib/kibana';
-
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import {
+  getCreateRulesSchemaMock,
+  getUpdateRulesSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
 import {
   createRule,
   updateRule,
@@ -24,15 +31,8 @@ import {
   performBulkAction,
   performBulkExportAction,
 } from './api';
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import {
-  getCreateRulesSchemaMock,
-  getUpdateRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
 import type { FindRulesReferencedByExceptionsListProp } from './types';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -740,7 +740,7 @@ describe('Detections Rules API', () => {
       await performBulkAction(
         'edit',
         ['ruleId1'],
-        [{ type: 'add_index_patterns', value: ['some-index-pattern'] }]
+        [{ type: BulkActionEditType.add_index_patterns, value: ['some-index-pattern'] }]
       );
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
