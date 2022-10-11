@@ -25,8 +25,10 @@ import { useBehaviorSubject } from '../use_behavior_subject';
 import { Title } from './components/title';
 import { ErrorContent } from './components/error_content';
 import { UploadFilesPrompt } from './components/upload_files';
-import * as layout from './components/layout';
 import { FileGrid } from './components/file_grid';
+import { i18nTexts } from './i18n_texts';
+
+import './file_picker.scss';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -47,7 +49,7 @@ export interface Props<Kind extends string = string> {
   perPage?: number;
 }
 
-const Component: FunctionComponent<Props> = ({ perPage, onClose }) => {
+const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
   const { client } = useFilesContext();
   const { state, kind } = useFilePickerContext();
   const selectedFiles = useBehaviorSubject(state.fileIds$);
@@ -57,13 +59,7 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose }) => {
   });
 
   return (
-    <EuiModal
-      css={css`
-        min-width: 75vw;
-        min-height: 20vw;
-      `}
-      onClose={onClose}
-    >
+    <EuiModal className="filesFilePicker" onClose={onClose}>
       <EuiModalHeader>
         <Title />
       </EuiModalHeader>
@@ -93,7 +89,11 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose }) => {
             <FileGrid files={data.files} />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton disabled={!state.hasFilesSelected()}>Select file(s)</EuiButton>
+            <EuiButton disabled={!state.hasFilesSelected()} onClick={() => onDone(selectedFiles)}>
+              {selectedFiles.length > 1
+                ? i18nTexts.selectFilesLabel(selectedFiles.length)
+                : i18nTexts.selectFileLabel}
+            </EuiButton>
           </EuiModalFooter>
         </>
       )}

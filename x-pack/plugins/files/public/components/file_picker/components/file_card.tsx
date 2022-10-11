@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FileImageMetadata, FileJSON } from '../../../../common';
+import { FileJSON } from '../../../../common';
 import { Image } from '../../image';
 import { isImage } from '../../util';
 import { useFilesContext } from '../../context';
@@ -22,24 +22,31 @@ interface Props {
 
 export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const { client } = useFilesContext();
-  const { kind } = useFilePickerContext();
+  const { kind, state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
+  const isSelected = state.hasFileId(file.id);
   return (
     <EuiCard
-      titleSize="xs"
-      title={file.name}
+      title=""
+      css={css`
+        place-self: center;
+      `}
+      paddingSize="s"
+      selectable={{
+        isSelected,
+        onClick: () => (isSelected ? state.removeFile(file.id) : state.addFile(file.id)),
+      }}
       image={
         <div
           css={css`
             display: grid;
             place-items: center;
-            min-height: ${euiTheme.size.xxxxl};
+            height: calc(${euiTheme.size.xxxxl} * 2);
           `}
         >
           {displayImage ? (
             <Image
-              size="m"
               alt={file.alt ?? ''}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
             />
@@ -50,16 +57,13 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       }
       description={
         <>
-          {displayImage ? (
-            (file as FileJSON<FileImageMetadata>).meta?.height != null ? (
-              <EuiText color="subdued" size="xs">
-                {(file as FileJSON<FileImageMetadata>).meta?.width}px by{' '}
-                {(file as FileJSON<FileImageMetadata>).meta?.height}px
-              </EuiText>
-            ) : null
-          ) : null}
+          <EuiText size="xs">
+            <strong>
+              {file.name}.{file.extension}
+            </strong>
+          </EuiText>
           <EuiText color="subdued" size="xs">
-            <p>{numeral(file.size).format('0[.]0 b')}</p>
+            {numeral(file.size).format('0[.]0 b')}
           </EuiText>
         </>
       }

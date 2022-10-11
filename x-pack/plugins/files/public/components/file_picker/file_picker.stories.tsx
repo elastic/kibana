@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import type { FileJSON } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
@@ -22,8 +23,8 @@ register({
 
 const defaultProps: FilePickerProps = {
   kind,
-  onDone: () => {},
-  onClose: () => {},
+  onDone: action('done!'),
+  onClose: action('close!'),
 };
 
 export default {
@@ -53,6 +54,7 @@ const Template: ComponentStory<typeof FilePicker> = (props) => <FilePicker {...p
 export const Empty = Template.bind({});
 
 const d = new Date();
+let id = 0;
 function createFileJSON(): FileJSON {
   return {
     alt: '',
@@ -60,7 +62,7 @@ function createFileJSON(): FileJSON {
     updated: d.toISOString(),
     extension: 'png',
     fileKind: kind,
-    id: '1',
+    id: String(++id),
     meta: {
       width: 1000,
       height: 1000,

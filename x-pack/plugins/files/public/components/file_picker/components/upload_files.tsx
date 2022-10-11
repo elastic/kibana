@@ -21,7 +21,7 @@ export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
     <UploadFile
       kind={kind}
       immediate
-      fullWidth
+      // fullWidth
       onDone={(file) => state.addFile(file.map(({ id }) => id))}
       initialPromptText={i18nTexts.emptyStatePrompt}
     />

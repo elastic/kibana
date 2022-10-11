@@ -22,7 +22,7 @@ export const FileGrid: FunctionComponent<Props> = ({ files }) => {
     <div
       css={css`
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(calc(${euiTheme.size.xxxxl} * 3.2), 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(calc(${euiTheme.size.xxxxl} * 2.5), 1fr));
         gap: ${euiTheme.size.m};
       `}
     >
