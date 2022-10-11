@@ -60,7 +60,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     fn: (input, args) => {
       return {
         type: 'event_annotation_group',
-        annotations: args.annotations,
+        annotations: args.annotations.filter((annotation) => !annotation.isHidden),
         dataView: args.dataView,
       };
     },
