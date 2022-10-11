@@ -348,54 +348,60 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [refreshToken]);
 
   return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiFieldSearch
-            fullWidth
-            isClearable
-            value={search}
-            onChange={onSearchChange}
-            onKeyUp={onKeyUp}
-            placeholder={SEARCH_PLACEHOLDER}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            data-test-subj="ruleEventLogListDatePicker"
-            width="auto"
-            isLoading={isLoading}
-            start={dateStart}
-            end={dateEnd}
-            onTimeChange={onTimeChange}
-            onRefresh={onRefresh}
-            dateFormat={dateFormat}
-            commonlyUsedRanges={commonlyUsedRanges}
-            updateButtonProps={updateButtonProps}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <RuleEventLogListKPI
-        ruleId={ruleId}
-        dateStart={dateStart}
-        dateEnd={dateEnd}
-        outcomeFilter={filter}
-        message={searchText}
-        refreshToken={internalRefreshToken}
-      />
-      <EuiSpacer />
-      {renderList()}
-      {isOnLastPage && (
-        <RefineSearchPrompt
-          documentSize={actualTotalItemCount}
-          visibleDocumentSize={MAX_RESULTS}
-          backToTopAnchor="rule_event_log_list"
+    <EuiFlexGroup gutterSize="none" direction="column">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFieldSearch
+              fullWidth
+              isClearable
+              value={search}
+              onChange={onSearchChange}
+              onKeyUp={onKeyUp}
+              placeholder={SEARCH_PLACEHOLDER}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              data-test-subj="ruleEventLogListDatePicker"
+              width="auto"
+              isLoading={isLoading}
+              start={dateStart}
+              end={dateEnd}
+              onTimeChange={onTimeChange}
+              onRefresh={onRefresh}
+              dateFormat={dateFormat}
+              commonlyUsedRanges={commonlyUsedRanges}
+              updateButtonProps={updateButtonProps}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <RuleEventLogListKPI
+          ruleId={ruleId}
+          dateStart={dateStart}
+          dateEnd={dateEnd}
+          outcomeFilter={filter}
+          message={searchText}
+          refreshToken={internalRefreshToken}
         />
-      )}
+        <EuiSpacer />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {renderList()}
+        {isOnLastPage && (
+          <RefineSearchPrompt
+            documentSize={actualTotalItemCount}
+            visibleDocumentSize={MAX_RESULTS}
+            backToTopAnchor="rule_event_log_list"
+          />
+        )}
+      </EuiFlexItem>
       {isFlyoutOpen && selectedRunLog && (
         <RuleActionErrorLogFlyout
           runLog={selectedRunLog}
@@ -403,7 +409,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           onClose={onFlyoutClose}
         />
       )}
-    </>
+    </EuiFlexGroup>
   );
 };
 
