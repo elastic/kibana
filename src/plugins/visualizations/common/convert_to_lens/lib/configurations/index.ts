@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './buckets';
-export * from './metrics';
-export * from './convert';
-export * from './configurations';
+export { getPalette } from './palette';
+export { getPercentageModeConfig } from './percentage_mode';

@@ -8,20 +8,22 @@
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { VisParams } from '../../types';
+import { GaugeVisParams } from '../../types';
 
 export const getConfiguration = (
   layerId: string,
-  params: VisParams,
+  { gauge }: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
   {
     metrics,
     buckets,
+    maxAccessor,
     columnsWithoutReferenced,
     bucketCollapseFn,
   }: {
     metrics: string[];
     buckets: string[];
+    maxAccessor: string;
     columnsWithoutReferenced: Column[];
     bucketCollapseFn?: Record<string, string | undefined>;
   }
@@ -31,9 +33,11 @@ export const getConfiguration = (
   return {
     layerId,
     layerType: 'data',
-    palette: params.metric.metricColorMode !== 'None' ? palette : undefined,
+    palette,
     metricAccessor,
     breakdownByAccessor,
+    maxAccessor,
     collapseFn: Object.values(bucketCollapseFn ?? {})[0],
+    subtitle: gauge.labels.show && gauge.style.subText ? gauge.style.subText : undefined,
   };
 };
