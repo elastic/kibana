@@ -198,17 +198,9 @@ const useFetchAlerts = ({
                   }
                   dispatch({
                     type: 'response',
-                    alerts: rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
-                      if (hit.fields) {
-                        acc.push({
-                          ...hit.fields,
-                          _id: hit._id,
-                          _index: hit._index,
-                        } as EcsFieldsResponse);
-                      }
-
-                      return acc;
-                    }, []),
+                    alerts: rawResponse.hits.hits
+                      .map((hit) => hit.fields as EcsFieldsResponse)
+                      .filter(Boolean),
                     totalAlerts,
                   });
                   searchSubscription$.current.unsubscribe();

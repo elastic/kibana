@@ -138,10 +138,14 @@ export const ruleRegistrySearchStrategyProvider = (
           return (siemRequest ? requestUserEs : internalUserEs).search({ params }, options, deps);
         }),
         map((response) => {
-          // Do we have to loop over each hit? Yes.
-          // ecs auditLogger requires that we log each alert independently
-          if (securityAuditLogger != null) {
-            response.rawResponse.hits?.hits?.forEach((hit) => {
+          if (!response.rawResponse?.hits?.hits) {
+            return response;
+          }
+
+          const hits = response.rawResponse.hits.hits.map((hit) => {
+            // Do we have to loop over each hit? Yes.
+            // ecs auditLogger requires that we log each alert independently
+            if (securityAuditLogger != null) {
               securityAuditLogger.log(
                 alertAuditEvent({
                   action: AlertAuditAction.FIND,
@@ -149,9 +153,26 @@ export const ruleRegistrySearchStrategyProvider = (
                   outcome: 'success',
                 })
               );
-            });
-          }
-          return response;
+            }
+
+            if (hit.fields) {
+              hit.fields._id = [hit._id];
+              hit.fields._index = [hit._index];
+            }
+
+            return hit;
+          });
+
+          return {
+            ...response,
+            rawResponse: {
+              ...response.rawResponse,
+              hits: {
+                ...response.rawResponse.hits,
+                hits,
+              },
+            },
+          };
         }),
         catchError((err) => {
           // check if auth error, if yes, write to ecs logger
