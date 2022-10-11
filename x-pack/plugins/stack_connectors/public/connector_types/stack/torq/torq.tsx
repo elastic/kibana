@@ -27,11 +27,12 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
     validationResult.errors = errors;
     if (!actionParams.body?.length) {
       errors.body.push(translations.BODY_REQUIRED);
-    }
-    try {
-      JSON.parse(replaceReferencesWithNumbers(actionParams.body || ""));
-    } catch (e) {
-      errors.body.push(translations.INVALID_JSON);
+    } else {
+      try {
+        JSON.parse(replaceReferencesWithNumbers(actionParams.body || ""));
+      } catch (e) {
+        errors.body.push(translations.INVALID_JSON);
+      }
     }
     return validationResult;
   };
