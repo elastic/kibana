@@ -45,7 +45,7 @@ describe('Users filter', () => {
     const searchInput = renderResult.getByTestId(`${testPrefix}-search`);
     expect(searchInput).toBeTruthy();
     expect(searchInput.getAttribute('placeholder')).toEqual(
-      'Filter by user or comma separated list of users'
+      'Filter by username'
     );
   });
 
