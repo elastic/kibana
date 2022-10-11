@@ -9,6 +9,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import { NoData } from '../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { useMetricsDataViewContext } from './hooks/use_data_view';
@@ -91,6 +92,7 @@ export const HostsContent: React.FunctionComponent = () => {
               indexPatterns={[metricsDataView]}
               onQuerySubmit={onQuerySubmit}
             />
+            <EuiSpacer />
             <HostsTable
               dataView={metricsDataView}
               timeRange={dateRange}
