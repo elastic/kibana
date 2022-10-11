@@ -11,7 +11,7 @@ import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
-const statusFilters: RuleAlertingOutcome[] = ['success', 'failure', 'warning'];
+const statusFilters: RuleAlertingOutcome[] = ['success', 'failure', 'warning', 'unknown'];
 
 interface RuleEventLogListStatusFilterProps {
   selectedOptions: string[];
