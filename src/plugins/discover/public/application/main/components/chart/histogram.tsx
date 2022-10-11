@@ -41,6 +41,7 @@ import {
   renderEndzoneTooltip,
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
@@ -252,12 +253,16 @@ export function DiscoverHistogram({
     </EuiText>
   );
   if (bucketInterval?.scaled) {
+    const timeRangeWrapperCss = css`
+      flex-grow: 0;
+    `;
     timeRange = (
       <EuiFlexGroup
         alignItems="baseline"
         justifyContent="center"
         gutterSize="none"
         responsive={false}
+        css={timeRangeWrapperCss}
       >
         <EuiFlexItem grow={false}>{timeRange}</EuiFlexItem>
         <EuiFlexItem grow={false}>
