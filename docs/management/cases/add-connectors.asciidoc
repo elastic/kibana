@@ -12,7 +12,6 @@ management systems:
 * {sn-sir}
 * {swimlane}
 * {webhook-cm}
-* {torq}
 
 NOTE: To create connectors and send cases to external systems, you must have the
 appropriate {kib} feature privileges. Refer to <<setup-cases>>.
