@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  EndpointCapabilities,
+  ConsoleResponseActionCommands,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -19,10 +23,6 @@ import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_ENDPOINT_FOR_RESPONDER,
 } from '../../../common/translations';
-import type {
-  ResponderCapabilities,
-  ResponderCommands,
-} from '../../../../common/endpoint/constants';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -48,7 +48,7 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilities>([
+const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
   ['kill-process', 'kill_process'],
@@ -60,23 +60,23 @@ const getRbacControl = ({
   commandName,
   privileges,
 }: {
-  commandName: ResponderCommands;
+  commandName: ConsoleResponseActionCommands;
   privileges: EndpointPrivileges;
 }): boolean => {
-  const commandToPrivilegeMap = new Map<ResponderCommands, boolean>([
+  const commandToPrivilegeMap = new Map<ConsoleResponseActionCommands, boolean>([
     ['isolate', privileges.canIsolateHost],
     ['release', privileges.canUnIsolateHost],
     ['kill-process', privileges.canKillProcess],
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
   ]);
-  return commandToPrivilegeMap.get(commandName as ResponderCommands) ?? false;
+  return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
   const privileges = command.commandDefinition.meta.privileges;
-  const endpointCapabilities: ResponderCapabilities[] = command.commandDefinition.meta.capabilities;
-  const commandName = command.commandDefinition.name as ResponderCommands;
+  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
+  const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
   const responderCapability = commandToCapabilitiesMap.get(commandName);
   let errorMessage = '';
   if (!responderCapability) {
@@ -131,7 +131,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
-  const doesEndpointSupportCommand = (commandName: ResponderCommands) => {
+  const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
