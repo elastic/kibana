@@ -52,6 +52,20 @@ export const generateMlInferencePipelineBody = ({
           },
           model_id: model.model_id,
           target_field: `ml.inference.${destinationField}`,
+          on_failure: [
+            {
+              append: {
+                field: '_source._ingest.inference_errors',
+                value: [
+                  {
+                    pipeline: pipelineName,
+                    message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+                    timestamp: '{{{ _ingest.timestamp }}}',
+                  },
+                ],
+              },
+            },
+          ],
         },
       },
       {

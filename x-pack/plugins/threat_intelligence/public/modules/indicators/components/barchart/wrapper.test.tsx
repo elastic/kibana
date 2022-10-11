@@ -11,7 +11,6 @@ import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { CHART_UPDATE_PROGRESS_TEST_ID, IndicatorsBarChartWrapper } from '.';
-import { DEFAULT_TIME_RANGE } from '../../../query_bar/hooks/use_filters/utils';
 import moment from 'moment';
 
 jest.mock('../../../query_bar/hooks/use_filters');
@@ -29,7 +28,7 @@ const mockIndexPattern: DataView = {
   ],
 } as DataView;
 
-const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
+const mockTimeRange: TimeRange = { from: '', to: '' };
 
 describe('<IndicatorsBarChartWrapper />', () => {
   describe('when not loading or refetching', () => {

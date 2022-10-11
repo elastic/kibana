@@ -49,6 +49,9 @@ describe('GetSLO', () => {
           duration: '7d',
           is_rolling: true,
         },
+        created_at: slo.created_at,
+        updated_at: slo.updated_at,
+        revision: slo.revision,
       });
     });
   });
