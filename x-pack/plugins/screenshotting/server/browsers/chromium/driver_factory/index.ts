@@ -36,9 +36,11 @@ import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics, PerformanceMetrics } from './metrics';
 
+type DefaultViewport = Pick<Viewport, 'width' | 'height' | 'deviceScaleFactor'>;
+
 interface CreatePageOptions {
   browserTimezone?: string;
-  viewport: { width?: number; height?: number; deviceScaleFactor?: number };
+  defaultViewport: Partial<DefaultViewport>;
   openUrlTimeout: number;
 }
 
@@ -74,12 +76,11 @@ export type InternalLogger = (
  * Size of the desired initial viewport. This is needed to render the app before elements load into their
  * layout. Once the elements are positioned, the viewport must be *resized* to include the entire element container.
  */
-export const DEFAULT_VIEWPORT: Required<Pick<Viewport, 'width' | 'height' | 'deviceScaleFactor'>> =
-  {
-    width: 1950,
-    height: 1200,
-    deviceScaleFactor: 1,
-  };
+export const DEFAULT_VIEWPORT: Required<DefaultViewport> = {
+  width: 1950,
+  height: 1200,
+  deviceScaleFactor: 1,
+};
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168
@@ -131,10 +132,11 @@ export class HeadlessChromiumDriverFactory {
   }
 
   private getChromiumArgs() {
+    const { height, width } = DEFAULT_VIEWPORT;
     return args({
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
+      windowSize: { height, width },
     });
   }
 
@@ -156,27 +158,31 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout, viewport }: CreatePageOptions,
-    logger = this.logger
+    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
+    pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
       const logs$ = new Rx.ReplaySubject<string>();
-      const log = this.createDiagnosticLogger(logger.get('browser-driver'), logs$);
+      const log = this.createDiagnosticLogger(pLogger.get('browser-driver'), logs$);
+      log(`Creating browser page driver...`, 'info');
 
       const chromiumArgs = this.getChromiumArgs();
       log(`Chromium launch args set to: ${chromiumArgs}`);
       log(`Sandbox is disabled: ${this.config.browser.chromium.disableSandbox}`);
-      log(`Creating browser page driver...`, 'info');
 
       // We set the viewport width using the client-side layout info to reduce the chances of
       // browser reflow. Only the window height is expected to be adjusted dramatically
       // before taking a screenshot, to ensure the elements to capture are contained in the viewport.
-
-      const newViewport = { ...DEFAULT_VIEWPORT, ...viewport };
+      const viewport = {
+        deviceScaleFactor: DEFAULT_VIEWPORT.deviceScaleFactor,
+        width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+        height: defaultViewport.height ?? DEFAULT_VIEWPORT.height,
+      };
 
       log(
         `Launching with viewport:` +
-          ` width=${newViewport.width} height=${newViewport.height} scaleFactor=${newViewport.deviceScaleFactor}`
+          ` width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`,
+        'info'
       );
 
       (async () => {
@@ -194,7 +200,7 @@ export class HeadlessChromiumDriverFactory {
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
             args: chromiumArgs,
-            defaultViewport: newViewport,
+            defaultViewport: viewport,
             env: {
               TZ: browserTimezone,
             },
@@ -293,7 +299,7 @@ export class HeadlessChromiumDriverFactory {
         // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
         observer.add(() => {
           const userDataDir = this.userDataDir;
-          logger.debug(`Chromium userDataDir: ${this.userDataDir}`);
+          pLogger.debug(`Chromium userDataDir: ${this.userDataDir}`);
           log(`Deleting chromium user data directory`);
           // the unsubscribe function isn't `async` so we're going to make our best effort at
           // deleting the userDataDir and if it fails log an error.

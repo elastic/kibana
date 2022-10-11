@@ -123,7 +123,10 @@ export class Screenshots {
     const { width, height } = layout;
 
     return this.browserDriverFactory
-      .createPage({ browserTimezone, openUrlTimeout, viewport: { width, height } }, this.logger)
+      .createPage(
+        { browserTimezone, openUrlTimeout, defaultViewport: { width, height } },
+        this.logger
+      )
       .pipe(
         this.semaphore.acquire(),
         mergeMap(({ driver, error$, logs$, close }) => {
