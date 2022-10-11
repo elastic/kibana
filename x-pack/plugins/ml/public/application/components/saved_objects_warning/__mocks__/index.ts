@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-export const mlApiServicesMock = {
-  jobs: {
-    jobForCloning: jest.fn(),
-  },
-  results: {
-    getAnomalyCharts$: jest.fn(),
-  },
-  notifications: {
-    findMessages: jest.fn(),
-  },
-};
+export const SavedObjectsWarning = jest.fn(() => {
+  return null;
+});
