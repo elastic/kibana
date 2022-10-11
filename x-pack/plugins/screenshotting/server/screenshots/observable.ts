@@ -6,8 +6,8 @@
  */
 
 import type { Headers } from '@kbn/core/server';
-import { defer, forkJoin, Observable, ReplaySubject, throwError } from 'rxjs';
-import { catchError, mergeMap, switchMapTo, tap, timeoutWith } from 'rxjs/operators';
+import { defer, forkJoin, Observable, throwError } from 'rxjs';
+import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { errors } from '../../common';
 import {
   Context,
@@ -128,7 +128,6 @@ const getTimeouts = (captureConfig: ConfigType['capture']) => ({
 
 export class ScreenshotObservableHandler {
   private timeouts: PhaseTimeouts;
-  public readonly logs$ = new ReplaySubject<string | Error>();
 
   constructor(
     private readonly driver: HeadlessChromiumDriver,
@@ -140,10 +139,6 @@ export class ScreenshotObservableHandler {
     this.timeouts = getTimeouts(config.capture);
   }
 
-  private log(message: string | Error) {
-    this.logs$.next(new Date(Date.now()) + `: ${message}`);
-  }
-
   /*
    * Decorates a TimeoutError with context of the phase that has timed out.
    */
@@ -151,10 +146,8 @@ export class ScreenshotObservableHandler {
     const { timeoutValue, label, configValue } = phase;
     return (source: Observable<O>) =>
       source.pipe(
-        catchError((err) => {
-          const error = new Error(`The "${label}" phase encountered an error: ${err}`);
-          this.log(error);
-          throw error;
+        catchError((error) => {
+          throw new Error(`The "${label}" phase encountered an error: ${error}`);
         }),
         timeoutWith(
           timeoutValue,
@@ -179,7 +172,6 @@ export class ScreenshotObservableHandler {
       } else {
         [url, context] = urlOrUrlWithContext;
       }
-      this.log(`opening URL: ${url}`);
 
       return openUrl(
         this.driver,
@@ -196,7 +188,6 @@ export class ScreenshotObservableHandler {
   private waitForElements() {
     const driver = this.driver;
     const waitTimeout = this.timeouts.waitForElements.timeoutValue * 1.8; // the waitUntil is needed to catch actually timing out
-    this.log(`waiting for elements to have loaded in the page`);
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
       mergeMap((itemsCount) =>
@@ -210,7 +201,6 @@ export class ScreenshotObservableHandler {
     const driver = this.driver;
     const layout = this.layout;
     const eventLogger = this.eventLogger;
-    this.log(`waiting for rendering to complete`);
 
     return defer(async () => {
       // Waiting till _after_ elements have rendered before injecting our CSS
@@ -227,7 +217,6 @@ export class ScreenshotObservableHandler {
         await layout.positionElements?.(driver, eventLogger.kbnLogger);
         spanEnd();
       } catch (error) {
-        this.log(error);
         eventLogger.error(error, Actions.GET_ELEMENT_POSITION_DATA);
         throw error;
       }
@@ -278,12 +267,10 @@ export class ScreenshotObservableHandler {
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
-          const { elementsPositionAndAttributes } = data;
           const elements =
-            elementsPositionAndAttributes ?? getDefaultElementPosition(this.layout.getViewport());
+            data.elementsPositionAndAttributes ??
+            getDefaultElementPosition(this.layout.getViewport());
           let screenshots: Screenshot[] = [];
-          this.log(`capturing screenshot with ${elementsPositionAndAttributes?.length} elements`);
-
           try {
             screenshots = this.shouldCapturePdf()
               ? await getPdf(this.driver, this.eventLogger, this.getTitle(data.timeRange), {
@@ -295,9 +282,8 @@ export class ScreenshotObservableHandler {
                   layout: this.layout,
                   error: data.error,
                 });
-          } catch (err) {
-            this.log(err);
-            throw new errors.FailedToCaptureScreenshot(err.message);
+          } catch (e) {
+            throw new errors.FailedToCaptureScreenshot(e.message);
           }
           const { timeRange, error: setupError, renderErrors } = data;
 
@@ -308,9 +294,6 @@ export class ScreenshotObservableHandler {
             renderErrors,
             elementsPositionAndAttributes: elements,
           };
-        }),
-        tap(() => {
-          this.logs$.complete();
         })
       );
   }

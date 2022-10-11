@@ -127,18 +127,18 @@ export class HeadlessChromiumDriverFactory {
     const dataDir = getDataPath();
     fs.mkdirSync(dataDir, { recursive: true });
     this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+    logger.debug(`Chromium userDataDir: ${this.userDataDir}`);
   }
 
   private getChromiumArgs() {
     return args({
-      userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
       windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
     });
   }
 
-  private createInternalLogger(logger: Logger, logs$: Rx.ReplaySubject<string>) {
+  private createDiagnosticLogger(logger: Logger, logs$: Rx.ReplaySubject<string>) {
     const log: InternalLogger = (message, level = 'debug') => {
       if (level === 'error' && typeof message === 'object') {
         logger.error(message);
@@ -147,7 +147,7 @@ export class HeadlessChromiumDriverFactory {
       } else {
         logger[level](message);
       }
-      logs$.next(new Date(Date.now()) + `: ${message}`);
+      logs$.next(new Date(Date.now()).toISOString() + `: ${message}`);
     };
     return log;
   }
@@ -161,12 +161,11 @@ export class HeadlessChromiumDriverFactory {
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
       const logs$ = new Rx.ReplaySubject<string>();
-      const log = this.createInternalLogger(logger.get('browser-driver'), logs$);
-
-      log(`Sandbox is enabled: ${this.config.browser.chromium.disableSandbox ?? `true`}`);
+      const log = this.createDiagnosticLogger(logger.get('browser-driver'), logs$);
 
       const chromiumArgs = this.getChromiumArgs();
       log(`Chromium launch args set to: ${chromiumArgs}`);
+      log(`Sandbox is disabled: ${this.config.browser.chromium.disableSandbox}`);
       log(`Creating browser page driver...`, 'info');
 
       // We set the viewport width using the client-side layout info to reduce the chances of
@@ -184,10 +183,10 @@ export class HeadlessChromiumDriverFactory {
       );
 
       (async () => {
-        log(`sandbox disabled: ${this.config.browser.chromium.disableSandbox ?? `false`}`);
-        const { os: sandboxOs } = await getDefaultChromiumSandboxDisabled();
-        log(`os / distro: ${JSON.stringify(sandboxOs)}`);
-        log(`architecture: ${os.arch()}`);
+        const {
+          os: { os: distOs, dist, release },
+        } = await getDefaultChromiumSandboxDisabled();
+        log(`Operating system: ${distOs}/${dist}/${release}. Architecture: ${os.arch()}`);
 
         let browser: Browser | undefined;
         try {
@@ -251,7 +250,7 @@ export class HeadlessChromiumDriverFactory {
             }
 
             try {
-              log('Attempting to close browser...');
+              log('Closing the browser...');
               await browser?.close();
               log('Browser closed.');
             } catch (err) {
@@ -297,11 +296,12 @@ export class HeadlessChromiumDriverFactory {
         // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
         observer.add(() => {
           const userDataDir = this.userDataDir;
-          log(`Deleting chromium user data directory at [${userDataDir}]`);
+          logger.debug(`Chromium userDataDir: ${this.userDataDir}`);
+          log(`Deleting chromium user data directory`);
           // the unsubscribe function isn't `async` so we're going to make our best effort at
           // deleting the userDataDir and if it fails log an error.
           del(userDataDir, { force: true }).catch((error) => {
-            log(new Error(`error deleting user data directory at [${userDataDir}]: ${error}`));
+            log(new Error(`error deleting user data directory: ${error}`));
           });
 
           logs$.complete();
@@ -347,13 +347,13 @@ export class HeadlessChromiumDriverFactory {
   getBrowserLogger(page: Page, logger: InternalLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
       concatMap(async (line) => {
+        const lineUrl = line.location()?.url;
+        const urlPath = lineUrl; // strip the hostname and port from the URL
+        const lineText = line.text().trim();
         if (line.type() === 'error') {
           const message = await this.getErrorMessage(line);
           logger(
-            new Error(
-              `Error in browser console:` +
-                ` { message: "${message ?? line.text()}", url: "${line.location()?.url}" }`
-            ),
+            new Error(`[${urlPath}]:` + ` "${message ?? lineText}"`),
             undefined,
             'headless-browser-console'
           );
@@ -361,8 +361,7 @@ export class HeadlessChromiumDriverFactory {
         }
 
         logger(
-          `Message in browser console:` +
-            ` { text: "${line.text()?.trim()}", url: ${line.location()?.url} }`,
+          `Console message [${urlPath}]: "${lineText}"`,
           undefined,
           `headless-browser-console:${line.type()}`
         );

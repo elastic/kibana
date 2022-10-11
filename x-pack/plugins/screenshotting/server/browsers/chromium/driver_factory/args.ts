@@ -15,18 +15,12 @@ interface WindowSize {
 type Proxy = ConfigType['browser']['chromium']['proxy'];
 
 interface LaunchArgs {
-  userDataDir: string;
   windowSize?: WindowSize;
   disableSandbox?: boolean;
   proxy: Proxy;
 }
 
-export const args = ({
-  userDataDir,
-  disableSandbox,
-  windowSize,
-  proxy: proxyConfig,
-}: LaunchArgs) => {
+export const args = ({ disableSandbox, windowSize, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -47,7 +41,6 @@ export const args = ({
     '--mute-audio',
     // Skip first run wizards
     '--no-first-run',
-    `--user-data-dir=${userDataDir}`,
     '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
