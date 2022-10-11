@@ -50,11 +50,11 @@ import {
   HOST_METADATA_LIST_ROUTE,
   metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
-  RESPONDER_CAPABILITIES,
 } from '../../../../../common/endpoint/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -1019,7 +1019,7 @@ describe('when on the endpoint list page', () => {
             ...hosts[0].metadata,
             Endpoint: {
               ...hosts[0].metadata.Endpoint,
-              capabilities: [...RESPONDER_CAPABILITIES],
+              capabilities: [...ENDPOINT_CAPABILITIES],
               state: {
                 ...hosts[0].metadata.Endpoint.state,
                 isolation: false,

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ResponseActions } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -55,7 +55,7 @@ interface NormalizedActionRequest {
   agents: string[];
   createdBy: string;
   createdAt: string;
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: EndpointActionDataParameterTypes;
 }
