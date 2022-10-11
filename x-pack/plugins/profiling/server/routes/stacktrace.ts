@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { chunk } from 'lodash';
 import LRUCache from 'lru-cache';
 import { INDEX_EXECUTABLES, INDEX_FRAMES, INDEX_TRACES } from '../../common';
 import {
@@ -240,42 +239,22 @@ export async function mgetStackTraces({
   logger,
   client,
   events,
-  concurrency = 1,
 }: {
   logger: Logger;
   client: ProfilingESClient;
   events: Map<StackTraceID, number>;
-  concurrency?: number;
 }) {
-  const stackTraceIDs = [...events.keys()];
-  const chunkSize = Math.floor(events.size / concurrency);
-  let chunks = chunk(stackTraceIDs, chunkSize);
-
-  if (chunks.length !== concurrency) {
-    // The last array element contains the remainder, just drop it as irrelevant.
-    chunks = chunks.slice(0, concurrency);
-  }
-
-  const stackResponses = await withProfilingSpan('mget_stacktraces', () =>
-    Promise.all(
-      chunks.map((ids) => {
-        return client.mget<
-          PickFlattened<
-            ProfilingStackTrace,
-            ProfilingESField.StacktraceFrameIDs | ProfilingESField.StacktraceFrameTypes
-          >
-        >('mget_stacktraces_chunk', {
-          index: INDEX_TRACES,
-          ids,
-          realtime: true,
-          _source_includes: [
-            ProfilingESField.StacktraceFrameIDs,
-            ProfilingESField.StacktraceFrameTypes,
-          ],
-        });
-      })
-    )
-  );
+  const stackResponses = await client.mget<
+    PickFlattened<
+      ProfilingStackTrace,
+      ProfilingESField.StacktraceFrameIDs | ProfilingESField.StacktraceFrameTypes
+    >
+  >('mget_stacktraces', {
+    index: INDEX_TRACES,
+    ids: [...events.keys()],
+    realtime: true,
+    _source_includes: [ProfilingESField.StacktraceFrameIDs, ProfilingESField.StacktraceFrameTypes],
+  });
 
   let totalFrames = 0;
   const stackTraces = new Map<StackTraceID, StackTrace>();
@@ -285,31 +264,28 @@ export async function mgetStackTraces({
   const t0 = Date.now();
 
   await withProfilingSpan('decode_stacktraces', async () => {
-    // flatMap() is significantly slower than an explicit for loop
-    for (const res of stackResponses) {
-      for (const trace of res.docs) {
-        if ('error' in trace) {
-          continue;
+    for (const trace of stackResponses.docs) {
+      if ('error' in trace) {
+        continue;
+      }
+      // Sometimes we don't find the trace.
+      // This is due to ES delays writing (data is not immediately seen after write).
+      // Also, ES doesn't know about transactions.
+      if (trace.found) {
+        const traceid = trace._id as StackTraceID;
+        let stackTrace = traceLRU.get(traceid) as StackTrace;
+        if (!stackTrace) {
+          stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
+          traceLRU.set(traceid, stackTrace);
         }
-        // Sometimes we don't find the trace.
-        // This is due to ES delays writing (data is not immediately seen after write).
-        // Also, ES doesn't know about transactions.
-        if (trace.found) {
-          const traceid = trace._id as StackTraceID;
-          let stackTrace = traceLRU.get(traceid) as StackTrace;
-          if (!stackTrace) {
-            stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
-            traceLRU.set(traceid, stackTrace);
-          }
 
-          totalFrames += stackTrace.FrameIDs.length;
-          stackTraces.set(traceid, stackTrace);
-          for (const frameID of stackTrace.FrameIDs) {
-            stackFrameDocIDs.add(frameID);
-          }
-          for (const fileID of stackTrace.FileIDs) {
-            executableDocIDs.add(fileID);
-          }
+        totalFrames += stackTrace.FrameIDs.length;
+        stackTraces.set(traceid, stackTrace);
+        for (const frameID of stackTrace.FrameIDs) {
+          stackFrameDocIDs.add(frameID);
+        }
+        for (const fileID of stackTrace.FileIDs) {
+          executableDocIDs.add(fileID);
         }
       }
     }
