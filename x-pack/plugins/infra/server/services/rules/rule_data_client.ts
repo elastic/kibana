@@ -12,6 +12,7 @@ import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/asset
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
 
 export const createRuleDataClient = ({
   ownerFeatureId,
@@ -30,7 +31,7 @@ export const createRuleDataClient = ({
     feature: ownerFeatureId,
     registrationContext,
     dataset: Dataset.alerts,
-    componentTemplateRefs: [],
+    componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
     componentTemplates: [
       {
         name: 'mappings',
