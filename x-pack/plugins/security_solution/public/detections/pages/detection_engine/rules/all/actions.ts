@@ -15,9 +15,11 @@ import { getEditRuleUrl } from '../../../../../common/components/link_to/redirec
 import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../common/lib/telemetry';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
-import {
+import type {
   BulkActionSummary,
   BulkActionResponse,
+} from '../../../../containers/detection_engine/rules';
+import {
   performBulkAction,
   performBulkExportAction,
 } from '../../../../containers/detection_engine/rules';

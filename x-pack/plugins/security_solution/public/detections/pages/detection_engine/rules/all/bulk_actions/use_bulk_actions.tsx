@@ -11,9 +11,9 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { performBulkExportAction } from '@kbn/security-solution-plugin/public/detections/containers/detection_engine/rules';
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { performBulkExportAction } from '../../../../../containers/detection_engine/rules';
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   BulkAction,
