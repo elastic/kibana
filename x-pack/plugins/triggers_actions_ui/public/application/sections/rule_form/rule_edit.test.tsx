@@ -232,7 +232,7 @@ describe('rule_edit', () => {
 
   it('should render an alert icon next to save button stating the potential change in permissions', async () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     await setup();
 
     expect(wrapper.find('[data-test-subj="changeInPrivilegesTip"]').exists()).toBeTruthy();

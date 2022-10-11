@@ -43,7 +43,7 @@ let fetchMock: jest.Mock<any>;
 const flushPromises = () =>
   new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const timeTravel = async (msToRun = 0) => {
   await flushPromises();

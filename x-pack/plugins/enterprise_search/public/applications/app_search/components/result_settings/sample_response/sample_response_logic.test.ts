@@ -83,7 +83,7 @@ describe('SampleResponseLogic', () => {
 
   describe('listeners', () => {
     describe('getSearchResults', () => {
-      beforeAll(() => jest.useFakeTimers('legacy'));
+      beforeAll(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterAll(() => jest.useRealTimers());
 
       it('makes a search API request and calls getSearchResultsSuccess with the first result of the response', async () => {

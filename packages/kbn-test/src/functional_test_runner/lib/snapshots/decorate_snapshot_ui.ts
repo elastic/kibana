@@ -203,7 +203,8 @@ export function expectSnapshot(received: any) {
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {
   const matcher = toMatchSnapshot.bind(snapshotContext as any);
-  const result = matcher(received);
+  // https://github.com/facebook/jest/pull/13240
+  const result: any = matcher(received);
 
   if (!result.pass) {
     throw new Error(result.message());
@@ -217,7 +218,9 @@ function expectToMatchInlineSnapshot(
 ) {
   const matcher = toMatchInlineSnapshot.bind(snapshotContext as any);
 
-  const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
+  // https://github.com/facebook/jest/pull/13240
+  // @ts-expect-error
+  const result: any = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
 
   if (!result.pass) {
     throw new Error(result.message());

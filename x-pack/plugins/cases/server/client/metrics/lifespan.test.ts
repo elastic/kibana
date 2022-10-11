@@ -12,7 +12,7 @@ import { getStatusInfo } from './lifespan';
 describe('lifespan', () => {
   describe('getStatusInfo', () => {
     beforeEach(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
     });
 
     afterEach(() => {

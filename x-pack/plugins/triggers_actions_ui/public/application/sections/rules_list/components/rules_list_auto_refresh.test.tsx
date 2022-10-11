@@ -18,7 +18,7 @@ describe('RulesListAutoRefresh', () => {
   });
 
   it('renders the update text correctly', async () => {
-    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
 
     const wrapper = mountWithIntl(
       <RulesListAutoRefresh lastUpdate={moment('1990-01-01').format()} onRefresh={onRefresh} />
@@ -50,7 +50,7 @@ describe('RulesListAutoRefresh', () => {
   });
 
   it('calls onRefresh when it auto refreshes', async () => {
-    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
 
     mountWithIntl(
       <RulesListAutoRefresh

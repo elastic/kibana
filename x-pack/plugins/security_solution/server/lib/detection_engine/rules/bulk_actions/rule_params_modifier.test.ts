@@ -233,7 +233,7 @@ describe('ruleParamsModifier', () => {
           },
         ]
       );
-      expect(editedRuleParams).toHaveProperty('index', undefined);
+      expect(editedRuleParams).not.toHaveProperty('index');
       expect(editedRuleParams).toHaveProperty('dataViewId', testDataViewId);
     });
 

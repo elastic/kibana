@@ -34,7 +34,7 @@ describe('Painless DiagnosticAdapter', () => {
   let validation: LangValidation;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

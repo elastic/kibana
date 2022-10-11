@@ -39,7 +39,7 @@ jest.mock('../storage', () => ({
 
 describe('useMlNotifications', () => {
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(1663945337063);
   });
 

@@ -248,7 +248,7 @@ export function render<ExtraCore>(
     path,
     useRealStore,
   }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }
