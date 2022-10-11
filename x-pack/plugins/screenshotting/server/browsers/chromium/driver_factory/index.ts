@@ -12,6 +12,7 @@ import { spawn } from 'child_process';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
+import os from 'os';
 import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
@@ -29,7 +30,7 @@ import {
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
 import { ConfigType } from '../../../config';
-// import { getDefaultChromiumSandboxDisabled } from '../../../config/default_chromium_sandbox_disabled';
+import { getDefaultChromiumSandboxDisabled } from '../../../config/default_chromium_sandbox_disabled';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -162,8 +163,6 @@ export class HeadlessChromiumDriverFactory {
       const logs$ = new Rx.ReplaySubject<string>();
       const log = this.createInternalLogger(logger.get('browser-driver'), logs$);
 
-      // TODO log the CPU
-      // TODO log the OS
       log(`Sandbox is enabled: ${this.config.browser.chromium.disableSandbox ?? `true`}`);
 
       const chromiumArgs = this.getChromiumArgs();
@@ -185,6 +184,11 @@ export class HeadlessChromiumDriverFactory {
       );
 
       (async () => {
+        log(`sandbox disabled: ${this.config.browser.chromium.disableSandbox ?? `false`}`);
+        const { os: sandboxOs } = await getDefaultChromiumSandboxDisabled();
+        log(`os / distro: ${JSON.stringify(sandboxOs)}`);
+        log(`architecture: ${os.arch()}`);
+
         let browser: Browser | undefined;
         try {
           browser = await puppeteer.launch({
@@ -200,9 +204,11 @@ export class HeadlessChromiumDriverFactory {
             },
           });
         } catch (err) {
-          observer.error(
-            new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
+          const error = new errors.FailedToSpawnBrowserError(
+            `Error spawning Chromium browser! ${err}`
           );
+          observer.error(error);
+          log(error, 'error');
           return;
         }
 

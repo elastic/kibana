@@ -88,14 +88,13 @@ export interface CaptureResult {
   /**
    * Log messages of a screenshotting run
    * - is sandbox enabled
-   * - type of OS
-   * - type of CPU architecture
+   * - type of OS and CPU architecture
    * - puppeteer launch args
-   * - page URL
    * - browser revision & user-agent
-   * - timings of browser launch and other events
+   * - TODO timings of browser launch and other events
    * - logs from the page console
-   * - errors and warnings from the browser process stderr
+   *
+   * NOTE: errors and warnings from the browser process stdout/stderr are not available.
    */
   logs$: Observable<string>;
 }

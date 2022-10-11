@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
