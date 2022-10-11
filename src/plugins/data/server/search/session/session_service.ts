@@ -207,10 +207,13 @@ export class SearchSessionService implements ISearchSessionService {
 
     return {
       ...findResponse,
-      statuses: sessionStatuses.reduce((res, status, index) => {
-        res[findResponse.saved_objects[index].id] = { status };
-        return res;
-      }, {} as Record<string, SearchSessionStatusResponse>),
+      statuses: sessionStatuses.reduce<Record<string, SearchSessionStatusResponse>>(
+        (res, status, index) => {
+          res[findResponse.saved_objects[index].id] = { status };
+          return res;
+        },
+        {}
+      ),
     };
   };
 
@@ -311,10 +314,13 @@ export class SearchSessionService implements ISearchSessionService {
             const queue = this.trackIdBatchQueueMap.get(sessionId)?.queue ?? [];
             if (queue.length === 0) return;
             this.trackIdBatchQueueMap.delete(sessionId);
-            const batchedIdMapping = queue.reduce((res, next) => {
-              res[next.requestHash] = next.searchInfo;
-              return res;
-            }, {} as SearchSessionSavedObjectAttributes['idMapping']);
+            const batchedIdMapping = queue.reduce<SearchSessionSavedObjectAttributes['idMapping']>(
+              (res, next) => {
+                res[next.requestHash] = next.searchInfo;
+                return res;
+              },
+              {}
+            );
             this.update(queue[0].deps, queue[0].user, sessionId, { idMapping: batchedIdMapping })
               .then(() => {
                 queue.forEach((q) => q.resolve());
