@@ -32,7 +32,7 @@ const ServiceNodeName = euiStyled.div`
   ${truncate(8 * unit)}
 `;
 
-function ServiceNodeOverview() {
+export function JvmMetricsOverview() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -47,7 +47,7 @@ function ServiceNodeOverview() {
         return undefined;
       }
       return callApmApi(
-        'GET /internal/apm/services/{serviceName}/serviceNodes',
+        'GET /internal/apm/services/{serviceName}/metrics/nodes',
         {
           params: {
             path: {
@@ -177,5 +177,3 @@ function ServiceNodeOverview() {
     />
   );
 }
-
-export { ServiceNodeOverview };
