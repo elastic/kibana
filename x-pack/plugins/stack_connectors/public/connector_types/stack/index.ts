@@ -14,3 +14,4 @@ export { getSlackConnectorType } from './slack';
 export { getTeamsConnectorType } from './teams';
 export { getWebhookConnectorType } from './webhook';
 export { getXmattersConnectorType } from './xmatters';
+export { getTorqConnectorType } from './torq';

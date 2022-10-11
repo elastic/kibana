@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getTorqActionType } from './torq';
+export { getActionType as getTorqConnectorType } from './torq';
