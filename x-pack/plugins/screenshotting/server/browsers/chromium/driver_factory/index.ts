@@ -348,7 +348,14 @@ export class HeadlessChromiumDriverFactory {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
       concatMap(async (line) => {
         const lineUrl = line.location()?.url;
-        const urlPath = lineUrl; // strip the hostname and port from the URL
+        let urlPath: string | undefined = '';
+        try {
+          // strip out the hostname and port from the log message
+          urlPath = lineUrl != null ? new URL(lineUrl).pathname : lineUrl;
+        } catch (e) {
+          // URL could not be parsed
+          urlPath = lineUrl;
+        }
         const lineText = line.text().trim();
         if (line.type() === 'error') {
           const message = await this.getErrorMessage(line);
