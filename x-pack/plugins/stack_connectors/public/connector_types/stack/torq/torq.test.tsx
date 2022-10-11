@@ -56,7 +56,7 @@ describe('torq action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: ['Body is required.', 'Body must be a valid JSON.'],
+        body: ['Body is required.'],
       },
     });
   });
