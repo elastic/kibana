@@ -114,5 +114,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
     });
+
+    it('should convert metric with params', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql(
+          'Counter rate of machine.ram per second'
+        );
+      });
+    });
+
+    it('should convert metric with params', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql(
+          'Counter rate of machine.ram per second'
+        );
+      });
+    });
   });
 }
