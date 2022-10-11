@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode, FunctionComponent } from 'react';
+import { useMemo } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 
 import {
@@ -32,6 +33,10 @@ import { useLocalSearch, searchIdField } from '../../../hooks';
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
+
+import { ExperimentalFeaturesService } from '../../../services';
+
+import { promoteFeaturedIntegrations } from './utils';
 
 import { PackageCard } from './package_card';
 
@@ -72,7 +77,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const [isSticky, setIsSticky] = useState(false);
   const [windowScrollY] = useState(window.scrollY);
   const { euiTheme } = useEuiTheme();
-
+  const { noLargeFeaturedIntegrations } = ExperimentalFeaturesService.get();
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
     const onScroll = () => {
@@ -98,12 +103,8 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
-  let gridContent: JSX.Element;
-
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
+  const filteredPromotedList = useMemo(() => {
+    if (isLoading) return [];
     const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
@@ -111,9 +112,21 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             .includes(item[searchIdField])
         )
       : list;
+
+    return noLargeFeaturedIntegrations
+      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
+      : filteredList;
+  }, [isLoading, list, localSearchRef, noLargeFeaturedIntegrations, searchTerm, selectedCategory]);
+
+  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
+  let gridContent: JSX.Element;
+
+  if (isLoading || !localSearchRef.current) {
+    gridContent = <Loading />;
+  } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={filteredPromotedList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
         showCardLabels={showCardLabels}
       />
@@ -122,7 +135,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
-      {featuredList}
+      {!noLargeFeaturedIntegrations && featuredList}
       <div ref={menuRef}>
         <EuiFlexGroup
           alignItems="flexStart"
