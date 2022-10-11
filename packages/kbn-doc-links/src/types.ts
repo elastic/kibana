@@ -111,7 +111,6 @@ export interface DocLinks {
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
-    readonly contentExtraction: string;
     readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
@@ -277,6 +276,7 @@ export interface DocLinks {
     };
     readonly threatIntelInt: string;
     readonly responseActions: string;
+    readonly configureEndpointIntegrationPolicy: string;
   };
   readonly query: {
     readonly eql: string;
