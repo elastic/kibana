@@ -60,7 +60,7 @@ describe('when navigating to integration page', () => {
     cy.visitKibana(integrationsPath);
 
     // open integration policy form
-    cy.getByTestSubj('integration-card:epr:apm:featured').click();
+    cy.getByTestSubj('integration-card:ui_link:apm').click();
     cy.contains('Elastic APM in Fleet').click();
     cy.contains('a', 'APM integration').click();
     cy.getByTestSubj('addIntegrationPolicyButton').click();

@@ -99,7 +99,7 @@ export const mapToCard = ({
     url: uiInternalPathUrl,
     fromIntegrations: selectedCategory,
     integration: 'integration' in item ? item.integration || '' : '',
-    name: 'name' in item ? item.name || '' : '',
+    name: 'name' in item ? item.name : item.id,
     version: 'version' in item ? item.version || '' : '',
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),

@@ -34,6 +34,10 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
+import { ExperimentalFeaturesService } from '../../../services';
+
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
 export interface Props {
@@ -73,7 +77,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const [isSticky, setIsSticky] = useState(false);
   const [windowScrollY] = useState(window.scrollY);
   const { euiTheme } = useEuiTheme();
-
+  const { noLargeFeaturedIntegrations } = ExperimentalFeaturesService.get();
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
     const onScroll = () => {
@@ -99,16 +103,20 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
 
-  const filteredList = useMemo(() => {
+  const filteredPromotedList = useMemo(() => {
     if (isLoading) return [];
-    return searchTerm
+    const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
             .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
       : list;
-  }, [isLoading, list, localSearchRef, searchTerm]);
+
+    return noLargeFeaturedIntegrations
+      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
+      : filteredList;
+  }, [isLoading, list, localSearchRef, noLargeFeaturedIntegrations, searchTerm, selectedCategory]);
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -118,7 +126,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={filteredPromotedList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
         showCardLabels={showCardLabels}
       />
@@ -127,7 +135,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
-      {featuredList}
+      {!noLargeFeaturedIntegrations && featuredList}
       <div ref={menuRef}>
         <EuiFlexGroup
           alignItems="flexStart"
