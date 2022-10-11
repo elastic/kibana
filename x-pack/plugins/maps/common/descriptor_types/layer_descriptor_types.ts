@@ -93,9 +93,7 @@ export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
 
 export type LayerGroupDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.LAYER_GROUP;
-  id: string;
   label: string;
-  parent?: string;
   sourceDescriptor: null;
   visible: boolean;
 };
