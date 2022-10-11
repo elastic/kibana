@@ -7,10 +7,11 @@
 
 import './feature_table.scss';
 
-import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiAccordionProps,
   EuiButtonGroup,
+  EuiButtonGroupOptionProps,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
