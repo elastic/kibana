@@ -14,7 +14,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../translations';
-import type { RuleReference } from '../../types';
+import type { Rule } from '../../types';
 import { MetaInfoDetails } from './details_info/details_info';
 import { HeaderMenu } from '../../header_menu';
 
@@ -25,32 +25,32 @@ const itemCss = css`
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
-  references: RuleReference[];
+  rules: Rule[];
   dataTestSubj: string;
   formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
 }
 
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
-  ({ item, references, dataTestSubj, securityLinkAnchorComponent, formattedDateComponent }) => {
+  ({ item, rules, dataTestSubj, securityLinkAnchorComponent, formattedDateComponent }) => {
     const FormattedDateComponent = formattedDateComponent;
     const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
-      if (references == null || securityLinkAnchorComponent === null) {
+      if (!rules.length || securityLinkAnchorComponent === null) {
         return [];
       }
 
       const SecurityLinkAnchor = securityLinkAnchorComponent;
-      return references.map((reference) => (
+      return rules.map((rule) => (
         <EuiContextMenuItem
-          data-test-subj={`${dataTestSubj || ''}ActionItem${reference.id}`}
-          key={reference.id}
+          data-test-subj={`${dataTestSubj || ''}ActionItem${rule.id}`}
+          key={rule.id}
         >
-          <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
-            <SecurityLinkAnchor referenceName={reference.name} referenceId={reference.id} />
+          <EuiToolTip content={rule.name} anchorClassName="eui-textTruncate">
+            <SecurityLinkAnchor referenceName={rule.name} referenceId={rule.id} />
           </EuiToolTip>
         </EuiContextMenuItem>
       ));
-    }, [references, securityLinkAnchorComponent, dataTestSubj]);
+    }, [rules, securityLinkAnchorComponent, dataTestSubj]);
 
     return (
       <EuiFlexGroup alignItems="center" responsive gutterSize="s" data-test-subj={dataTestSubj}>
@@ -88,7 +88,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             iconType="list"
             actions={itemActions}
             disableActions={false}
-            text={i18n.AFFECTED_RULES(references.length)}
+            text={i18n.AFFECTED_RULES(rules.length)}
             dataTestSubj={dataTestSubj}
           />
         </EuiFlexItem>

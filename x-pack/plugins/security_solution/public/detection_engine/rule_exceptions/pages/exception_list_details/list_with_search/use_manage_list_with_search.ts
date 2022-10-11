@@ -147,13 +147,10 @@ export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
     listType: list.type,
     lastUpdated,
     pagination,
-
     viewerStatus,
     emptyViewerTitle,
     emptyViewerBody,
-
     ruleReferences: exceptionListReferences,
-
     onSearch,
     onAddExceptionClick,
     onDeleteException,

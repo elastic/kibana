@@ -19,6 +19,7 @@ import {
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { ExceptionListDetails } from '../../../../../../detection_engine/rule_exceptions/pages/exception_list_details';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -347,6 +348,7 @@ export const ExceptionListsTable = React.memo(() => {
     },
     [setPagination]
   );
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <>
@@ -391,6 +393,10 @@ export const ExceptionListsTable = React.memo(() => {
               noItemsMessage={emptyPrompt}
               onChange={handlePaginationChange}
               pagination={paginationMemo}
+              onClick={() => {
+                // TODO: need the clickedItem
+                setShowDetails(!showDetails);
+              }}
             />
           </>
         )}
@@ -412,6 +418,7 @@ export const ExceptionListsTable = React.memo(() => {
           titleText={i18n.REFERENCE_MODAL_TITLE}
         />
       </div>
+      {showDetails && <ExceptionListDetails list={tableItems[1]} />}
     </>
   );
 });

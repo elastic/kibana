@@ -20,6 +20,7 @@ import {
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 import type {
   GetExceptionItemProps,
+  RuleReference,
   RuleReferences,
 } from '@kbn/securitysolution-exception-list-components';
 import { findRuleExceptionReferences } from '../../../../../detections/containers/detection_engine/rules';
@@ -129,7 +130,13 @@ export const getExceptionItemsReferences = async (
     return references.reduce<RuleReferences>((acc, result) => {
       const [[key, value]] = Object.entries(result);
 
-      acc[key] = [value];
+      const reference: RuleReference = {
+        name: value.name,
+        id: value.id,
+        rules: value.referenced_rules,
+        listId: value.list_id,
+      };
+      acc[key] = reference;
 
       return acc;
     }, {});

@@ -21,7 +21,7 @@ import {
   ExceptionItemCardComments,
 } from '.';
 
-import type { ExceptionListItemIdentifiers, RuleReference } from '../types';
+import type { ExceptionListItemIdentifiers, Rule } from '../types';
 import { useManageExceptionItemCard } from './use_manage_exception_item_card';
 
 export interface ExceptionItemProps {
@@ -29,7 +29,7 @@ export interface ExceptionItemProps {
   disableActions?: boolean;
   exceptionItem: ExceptionListItemSchema;
   listType: ExceptionListTypeEnum;
-  ruleReferences: RuleReference[];
+  ruleReferences: Rule[];
   editActionLabel?: string;
   deleteActionLabel?: string;
   securityLinkAnchorComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
@@ -76,7 +76,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
         <EuiFlexItem data-test-subj="exceptionItemCardMeta">
           <ExceptionItemCardMetaInfo
             item={exceptionItem}
-            references={ruleReferences}
+            rules={ruleReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
             securityLinkAnchorComponent={securityLinkAnchorComponent}
             formattedDateComponent={formattedDateComponent}

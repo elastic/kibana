@@ -22,7 +22,7 @@ interface LinkAnchorProps {
 const LinkAnchor: FC<LinkAnchorProps> = ({ referenceName, referenceId }) => {
   return (
     <SecuritySolutionLinkAnchor
-      data-test-subj="ruleName"
+      data-test-subj="SecuritySolutionLinkAnchor"
       deepLinkId={SecurityPageName.rules}
       path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
     >
