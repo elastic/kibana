@@ -53,7 +53,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 
-  const result = getColumnsFromVis(
+  const layers = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
@@ -63,12 +63,14 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
 
+  const result = layers[0];
+
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length) {
+  if (result.metrics.length > 1 || result.buckets.all.length) {
     return null;
   }
 
