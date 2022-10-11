@@ -10,9 +10,9 @@ import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_fr
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
 
 export const createRuleDataClient = ({
   ownerFeatureId,
