@@ -331,15 +331,7 @@ export function showThisLayerOnly(layerId: string) {
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (layer.isBasemap(index)) {
-        return;
-      }
-
-      // show target layer
-      if (layer.getId() === layerId) {
-        if (!layer.isVisible()) {
-          dispatch(setLayerVisibility(layerId, true));
-        }
+      if (layer.isBasemap(index) || layer.getId() === layerId) {
         return;
       }
 
@@ -348,6 +340,13 @@ export function showThisLayerOnly(layerId: string) {
         dispatch(setLayerVisibility(layer.getId(), false));
       }
     });
+
+    // show target layer after hiding all other layers 
+    // since hiding layer group will hide its children
+    const targetLayer = getLayerById(layerId, getState());
+    if (targetLayer && !targetLayer.isVisible()) {
+      dispatch(setLayerVisibility(layerId, true));
+    }
   };
 }
 
