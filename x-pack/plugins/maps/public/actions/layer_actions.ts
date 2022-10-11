@@ -305,7 +305,7 @@ export function hideAllLayers() {
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (layer.isVisible() && !layer.isBasemap(index)) {
+      if (!layer.isBasemap(index)) {
         dispatch(setLayerVisibility(layer.getId(), false));
       }
     });
@@ -318,9 +318,7 @@ export function showAllLayers() {
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (!layer.isVisible()) {
-        dispatch(setLayerVisibility(layer.getId(), true));
-      }
+      dispatch(setLayerVisibility(layer.getId(), true));
     });
   };
 }
@@ -336,15 +334,13 @@ export function showThisLayerOnly(layerId: string) {
       }
 
       // hide all other layers
-      if (layer.isVisible()) {
-        dispatch(setLayerVisibility(layer.getId(), false));
-      }
+      dispatch(setLayerVisibility(layer.getId(), false));
     });
 
     // show target layer after hiding all other layers
     // since hiding layer group will hide its children
     const targetLayer = getLayerById(layerId, getState());
-    if (targetLayer && !targetLayer.isVisible()) {
+    if (targetLayer) {
       dispatch(setLayerVisibility(layerId, true));
     }
   };
