@@ -256,6 +256,8 @@ export function MonitorDetailFlyout(props: Props) {
   const monitorDetail = useMonitorDetail(id, location);
   const locationStatuses = useStatusByLocation(id);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
+  console.log(monitorSavedObject);
+  console.log('locations', locations);
   return (
     <EuiFlyout size="s" type="push" onClose={props.onClose}>
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
@@ -296,7 +298,7 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiTitle size="xs">
               <h3>{DURATION_HEADER_TEXT}</h3>
             </EuiTitle>
-            <DetailFlyoutDurationChart {...props} />
+            <DetailFlyoutDurationChart {...props} location={location} />
             <EuiSpacer />
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>
