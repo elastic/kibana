@@ -46,20 +46,29 @@ export const searchSessionsConfigSchema = schema.object({
   }),
 });
 
-export const configSchema = schema.object({
-  search: schema.object({
-    aggs: schema.object({
-      shardDelay: schema.object({
-        // Whether or not to register the shard_delay (which is only available in snapshot versions
-        // of Elasticsearch) agg type/expression function to make it available in the UI for either
-        // functional or manual testing
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-    }),
-    sessions: searchSessionsConfigSchema,
+export const searchConfigSchema = schema.object({
+  asyncSearch: schema.object({
+    waitForCompletion: schema.duration({ defaultValue: '100ms' }),
+    keepAlive: schema.duration({ defaultValue: '1m' }),
+    batchedReduceSize: schema.number({ defaultValue: 64 }),
   }),
+  aggs: schema.object({
+    shardDelay: schema.object({
+      // Whether or not to register the shard_delay (which is only available in snapshot versions
+      // of Elasticsearch) agg type/expression function to make it available in the UI for either
+      // functional or manual testing
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
+  sessions: searchSessionsConfigSchema,
+});
+
+export const configSchema = schema.object({
+  search: searchConfigSchema,
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export type SearchConfigSchema = TypeOf<typeof searchConfigSchema>;
 
 export type SearchSessionsConfigSchema = TypeOf<typeof searchSessionsConfigSchema>;

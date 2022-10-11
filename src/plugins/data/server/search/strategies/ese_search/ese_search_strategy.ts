@@ -33,9 +33,11 @@ import {
   getTotalLoaded,
   shimHitsTotal,
 } from '../es_search';
+import { SearchConfigSchema } from '../../../../config';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
+  searchConfig: SearchConfigSchema,
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
@@ -52,19 +54,15 @@ export const enhancedEsSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
+        ? getDefaultAsyncGetParams(searchConfig, options)
         : {
-            ...(await getDefaultAsyncSubmitParams(
-              uiSettingsClient,
-              searchSessionsClient.getConfig(),
-              options
-            )),
+            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
       const { body, headers } = id

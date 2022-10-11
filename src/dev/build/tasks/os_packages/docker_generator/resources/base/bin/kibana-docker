@@ -41,6 +41,9 @@ kibana_vars=(
     csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
+    data.search.asyncSearch.waitForCompletion
+    data.search.asyncSearch.keepAlive
+    data.search.asyncSearch.batchedReduceSize
     data.search.sessions.defaultExpiration
     data.search.sessions.enabled
     data.search.sessions.maxUpdateRetries
