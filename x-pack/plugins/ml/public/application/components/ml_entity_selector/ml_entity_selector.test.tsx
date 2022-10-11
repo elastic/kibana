@@ -130,6 +130,53 @@ describe('MlEntitySelector', () => {
     ]);
   });
 
+  test('provide current selection update on change with duplicates handling', async () => {
+    (useMlApiContext as jest.MockedFunction<typeof useMlApiContext>).mockImplementationOnce(() => {
+      return {
+        jobs: {
+          getAllJobAndGroupIds,
+        },
+        dataFrameAnalytics: {
+          getDataFrameAnalytics: jest.fn(() => {
+            return Promise.resolve({
+              count: 2,
+              // same ID as the anomaly detection job
+              data_frame_analytics: [{ id: 'ad_01' }, { id: 'dfa_02' }],
+            });
+          }),
+        },
+        trainedModels: {
+          getTrainedModels,
+        },
+      } as unknown as jest.Mocked<MlApiServices>;
+    });
+
+    const onChangeSpy = jest.fn();
+
+    const { getByTestId } = render(
+      <MlEntitySelector
+        selectedOptions={[{ id: 'ad_01' }, { id: 'keep_it' }]}
+        onSelectionChange={onChangeSpy}
+        handleDuplicates={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('mlEntitySelector_loaded')).toBeInTheDocument();
+    });
+
+    // Assert selected
+    const comboBoxInput = getByTestId('comboBoxInput');
+    const selectedOptions = comboBoxInput.querySelectorAll('.euiComboBoxPill');
+    expect(selectedOptions).toHaveLength(3);
+    expect(selectedOptions[0]).toHaveAttribute('id', 'anomaly_detector:ad_01');
+    expect(selectedOptions[1]).toHaveAttribute('id', 'data_frame_analytics:ad_01');
+
+    // Assert removal
+    selectedOptions[0].getElementsByTagName('button')[0].click();
+    expect(onChangeSpy).toHaveBeenCalledWith([{ id: 'keep_it', type: 'unknown' }]);
+  });
+
   test('display a toast on error', async () => {
     const displayErrorToast = jest.fn();
     const sampleError = new Error('try a bit later');
