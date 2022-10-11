@@ -13,7 +13,7 @@ import {
 } from '../../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
-import { createTimeline } from '../../tasks/api_calls/timelines';
+import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
 describe('Export timelines', () => {
@@ -23,7 +23,7 @@ describe('Export timelines', () => {
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
-    createTimeline(getTimelineTemplate(), 'template').then((response) => {
+    createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
     });

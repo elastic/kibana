@@ -7,52 +7,69 @@
 
 import type { CompleteTimeline } from '../../objects/timeline';
 
-export const createTimeline = (
-  timeline: CompleteTimeline,
-  timelineType: 'default' | 'template' = 'default'
-) =>
+const timelineBody = (timeline: CompleteTimeline) => {
+  return {
+    columns: [
+      {
+        id: '@timestamp',
+      },
+      {
+        id: 'user.name',
+      },
+      {
+        id: 'event.category',
+      },
+      {
+        id: 'event.action',
+      },
+      {
+        id: 'host.name',
+      },
+    ],
+    kqlMode: 'filter',
+    kqlQuery: {
+      filterQuery: {
+        kuery: {
+          expression: timeline.query,
+          kind: 'kuery',
+        },
+      },
+    },
+    dateRange: {
+      end: '2022-04-01T12:22:56.000Z',
+      start: '2018-01-01T12:22:56.000Z',
+    },
+    description: timeline.description,
+    title: timeline.title,
+    savedQueryId: null,
+    ...(timeline.dataViewId != null && timeline.indexNames != null
+      ? { dataViewId: timeline.dataViewId, indexNames: timeline.indexNames }
+      : {}),
+  };
+};
+
+export const createTimeline = (timeline: CompleteTimeline) =>
   cy.request({
     method: 'POST',
     url: 'api/timeline',
     body: {
       timeline: {
-        columns: [
-          {
-            id: '@timestamp',
-          },
-          {
-            id: 'user.name',
-          },
-          {
-            id: 'event.category',
-          },
-          {
-            id: 'event.action',
-          },
-          {
-            id: 'host.name',
-          },
-        ],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: {
-            kuery: {
-              expression: timeline.query,
-              kind: 'kuery',
-            },
-          },
-        },
-        dateRange: {
-          end: '2022-04-01T12:22:56.000Z',
-          start: '2018-01-01T12:22:56.000Z',
-        },
-        description: timeline.description,
-        title: timeline.title,
-        timelineType,
-        savedQueryId: null,
-        ...(timeline.dataViewId != null && timeline.indexNames != null
-          ? { dataViewId: timeline.dataViewId, indexNames: timeline.indexNames }
-          : {}),
+        ...timelineBody(timeline),
+        timelineType: 'default',
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
+export const createTimelineTemplate = (timeline: CompleteTimeline) =>
+  cy.request({
+    method: 'POST',
+    url: 'api/timeline',
+    body: {
+      timeline: {
+        ...timelineBody(timeline),
+        timelineType: 'template',
+        templateTimelineVersion: 1,
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
