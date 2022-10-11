@@ -10,12 +10,11 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { BaseRunningService } from '../../common/base_running_service';
-// FIXME:PT move these to a common directory or to `agent_emulator` once action reponder is removed
 import {
   fetchEndpointActionList,
   sendEndpointActionResponse,
   sendFleetActionResponse,
-} from '../../action_responder/utils';
+} from './endpoint_response_actions';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
 /**
