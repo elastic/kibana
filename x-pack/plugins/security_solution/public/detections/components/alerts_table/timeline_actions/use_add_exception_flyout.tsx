@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
 
 interface UseExceptionFlyoutProps {
-  ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
   timelineId: string;
   onRuleChange?: () => void;
@@ -21,7 +19,6 @@ interface UseExceptionFlyoutProps {
 interface UseExceptionFlyout {
   exceptionFlyoutType: ExceptionListTypeEnum | null;
   openAddExceptionFlyout: boolean;
-  ruleIndices: string[];
   onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
   onAddExceptionCancel: (didRuleChange: boolean) => void;
   onAddExceptionConfirm: (
@@ -32,7 +29,6 @@ interface UseExceptionFlyout {
 }
 
 export const useExceptionFlyout = ({
-  ruleIndex,
   refetch,
   timelineId,
   onRuleChange,
@@ -41,14 +37,6 @@ export const useExceptionFlyout = ({
   const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
     null
   );
-
-  const ruleIndices = useMemo((): string[] => {
-    if (ruleIndex != null) {
-      return ruleIndex;
-    } else {
-      return DEFAULT_INDEX_PATTERN;
-    }
-  }, [ruleIndex]);
 
   const onAddExceptionTypeClick = useCallback((exceptionListType?: ExceptionListTypeEnum): void => {
     setExceptionFlyoutType(exceptionListType ?? null);
@@ -75,7 +63,6 @@ export const useExceptionFlyout = ({
 
   return {
     exceptionFlyoutType,
-    ruleIndices,
     openAddExceptionFlyout,
     onAddExceptionTypeClick,
     onAddExceptionCancel,

@@ -64,12 +64,16 @@ export const FlyoutFooterComponent = React.memo(
     refetchFlyoutData,
   }: FlyoutFooterProps & PropsFromRedux) => {
     const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
-    const ruleIndex = useMemo(
+    const ruleIndexRaw = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
         find({ category: 'kibana', field: 'kibana.alert.rule.parameters.index' }, detailsData)
           ?.values,
       [detailsData]
+    );
+    const ruleIndex = useMemo(
+      (): string[] | undefined => (Array.isArray(ruleIndexRaw) ? ruleIndexRaw : undefined),
+      [ruleIndexRaw]
     );
     const ruleDataViewIdRaw = useMemo(
       () =>
@@ -121,9 +125,7 @@ export const FlyoutFooterComponent = React.memo(
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
-      ruleIndices,
     } = useExceptionFlyout({
-      ruleIndex,
       refetch: refetchAll,
       timelineId,
     });
@@ -175,7 +177,7 @@ export const FlyoutFooterComponent = React.memo(
           addExceptionModalWrapperData.eventId != null && (
             <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}
-              ruleIndices={ruleIndices}
+              ruleIndices={ruleIndex}
               ruleDataViewId={ruleDataViewId}
               exceptionListType={exceptionFlyoutType}
               onCancel={onAddExceptionCancel}

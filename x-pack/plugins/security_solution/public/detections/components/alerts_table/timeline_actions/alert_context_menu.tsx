@@ -149,12 +149,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const {
     exceptionFlyoutType,
     openAddExceptionFlyout,
-    ruleIndices,
     onAddExceptionCancel,
     onAddExceptionConfirm,
     onAddExceptionTypeClick,
   } = useExceptionFlyout({
-    ruleIndex,
     refetch: refetchAll,
     onRuleChange,
     timelineId,
@@ -254,7 +252,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {openAddExceptionFlyout && ruleId != null && ruleName != null && ecsRowData?._id != null && (
         <AddExceptionFlyoutWrapper
           ruleId={ruleId}
-          ruleIndices={ruleIndices}
+          ruleIndices={ruleIndex}
           ruleDataViewId={ruleDataViewId}
           ruleName={ruleName}
           exceptionListType={exceptionFlyoutType}
@@ -361,7 +359,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
         ? enrichedAlert.signal.rule.index
         : [enrichedAlert.signal.rule.index];
     }
-    return [ruleIndices];
+    return ruleIndices;
   }, [enrichedAlert, ruleIndices]);
 
   const memoDataViewId = useMemo(() => {
@@ -400,7 +398,10 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     ] as Rule[];
   }, [enrichedAlert, memoDataViewId, memoRuleIndices, ruleId, ruleName]);
 
-  const isLoading = (isLoadingAlertData && isSignalIndexLoading) || enrichedAlert == null;
+  const isLoading =
+    (isLoadingAlertData && isSignalIndexLoading) ||
+    enrichedAlert == null ||
+    memoRuleIndices == null;
 
   return (
     <AddExceptionFlyout
