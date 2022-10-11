@@ -68,7 +68,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
   }
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1) {
+  if (result.metrics.length > 1 || result.buckets.length) {
     return null;
   }
 
