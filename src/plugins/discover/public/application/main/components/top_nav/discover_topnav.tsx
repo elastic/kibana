@@ -62,7 +62,8 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -107,22 +108,16 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataViewToSave) => {
-                if (dataViewToSave.id) {
-                  stateContainer.actions.changeDataView(dataViewToSave.id);
-                }
-              },
-              allowAdHocDataView: true,
-            });
-          }
-        : undefined,
-    [canEditDataView, dataViewEditor, stateContainer]
-  );
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataViewToSave) => {
+        if (dataViewToSave.id) {
+          stateContainer.actions.changeDataView(dataViewToSave.id);
+        }
+      },
+      allowAdHocDataView: true,
+    });
+  }, [dataViewEditor, stateContainer]);
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {

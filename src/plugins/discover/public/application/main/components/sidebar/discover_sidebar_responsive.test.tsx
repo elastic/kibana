@@ -181,7 +181,9 @@ describe('discover responsive sidebar', function () {
           <DiscoverSidebarResponsive {...props} />
         </KibanaContextProvider>
       );
-      comp.update();
+      // wait for lazy modules
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await comp.update();
     });
   });
 

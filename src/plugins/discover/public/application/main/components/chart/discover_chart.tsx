@@ -18,16 +18,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  getVisualizeInformation,
+  triggerVisualizeActions,
+} from '@kbn/unified-field-list-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  getVisualizeInformation,
-  triggerVisualizeActions,
-} from '../sidebar/lib/visualize_trigger_utils';
+import { getUiActions } from '../../../../kibana_services';
+import { PLUGIN_ID } from '../../../../../common';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -70,7 +72,13 @@ export function DiscoverChart({
 
   useEffect(() => {
     if (!timeField) return;
-    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
+    getVisualizeInformation(
+      getUiActions(),
+      timeField,
+      dataView,
+      savedSearch.columns || [],
+      []
+    ).then((info) => {
       setCanVisualize(Boolean(info));
     });
   }, [dataView, savedSearch.columns, timeField]);
@@ -79,7 +87,13 @@ export function DiscoverChart({
     if (!timeField) {
       return;
     }
-    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
+    triggerVisualizeActions(
+      getUiActions(),
+      timeField,
+      savedSearch.columns || [],
+      PLUGIN_ID,
+      dataView
+    );
   }, [dataView, savedSearch.columns, timeField]);
 
   const onShowChartOptions = useCallback(() => {

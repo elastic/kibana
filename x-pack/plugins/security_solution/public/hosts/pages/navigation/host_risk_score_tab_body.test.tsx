@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-import { useHostRiskScore, useHostRiskScoreKpi } from '../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { HostRiskScoreQueryTabBody } from './host_risk_score_tab_body';
 import { HostsType } from '../../store/model';
@@ -18,8 +18,8 @@ jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 
 describe('Host risk score query tab body', () => {
-  const mockUseHostRiskScore = useHostRiskScore as jest.Mock;
-  const mockUseHostRiskScoreKpi = useHostRiskScoreKpi as jest.Mock;
+  const mockUseRiskScore = useRiskScore as jest.Mock;
+  const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     indexNames: [],
@@ -32,7 +32,7 @@ describe('Host risk score query tab body', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-    mockUseHostRiskScoreKpi.mockReturnValue({
+    mockUseRiskScoreKpi.mockReturnValue({
       loading: false,
       severityCount: {
         unknown: 12,
@@ -42,7 +42,7 @@ describe('Host risk score query tab body', () => {
         critical: 12,
       },
     });
-    mockUseHostRiskScore.mockReturnValue([
+    mockUseRiskScore.mockReturnValue([
       false,
       {
         hosts: [],
@@ -65,8 +65,8 @@ describe('Host risk score query tab body', () => {
         <HostRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseHostRiskScore.mock.calls[0][0].skip).toEqual(false);
-    expect(mockUseHostRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
   it('toggleStatus=false, skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
@@ -75,7 +75,7 @@ describe('Host risk score query tab body', () => {
         <HostRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseHostRiskScore.mock.calls[0][0].skip).toEqual(true);
-    expect(mockUseHostRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 });
