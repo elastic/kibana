@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 interface SettingsPanelProps {
   description: string;
+  label: string;
   link: React.ReactNode;
   onChange: (event: EuiSwitchEvent) => void;
   title: string;
@@ -28,6 +29,7 @@ interface SettingsPanelProps {
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   description,
+  label,
   link,
   onChange,
   title,
@@ -57,13 +59,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     <EuiSplitPanel.Inner grow={false} color="subdued">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiSwitch
-            checked={value}
-            label={i18n.translate('xpack.enterpriseSearch.content.settings.extractBinaryLabel', {
-              defaultMessage: 'Content extraction',
-            })}
-            onChange={onChange}
-          />
+          <EuiSwitch checked={value} label={label} onChange={onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{link}</EuiFlexItem>
       </EuiFlexGroup>
