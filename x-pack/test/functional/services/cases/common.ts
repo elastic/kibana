@@ -101,5 +101,14 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await (await find.byClassName('euiSelectableListItem__content')).click();
       await header.waitUntilLoadingHasFinished();
     },
+
+    async selectAllRowsInAssigneesPopover() {
+      const rows = await find.allByCssSelector('.euiSelectableListItem__content');
+      for (const row of rows) {
+        await row.click();
+      }
+
+      await header.waitUntilLoadingHasFinished();
+    },
   };
 }

@@ -228,14 +228,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      it('filters cases by the first cases all user assignee', async () => {
-        await cases.casesTable.filterByAssignee('all');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
-      });
+      describe('assignees filtering', () => {
+        it('filters cases by the first cases all user assignee', async () => {
+          await cases.casesTable.filterByAssignee('all');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user');
+        });
 
-      it('filters cases by the casesAllUser2 assignee', async () => {
-        await cases.casesTable.filterByAssignee('2');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
+        it('filters cases by the casesAllUser2 assignee', async () => {
+          await cases.casesTable.filterByAssignee('2');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+        });
       });
     });
 
