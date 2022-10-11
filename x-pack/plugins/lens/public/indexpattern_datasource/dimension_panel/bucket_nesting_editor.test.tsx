@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { GenericIndexPatternColumn } from '../indexpattern';
-import { IndexPatternField } from '../../types';
+import { IndexPatternField, VisualizationDimensionGroupConfig } from '../../types';
 
 const fieldMap: Record<string, IndexPatternField> = {
   a: { displayName: 'a' } as IndexPatternField,
@@ -270,5 +270,27 @@ describe('BucketNestingEditor', () => {
     });
 
     expect(setColumns).toHaveBeenCalledWith(['b', 'c', 'a']);
+  });
+
+  it('should display nothing if visualization exposes the hidden flag', () => {
+    const component = mount(
+      <BucketNestingEditor
+        columnId="a"
+        getFieldByName={getFieldByName}
+        layer={{
+          columnOrder: ['c', 'a', 'b'],
+          columns: {
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
+          },
+          indexPatternId: 'foo',
+        }}
+        setColumns={jest.fn()}
+        visualizationGroup={{ hideGrouping: true } as VisualizationDimensionGroupConfig}
+      />
+    );
+
+    expect(component.children().length).toBe(0);
   });
 });
