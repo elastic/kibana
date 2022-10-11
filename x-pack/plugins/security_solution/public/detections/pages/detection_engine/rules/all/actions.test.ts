@@ -7,6 +7,7 @@
 
 import { performBulkAction } from '../../../../containers/detection_engine/rules';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../common/lib/telemetry';
+import { BulkAction } from '../../../../../../common/detection_engine/schemas/request';
 
 import { performTrackableBulkAction } from './actions';
 
@@ -59,13 +60,13 @@ describe('Rule Actions', () => {
       });
 
       test('sends enable action telemetry', async () => {
-        await performTrackableBulkAction('enable', 'some query');
+        await performTrackableBulkAction(BulkAction.enable, 'some query');
 
         expect(track).toHaveBeenCalledWith(METRIC_TYPE.COUNT, TELEMETRY_EVENT.CUSTOM_RULE_ENABLED);
       });
 
       test('sends disable action telemetry', async () => {
-        await performTrackableBulkAction('disable', 'some query');
+        await performTrackableBulkAction(BulkAction.disable, 'some query');
 
         expect(track).toHaveBeenCalledWith(METRIC_TYPE.COUNT, TELEMETRY_EVENT.CUSTOM_RULE_DISABLED);
       });

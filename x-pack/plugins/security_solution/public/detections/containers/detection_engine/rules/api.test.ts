@@ -6,7 +6,7 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { BulkActionEditType } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
