@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  observTourActiveStorageKey,
-  observTourStepStorageKey,
-} from '@kbn/observability-plugin/public/components/shared/tour';
+import { observTourStepStorageKey } from '@kbn/observability-plugin/public/components/shared/tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -17,9 +14,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const find = getService('find');
+  const supertest = getService('supertest');
 
   const setInitialTourState = async (activeStep?: number) => {
-    await browser.setLocalStorageItem(observTourActiveStorageKey, 'true');
     await browser.setLocalStorageItem(observTourStepStorageKey, String(activeStep || 1));
     await browser.refresh();
   };
@@ -29,6 +26,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await supertest
+        .put(`/api/guided_onboarding`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          status: 'in_progress',
+          guidedId: 'observability',
+          isActive: true,
+          steps: [
+            {
+              id: 'add_data',
+              status: 'complete',
+            },
+            {
+              id: 'view_dashboard',
+              status: 'complete',
+            },
+            {
+              id: 'tour_observability',
+              status: 'in_progress',
+            },
+          ],
+        })
+        .expect(200);
       await pageObjects.common.navigateToApp('observability');
       // Need to increase the browser height so the tour steps fit to screen
       await browser.setWindowSize(1600, 1400);
@@ -36,7 +56,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await browser.removeLocalStorageItem(observTourActiveStorageKey);
       await browser.removeLocalStorageItem(observTourStepStorageKey);
     });
 
