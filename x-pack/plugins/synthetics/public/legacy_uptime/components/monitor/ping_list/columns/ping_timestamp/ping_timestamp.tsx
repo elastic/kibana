@@ -41,7 +41,7 @@ export const PingTimestamp = ({
   label,
   checkGroup,
   stepStatus,
-  allStepsLoaded,
+  allStepsLoaded = true,
   initialStepNo = 1,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
