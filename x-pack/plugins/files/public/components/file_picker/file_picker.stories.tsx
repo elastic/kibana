@@ -73,8 +73,26 @@ function createFileJSON(): FileJSON {
     status: 'READY',
   };
 }
-export const Basic = Template.bind({});
-Basic.decorators = [
+export const BasicOne = Template.bind({});
+BasicOne.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+          list: async (): Promise<FilesClientResponses['list']> => ({
+            files: [createFileJSON()],
+          }),
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
+
+export const BasicMany = Template.bind({});
+BasicMany.decorators = [
   (Story) => (
     <FilesContext
       client={
@@ -82,7 +100,6 @@ Basic.decorators = [
           getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
           list: async (): Promise<FilesClientResponses['list']> => ({
             files: [
-              createFileJSON(),
               createFileJSON(),
               createFileJSON(),
               createFileJSON(),
