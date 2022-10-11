@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -23,6 +23,7 @@ import {
   PROCESS_ANCESTRY_EMPTY,
   PROCESS_ANCESTRY_ERROR,
 } from './translations';
+import { BETA } from '../../../translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
@@ -109,6 +110,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         }
         renderContent={renderContent}
         onToggle={onToggle}
+        extraAction={<EuiBetaBadge size="s" label={BETA} color="subdued" />}
       />
     );
   }
