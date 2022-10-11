@@ -730,7 +730,7 @@ Example: \`gte(average(bytes), 1000)\`
 Returns a value depending on whether the element of condition is true or false.
 
 Example: Average revenue per customer but in some cases customer id is not provided which counts as additional customer
-\`sum(total)/(cardinality(customer_id) + ifelse(count() > count(filter=customer_id:*), 1, 0)\`
+\`sum(total)/(cardinality(customer_id) + ifelse(count() > count(filter=customer_id:*), 1, 0))\`
     `,
     }),
   },
