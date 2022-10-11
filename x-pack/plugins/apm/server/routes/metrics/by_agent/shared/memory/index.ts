@@ -62,7 +62,7 @@ export const percentCgroupMemoryUsedScript = {
     `,
 } as const;
 
-export async function getMemoryInfo({
+async function fetchMemoryInfo({
   environment,
   kuery,
   setup,
@@ -127,7 +127,7 @@ export async function getMemoryInfo({
     },
   };
 
-  const response = await apmEventClient.search('get_memory_info', params);
+  const response = await apmEventClient.search('fetch_memory_info', params);
 
   return {
     hasData: response.hits.total.value > 0,
@@ -150,6 +150,55 @@ export async function getMemoryInfo({
   };
 }
 
+export async function getMemoryInfo({
+  environment,
+  kuery,
+  setup,
+  serviceName,
+  serviceNodeName,
+  start,
+  end,
+}: {
+  environment: string;
+  kuery: string;
+  setup: Setup;
+  serviceName: string;
+  serviceNodeName?: string;
+  start: number;
+  end: number;
+}) {
+  return withApmSpan('get_memory_info', async () => {
+    const options = {
+      environment,
+      kuery,
+      setup,
+      serviceName,
+      serviceNodeName,
+      start,
+      end,
+    };
+    let memoryInfo = await fetchMemoryInfo({
+      ...options,
+      additionalFilters: [
+        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+      ],
+      script: percentCgroupMemoryUsedScript,
+    });
+
+    if (!memoryInfo.hasData) {
+      memoryInfo = await fetchMemoryInfo({
+        ...options,
+        additionalFilters: [
+          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+        ],
+        script: percentSystemMemoryUsedScript,
+      });
+    }
+    return memoryInfo;
+  });
+}
+
 export async function getMemoryChartData({
   environment,
   kuery,
@@ -168,7 +217,7 @@ export async function getMemoryChartData({
   end: number;
 }): Promise<FetchAndTransformMetrics> {
   return withApmSpan('get_memory_metrics_charts', async () => {
-    const options = {
+    const memoryInfo = await getMemoryInfo({
       environment,
       kuery,
       setup,
@@ -176,25 +225,7 @@ export async function getMemoryChartData({
       serviceNodeName,
       start,
       end,
-    };
-    let memoryInfo = await getMemoryInfo({
-      ...options,
-      additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-      ],
-      script: percentCgroupMemoryUsedScript,
     });
-
-    if (!memoryInfo.hasData) {
-      memoryInfo = await getMemoryInfo({
-        ...options,
-        additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-        ],
-        script: percentSystemMemoryUsedScript,
-      });
-    }
 
     return {
       key: 'memory_usage_chart',
