@@ -18,6 +18,10 @@ export class FilePickerState {
     return this.fileSet.size === 0;
   }
 
+  public hasFilesSelected = (): boolean => {
+    return this.fileSet.size > 0;
+  };
+
   public addFile = (fileId: string | string[]): void => {
     (Array.isArray(fileId) ? fileId : [fileId]).forEach((id) => this.fileSet.add(id));
     this.sendNext();

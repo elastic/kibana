@@ -9,6 +9,7 @@ import React from 'react';
 import type { FunctionComponent } from 'react';
 import { UploadFile } from '../../upload_file';
 import { useFilePickerContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 
 interface Props {
   kind: string;
@@ -22,6 +23,7 @@ export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
       immediate
       fullWidth
       onDone={(file) => state.addFile(file.map(({ id }) => id))}
+      initialPromptText={i18nTexts.emptyStatePrompt}
     />
   );
 };

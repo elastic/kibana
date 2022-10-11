@@ -63,6 +63,10 @@ export interface Props<Kind extends string = string> {
    */
   allowRepeatedUploads?: boolean;
   /**
+   * The initial text prompt
+   */
+  initialPromptText?: string;
+  /**
    * Called when the an upload process fully completes
    */
   onDone: (files: UploadedFile[]) => void;
@@ -86,6 +90,7 @@ export const UploadFile = <Kind extends string = string>({
   fullWidth,
   allowClear,
   kind: kindId,
+  initialPromptText,
   immediate = false,
   allowRepeatedUploads = false,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
@@ -127,6 +132,7 @@ export const UploadFile = <Kind extends string = string>({
         immediate={immediate}
         allowClear={allowClear}
         fullWidth={fullWidth}
+        initialFilePromptText={initialPromptText}
       />
     </context.Provider>
   );

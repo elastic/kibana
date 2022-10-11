@@ -14,4 +14,7 @@ export const i18nTexts = {
   loadingFilesErrorTitle: i18n.translate('xpack.fileUpload.filePicker.error.loadingTitle', {
     defaultMessage: 'Something went wrong while loading files',
   }),
+  emptyStatePrompt: i18n.translate('xpack.fileUpload.filePicker.emptyStatePrompt', {
+    defaultMessage: 'Upload a file to get started',
+  }),
 };

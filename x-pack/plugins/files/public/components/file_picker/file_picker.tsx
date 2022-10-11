@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { EuiButton, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
 import { css } from '@emotion/react';
 import { FilePickerContext } from './context';
@@ -18,6 +18,7 @@ import { useBehaviorSubject } from '../use_behavior_subject';
 import { Title } from './components/title';
 import { ErrorContent } from './components/error_content';
 import { UploadFilesPrompt } from './components/upload_files';
+import * as layout from './components/layout';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -38,58 +39,63 @@ const Component: FunctionComponent<Props> = ({ kind, perPage }) => {
     queryFn: () => client.list({ kind, perPage }),
     retry: false,
   });
-  const { euiTheme } = useEuiTheme();
-
-  const hasFilesSelected = Boolean(selectedFiles.length);
 
   return (
-    <div
-      css={css`
-        display: grid;
-        place-items: center;
-        grid-template-columns: ${euiTheme.size.m} 1fr 2fr 1fr ${euiTheme.size.m};
-        grid-template-rows: 1fr ${euiTheme.size.m} 3fr 1fr;
-        grid-template-areas:
-          '. title title . .'
-          '. . . . .'
-          '. content content content .'
-          '. footer footer footer .';
-      `}
-    >
-      <div
+    <layout.Grid>
+      <layout.Header
         css={css`
-          grid-area: title;
           place-self: center start;
         `}
       >
         <Title />
-      </div>
-      <div
-        css={css`
-          grid-area: content;
-          place-self: center stretch;
-        `}
-      >
-        {status === 'loading' ? (
+      </layout.Header>
+      {status === 'loading' ? (
+        <layout.ContentAndFooter
+          css={css`
+            place-self: center stretch;
+          `}
+        >
           <EuiLoadingSpinner size="xl" />
-        ) : status === 'error' ? (
+        </layout.ContentAndFooter>
+      ) : status === 'error' ? (
+        <layout.ContentAndFooter
+          css={css`
+            place-self: center stretch;
+          `}
+        >
           <ErrorContent error={error as Error} />
-        ) : data.files.length === 0 ? (
+        </layout.ContentAndFooter>
+      ) : data.files.length === 0 ? (
+        <layout.ContentAndFooter
+          css={css`
+            place-self: center stretch;
+          `}
+        >
           <UploadFilesPrompt kind={kind} />
-        ) : (
-          // TODO actually make some content here
-          'OK'
-        )}
-      </div>
-      <div
-        css={css`
-          grid-area: footer;
-          place-self: center end;
-        `}
-      >
-        <EuiButton disabled={!hasFilesSelected}>Select file(s)</EuiButton>
-      </div>
-    </div>
+        </layout.ContentAndFooter>
+      ) : (
+        <>
+          <layout.Content
+            css={css`
+              grid-area: content;
+            `}
+          >
+            {
+              // TODO actually make some content here
+              'OK'
+            }
+          </layout.Content>
+          <layout.Footer
+            css={css`
+              grid-area: footer;
+              place-self: center end;
+            `}
+          >
+            <EuiButton disabled={!state.hasFilesSelected()}>Select file(s)</EuiButton>
+          </layout.Footer>
+        </>
+      )}
+    </layout.Grid>
   );
 };
 
