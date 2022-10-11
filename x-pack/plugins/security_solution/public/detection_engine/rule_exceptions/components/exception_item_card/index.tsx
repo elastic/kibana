@@ -17,14 +17,14 @@ import * as i18n from './translations';
 import { ExceptionItemCardHeader } from './header';
 import { ExceptionItemCardConditions } from './conditions';
 import { ExceptionItemCardMetaInfo } from './meta';
-import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { ExceptionItemCardComments } from './comments';
 
 export interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
   listType: ExceptionListTypeEnum;
   disableActions: boolean;
-  ruleReferences: RuleReferenceSchema[];
+  ruleReferences: ExceptionListRuleReferencesSchema | null;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
   dataTestSubj: string;

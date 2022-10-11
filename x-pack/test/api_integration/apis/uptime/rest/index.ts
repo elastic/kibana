@@ -70,6 +70,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
+      loadTestFile(require.resolve('./uptime_zip_url_deprecation.ts'));
     });
 
     describe('uptime CRUD routes', () => {
