@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .query({
-          namespace_types: `${exceptionList.namespace_type},${exceptionList2.namespace_type}`,
+          namespace_types: 'single,agnostic',
         })
         .expect(200);
 
