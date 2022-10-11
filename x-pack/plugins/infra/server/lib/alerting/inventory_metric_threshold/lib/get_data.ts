@@ -23,9 +23,9 @@ interface BucketKey {
   node: string;
 }
 
-type AdditionalContext = {
+interface AdditionalContext {
   [x: string]: any;
-};
+}
 
 type Response = Record<
   string,
