@@ -136,7 +136,11 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
         <div className="unifiedFieldList__fieldListGrouped__container">
           {Boolean(screenReaderDescriptionForSearchInputId) && (
             <EuiScreenReaderOnly>
-              <div aria-live="polite" id={screenReaderDescriptionForSearchInputId}>
+              <div
+                aria-live="polite"
+                id={screenReaderDescriptionForSearchInputId}
+                data-test-subj="unifiedFieldList__fieldListGroupedDescription"
+              >
                 {i18n.translate('unifiedFieldList.fieldListGrouped.fieldSearchLiveRegion', {
                   defaultMessage:
                     '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',

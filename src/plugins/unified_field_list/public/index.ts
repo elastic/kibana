@@ -46,11 +46,11 @@ export type {
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
 } from './types';
+export { ExistenceFetchStatus } from './types';
 
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
-  ExistenceFetchStatus,
   type ExistingFieldsInfo,
   type FetchExistenceInfoParams,
   type ExistingFieldsReader,

@@ -288,8 +288,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   // TODO: add a loading indicator while info is loading
   const fieldsExistenceStatus = getFieldsExistenceStatus(currentIndexPatternId);
 
-  // console.log(currentIndexPatternId, fieldsExistenceStatus);
-
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
     if (!currentIndexPattern) return [];
@@ -299,6 +297,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
         );
   }, [currentIndexPattern, visualizeGeoFieldTrigger]);
+
+  // console.log(currentIndexPatternId, fieldsExistenceStatus, allFields);
 
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const availableFieldTypes = uniq([
@@ -604,6 +604,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       uiActions,
     ]
   );
+
+  // console.log(fieldGroups);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>

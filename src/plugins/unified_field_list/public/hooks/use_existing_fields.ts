@@ -16,14 +16,8 @@ import {
   getEsQueryConfig,
 } from '@kbn/data-plugin/public';
 import { type DataView } from '@kbn/data-plugin/common';
-import { loadFieldExisting } from '../services/field_existing';
-
-export enum ExistenceFetchStatus {
-  dataViewHasRestrictions = 'dataViewHasRestrictions',
-  failed = 'failed',
-  succeeded = 'succeeded',
-  unknown = 'unknown',
-}
+import { loadFieldExisting } from '../services/field_existing/load_field_existing';
+import { ExistenceFetchStatus } from '../types';
 
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
@@ -83,7 +77,6 @@ export const useExistingFieldsFetcher = (
         return;
       }
 
-      // console.log('fetching', dataViewId);
       const currentInfo = globalMap$.getValue()?.[dataViewId];
 
       if (!mountedRef.current) {
@@ -92,11 +85,18 @@ export const useExistingFieldsFetcher = (
 
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
       const dataView = await dataViews.get(dataViewId);
+
+      if (!dataView) {
+        return;
+      }
+
       const hasRestrictions = Boolean(dataView?.typeMeta?.aggs);
       const info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,
       };
+
+      // console.log('fetching', dataViewId);
 
       try {
         if (hasRestrictions) {

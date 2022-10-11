@@ -19,3 +19,10 @@ export type AddFieldFilterHandler = (
   value: unknown,
   type: '+' | '-'
 ) => void;
+
+export enum ExistenceFetchStatus {
+  dataViewHasRestrictions = 'dataViewHasRestrictions',
+  failed = 'failed',
+  succeeded = 'succeeded',
+  unknown = 'unknown',
+}

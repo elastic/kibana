@@ -13,15 +13,20 @@ import {
   dataViewPluginMocks,
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
-import { InnerIndexPatternDataPanel, IndexPatternDataPanel, Props } from './datapanel';
-import { FieldList } from './field_list';
+import { IndexPatternDataPanel, InnerIndexPatternDataPanel, Props } from './datapanel';
+import {
+  FieldList,
+  ExistenceFetchStatus,
+  type ExistingFieldsReader,
+} from '@kbn/unified-field-list-plugin/public';
+import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
 import { FieldItem } from './field_item';
-import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -33,10 +38,10 @@ import { DOCUMENT_FIELD_NAME } from '../../common';
 import { createIndexPatternServiceMock } from '../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../mocks';
 import { DataViewsState } from '../state_management';
-import { ExistingFieldsMap, FramePublicAPI, IndexPattern } from '../types';
-import { IndexPatternServiceProps } from '../data_views_service/service';
-import { FieldSpec, DataView } from '@kbn/data-views-plugin/public';
+import { IndexPattern } from '../types';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { ReactWrapper } from 'enzyme';
 
 const fieldsOne = [
   {
@@ -162,17 +167,52 @@ const fieldsThree = [
   documentField,
 ];
 
-function getExistingFields(indexPatterns: Record<string, IndexPattern>) {
-  const existingFields: ExistingFieldsMap = {};
-  for (const { title, fields } of Object.values(indexPatterns)) {
+type MockExistingFieldsByDataView = Record<string, Record<string, boolean>>;
+
+function getExistingFieldsMock(indexPatterns: Record<string, IndexPattern>) {
+  const fieldsByDataViewMap: MockExistingFieldsByDataView = {};
+  for (const { id, fields } of Object.values(indexPatterns)) {
     const fieldsMap: Record<string, boolean> = {};
     for (const { displayName, name } of fields) {
       fieldsMap[displayName ?? name] = true;
     }
-    existingFields[title] = fieldsMap;
+    fieldsByDataViewMap[id] = fieldsMap;
   }
-  return existingFields;
+  return jest.fn(
+    (): ExistingFieldsReader => ({
+      hasFieldData: (dataViewId, fieldName) => Boolean(fieldsByDataViewMap[dataViewId][fieldName]),
+      getFieldsExistenceStatus: (dataViewId) => ExistenceFetchStatus.succeeded,
+    })
+  );
 }
+
+function getCustomExistingFieldsMock(fieldsByDataViewMap: MockExistingFieldsByDataView = {}) {
+  return jest.fn(
+    (): ExistingFieldsReader => ({
+      hasFieldData: (dataViewId, fieldName) => Boolean(fieldsByDataViewMap[dataViewId][fieldName]),
+      getFieldsExistenceStatus: (dataViewId) =>
+        dataViewId in fieldsByDataViewMap
+          ? ExistenceFetchStatus.succeeded
+          : ExistenceFetchStatus.unknown,
+    })
+  );
+}
+
+const originalUseExistingFieldsFetcher = UseExistingFieldsApi.useExistingFieldsFetcher;
+
+jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsReader').mockImplementation(() => ({
+  hasFieldData: () => false,
+  getFieldsExistenceStatus: () => ExistenceFetchStatus.unknown,
+}));
+
+jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsFetcher').mockImplementation(() => ({
+  refetchFieldsExistenceInfo: jest.fn(),
+}));
+
+jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
+  indexPatternTitle: 'test',
+  existingFieldNames: fieldsOne.map((field) => field.name),
+}));
 
 const initialState: IndexPatternPrivateState = {
   currentIndexPatternId: '1',
@@ -234,7 +274,11 @@ const initialState: IndexPatternPrivateState = {
   },
 };
 
-function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<DataViewsState> = {}) {
+function getFrameAPIMock({
+  indexPatterns,
+  existingFields,
+  ...rest
+}: Partial<DataViewsState> & { existingFields?: MockExistingFieldsByDataView } = {}) {
   const frameAPI = createMockFramePublicAPI();
   const defaultIndexPatterns = {
     '1': {
@@ -268,13 +312,22 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
       spec: {},
     },
   };
+
+  (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockImplementation(
+    existingFields
+      ? getCustomExistingFieldsMock(existingFields)
+      : getExistingFieldsMock(indexPatterns ?? defaultIndexPatterns)
+  );
+
+  (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(() => ({
+    refetchFieldsExistenceInfo: jest.fn(),
+  }));
+
   return {
     ...frameAPI,
     dataViews: {
       ...frameAPI.dataViews,
       indexPatterns: indexPatterns ?? defaultIndexPatterns,
-      existingFields: existingFields ?? getExistingFields(indexPatterns ?? defaultIndexPatterns),
-      isFirstExistenceFetch: false,
       ...rest,
     },
   };
@@ -291,17 +344,21 @@ describe('IndexPattern Data Panel', () => {
       id: 'a',
       title: 'aaa',
       timeFieldName: 'atime',
-      fields: [{ name: 'aaa_field_1' }, { name: 'aaa_field_2' }],
-      getFieldByName: getFieldByNameFactory([]),
+      fields: fieldsOne,
+      getFieldByName: getFieldByNameFactory(fieldsOne),
       hasRestrictions: false,
+      isPersisted: true,
+      spec: {},
     },
     b: {
       id: 'b',
       title: 'bbb',
       timeFieldName: 'btime',
-      fields: [{ name: 'bbb_field_1' }, { name: 'bbb_field_2' }],
-      getFieldByName: getFieldByNameFactory([]),
+      fields: fieldsTwo,
+      getFieldByName: getFieldByNameFactory(fieldsTwo),
       hasRestrictions: false,
+      isPersisted: true,
+      spec: {},
     },
   };
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
@@ -313,6 +370,7 @@ describe('IndexPattern Data Panel', () => {
   beforeEach(() => {
     core = coreMock.createStart();
     dataViews = dataViewPluginMocks.createStartContract();
+    const frame = getFrameAPIMock();
     defaultProps = {
       data: dataPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
@@ -334,7 +392,8 @@ describe('IndexPattern Data Panel', () => {
       hasSuggestionForField: jest.fn(() => false),
       uiActions: uiActionsPluginMock.createStartContract(),
       indexPatternService: createIndexPatternServiceMock({ core, dataViews }),
-      frame: getFrameAPIMock(),
+      frame,
+      activeIndexPatterns: [frame.dataViews.indexPatterns['1']],
     };
   });
 
@@ -358,17 +417,22 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    function testProps(updateIndexPatterns: IndexPatternServiceProps['updateIndexPatterns']) {
+    function testProps({
+      currentIndexPatternId,
+      existingFieldsByDataViewMap,
+      otherProps,
+    }: {
+      currentIndexPatternId: keyof typeof indexPatterns;
+      existingFieldsByDataViewMap?: MockExistingFieldsByDataView;
+      otherProps?: object;
+    }) {
       core.uiSettings.get.mockImplementation((key: string) => {
         if (key === UI_SETTINGS.META_FIELDS) {
           return [];
         }
       });
       dataViews.getFieldsForIndexPattern.mockImplementation((dataView) => {
-        return Promise.resolve([
-          { name: `${dataView.title}_field_1` },
-          { name: `${dataView.title}_field_2` },
-        ]) as Promise<FieldSpec[]>;
+        return Promise.resolve(dataView.fields) as Promise<FieldSpec[]>;
       });
       dataViews.get.mockImplementation(async (id: string) => {
         return [indexPatterns.a, indexPatterns.b].find(
@@ -378,7 +442,7 @@ describe('IndexPattern Data Panel', () => {
       return {
         ...defaultProps,
         indexPatternService: createIndexPatternServiceMock({
-          updateIndexPatterns,
+          updateIndexPatterns: jest.fn(),
           core,
           dataViews,
         }),
@@ -388,155 +452,169 @@ describe('IndexPattern Data Panel', () => {
           dragging: { id: '1', humanData: { label: 'Label' } },
         },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
-        frame: {
-          dataViews: {
-            indexPatternRefs: [],
-            existingFields: {},
-            isFirstExistenceFetch: false,
-            indexPatterns,
-          },
-        } as unknown as FramePublicAPI,
+        frame: getFrameAPIMock({
+          indexPatterns: indexPatterns as unknown as DataViewsState['indexPatterns'],
+          existingFields: existingFieldsByDataViewMap ?? {},
+        }),
+        activeIndexPatterns: [indexPatterns[currentIndexPatternId]],
         state: {
-          currentIndexPatternId: 'a',
+          currentIndexPatternId,
           layers: {
             1: {
-              indexPatternId: 'a',
+              indexPatternId: currentIndexPatternId,
               columnOrder: [],
               columns: {},
             },
           },
         } as IndexPatternPrivateState,
+        ...(otherProps || {}),
       };
     }
 
-    async function testExistenceLoading(
-      props: Props,
-      stateChanges?: Partial<IndexPatternPrivateState>,
-      propChanges?: Partial<Props>
-    ) {
+    it('loads existence data', async () => {
+      const props = testProps({
+        currentIndexPatternId: 'a',
+        existingFieldsByDataViewMap: {
+          a: {
+            [indexPatterns.a.fields[0].name]: true,
+            [indexPatterns.a.fields[1].name]: true,
+          },
+        },
+      });
       const inst = mountWithIntl<Props>(<IndexPatternDataPanel {...props} />);
 
-      await act(async () => {
-        inst.update();
-      });
-
-      if (stateChanges || propChanges) {
-        await act(async () => {
-          inst.setProps({
-            ...props,
-            ...(propChanges || {}),
-            state: {
-              ...props.state,
-              ...(stateChanges || {}),
-            },
-          });
-          inst.update();
-        });
-      }
-    }
-
-    it('loads existence data', async () => {
-      const updateIndexPatterns = jest.fn();
-      await testExistenceLoading(testProps(updateIndexPatterns));
-
-      expect(updateIndexPatterns).toHaveBeenCalledWith(
-        {
-          existingFields: {
-            aaa: {
-              aaa_field_1: true,
-              aaa_field_2: true,
-            },
-          },
-          isFirstExistenceFetch: false,
-        },
-        { applyImmediately: true }
+      expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViews: props.activeIndexPatterns,
+          query: props.query,
+          filters: props.filters,
+          fromDate: props.dateRange.fromDate,
+          toDate: props.dateRange.toDate,
+        })
       );
+      expect(UseExistingFieldsApi.useExistingFieldsReader).toHaveBeenCalled();
+      expect(
+        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
+      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
     });
 
     it('loads existence data for current index pattern id', async () => {
-      const updateIndexPatterns = jest.fn();
-      await testExistenceLoading(testProps(updateIndexPatterns), {
+      const props = testProps({
         currentIndexPatternId: 'b',
-      });
-
-      expect(updateIndexPatterns).toHaveBeenCalledWith(
-        {
-          existingFields: {
-            aaa: {
-              aaa_field_1: true,
-              aaa_field_2: true,
-            },
-            bbb: {
-              bbb_field_1: true,
-              bbb_field_2: true,
-            },
+        existingFieldsByDataViewMap: {
+          a: {
+            [indexPatterns.a.fields[0].name]: true,
+            [indexPatterns.a.fields[1].name]: true,
           },
-          isFirstExistenceFetch: false,
+          b: {
+            [indexPatterns.b.fields[0].name]: true,
+          },
         },
-        { applyImmediately: true }
+      });
+      const inst = mountWithIntl<Props>(<IndexPatternDataPanel {...props} />);
+
+      expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViews: props.activeIndexPatterns,
+          query: props.query,
+          filters: props.filters,
+          fromDate: props.dateRange.fromDate,
+          toDate: props.dateRange.toDate,
+        })
       );
+      expect(UseExistingFieldsApi.useExistingFieldsReader).toHaveBeenCalled();
+      expect(
+        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
+      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('does not load existence data if date and index pattern ids are unchanged', async () => {
-      const updateIndexPatterns = jest.fn();
-      await testExistenceLoading(
-        testProps(updateIndexPatterns),
-        {
-          currentIndexPatternId: 'a',
+      const props = testProps({
+        currentIndexPatternId: 'a',
+        existingFieldsByDataViewMap: {
+          a: {
+            [indexPatterns.a.fields[0].name]: true,
+            [indexPatterns.a.fields[1].name]: true,
+          },
         },
-        { dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' } }
+      });
+      (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(
+        originalUseExistingFieldsFetcher
       );
+      let inst: ReactWrapper;
 
-      expect(updateIndexPatterns).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        inst = await mountWithIntl(<IndexPatternDataPanel {...props} />);
+        inst.update();
+      });
+
+      expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViews: props.activeIndexPatterns,
+          fromDate: props.dateRange.fromDate,
+          toDate: props.dateRange.toDate,
+        })
+      );
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await inst!.setProps({ dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' } });
+        await inst!.update();
+      });
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
     });
 
     it('loads existence data if date range changes', async () => {
-      const updateIndexPatterns = jest.fn();
-      await testExistenceLoading(testProps(updateIndexPatterns), undefined, {
-        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
-      });
-
-      expect(updateIndexPatterns).toHaveBeenCalledTimes(2);
-      expect(dataViews.getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
-      expect(dataViews.get).toHaveBeenCalledTimes(2);
-
-      const firstCall = dataViews.getFieldsForIndexPattern.mock.calls[0];
-      expect(firstCall[0]).toEqual(indexPatterns.a);
-      expect(firstCall[1]?.filter?.bool?.filter).toContainEqual(dslQuery);
-      expect(firstCall[1]?.filter?.bool?.filter).toContainEqual({
-        range: {
-          atime: {
-            format: 'strict_date_optional_time',
-            gte: '2019-01-01',
-            lte: '2020-01-01',
+      const props = testProps({
+        currentIndexPatternId: 'a',
+        existingFieldsByDataViewMap: {
+          a: {
+            [indexPatterns.a.fields[0].name]: true,
+            [indexPatterns.a.fields[1].name]: true,
           },
         },
-      });
-
-      const secondCall = dataViews.getFieldsForIndexPattern.mock.calls[1];
-      expect(secondCall[0]).toEqual(indexPatterns.a);
-      expect(secondCall[1]?.filter?.bool?.filter).toContainEqual(dslQuery);
-      expect(secondCall[1]?.filter?.bool?.filter).toContainEqual({
-        range: {
-          atime: {
-            format: 'strict_date_optional_time',
-            gte: '2019-01-01',
-            lte: '2020-01-02',
-          },
+        otherProps: {
+          dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         },
       });
+      (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(
+        originalUseExistingFieldsFetcher
+      );
+      let inst: ReactWrapper;
 
-      expect(updateIndexPatterns).toHaveBeenCalledWith(
-        {
-          existingFields: {
-            aaa: {
-              aaa_field_1: true,
-              aaa_field_2: true,
-            },
-          },
-          isFirstExistenceFetch: false,
-        },
-        { applyImmediately: true }
+      await act(async () => {
+        inst = await mountWithIntl(<IndexPatternDataPanel {...props} />);
+        inst.update();
+      });
+
+      expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViews: props.activeIndexPatterns,
+          fromDate: props.dateRange.fromDate,
+          toDate: props.dateRange.toDate,
+        })
+      );
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+          dslQuery,
+        })
+      );
+
+      await act(async () => {
+        await inst!.setProps({ dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' } });
+        await inst!.update();
+      });
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromDate: '2019-01-01',
+          toDate: '2020-01-02',
+          dslQuery,
+        })
       );
     });
 
@@ -758,7 +836,7 @@ describe('IndexPattern Data Panel', () => {
           frame={getFrameAPIMock({ existingFields: { idx1: {} } })}
         />
       );
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+      expect(wrapper.find(EuiCallOut).length).toEqual(2);
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -790,7 +868,7 @@ describe('IndexPattern Data Panel', () => {
           .length
       ).toEqual(1);
       wrapper.setProps({ frame: getFrameAPIMock({ existingFields: { idx1: {} } }) });
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+      expect(wrapper.find(EuiCallOut).length).toEqual(2);
     });
 
     // TODO: refactor these tests
@@ -897,7 +975,7 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         DOCUMENT_FIELD_NAME,
       ]);
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(3);
+      expect(wrapper.find(EuiCallOut).length).toEqual(3);
     });
 
     it('should toggle type if clicked again', () => {
