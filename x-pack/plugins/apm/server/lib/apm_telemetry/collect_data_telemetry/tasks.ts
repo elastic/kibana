@@ -1159,13 +1159,16 @@ export const tasks: TelemetryTask[] = [
     name: 'per_service',
     executor: async ({ indices, search }) => {
       const response = await search({
-        index: [indices.metric],
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }],
+              filter: [
+                { range: { '@timestamp': { gte: 'now-1h' } } },
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+              ],
             },
           },
           aggs: {
