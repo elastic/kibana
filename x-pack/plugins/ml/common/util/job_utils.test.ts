@@ -22,6 +22,7 @@ import {
   getEarliestDatafeedStartTime,
   resolveMaxTimeInterval,
   getFiltersForDSLQuery,
+  isKnownEmptyQuery,
 } from './job_utils';
 import { CombinedJob, Job } from '../types/anomaly_detection_jobs';
 import { FilterStateStore } from '@kbn/es-query';
@@ -712,6 +713,82 @@ describe('getFiltersForDSLQuery', () => {
           query,
         },
       ]);
+    });
+  });
+
+  describe('isKnownEmptyQuery', () => {
+    test('returns true for default lens created query', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          filter: [],
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+          must_not: [],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query1', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+          must_not: [],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query3', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query4', () => {
+      const result = isKnownEmptyQuery({
+        match_all: {},
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query5', () => {
+      const result = isKnownEmptyQuery({
+        match_phrase: {
+          region: 'us-east-1',
+        },
+      });
+      expect(result).toBe(false);
+    });
+
+    test('returns true for default lens created query6', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                region: 'us-east-1',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+      expect(result).toBe(false);
     });
   });
 });
