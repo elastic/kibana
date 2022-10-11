@@ -230,25 +230,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
       let records: AnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
-        records.push({
-          ...hit._source,
-          record_score:
-            hit._source.record_score > 30
-              ? hit._source.record_score - 25
-              : hit._source.record_score,
-          anomaly_score_explanation: {
-            anomaly_type: 'dip',
-            anomaly_length: 7,
-            single_bucket_impact: 12,
-            multi_bucket_impact: 2,
-            anomaly_characteristics_impact: 8,
-            lower_confidence_bound: 0.12,
-            typical_value: 42.0,
-            upper_confidence_bound: 83.12,
-            high_variance_penalty: true,
-            incomplete_bucket_penalty: false,
-          },
-        });
+        records.push(hit._source);
       });
 
       // Sort anomalies in ascending time order.
