@@ -49,12 +49,13 @@ export function getValueOrName(node: TinymathAST) {
   return node.name;
 }
 
-export function mergeWithGlobalFilter(
+export function mergeWithGlobalFilters(
   operation:
     | OperationDefinition<GenericIndexPatternColumn, 'field'>
     | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   mappedParams: Record<string, string | number>,
-  globalFilter?: Query
+  globalFilter?: Query,
+  globalReducedTimeRange?: string
 ) {
   if (globalFilter && operation.filterable) {
     const languageKey = 'kql' in mappedParams ? 'kql' : 'lucene';
@@ -67,6 +68,10 @@ export function mergeWithGlobalFilter(
       const language = globalFilter.language === 'kuery' ? 'kql' : globalFilter.language;
       mappedParams[language] = globalFilter.query as string;
     }
+  }
+  // Local definition override the global one
+  if (globalReducedTimeRange && operation.canReduceTimeRange && !mappedParams.reducedTimeRange) {
+    mappedParams.reducedTimeRange = globalReducedTimeRange;
   }
   return mappedParams;
 }

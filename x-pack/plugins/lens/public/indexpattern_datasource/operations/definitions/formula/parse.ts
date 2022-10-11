@@ -24,7 +24,7 @@ import {
   findVariables,
   getOperationParams,
   groupArgsByType,
-  mergeWithGlobalFilter,
+  mergeWithGlobalFilters,
   nonNullable,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
@@ -78,7 +78,8 @@ function extractColumns(
   label: string
 ): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
   const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
-  const globalFilter = layer.columns[idPrefix].filter;
+  const { filter: globalFilter, reducedTimeRange: globalReducedTimeRange } =
+    layer.columns[idPrefix];
 
   function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
@@ -111,10 +112,11 @@ function extractColumns(
       }
 
       const mappedParams = {
-        ...mergeWithGlobalFilter(
+        ...mergeWithGlobalFilters(
           nodeOperation,
           getOperationParams(nodeOperation, namedArguments || []),
-          globalFilter
+          globalFilter,
+          globalReducedTimeRange
         ),
         usedInMath: true,
       };
@@ -156,10 +158,11 @@ function extractColumns(
         mathColumn.label = label;
       }
 
-      const mappedParams = mergeWithGlobalFilter(
+      const mappedParams = mergeWithGlobalFilters(
         nodeOperation,
         getOperationParams(nodeOperation, namedArguments || []),
-        globalFilter
+        globalFilter,
+        globalReducedTimeRange
       );
       const newCol = (
         nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
