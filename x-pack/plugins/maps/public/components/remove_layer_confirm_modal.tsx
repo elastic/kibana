@@ -38,7 +38,7 @@ export function RemoveLayerConfirmModal(props: Props) {
     return numChildren > 0 ? (
       <p>
         {i18n.translate('xpack.maps.deleteLayerConfirmModal.multiLayerWarning', {
-          defaultMessage: `Removing this layer will also remove {numChildren} nested layers.`,
+          defaultMessage: `Removing this layer also removes {numChildren} nested layers.`,
           values: { numChildren },
         })}
       </p>
