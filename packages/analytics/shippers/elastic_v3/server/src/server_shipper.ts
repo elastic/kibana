@@ -317,7 +317,7 @@ export class ElasticV3ServerShipper implements IShipper {
 
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
-      this.initContext.logger.debug(
+      this.initContext.logger.info(
         `[Server shipper]: sending ${events.length} performance events - ${eventNames.join(',')}`
       );
     }
