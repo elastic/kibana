@@ -1078,4 +1078,18 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.union([t.literal(2), t.literal(3), t.literal(4)]),
   },
+  time_series_metric: {
+    fieldConfig: {
+      defaultValue: null,
+      type: FIELD_TYPES.SELECT,
+    },
+    schema: t.union([t.literal('gauge'), t.literal('counter'), t.null]),
+  },
+  time_series_dimension: {
+    fieldConfig: {
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: false,
+    },
+    schema: t.boolean,
+  },
 };

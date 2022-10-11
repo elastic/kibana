@@ -92,6 +92,11 @@ describe('AlertsTable', () => {
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
     updatedAt: Date.now(),
+    onToggleColumn: () => {},
+    onResetColumns: () => {},
+    onColumnsChange: () => {},
+    onChangeVisibleColumns: () => {},
+    browserFields: {},
   };
 
   const AlertsTableWithLocale: React.FunctionComponent<AlertsTableProps> = (props) => (
@@ -121,6 +126,11 @@ describe('AlertsTable', () => {
     it('should show when it was updated', () => {
       const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
       expect(getByTestId('toolbar-updated-at')).not.toBe(null);
+    });
+
+    it('should show alerts count', () => {
+      const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
     });
 
     describe('leading control columns', () => {

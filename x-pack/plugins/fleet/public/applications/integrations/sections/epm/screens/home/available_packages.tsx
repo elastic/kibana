@@ -26,6 +26,11 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import {
+  isInputOnlyPolicyTemplate,
+  isIntegrationPolicyTemplate,
+} from '../../../../../../../common/services';
+
 import { useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
@@ -132,8 +137,12 @@ function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
     return pkg.categories;
   }
 
-  const allCategories = pkg.policy_templates?.reduce((accumulator, integration) => {
-    return [...accumulator, ...(integration.categories || [])];
+  const allCategories = pkg.policy_templates?.reduce((accumulator, policyTemplate) => {
+    if (isInputOnlyPolicyTemplate(policyTemplate)) {
+      // input only policy templates do not have categories
+      return accumulator;
+    }
+    return [...accumulator, ...(policyTemplate.categories || [])];
   }, pkg.categories || []);
 
   return _.uniq(allCategories);
@@ -160,8 +169,13 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       ...acc,
       topPackage,
       ...(doesPackageHaveIntegrations(pkg)
-        ? policyTemplates.map((integration) => {
-            const { name, title, description, icons, categories = [] } = integration;
+        ? policyTemplates.map((policyTemplate) => {
+            const { name, title, description, icons } = policyTemplate;
+
+            const categories =
+              isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
+                ? policyTemplate.categories
+                : [];
             const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
@@ -239,27 +253,35 @@ export const AvailablePackages: React.FC<{
   );
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
+  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
+    useGetAppendCustomIntegrations();
+
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
       preference === 'beats' ? [] : eprIntegrationList,
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
+  const cards: IntegrationCardItem[] = useMemo(() => {
+    const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+    return eprAndCustomPackages
+      .map((item) => {
+        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
 
-  const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
-    ...mergedEprPackages,
-    ...(appendCustomIntegrations || []),
-  ];
+  const filteredCards = useMemo(
+    () =>
+      cards.filter((c) => {
+        if (category === '') {
+          return true;
+        }
 
-  const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard({ getAbsolutePath, getHref, item });
-  });
-
-  cards.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
+        return c.categories.includes(category);
+      }),
+    [cards, category]
+  );
 
   const {
     data: eprCategories,
@@ -316,14 +338,6 @@ export const AvailablePackages: React.FC<{
       ...controls,
     ];
   }
-
-  const filteredCards = cards.filter((c) => {
-    if (category === '') {
-      return true;
-    }
-
-    return c.categories.includes(category);
-  });
 
   // TODO: Remove this hard coded list of integrations with a suggestion service
   const featuredList = (
@@ -393,7 +407,7 @@ export const AvailablePackages: React.FC<{
   return (
     <PackageListGrid
       featuredList={featuredList}
-      isLoading={isLoadingAllPackages}
+      isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}

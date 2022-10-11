@@ -33,7 +33,6 @@ export const ComplianceDashboard = () => {
         bottomBorder
         pageTitle={
           <CloudPosturePageTitle
-            isBeta
             title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
               defaultMessage: 'Cloud Posture',
             })}

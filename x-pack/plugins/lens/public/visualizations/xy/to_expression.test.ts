@@ -11,7 +11,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getXyVisualization, XYState } from './xy_visualization';
 import { OperationDescriptor } from '../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
@@ -19,6 +19,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -30,6 +31,7 @@ describe('#toExpression', () => {
     core: coreMock.createStart(),
     storage: {} as IStorageWrapper,
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -100,7 +102,7 @@ describe('#toExpression', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               splitAccessor: 'd',
               xAccessor: 'a',
@@ -126,7 +128,7 @@ describe('#toExpression', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -151,7 +153,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -191,7 +193,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: undefined,
             xAccessor: undefined,
@@ -218,7 +220,7 @@ describe('#toExpression', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               splitAccessor: undefined,
               xAccessor: 'a',
@@ -242,7 +244,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -278,7 +280,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -318,7 +320,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -358,7 +360,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -398,7 +400,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -422,7 +424,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -453,7 +455,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -484,7 +486,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -510,7 +512,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -519,7 +521,7 @@ describe('#toExpression', () => {
           },
           {
             layerId: 'referenceLine',
-            layerType: layerTypes.REFERENCELINE,
+            layerType: LayerTypes.REFERENCELINE,
             accessors: ['b', 'c'],
             yConfig: [{ forAccessor: 'a' }],
           },
@@ -548,7 +550,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -557,9 +559,10 @@ describe('#toExpression', () => {
           },
           {
             layerId: 'first',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             annotations: [],
             indexPatternId: 'my-indexPattern',
+            ignoreGlobalFilters: true,
           },
         ],
       },
@@ -579,7 +582,7 @@ describe('#toExpression', () => {
       layers: [
         {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'area',
           splitAccessor: 'd',
           xAccessor: 'a',

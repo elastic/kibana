@@ -44,35 +44,25 @@ to re-open the flyout and change the rule properties.
 
 All rules share the following four properties:
 
-Name:: The name of the rule. While this name does not have to be unique, the
-name can be referenced in actions and also appears in the searchable rule
-listing in *{rules-ui}*. A distinctive name can help identify and find a rule.
+Name:: The name of the rule. While this name does not have to be unique, a
+distinctive name can help you identify a rule.
 Tags:: A list of tag names that can be applied to a rule. Tags can help you
-organize and find rules, because tags appear in the rule listing in
-*{rules-ui}*, which is searchable by tag.
-Check every:: This value determines how frequently the rule conditions are
-checked. Note that the timing of background rule checks is not guaranteed,
-particularly for intervals of less than 10 seconds. For more information, go to
-<<alerting-production-considerations>>.
-Notify:: This value limits how often actions are repeated when an alert remains
-active across rule checks. For more information, go to
-<<alerting-concepts-suppressing-duplicate-notifications>>. +
-- **Only on status change**: Actions are not repeated when an alert remains
-active across checks. Actions run only when the alert status changes.
-- **Every time alert is active**: Actions are repeated when an alert remains
-active across checks.
-- **On a custom action interval**: Actions are suppressed for the throttle
-interval, but repeat when an alert remains active across checks for a duration
-longer than the throttle interval.
-
-[float]
+organize and find rules.
+Check every:: Defines how often to evaluate the rule condition. Checks are
+queued; they run as close to the defined value as capacity allows. For more
+details, go to <<alerting-production-considerations,Alerting production considerations>>.
+Notify:: Defines how often alerts generate actions. Options include running
+actions at each check interval, only when the alert status changes, or at a
+custom action interval.
++
+--
 [[alerting-concepts-suppressing-duplicate-notifications]]
-[NOTE]
+[TIP]
 ==============================================
 Since actions are triggered per alert, a rule can end up generating a large
 number of actions. Take the following example where a rule is monitoring three
 servers every minute for CPU usage > 0.9, and the rule is set to notify
-`Every time alert is active`:
+`On check intervals`:
 
 * Minute 1: server X123 > 0.9. _One email_ is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. _Two emails_ are sent, one for X123 and one for Y456.
@@ -80,7 +70,7 @@ servers every minute for CPU usage > 0.9, and the rule is set to notify
 
 In this example, three emails are sent for server X123 in the span of 3 minutes
 for the same rule. Often, it's desirable to suppress these re-notifications. If
-you set the rule notify setting to `On a custom action interval` with an interval
+you set the rule notify setting to `On custom action intervals` with an interval
 of 5 minutes, you reduce noise by getting emails only every 5 minutes for
 servers that continue to exceed the threshold:
 
@@ -89,8 +79,9 @@ servers that continue to exceed the threshold:
 * Minute 3: X123, Y456, Z789 > 0.9. _One email_ is sent for Z789.
 
 To get notified only once when a server exceeds the threshold, you can set the
-rule notify setting to `Only on status change`. 
+rule notify setting to `On status changes`. 
 ==============================================
+--
 
 [role="screenshot"]
 image::images/rule-flyout-general-details.png[alt='All rules have name, tags, check every, and notify properties in common']
@@ -225,13 +216,15 @@ Select a rule name from the rule listing to access the *Rule details* page, whic
 [role="screenshot"]
 image::images/rule-details-alerts-active.png[Rule details page with three alerts]
 
-In this example, the rule detects when a site serves more than a threshold number of bytes in a 24 hour period. Four sites are above the threshold. These are called alerts - occurrences of the condition being detected - and the alert name, status, time of detection, and duration of the condition are shown in this view.
+In this example, the rule detects when a site serves more than a threshold number of bytes in a 24 hour period. Four sites are above the threshold. These are called alerts - occurrences of the condition being detected - and the alert name, status, time of detection, and duration of the condition are shown in this view. Alerts come and go from the list depending on whether the rule conditions are met.
 
-Upon detection, each alert can trigger one or more actions. If the condition persists, the same actions will trigger either on the next scheduled rule check, or (if defined) after the re-notify period on the rule has passed. To prevent re-notification, you can suppress future actions by clicking the toggle in the *Mute* column to mute an individual alert.
+When an alert is created, it generates actions. If the conditions that caused the alert persist, the actions run again according to the rule notification settings. There are two common alert statuses:
 
-Alerts will come and go from the list depending on whether they meet the rule conditions or not - unless they are muted. If a muted instance no longer meets the rule conditions, it will appear as inactive in the list. This prevents an alert from triggering actions if it reappears in the future.
+`active`:: The conditions for the rule are met, and actions should be generated according to the notification settings.
+`recovered`:: The conditions for the rule are no longer met, and recovery actions should be generated.
 
-You can also disable a rule altogether. When disabled, the rule stops running checks altogether and will clear any alerts it is tracking. You may want to disable rules that are not currently needed to reduce the load on {kib} and {es}.
+You can suppress future actions for a specific alert by turning on the *Mute* toggle. If a muted alert no longer meets the rule conditions, it stays in the list to avoid generating actions if the conditions recur. You can also disable a rule, which stops it from running checks and clears any alerts it was tracking. You may want to disable rules that are not currently needed to reduce the load on {kib} and {es}.
 
 [role="screenshot"]
 image::images/rule-details-disabling.png[Use the disable toggle to turn off rule checks and clear alerts tracked]
+

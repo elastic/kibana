@@ -27,6 +27,8 @@ import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import {
   calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  defaultEndpointPermissions,
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
@@ -61,7 +63,7 @@ export class RequestContextFactory implements IRequestContextFactory {
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
     const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
-    const { lists, ruleRegistry, security } = plugins;
+    const { lists, ruleRegistry, security, licensing, osquery } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
@@ -81,6 +83,19 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const coreContext = await context.core;
 
+    let endpointPermissions = defaultEndpointPermissions();
+    if (endpointAppContextService.security) {
+      const checkPrivileges =
+        endpointAppContextService.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+      const { privileges } = await checkPrivileges({
+        kibana: [
+          endpointAppContextService.security.authz.actions.ui.get('siem', 'crud'),
+          endpointAppContextService.security.authz.actions.ui.get('siem', 'show'),
+        ],
+      });
+      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
+    }
+
     return {
       core: coreContext,
 
@@ -91,8 +106,16 @@ export class RequestContextFactory implements IRequestContextFactory {
           if (!startPlugins.fleet) {
             endpointAuthz = getEndpointAuthzInitialState();
           } else {
+            const isEndpointRbacEnabled =
+              endpointAppContextService.experimentalFeatures.endpointRbacEnabled;
             const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
-            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
+            endpointAuthz = calculateEndpointAuthz(
+              licenseService,
+              fleetAuthz,
+              userRoles,
+              isEndpointRbacEnabled,
+              endpointPermissions
+            );
           }
         }
 
@@ -132,6 +155,11 @@ export class RequestContextFactory implements IRequestContextFactory {
       getScopedFleetServices: memoize((req: KibanaRequest) =>
         endpointAppContextService.getScopedFleetServices(req)
       ),
+
+      getQueryRuleAdditionalOptions: {
+        licensing,
+        osqueryCreateAction: osquery.osqueryCreateAction,
+      },
     };
   }
 }

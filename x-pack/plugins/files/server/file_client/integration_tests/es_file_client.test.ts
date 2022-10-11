@@ -11,9 +11,6 @@ import { createEsFileClient } from '../create_es_file_client';
 import { FileClient } from '../types';
 import { FileMetadata } from '../../../common';
 
-/**
- * This file client is using Elasticsearch interfaces directly to manage files.
- */
 describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
@@ -196,6 +193,9 @@ describe('ES-index-backed file client', () => {
       })
     );
 
-    await Promise.all([fileClient.delete({ id: id1 }), fileClient.delete({ id: id2 })]);
+    await Promise.all([
+      fileClient.delete({ id: id1, hasContent: false }),
+      fileClient.delete({ id: id2, hasContent: false }),
+    ]);
   });
 });

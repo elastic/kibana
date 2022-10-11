@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'endpointPageUtils',
     'responder',
     'timeline',
+    'detections',
   ]);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
@@ -38,7 +39,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // Close responder
     await pageObjects.responder.closeResponder();
   };
-
   const getEndpointAlertsQueryForAgentId = (
     agentId: string
   ): object & { $stringify: () => string } => {
@@ -87,6 +87,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       endpointAgentId = indexedData.hosts[0].agent.id;
+
+      // start/stop the endpoint rule. This should cause the rule to run immediately
+      // and create the Alerts and avoid us having to wait for the interval (of 5 minutes)
+      await detectionsTestService.stopStartEndpointRule();
     });
 
     after(async () => {
@@ -112,7 +116,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('from timeline', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/140546
+    describe.skip('from timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {
@@ -135,10 +140,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
           timeline.data.persistTimeline.timeline.version
         );
-
-        // start/stop the endpoint rule. This should cause the rule to run immediately
-        // and avoid us having to wait for the interval (of 5 minutes)
-        await detectionsTestService.stopStartEndpointRule();
 
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
@@ -179,6 +180,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await performResponderSanityChecks();
 
         await pageObjects.timeline.closeTimeline();
+      });
+    });
+
+    describe('from alerts', () => {
+      before(async () => {
+        await detectionsTestService.waitForAlerts(
+          getEndpointAlertsQueryForAgentId(endpointAgentId),
+          // The Alerts rules seems to run every 5 minutes, so we wait here a max
+          // of 6 minutes to ensure it runs and completes and alerts are available.
+          60_000 * 6
+        );
+      });
+
+      it('should show Responder from alert details under alerts list page', async () => {
+        const hostname = indexedData.hosts[0].host.name;
+        await pageObjects.detections.navigateToAlerts(
+          `query=(language:kuery,query:'host.hostname: "${hostname}" ')`
+        );
+        await pageObjects.detections.waitForListToHaveAlerts();
+        await pageObjects.detections.openFirstAlertDetailsForHostName(hostname);
+        await pageObjects.detections.openResponseConsoleFromAlertDetails();
+        await performResponderSanityChecks();
       });
     });
   });

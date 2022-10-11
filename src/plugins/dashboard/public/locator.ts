@@ -94,7 +94,7 @@ export type DashboardAppLocatorParams = {
   /**
    * List of dashboard panels
    */
-  panels?: SavedDashboardPanel[];
+  panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
 
   /**
    * Saved query ID

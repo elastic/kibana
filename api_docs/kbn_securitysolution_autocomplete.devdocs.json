@@ -60,7 +60,7 @@
         "label": "AutocompleteFieldListsComponent",
         "description": [],
         "signature": [
-          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, allowLargeValueLists, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
         "deprecated": false,
@@ -71,7 +71,7 @@
             "id": "def-common.AutocompleteFieldListsComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n}",
+            "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  allowLargeValueLists = false,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldListsProps>"
@@ -288,7 +288,9 @@
         "label": "FieldComponent",
         "description": [],
         "signature": [
-          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, }: React.PropsWithChildren<OperatorProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, }: React.PropsWithChildren<",
+          "FieldProps",
+          ">): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
         "deprecated": false,
@@ -302,7 +304,9 @@
             "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<OperatorProps>"
+              "React.PropsWithChildren<",
+              "FieldProps",
+              ">"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
             "deprecated": false,
@@ -323,9 +327,24 @@
           "\nGiven an array of lists and optionally a field this will return all\nthe lists that match against the field based on the types from the field\n\nNOTE: That we support one additional property from \"FieldSpec\" located here:\nsrc/plugins/data/common/index_patterns/fields/types.ts\nThis type property is esTypes. If it exists and is on there we will read off the esTypes."
         ],
         "signature": [
-          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
+          "(lists: ",
+          {
+            "pluginId": "@kbn/securitysolution-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionAutocompletePluginApi",
+            "section": "def-common.AutocompleteListsData",
+            "text": "AutocompleteListsData"
+          },
+          ", field?: (",
           "DataViewFieldBase",
-          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+          " & { esTypes?: string[] | undefined; }) | undefined) => ",
+          {
+            "pluginId": "@kbn/securitysolution-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionAutocompletePluginApi",
+            "section": "def-common.AutocompleteListsData",
+            "text": "AutocompleteListsData"
+          }
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
         "deprecated": false,
@@ -334,14 +353,20 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.filterFieldToList.$1",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "lists",
             "description": [
               "The lists to match against the field"
             ],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              {
+                "pluginId": "@kbn/securitysolution-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionAutocompletePluginApi",
+                "section": "def-common.AutocompleteListsData",
+                "text": "AutocompleteListsData"
+              }
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
@@ -381,7 +406,7 @@
           "\nDetermines the options, selected values and option labels for EUI combo box"
         ],
         "signature": [
-          "<T>({ getLabel, options, selectedOptions, }: { getLabel: (value: T) => string; options: T[]; selectedOptions: T[]; }) => ",
+          "<T>({ getLabel, options, selectedOptions, disabledOptions, }: { getLabel: (value: T) => string; options: T[]; selectedOptions: T[]; disabledOptions?: T[] | undefined; }) => ",
           {
             "pluginId": "@kbn/securitysolution-autocomplete",
             "scope": "common",
@@ -399,7 +424,7 @@
             "id": "def-common.getGenericComboBoxProps.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  getLabel,\n  options,\n  selectedOptions,\n}",
+            "label": "{\n  getLabel,\n  options,\n  selectedOptions,\n  disabledOptions,\n}",
             "description": [],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
             "deprecated": false,
@@ -460,6 +485,20 @@
                 "description": [],
                 "signature": [
                   "T[]"
+                ],
+                "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-autocomplete",
+                "id": "def-common.getGenericComboBoxProps.$1.disabledOptions",
+                "type": "Array",
+                "tags": [],
+                "label": "disabledOptions",
+                "description": [],
+                "signature": [
+                  "T[] | undefined"
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
@@ -730,6 +769,48 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/securitysolution-autocomplete",
+        "id": "def-common.AutocompleteListsData",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutocompleteListsData",
+        "description": [],
+        "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.AutocompleteListsData.smallLists",
+            "type": "Array",
+            "tags": [],
+            "label": "smallLists",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.AutocompleteListsData.largeLists",
+            "type": "Array",
+            "tags": [],
+            "label": "largeLists",
+            "description": [],
+            "signature": [
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/securitysolution-autocomplete",
         "id": "def-common.GetGenericComboBoxPropsReturn",

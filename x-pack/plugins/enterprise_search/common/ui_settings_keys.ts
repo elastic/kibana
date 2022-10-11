@@ -6,4 +6,4 @@
  */
 
 export const enterpriseSearchFeatureId = 'enterpriseSearch';
-export const enableIndexPipelinesTab = 'enterpriseSearch:enableIndexTransformsTab';
+export const enableBehavioralAnalyticsSection = 'enterpriseSearch:enableBehavioralAnalyticsSection';

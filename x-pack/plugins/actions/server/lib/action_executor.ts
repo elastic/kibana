@@ -227,6 +227,7 @@ export class ActionExecutor {
             secrets: validatedSecrets,
             isEphemeral,
             taskInfo,
+            configurationUtilities,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {

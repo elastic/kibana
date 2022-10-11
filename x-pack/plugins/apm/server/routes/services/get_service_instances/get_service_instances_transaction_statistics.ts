@@ -160,7 +160,7 @@ export async function getServiceInstancesTransactionStatistics<
           getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
-      body: { size: 0, query, aggs },
+      body: { size: 0, track_total_hits: false, query, aggs },
     }
   );
 

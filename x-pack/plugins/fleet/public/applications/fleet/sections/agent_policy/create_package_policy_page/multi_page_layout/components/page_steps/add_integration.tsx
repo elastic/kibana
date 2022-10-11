@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
@@ -19,9 +19,9 @@ import { isVerificationError } from '../../../../../../../../services';
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
-import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
+import { sendCreatePackagePolicy, useStartServices, useUIExtension } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import { Error } from '../../../../../../components';
+import { Error, ExtensionWrapper } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
@@ -212,6 +212,55 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     getBasePolicy();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const extensionView = useUIExtension(packageInfo.name ?? '', 'package-policy-create-multi-step');
+  const addIntegrationExtensionView = useMemo(() => {
+    return (
+      extensionView && (
+        <ExtensionWrapper>
+          <extensionView.Component />
+        </ExtensionWrapper>
+      )
+    );
+  }, [extensionView]);
+
+  const content = useMemo(() => {
+    if (packageInfo.name !== 'endpoint') {
+      return (
+        <>
+          <EuiSpacer size={'l'} />
+          <StepConfigurePackagePolicy
+            packageInfo={packageInfo}
+            showOnlyIntegration={integrationInfo?.name}
+            packagePolicy={packagePolicy}
+            updatePackagePolicy={updatePackagePolicy}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+            noTopRule={true}
+          />
+          {validationResults && (
+            <ExpandableAdvancedSettings>
+              <StepDefinePackagePolicy
+                packageInfo={packageInfo}
+                packagePolicy={packagePolicy}
+                updatePackagePolicy={updatePackagePolicy}
+                validationResults={validationResults!}
+                submitAttempted={formState === 'INVALID'}
+                noAdvancedToggle={true}
+              />
+            </ExpandableAdvancedSettings>
+          )}
+        </>
+      );
+    }
+  }, [
+    formState,
+    integrationInfo?.name,
+    packageInfo,
+    packagePolicy,
+    updatePackagePolicy,
+    validationResults,
+  ]);
+
   if (!agentPolicy) {
     return (
       <AddIntegrationError
@@ -228,28 +277,8 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   return (
     <>
       {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} />}
-      <EuiSpacer size={'l'} />
-      <StepConfigurePackagePolicy
-        packageInfo={packageInfo}
-        showOnlyIntegration={integrationInfo?.name}
-        packagePolicy={packagePolicy}
-        updatePackagePolicy={updatePackagePolicy}
-        validationResults={validationResults!}
-        submitAttempted={formState === 'INVALID'}
-        noTopRule={true}
-      />
-      {validationResults && (
-        <ExpandableAdvancedSettings>
-          <StepDefinePackagePolicy
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-            noAdvancedToggle={true}
-          />
-        </ExpandableAdvancedSettings>
-      )}
+      {content}
+      {addIntegrationExtensionView}
       <NotObscuredByBottomBar />
       <CreatePackagePolicyBottomBar
         cancelClickHandler={isManaged ? onBack : () => setIsManaged(true)}

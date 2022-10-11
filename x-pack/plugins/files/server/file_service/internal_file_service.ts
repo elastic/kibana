@@ -12,7 +12,7 @@ import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
 import { FileMetadata, File as IFile, FileKind, FileJSON, FilesMetrics } from '../../common';
 import { File, toJSON } from '../file';
-import { FileKindsRegistry } from '../file_kinds_registry';
+import { FileKindsRegistry } from '../../common/file_kinds_registry';
 import { FileNotFoundError } from './errors';
 import type { FileMetadataClient } from '../file_client';
 import type {

@@ -51,3 +51,5 @@ export const plugin = (initContext: PluginInitializerContext) =>
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
 export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };
+
+export { uiSettings } from './ui_settings';

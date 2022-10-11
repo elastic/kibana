@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,39 +20,46 @@ import {
   EuiText,
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
-import React from 'react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '../../services/kibana_react';
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
-export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
-  overlays
-    .openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
-      confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
-      cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
-      buttonColor: 'danger',
-      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: discardConfirmStrings.getDiscardTitle(),
-    })
-    .then((isConfirmed) => {
-      if (isConfirmed) {
-        discardCallback();
-      }
-    });
+export const confirmDiscardUnsavedChanges = (discardCallback: () => void) => {
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
+
+  openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
+    confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
+    cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
+    buttonColor: 'danger',
+    defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+    title: discardConfirmStrings.getDiscardTitle(),
+  }).then((isConfirmed) => {
+    if (isConfirmed) {
+      discardCallback();
+    }
+  });
+};
 
 export const confirmCreateWithUnsaved = (
-  overlays: OverlayStart,
-  theme: CoreStart['theme'],
   startBlankCallback: () => void,
   contineCallback: () => void
 ) => {
   const titleId = 'confirmDiscardOrKeepTitle';
   const descriptionId = 'confirmDiscardOrKeepDescription';
 
-  const session = overlays.openModal(
+  const {
+    settings: {
+      theme: { theme$ },
+    },
+    overlays: { openModal },
+  } = pluginServices.getServices();
+
+  const session = openModal(
     toMountPoint(
       <EuiFocusTrap
         clickOutsideDisables={true}
@@ -107,7 +116,7 @@ export const confirmCreateWithUnsaved = (
           </div>
         </EuiOutsideClickDetector>
       </EuiFocusTrap>,
-      { theme$: theme.theme$ }
+      { theme$ }
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

@@ -21,6 +21,7 @@ import {
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 
@@ -100,7 +101,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -148,7 +157,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -196,7 +213,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -244,7 +269,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -292,7 +325,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
     });
@@ -350,7 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).length(1);
+          expect(stats.detection_rules).length(2);
           const detectionRule = stats.detection_rules[0][0];
           expect(detectionRule['@timestamp']).to.be.a('string');
           expect(detectionRule.cluster_uuid).to.be.a('string');
@@ -408,9 +449,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -427,6 +469,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -479,9 +525,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -498,6 +545,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -550,9 +601,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -569,6 +621,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -621,9 +677,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -640,6 +697,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -692,9 +753,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -711,6 +773,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -787,11 +853,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule)
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
-              return obj1.entries.name - obj2.entries.name;
+              return obj1?.entries?.name - obj2?.entries?.name;
             });
 
           expect(detectionRules).to.eql([
@@ -824,6 +891,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description 1',
               os_types: [],
               rule_version: detectionRules[1].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });

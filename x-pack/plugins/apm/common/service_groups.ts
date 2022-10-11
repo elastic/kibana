@@ -13,7 +13,6 @@ export interface ServiceGroup {
   groupName: string;
   kuery: string;
   description?: string;
-  serviceNames: string[];
   color?: string;
 }
 

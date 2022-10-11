@@ -44,7 +44,7 @@ When creating or editing an index threshold rule, you see a graph of the data th
 [role="screenshot"]
 image::images/index-threshold-chart.png[Index Threshold chart]
 
-The end date is related to the rule interval.
+The end date is related to the check interval for the rule.
 //(IIRC, 30 “intervals” worth of time)
 You can use this view to see if the rule is getting the data you expect, and visually compare to the threshold value (a horizontal line in the graph). If the graph does not contain any lines except for the threshold line, then the rule has an issue, for example, no data is available given the specified index and fields or there is a permission error.
 Diagnosing these may be difficult - but there may be log messages for error conditions. 

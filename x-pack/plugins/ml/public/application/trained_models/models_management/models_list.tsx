@@ -697,7 +697,7 @@ export const ModelsList: FC<Props> = ({
     : undefined;
 
   const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
-    items,
+    items.length,
     pageState,
     updatePageState
   );

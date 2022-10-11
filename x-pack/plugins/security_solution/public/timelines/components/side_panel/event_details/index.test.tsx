@@ -96,13 +96,11 @@ jest.mock(
 jest.mock('../../../../detections/components/alerts_table/actions');
 jest.mock('../../../../risk_score/containers', () => {
   return {
-    useHostRiskScore: jest.fn().mockReturnValue([
-      true,
-      {
-        data: undefined,
-        isModuleEnabled: false,
-      },
-    ]),
+    useRiskScore: jest.fn().mockReturnValue({
+      loading: true,
+      data: undefined,
+      isModuleEnabled: false,
+    }),
   };
 });
 
@@ -125,7 +123,7 @@ jest.mock('../../../containers/details', () => {
   };
 });
 
-describe('event details footer component', () => {
+describe('event details panel component', () => {
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
@@ -138,6 +136,14 @@ describe('event details footer component', () => {
           ui: {
             getCasesContext: () => mockCasesContext,
           },
+        },
+        timelines: {
+          getHoverActions: jest.fn().mockReturnValue({
+            getAddToTimelineButton: jest.fn(),
+          }),
+        },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
         },
       },
     });

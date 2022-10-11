@@ -16,12 +16,12 @@ import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
 import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 
-const mockUseIsWithinBreakpoints = jest.fn(() => true);
+const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    useIsWithinBreakpoints: () => mockUseIsWithinBreakpoints(),
+    useIsWithinMinBreakpoint: () => mockUseIsWithinMinBreakpoint(),
   };
 });
 
@@ -143,14 +143,14 @@ describe('SolutionGroupedNav', () => {
 
   describe('bottom offset', () => {
     it('should add bottom offset', () => {
-      mockUseIsWithinBreakpoints.mockReturnValueOnce(true);
+      mockUseIsWithinMinBreakpoint.mockReturnValueOnce(true);
       const result = renderNavPanel({ bottomOffset: bottomNavOffset });
 
       expect(result.getByTestId('groupedNavPanel')).toHaveStyle({ bottom: bottomNavOffset });
     });
 
     it('should not add bottom offset if not large screen', () => {
-      mockUseIsWithinBreakpoints.mockReturnValueOnce(false);
+      mockUseIsWithinMinBreakpoint.mockReturnValueOnce(false);
       const result = renderNavPanel({ bottomOffset: bottomNavOffset });
 
       expect(result.getByTestId('groupedNavPanel')).not.toHaveStyle({ bottom: bottomNavOffset });

@@ -24,6 +24,7 @@ import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
 import type { UIExtensionsStorage } from '../types';
+import { ExperimentalFeaturesService } from '../services';
 
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
@@ -62,6 +63,13 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
   const mountHistory = new CoreScopedHistory(history, basePath);
+
+  ExperimentalFeaturesService.init({
+    createPackagePolicyMultiPageLayout: true,
+    packageVerification: true,
+    noLargeFeaturedIntegrations: true,
+    showDevtoolsRequest: false,
+  });
 
   const HookWrapper = memo(({ children }) => {
     return (

@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import type { ChangePoint, ChangePointHistogram } from '@kbn/ml-agg-utils';
+import type {
+  ChangePoint,
+  ChangePointHistogram,
+  ChangePointGroup,
+  ChangePointGroupHistogram,
+} from '@kbn/ml-agg-utils';
 
 export const API_ACTION_NAME = {
   ADD_CHANGE_POINTS: 'add_change_points',
   ADD_CHANGE_POINTS_HISTOGRAM: 'add_change_points_histogram',
+  ADD_CHANGE_POINTS_GROUP: 'add_change_point_group',
+  ADD_CHANGE_POINTS_GROUP_HISTOGRAM: 'add_change_point_group_histogram',
   ADD_ERROR: 'add_error',
+  PING: 'ping',
   RESET: 'reset',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
@@ -44,6 +52,32 @@ export function addChangePointsHistogramAction(
   };
 }
 
+interface ApiActionAddChangePointsGroup {
+  type: typeof API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP;
+  payload: ChangePointGroup[];
+}
+
+export function addChangePointsGroupAction(payload: ApiActionAddChangePointsGroup['payload']) {
+  return {
+    type: API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP,
+    payload,
+  };
+}
+
+interface ApiActionAddChangePointsGroupHistogram {
+  type: typeof API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP_HISTOGRAM;
+  payload: ChangePointGroupHistogram[];
+}
+
+export function addChangePointsGroupHistogramAction(
+  payload: ApiActionAddChangePointsGroupHistogram['payload']
+): ApiActionAddChangePointsGroupHistogram {
+  return {
+    type: API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP_HISTOGRAM,
+    payload,
+  };
+}
+
 interface ApiActionAddError {
   type: typeof API_ACTION_NAME.ADD_ERROR;
   payload: string;
@@ -54,6 +88,14 @@ export function addErrorAction(payload: ApiActionAddError['payload']): ApiAction
     type: API_ACTION_NAME.ADD_ERROR,
     payload,
   };
+}
+
+interface ApiActionPing {
+  type: typeof API_ACTION_NAME.PING;
+}
+
+export function pingAction(): ApiActionPing {
+  return { type: API_ACTION_NAME.PING };
 }
 
 interface ApiActionReset {
@@ -84,7 +126,10 @@ export function updateLoadingStateAction(
 
 export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionAddChangePoints
+  | ApiActionAddChangePointsGroup
   | ApiActionAddChangePointsHistogram
+  | ApiActionAddChangePointsGroupHistogram
   | ApiActionAddError
+  | ApiActionPing
   | ApiActionReset
   | ApiActionUpdateLoadingState;

@@ -62,10 +62,9 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
 
     const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
-    const enhancedEdges =
-      deps?.spaceId && deps?.endpointContext.experimentalFeatures.riskyHostsEnabled
-        ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
-        : edges;
+    const enhancedEdges = deps?.spaceId
+      ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
+      : edges;
 
     return {
       ...response,
@@ -88,11 +87,10 @@ async function enhanceEdges(
   esClient: IScopedClusterClient
 ): Promise<HostsEdges[]> {
   const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames);
-
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
-      [hit._source?.host.name ?? '']: hit._source?.host.risk.calculated_level,
+      [hit._source?.host.name ?? '']: hit._source?.host?.risk?.calculated_level,
     }),
     {}
   );

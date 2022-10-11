@@ -43,6 +43,12 @@ export const fields: DataViewFieldBase[] = [
     scripted: false,
   },
   {
+    name: 'machine.os.keyword',
+    type: 'string',
+    esTypes: ['keyword'],
+    scripted: false,
+  },
+  {
     name: 'script number',
     type: 'number',
     scripted: true,

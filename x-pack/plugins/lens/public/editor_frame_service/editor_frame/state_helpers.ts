@@ -50,11 +50,9 @@ function getIndexPatterns(
   const indexPatternIds = [];
   if (initialContext) {
     if ('isVisualizeAction' in initialContext) {
-      for (const { indexPatternId } of initialContext.layers) {
-        indexPatternIds.push(indexPatternId);
-      }
+      indexPatternIds.push(...initialContext.indexPatternIds);
     } else {
-      indexPatternIds.push(initialContext.indexPatternId);
+      indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
   } else {
     // use the initialId only when no context is passed over
@@ -112,9 +110,10 @@ export async function initializeDataViews(
     })
   );
   const { isFullEditor } = options ?? {};
+  const contextDataViewSpec = (initialContext as VisualizeFieldContext)?.dataViewSpec;
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
-    ? loadIndexPatternRefs(dataViews, adHocDataViews)
+    ? loadIndexPatternRefs(dataViews, adHocDataViews, contextDataViewSpec)
     : []);
 
   // if no state is available, use the fallbackId
@@ -208,6 +207,7 @@ export async function initializeSources(
       visualizationMap,
       visualizationState,
       references,
+      initialContext,
     }),
   };
 }
@@ -216,16 +216,19 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
+  initialContext,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) {
   if (visualizationState?.activeId) {
     return (
       visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
         visualizationState.state,
-        references
+        references,
+        initialContext
       ) ?? visualizationState.state
     );
   }

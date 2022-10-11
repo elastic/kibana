@@ -52,7 +52,6 @@ export const links: LinkItem = {
         defaultMessage: 'Host risk',
       }),
       path: `${HOSTS_PATH}/hostRisk`,
-      experimentalKey: 'riskyHostsEnabled',
     },
     {
       id: SecurityPageName.sessions,
@@ -60,7 +59,8 @@ export const links: LinkItem = {
         defaultMessage: 'Sessions',
       }),
       path: `${HOSTS_PATH}/sessions`,
-      isBeta: true,
+      isBeta: false,
+      licenseType: 'enterprise',
     },
   ],
 };

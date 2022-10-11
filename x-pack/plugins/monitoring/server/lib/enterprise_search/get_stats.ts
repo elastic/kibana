@@ -29,7 +29,7 @@ export async function getStats(
 
   // just get the legacy pattern since no integration exists yet
   const indexPattern = getLegacyIndexPattern({
-    moduleType: 'enterprisesearch',
+    moduleType: 'enterprise_search',
     config: Globals.app.config,
     ccs: req.payload.ccs,
   });

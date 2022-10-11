@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes } from '../../types';
 
 export const kpiHostAreaLensAttributes: LensAttributes = {
@@ -32,7 +33,7 @@ export const kpiHostAreaLensAttributes: LensAttributes = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: ' ',
+                label: UNIQUE_COUNT('host.name'),
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'host.name',

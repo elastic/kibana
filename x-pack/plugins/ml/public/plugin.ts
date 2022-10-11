@@ -29,8 +29,8 @@ import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public'
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -54,6 +54,7 @@ import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
@@ -66,10 +67,10 @@ export interface MlStartDependencies {
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
   cases?: CasesUiStart;
+  security: SecurityPluginStart;
 }
 
 export interface MlSetupDependencies {
-  security?: SecurityPluginSetup;
   maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
@@ -119,8 +120,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            security: pluginsSetup.security,
-            licensing: pluginsSetup.licensing,
+            security: pluginsStart.security,
+            licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,

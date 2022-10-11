@@ -12,10 +12,12 @@ export interface RowRenderer {
   id: RowRendererId;
   isInstance: (data: Ecs) => boolean;
   renderRow: ({
+    contextId,
     data,
     isDraggable,
     timelineId,
   }: {
+    contextId?: string;
     data: Ecs;
     isDraggable: boolean;
     timelineId: string;

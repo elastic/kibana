@@ -186,9 +186,11 @@
           "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
-          ") => StreamFactoryReturnType<T>"
+          ", flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -197,7 +199,7 @@
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -225,6 +227,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flushFix",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [
@@ -242,9 +259,11 @@
           "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
-          ") => StreamFactoryReturnType<T>"
+          ", flushFix: boolean) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -253,7 +272,7 @@
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -276,6 +295,21 @@
             "description": [],
             "signature": [
               "Logger"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "flushFix",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,

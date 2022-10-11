@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./bulk_update'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./bulk_delete'));
     loadTestFile(require.resolve('./export'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));

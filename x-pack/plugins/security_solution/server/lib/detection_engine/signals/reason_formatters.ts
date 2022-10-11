@@ -37,14 +37,14 @@ const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
   const reasonFields: ReasonFields = {};
   const docToUse = mergedDoc?.fields || mergedDoc?._source || mergedDoc;
 
-  reasonFields.destinationAddress = getOr(null, 'destination.address', docToUse);
+  reasonFields.destinationAddress = getOr(null, 'destination.ip', docToUse);
   reasonFields.destinationPort = getOr(null, 'destination.port', docToUse);
   reasonFields.eventCategory = getOr(null, 'event.category', docToUse);
   reasonFields.fileName = getOr(null, 'file.name', docToUse);
   reasonFields.hostName = getOr(null, 'host.name', docToUse);
   reasonFields.processName = getOr(null, 'process.name', docToUse);
   reasonFields.processParentName = getOr(null, 'process.parent.name', docToUse);
-  reasonFields.sourceAddress = getOr(null, 'source.address', docToUse);
+  reasonFields.sourceAddress = getOr(null, 'source.ip', docToUse);
   reasonFields.sourcePort = getOr(null, 'source.port', docToUse);
   reasonFields.userName = getOr(null, 'user.name', docToUse);
 

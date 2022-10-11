@@ -12,22 +12,33 @@ import { createRegisteredAttachmentUserActionBuilder } from './registered_attach
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'externalReferenceAttachmentTypeRegistry' | 'caseData'
+  | 'userAction'
+  | 'externalReferenceAttachmentTypeRegistry'
+  | 'caseData'
+  | 'handleDeleteComment'
+  | 'userProfiles'
 > & {
   comment: SnakeToCamelCase<CommentResponseExternalReferenceType>;
+  isLoading: boolean;
 };
 
 export const createExternalReferenceAttachmentUserActionBuilder = ({
   userAction,
+  userProfiles,
   comment,
   externalReferenceAttachmentTypeRegistry,
   caseData,
+  isLoading,
+  handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
+    userProfiles,
     comment,
     registry: externalReferenceAttachmentTypeRegistry,
     caseData,
+    handleDeleteComment,
+    isLoading,
     getId: () => comment.externalReferenceAttachmentTypeId,
     getAttachmentViewProps: () => ({
       externalReferenceId: comment.externalReferenceId,

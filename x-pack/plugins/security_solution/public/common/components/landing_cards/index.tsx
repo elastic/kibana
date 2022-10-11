@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 import styled from 'styled-components';
+import { useVariation } from '../utils';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
 import cloudSvg from '../../images/cloud1.svg';
@@ -60,9 +61,18 @@ export const LandingCards = memo(() => {
     http: {
       basePath: { prepend },
     },
+    cloudExperiments,
   } = useKibana().services;
 
-  const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
+  const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(ADD_DATA_PATH);
+  useVariation(
+    cloudExperiments,
+    'security-solutions.add-integrations-url',
+    ADD_DATA_PATH,
+    setAddIntegrationsUrl
+  );
+
+  const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
   return (
     <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
       <EuiFlexItem>

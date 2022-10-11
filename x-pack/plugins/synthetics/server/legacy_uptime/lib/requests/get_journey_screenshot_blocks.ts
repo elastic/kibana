@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
+import { ScreenshotBlockDoc } from '../../../../common/runtime_types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 interface ScreenshotBlockResultType {

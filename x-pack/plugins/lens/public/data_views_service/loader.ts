@@ -42,10 +42,14 @@ export function convertDataViewIntoLensIndexPattern(
         displayName: field.displayName,
         type: field.type,
         aggregatable: field.aggregatable,
+        filterable: field.filterable,
         searchable: field.searchable,
         meta: dataView.metaFields.includes(field.name),
         esTypes: field.esTypes,
         scripted: field.scripted,
+        isMapped: field.isMapped,
+        customLabel: field.customLabel,
+        runtimeField: field.runtimeField,
         runtime: Boolean(field.runtimeField),
         timeSeriesMetricType: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
@@ -106,19 +110,32 @@ export function convertDataViewIntoLensIndexPattern(
     fields: newFields,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
-    spec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
+    spec: dataView.toSpec(false),
+    isPersisted: dataView.isPersisted(),
   };
 }
 
 export async function loadIndexPatternRefs(
   dataViews: MinimalDataViewsContract,
-  adHocDataViews?: Record<string, DataViewSpec>
+  adHocDataViews?: Record<string, DataViewSpec>,
+  contextDataViewSpec?: DataViewSpec
 ): Promise<IndexPatternRef[]> {
   const indexPatterns = await dataViews.getIdsWithTitle();
+  const missedIndexPatterns = Object.values(adHocDataViews || {});
+
+  // add data view from context
+  if (contextDataViewSpec) {
+    const existingDataView = indexPatterns.find(
+      (indexPattern) => indexPattern.id === contextDataViewSpec.id
+    );
+    if (!existingDataView) {
+      missedIndexPatterns.push(contextDataViewSpec);
+    }
+  }
 
   return indexPatterns
     .concat(
-      Object.values(adHocDataViews || {}).map((dataViewSpec) => ({
+      missedIndexPatterns.map((dataViewSpec) => ({
         id: dataViewSpec.id!,
         name: dataViewSpec.name,
         title: dataViewSpec.title!,

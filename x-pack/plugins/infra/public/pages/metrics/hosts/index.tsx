@@ -6,13 +6,9 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-
-import { DocumentTitle } from '../../../components/document_title';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -22,6 +18,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { HostsContent } from './hosts_content';
 import { MetricsDataViewProvider } from './hooks/use_data_view';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 export const HostsPage = () => {
   const {
@@ -42,16 +39,6 @@ export const HostsPage = () => {
   ]);
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureHostsPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Hosts',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist && source ? (
@@ -63,17 +50,8 @@ export const HostsPage = () => {
                 pageTitle: hostsTitle,
               }}
               pageSectionProps={{
-                paddingSize: 'none',
                 contentProps: {
-                  // This is added to facilitate a full height layout whereby the
-                  // inner container will set its own height and be scrollable.
-                  css: css`
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1 0 auto;
-                    width: 100%;
-                    height: 100%;
-                  `,
+                  css: fullHeightContentStyles,
                 },
               }}
             >

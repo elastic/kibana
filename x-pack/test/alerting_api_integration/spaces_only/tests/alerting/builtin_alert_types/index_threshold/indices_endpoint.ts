@@ -13,7 +13,7 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../.
 import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
-const API_URI = 'api/triggers_actions_ui/data/_indices';
+const API_URI = 'internal/triggers_actions_ui/data/_indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function indicesEndpointTests({ getService }: FtrProviderContext) {

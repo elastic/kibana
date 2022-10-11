@@ -54,6 +54,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         defaultMessage: 'The provided filter will be applied to the entire formula.',
       }),
     },
+    canReduceTimeRange: {
+      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaCanReduceTimeRangeHelpText', {
+        defaultMessage: 'Applies to the entire formula.',
+      }),
+    },
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
@@ -138,7 +143,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         },
       ];
     },
-    buildColumn({ previousColumn, layer, indexPattern }, _, operationDefinitionMap) {
+    buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
       let previousFormula = '';
       if (previousColumn) {
         previousFormula = generateFormula(
@@ -150,10 +155,16 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       }
       // carry over the format settings from previous operation for seamless transfer
       // NOTE: this works only for non-default formatters set in Lens
-      let prevFormat = {};
+      let format = {};
       if (previousColumn && isColumnFormatted(previousColumn)) {
-        prevFormat = { format: previousColumn.params?.format };
+        format = { format: previousColumn.params?.format };
       }
+
+      if (columnParams?.format) {
+        format = { format: columnParams.format };
+      }
+      const isPreviousFormulaColumn = previousColumn?.operationType === 'formula';
+
       return {
         label: previousFormula || defaultLabel,
         dataType: 'number',
@@ -161,13 +172,18 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         isBucketed: false,
         scale: 'ratio',
         params: previousFormula
-          ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
-          : { ...prevFormat },
+          ? {
+              formula: previousFormula,
+              isFormulaBroken: false,
+              ...format,
+              ...(columnParams?.formula ? { formula: columnParams?.formula } : {}),
+            }
+          : { ...format, ...(columnParams?.formula ? { formula: columnParams?.formula } : {}) },
         references: [],
         // carry over the filter if coming from another formula,
         // otherwise the filter has been already migrated into the formula text
-        filter:
-          previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
+        filter: isPreviousFormulaColumn ? getFilter(previousColumn, columnParams) : undefined,
+        reducedTimeRange: isPreviousFormulaColumn ? previousColumn.reducedTimeRange : undefined,
         timeScale: previousColumn?.timeScale,
       };
     },

@@ -26,7 +26,7 @@
     {
       "integration": "cloudtrail",
       "package": "aws",
-      "version": "1.10.2"
+      "version": "^1.5.0"
     }
   ],
   "required_fields": [
@@ -61,7 +61,8 @@
     "AWS",
     "Continuous Monitoring",
     "SecOps",
-    "Monitoring"
+    "Monitoring",
+    "has_guide"
   ],
   "threat": [
     {
@@ -82,5 +83,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 102
 }
