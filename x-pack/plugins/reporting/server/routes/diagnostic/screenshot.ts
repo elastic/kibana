@@ -78,11 +78,12 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         assert(result, 'PNG result is undefined');
         assert(result.buffer, 'PNG result buffer is undefined');
 
+        const logs = result.logs ?? [];
         if (result.warnings.length) {
           response.success = false;
-          response.logs = result.warnings.concat(result.logs);
+          response.logs = result.warnings.concat(logs);
         } else {
-          response.logs = result.logs;
+          response.logs = logs;
         }
 
         response.capture = result.buffer.toString('base64');
