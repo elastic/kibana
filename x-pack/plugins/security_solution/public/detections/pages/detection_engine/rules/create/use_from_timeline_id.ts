@@ -61,6 +61,7 @@ export const useFromTimelineId = (initialState: {
               { fields: [], title: indexPattern.join(',') }
             )
           : '';
+
       const newFilters = timeline.filters ?? [];
 
       setRuleData({

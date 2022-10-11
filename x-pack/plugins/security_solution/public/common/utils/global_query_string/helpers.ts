@@ -59,11 +59,8 @@ export const useGetInitialUrlParamValue = <State>(urlParamKey: string) => {
       getQueryStringFromLocation(window.location.search),
       urlParamKey
     );
-    console.log('param', param);
-    console.log('typeof', typeof param);
 
     const decodedParam = decodeRisonUrlState<State>(param ?? undefined);
-    console.log('return', { param, decodedParam });
     return { param, decodedParam };
   }, [urlParamKey]);
 
