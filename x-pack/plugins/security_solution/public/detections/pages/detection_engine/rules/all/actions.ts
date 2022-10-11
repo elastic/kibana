@@ -225,8 +225,8 @@ function sendTelemetry(action: Omit<BulkAction, BulkAction.export>, response: Bu
     track(
       METRIC_TYPE.COUNT,
       action === BulkAction.disable
-        ? TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
-        : TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
+        ? TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
+        : TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
     );
   }
 }
