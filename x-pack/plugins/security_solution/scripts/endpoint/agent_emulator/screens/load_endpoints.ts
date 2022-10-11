@@ -11,7 +11,7 @@ import { loadEndpoints } from '../services/endpoint_loader';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { ProgressFormatter } from '../../common/screen/progress_formatter';
 import type { DataFormatter } from '../../common/screen';
-import { ScreenBaseClass } from '../../common/screen';
+import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
 import { TOOL_TITLE } from '../constants';
 
 interface LoadOptions {
@@ -23,6 +23,16 @@ interface LoadOptions {
 
 export class LoadEndpointsScreen extends ScreenBaseClass {
   private runInfo: LoadOptions | undefined = undefined;
+  private choices: ChoiceMenuFormatter = new ChoiceMenuFormatter([
+    {
+      title: 'Load',
+      key: '1',
+    },
+    {
+      title: 'Configure',
+      key: '2',
+    },
+  ]);
 
   constructor(private readonly emulatorContext: EmulatorRunContext) {
     super();
@@ -41,42 +51,51 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
       return this.loadingView();
     }
 
-    return this.promptView();
+    return this.mainView();
   }
 
   protected onEnterChoice(choice: string) {
     const choiceValue = choice.trim().toUpperCase();
 
-    if (choiceValue === 'Q') {
-      this.hide();
-      return;
-    }
-
-    if (!choiceValue) {
-      if (this.runInfo?.isDone) {
-        this.runInfo = undefined;
-        this.reRender();
+    switch (choiceValue) {
+      case 'Q':
+        this.hide();
         return;
-      }
 
-      this.throwUnknownChoiceError(choice);
+      case '1':
+        this.runInfo = {
+          count: 2,
+          progress: new ProgressFormatter(),
+          isRunning: false,
+          isDone: false,
+        };
+
+        this.reRender();
+        this.loadEndpoints();
+        return;
+
+      case '2':
+        // show config
+        return;
+
+      default:
+        if (!choiceValue) {
+          if (this.runInfo?.isDone) {
+            this.runInfo = undefined;
+            this.reRender();
+            return;
+          }
+
+          this.throwUnknownChoiceError(choice);
+        }
     }
 
-    const count: number = Number(choiceValue);
+    //
+    // const count: number = Number(choiceValue);
 
-    if (!Number.isFinite(count)) {
-      throw new Error(`Invalid number: ${choice}`);
-    }
-
-    this.runInfo = {
-      count,
-      progress: new ProgressFormatter(),
-      isRunning: false,
-      isDone: false,
-    };
-
-    this.reRender();
-    this.loadEndpoints();
+    // if (!Number.isFinite(count)) {
+    //   throw new Error(`Invalid number: ${choice}`);
+    // }
   }
 
   private async loadEndpoints() {
@@ -102,11 +121,16 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
     }
   }
 
-  private promptView(): string | DataFormatter {
+  private mainView(): string | DataFormatter {
     return `
+  Generate and load endpoints into elasticsearch along with associated
+  fleet agents. Current settings:
 
-  How many endpoints to load?
-  `;
+      Count: ${this.runInfo?.count ?? 2}
+
+  Options:
+
+  ${this.choices.output}`;
   }
 
   private loadingView(): string | DataFormatter {
@@ -115,7 +139,8 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
 
   Creating ${this.runInfo.count} endpoint(s):
 
-  ${this.runInfo.progress.output}`;
+  ${this.runInfo.progress.output}
+`;
     }
 
     return 'Unknown state';
@@ -125,6 +150,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
     return `${this.loadingView()}
 
   Done. Endpoint(s) have been loaded into Elastic/Kibana.
-  Press Enter to continue`;
+  Press Enter to continue
+`;
   }
 }

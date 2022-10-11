@@ -6,9 +6,11 @@
  */
 
 /**
- * An item representing a choice to be shown on a screen
+ * An item representing a choice/item to be shown on a screen
  */
 export interface Choice {
+  /** The keyboard key (or combination of keys) that the user will enter to select this choice */
   key: string;
+  /** The title of the choice */
   title: string;
 }

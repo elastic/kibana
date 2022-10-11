@@ -50,7 +50,7 @@ export const loadEndpoints = async (
   log?: ToolingLog,
   onProgress?: (percentDone: LoadEndpointsProgress) => void
 ): Promise<void> => {
-  // TODO: Support option for loading endpoints with alerts
+  // TODO:PT Support option for loading endpoints with alerts/events
 
   if (log) {
     log.verbose(`loadEndpoints(): Loading ${count} endpoints...`);

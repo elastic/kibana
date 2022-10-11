@@ -81,12 +81,11 @@ export class ScreenBaseClass {
   protected footer(choices: Choice[] = [QuitChoice]): string | DataFormatter {
     const displayChoices =
       choices && choices.length
-        ? `\n${this.leftPad(new ChoiceMenuFormatter(choices, { layout: 'horizontal' }).output)}\n`
+        ? `${this.leftPad(new ChoiceMenuFormatter(choices, { layout: 'horizontal' }).output)}\n`
         : '';
 
     return `
-
-  ${displayChoices}${HORIZONTAL_LINE}`;
+${displayChoices}${HORIZONTAL_LINE}`;
   }
 
   /**
