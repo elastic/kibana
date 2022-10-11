@@ -29,9 +29,15 @@ See {apm-guide-ref}/ilm-how-to.html[Index lifecycle management] to learn more ab
 the default APM index lifecycle policies.
 
 [float]
-==== Service statistics
+==== Service size chart
 
-The service statistics chart provides detailed information on each service:
+The service size chart displays the estimated size of each service over time.
+Expand the time filter to visualize data trends and estimate daily data generation.
+
+[float]
+==== Service statistics table
+
+The service statistics table provides detailed information on each service:
 
 * A list of **service environments**.
 * The **sampling rate**. This value is calculated by dividing the number of sampled transactions by total throughput.
