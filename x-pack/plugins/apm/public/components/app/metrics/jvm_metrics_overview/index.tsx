@@ -11,19 +11,19 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
-} from '../../../../common/service_nodes';
+} from '../../../../../common/service_nodes';
 import {
   asDynamicBytes,
   asInteger,
   asPercent,
-} from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { truncate, unit } from '../../../utils/style';
-import { ServiceNodeMetricOverviewLink } from '../../shared/links/apm/service_node_metric_overview_link';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+} from '../../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { truncate, unit } from '../../../../utils/style';
+import { ServiceNodeMetricOverviewLink } from '../../../shared/links/apm/service_node_metric_overview_link';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 
 const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
@@ -32,10 +32,10 @@ const ServiceNodeName = euiStyled.div`
   ${truncate(8 * unit)}
 `;
 
-function ServiceNodeOverview() {
+export function JvmMetricsOverview() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/nodes');
+  } = useApmParams('/services/{serviceName}/metrics');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -47,7 +47,7 @@ function ServiceNodeOverview() {
         return undefined;
       }
       return callApmApi(
-        'GET /internal/apm/services/{serviceName}/serviceNodes',
+        'GET /internal/apm/services/{serviceName}/metrics/nodes',
         {
           params: {
             path: {
@@ -177,5 +177,3 @@ function ServiceNodeOverview() {
     />
   );
 }
-
-export { ServiceNodeOverview };
