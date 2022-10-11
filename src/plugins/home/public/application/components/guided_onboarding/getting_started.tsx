@@ -27,7 +27,8 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { UseCaseCard } from './use_case_card';
+import { GuideCard } from './guide_card';
+import { LinkCard } from './link_card';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
@@ -88,13 +89,16 @@ export const GettingStarted = () => {
           <EuiSpacer size="xxl" />
           <EuiFlexGrid columns={3} gutterSize="xl">
             <EuiFlexItem>
-              <UseCaseCard useCase="search" />
+              <GuideCard useCase="search" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <UseCaseCard useCase="observability" />
+              <GuideCard useCase="observability" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <UseCaseCard useCase="security" />
+              <LinkCard />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <GuideCard useCase="security" />
             </EuiFlexItem>
           </EuiFlexGrid>
           <EuiSpacer />
