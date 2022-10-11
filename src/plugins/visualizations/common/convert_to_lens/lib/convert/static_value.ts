@@ -6,4 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { getStopsWithColorsFromRanges } from './palette';
+import uuid from 'uuid';
+import { StaticValueColumn } from '../../types';
+
+export const createStaticValueColumn = (value: number): StaticValueColumn => ({
+  operationType: 'static_value',
+  columnId: uuid(),
+  isBucketed: false,
+  isSplit: false,
+  dataType: 'number',
+  references: [],
+  params: {
+    value: value.toString(),
+  },
+});
