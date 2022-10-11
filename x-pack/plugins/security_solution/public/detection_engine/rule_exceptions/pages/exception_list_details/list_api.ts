@@ -13,9 +13,15 @@ import type {
   ListArray,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { fetchExceptionListsItemsByListIds } from '@kbn/securitysolution-list-api';
+import {
+  deleteExceptionListItemById,
+  fetchExceptionListsItemsByListIds,
+} from '@kbn/securitysolution-list-api';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
-import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
+import type {
+  GetExceptionItemProps,
+  RuleReferences,
+} from '@kbn/securitysolution-exception-list-components';
 import { findRuleExceptionReferences } from '../../../../detections/containers/detection_engine/rules';
 
 interface FetchItemsProps {
@@ -25,6 +31,11 @@ interface FetchItemsProps {
   pagination: Pagination | undefined;
   search?: string;
   filter?: string;
+}
+interface DeleteItem {
+  id: string;
+  namespaceType: NamespaceType;
+  http: HttpSetup | undefined;
 }
 
 export const prepareFetchExceptionItemsParams = (
@@ -101,7 +112,9 @@ export const fetchListExceptionItems = async ({
   }
 };
 
-export const getExceptionItemsReferences = async (list: ExceptionListSchema) => {
+export const getExceptionItemsReferences = async (
+  list: ExceptionListSchema
+): Promise<RuleReferences> => {
   try {
     const abortCtrl = new AbortController();
 
@@ -113,12 +126,27 @@ export const getExceptionItemsReferences = async (list: ExceptionListSchema) => 
       })),
       signal: abortCtrl.signal,
     });
-
-    return references.reduce((acc, result) => {
+    return references.reduce<RuleReferences>((acc, result) => {
       const [[key, value]] = Object.entries(result);
-      acc[key] = value;
+
+      acc[key] = [value];
+
       return acc;
     }, {});
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const deleteExceptionListItem = async ({ id, namespaceType, http }: DeleteItem) => {
+  try {
+    const abortCtrl = new AbortController();
+    await deleteExceptionListItemById({
+      http: http as HttpSetup,
+      id,
+      namespaceType,
+      signal: abortCtrl.signal,
+    });
   } catch (error) {
     throw new Error(error);
   }

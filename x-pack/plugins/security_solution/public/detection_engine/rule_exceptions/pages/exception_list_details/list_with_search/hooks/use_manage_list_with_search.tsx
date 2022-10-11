@@ -7,7 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
@@ -15,11 +18,12 @@ import {
   prepareFetchExceptionItemsParams,
   fetchListExceptionItems,
   getExceptionItemsReferences,
-} from '../list_api';
-import * as i18n from '../translations';
-import { useExceptionListDetailsContext } from '../context/exception_list_details.context';
+  deleteExceptionListItem,
+} from '../../list_api';
+import * as i18n from '../../translations';
+import { useExceptionListDetailsContext } from '../../context/exception_list_details.context';
 
-export const useListWithSearchComponent = (list: ExceptionListSchema) => {
+export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
   const {
     isReadOnly,
     toasts,
@@ -115,8 +119,24 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
   );
 
   const onAddExceptionClick = () => {};
-  const onDeleteException = () => {};
-  const onEditExceptionItem = () => {};
+  const onDeleteException = useCallback(
+    async ({ id, name, namespaceType }) => {
+      try {
+        // setViewerStatus(ViewerStatus.DELETING); // TODO ASK YARA if it is needed or it can be replaced with Loading
+        setViewerStatus(ViewerStatus.LOADING);
+        await deleteExceptionListItem({ id, http, namespaceType });
+        toasts?.addSuccess({
+          title: i18n.EXCEPTION_ITEM_DELETE_TITLE,
+          text: i18n.EXCEPTION_ITEM_DELETE_TEXT(name),
+        });
+        fetchItems();
+      } catch (error) {
+        handleErrorStatus(error);
+      }
+    },
+    [http, toasts, fetchItems, handleErrorStatus]
+  );
+  const onEditExceptionItem = (exception: ExceptionListItemSchema) => {};
   const onCreateExceptionListItem = useCallback(() => {}, []);
   // #endregion
 

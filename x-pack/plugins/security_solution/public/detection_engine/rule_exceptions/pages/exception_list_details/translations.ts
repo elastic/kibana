@@ -83,3 +83,18 @@ export const EXCEPTION_ITEM_CARD_DELETE_LABEL = i18n.translate(
     defaultMessage: 'Delete rule exception',
   }
 );
+export const EXCEPTION_ITEM_DELETE_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.list.exception.item.card.exceptionItemDeleteSuccessTitle',
+  {
+    defaultMessage: 'Exception deleted',
+  }
+);
+
+export const EXCEPTION_ITEM_DELETE_TEXT = (itemName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.exceptions.list.exception.item.card.exceptionItemDeleteSuccessText',
+    {
+      values: { itemName },
+      defaultMessage: '"{itemName}" deleted successfully.',
+    }
+  );

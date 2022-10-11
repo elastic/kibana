@@ -24,7 +24,7 @@ import * as i18n from '../translations';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { getFormattedComments } from '../../../utils/helpers';
 import { ListDetailsLinkAnchor } from '../../../components/list_details_link_anchor';
-import { useListWithSearchComponent } from './use_list_with_search';
+import { useManageListWithSearchComponent } from './hooks/use_manage_list_with_search';
 import { ExceptionsUtility } from '../../../components/exceptions_utility';
 
 interface ListWithSearchComponentProps {
@@ -49,7 +49,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
     onEditExceptionItem,
     onPaginationChange,
     onCreateExceptionListItem,
-  } = useListWithSearchComponent(list);
+  } = useManageListWithSearchComponent(list);
 
   return viewerStatus === ViewerStatus.EMPTY || viewerStatus === ViewerStatus.LOADING ? (
     <EmptyViewerState
