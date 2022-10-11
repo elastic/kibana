@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   apmLabsButton,
   apmProgressiveLoading,
@@ -31,7 +33,7 @@ const apmSettingsKeys = [
 ];
 
 export function GeneralSettings() {
-  const { docLinks, notifications } = useApmPluginContext().core;
+  const { docLinks, notifications, application } = useApmPluginContext().core;
   const {
     handleFieldChange,
     settingsEditableConfig,
@@ -63,6 +65,29 @@ export function GeneralSettings() {
 
   return (
     <>
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.apm.apmSettings.kibanaLink"
+            defaultMessage="The full list of APM options can be found in {link}"
+            values={{
+              link: (
+                <EuiLink
+                  href={application.getUrlForApp('management', {
+                    path: `/kibana/settings?query=category:(observability)`,
+                  })}
+                >
+                  {i18n.translate('xpack.apm.apmSettings.kibanaLink.label', {
+                    defaultMessage: 'Kibana advanced settings',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+        iconType="iInCircle"
+      />
+      <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
         const editableConfig = settingsEditableConfig[settingKey];
         return (
