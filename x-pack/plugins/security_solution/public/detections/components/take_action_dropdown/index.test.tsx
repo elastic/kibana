@@ -36,7 +36,7 @@ import {
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -470,7 +470,7 @@ describe('take action dropdown', () => {
                 ...getApiResponse().metadata,
                 Endpoint: {
                   ...getApiResponse().metadata.Endpoint,
-                  capabilities: [...RESPONDER_CAPABILITIES],
+                  capabilities: [...ENDPOINT_CAPABILITIES],
                 },
               },
               host_status: HostStatus.UNENROLLED,
