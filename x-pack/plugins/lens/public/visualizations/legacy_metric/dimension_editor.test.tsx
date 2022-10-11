@@ -22,7 +22,7 @@ import {
 import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
 
 // mocking random id generator function
@@ -57,7 +57,7 @@ describe('metric dimension editor', () => {
   function testState(): LegacyMetricState {
     return {
       layerId: 'first',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       accessor: 'foo',
     };
   }

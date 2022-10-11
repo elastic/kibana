@@ -43,7 +43,7 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import { DataType } from '../..';
+import type { DataType } from '../..';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -530,6 +530,81 @@ export function insertNewColumn({
   );
 }
 
+function replaceFormulaColumn(
+  {
+    operationDefinition,
+    layer,
+    previousColumn,
+    indexPattern,
+    previousDefinition,
+    columnId,
+  }: {
+    operationDefinition: Extract<GenericOperationDefinition, { input: 'managedReference' }>;
+    previousDefinition: GenericOperationDefinition;
+    layer: IndexPatternLayer;
+    previousColumn: IndexPatternLayer['columns'][number];
+    indexPattern: IndexPattern;
+    columnId: string;
+  },
+  { shouldResetLabel }: { shouldResetLabel?: boolean }
+) {
+  const baseOptions = {
+    columns: layer.columns,
+    previousColumn,
+    indexPattern,
+  };
+  let tempLayer = layer;
+  const newColumn = operationDefinition.buildColumn(
+    { ...baseOptions, layer: tempLayer },
+    'params' in previousColumn ? previousColumn.params : undefined,
+    operationDefinitionMap
+  ) as FormulaIndexPatternColumn;
+
+  // now remove the previous references
+  if (previousDefinition.input === 'fullReference') {
+    (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+      tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
+    });
+  }
+
+  const basicLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
+  // rebuild the references again for the specific AST generated
+  let newLayer;
+
+  try {
+    newLayer = newColumn.params.formula
+      ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
+          indexPattern,
+        }).layer
+      : basicLayer;
+  } catch (e) {
+    newLayer = basicLayer;
+  }
+
+  // when coming to Formula keep the custom label
+  const regeneratedColumn = newLayer.columns[columnId];
+  if (
+    !shouldResetLabel &&
+    regeneratedColumn.operationType !== previousColumn.operationType &&
+    previousColumn.customLabel
+  ) {
+    regeneratedColumn.customLabel = true;
+    regeneratedColumn.label = previousColumn.label;
+  }
+
+  return updateDefaultLabels(
+    adjustColumnReferencesForChangedColumn(
+      {
+        ...tempLayer,
+        columnOrder: getColumnOrder(newLayer),
+        columns: newLayer.columns,
+      },
+      columnId
+    ),
+    indexPattern
+  );
+}
+
 export function replaceColumn({
   layer,
   columnId,
@@ -678,54 +753,16 @@ export function replaceColumn({
     // TODO: Refactor all this to be more generic and know less about Formula
     // if managed it has to look at the full picture to have a seamless transition
     if (operationDefinition.input === 'managedReference') {
-      const newColumn = operationDefinition.buildColumn(
-        { ...baseOptions, layer: tempLayer },
-        'params' in previousColumn ? previousColumn.params : undefined,
-        operationDefinitionMap
-      ) as FormulaIndexPatternColumn;
-
-      // now remove the previous references
-      if (previousDefinition.input === 'fullReference') {
-        (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-          tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
-        });
-      }
-
-      const basicLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
-      // rebuild the references again for the specific AST generated
-      let newLayer;
-
-      try {
-        newLayer = newColumn.params.formula
-          ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
-              indexPattern,
-            }).layer
-          : basicLayer;
-      } catch (e) {
-        newLayer = basicLayer;
-      }
-
-      // when coming to Formula keep the custom label
-      const regeneratedColumn = newLayer.columns[columnId];
-      if (
-        !shouldResetLabel &&
-        regeneratedColumn.operationType !== previousColumn.operationType &&
-        previousColumn.customLabel
-      ) {
-        regeneratedColumn.customLabel = true;
-        regeneratedColumn.label = previousColumn.label;
-      }
-
-      return updateDefaultLabels(
-        adjustColumnReferencesForChangedColumn(
-          {
-            ...tempLayer,
-            columnOrder: getColumnOrder(newLayer),
-            columns: newLayer.columns,
-          },
-          columnId
-        ),
-        indexPattern
+      return replaceFormulaColumn(
+        {
+          operationDefinition,
+          layer: tempLayer,
+          previousColumn,
+          indexPattern,
+          previousDefinition,
+          columnId,
+        },
+        { shouldResetLabel }
       );
     }
 
@@ -837,6 +874,20 @@ export function replaceColumn({
         columnOrder: getColumnOrder(newLayer),
       },
       columnId
+    );
+  } else if (operationDefinition.input === 'managedReference') {
+    // Just changing a param in a formula column should trigger
+    // a full formula regeneration for side effects on referenced columns
+    return replaceFormulaColumn(
+      {
+        operationDefinition,
+        layer,
+        previousColumn,
+        indexPattern,
+        previousDefinition,
+        columnId,
+      },
+      { shouldResetLabel }
     );
   } else {
     throw new Error('nothing changed');
