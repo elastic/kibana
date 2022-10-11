@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const RISK_SCORE_TAB = '[data-test-subj="navigation-userRisk"]';
-export const RISK_SCORE_TAB_CONTENT = '[data-test-subj="table-userRisk-loading-false"]';
+export { promoteFeaturedIntegrations } from './promote_featured_integrations';
