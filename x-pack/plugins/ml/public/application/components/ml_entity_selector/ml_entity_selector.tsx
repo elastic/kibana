@@ -43,6 +43,16 @@ const defaultEntities = {
   trained_models: true,
 };
 
+/**
+ * Reusable component for picking ML entities.
+ *
+ * @param entityTypes
+ * @param multiSelect
+ * @param selectedOptions
+ * @param onSelectionChange
+ * @param handleDuplicates
+ * @constructor
+ */
 export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   entityTypes = defaultEntities,
   multiSelect = true,

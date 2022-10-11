@@ -10,7 +10,7 @@ import { uniqBy } from 'lodash';
 import { EuiFilterButton, EuiPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
-import { MlEntitySelector, MlEntitySelectorProps } from './ml_entity_selector';
+import { MlEntitySelector, type MlEntitySelectorProps } from '../../components/ml_entity_selector';
 
 /**
  * Custom filter component to use with {@link EuiInMemoryTable}
