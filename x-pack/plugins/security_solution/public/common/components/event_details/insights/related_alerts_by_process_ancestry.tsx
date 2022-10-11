@@ -23,6 +23,7 @@ import {
   PROCESS_ANCESTRY_COUNT,
   PROCESS_ANCESTRY_EMPTY,
   PROCESS_ANCESTRY_ERROR,
+  PROCESS_ANCESTRY_FILTER,
 } from './translations';
 
 interface Props {
@@ -36,6 +37,8 @@ interface Props {
 interface Cache {
   alertIds: string[];
 }
+
+const dataProviderLimit = 5;
 
 /**
  * Fetches and displays alerts that were generated in the associated process'
@@ -168,10 +171,10 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
   eventId: string;
   timelineId?: string;
 }> = ({ alertIds, eventId, timelineId }) => {
-  const dataProviderLimit = 5;
+  const shouldUseFilters = alertIds && alertIds.length && alertIds.length >= dataProviderLimit;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
-      if (alertIds.length > dataProviderLimit) {
+      if (shouldUseFilters) {
         return null;
       } else {
         return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
@@ -182,14 +185,14 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
       }
     }
     return null;
-  }, [alertIds, eventId, timelineId, dataProviderLimit]);
+  }, [alertIds, eventId, timelineId, shouldUseFilters]);
 
   const filters: Filter[] | null = useMemo(() => {
-    if (alertIds && alertIds.length && alertIds.length >= dataProviderLimit) {
+    if (shouldUseFilters) {
       return [
         {
           meta: {
-            alias: 'Process Ancestry Alert IDs',
+            alias: PROCESS_ANCESTRY_FILTER,
             type: 'phrases',
             key: '_id',
             params: [...alertIds],
@@ -199,15 +202,13 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
           },
           query: {
             bool: {
-              should: [
-                ...alertIds.map((id) => {
-                  return {
-                    match_phrase: {
-                      _id: id,
-                    },
-                  };
-                }),
-              ],
+              should: alertIds.map((id) => {
+                return {
+                  match_phrase: {
+                    _id: id,
+                  },
+                };
+              }),
               minimum_should_match: 1,
             },
           },
@@ -216,7 +217,7 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
     } else {
       return null;
     }
-  }, [alertIds, dataProviderLimit]);
+  }, [alertIds, shouldUseFilters]);
 
   if (!dataProviders && !filters) {
     return null;
