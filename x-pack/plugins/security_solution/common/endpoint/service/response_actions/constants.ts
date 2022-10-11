@@ -13,5 +13,6 @@ export const RESPONSE_ACTION_COMMANDS = [
   'kill-process',
   'suspend-process',
   'running-processes',
+  'get-file',
 ] as const;
 export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
