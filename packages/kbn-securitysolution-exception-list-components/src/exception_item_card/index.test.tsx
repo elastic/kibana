@@ -13,11 +13,11 @@ import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '../test_helpers/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../test_helpers/comments.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { RuleReference } from '../types';
+import { Rule } from '../types';
 
-const ruleReferences: RuleReference[] = [
+const ruleReferences: Rule[] = [
   {
-    exceptionLists: [
+    exception_lists: [
       {
         id: '123',
         list_id: 'i_exist',
