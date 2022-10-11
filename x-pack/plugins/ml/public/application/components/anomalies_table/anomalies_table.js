@@ -66,7 +66,6 @@ export class AnomaliesTableInternal extends Component {
   }
 
   toggleRow = async (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
-    console.log(item);
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];

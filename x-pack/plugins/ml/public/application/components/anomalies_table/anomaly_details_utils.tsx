@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  // EuiFlexGrid,
   useEuiTheme,
   EuiText,
   EuiSpacer,
@@ -281,7 +280,7 @@ export const DetailsItems: FC<{
       defaultMessage: 'Probability',
     }),
     description:
-      // @ts-expect-error parseFloat accept take a number
+      // @ts-expect-error parseFloat accepts a number
       source.probability !== undefined ? Number.parseFloat(source.probability).toPrecision(3) : '',
   });
 
@@ -321,7 +320,7 @@ export const DetailsItems: FC<{
       {items.map(({ title, description }) => (
         <>
           <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem style={{ width: '180px' }} grow={false}>
+            <EuiFlexItem css={{ width: '180px' }} grow={false}>
               {title}
             </EuiFlexItem>
             <EuiFlexItem>{description}</EuiFlexItem>
@@ -339,8 +338,9 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
     return null;
   }
   const initialScore = Math.floor(1000 * anomaly.source.initial_record_score) / 1000;
-  const finalScore = Math.floor(1000 * (anomaly.source.record_score - 25)) / 1000; // remove the 25!!!!!!!!!!!!!!!!!!!!!
+  const finalScore = Math.floor(1000 * anomaly.source.record_score) / 1000;
   const scoreDifference = initialScore - finalScore;
+  const ACCEPTABLE_NORMALIZATION = 10;
 
   const yes = i18n.translate('xpack.ml.anomaliesTable.anomalyExplanationDetails.yes', {
     defaultMessage: 'Yes',
@@ -363,7 +363,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
     });
   }
 
-  if (scoreDifference > 10) {
+  if (scoreDifference > ACCEPTABLE_NORMALIZATION) {
     explanationDetails.push({
       title: (
         <EuiToolTip
@@ -561,7 +561,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           {impactDetails.map(({ title, description }) => (
             <>
               <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem style={{ width: '220px' }} grow={false}>
+                <EuiFlexItem css={{ width: '220px' }} grow={false}>
                   {title}
                 </EuiFlexItem>
                 <EuiFlexItem>{description}</EuiFlexItem>
@@ -578,8 +578,10 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
 const RecordScore: FC<{ score: number }> = ({ score }) => {
   return (
     <div
-      style={{
+      css={{
         borderBottom: '2px solid',
+      }}
+      style={{
         borderBottomColor: getSeverityColor(score),
       }}
     >
@@ -637,9 +639,12 @@ const ImpactVisual: FC<{ score: number }> = ({ score }) => {
           return (
             <EuiFlexItem grow={false}>
               <div
-                style={{
+                css={{
                   height: boxPx,
                   width: boxPx,
+                  borderRadius: '2px',
+                }}
+                style={{
                   backgroundColor: impact > i ? fullBox : emptyBox,
                 }}
               />
