@@ -15,11 +15,11 @@ import {
   EuiIcon,
   Direction,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { State } from '../table_list_view';
-
-import './table_sort_select.scss';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;
@@ -62,6 +62,8 @@ interface Props {
 }
 
 export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: Props) {
+  const { euiTheme } = useEuiTheme();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<SortItem[]>(() => {
     let opts: SortItem[] = [
@@ -99,6 +101,12 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
     return opts;
   });
   const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
+
+  const panelHeaderCSS = css`
+    border-bottom: ${euiTheme.border.thin};
+    font-weight: ${600};
+    padding: ${euiTheme.size.s};
+  `;
 
   const togglePopOver = () => {
     setIsPopoverOpen((prev) => !prev);
@@ -149,17 +157,15 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
       panelClassName="euiFilterGroup__popoverPanel"
     >
       <>
-        <EuiText className="contentManagementTableList__sortSelect__header">
-          {i18nText.headerSort}
-        </EuiText>
-      <EuiSelectable<SortItem>
-        singleSelection
-        aria-label="some aria label"
-        options={options}
-        onChange={onSelectChange}
-      >
-        {(list) => list}
-      </EuiSelectable>
+        <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>
+        <EuiSelectable<SortItem>
+          singleSelection
+          aria-label="some aria label"
+          options={options}
+          onChange={onSelectChange}
+        >
+          {(list) => list}
+        </EuiSelectable>
       </>
     </EuiPopover>
   );

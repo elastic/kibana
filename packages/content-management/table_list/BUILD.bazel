@@ -9,7 +9,6 @@ SOURCE_FILES = glob(
   [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.scss",
   ],
   exclude = [
     "**/*.config.js",
@@ -104,11 +103,7 @@ jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  web = True,
-  additional_args = [
-    "--copy-files",
-    "--quiet"
-  ],
+  web = True
 )
 
 ts_config(
