@@ -10,7 +10,7 @@
  * of the anomalies table.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
@@ -24,7 +24,9 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { getSeverity } from '../../../../common/util/anomaly_utils';
 import { MAX_CHARS } from './anomalies_table_constants';
@@ -62,7 +64,16 @@ export const AnomalyDetails: FC<Props> = ({
   tabIndex,
   job,
 }) => {
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
+
+  const dividerStyle = useMemo(() => {
+    return isPopulatedObject(anomaly.source.anomaly_score_explanation)
+      ? { borderRight: `1px solid ${colors.lightShade}` }
+      : {};
+  }, [colors, anomaly]);
 
   const toggleAllInfluencers = () => {
     setShowAllInfluencers(!showAllInfluencers);
@@ -357,7 +368,7 @@ export const AnomalyDetails: FC<Props> = ({
             <EuiSpacer size="m" />
 
             <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem style={{ borderRight: '1px solid #ccc' }}>
+              <EuiFlexItem css={dividerStyle}>
                 {renderDetails()}
                 {renderInfluencers()}
               </EuiFlexItem>
