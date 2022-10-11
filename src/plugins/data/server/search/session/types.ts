@@ -49,7 +49,7 @@ export interface IScopedSearchSessionsClient {
     expires: Date
   ) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>;
   status: (sessionId: string) => Promise<SearchSessionStatusResponse>;
-  getConfig: () => SearchSessionsConfigSchema | null;
+  getConfig: () => SearchSessionsConfigSchema;
 }
 
 export interface ISearchSessionService {
