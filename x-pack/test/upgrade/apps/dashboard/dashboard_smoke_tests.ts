@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);
           log.debug('Checking input controls rendered');
-          if (semver.lt(process.env.ORIGINAL_VERSION!, '8.5.0-SNAPSHOT')) {
+          if (semver.lt(process.env.ORIGINAL_VERSION!, '8.6.0-SNAPSHOT')) {
             await dashboardExpect.inputControlItemCount(3);
           } else {
             await dashboardExpect.controlCount(3);
