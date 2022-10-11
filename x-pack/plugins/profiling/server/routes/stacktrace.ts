@@ -393,6 +393,8 @@ export async function mgetStackFrames({
   return stackFrames;
 }
 
+const executableLRU = new LRUCache<FileID, Executable>({ max: 100000 });
+
 export async function mgetExecutables({
   logger,
   client,
@@ -403,6 +405,14 @@ export async function mgetExecutables({
   executableIDs: Set<string>;
 }): Promise<Map<FileID, Executable>> {
   const executables = new Map<FileID, Executable>();
+
+  for (const fileID of executableIDs) {
+    const executable = executableLRU.get(fileID);
+    if (executable) {
+      executables.set(fileID, executable);
+      executableIDs.delete(fileID);
+    }
+  }
 
   if (executableIDs.size === 0) {
     return executables;
@@ -423,13 +433,17 @@ export async function mgetExecutables({
       continue;
     }
     if (exe.found) {
-      executables.set(exe._id, {
+      const executable = {
         FileName: exe._source!.Executable.file.name,
-      });
+      };
+      executables.set(exe._id, executable);
+      executableLRU.set(exe._id, executable);
       exeFound++;
-    } else {
-      executables.set(exe._id, emptyExecutable);
+      continue;
     }
+
+    executables.set(exe._id, emptyExecutable);
+    executableLRU.set(exe._id, emptyExecutable);
   }
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
