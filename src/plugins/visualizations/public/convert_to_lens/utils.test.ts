@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
   AggBasedColumn,
@@ -27,6 +27,7 @@ import {
   getBucketColumns,
   getColumnIds,
   getColumnsWithoutReferenced,
+  getCustomBucketColumns,
   getMetricsWithoutDuplicates,
   isReferenced,
   isValidVis,
@@ -647,5 +648,78 @@ describe('getColumnIds', () => {
       colId3,
       colId4,
     ]);
+  });
+
+  describe('getCustomBucketColumns', () => {
+    const dataView = stubLogstashDataView;
+    const baseMetric = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+    };
+    const metric1: SchemaConfig<METRIC_TYPES.COUNT> = {
+      ...baseMetric,
+      accessor: 2,
+      aggType: METRIC_TYPES.COUNT,
+      aggId: '3',
+    };
+    const metric2: SchemaConfig<METRIC_TYPES.MAX> = {
+      ...baseMetric,
+      accessor: 3,
+      aggType: METRIC_TYPES.MAX,
+      aggId: '4',
+    };
+    const customBucketsWithMetricIds = [
+      {
+        customBucket: {} as IAggConfig,
+        metricIds: ['3', '4'],
+      },
+      {
+        customBucket: {} as IAggConfig,
+        metricIds: ['5'],
+      },
+    ];
+    test('return custom buckets columns and map', () => {
+      mockConvertBucketToColumns.mockReturnValueOnce({
+        columnId: 'col-1',
+        operationType: 'date_histogram',
+      });
+      mockConvertBucketToColumns.mockReturnValueOnce({
+        columnId: 'col-2',
+        operationType: 'terms',
+      });
+      expect(
+        getCustomBucketColumns(
+          customBucketsWithMetricIds,
+          [
+            { columnId: 'col-3', meta: { aggId: '3' } },
+            { columnId: 'col-4', meta: { aggId: '4' } },
+            { columnId: 'col-5', meta: { aggId: '5' } },
+          ] as AggBasedColumn[],
+          dataView,
+          [metric1, metric2]
+        )
+      ).toEqual({
+        customBucketColumns: [
+          {
+            columnId: 'col-1',
+            operationType: 'date_histogram',
+          },
+          {
+            columnId: 'col-2',
+            operationType: 'terms',
+          },
+        ],
+        customBucketsMap: {
+          'col-3': 'col-1',
+          'col-4': 'col-1',
+          'col-5': 'col-2',
+        },
+      });
+    });
   });
 });
