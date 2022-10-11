@@ -65,7 +65,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           generatePngObservable(reporting, logger, {
             layout,
             request: req,
-            browserTimezone: 'America/Los_Angeles',
+            browserTimezone: 'UTC',
             urls: [hashUrl],
           }).pipe(
             mergeMap(async ({ logs$, ...rest }) => ({
