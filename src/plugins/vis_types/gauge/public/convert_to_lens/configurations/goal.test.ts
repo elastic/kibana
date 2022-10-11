@@ -8,29 +8,44 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { getConfiguration } from '.';
-import { VisParams } from '../../types';
+import { GaugeVisParams } from '../../types';
+import { getConfiguration } from './goal';
 
-const params: VisParams = {
+const params: GaugeVisParams = {
   addTooltip: false,
   addLegend: false,
-  dimensions: {} as VisParams['dimensions'],
-  metric: {
+  isDisplayWarning: true,
+  gauge: {
+    type: 'meter',
+    orientation: 'vertical',
+    alignment: 'automatic',
+    gaugeType: 'Arc',
+    scale: {
+      color: 'rgba(105,112,125,0.2)',
+      labels: false,
+      show: false,
+    },
+    gaugeStyle: 'Full',
+    extendRange: false,
+    backStyle: 'Full',
     percentageMode: false,
     percentageFormatPattern: '',
-    useRanges: true,
     colorSchema: ColorSchemas.Greys,
-    metricColorMode: 'Labels',
     colorsRange: [
       { type: 'range', from: 0, to: 100 },
       { type: 'range', from: 100, to: 200 },
-      { type: 'range', from: 200, to: 300 },
     ],
     labels: {},
     invertColors: false,
-    style: {} as VisParams['metric']['style'],
+    style: {
+      bgFill: '',
+      bgColor: false,
+      labelColor: false,
+      subText: '',
+      fontSize: 10,
+    },
   },
-  type: 'metric',
+  type: 'gauge',
 };
 
 describe('getConfiguration', () => {
@@ -42,22 +57,27 @@ describe('getConfiguration', () => {
 
   test('shourd return correct configuration', () => {
     const layerId = 'layer-id';
-    const metric = 'metric-id';
-    const bucket = 'bucket-id';
+    const metricAccessor = 'metric-id';
+    const breakdownByAccessor = 'bucket-id';
+    const metrics = [metricAccessor];
+    const buckets = [breakdownByAccessor];
+    const maxAccessor = 'max-accessor-id';
     const collapseFn = 'sum';
     expect(
       getConfiguration(layerId, params, palette, {
-        metrics: [metric],
-        buckets: [bucket],
+        metrics,
+        buckets,
+        maxAccessor,
         columnsWithoutReferenced: [],
-        bucketCollapseFn: { [metric]: collapseFn },
+        bucketCollapseFn: { [metricAccessor]: collapseFn },
       })
     ).toEqual({
-      breakdownByAccessor: bucket,
+      breakdownByAccessor,
       collapseFn,
       layerId,
       layerType: 'data',
-      metricAccessor: metric,
+      maxAccessor,
+      metricAccessor,
       palette,
     });
   });
