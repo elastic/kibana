@@ -71,7 +71,7 @@ export function getStateColumnActions({
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
-  columns: string[];
+  columns?: string[];
   sort: string[][] | undefined;
 }) {
   function onAddColumn(columnName: string) {
@@ -96,11 +96,11 @@ export function getStateColumnActions({
   }
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
-    // The next line should gone when classic table will be removed
+    // The next line should be gone when classic table will be removed
     const actualColumns =
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
-        ? columns.slice(1)
-        : columns;
+        ? (nextColumns || []).slice(1)
+        : nextColumns;
 
     setAppState({ columns: actualColumns });
   }
