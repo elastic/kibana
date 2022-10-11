@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import semver from 'semver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
