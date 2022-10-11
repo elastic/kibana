@@ -149,7 +149,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate', 'createRule'];
+      const timelineActions: ActionTimelineToShow[] = [
+        'createFrom',
+        'duplicate',
+        ...(onCreateRule != null ? ['createRule'] : []),
+      ];
 
       if (timelineStatus !== TimelineStatus.immutable) {
         timelineActions.push('export');
@@ -165,7 +169,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
 
       return timelineActions;
-    }, [onDeleteSelected, deleteTimelines, timelineStatus]);
+    }, [onCreateRule, timelineStatus, onDeleteSelected, deleteTimelines]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 

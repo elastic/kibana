@@ -56,7 +56,17 @@ jest.mock('../../containers/all', () => {
   };
 });
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...actual,
+    useNavigation: jest.fn().mockReturnValue({
+      getAppUrl: jest.fn(),
+      navigateTo: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../../../common/components/link_to');
 
 jest.mock('../../../common/components/link_to', () => {

@@ -36,6 +36,15 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }) };
 });
 
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: jest.fn(),
+  };
+});
+
 test('aggregatableFields', function () {
   expect(
     aggregatableFields([
