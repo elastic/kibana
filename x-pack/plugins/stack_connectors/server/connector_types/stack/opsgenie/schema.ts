@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
@@ -22,20 +21,6 @@ const responderTypes = schema.oneOf([
   schema.literal('escalation'),
   schema.literal('schedule'),
 ]);
-
-const validateDetails = (details: Record<string, string>): string | void => {
-  let totalChars = 0;
-
-  for (const value of Object.values(details)) {
-    totalChars += value.length;
-
-    if (totalChars > 8000) {
-      return i18n.translate('xpack.stackConnectors.opsgenie.invalidDetails', {
-        defaultMessage: 'details field character count exceeds the 8000 limit',
-      });
-    }
-  }
-};
 
 export const CreateAlertParamsSchema = schema.object({
   message: schema.string({ maxLength: 130 }),
@@ -82,9 +67,12 @@ export const CreateAlertParamsSchema = schema.object({
   ),
   actions: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 10 })),
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 20 })),
-  details: schema.maybe(
-    schema.recordOf(schema.string(), schema.string(), { validate: validateDetails })
-  ),
+  /**
+   * The validation requirement here is that the total characters between the key and value do not exceed 8000. Opsgenie
+   * will truncate the value if it would exceed the 8000 but it doesn't throw an error. Because of this I'm intentionally
+   * not validating the length of the keys and values here.
+   */
+  details: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   entity: schema.maybe(schema.string({ maxLength: 512 })),
   source: schema.maybe(schema.string({ maxLength: 100 })),
   priority: schema.maybe(

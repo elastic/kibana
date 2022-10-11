@@ -452,61 +452,6 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               });
             });
 
-            it('should fail to create an alert when the details field keys are more than 8000 characters', async () => {
-              const { body } = await supertest
-                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .send({
-                  params: {
-                    subAction: 'createAlert',
-                    subActionParams: {
-                      message: 'hello',
-                      details: {
-                        bananas: 'a'.repeat(8001),
-                      },
-                    },
-                  },
-                })
-                .expect(200);
-
-              expect(body).to.eql({
-                connector_id: opsgenieActionId,
-                status: 'error',
-                retry: false,
-                message: 'an error occurred while running the action',
-                service_message:
-                  'Request validation failed (Error: [details]: details field character count exceeds the 8000 limit)',
-              });
-            });
-
-            it('should succeed to create an alert when the details field keys total equal 8000 characters', async () => {
-              const { body } = await supertest
-                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .send({
-                  params: {
-                    subAction: 'createAlert',
-                    subActionParams: {
-                      message: 'hello',
-                      details: {
-                        bananas: 'a'.repeat(8000),
-                      },
-                    },
-                  },
-                })
-                .expect(200);
-
-              expect(body).to.eql({
-                connector_id: opsgenieActionId,
-                status: 'ok',
-                data: {
-                  requestId: '43a29c5c-3dbf-4fa4-9c26-f4f71023e120',
-                  result: 'Request will be processed',
-                  took: 0.107,
-                },
-              });
-            });
-
             it('should succeed to create an alert when the details field a record of string to string', async () => {
               const { body } = await supertest
                 .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
