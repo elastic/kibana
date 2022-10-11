@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { HelloWorldEmbeddable } from '../../tests/fixtures';
+import { HelloWorldEmbeddable, HelloWorldEmbeddableReact } from '../../tests/fixtures';
 import { EmbeddableRoot } from './embeddable_root';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -23,6 +23,13 @@ test('EmbeddableRoot renders an embeddable', async () => {
   ).toBe(1);
   expect(findTestSubject(component, 'embedSpinner').length).toBe(0);
   expect(findTestSubject(component, 'embedError').length).toBe(0);
+});
+
+test('EmbeddableRoot renders a React-based embeddable', async () => {
+  const embeddable = new HelloWorldEmbeddableReact({ id: 'hello' });
+  const component = mount(<EmbeddableRoot embeddable={embeddable} />);
+
+  expect(component.find('[data-test-subj="helloWorldEmbeddable"]')).toHaveLength(1);
 });
 
 test('EmbeddableRoot updates input', async () => {
