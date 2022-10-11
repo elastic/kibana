@@ -6,7 +6,7 @@
  */
 
 export { ScreenBaseClass } from './screen_base_class';
-export { ChoiceListFormatter } from './choice_list_formatter';
+export { ChoiceMenuFormatter } from './choice_menu_formatter';
 export { DataFormatter } from './data_formatter';
 export * from './types';
 export * from './type_gards';

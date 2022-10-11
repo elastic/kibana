@@ -9,13 +9,13 @@ import { isChoice } from './type_gards';
 import type { Choice } from './types';
 import { DataFormatter } from './data_formatter';
 
-type ChoiceListFormatterItems = string[] | Choice[];
+type ChoiceMenuFormatterItems = string[] | Choice[];
 
-interface ChoiceListFormatterOptions {
+interface ChoiceMenuFormatterOptions {
   layout: 'vertical' | 'horizontal';
 }
 
-const getDefaultOptions = (): ChoiceListFormatterOptions => {
+const getDefaultOptions = (): ChoiceMenuFormatterOptions => {
   return {
     layout: 'vertical',
   };
@@ -24,12 +24,12 @@ const getDefaultOptions = (): ChoiceListFormatterOptions => {
 /**
  * Formatter for displaying lists of choices
  */
-export class ChoiceListFormatter extends DataFormatter {
+export class ChoiceMenuFormatter extends DataFormatter {
   private readonly outputContent: string;
 
   constructor(
-    private readonly choiceList: ChoiceListFormatterItems,
-    private readonly options: ChoiceListFormatterOptions = getDefaultOptions()
+    private readonly choiceList: ChoiceMenuFormatterItems,
+    private readonly options: ChoiceMenuFormatterOptions = getDefaultOptions()
   ) {
     super();
 

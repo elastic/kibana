@@ -13,7 +13,7 @@ import * as readline from 'node:readline';
 import { blue, green, red } from 'chalk';
 import { QuitChoice } from './common_choices';
 import type { Choice } from './types';
-import { ChoiceListFormatter } from './choice_list_formatter';
+import { ChoiceMenuFormatter } from './choice_menu_formatter';
 import { DataFormatter } from './data_formatter';
 import { HORIZONTAL_LINE } from '../constants';
 
@@ -81,7 +81,7 @@ export class ScreenBaseClass {
   protected footer(choices: Choice[] = [QuitChoice]): string | DataFormatter {
     const displayChoices =
       choices && choices.length
-        ? `\n${this.leftPad(new ChoiceListFormatter(choices, { layout: 'horizontal' }).output)}\n`
+        ? `\n${this.leftPad(new ChoiceMenuFormatter(choices, { layout: 'horizontal' }).output)}\n`
         : '';
 
     return `

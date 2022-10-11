@@ -8,7 +8,7 @@
 import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { LoadEndpointsScreen } from './load_endpoints';
 import { TOOL_TITLE } from '../constants';
-import { ScreenBaseClass, ChoiceListFormatter } from '../../common/screen';
+import { ScreenBaseClass, ChoiceMenuFormatter } from '../../common/screen';
 import type { DataFormatter } from '../../common/screen/data_formatter';
 
 export class MainScreen extends ScreenBaseClass {
@@ -26,7 +26,7 @@ export class MainScreen extends ScreenBaseClass {
   protected body(): string | DataFormatter {
     return `
 
-${new ChoiceListFormatter(['Load endpoints']).output}\n`;
+${new ChoiceMenuFormatter(['Load endpoints']).output}\n`;
   }
 
   protected footer(): string | DataFormatter {
