@@ -37,7 +37,7 @@ export const goToRuleEditPage = (
 };
 
 export async function performTrackableBulkAction(
-  action: Omit<BulkAction, BulkAction.export>,
+  action: Exclude<BulkAction, BulkAction.export>,
   queryOrIds: string | string[],
   editPayload?: BulkActionEditPayload[],
   isDryRun = false
