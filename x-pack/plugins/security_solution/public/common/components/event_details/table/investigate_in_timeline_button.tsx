@@ -25,7 +25,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
-  filters: Filter[] | null;
+  filters?: Filter[] | null;
 }> = ({ asEmptyButton, children, dataProviders, filters, ...rest }) => {
   const dispatch = useDispatch();
 
