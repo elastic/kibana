@@ -215,7 +215,9 @@ function LocationSelect({
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{STATUS_TITLE_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <EuiBadge color={isDown ? 'danger' : 'success'}>{isDown ? 'Down' : 'Up'}</EuiBadge>
+            <EuiBadge color={isDown ? 'danger' : 'success'}>
+              {isDown ? MONITOR_STATUS_DOWN_LABEL : MONITOR_STATUS_UP_LABEL}
+            </EuiBadge>
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
@@ -513,5 +515,21 @@ const LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL = i18n.translate(
   {
     defaultMessage:
       "This icon button opens a context menu that will allow you to change the monitor's selected location. If you change the location, the flyout will display metrics for the monitor's performance in that location.",
+  }
+);
+
+const MONITOR_STATUS_UP_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.flyout.monitorStatus.up',
+  {
+    defaultMessage: 'Up',
+    description: '"Up" in the sense that a process is running and available.',
+  }
+);
+
+const MONITOR_STATUS_DOWN_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.flyout.monitorStatus.down',
+  {
+    defaultMessage: 'Down',
+    description: '"Down" in the sense that a process is not running or available.',
   }
 );
