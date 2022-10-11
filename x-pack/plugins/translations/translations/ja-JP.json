@@ -7487,7 +7487,6 @@
     "xpack.apm.serviceDetails.metrics.errorsList.title": "エラー",
     "xpack.apm.serviceDetails.metrics.memoryUsageChartTitle": "システムメモリー使用状況",
     "xpack.apm.serviceDetails.metricsTabLabel": "メトリック",
-    "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.overviewTabLabel": "概要",
     "xpack.apm.serviceDetails.transactionsTabLabel": "トランザクション",
     "xpack.apm.serviceGroup.allServices.title": "すべてのサービス",

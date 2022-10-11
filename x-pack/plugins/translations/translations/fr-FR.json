@@ -7500,7 +7500,6 @@
     "xpack.apm.serviceDetails.metrics.errorsList.title": "Erreurs",
     "xpack.apm.serviceDetails.metrics.memoryUsageChartTitle": "Utilisation mémoire système",
     "xpack.apm.serviceDetails.metricsTabLabel": "Indicateurs",
-    "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.overviewTabLabel": "Aperçu",
     "xpack.apm.serviceDetails.transactionsTabLabel": "Transactions",
     "xpack.apm.serviceGroup.allServices.title": "Tous les services",
