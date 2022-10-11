@@ -10,7 +10,7 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { AgentKeepAliveService } from './keep_alive';
+import { AgentKeepAliveService } from './agent_keep_alive';
 import { ActionResponderService } from './action_responder';
 import { createRuntimeServices } from '../../common/stack_services';
 
