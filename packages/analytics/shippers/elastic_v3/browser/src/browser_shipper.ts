@@ -125,6 +125,17 @@ export class ElasticV3BrowserShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
+    const performance_events = events.filter(e => {
+      return e.event_type === 'performance_metric'
+    })
+
+    if (performance_events.length > 0) {
+      const eventNames = performance_events.map(e => e.properties.eventName)
+      this.initContext.logger.debug(
+        `[${ElasticV3BrowserShipper.shipperName}]: sending ${events.length} performance events - ${eventNames.join(',')}`
+      );
+    }
+
     const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
@@ -134,7 +145,7 @@ export class ElasticV3BrowserShipper implements IShipper {
       keepalive: true,
     });
 
-    if (this.options.debug) {
+    if (performance_events.length > 0) {
       this.initContext.logger.debug(
         `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`
       );
