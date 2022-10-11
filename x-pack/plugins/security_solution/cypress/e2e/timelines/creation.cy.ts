@@ -23,7 +23,7 @@ import {
   EDIT_TIMELINE_BTN,
   EDIT_TIMELINE_TOOLTIP,
 } from '../../screens/timeline';
-import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
+import { createTimeline } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana, deleteTimelines } from '../../tasks/common';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
@@ -48,7 +48,7 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
 describe('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
-    createTimelineTemplate(getTimeline());
+    createTimeline(getTimeline(), 'template');
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
 
