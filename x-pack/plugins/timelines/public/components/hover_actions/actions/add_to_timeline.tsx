@@ -11,6 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { TimelineId } from '../../../types';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
@@ -43,6 +44,17 @@ const useGetHandleStartDragToTimeline = ({
   }, [startDragToTimeline]);
 
   return handleStartDragToTimeline;
+};
+
+export interface SuccessMessageProps {
+  children: React.ReactChild;
+}
+export const AddSuccessMessage = (props: SuccessMessageProps) => {
+  return (
+    <span className="eui-textBreakWord" data-test-subj="add-to-timeline-toast-success">
+      {props.children}
+    </span>
+  );
 };
 
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
@@ -84,9 +96,16 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
                 dataProvider: provider,
               })
             );
-            addSuccess(
-              i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(provider.name, timelineType === 'default')
-            );
+            addSuccess({
+              title: toMountPoint(
+                <AddSuccessMessage>
+                  {i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
+                    provider.name,
+                    timelineType === 'default'
+                  )}
+                </AddSuccessMessage>
+              ),
+            });
           }
         });
       }
