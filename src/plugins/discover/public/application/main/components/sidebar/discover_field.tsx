@@ -83,7 +83,6 @@ const FieldName: React.FC<{ field: DataViewField }> = memo(({ field }) => {
     </span>
   );
 });
-
 interface ActionButtonProps {
   field: DataViewField;
   isSelected?: boolean;
