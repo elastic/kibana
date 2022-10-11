@@ -90,10 +90,13 @@ export const singleSearchAfter = async <
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
+      const profile = nextSearchAfterResult?.profile ?? null;
+
       return {
         searchResult: nextSearchAfterResult,
         searchDuration: makeFloatString(end - start),
         searchErrors,
+        profile,
       };
     } catch (exc) {
       ruleExecutionLogger.error(`[-] nextSearchAfter threw an error ${exc}`);

@@ -778,6 +778,7 @@ export const mergeSearchResults = <
       timed_out: existingTimedOut,
       _shards: existingShards,
       hits: existingHits,
+      profile: existingProfile,
     } = prev;
 
     const {
@@ -787,6 +788,7 @@ export const mergeSearchResults = <
       _shards: newShards,
       aggregations: newAggregations,
       hits: newHits,
+      profile: newProfile,
     } = next;
 
     return {
@@ -805,6 +807,7 @@ export const mergeSearchResults = <
         ],
       },
       aggregations: newAggregations,
+      profile: [existingProfile, newProfile],
       hits: {
         total: calculateTotal(prev.hits.total, next.hits.total),
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

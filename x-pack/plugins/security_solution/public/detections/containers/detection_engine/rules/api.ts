@@ -18,6 +18,7 @@ import {
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
+  DETECTION_ENGINE_RULES_PROFILE,
 } from '../../../../../common/constants';
 import type { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type {
@@ -111,6 +112,16 @@ export const patchRule = async ({
  */
 export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
   KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+export const getRuleProfile = async ({
+  rule,
+  signal,
+}: PreviewRulesProps): Promise<PreviewResponse> =>
+  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PROFILE, {
     method: 'POST',
     body: JSON.stringify(rule),
     signal,

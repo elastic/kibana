@@ -132,6 +132,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     logs,
     hasNoiseWarning,
     isAborted,
+    profileResponse,
   } = usePreviewRoute({
     defineRuleData: previewData.defineRuleData,
     aboutRuleData: previewData.aboutRuleData,
@@ -207,7 +208,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       timeframeStart,
     ]
   );
-
+  console.log(profileResponse);
   return (
     <>
       <EuiSpacer size="s" />

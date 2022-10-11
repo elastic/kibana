@@ -37,6 +37,14 @@ export const usePreviewRoute = ({
   const { isLoading, response, rule, setRule } = usePreviewRule({
     timeframeOptions,
   });
+
+  const {
+    isLoading: isProfileLoading,
+    response: profileResponse,
+    setRule: setProfileRule,
+  } = usePreviewRule({
+    timeframeOptions,
+  });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
@@ -75,6 +83,14 @@ export const usePreviewRoute = ({
           exceptionsList,
         })
       );
+      setProfileRule(
+        formatPreviewRule({
+          defineRuleData,
+          aboutRuleData,
+          scheduleRuleData,
+          exceptionsList,
+        })
+      );
     }
   }, [
     isRequestTriggered,
@@ -84,6 +100,7 @@ export const usePreviewRoute = ({
     aboutRuleData,
     scheduleRuleData,
     exceptionsList,
+    setProfileRule,
   ]);
 
   return {
@@ -95,5 +112,6 @@ export const usePreviewRoute = ({
     previewId: response.previewId ?? '',
     logs,
     isAborted,
+    profileResponse,
   };
 };

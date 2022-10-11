@@ -86,6 +86,7 @@ import {
   readPrebuiltDevToolContentRoute,
   restartTransformRoute,
 } from '../lib/risk_score/routes';
+import { getProfileRoute } from '../lib/detection_engine/routes/rules/get_profile_route';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -111,6 +112,16 @@ export const initRoutes = (
   deleteRulesRoute(router);
   findRulesRoute(router, logger);
   previewRulesRoute(
+    router,
+    config,
+    ml,
+    security,
+    ruleOptions,
+    securityRuleTypeOptions,
+    previewRuleDataClient,
+    getStartServices
+  );
+  getProfileRoute(
     router,
     config,
     ml,

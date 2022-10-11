@@ -46,6 +46,17 @@ export const createThreatSignal = async ({
     threatList: currentThreatList,
     entryKey: 'value',
   });
+  const esFilter = await getFilter({
+    type,
+    filters: [...filters, threatFilter],
+    language,
+    query,
+    savedId,
+    services,
+    index: inputIndex,
+    exceptionFilter,
+  });
+  console.log('esFilter---------------', JSON.stringify(esFilter));
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being

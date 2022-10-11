@@ -252,6 +252,8 @@ export const previewRulesRoute = async (
               tags: [],
               updatedBy: rule.updatedBy,
             })) as TState;
+            // console.log('params----------', JSON.stringify(params));
+            // console.log('rule----------', JSON.stringify(rule));
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
@@ -325,6 +327,7 @@ export const previewRulesRoute = async (
             const thresholdAlertType = previewRuleTypeWrapper(
               createThresholdAlertType(ruleOptions)
             );
+
             await runExecutors(
               thresholdAlertType.executor,
               thresholdAlertType.id,
@@ -345,6 +348,7 @@ export const previewRulesRoute = async (
             const threatMatchAlertType = previewRuleTypeWrapper(
               createIndicatorMatchAlertType(ruleOptions)
             );
+
             await runExecutors(
               threatMatchAlertType.executor,
               threatMatchAlertType.id,

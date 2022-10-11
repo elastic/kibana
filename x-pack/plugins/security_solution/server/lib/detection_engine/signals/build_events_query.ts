@@ -201,6 +201,7 @@ export const buildEventsSearchQuery = ({
       ...searchQuery,
       body: {
         ...searchQuery.body,
+        profile: true,
         search_after: searchAfterSortIds,
       },
     };

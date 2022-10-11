@@ -47,7 +47,7 @@ export const getThreatList = async ({
     index,
     exceptionFilter,
   });
-
+  console.log('-----threatQueryFilters------', JSON.stringify(queryFilter));
   ruleExecutionLogger.debug(
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );

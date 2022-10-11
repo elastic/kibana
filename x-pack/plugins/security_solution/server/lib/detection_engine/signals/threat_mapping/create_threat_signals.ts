@@ -22,6 +22,7 @@ import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
+import { getFilter } from '../get_filter';
 
 export const createThreatSignals = async ({
   alertId,
@@ -237,6 +238,37 @@ export const createThreatSignals = async ({
         }),
     });
   } else {
+    // console.log(
+    //   'allThreatFilters',
+    //   JSON.stringify(
+    //     await getFilter({
+    //       type,
+    //       filters: [...allThreatFilters],
+    //       language,
+    //       query: threatQuery,
+    //       savedId,
+    //       services,
+    //       index: inputIndex,
+    //       exceptionFilter,
+    //     })
+    //   )
+    // );
+    // console.log(
+    //   'allEventFilters',
+    //   JSON.stringify(
+    //     await getFilter({
+    //       type,
+    //       filters: [...allEventFilters],
+    //       language,
+    //       query,
+    //       savedId,
+    //       services,
+    //       index: inputIndex,
+    //       exceptionFilter,
+    //     })
+    //   )
+    // );
+
     await createSignals({
       totalDocumentCount: threatListCount,
       getDocumentList: async ({ searchAfter }) =>
