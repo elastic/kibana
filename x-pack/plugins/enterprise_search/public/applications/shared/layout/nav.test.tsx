@@ -73,6 +73,11 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Elasticsearch',
           },
           {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+          {
             href: '/app/enterprise_search/app_search',
             id: 'app_search',
             name: 'App Search',

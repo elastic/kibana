@@ -97,6 +97,19 @@ export const WORKPLACE_SEARCH_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };
 
+export const SEARCH_EXPERIENCES_PLUGIN = {
+  ID: 'searchExperiences',
+  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
+    defaultMessage: 'Search Experiences',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
+    defaultMessage:
+      'Build an intuitive, engaging search experience without reinventing the wheel.',
+  }),
+  URL: '/app/enterprise_search/search_experiences',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {
