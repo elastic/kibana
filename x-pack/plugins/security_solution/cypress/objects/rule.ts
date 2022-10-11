@@ -6,14 +6,11 @@
  */
 
 import type { Throttle } from '@kbn/securitysolution-io-ts-alerting-types';
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
 import type { Connectors } from './connector';
-
-export const totalNumberOfPrebuiltRules = rawRules.length;
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
