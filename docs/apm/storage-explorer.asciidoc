@@ -3,7 +3,7 @@
 
 beta::[]
 
-Analyze your APM data creation and manage costs with **storage explorer**.
+Analyze your APM data and manage costs with **storage explorer**.
 For example, analyze the storage footprint of each of your services to see which are producing
 large amounts of data--then change the sample rate of a service to lower the amount of data ingested.
 Or, expand the time filter to visualize data trends over time so that you can better forecast
@@ -47,7 +47,7 @@ the total number of documents.
 image::apm/images/storage-explorer-expanded.png[APM Storage explorer service breakdown]
 
 As you explore your service statistics, you might want to take action to reduce the number of
-documents and therefor storage size of a particular service.
+documents and therefore storage size of a particular service.
 
 [float]
 ===== Reduce the number of transactions
