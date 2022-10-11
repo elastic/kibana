@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import assert from 'assert';
 import { lastValueFrom, toArray } from 'rxjs';
 import { DiagnosticResponse } from '.';
 import { incrementApiUsageCounter } from '..';
@@ -61,11 +60,10 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             request: req,
             browserTimezone: 'UTC',
             urls: [hashUrl],
-          }).pipe()
+          })
+            // Pipe is required to ensure that we can subscribe to it
+            .pipe()
         );
-
-        assert(result, 'PNG result is undefined');
-        assert(result.buffer, 'PNG result buffer is undefined');
 
         logs = result.logs$ ? await lastValueFrom(result.logs$.pipe(toArray())) : [];
 
