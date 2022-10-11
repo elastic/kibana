@@ -330,6 +330,8 @@ export async function mgetStackTraces({
   return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
+const frameLRU = new LRUCache<StackFrameID, StackFrame>({ max: 100000 });
+
 export async function mgetStackFrames({
   logger,
   client,
@@ -340,6 +342,14 @@ export async function mgetStackFrames({
   stackFrameIDs: Set<string>;
 }): Promise<Map<StackFrameID, StackFrame>> {
   const stackFrames = new Map<StackFrameID, StackFrame>();
+
+  for (const stackFrameID of stackFrameIDs) {
+    const stackFrame = frameLRU.get(stackFrameID);
+    if (stackFrame) {
+      stackFrames.set(stackFrameID, stackFrame);
+      stackFrameIDs.delete(stackFrameID);
+    }
+  }
 
   if (stackFrameIDs.size === 0) {
     return stackFrames;
@@ -360,17 +370,21 @@ export async function mgetStackFrames({
       continue;
     }
     if (frame.found) {
-      stackFrames.set(frame._id, {
+      const stackFrame = {
         FileName: frame._source!.Stackframe.file?.name,
         FunctionName: frame._source!.Stackframe.function?.name,
         FunctionOffset: frame._source!.Stackframe.function?.offset,
         LineNumber: frame._source!.Stackframe.line?.number,
         SourceType: frame._source!.Stackframe.source?.type,
-      });
+      };
+      stackFrames.set(frame._id, stackFrame);
+      frameLRU.set(frame._id, stackFrame);
       framesFound++;
-    } else {
-      stackFrames.set(frame._id, emptyStackFrame);
+      continue;
     }
+
+    stackFrames.set(frame._id, emptyStackFrame);
+    frameLRU.set(frame._id, emptyStackFrame);
   }
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
