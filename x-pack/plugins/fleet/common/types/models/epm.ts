@@ -328,10 +328,11 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
+  allow_routing = 'allow_routing',
 }
 
 export interface RegistryDataStream {
-  [key: string]: any;
+  [key: string]: unknown;
   [RegistryDataStreamKeys.type]: string;
   [RegistryDataStreamKeys.ilm_policy]?: string;
   [RegistryDataStreamKeys.hidden]?: boolean;
@@ -344,6 +345,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
+  [RegistryDataStreamKeys.allow_routing]?: boolean;
 }
 
 export interface RegistryElasticsearch {

@@ -99,6 +99,7 @@ export async function storedPackagePoliciesToAgentPermissions(
                     type: stream.data_stream.type,
                     dataset:
                       stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                    allow_routing: stream.data_stream.allow_routing,
                   };
 
                   if (stream.data_stream.elasticsearch) {
@@ -140,6 +141,7 @@ interface DataStreamMeta {
   dataset: string;
   dataset_is_prefix?: boolean;
   hidden?: boolean;
+  allow_routing?: boolean;
   elasticsearch?: {
     privileges?: RegistryDataStreamPrivileges;
   };
@@ -157,6 +159,10 @@ export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: s
   }
 
   index += `-${namespace}`;
+
+  if (dataStream.allow_routing) {
+    index = `${dataStream.type}-*-*`;
+  }
 
   const privileges = dataStream?.elasticsearch?.privileges?.indices?.length
     ? dataStream.elasticsearch.privileges.indices

@@ -29,6 +29,7 @@ export interface NewPackagePolicyInputStream {
   data_stream: {
     dataset: string;
     type: string;
+    allow_routing?: boolean;
     elasticsearch?: {
       privileges?: {
         indices?: string[];

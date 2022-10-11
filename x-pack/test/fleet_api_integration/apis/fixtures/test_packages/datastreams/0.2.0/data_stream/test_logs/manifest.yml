@@ -2,6 +2,8 @@ title: Test Dataset
 
 type: logs
 
+allow_routing: true
+
 elasticsearch:
   index_template.mappings:
     dynamic: true

@@ -25,7 +25,7 @@ import {
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
-  data_stream: { type: string; dataset: string };
+  data_stream: { type: string; dataset: string; allow_routing?: boolean };
 };
 
 export const getStreamsForInputType = (
@@ -47,6 +47,7 @@ export const getStreamsForInputType = (
           data_stream: {
             type: dataStream.type,
             dataset: dataStream.dataset,
+            allow_routing: dataStream.allow_routing,
           },
           release: dataStream.release,
         });

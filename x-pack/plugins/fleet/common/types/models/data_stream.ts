@@ -10,6 +10,7 @@ export interface DataStream {
   dataset: string;
   namespace: string;
   type: string;
+  allow_routing: boolean;
   package: string;
   package_version: string;
   last_activity_ms: number;
