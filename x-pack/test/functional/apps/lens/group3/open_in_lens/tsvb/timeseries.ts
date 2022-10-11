@@ -137,26 +137,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should convert metric with params', async () => {
+    it('should not allow converting of not valid panel', async () => {
       await visualBuilder.selectAggType('Counter Rate');
-      await visualBuilder.setFieldForAggregation('machine.ram');
-
       await header.waitUntilLoadingHasFinished();
-
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
-      await lens.waitForVisualization('xyVisChart');
-      await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
-
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-        expect(dimensions).to.have.length(2);
-        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
-        expect(await dimensions[1].getVisibleText()).to.eql(
-          'Counter rate of machine.ram per second'
-        );
-      });
+      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
+      expect(canEdit).to.be(false);
     });
   });
 }
