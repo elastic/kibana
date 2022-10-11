@@ -11,7 +11,8 @@
     "embeddable",
     "infra",
     "inspector",
-    "apm"
+    "apm",
+    "guidedOnboarding"
   ],
   "optionalPlugins": [
     "cloud",
