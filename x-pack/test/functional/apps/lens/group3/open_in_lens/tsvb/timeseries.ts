@@ -143,5 +143,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const canEdit = await testSubjects.exists('visualizeEditInLensButton');
       expect(canEdit).to.be(false);
     });
+
+    it('should not allow converting of unsupported aggregations', async () => {
+      await visualBuilder.selectAggType('Variance');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
+      expect(canEdit).to.be(false);
+    });
   });
 }
