@@ -194,14 +194,14 @@ export const DetailsItems: FC<{
       anomaly.source.anomaly_score_explanation?.upper_confidence_bound !== undefined
     ) {
       items.push({
-        title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
+        title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.upperBoundsTitle', {
           defaultMessage: 'Upper bounds',
         }),
         description: formatValue(anomaly.typical, source.function, undefined, source),
       });
 
       items.push({
-        title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
+        title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.lowerBoundsTitle', {
           defaultMessage: 'Lower bounds',
         }),
         description: formatValue(
@@ -369,7 +369,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
         <EuiToolTip
           position="left"
           content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScoreTooltip',
             {
               defaultMessage: 'Record score normalized blah blah blah',
             }
@@ -377,7 +377,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
         >
           <span>
             <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucket"
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScore"
               defaultMessage="Record score normalized"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -526,7 +526,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
       <EuiText size="xs">
         <h4>
           <FormattedMessage
-            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDetailsTitle"
+            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
             defaultMessage="Anomaly explanation"
           />
         </h4>
@@ -551,7 +551,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           <EuiText size="xs">
             <h4>
               <FormattedMessage
-                id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDetailsTitle"
+                id="xpack.ml.anomaliesTable.anomalyDetails.impactOnScoreTitle"
                 defaultMessage="Impact on initial score"
               />
             </h4>
