@@ -26,6 +26,7 @@ import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
+import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
@@ -647,6 +648,28 @@ export function registerIndexRoutes({
         // otherwise, let the default handler wrap it
         throw error;
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/history',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
+
+      return response.ok({
+        body: history,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }
