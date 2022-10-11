@@ -7,9 +7,9 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { FC, memo } from 'react';
-import { HeaderMenu } from '../header_menu';
-import { headerMenuCss } from './exception_list_header.styles';
-import * as i18n from '../translations';
+import { HeaderMenu } from '../../header_menu';
+import { headerMenuCss } from '../exception_list_header.styles';
+import * as i18n from '../../translations';
 
 interface MenuItemsProps {
   isReadonly: boolean;

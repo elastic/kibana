@@ -15,8 +15,8 @@ interface TextWithEditProps {
   isReadonly: boolean;
   dataTestSubj?: string;
   text: string;
-  onEdit: () => void;
   textCss?: Interpolation<Theme>;
+  onEdit: () => void;
 }
 
 const TextWithEditComponent: FC<TextWithEditProps> = ({
@@ -36,7 +36,7 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
           data-test-subj={`${dataTestSubj || ''}EditTitleIcon`}
           aria-label="Edit Text List Header"
           iconType="pencil"
-          onClick={onEdit}
+          onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
         />
       )}
     </div>

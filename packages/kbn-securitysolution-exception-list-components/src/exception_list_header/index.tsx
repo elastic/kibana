@@ -6,13 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { EuiIcon, EuiPageHeader, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
-import { textWithEditContainerCss, textCss } from './exception_list_header.styles';
+import {
+  textWithEditContainerCss,
+  textCss,
+  descriptionContainerCss,
+  headerCss,
+} from './exception_list_header.styles';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
+import { EditModal, ListDetails } from './edit_modal';
 
 interface ExceptionListHeaderComponentProps {
   title: string;
@@ -20,8 +26,7 @@ interface ExceptionListHeaderComponentProps {
   listId?: string;
   isReadonly: boolean;
   dataTestSubj?: string;
-  onEditTitle: () => void;
-  onEditDescription: () => void;
+  onEditListDetails: (listDetails: ListDetails) => void;
   onExportList: () => void;
   onDeleteList: () => void;
 }
@@ -32,13 +37,24 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   listId,
   isReadonly,
   dataTestSubj,
-  onEditTitle,
-  onEditDescription,
+  onEditListDetails,
   onExportList,
   onDeleteList,
 }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const listDetails = useMemo(() => ({ title, description }), [description, title]);
+  const onEdit = () => {
+    setIsModalVisible(true);
+  };
+  const onSave = (formValues: any) => {
+    setIsModalVisible(false);
+    if (typeof onEditListDetails === 'function') onEditListDetails(formValues);
+  };
+  const onCancel = () => {
+    setIsModalVisible(false);
+  };
   return (
-    <>
+    <div css={headerCss}>
       <EuiPageHeader
         bottomBorder
         paddingSize="none"
@@ -46,24 +62,24 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           <TextWithEdit
             text={title || i18n.EXCEPTION_LIST_HEADER_TITLE}
             isReadonly={isReadonly}
-            onEdit={onEditTitle}
+            onEdit={onEdit}
           />
         }
         responsive
         data-test-subj={`${dataTestSubj || ''}PageHeader`}
         description={
-          <>
+          <div css={descriptionContainerCss}>
             <TextWithEdit
               textCss={textCss}
               isReadonly={isReadonly}
               text={description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
-              onEdit={onEditDescription}
+              onEdit={onEdit}
             />
             <div css={textWithEditContainerCss}>
               <EuiText css={textCss}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
               <EuiText css={textCss}>{listId}</EuiText>
             </div>
-          </>
+          </div>
         }
         rightSideItems={[
           <MenuItems
@@ -87,7 +103,10 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           },
         ]}
       />
-    </>
+      {isModalVisible && (
+        <EditModal listDetails={listDetails} onSave={onSave} onCancel={onCancel} />
+      )}
+    </div>
   );
 };
 

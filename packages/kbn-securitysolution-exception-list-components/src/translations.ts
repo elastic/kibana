@@ -107,3 +107,36 @@ export const EXCEPTION_LIST_HEADER_DESCRIPTION = i18n.translate(
     defaultMessage: 'Add a description',
   }
 );
+
+export const EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE = (listTitle: string) =>
+  i18n.translate('exceptionList-components.exception_list_header_edit_modal_title', {
+    defaultMessage: 'Edit {listTitle}',
+    values: { listTitle },
+  });
+
+export const EXCEPTION_LIST_HEADER_EDIT_MODAL_SAVE_BUTTON = i18n.translate(
+  'exceptionList-components.exception_list_header_edit_modal_save_button',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const EXCEPTION_LIST_HEADER_EDIT_MODAL_CANCEL_BUTTON = i18n.translate(
+  'exceptionList-components.exception_list_header_edit_modal_cancel_button',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+export const EXCEPTION_LIST_HEADER_TITLE_TEXTBOX = i18n.translate(
+  'exceptionList-components.exception_list_header_title_textbox',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX = i18n.translate(
+  'exceptionList-components.exception_list_header_description_textbox',
+  {
+    defaultMessage: 'Description',
+  }
+);
