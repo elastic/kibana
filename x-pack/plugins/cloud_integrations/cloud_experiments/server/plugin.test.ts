@@ -105,20 +105,24 @@ describe('Cloud Experiments server plugin', () => {
       expect(usageCollection.registerCollector).toHaveBeenCalledTimes(1);
     });
 
-    test('updates the user metadata on setup', () => {
-      plugin.setup(coreMock.createSetup(), {
-        cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
-      });
-      const launchDarklyInstanceMock = (
-        LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>
-      ).mock.instances[0];
-      expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith({
-        userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
-        kibanaVersion: coreMock.createPluginInitializerContext().env.packageInfo.version,
-        is_elastic_staff_owned: true,
-        trial_end_date: expect.any(String),
-      });
-    });
+    test(
+      'updates the user metadata on setup',
+      fakeSchedulers((advance) => {
+        plugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+        });
+        const launchDarklyInstanceMock = (
+          LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>
+        ).mock.instances[0];
+        advance(100); // Remove the debounceTime effect
+        expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith({
+          userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+          kibanaVersion: coreMock.createPluginInitializerContext().env.packageInfo.version,
+          is_elastic_staff_owned: true,
+          trial_end_date: expect.any(String),
+        });
+      })
+    );
   });
 
   describe('start', () => {
@@ -129,6 +133,7 @@ describe('Cloud Experiments server plugin', () => {
     const firstKnownFlag = Object.keys(FEATURE_FLAG_NAMES)[0] as keyof typeof FEATURE_FLAG_NAMES;
 
     beforeEach(() => {
+      jest.useRealTimers();
       const initializerContext = coreMock.createPluginInitializerContext(
         config.schema.validate(
           {
@@ -146,6 +151,7 @@ describe('Cloud Experiments server plugin', () => {
 
     afterEach(() => {
       plugin.stop();
+      jest.useFakeTimers();
     });
 
     test('returns the contract', () => {
@@ -159,26 +165,22 @@ describe('Cloud Experiments server plugin', () => {
       );
     });
 
-    test(
-      'triggers a userMetadataUpdate for `has_data`',
-      fakeSchedulers(async (advance) => {
-        plugin.setup(coreMock.createSetup(), {
-          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
-        });
-        dataViews.dataViewsServiceFactory.mockResolvedValue(dataViewsService);
-        dataViewsService.hasUserDataView.mockResolvedValue(true);
-        plugin.start(coreMock.createStart(), { dataViews });
+    test('triggers a userMetadataUpdate for `has_data`', async () => {
+      plugin.setup(coreMock.createSetup(), {
+        cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+      });
+      dataViews.dataViewsServiceFactory.mockResolvedValue(dataViewsService);
+      dataViewsService.hasUserDataView.mockResolvedValue(true);
+      plugin.start(coreMock.createStart(), { dataViews });
 
-        // After scheduler kicks in...
-        advance(1); // The timer kicks in first on 0 (but let's give us 1ms so the trial is expired)
-        await new Promise((resolve) => process.nextTick(resolve)); // The timer triggers a promise, so we need to skip to the next tick
-        expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith(
-          expect.objectContaining({
-            has_data: true,
-          })
-        );
-      })
-    );
+      // After scheduler kicks in...
+      await new Promise((resolve) => setTimeout(resolve, 200)); // Waiting for scheduler and debounceTime to complete (don't know why fakeScheduler didn't work here).
+      expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({
+          has_data: true,
+        })
+      );
+    });
 
     describe('getVariation', () => {
       describe('with the client created', () => {

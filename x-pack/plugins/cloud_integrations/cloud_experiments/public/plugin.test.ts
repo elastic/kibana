@@ -13,7 +13,16 @@ import { CloudExperimentsPluginStart } from '../common';
 import { FEATURE_FLAG_NAMES } from '../common/constants';
 import { CloudExperimentsPlugin } from './plugin';
 import { LaunchDarklyClient } from './launch_darkly_client';
+import { MetadataService } from '../common/metadata_service';
 jest.mock('./launch_darkly_client');
+
+function getLaunchDarklyClientInstanceMock() {
+  const launchDarklyClientInstanceMock = (
+    LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>
+  ).mock.instances[0] as jest.Mocked<LaunchDarklyClient>;
+
+  return launchDarklyClientInstanceMock;
+}
 
 describe('Cloud Experiments public plugin', () => {
   jest.spyOn(console, 'debug').mockImplementation(); // silence console.debug logs
@@ -33,6 +42,7 @@ describe('Cloud Experiments public plugin', () => {
       expect(plugin).toHaveProperty('stop');
       expect(plugin).toHaveProperty('flagOverrides', undefined);
       expect(plugin).toHaveProperty('launchDarklyClient', undefined);
+      expect(plugin).toHaveProperty('metadataService', expect.any(MetadataService));
     });
 
     test('fails if launch_darkly is not provided in the config and it is a non-dev environment', () => {
@@ -66,7 +76,7 @@ describe('Cloud Experiments public plugin', () => {
 
   describe('setup', () => {
     let plugin: CloudExperimentsPlugin;
-    let launchDarklyInstanceMock: jest.Mocked<LaunchDarklyClient>;
+    let metadataServiceSetupSpy: jest.SpyInstance;
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
@@ -75,8 +85,8 @@ describe('Cloud Experiments public plugin', () => {
         metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      launchDarklyInstanceMock = (LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>)
-        .mock.instances[0] as jest.Mocked<LaunchDarklyClient>;
+      // eslint-disable-next-line dot-notation
+      metadataServiceSetupSpy = jest.spyOn(plugin['metadataService'], 'setup');
     });
 
     afterEach(() => {
@@ -109,16 +119,20 @@ describe('Cloud Experiments public plugin', () => {
           cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
         });
 
-        expect(launchDarklyInstanceMock.updateUserMetadata).not.toHaveBeenCalled();
+        expect(metadataServiceSetupSpy).not.toHaveBeenCalled();
       });
 
       test('it initializes the LaunchDarkly client', async () => {
         plugin.setup(coreMock.createSetup(), {
           cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
         });
-        // await the lazy import
-        await new Promise((resolve) => process.nextTick(resolve));
-        expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledTimes(1);
+
+        expect(metadataServiceSetupSpy).toHaveBeenCalledWith({
+          is_elastic_staff_owned: true,
+          kibanaVersion: 'version',
+          trial_end_date: '2020-10-01T14:13:12.000Z',
+          userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+        });
       });
     });
   });
@@ -135,8 +149,7 @@ describe('Cloud Experiments public plugin', () => {
         flag_overrides: { [firstKnownFlag]: '1234' },
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      launchDarklyInstanceMock = (LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>)
-        .mock.instances[0] as jest.Mocked<LaunchDarklyClient>;
+      launchDarklyInstanceMock = getLaunchDarklyClientInstanceMock();
     });
 
     afterEach(() => {
@@ -146,6 +159,7 @@ describe('Cloud Experiments public plugin', () => {
     test('returns the contract', () => {
       plugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
       const startContract = plugin.start(coreMock.createStart(), {
+        cloud: cloudMock.createStart(),
         dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(startContract).toStrictEqual(
@@ -162,10 +176,10 @@ describe('Cloud Experiments public plugin', () => {
       });
 
       const dataViews = dataViewPluginMocks.createStartContract();
-      plugin.start(coreMock.createStart(), { dataViews });
+      plugin.start(coreMock.createStart(), { cloud: cloudMock.createStart(), dataViews });
 
       // After scheduler kicks in...
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 200));
       // Using a timeout of 0ms to let the `timer` kick in.
       // For some reason, fakeSchedulers is not working on browser-side tests :shrug:
       expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith(
@@ -183,6 +197,7 @@ describe('Cloud Experiments public plugin', () => {
             cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
           });
           startContract = plugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
             dataViews: dataViewPluginMocks.createStartContract(),
           });
         });
@@ -221,6 +236,7 @@ describe('Cloud Experiments public plugin', () => {
           });
           expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
           startContract = customPlugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
             dataViews: dataViewPluginMocks.createStartContract(),
           });
         });
@@ -252,6 +268,7 @@ describe('Cloud Experiments public plugin', () => {
             cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
           });
           startContract = plugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
             dataViews: dataViewPluginMocks.createStartContract(),
           });
         });
@@ -283,6 +300,7 @@ describe('Cloud Experiments public plugin', () => {
           });
           expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
           startContract = customPlugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
             dataViews: dataViewPluginMocks.createStartContract(),
           });
         });
@@ -311,12 +329,12 @@ describe('Cloud Experiments public plugin', () => {
         metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      launchDarklyInstanceMock = (LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>)
-        .mock.instances[0] as jest.Mocked<LaunchDarklyClient>;
+      launchDarklyInstanceMock = getLaunchDarklyClientInstanceMock();
       plugin.setup(coreMock.createSetup(), {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
       });
       plugin.start(coreMock.createStart(), {
+        cloud: cloudMock.createStart(),
         dataViews: dataViewPluginMocks.createStartContract(),
       });
     });

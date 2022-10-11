@@ -8,9 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { get, has } from 'lodash';
 import { duration } from 'moment';
-import { concatMap, filter } from 'rxjs';
+import { concatMap } from 'rxjs';
 import { Sha256 } from '@kbn/crypto-browser';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 import type {
@@ -26,6 +26,7 @@ interface CloudExperimentsPluginSetupDeps {
 }
 
 interface CloudExperimentsPluginStartDeps {
+  cloud: CloudStart;
   dataViews: DataViewsPublicPluginStart;
 }
 
@@ -84,18 +85,6 @@ export class CloudExperimentsPlugin
         trial_end_date: deps.cloud.trialEndDate?.toISOString(),
         is_elastic_staff_owned: deps.cloud.isElasticStaffOwned,
       });
-
-      // We only subscribe to the user metadata updates if Cloud is enabled.
-      // This way, since the user is not identified, it cannot retrieve Feature Flags from LaunchDarkly when not running on Cloud.
-      this.metadataService.userMetadata$
-        .pipe(
-          filter(Boolean), // Filter out undefined
-          // Using concatMap to ensure we call the promised update in an orderly manner to avoid concurrency issues
-          concatMap(
-            async (userMetadata) => await this.launchDarklyClient!.updateUserMetadata(userMetadata)
-          )
-        )
-        .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
     }
   }
 
@@ -105,11 +94,24 @@ export class CloudExperimentsPlugin
    */
   public start(
     core: CoreStart,
-    { dataViews }: CloudExperimentsPluginStartDeps
+    { cloud, dataViews }: CloudExperimentsPluginStartDeps
   ): CloudExperimentsPluginStart {
-    this.metadataService.start({
-      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
-    });
+    if (cloud.isCloudEnabled) {
+      this.metadataService.start({
+        hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
+      });
+
+      // We only subscribe to the user metadata updates if Cloud is enabled.
+      // This way, since the user is not identified, it cannot retrieve Feature Flags from LaunchDarkly when not running on Cloud.
+      this.metadataService.userMetadata$
+        .pipe(
+          // Using concatMap to ensure we call the promised update in an orderly manner to avoid concurrency issues
+          concatMap(
+            async (userMetadata) => await this.launchDarklyClient!.updateUserMetadata(userMetadata)
+          )
+        )
+        .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
+    }
     return {
       getVariation: this.getVariation,
       reportMetric: this.reportMetric,

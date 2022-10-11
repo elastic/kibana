@@ -6,9 +6,18 @@
  */
 
 import moment from 'moment';
-import { firstValueFrom } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
+import { firstValueFrom } from 'rxjs';
 import { MetadataService } from './metadata_service';
+
+jest.mock('rxjs', () => {
+  const RxJs = jest.requireActual('rxjs');
+
+  return {
+    ...RxJs,
+    debounceTime: () => RxJs.identity, // Remove the delaying effect of debounceTime
+  };
+});
 
 describe('MetadataService', () => {
   jest.useFakeTimers();
@@ -26,9 +35,6 @@ describe('MetadataService', () => {
 
   describe('setup', () => {
     test('emits the initial metadata', async () => {
-      // Initially undefined
-      await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual(undefined);
-
       const initialMetadata = { userId: 'fake-user-id', kibanaVersion: 'version' };
       metadataService.setup(initialMetadata);
       await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual(
@@ -39,11 +45,6 @@ describe('MetadataService', () => {
     test(
       'emits in_trial when trial_end_date is provided',
       fakeSchedulers(async (advance) => {
-        // Initially undefined
-        await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual(
-          undefined
-        );
-
         const initialMetadata = {
           userId: 'fake-user-id',
           kibanaVersion: 'version',

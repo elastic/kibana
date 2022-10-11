@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { BehaviorSubject, exhaustMap, Subject, takeUntil, takeWhile, timer } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinct,
+  exhaustMap,
+  filter,
+  type Observable,
+  shareReplay,
+  Subject,
+  takeUntil,
+  takeWhile,
+  timer,
+} from 'rxjs';
 import { type Duration } from 'moment';
 
 export interface MetadataServiceStartContract {
@@ -28,13 +40,13 @@ export interface MetadataServiceConfig {
 }
 
 export class MetadataService {
-  public readonly userMetadata$ = new BehaviorSubject<UserMetadata | undefined>(undefined);
+  private readonly _userMetadata$ = new BehaviorSubject<UserMetadata | undefined>(undefined);
   private readonly stop$ = new Subject<void>();
 
   constructor(private readonly config: MetadataServiceConfig) {}
 
   public setup(initialUserMetadata: UserMetadata) {
-    this.userMetadata$.next(initialUserMetadata);
+    this._userMetadata$.next(initialUserMetadata);
 
     // Calculate `in_trial` based on the `trial_end_date`.
     // Elastic Cloud allows customers to end their trials earlier or even extend it in some cases, but this is a good compromise for now.
@@ -48,9 +60,18 @@ export class MetadataService {
     }
   }
 
+  public get userMetadata$(): Observable<UserMetadata> {
+    return this._userMetadata$.pipe(
+      filter(Boolean), // Ensure we don't return undefined
+      debounceTime(100), // Swallows multiple emissions that may occur during bootstrap
+      distinct((meta) => [meta.in_trial, meta.has_data].join('-')), // Checks if any of the dynamic fields have changed
+      shareReplay(1)
+    );
+  }
+
   public start({ hasDataFetcher }: MetadataServiceStartContract) {
     // If no initial metadata (setup was not called) => it should not schedule any metadata extension
-    if (!this.userMetadata$.value) return;
+    if (!this._userMetadata$.value) return;
 
     this.scheduleUntil(
       async () => hasDataFetcher(),
@@ -61,7 +82,7 @@ export class MetadataService {
 
   public stop() {
     this.stop$.next();
-    this.userMetadata$.complete();
+    this._userMetadata$.complete();
   }
 
   /**
@@ -78,13 +99,13 @@ export class MetadataService {
       .pipe(
         takeUntil(this.stop$),
         exhaustMap(async () => {
-          this.userMetadata$.next({
-            ...this.userMetadata$.value!, // We are running the schedules after the initial user metadata is set
+          this._userMetadata$.next({
+            ...this._userMetadata$.value!, // We are running the schedules after the initial user metadata is set
             ...(await fn()),
           });
         }),
         takeWhile(() => {
-          return !untilFn(this.userMetadata$.value!);
+          return !untilFn(this._userMetadata$.value!);
         })
       )
       .subscribe();
