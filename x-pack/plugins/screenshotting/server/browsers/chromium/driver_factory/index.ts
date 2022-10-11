@@ -147,7 +147,7 @@ export class HeadlessChromiumDriverFactory {
       } else {
         logger[level](message);
       }
-      logs$.next(`${message}`);
+      logs$.next(new Date(Date.now()) + `: ${message}`);
     };
     return log;
   }

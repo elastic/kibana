@@ -12,7 +12,7 @@ import type { Optional } from '@kbn/utility-types';
 import { Semaphore } from '@kbn/std';
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
-import { from, Observable, of, throwError } from 'rxjs';
+import { from, merge, Observable, of, throwError } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -96,7 +96,7 @@ export interface CaptureResult {
    *
    * NOTE: errors and warnings from the browser process stdout/stderr are not available.
    */
-  logs$: Observable<string>;
+  logs$: Observable<string | Error>;
 }
 
 export type ScreenshotOptions = PdfScreenshotOptions | PngScreenshotOptions;
@@ -166,7 +166,9 @@ export class Screenshots {
             toArray(),
             mergeMap((results) =>
               // At this point we no longer need the page, close it and send out the results
-              close().pipe(map(({ metrics }) => ({ metrics, results, logs$ })))
+              close().pipe(
+                map(({ metrics }) => ({ metrics, results, logs$: merge(logs$, screen.logs$) }))
+              )
             )
           );
         }),
