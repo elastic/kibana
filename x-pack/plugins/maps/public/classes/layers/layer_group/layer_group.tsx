@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
-import { asyncForEach } from '@kbn/std';
+import { asyncMap } from '@kbn/std';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
@@ -87,16 +88,16 @@ export class LayerGroup implements ILayer {
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
 
-    const clonedChildrenDescriptors: LayerDescriptor[] = [];
-    await asyncForEach(this.getChildren(), async (childLayer) => {
-      (await childLayer.cloneDescriptor()).forEach((childLayerDescriptor) => {
+    const childrenDescriptors = await asyncMap(this.getChildren(), async (childLayer) => {
+      return (await childLayer.cloneDescriptor()).map((childLayerDescriptor) => {
         if (childLayerDescriptor.parent === this.getId()) {
           childLayerDescriptor.parent = clonedDescriptor.id;
         }
-        clonedChildrenDescriptors.push(childLayerDescriptor);
+        return childLayerDescriptor;
       });
     });
-    return [...clonedChildrenDescriptors, clonedDescriptor];
+
+    return [..._.flatten(childrenDescriptors), clonedDescriptor];
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
