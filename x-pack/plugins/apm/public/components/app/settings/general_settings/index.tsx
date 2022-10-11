@@ -69,7 +69,7 @@ export function GeneralSettings() {
         title={
           <FormattedMessage
             id="xpack.apm.apmSettings.kibanaLink"
-            defaultMessage="{link} to find more options on Kibana advanced settings."
+            defaultMessage="The full list of APM options can be found in {link}"
             values={{
               link: (
                 <EuiLink
@@ -77,7 +77,9 @@ export function GeneralSettings() {
                     path: `/kibana/settings?query=category:(observability)`,
                   })}
                 >
-                  Click here
+                  {i18n.translate('xpack.apm.apmSettings.kibanaLink.label', {
+                    defaultMessage: 'Kibana advanced settings',
+                  })}
                 </EuiLink>
               ),
             }}
