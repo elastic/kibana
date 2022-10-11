@@ -23,9 +23,9 @@ import {
   ignoreElements,
   map,
   mergeMap,
-  reduce,
   takeUntil,
   tap,
+  toArray,
 } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
@@ -431,7 +431,7 @@ export class HeadlessChromiumDriverFactory {
     return Rx.merge(pageError$, browserDisconnect$);
   }
 
-  diagnose(overrideFlags: string[] = []): Rx.Observable<string> {
+  diagnose(overrideFlags: string[] = []): Rx.Observable<string[]> {
     const kbnArgs = this.getChromiumArgs();
     const finalArgs = uniq([...DEFAULT_ARGS, ...kbnArgs, ...overrideFlags]);
 
@@ -473,7 +473,7 @@ export class HeadlessChromiumDriverFactory {
     // a log indicative of an issue (for example, no default font found).
     return Rx.merge(exit$, error$, log$).pipe(
       takeUntil(Rx.timer(DIAGNOSTIC_TIME)),
-      reduce<unknown, string>((acc, curr) => `${acc}${curr}\n`, ''),
+      toArray(),
       tap(() => {
         if (browserProcess && browserProcess.pid && !browserProcess.killed) {
           browserProcess.kill('SIGKILL');

@@ -54,19 +54,22 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
         const logs = await lastValueFrom(screenshotting.diagnose());
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
-        const boundSuccessfully = logs.includes(`DevTools listening on`);
+        let boundSuccessfully = false;
         const help = knownIssues.reduce((helpTexts: string[], knownIssue) => {
           const helpText = logsToHelpMap[knownIssue];
-          if (logs.includes(knownIssue)) {
-            helpTexts.push(helpText);
-          }
+          logs.forEach((line) => {
+            if (line.includes(knownIssue)) {
+              helpTexts.push(helpText);
+            }
+            boundSuccessfully = boundSuccessfully || line.includes(`DevTools listening on`);
+          });
           return helpTexts;
         }, []);
 
         const response: DiagnosticResponse = {
           success: boundSuccessfully && !help.length,
           help,
-          logs: [logs],
+          logs,
         };
 
         return res.ok({ body: response });

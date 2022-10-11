@@ -21,7 +21,7 @@ import { registerDiagnoseBrowser } from '../browser';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
+const devtoolMessage = ['DevTools listening on (ws://localhost:4000)'];
 const fontNotFoundMessage = 'Could not find the default font';
 
 describe('POST /diagnose/browser', () => {
@@ -91,7 +91,7 @@ describe('POST /diagnose/browser', () => {
   });
 
   it('returns logs when browser crashes + helpful links', async () => {
-    const logs = `Could not find the default font`;
+    const logs = [`Could not find the default font`];
     registerDiagnoseBrowser(core, mockLogger);
 
     await server.start();
@@ -119,7 +119,7 @@ describe('POST /diagnose/browser', () => {
     registerDiagnoseBrowser(core, mockLogger);
 
     await server.start();
-    screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
+    screenshotting.diagnose.mockReturnValue(Rx.of([`${devtoolMessage}\n${fontNotFoundMessage}`]));
 
     return supertest(httpSetup.server.listener)
       .post('/api/reporting/diagnose/browser')

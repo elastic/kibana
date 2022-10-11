@@ -26,7 +26,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
-  ScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -387,7 +386,7 @@ export class ReportingCore {
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
           ),
-        } as ScreenshotOptions);
+        });
       })
     );
   }
