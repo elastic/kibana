@@ -11,7 +11,7 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 import { StepImageCaption, StepImageCaptionProps } from './step_image_caption';
 import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import moment from 'moment';
-import { mockRef } from '../../../../../lib/__mocks__/screenshot_ref.mock';
+import { mockRef } from '../../../../../lib/__mocks__/legacy_screenshot_ref.mock';
 
 describe('StepImageCaption', () => {
   let defaultProps: StepImageCaptionProps;

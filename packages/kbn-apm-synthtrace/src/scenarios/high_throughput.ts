@@ -28,11 +28,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const instances = services.map((service, index) =>
         apm
-          .service(
-            `${service}-${languages[index % languages.length]}`,
-            'production',
-            languages[index % languages.length]
-          )
+          .service({
+            name: `${service}-${languages[index % languages.length]}`,
+            environment: 'production',
+            agentName: languages[index % languages.length],
+          })
           .instance(`instance-${index}`)
       );
       const entities = [
@@ -68,18 +68,22 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           const generateError = index % random(mod, 9) === 0;
           const generateChildError = index % random(mod, 9) === 0;
           const span = instance
-            .transaction(url)
+            .transaction({ transactionName: url })
             .timestamp(timestamp)
             .duration(duration)
             .children(
               instance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .duration(childDuration)
                 .destination('elasticsearch')
                 .timestamp(timestamp)
                 .outcome(generateError && generateChildError ? 'failure' : 'success'),
               instance
-                .span('custom_operation', 'custom')
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
                 .duration(remainderDuration)
                 .success()
                 .timestamp(timestamp + childDuration)
@@ -88,7 +92,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             ? span.success()
             : span
                 .failure()
-                .errors(instance.error(`No handler for ${url}`).timestamp(timestamp + 50));
+                .errors(
+                  instance.error({ message: `No handler for ${url}` }).timestamp(timestamp + 50)
+                );
         });
 
         return successfulTraceEvents;

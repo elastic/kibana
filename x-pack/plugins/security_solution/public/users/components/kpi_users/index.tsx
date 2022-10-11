@@ -6,24 +6,31 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import type { UsersKpiProps } from './types';
 
 import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
-import { useUserRiskScore } from '../../../risk_score/containers';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
-import { RISKY_USERS_DOC_LINK } from '../constants';
+import { RiskScoreDocLink } from '../../../risk_score/components/risk_score_onboarding/risk_score_doc_link';
+import { getUserRiskIndex, RiskScoreEntity } from '../../../../common/search_strategy';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useRiskScoreFeatureStatus } from '../../../risk_score/containers/feature_status';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [_, { isModuleEnabled }] = useUserRiskScore();
+    const spaceId = useSpaceId();
+    const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
+    const { isEnabled, isLicenseValid, isLoading } = useRiskScoreFeatureStatus(
+      RiskScoreEntity.user,
+      defaultIndex
+    );
 
     return (
       <>
-        {isModuleEnabled === false && (
+        {isLicenseValid && !isEnabled && !isLoading && (
           <>
             <CallOutSwitcher
               namespace="users"
@@ -36,9 +43,10 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
                 description: (
                   <>
                     {i18n.LEARN_MORE}{' '}
-                    <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
-                      {i18n.USER_RISK_DATA}
-                    </EuiLink>
+                    <RiskScoreDocLink
+                      riskScoreEntity={RiskScoreEntity.user}
+                      title={i18n.USER_RISK_DATA}
+                    />
                     <EuiSpacer />
                   </>
                 ),

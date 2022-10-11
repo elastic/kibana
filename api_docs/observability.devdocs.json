@@ -738,11 +738,7 @@
           },
           " | undefined; list: () => string[]; }; selectedAlertId?: string | undefined; } & ",
           "CommonProps",
-          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"key\" | keyof React.HTMLAttributes<HTMLDivElement> | \"css\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"children\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"as\" | keyof ",
-          "CommonProps",
-          " | keyof React.ClassAttributes<HTMLDivElement> | keyof _EuiFlyoutProps>, \"children\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"alert\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"as\" | \"css\" | keyof ",
-          "CommonProps",
-          " | \"alerts\" | keyof _EuiFlyoutProps | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
+          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"key\" | keyof React.HTMLAttributes<HTMLDivElement> | \"css\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"children\" | \"ref\" | \"type\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"className\" | \"size\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"css\" | \"as\" | \"paddingSize\" | \"focusTrapProps\" | \"ownFocus\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\">, \"children\" | \"type\" | \"onError\" | \"hidden\" | \"color\" | \"id\" | \"alert\" | \"className\" | \"size\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"key\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"css\" | \"as\" | \"paddingSize\" | \"focusTrapProps\" | \"ownFocus\" | \"alerts\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
         ],
         "path": "x-pack/plugins/observability/public/index.ts",
         "deprecated": false,
@@ -3070,6 +3066,60 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.NavigationSection",
+        "type": "Interface",
+        "tags": [],
+        "label": "NavigationSection",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.NavigationSection.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.NavigationSection.sortKey",
+            "type": "number",
+            "tags": [],
+            "label": "sortKey",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.NavigationSection.entries",
+            "type": "Array",
+            "tags": [],
+            "label": "entries",
+            "description": [],
+            "signature": [
+              "NavigationEntry",
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability/public/services/navigation_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.ObservabilityFetchDataResponse",
         "type": "Interface",
         "tags": [],
@@ -3654,11 +3704,29 @@
             "description": [],
             "signature": [
               "{ get: (id: string) => ",
-              "ActionTypeModel",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
               "<unknown, unknown, any>; list: () => ",
-              "ActionTypeModel",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
               "<unknown, unknown, any>[]; register: (objectType: ",
-              "ActionTypeModel",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ActionTypeModel",
+                "text": "ActionTypeModel"
+              },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -3725,7 +3793,7 @@
             "label": "format",
             "description": [],
             "signature": [
-              "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
@@ -3744,7 +3812,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+                  "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
@@ -5004,6 +5072,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.enableInfrastructureHostsView",
+        "type": "string",
+        "tags": [],
+        "label": "enableInfrastructureHostsView",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureHostsView\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.enableInspectEsQueries",
         "type": "string",
         "tags": [],
@@ -5237,7 +5320,7 @@
         "label": "ObservabilityRuleTypeFormatter",
         "description": [],
         "signature": [
-          "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+          "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
@@ -5256,7 +5339,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
@@ -5558,7 +5641,13 @@
         " | undefined; list: () => string[]; }; navigation: { registerSections: (sections$: ",
         "Observable",
         "<",
-        "NavigationSection",
+        {
+          "pluginId": "observability",
+          "scope": "public",
+          "docId": "kibObservabilityPluginApi",
+          "section": "def-public.NavigationSection",
+          "text": "NavigationSection"
+        },
         "[]>) => void; }; useRulesLink: (options?: ",
         "Options",
         ") => ",
@@ -5791,7 +5880,7 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "{ get: { <TDocument = unknown>(this: That, params: ",
+                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
                   " | ",
                   "GetRequest",
@@ -5909,7 +5998,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -7524,13 +7613,7 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               " & { licensing: Promise<",
               {
                 "pluginId": "licensing",
@@ -7548,13 +7631,7 @@
                 "text": "AlertingApiRequestHandlerContext"
               },
               ">; core: Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
-                "text": "CoreRequestHandlerContext"
-              },
+              "CoreRequestHandlerContext",
               ">; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7642,14 +7719,64 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"POST /api/observability/slos\"?: ",
+          "{ \"DELETE /api/observability/slos/{id}\"?: ",
           "ServerRoute",
-          "<\"POST /api/observability/slos\", ",
+          "<\"DELETE /api/observability/slos/{id}\", ",
           "TypeC",
-          "<{ body: ",
-          "IntersectionC",
-          "<[",
+          "<{ path: ",
           "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", void, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          "ServerRoute",
+          "<\"GET /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; revision: number; created_at: Date; updated_at: Date; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
+          "ServerRoute",
+          "<\"PUT /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; body: ",
+          "PartialC",
           "<{ name: ",
           "StringC",
           "; description: ",
@@ -7660,31 +7787,31 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<string>; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; service: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_type: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_name: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; 'threshold.us': ",
           "NumberC",
@@ -7692,7 +7819,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<string>; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -7700,25 +7827,25 @@
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; service: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_type: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_name: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; }>, ",
           "PartialC",
@@ -7740,19 +7867,13 @@
           "StringC",
           "; is_rolling: ",
           "LiteralC",
-          "<true>; }>; budgeting_method: ",
+          "<boolean>; }>; budgeting_method: ",
           "LiteralC",
           "<\"occurrences\">; objective: ",
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; }>, ",
-          "PartialC",
-          "<{ settings: ",
-          "PartialC",
-          "<{ destination_index: ",
-          "StringC",
-          "; }>; }>]>; }>, ",
+          "; }>; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7760,7 +7881,125 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; time_window: { duration: string; is_rolling: true; }; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; settings: { destination_index?: string | undefined; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; created_at: Date; updated_at: Date; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"POST /api/observability/slos\"?: ",
+          "ServerRoute",
+          "<\"POST /api/observability/slos\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; description: ",
+          "StringC",
+          "; indicator: ",
+          "UnionC",
+          "<[",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<string>; params: ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; service: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_type: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_name: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; 'threshold.us': ",
+          "NumberC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<string>; params: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; service: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_type: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_name: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; }>, ",
+          "PartialC",
+          "<{ good_status_codes: ",
+          "ArrayC",
+          "<",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"2xx\">, ",
+          "LiteralC",
+          "<\"3xx\">, ",
+          "LiteralC",
+          "<\"4xx\">, ",
+          "LiteralC",
+          "<\"5xx\">]>>; }>]>; }>]>; time_window: ",
+          "TypeC",
+          "<{ duration: ",
+          "StringC",
+          "; is_rolling: ",
+          "LiteralC",
+          "<boolean>; }>; budgeting_method: ",
+          "LiteralC",
+          "<\"occurrences\">; objective: ",
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7815,7 +8054,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; }"
+          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -7830,14 +8069,64 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /api/observability/slos\"?: ",
+          "{ \"DELETE /api/observability/slos/{id}\"?: ",
           "ServerRoute",
-          "<\"POST /api/observability/slos\", ",
+          "<\"DELETE /api/observability/slos/{id}\", ",
           "TypeC",
-          "<{ body: ",
-          "IntersectionC",
-          "<[",
+          "<{ path: ",
           "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", void, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          "ServerRoute",
+          "<\"GET /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; revision: number; created_at: Date; updated_at: Date; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
+          "ServerRoute",
+          "<\"PUT /api/observability/slos/{id}\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; body: ",
+          "PartialC",
           "<{ name: ",
           "StringC",
           "; description: ",
@@ -7848,31 +8137,31 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<string>; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; service: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_type: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_name: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; 'threshold.us': ",
           "NumberC",
@@ -7880,7 +8169,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<string>; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -7888,25 +8177,25 @@
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; service: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_type: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; transaction_name: ",
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"ALL\">, ",
+          "<\"*\">, ",
           "StringC",
           "]>; }>, ",
           "PartialC",
@@ -7928,19 +8217,13 @@
           "StringC",
           "; is_rolling: ",
           "LiteralC",
-          "<true>; }>; budgeting_method: ",
+          "<boolean>; }>; budgeting_method: ",
           "LiteralC",
           "<\"occurrences\">; objective: ",
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; }>, ",
-          "PartialC",
-          "<{ settings: ",
-          "PartialC",
-          "<{ destination_index: ",
-          "StringC",
-          "; }>; }>]>; }>, ",
+          "; }>; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7948,7 +8231,125 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; time_window: { duration: string; is_rolling: true; }; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; settings: { destination_index?: string | undefined; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; created_at: Date; updated_at: Date; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"POST /api/observability/slos\"?: ",
+          "ServerRoute",
+          "<\"POST /api/observability/slos\", ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; description: ",
+          "StringC",
+          "; indicator: ",
+          "UnionC",
+          "<[",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<string>; params: ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; service: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_type: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_name: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; 'threshold.us': ",
+          "NumberC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<string>; params: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; service: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_type: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transaction_name: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; }>, ",
+          "PartialC",
+          "<{ good_status_codes: ",
+          "ArrayC",
+          "<",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"2xx\">, ",
+          "LiteralC",
+          "<\"3xx\">, ",
+          "LiteralC",
+          "<\"4xx\">, ",
+          "LiteralC",
+          "<\"5xx\">]>>; }>]>; }>]>; time_window: ",
+          "TypeC",
+          "<{ duration: ",
+          "StringC",
+          "; is_rolling: ",
+          "LiteralC",
+          "<boolean>; }>; budgeting_method: ",
+          "LiteralC",
+          "<\"occurrences\">; objective: ",
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { id: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8013,7 +8414,1613 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.uiSettings",
+        "type": "Object",
+        "tags": [],
+        "label": "uiSettings",
+        "description": [
+          "\nuiSettings definitions for Observability."
+        ],
+        "path": "x-pack/plugins/observability/server/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableNewSyntheticsView",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableNewSyntheticsView]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableNewSyntheticsView.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableNewSyntheticsView.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableNewSyntheticsView.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableNewSyntheticsView.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableNewSyntheticsView.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableNewSyntheticsView.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableInspectEsQueries",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableInspectEsQueries]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInspectEsQueries.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInspectEsQueries.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInspectEsQueries.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInspectEsQueries.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInspectEsQueries.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInspectEsQueries.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.maxSuggestions",
+            "type": "Object",
+            "tags": [],
+            "label": "[maxSuggestions]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.maxSuggestions.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.maxSuggestions.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.maxSuggestions.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.maxSuggestions.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.maxSuggestions.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableComparisonByDefault",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableComparisonByDefault]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableComparisonByDefault.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableComparisonByDefault.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableComparisonByDefault.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableComparisonByDefault.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableComparisonByDefault.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.defaultApmServiceEnvironment",
+            "type": "Object",
+            "tags": [],
+            "label": "[defaultApmServiceEnvironment]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.sensitive",
+                "type": "boolean",
+                "tags": [],
+                "label": "sensitive",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<string>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmProgressiveLoading",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmProgressiveLoading]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observability",
+                    "scope": "common",
+                    "docId": "kibObservabilityPluginApi",
+                    "section": "def-common.ProgressiveLoadingQuality",
+                    "text": "ProgressiveLoadingQuality"
+                  }
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<",
+                  {
+                    "pluginId": "observability",
+                    "scope": "common",
+                    "docId": "kibObservabilityPluginApi",
+                    "section": "def-common.ProgressiveLoadingQuality",
+                    "text": "ProgressiveLoadingQuality"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"select\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.options",
+                "type": "Array",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observability",
+                    "scope": "common",
+                    "docId": "kibObservabilityPluginApi",
+                    "section": "def-common.ProgressiveLoadingQuality",
+                    "text": "ProgressiveLoadingQuality"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels",
+                "type": "Object",
+                "tags": [],
+                "label": "optionLabels",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observability",
+                    "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.off",
+                    "type": "string",
+                    "tags": [],
+                    "label": "[ProgressiveLoadingQuality.off]",
+                    "description": [],
+                    "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observability",
+                    "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.low",
+                    "type": "string",
+                    "tags": [],
+                    "label": "[ProgressiveLoadingQuality.low]",
+                    "description": [],
+                    "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observability",
+                    "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.medium",
+                    "type": "string",
+                    "tags": [],
+                    "label": "[ProgressiveLoadingQuality.medium]",
+                    "description": [],
+                    "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observability",
+                    "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.high",
+                    "type": "string",
+                    "tags": [],
+                    "label": "[ProgressiveLoadingQuality.high]",
+                    "description": [],
+                    "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmProgressiveLoading.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableServiceGroups",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableServiceGroups]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceGroups.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableServiceMetrics",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableServiceMetrics]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableServiceMetrics.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmServiceInventoryOptimizedSorting]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmServiceGroupMaxNumberOfServices]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmTraceExplorerTab",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmTraceExplorerTab]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmTraceExplorerTab.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmOperationsTab",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmOperationsTab]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmOperationsTab.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmLabsButton",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmLabsButton]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmLabsButton.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableInfrastructureHostsView",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableInfrastructureHostsView]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsView.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsView.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsView.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsView.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsView.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableAwsLambdaMetrics",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableAwsLambdaMetrics]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Type",
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAwsLambdaMetrics.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "observability",
       "id": "def-server.ObservabilityPluginSetup",
@@ -8023,13 +10030,7 @@
       "description": [],
       "signature": [
         "{ getScopedAnnotationsClient: (requestContext: ",
-        {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCorePluginApi",
-          "section": "def-server.RequestHandlerContext",
-          "text": "RequestHandlerContext"
-        },
+        "RequestHandlerContext",
         " & { licensing: Promise<",
         {
           "pluginId": "licensing",
@@ -8196,6 +10197,21 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmLabsButton",
+        "type": "string",
+        "tags": [],
+        "label": "apmLabsButton",
+        "description": [],
+        "signature": [
+          "\"observability:apmLabsButton\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.apmOperationsTab",
@@ -8425,6 +10441,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.enableAwsLambdaMetrics",
+        "type": "string",
+        "tags": [],
+        "label": "enableAwsLambdaMetrics",
+        "description": [],
+        "signature": [
+          "\"observability:enableAwsLambdaMetrics\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.enableComparisonByDefault",
         "type": "string",
         "tags": [],
@@ -8440,6 +10471,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.enableInfrastructureHostsView",
+        "type": "string",
+        "tags": [],
+        "label": "enableInfrastructureHostsView",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureHostsView\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.enableInspectEsQueries",
         "type": "string",
         "tags": [],
@@ -8447,6 +10493,51 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableNewSyntheticsView",
+        "type": "string",
+        "tags": [],
+        "label": "enableNewSyntheticsView",
+        "description": [],
+        "signature": [
+          "\"observability:enableNewSyntheticsView\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableServiceGroups",
+        "type": "string",
+        "tags": [],
+        "label": "enableServiceGroups",
+        "description": [],
+        "signature": [
+          "\"observability:enableServiceGroups\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableServiceMetrics",
+        "type": "string",
+        "tags": [],
+        "label": "enableServiceMetrics",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMetrics\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,

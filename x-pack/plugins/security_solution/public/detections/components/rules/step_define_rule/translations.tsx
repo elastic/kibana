@@ -14,6 +14,13 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
+export const SAVED_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
+  {
+    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
+  }
+);
+
 export const EQL_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
   {
@@ -70,6 +77,22 @@ export const EQL_QUERY_BAR_LABEL = i18n.translate(
     defaultMessage: 'EQL query',
   }
 );
+
+export const SAVED_QUERY_FORM_ROW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryFormRowLabel',
+  {
+    defaultMessage: 'Saved query',
+  }
+);
+
+export const getSavedQueryCheckboxLabel = (savedQueryName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldShouldLoadQueryDynamicallyLabel',
+    {
+      defaultMessage: 'Load saved query "{savedQueryName}" dynamically on each rule execution',
+      values: { savedQueryName },
+    }
+  );
 
 export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',

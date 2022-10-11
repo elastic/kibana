@@ -124,54 +124,8 @@ describe('loader', () => {
       const state = loadInitialState({
         storage,
         initialContext: {
-          indexPatternId: '1',
+          dataViewSpec: { id: '1' },
           fieldName: '',
-        },
-        indexPatternRefs,
-        indexPatterns: sampleIndexPatterns,
-      });
-
-      expect(state).toMatchObject({
-        currentIndexPatternId: '1',
-        layers: {},
-      });
-      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
-        indexPatternId: '1',
-      });
-    });
-
-    it('should use the indexPatternId of the visualize trigger chart context, if provided', () => {
-      const storage = createMockStorage();
-      const state = loadInitialState({
-        storage,
-        initialContext: {
-          layers: [
-            {
-              indexPatternId: '1',
-              xFieldName: 'timestamp',
-              xMode: 'date_histogram',
-              chartType: 'area',
-              axisPosition: 'left',
-              metrics: [],
-              timeInterval: 'auto',
-            },
-          ],
-          type: 'lnsXY',
-          configuration: {
-            legend: {
-              isVisible: true,
-              position: 'right',
-              shouldTruncate: true,
-              maxLines: true,
-            },
-            gridLinesVisibility: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-          },
-          savedObjectId: '',
-          isVisualizeAction: true,
         },
         indexPatternRefs,
         indexPatterns: sampleIndexPatterns,

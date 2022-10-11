@@ -11,9 +11,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { TimeScaleUnit } from '../../../../common/expressions';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { TimeScaleUnit } from '../../../../common/expressions';
+import type { OperationDefinition, ParamEditorProps } from '.';
+import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField } from '../../../types';
 import {
   getInvalidFieldMessage,
@@ -22,13 +22,11 @@ import {
   getFormatFromPreviousColumn,
   isColumnOfType,
 } from './helpers';
-import {
-  adjustTimeScaleLabelSuffix,
-  adjustTimeScaleOnOtherColumnChange,
-} from '../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -52,6 +50,10 @@ function ofName(
   timeScale: string | undefined,
   reducedTimeRange: string | undefined
 ) {
+  if (field?.customLabel && field?.type !== 'document') {
+    return field.customLabel;
+  }
+
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
       ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
@@ -123,6 +125,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         previousColumn?.timeScale,
         previousColumn?.reducedTimeRange
       ),
+      customLabel: Boolean(field.customLabel),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
@@ -181,8 +184,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  onOtherColumnChanged: (layer, thisColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {
@@ -191,7 +192,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         enabled: true,
         schema: 'metric',
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
+        timeShift: column.filter || column.reducedTimeRange ? undefined : column.timeShift,
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     } else {
@@ -201,11 +202,19 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         schema: 'metric',
         field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
+        timeShift: column.filter || column.reducedTimeRange ? undefined : column.timeShift,
         emptyAsNull: column.params?.emptyAsNull,
       }).toAst();
     }
   },
+  getGroupByKey: (agg) => {
+    return getGroupByKey(
+      agg,
+      ['aggCount', 'aggValueCount'],
+      [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+    );
+  },
+
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -239,5 +248,10 @@ To calculate the number of documents that match a specific filter, use \`count(k
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
+    defaultMessage: `
+The total number of documents. When you provide a field, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
+      `,
+  }),
   shiftable: true,
 };

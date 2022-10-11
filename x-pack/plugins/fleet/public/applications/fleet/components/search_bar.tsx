@@ -6,17 +6,25 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-
+import styled from 'styled-components';
 import { fromKueryExpression } from '@kbn/es-query';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+import { i18n } from '@kbn/i18n';
+
 import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
 
 const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
+
+const NoWrapQueryStringInput = styled(QueryStringInput)`
+  .kbnQueryBar__textarea {
+    white-space: nowrap;
+  }
+`;
 
 interface Props {
   value: string;
@@ -35,7 +43,17 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   indexPattern = INDEX_NAME,
   dataTestSubj,
 }) => {
-  const { data } = useStartServices();
+  const {
+    data,
+    unifiedSearch,
+    storage,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    usageCollection,
+  } = useStartServices();
+
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
   const isQueryValid = useMemo(() => {
@@ -76,7 +94,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   }, [data.dataViews, fieldPrefix, indexPattern]);
 
   return (
-    <QueryStringInput
+    <NoWrapQueryStringInput
       iconType="search"
       disableLanguageSwitcher={true}
       indexPatterns={
@@ -105,6 +123,17 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       submitOnBlur
       isClearable
       autoSubmit
+      appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
+      deps={{
+        unifiedSearch,
+        notifications,
+        http,
+        docLinks,
+        uiSettings,
+        data,
+        storage,
+        usageCollection,
+      }}
       {...(dataTestSubj && { dataTestSubj })}
     />
   );

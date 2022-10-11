@@ -21,10 +21,14 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
+import {
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../../common/detection_engine/transform_actions';
 import type { Rule } from '../../../containers/detection_engine/rules';
 import type {
   AboutStepRule,
@@ -67,12 +71,16 @@ export const getStepsData = ({
 };
 
 export const getActionsStepsData = (
-  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+  rule: Omit<Rule, 'actions'> & {
+    actions: RuleAlertAction[];
+    response_actions?: ResponseAction[];
+  }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [] } = rule;
+  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
+    responseActions: responseActions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
@@ -126,6 +134,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   historyWindowSize: rule.history_window_start
     ? convertHistoryStartToSize(rule.history_window_start)
     : '7d',
+  shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {
@@ -378,7 +387,7 @@ const commonRuleParamsKeys = [
   'type',
   'version',
 ];
-const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 

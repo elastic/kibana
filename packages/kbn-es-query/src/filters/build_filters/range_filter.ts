@@ -47,7 +47,7 @@ export interface RangeFilterParams {
   format?: string;
 }
 
-const hasRangeKeys = (params: RangeFilterParams) =>
+export const hasRangeKeys = (params: RangeFilterParams) =>
   Boolean(
     keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
   );
@@ -108,8 +108,8 @@ export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFi
 /**
  * @internal
  */
-export const getRangeFilterField = (filter: RangeFilter) => {
-  return filter.query.range && Object.keys(filter.query.range)[0];
+export const getRangeFilterField = (filter: RangeFilter | ScriptedRangeFilter) => {
+  return filter.meta?.field ?? (filter.query.range && Object.keys(filter.query.range)[0]);
 };
 
 const formatValue = (params: any[]) =>

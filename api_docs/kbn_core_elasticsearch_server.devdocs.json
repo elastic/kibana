@@ -66,6 +66,31 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -883,7 +908,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user"
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -1001,7 +1026,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -2254,6 +2279,35 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [
+              "\nThe maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed."
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [
+              "\nThe timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed."
+            ],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.IElasticsearchConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -2499,7 +2553,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -2617,7 +2671,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -3703,7 +3757,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -3821,7 +3875,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -5154,7 +5208,7 @@
           "\nClient used to query the elasticsearch cluster.\n"
         ],
         "signature": [
-          "{ get: { <TDocument = unknown>(this: That, params: ",
+          "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
           "GetRequest",
           " | ",
           "GetRequest",
@@ -5272,7 +5326,7 @@
           "default",
           "; security: ",
           "default",
-          "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+          "; index: { <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
           "IndexRequest",

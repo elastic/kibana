@@ -10,6 +10,7 @@ import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
@@ -20,7 +21,6 @@ import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { LastValueIndexPatternColumn } from '../last_value';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
-import type { PercentileIndexPatternColumn } from '../percentile';
 
 import type { IndexPatternLayer } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
@@ -91,11 +91,23 @@ export function getDisallowedTermsMessage(
   columnId: string,
   indexPattern: IndexPattern
 ) {
+  const referenced: Set<string> = new Set();
+  Object.entries(layer.columns).forEach(([cId, c]) => {
+    if ('references' in c) {
+      c.references.forEach((r) => {
+        referenced.add(r);
+      });
+    }
+  });
   const hasMultipleShifts =
     uniq(
-      Object.values(layer.columns)
-        .filter((col) => operationDefinitionMap[col.operationType].shiftable)
-        .map((col) => col.timeShift || '')
+      Object.entries(layer.columns)
+        .filter(
+          ([colId, col]) =>
+            operationDefinitionMap[col.operationType].shiftable &&
+            (!isReferenced(layer, colId) || col.timeShift)
+        )
+        .map(([colId, col]) => col.timeShift || '')
     ).length > 1;
   if (!hasMultipleShifts) {
     return undefined;
@@ -142,7 +154,7 @@ export function getDisallowedTermsMessage(
             const response: FieldStatsResponse<string | number> = await loadFieldStats({
               services: { data },
               dataView: currentDataView,
-              field: indexPattern.getFieldByName(fieldNames[0])!,
+              field: indexPattern.getFieldByName(fieldNames[0])! as DataViewField,
               dslQuery: buildEsQuery(
                 indexPattern,
                 frame.query,
@@ -226,31 +238,6 @@ export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
     (column.operationType === 'percentile_rank' &&
       Number.isInteger((column as PercentileRanksIndexPatternColumn).params.value))
   );
-}
-
-export function computeOrderForMultiplePercentiles(
-  column: GenericIndexPatternColumn,
-  layer: IndexPatternLayer,
-  orderedColumnIds: string[]
-) {
-  // compute the percentiles orderBy correctly for multiple percentiles
-  if (column.operationType === 'percentile') {
-    const percentileColumns = [];
-    for (const [key, value] of Object.entries(layer.columns)) {
-      if (
-        value.operationType === 'percentile' &&
-        (value as PercentileIndexPatternColumn).sourceField ===
-          (column as PercentileIndexPatternColumn).sourceField
-      ) {
-        percentileColumns.push(key);
-      }
-    }
-    if (percentileColumns.length > 1) {
-      const parentColumn = String(orderedColumnIds.indexOf(percentileColumns[0]));
-      return `${parentColumn}.${(column as PercentileIndexPatternColumn).params?.percentile}`;
-    }
-  }
-  return null;
 }
 
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {

@@ -339,7 +339,7 @@
           "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
         ],
         "signature": [
-          "\"critical\" | \"degraded\" | \"unavailable\" | \"available\""
+          "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
         "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,

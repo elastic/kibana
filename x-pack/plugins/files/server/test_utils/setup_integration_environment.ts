@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
-import { getFileKindsRegistry } from '../file_kinds_registry';
+import { getFileKindsRegistry } from '../../common/file_kinds_registry';
 
 export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;
 
@@ -93,7 +93,7 @@ export async function setupIntegrationEnvironment() {
    * Register a test file type
    */
   const testHttpConfig = { tags: ['access:myapp'] };
-  getFileKindsRegistry().register({
+  const myFileKind = {
     id: fileKind,
     blobStoreSettings: {
       esFixedSizeIndex: { index: testIndex },
@@ -107,7 +107,8 @@ export async function setupIntegrationEnvironment() {
       list: testHttpConfig,
       share: testHttpConfig,
     },
-  });
+  };
+  getFileKindsRegistry().register(myFileKind);
   const coreStart = await root.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 

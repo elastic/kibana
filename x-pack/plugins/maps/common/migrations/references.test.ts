@@ -42,6 +42,21 @@ describe('extractReferences', () => {
     });
   });
 
+  test('Should handle mapStateJSON without adHocDataViews', () => {
+    const mapStateJSON = JSON.stringify({});
+    const attributes = {
+      title: 'my map',
+      mapStateJSON,
+    };
+    expect(extractReferences({ attributes })).toEqual({
+      attributes: {
+        title: 'my map',
+        mapStateJSON,
+      },
+      references: [],
+    });
+  });
+
   test('Should extract index-pattern reference from ES search source descriptor', () => {
     const attributes = {
       title: 'my map',
@@ -59,6 +74,30 @@ describe('extractReferences', () => {
           type: 'index-pattern',
         },
       ],
+    });
+  });
+
+  test('Should ignore adhoc data view reference from search source', () => {
+    const mapStateJSON = JSON.stringify({
+      adHocDataViews: [
+        {
+          id: 'c698b940-e149-11e8-a35a-370a8516603a',
+        },
+      ],
+    });
+
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
+      mapStateJSON,
+    };
+    expect(extractReferences({ attributes })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
+        mapStateJSON,
+      },
+      references: [],
     });
   });
 
@@ -119,6 +158,29 @@ describe('extractReferences', () => {
           type: 'index-pattern',
         },
       ],
+    });
+  });
+
+  test('Should ignore adhoc data view reference from joins', () => {
+    const mapStateJSON = JSON.stringify({
+      adHocDataViews: [
+        {
+          id: 'e20b2a30-f735-11e8-8ce0-9723965e01e3',
+        },
+      ],
+    });
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.join.withIndexPatternId,
+      mapStateJSON,
+    };
+    expect(extractReferences({ attributes })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.join.withIndexPatternId,
+        mapStateJSON,
+      },
+      references: [],
     });
   });
 });

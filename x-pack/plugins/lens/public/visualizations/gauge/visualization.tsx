@@ -23,6 +23,7 @@ import {
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
@@ -34,7 +35,6 @@ import {
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
 
@@ -215,7 +215,7 @@ export const getGaugeVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
         palette: mainPalette,
         ticksPosition: 'auto',
@@ -275,7 +275,7 @@ export const getGaugeVisualization = ({
             : [],
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: !metricAccessor,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',
           enableDimensionEditor: true,
         },
@@ -352,7 +352,7 @@ export const getGaugeVisualization = ({
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,
-          required: false,
+          requiredMinDimensionCount: 0,
           dataTestSubj: 'lnsGauge_goalDimensionPanel',
         },
       ],
@@ -432,7 +432,7 @@ export const getGaugeVisualization = ({
 
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.gauge.addLayer', {
           defaultMessage: 'Visualization',
         }),

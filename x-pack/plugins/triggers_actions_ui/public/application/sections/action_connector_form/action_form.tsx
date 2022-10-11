@@ -37,7 +37,6 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
@@ -61,8 +60,9 @@ export interface ActionAccordionFormProps {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  getDefaultActionParams?: DefaultActionParamsGetter;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideActionHeader?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -84,8 +84,9 @@ export const ActionForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
-  getDefaultActionParams,
+  recoveryActionGroup,
   isActionGroupDisabledForActionType,
+  hideActionHeader,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -296,15 +297,19 @@ export const ActionForm = ({
     </SectionLoading>
   ) : (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      {!hideActionHeader && (
+        <>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                defaultMessage="Actions"
+                id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {actionTypesIndex &&
         actions.map((actionItem: RuleAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
@@ -361,6 +366,7 @@ export const ActionForm = ({
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group, false)}
+              recoveryActionGroup={recoveryActionGroup}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {

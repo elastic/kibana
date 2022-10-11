@@ -8,8 +8,9 @@ import moment from 'moment';
 import { Readable } from 'stream';
 import mimeType from 'mime';
 import cuid from 'cuid';
-import type { Logger } from '@kbn/core/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   File,
   FileJSON,
@@ -23,6 +24,7 @@ import type {
   BlobStorageClient,
   UploadOptions as BlobUploadOptions,
 } from '../blob_storage_service';
+import { getCounters, Counters } from '../usage';
 import { File as FileImpl } from '../file';
 import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
@@ -59,6 +61,15 @@ export function createFileClient({
 }
 
 export class FileClientImpl implements FileClient {
+  /**
+   * A usage counter instance that is shared across all FileClient instances.
+   */
+  private static usageCounter: undefined | UsageCounter;
+
+  public static configureUsageCounter(uc: UsageCounter) {
+    FileClientImpl.usageCounter = uc;
+  }
+
   private readonly logAuditEvent: AuditLogger['log'];
 
   constructor(
@@ -76,6 +87,14 @@ export class FileClientImpl implements FileClient {
         this.logger.info(JSON.stringify(e.event, null, 2));
       }
     };
+  }
+
+  private getCounters() {
+    return getCounters(this.fileKind);
+  }
+
+  private incrementUsageCounter(counter: Counters) {
+    FileClientImpl.usageCounter?.incrementCounter({ counterName: this.getCounters()[counter] });
   }
 
   private instantiateFile<M = unknown>(id: string, metadata: FileMetadata<M>): File<M> {
@@ -144,19 +163,29 @@ export class FileClientImpl implements FileClient {
   }
 
   public async delete({ id, hasContent = true }: DeleteArgs) {
-    if (this.internalFileShareService) {
-      // Stop sharing this file
-      await this.internalFileShareService.deleteForFile({ id });
+    this.incrementUsageCounter('DELETE');
+    try {
+      if (this.internalFileShareService) {
+        // Stop sharing this file
+        await this.internalFileShareService.deleteForFile({ id });
+      }
+      if (hasContent) await this.blobStorageClient.delete(id);
+      await this.metadataClient.delete({ id });
+      this.logAuditEvent(
+        createAuditEvent({
+          action: 'delete',
+          outcome: 'success',
+          message: `Deleted file with "${id}"`,
+        })
+      );
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.incrementUsageCounter('DELETE_ERROR_NOT_FOUND');
+      } else {
+        this.incrementUsageCounter('DELETE_ERROR');
+      }
+      throw e;
     }
-    if (hasContent) await this.blobStorageClient.delete(id);
-    await this.metadataClient.delete({ id });
-    this.logAuditEvent(
-      createAuditEvent({
-        action: 'delete',
-        outcome: 'success',
-        message: `Deleted file with "${id}"`,
-      })
-    );
   }
 
   public deleteContent: BlobStorageClient['delete'] = (arg) => {
@@ -191,7 +220,13 @@ export class FileClientImpl implements FileClient {
   };
 
   public download: BlobStorageClient['download'] = (args) => {
-    return this.blobStorageClient.download(args);
+    this.incrementUsageCounter('DOWNLOAD');
+    try {
+      return this.blobStorageClient.download(args);
+    } catch (e) {
+      this.incrementUsageCounter('DOWNLOAD_ERROR');
+      throw e;
+    }
   };
 
   async share({ file, name, validUntil }: ShareArgs): Promise<FileShareJSONWithToken> {

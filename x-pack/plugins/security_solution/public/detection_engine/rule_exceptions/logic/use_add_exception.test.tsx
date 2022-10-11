@@ -13,7 +13,7 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
 import * as listsApi from '@kbn/securitysolution-list-api';
-import * as getQueryFilterHelper from '../../../../common/detection_engine/get_query_filter';
+import * as getQueryFilterHelper from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
 import * as buildFilterHelpers from '../../../detections/components/alerts_table/default_config';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
@@ -43,7 +43,7 @@ describe('useAddOrUpdateException', () => {
   let updateAlertStatus: jest.SpyInstance<Promise<estypes.UpdateByQueryResponse>>;
   let addExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let updateExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
-  let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
+  let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getEsQueryFilter>>;
   let buildAlertStatusesFilter: jest.SpyInstance<
     ReturnType<typeof buildFilterHelpers.buildAlertStatusesFilter>
   >;
@@ -125,7 +125,9 @@ describe('useAddOrUpdateException', () => {
       .spyOn(listsApi, 'updateExceptionListItem')
       .mockResolvedValue(getExceptionListItemSchemaMock());
 
-    getQueryFilter = jest.spyOn(getQueryFilterHelper, 'getQueryFilter');
+    getQueryFilter = jest
+      .spyOn(getQueryFilterHelper, 'getEsQueryFilter')
+      .mockResolvedValue({ bool: { must_not: [], must: [], filter: [], should: [] } });
 
     buildAlertStatusesFilter = jest.spyOn(buildFilterHelpers, 'buildAlertStatusesFilter');
 

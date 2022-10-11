@@ -113,11 +113,7 @@ export const unpinFilter = (filter: Filter) =>
  * @public
  */
 export const isFilter = (x: unknown): x is Filter =>
-  !!x &&
-  typeof x === 'object' &&
-  !!(x as Filter).meta &&
-  typeof (x as Filter).meta === 'object' &&
-  typeof (x as Filter).meta.disabled === 'boolean';
+  !!x && typeof x === 'object' && !!(x as Filter).meta && typeof (x as Filter).meta === 'object';
 
 /**
  * @param {unknown} filters

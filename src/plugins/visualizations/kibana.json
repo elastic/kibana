@@ -17,11 +17,12 @@
     "screenshotMode",
     "presentationUtil",
     "dataViews",
-    "dataViewEditor"
+    "dataViewEditor",
+    "unifiedSearch"
   ],
   "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "charts"],
-  "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
+  "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions", "common/convert_to_lens"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

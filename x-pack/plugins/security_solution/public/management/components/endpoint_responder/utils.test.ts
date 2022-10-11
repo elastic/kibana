@@ -19,9 +19,9 @@ describe('Endpoint Responder - Utilities', () => {
       expect(parameters).toEqual({ entity_id: '123qwe' });
     });
 
-    it('should return undefined if no params are defined', () => {
+    it('should return entity id with emtpy string if no params are defined', () => {
       const parameters = parsedPidOrEntityIdParameter({});
-      expect(parameters).toEqual(undefined);
+      expect(parameters).toEqual({ entity_id: '' });
     });
   });
 });

@@ -62,6 +62,7 @@ describe('useGetCaseUserActions', () => {
               caseServices: {},
               hasDataToPush: true,
               participants: [elasticUser],
+              profileUids: new Set(),
             },
             isError: false,
             isLoading: false,
@@ -85,6 +86,134 @@ describe('useGetCaseUserActions', () => {
     await waitForNextUpdate();
     expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
     expect(addError).toHaveBeenCalled();
+  });
+
+  describe('getProfileUids', () => {
+    it('aggregates the uids from the createdBy field of a user action', async () => {
+      jest
+        .spyOn(api, 'getCaseUserActions')
+        .mockReturnValue(
+          Promise.resolve([
+            getUserAction('pushed', Actions.add, { createdBy: { profileUid: '456' } }),
+          ])
+        );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "456",
+            }
+          `);
+        });
+      });
+    });
+
+    it('aggregates the uids from a push', async () => {
+      jest.spyOn(api, 'getCaseUserActions').mockReturnValue(
+        Promise.resolve([
+          getUserAction('pushed', Actions.add, {
+            payload: { externalService: { pushedBy: { profileUid: '123' } } },
+          }),
+        ])
+      );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "123",
+            }
+          `);
+        });
+      });
+    });
+
+    it('aggregates the uids from an assignment add user action', async () => {
+      jest
+        .spyOn(api, 'getCaseUserActions')
+        .mockReturnValue(
+          Promise.resolve([...caseUserActions, getUserAction('assignees', Actions.add)])
+        );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            }
+          `);
+        });
+      });
+    });
+
+    it('ignores duplicate uids', async () => {
+      jest
+        .spyOn(api, 'getCaseUserActions')
+        .mockReturnValue(
+          Promise.resolve([
+            ...caseUserActions,
+            getUserAction('assignees', Actions.add),
+            getUserAction('assignees', Actions.add),
+          ])
+        );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            }
+          `);
+        });
+      });
+    });
+
+    it('aggregates the uids from an assignment delete user action', async () => {
+      jest
+        .spyOn(api, 'getCaseUserActions')
+        .mockReturnValue(
+          Promise.resolve([...caseUserActions, getUserAction('assignees', Actions.delete)])
+        );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            }
+          `);
+        });
+      });
+    });
   });
 
   describe('getPushedInfo', () => {

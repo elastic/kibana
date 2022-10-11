@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { IndexPatternLayer } from '../types';
 import type { TimeScaleUnit } from '../../../common/expressions';
-import type { DateHistogramIndexPatternColumn, GenericIndexPatternColumn } from './definitions';
-import { adjustTimeScaleLabelSuffix, adjustTimeScaleOnOtherColumnChange } from './time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from './time_scale_utils';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
@@ -269,70 +267,6 @@ describe('time scale utils', () => {
           undefined
         )
       ).toEqual('abc per day');
-    });
-  });
-
-  describe('adjustTimeScaleOnOtherColumnChange', () => {
-    const baseColumn: GenericIndexPatternColumn = {
-      operationType: 'count',
-      sourceField: '___records___',
-      label: 'Count of records per second',
-      dataType: 'number',
-      isBucketed: false,
-      timeScale: 's',
-    };
-    const baseLayer: IndexPatternLayer = {
-      columns: { col1: baseColumn },
-      columnOrder: [],
-      indexPatternId: '',
-    };
-    it('should keep column if there is no time scale', () => {
-      const column = { ...baseColumn, timeScale: undefined };
-      expect(
-        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: column } }, 'col1')
-      ).toBe(column);
-    });
-
-    it('should keep time scale if there is a date histogram', () => {
-      expect(
-        adjustTimeScaleOnOtherColumnChange(
-          {
-            ...baseLayer,
-            columns: {
-              col1: baseColumn,
-              col2: {
-                operationType: 'date_histogram',
-                dataType: 'date',
-                isBucketed: true,
-                label: '',
-                sourceField: 'date',
-                params: { interval: 'auto' },
-              } as DateHistogramIndexPatternColumn,
-            },
-          },
-          'col1'
-        )
-      ).toBe(baseColumn);
-    });
-
-    it('should remove time scale if there is no date histogram', () => {
-      expect(adjustTimeScaleOnOtherColumnChange(baseLayer, 'col1')).toHaveProperty(
-        'timeScale',
-        undefined
-      );
-    });
-
-    it('should remove suffix from label', () => {
-      expect(
-        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: baseColumn } }, 'col1')
-      ).toHaveProperty('label', 'Count of records');
-    });
-
-    it('should keep custom label', () => {
-      const column = { ...baseColumn, label: 'abc', customLabel: true };
-      expect(
-        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: column } }, 'col1')
-      ).toHaveProperty('label', 'abc');
     });
   });
 });

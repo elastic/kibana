@@ -41,6 +41,7 @@ import {
   ActionVariable,
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
+import type { BulkEditError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -155,6 +156,12 @@ export enum RuleFlyoutCloseReason {
   CANCELED,
 }
 
+export interface BulkEditResponse {
+  rules: Rule[];
+  errors: BulkEditError[];
+  total: number;
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -197,6 +204,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  defaultActionParams?: Partial<ActionParams>;
+  defaultRecoveredActionParams?: Partial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
 }
@@ -403,7 +412,6 @@ export interface FetchAlertData {
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
@@ -427,6 +435,11 @@ export interface AlertsTableProps {
   visibleColumns: string[];
   'data-test-subj': string;
   updatedAt: number;
+  browserFields: any;
+  onToggleColumn: (columnId: string) => void;
+  onResetColumns: () => void;
+  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
+  onChangeVisibleColumns: (newColumns: string[]) => void;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table

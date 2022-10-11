@@ -34,7 +34,7 @@ import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { IngestionStatus } from '../../../types';
-import { isConnectorIndex, isConnectorCrawlerIndex } from '../../../utils/indices';
+import { isConnectorIndex } from '../../../utils/indices';
 
 import { IndexViewLogic } from '../index_view_logic';
 
@@ -61,7 +61,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
   });
 
-  if (!isConnectorIndex(index) && !isConnectorCrawlerIndex(index)) {
+  if (!isConnectorIndex(index)) {
     return <></>;
   }
 
@@ -177,6 +177,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 setScheduling({ ...scheduling, interval: expression });
                 setHasChanges(true);
               }}
+              frequencyBlockList={['MINUTE']}
             />
           </EuiFlexItem>
           <EuiFlexItem>

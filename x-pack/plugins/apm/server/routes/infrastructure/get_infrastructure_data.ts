@@ -13,7 +13,7 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOST_HOSTNAME,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 
 export const getInfrastructureData = async ({
@@ -38,6 +38,7 @@ export const getInfrastructureData = async ({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -64,7 +65,7 @@ export const getInfrastructureData = async ({
         },
         podNames: {
           terms: {
-            field: POD_NAME,
+            field: KUBERNETES_POD_NAME,
             size: 500,
           },
         },

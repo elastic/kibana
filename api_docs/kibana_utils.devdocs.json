@@ -2362,13 +2362,7 @@
         ],
         "signature": [
           "<TPluginsStart extends object, TStart>(accessor: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.StartServicesAccessor",
-            "text": "StartServicesAccessor"
-          },
+          "StartServicesAccessor",
           "<TPluginsStart, TStart>) => ",
           {
             "pluginId": "kibanaUtils",
@@ -2378,13 +2372,7 @@
             "text": "StartServicesGetter"
           },
           "<TPluginsStart, TStart, ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">"
         ],
         "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
@@ -2401,13 +2389,7 @@
               "Asynchronous start service accessor provided by platform."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.StartServicesAccessor",
-                "text": "StartServicesAccessor"
-              },
+              "StartServicesAccessor",
               "<TPluginsStart, TStart>"
             ],
             "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
@@ -6626,13 +6608,7 @@
         "description": [],
         "signature": [
           "() => StartServices<Plugins, OwnContract, ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">"
         ],
         "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",

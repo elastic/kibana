@@ -56,7 +56,7 @@ describe('generateApiKey lib function', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: [],
+          cluster: ['monitor'],
           index: [
             {
               names: ['index_name', `${CONNECTORS_INDEX}*`],
@@ -91,7 +91,7 @@ describe('generateApiKey lib function', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: [],
+          cluster: ['monitor'],
           index: [
             {
               names: ['index_name', `${CONNECTORS_INDEX}*`],
@@ -138,7 +138,7 @@ describe('generateApiKey lib function', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: [],
+          cluster: ['monitor'],
           index: [
             {
               names: ['index_name', `${CONNECTORS_INDEX}*`],

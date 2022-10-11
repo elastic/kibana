@@ -350,49 +350,6 @@ describe('terms', () => {
       );
     });
 
-    it('should reflect correct orderBy for multiple percentiles', () => {
-      const newLayer = {
-        ...layer,
-        columns: {
-          ...layer.columns,
-          col2: {
-            ...layer.columns.col2,
-            operationType: 'percentile',
-            params: {
-              percentile: 95,
-            },
-          },
-          col3: {
-            ...layer.columns.col2,
-            operationType: 'percentile',
-            params: {
-              percentile: 65,
-            },
-          },
-        },
-      };
-      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
-      const esAggsFn = termsOperation.toEsAggsFn(
-        {
-          ...termsColumn,
-          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col3' } },
-        },
-        'col1',
-        {} as IndexPattern,
-        newLayer,
-        uiSettingsMock,
-        ['col1', 'col2', 'col3']
-      );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          function: 'aggTerms',
-          arguments: expect.objectContaining({
-            orderBy: ['1.65'],
-          }),
-        })
-      );
-    });
-
     it('should not enable missing bucket if other bucket is not set', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(

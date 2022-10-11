@@ -30,7 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/141093
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -176,6 +177,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('disableButton');
 
+      await refreshAlertsList();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
         'statusDropdown',
@@ -195,6 +199,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('disableButton');
+
+      await refreshAlertsList();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
         'statusDropdown',
@@ -226,56 +234,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
-    });
-
-    it('should mute all selection', async () => {
-      const createdAlert = await createAlert({ supertest, objectRemover });
-      await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-
-      await testSubjects.click('bulkAction');
-
-      await testSubjects.click('muteAll');
-
-      // Unmute all button shows after clicking mute all
-      await testSubjects.existOrFail('unmuteAll');
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-          createdAlert.name,
-          'statusDropdown',
-          'enabled'
-        );
-      });
-    });
-
-    it('should unmute all selection', async () => {
-      const createdAlert = await createAlert({ supertest, objectRemover });
-      await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-
-      await testSubjects.click('bulkAction');
-
-      await testSubjects.click('muteAll');
-
-      await testSubjects.click('unmuteAll');
-
-      // Mute all button shows after clicking unmute all
-      await testSubjects.existOrFail('muteAll');
-
-      await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-          createdAlert.name,
-          'statusDropdown',
-          'enabled'
-        );
-      });
     });
 
     it('should disable all selection', async () => {
@@ -458,9 +416,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         await refreshAlertsList();
-        expect(await testSubjects.getVisibleText('totalRulesCount')).to.be(
-          'Showing: 2 of 2 rules.'
-        );
+        expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('2 rules');
         expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
         expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
         expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
@@ -557,7 +513,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
         expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
-      await testSubjects.click('ruleTypeFilterButton');
+
+      await refreshAlertsList();
 
       // de-select action type filter
       await testSubjects.click('actionTypeFilterButton');

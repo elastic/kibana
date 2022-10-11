@@ -102,6 +102,10 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~overview', expectedValue);
     },
 
+    async assertNotificationsTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~notifications', expectedValue);
+    },
+
     async assertAnomalyDetectionTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
     },
@@ -144,6 +148,10 @@ export function MachineLearningNavigationProvider({
 
     async navigateToOverview() {
       await this.navigateToArea('~mlMainTab & ~overview', 'mlPageOverview');
+    },
+
+    async navigateToNotifications() {
+      await this.navigateToArea('~mlMainTab & ~notifications', 'mlPageNotifications');
     },
 
     async navigateToAnomalyDetection() {

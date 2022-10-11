@@ -17,7 +17,7 @@ import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 export function handleResponse(
@@ -116,7 +116,7 @@ export function buildGetIndicesQuery(
   const dataset = 'index'; // data_stream.dataset
   const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     dataset,

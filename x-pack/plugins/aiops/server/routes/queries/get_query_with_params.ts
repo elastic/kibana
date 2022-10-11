@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { Query } from '@kbn/es-query';
 import type { FieldValuePair } from '@kbn/ml-agg-utils';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
@@ -23,7 +22,7 @@ interface QueryParams {
   termFilters?: FieldValuePair[];
 }
 export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
-  const searchQuery = JSON.parse(params.searchQuery) as Query['query'];
+  const searchQuery = JSON.parse(params.searchQuery) as estypes.QueryDslQueryContainer;
   return {
     bool: {
       filter: [

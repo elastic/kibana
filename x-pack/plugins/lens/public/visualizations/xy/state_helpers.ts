@@ -10,11 +10,13 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { validateQuery } from '../../shared_components';
 import type {
   FramePublicAPI,
   DatasourcePublicAPI,
   VisualizationDimensionGroupConfig,
+  VisualizeEditorContext,
 } from '../../types';
 import {
   visualizationTypes,
@@ -26,6 +28,7 @@ import {
   XYState,
   XYPersistedState,
   State,
+  XYAnnotationLayerConfig,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
@@ -140,11 +143,13 @@ export function extractReferences(state: XYState) {
 
 export function injectReferences(
   state: XYPersistedState,
-  references?: SavedObjectReference[]
+  references?: SavedObjectReference[],
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;
   }
+
   const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
   return {
     ...state,
@@ -155,11 +160,21 @@ export function injectReferences(
       return {
         ...layer,
         indexPatternId:
+          getIndexPatternIdFromInitialContext(layer, initialContext) ||
           references.find(({ name }) => name === getLayerReferenceName(layer.layerId))?.id ||
           fallbackIndexPatternId,
       };
     }),
   };
+}
+
+function getIndexPatternIdFromInitialContext(
+  layer: XYAnnotationLayerConfig,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+) {
+  if (initialContext && 'isVisualizeAction' in initialContext) {
+    return layer && 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  }
 }
 
 export function validateColumn(
@@ -188,6 +203,14 @@ export function validateColumn(
   const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
 
   const invalidMessages: string[] = [];
+
+  if (annotation.timeField == null || annotation.timeField === '') {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldEmpty', {
+        defaultMessage: 'Time field is missing',
+      })
+    );
+  }
 
   if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
     invalidMessages.push(

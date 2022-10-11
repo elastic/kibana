@@ -26,7 +26,8 @@ import {
   XYVisStatePre850,
   VisState850,
 } from './types';
-import { layerTypes, LegacyMetricState } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
+import { LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
@@ -1064,7 +1065,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
-          expect(layer.layerType).toEqual(layerTypes.DATA);
+          expect(layer.layerType).toEqual(LayerTypes.DATA);
         }
       }
     });
@@ -1092,7 +1093,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
-          expect(layer.layerType).toEqual(layerTypes.DATA);
+          expect(layer.layerType).toEqual(LayerTypes.DATA);
         }
       }
     });
@@ -1109,7 +1110,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
     it('should add layer info to a datatable visualization', () => {
@@ -1125,7 +1126,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
     it('should add layer info to a heatmap visualization', () => {
@@ -1141,7 +1142,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
   });
@@ -2294,7 +2295,7 @@ describe('Lens migrations', () => {
     });
   });
 
-  describe('8.5.0 Add Annotation event type and dataView references', () => {
+  describe('8.5.0 Add Annotation event type and ignore filters flag', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
@@ -2328,6 +2329,7 @@ describe('Lens migrations', () => {
       expect(annotationLayer).toEqual({
         layerType: 'annotations',
         annotations: [{ id: 'annotation-id', type: 'manual' }],
+        ignoreGlobalFilters: true,
       });
     });
   });

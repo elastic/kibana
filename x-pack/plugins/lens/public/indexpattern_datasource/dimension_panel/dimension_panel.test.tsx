@@ -29,9 +29,10 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   HttpSetup,
-  CoreSetup,
+  CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { generateId } from '../../id_generator';
 import { IndexPatternPrivateState } from '../types';
 import {
@@ -49,7 +50,6 @@ import { TimeShift } from './time_shift';
 import { ReducedTimeRange } from './reduced_time_range';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
-import { layerTypes } from '../../../common';
 
 jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,
@@ -123,6 +123,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   },
 };
 
@@ -208,7 +210,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
@@ -238,7 +240,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       } as unknown as DataPublicPluginStart,
-      core: {} as CoreSetup,
+      core: {} as CoreStart,
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
@@ -2242,6 +2244,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 searchable: true,
               },
             ]),
+            isPersisted: true,
+            spec: {},
           },
         }}
       />

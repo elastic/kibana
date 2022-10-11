@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+
+import { ENDPOINT_PRIVILEGES } from './constants';
+
 export interface FleetAuthz {
   fleet: {
     all: boolean;
@@ -26,6 +31,16 @@ export interface FleetAuthz {
 
     readIntegrationPolicies: boolean;
     writeIntegrationPolicies: boolean;
+  };
+
+  packagePrivileges?: {
+    [packageName: string]: {
+      actions: {
+        [key: string]: {
+          executePackageAction: boolean;
+        };
+      };
+    };
   };
 }
 
@@ -72,3 +87,70 @@ export const calculateAuthz = ({
     writeIntegrationPolicies: fleet.all && integrations.all,
   },
 });
+
+export function calculatePackagePrivilegesFromCapabilities(
+  capabilities: Capabilities | undefined
+): FleetAuthz['packagePrivileges'] {
+  if (!capabilities) {
+    return {};
+  }
+
+  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
+    return {
+      ...acc,
+      [privilege]: {
+        executePackageAction: capabilities.siem[privilege] || false,
+      },
+    };
+  }, {});
+
+  return {
+    endpoint: {
+      actions: endpointActions,
+    },
+  };
+}
+
+function getAuthorizationFromPrivileges(
+  kibanaPrivileges: Array<{
+    resource?: string;
+    privilege: string;
+    authorized: boolean;
+  }>,
+  searchPrivilege: string
+): boolean {
+  const privilege = kibanaPrivileges.find((p) =>
+    p.privilege.endsWith(`${DEFAULT_APP_CATEGORIES.security.id}-${searchPrivilege}`)
+  );
+  return privilege?.authorized || false;
+}
+
+export function calculatePackagePrivilegesFromKibanaPrivileges(
+  kibanaPrivileges:
+    | Array<{
+        resource?: string;
+        privilege: string;
+        authorized: boolean;
+      }>
+    | undefined
+): FleetAuthz['packagePrivileges'] {
+  if (!kibanaPrivileges || !kibanaPrivileges.length) {
+    return {};
+  }
+
+  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege: string) => {
+    const kibanaPrivilege = getAuthorizationFromPrivileges(kibanaPrivileges, privilege);
+    return {
+      ...acc,
+      [privilege]: {
+        executePackageAction: kibanaPrivilege,
+      },
+    };
+  }, {});
+
+  return {
+    endpoint: {
+      actions: endpointActions,
+    },
+  };
+}

@@ -20,6 +20,7 @@ import type { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_sc
 import { buildReasonMessageForMlAlert } from './reason_formatters';
 import type { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import { createEnrichEventsFunction } from './enrichments';
 
 interface BulkCreateMlSignalsParams {
   anomalyHits: Array<estypes.SearchHit<Anomaly>>;
@@ -81,5 +82,12 @@ export const bulkCreateMlSignals = async (
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
   const wrappedDocs = params.wrapHits(ecsResults, buildReasonMessageForMlAlert);
-  return params.bulkCreate(wrappedDocs);
+  return params.bulkCreate(
+    wrappedDocs,
+    undefined,
+    createEnrichEventsFunction({
+      services: params.services,
+      logger: params.ruleExecutionLogger,
+    })
+  );
 };

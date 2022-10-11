@@ -10,5 +10,4 @@ import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 export const discoverStorybookConfig: StorybookConfig = {
   ...defaultConfig,
   stories: ['../**/*.stories.tsx'],
-  addons: [...(defaultConfig.addons || []), './addon/target/register'],
 };

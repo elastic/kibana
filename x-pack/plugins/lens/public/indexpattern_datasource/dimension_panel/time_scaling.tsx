@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -66,15 +65,9 @@ export function TimeScaling({
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
 }) {
-  const hasDateHistogram = layer.columnOrder.some(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
-  );
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
-  if (
-    !selectedOperation.timeScalingMode ||
-    selectedOperation.timeScalingMode === 'disabled' ||
-    !hasDateHistogram
-  ) {
+
+  if (!selectedOperation.timeScalingMode || selectedOperation.timeScalingMode === 'disabled') {
     return null;
   }
 

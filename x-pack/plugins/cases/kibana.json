@@ -24,6 +24,7 @@
      "embeddable",
      "esUiShared",
      "lens",
+     "licensing",
      "features",
      "kibanaReact",
      "kibanaUtils",

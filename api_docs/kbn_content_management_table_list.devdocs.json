@@ -1,0 +1,226 @@
+{
+  "id": "@kbn/content-management-table-list",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.TableListView",
+        "type": "Function",
+        "tags": [],
+        "label": "TableListView",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/content-management-table-list",
+            "scope": "common",
+            "docId": "kibKbnContentManagementTableListPluginApi",
+            "section": "def-common.UserContentCommonSchema",
+            "text": "UserContentCommonSchema"
+          },
+          ">({ tableListTitle, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id, children, }: ",
+          "Props",
+          "<T>) => JSX.Element | null"
+        ],
+        "path": "packages/content-management/table_list/src/table_list_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "Props",
+              "<T>"
+            ],
+            "path": "packages/content-management/table_list/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.TableListViewKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "TableListViewKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps to known dependency types."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "TableListViewKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/content-management/table_list/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListViewKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "TableListViewKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/content-management/table_list/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.TableListViewProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "TableListViewProvider",
+        "description": [
+          "\nAbstract external service Provider."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "Services",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/content-management/table_list/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.TableListViewProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "Services",
+              ">"
+            ],
+            "path": "packages/content-management/table_list/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.UserContentCommonSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserContentCommonSchema",
+        "description": [],
+        "path": "packages/content-management/table_list/src/table_list_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.UserContentCommonSchema.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/content-management/table_list/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.UserContentCommonSchema.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "packages/content-management/table_list/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.UserContentCommonSchema.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectsReference",
+              "[]"
+            ],
+            "path": "packages/content-management/table_list/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.UserContentCommonSchema.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/content-management/table_list/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list",
+            "id": "def-common.UserContentCommonSchema.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ title: string; description?: string | undefined; }"
+            ],
+            "path": "packages/content-management/table_list/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

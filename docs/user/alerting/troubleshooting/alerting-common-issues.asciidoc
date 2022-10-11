@@ -274,7 +274,7 @@ This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value us
 *Problem*:
 
 Alerting rules that were created or edited in 8.2 stop running after you upgrade
-to later releases. The following error occurs:
+to 8.3.0 or 8.3.1. The following error occurs:
 
 [source,text]
 ----
@@ -283,6 +283,7 @@ to later releases. The following error occurs:
 
 *Solution*:
 
-Upgrade to 8.3.2 or later releases, then go to *{stack-manage-app} > {rules-ui}* and multi-select the failed rules. Choose
+Upgrade to 8.3.2 or later releases to avoid the problem. To fix failing rules,
+go to *{stack-manage-app} > {rules-ui}* and multi-select the rules. Choose
 **Manage rules > Update API Keys** to generate new API keys. For more details
 about API key authorization, refer to <<alerting-authorization>>.

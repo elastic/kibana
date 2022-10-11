@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { Actions } from '../../../../common/api';
 import {
@@ -30,6 +32,7 @@ import { getMockBuilderArgs } from '../mock';
 import { useCaseViewParams } from '../../../common/navigation';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { userProfiles } from '../../../containers/user_profiles/api.mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -193,12 +196,22 @@ describe('createCommentUserActionBuilder', () => {
       externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
       const userAction = getExternalReferenceUserAction();
+      const damagedRaccoon = userProfiles[0];
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
+          comments: [
+            {
+              ...externalReferenceAttachment,
+              createdBy: {
+                username: damagedRaccoon.user.username,
+                fullName: damagedRaccoon.user.full_name,
+                email: damagedRaccoon.user.email,
+              },
+            },
+          ],
         },
         userAction,
       });
@@ -208,7 +221,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
-      expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
+      expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('added a chart')).toBeInTheDocument();
     });
 
@@ -263,6 +276,47 @@ describe('createCommentUserActionBuilder', () => {
       expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
     });
+
+    it('deletes the attachment correctly', async () => {
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-trash'));
+
+      await waitFor(() => {
+        expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      });
+
+      userEvent.click(result.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'external-reference-comment-id'
+        );
+      });
+    });
   });
 
   describe('Persistable state', () => {
@@ -298,6 +352,12 @@ describe('createCommentUserActionBuilder', () => {
       const attachment01 = {
         ...persistableStateAttachment,
         persistableStateAttachmentState: { test_foo: '01' },
+        createdBy: {
+          username: userProfiles[0].user.username,
+          fullName: userProfiles[0].user.full_name,
+          email: userProfiles[0].user.email,
+          profileUid: userProfiles[0].uid,
+        },
       };
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
@@ -319,7 +379,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
-      expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
+      expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('added an embeddable')).toBeInTheDocument();
 
       result.unmount();
@@ -397,6 +457,48 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
+    });
+
+    it('deletes the attachment correctly', async () => {
+      const attachment = getPersistableStateAttachment();
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+      persistableStateAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getPersistableStateUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [persistableStateAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-trash'));
+
+      await waitFor(() => {
+        expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      });
+
+      userEvent.click(result.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'persistable-state-comment-id'
+        );
+      });
     });
   });
 });

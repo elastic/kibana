@@ -6,3 +6,4 @@
  */
 
 export * from './explain_log_rate_spikes';
+export * from './log_categorization';

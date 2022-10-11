@@ -96,13 +96,11 @@ function getSelectedOption(
 export function TextDecorationSetting<Icon extends string = string>({
   currentConfig,
   setConfig,
-  customIconSet,
   isQueryBased,
   children,
 }: {
   currentConfig?: MarkerDecorationConfig<Icon>;
   setConfig: (config: MarkerDecorationConfig<Icon>) => void;
-  customIconSet?: IconSet<Icon>;
   isQueryBased?: boolean;
   /** A children render function for custom sub fields on textDecoration change */
   children?: (textDecoration: 'none' | 'name' | 'field') => JSX.Element | null;
@@ -156,9 +154,7 @@ export function TextDecorationSetting<Icon extends string = string>({
           buttonSize="compressed"
           options={options}
           idSelected={
-            !currentConfig?.textVisibility
-              ? `${idPrefix}none`
-              : `${idPrefix}${selectedVisibleOption}`
+            selectedVisibleOption ? `${idPrefix}${selectedVisibleOption}` : `${idPrefix}none`
           }
           onChange={(id) => {
             const chosenOption = id.replace(idPrefix, '') as 'none' | 'name' | 'field';
@@ -167,14 +163,14 @@ export function TextDecorationSetting<Icon extends string = string>({
                 textVisibility: false,
                 textField: undefined,
               });
-            } else if (chosenOption === 'field') {
-              setConfig({
-                textVisibility: true,
-              });
             } else if (chosenOption === 'name') {
               setConfig({
                 textVisibility: true,
                 textField: undefined,
+              });
+            } else if (chosenOption === 'field') {
+              setConfig({
+                textVisibility: Boolean(currentConfig?.textField),
               });
             }
 

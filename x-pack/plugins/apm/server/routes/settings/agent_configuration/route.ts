@@ -200,7 +200,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    | import('./../../../../../../../src/core/types/elasticsearch/search').SearchHit<
+    | import('@kbn/es-types').SearchHit<
         import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration,
         undefined,
         undefined

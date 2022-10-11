@@ -18,6 +18,7 @@ import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
+import { renewIDs } from '../utils';
 import type {
   IndexPatternLayer,
   IndexPatternPersistedState,
@@ -43,7 +44,7 @@ import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
-import { getOriginalId } from '../../common/expressions';
+import { getOriginalId } from '../../common/expressions/datatable/transpose_helpers';
 import { isQueryValid } from '../shared_components';
 
 export function isColumnInvalid(
@@ -193,7 +194,7 @@ export function getTSDBRollupWarningMessages(
       ).map((label) =>
         i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
           defaultMessage:
-            '"{label}" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.',
+            '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
           values: {
             label,
           },
@@ -511,14 +512,6 @@ export function getFiltersInLayer(
   indexPattern: IndexPattern,
   timeRange: TimeRange | undefined
 ) {
-  if (indexPattern.spec) {
-    return {
-      error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
-        defaultMessage:
-          '"Explore data in Discover" does not support unsaved data views. Save the data view to switch to Discover.',
-      }),
-    };
-  }
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
   const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
     ['enabled', 'disabled'] as const
@@ -622,3 +615,22 @@ export function getFiltersInLayer(
     },
   };
 }
+
+export const cloneLayer = (
+  layers: Record<string, IndexPatternLayer>,
+  layerId: string,
+  newLayerId: string,
+  getNewId: (id: string) => string
+) => {
+  if (layers[layerId]) {
+    return {
+      ...layers,
+      [newLayerId]: renewIDs(
+        layers[layerId],
+        Object.keys(layers[layerId]?.columns ?? {}),
+        getNewId
+      ),
+    };
+  }
+  return layers;
+};

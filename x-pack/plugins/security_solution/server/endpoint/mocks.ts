@@ -135,6 +135,10 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
+    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+      jest.fn(() => ({ privileges: { kibana: [] } }))
+    );
+
     return {
       agentService,
       agentPolicyService,
@@ -158,6 +162,7 @@ export const createMockEndpointAppContextServiceStartContract =
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
       featureUsageService: createFeatureUsageServiceMock(),
+      experimentalFeatures: createMockConfig().experimentalFeatures,
     };
   };
 

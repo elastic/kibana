@@ -20,9 +20,13 @@ export async function getLatestApmPackage({
   const { name, version } = await packageClient.fetchFindLatestPackage(
     APM_PACKAGE_NAME
   );
-  const registryPackage = await packageClient.getRegistryPackage(name, version);
+  const registryPackage = await packageClient.getPackage(name, version);
   const { title, policy_templates: policyTemplates } =
     registryPackage.packageInfo;
-  const policyTemplateInputVars = policyTemplates?.[0].inputs?.[0].vars ?? [];
+  const firstTemplate = policyTemplates?.[0];
+  const policyTemplateInputVars =
+    firstTemplate && 'inputs' in firstTemplate
+      ? firstTemplate.inputs?.[0].vars || []
+      : [];
   return { package: { name, version, title }, policyTemplateInputVars };
 }

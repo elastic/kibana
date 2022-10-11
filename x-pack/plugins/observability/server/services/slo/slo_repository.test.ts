@@ -6,69 +6,88 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { SLO, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { createSLO } from './fixtures/slo';
+import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
+import { SLONotFound } from '../../errors';
 
-const anSLO = createSLO({
-  type: 'slo.apm.transaction_duration',
-  params: {
-    environment: 'irrelevant',
-    service: 'irrelevant',
-    transaction_type: 'irrelevant',
-    transaction_name: 'irrelevant',
-    'threshold.us': 200000,
-  },
-});
+const SOME_SLO = createSLO(createAPMTransactionDurationIndicator());
 
 function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   return {
     id: slo.id,
-    attributes: {
-      ...slo,
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-    },
+    attributes: slo,
     type: SO_SLO_TYPE,
     references: [],
   };
 }
 
-describe('sloRepository', () => {
+describe('KibanaSavedObjectsSLORepository', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     soClientMock = savedObjectsClientMock.create();
   });
 
+  describe('validation', () => {
+    it('findById throws when an SLO is not found', async () => {
+      soClientMock.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+
+      await expect(repository.findById('inexistant-slo-id')).rejects.toThrowError(
+        new SLONotFound('SLO [inexistant-slo-id] not found')
+      );
+    });
+
+    it('deleteById throws when an SLO is not found', async () => {
+      soClientMock.delete.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+
+      await expect(repository.deleteById('inexistant-slo-id')).rejects.toThrowError(
+        new SLONotFound('SLO [inexistant-slo-id] not found')
+      );
+    });
+  });
+
   it('saves the SLO', async () => {
-    soClientMock.create.mockResolvedValueOnce(aStoredSLO(anSLO));
+    soClientMock.create.mockResolvedValueOnce(aStoredSLO(SOME_SLO));
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
 
-    const savedSLO = await repository.save(anSLO);
+    const savedSLO = await repository.save(SOME_SLO);
 
-    expect(savedSLO).toEqual(anSLO);
+    expect(savedSLO).toEqual(SOME_SLO);
     expect(soClientMock.create).toHaveBeenCalledWith(
       SO_SLO_TYPE,
       expect.objectContaining({
-        ...anSLO,
+        ...SOME_SLO,
         updated_at: expect.anything(),
         created_at: expect.anything(),
-      })
+      }),
+      { id: SOME_SLO.id, overwrite: true }
     );
   });
 
   it('finds an existing SLO', async () => {
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-    soClientMock.get.mockResolvedValueOnce(aStoredSLO(anSLO));
+    soClientMock.get.mockResolvedValueOnce(aStoredSLO(SOME_SLO));
 
-    const foundSLO = await repository.findById(anSLO.id);
+    const foundSLO = await repository.findById(SOME_SLO.id);
 
-    expect(foundSLO).toEqual(anSLO);
-    expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, anSLO.id);
+    expect(foundSLO).toEqual(SOME_SLO);
+    expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
+  });
+
+  it('deletes an SLO', async () => {
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+
+    await repository.deleteById(SOME_SLO.id);
+
+    expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
   });
 });
