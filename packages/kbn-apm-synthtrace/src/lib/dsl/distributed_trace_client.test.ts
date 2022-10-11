@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { apm } from '../../lib/apm';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { BaseSpan } from '../../lib/apm/base_span';
+import { apm } from '../apm';
+import { ApmFields } from '../apm/apm_fields';
+import { BaseSpan } from '../apm/base_span';
 import { DistributedTrace } from './distributed_trace_client';
 
 const opbeansRum = apm

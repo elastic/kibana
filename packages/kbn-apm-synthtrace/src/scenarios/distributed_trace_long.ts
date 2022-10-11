@@ -13,7 +13,7 @@ import { ApmFields } from '../lib/apm/apm_fields';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { DistributedTrace } from './helpers/distributed_trace_client';
+import { DistributedTrace } from '../lib/dsl/distributed_trace_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
