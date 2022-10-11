@@ -8,8 +8,8 @@
 import * as bh from 'blurhash';
 import type { FileImageMetadata } from '../../../common';
 
-export function isImage(file: Blob | File): boolean {
-  return file.type?.startsWith('image/');
+export function isImage(file: { type?: string }): boolean {
+  return Boolean(file.type?.startsWith('image/'));
 }
 
 export const boxDimensions = {

@@ -6,7 +6,14 @@
  */
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiLoadingSpinner,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+} from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
 import { css } from '@emotion/react';
 import { FilePickerContext } from './context';
@@ -19,6 +26,7 @@ import { Title } from './components/title';
 import { ErrorContent } from './components/error_content';
 import { UploadFilesPrompt } from './components/upload_files';
 import * as layout from './components/layout';
+import { FileGrid } from './components/file_grid';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -26,14 +34,22 @@ export interface Props<Kind extends string = string> {
    */
   kind: Kind;
   /**
+   * Will be called when the modal is closed
+   */
+  onClose: () => void;
+  /**
+   * Will be called after a user has a selected a set of files
+   */
+  onDone: (fileIds: string[]) => void;
+  /**
    * The number of results to show per page.
    */
   perPage?: number;
 }
 
-const Component: FunctionComponent<Props> = ({ kind, perPage }) => {
+const Component: FunctionComponent<Props> = ({ perPage, onClose }) => {
   const { client } = useFilesContext();
-  const { state } = useFilePickerContext();
+  const { state, kind } = useFilePickerContext();
   const selectedFiles = useBehaviorSubject(state.fileIds$);
   const { status, error, data } = useQuery({
     queryFn: () => client.list({ kind, perPage }),
@@ -41,66 +57,52 @@ const Component: FunctionComponent<Props> = ({ kind, perPage }) => {
   });
 
   return (
-    <layout.Grid>
-      <layout.Header
-        css={css`
-          place-self: center start;
-        `}
-      >
+    <EuiModal
+      css={css`
+        min-width: 75vw;
+        min-height: 20vw;
+      `}
+      onClose={onClose}
+    >
+      <EuiModalHeader>
         <Title />
-      </layout.Header>
+      </EuiModalHeader>
       {status === 'loading' ? (
-        <layout.ContentAndFooter
+        <EuiModalBody
           css={css`
             place-self: center stretch;
           `}
         >
           <EuiLoadingSpinner size="xl" />
-        </layout.ContentAndFooter>
+        </EuiModalBody>
       ) : status === 'error' ? (
-        <layout.ContentAndFooter
+        <EuiModalBody
           css={css`
             place-self: center stretch;
           `}
         >
           <ErrorContent error={error as Error} />
-        </layout.ContentAndFooter>
+        </EuiModalBody>
       ) : data.files.length === 0 ? (
-        <layout.ContentAndFooter
-          css={css`
-            place-self: center stretch;
-          `}
-        >
+        <EuiModalBody>
           <UploadFilesPrompt kind={kind} />
-        </layout.ContentAndFooter>
+        </EuiModalBody>
       ) : (
         <>
-          <layout.Content
-            css={css`
-              grid-area: content;
-            `}
-          >
-            {
-              // TODO actually make some content here
-              'OK'
-            }
-          </layout.Content>
-          <layout.Footer
-            css={css`
-              grid-area: footer;
-              place-self: center end;
-            `}
-          >
+          <EuiModalBody>
+            <FileGrid files={data.files} />
+          </EuiModalBody>
+          <EuiModalFooter>
             <EuiButton disabled={!state.hasFilesSelected()}>Select file(s)</EuiButton>
-          </layout.Footer>
+          </EuiModalFooter>
         </>
       )}
-    </layout.Grid>
+    </EuiModal>
   );
 };
 
 export const FilePicker: FunctionComponent<Props> = (props) => (
-  <FilePickerContext>
+  <FilePickerContext kind={props.kind}>
     <Component {...props} />
   </FilePickerContext>
 );

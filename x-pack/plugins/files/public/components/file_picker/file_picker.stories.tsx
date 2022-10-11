@@ -9,6 +9,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import type { FileJSON } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
+import { base64dLogo } from '../image/image.constants.stories';
 import { FilesContext } from '../context';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
 
@@ -21,6 +22,8 @@ register({
 
 const defaultProps: FilePickerProps = {
   kind,
+  onDone: () => {},
+  onClose: () => {},
 };
 
 export default {
@@ -58,7 +61,10 @@ function createFileJSON(): FileJSON {
     extension: 'png',
     fileKind: kind,
     id: '1',
-    meta: {},
+    meta: {
+      width: 1000,
+      height: 1000,
+    },
     mimeType: 'image/png',
     name: 'my file',
     size: 1,
@@ -71,8 +77,18 @@ Basic.decorators = [
     <FilesContext
       client={
         {
+          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
           list: async (): Promise<FilesClientResponses['list']> => ({
-            files: [createFileJSON(), createFileJSON(), createFileJSON(), createFileJSON()],
+            files: [
+              createFileJSON(),
+              createFileJSON(),
+              createFileJSON(),
+              createFileJSON(),
+              createFileJSON(),
+              createFileJSON(),
+              createFileJSON(),
+              createFileJSON(),
+            ],
           }),
         } as unknown as FilesClient
       }

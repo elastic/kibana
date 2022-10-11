@@ -12,18 +12,25 @@ import { FilePickerState, createFilePickerState } from './file_picker_state';
 
 interface FilePickerContextValue {
   state: FilePickerState;
+  kind: string;
 }
 
 const FilePickerCtx = createContext<FilePickerContextValue>(
   null as unknown as FilePickerContextValue
 );
 
-const client = new QueryClient();
-export const FilePickerContext: FunctionComponent = ({ children }) => {
+interface FilePickerContextProps {
+  kind: string;
+}
+export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
+  kind,
+  children,
+}) => {
+  const client = useMemo(() => new QueryClient(), []);
   const state = useMemo(createFilePickerState, []);
   return (
     <QueryClientProvider client={client}>
-      <FilePickerCtx.Provider value={{ state }}>{children}</FilePickerCtx.Provider>
+      <FilePickerCtx.Provider value={{ state, kind }}>{children}</FilePickerCtx.Provider>
     </QueryClientProvider>
   );
 };
