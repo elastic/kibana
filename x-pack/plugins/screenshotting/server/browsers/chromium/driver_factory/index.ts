@@ -38,7 +38,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  viewport: { width?: number; deviceScaleFactor?: number };
+  viewport: { width?: number; height?: number; deviceScaleFactor?: number };
   openUrlTimeout: number;
 }
 
@@ -171,11 +171,8 @@ export class HeadlessChromiumDriverFactory {
       // We set the viewport width using the client-side layout info to reduce the chances of
       // browser reflow. Only the window height is expected to be adjusted dramatically
       // before taking a screenshot, to ensure the elements to capture are contained in the viewport.
-      const newViewport = {
-        ...DEFAULT_VIEWPORT,
-        width: viewport.width ?? DEFAULT_VIEWPORT.width,
-        deviceScaleFactor: viewport.deviceScaleFactor ?? DEFAULT_VIEWPORT.deviceScaleFactor,
-      };
+
+      const newViewport = { ...DEFAULT_VIEWPORT, ...viewport };
 
       log(
         `Launching with viewport:` +

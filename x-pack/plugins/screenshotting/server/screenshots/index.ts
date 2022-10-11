@@ -128,12 +128,13 @@ export class Screenshots {
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
 
+    const { width, height } = layout;
     return this.browserDriverFactory
       .createPage(
         {
           browserTimezone,
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          viewport: { width: layout.width },
+          viewport: { width, height },
         },
         this.logger
       )
