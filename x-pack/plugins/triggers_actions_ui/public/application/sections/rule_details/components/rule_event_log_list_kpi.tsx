@@ -15,7 +15,6 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
 const getParsedDate = (date: string) => {
@@ -147,9 +146,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshToken]);
 
-  if (isLoading || !kpi) {
-    return <CenterJustifiedSpinner />;
-  }
+  const isLoadingData = useMemo(() => isLoading || !kpi, [isLoading, kpi]);
 
   const getStatDescription = (element: React.ReactNode) => {
     return (
@@ -170,7 +167,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-successOutcome"
                 description={getStatDescription(<RuleEventLogListStatus status="success" />)}
                 titleSize="s"
-                title={kpi.success}
+                title={kpi?.success ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -178,7 +176,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-unknownOutcome"
                 description={getStatDescription(<RuleEventLogListStatus status="unknown" />)}
                 titleSize="s"
-                title={kpi.unknown}
+                title={kpi?.unknown ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -186,7 +185,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-failureOutcome"
                 description={getStatDescription(<RuleEventLogListStatus status="failure" />)}
                 titleSize="s"
-                title={kpi.failure}
+                title={kpi?.failure ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -200,7 +200,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-activeAlerts"
                 description={getStatDescription('Active')}
                 titleSize="s"
-                title={kpi.activeAlerts}
+                title={kpi?.activeAlerts ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -208,7 +209,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-newAlerts"
                 description={getStatDescription('New')}
                 titleSize="s"
-                title={kpi.newAlerts}
+                title={kpi?.newAlerts ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -216,7 +218,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-recoveredAlerts"
                 description={getStatDescription('Recovered')}
                 titleSize="s"
-                title={kpi.recoveredAlerts}
+                title={kpi?.recoveredAlerts ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -230,7 +233,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-erroredActions"
                 description={getStatDescription('Errored')}
                 titleSize="s"
-                title={kpi.erroredActions}
+                title={kpi?.erroredActions ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -238,7 +242,8 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 data-test-subj="ruleEventLogKpi-triggeredActions"
                 description={getStatDescription('Triggered')}
                 titleSize="s"
-                title={kpi.triggeredActions}
+                title={kpi?.triggeredActions ?? 0}
+                isLoading={isLoadingData}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
