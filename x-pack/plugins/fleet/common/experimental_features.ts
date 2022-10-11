@@ -15,6 +15,7 @@ export const allowedExperimentalValues = Object.freeze({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,
+  noLargeFeaturedIntegrations: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
