@@ -20,11 +20,7 @@ import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
 import { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  DataViewsPublicPluginStart,
-  INDEX_PATTERN_TYPE,
-  MatchedItem,
-} from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE, MatchedItem } from '@kbn/data-views-plugin/public';
 
 import {
   DataView,
@@ -62,6 +58,7 @@ import {
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 import { DataViewEditorServiceContext } from './data_view_flyout_content_container';
+import { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**
@@ -199,7 +196,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // initial loading of indicies and data view names
   useEffect(() => {
-    const matchedIndiceSub = dataViewEditorService.matchedIndices$.subscribe((matchedIndices) => {
+    let isCancelled = false;
+    const matchedIndicesSub = dataViewEditorService.matchedIndices$.subscribe((matchedIndices) => {
       const timeFieldQuery = editData ? editData.title : title;
       dataViewEditorService.loadTimestampFields(
         removeSpaces(timeFieldQuery),
@@ -210,16 +208,19 @@ const IndexPatternEditorFlyoutContentComponent = ({
     });
 
     dataViewEditorService.loadIndices(title, allowHidden).then((matchedIndices) => {
+      if (isCancelled) return;
       dataViewEditorService.matchedIndices$.next(matchedIndices);
     });
 
     dataViewEditorService.loadDataViewNames(title).then((names) => {
+      if (isCancelled) return;
       existingDataViewNames$.current.next(names);
       isLoadingDataViewNames$.current.next(false);
     });
 
     return () => {
-      matchedIndiceSub.unsubscribe();
+      isCancelled = true;
+      matchedIndicesSub.unsubscribe();
     };
   }, [editData, type, title, allowHidden, requireTimestampField, dataViewEditorService]);
 
@@ -228,7 +229,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   // used in title field validation
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
-      const isRollupIndex = await dataViewEditorService.getIsRollupIndex();
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {
@@ -236,17 +236,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         loadingMatchedIndices$.current.next(true);
 
-        const allSrcs = await dataViews.getIndices({
-          isRollupIndex,
+        const allSrcs = await dataViewEditorService.debounceGetIndices({
           pattern: '*',
           showAllIndices: allowHidden,
         });
 
         const { matchedIndicesResult, exactMatched } = !isLoadingSources
-          ? await loadMatchedIndices(query, allowHidden, allSrcs, {
-              isRollupIndex,
-              dataViews,
-            })
+          ? await loadMatchedIndices(query, allowHidden, allSrcs, dataViewEditorService)
           : {
               matchedIndicesResult: matchedIndiciesDefault,
               exactMatched: [],
@@ -255,6 +251,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         if (currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current) {
           // we are still interested in this result
           if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+            const isRollupIndex = await dataViewEditorService.getIsRollupIndex();
             const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
             newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
             rollupIndex$.current.next(newRollupIndexName);
@@ -272,7 +269,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       return fetchIndices(newTitle);
     },
     [
-      dataViews,
       allowHidden,
       type,
       dataViewEditorService,
@@ -423,13 +419,7 @@ const loadMatchedIndices = memoizeOne(
     query: string,
     allowHidden: boolean,
     allSources: MatchedItem[],
-    {
-      isRollupIndex,
-      dataViews,
-    }: {
-      isRollupIndex: (index: string) => boolean;
-      dataViews: DataViewsPublicPluginStart;
-    }
+    dataViewEditorService: DataViewEditorService
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
     exactMatched: MatchedItem[];
@@ -438,8 +428,7 @@ const loadMatchedIndices = memoizeOne(
     const indexRequests = [];
 
     if (query?.endsWith('*')) {
-      const exactMatchedQuery = dataViews.getIndices({
-        isRollupIndex,
+      const exactMatchedQuery = dataViewEditorService.debounceGetIndices({
         pattern: query,
         showAllIndices: allowHidden,
       });
@@ -447,13 +436,11 @@ const loadMatchedIndices = memoizeOne(
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
-      const exactMatchQuery = dataViews.getIndices({
-        isRollupIndex,
+      const exactMatchQuery = dataViewEditorService.debounceGetIndices({
         pattern: query,
         showAllIndices: allowHidden,
       });
-      const partialMatchQuery = dataViews.getIndices({
-        isRollupIndex,
+      const partialMatchQuery = dataViewEditorService.debounceGetIndices({
         pattern: `${query}*`,
         showAllIndices: allowHidden,
       });

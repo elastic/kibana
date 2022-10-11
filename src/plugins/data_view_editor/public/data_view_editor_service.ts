@@ -8,11 +8,11 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { debounce } from 'lodash';
 
 import {
   DataViewsServicePublic,
   MatchedItem,
-  DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
 } from '@kbn/data-views-plugin/public';
@@ -64,14 +64,7 @@ export class DataViewEditorService {
   loadMatchedIndices = async (
     query: string,
     allowHidden: boolean,
-    allSources: MatchedItem[],
-    {
-      isRollupIndex,
-      dataViews,
-    }: {
-      isRollupIndex: (index: string) => boolean;
-      dataViews: DataViewsPublicPluginStart;
-    }
+    allSources: MatchedItem[]
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
     exactMatched: MatchedItem[];
@@ -80,8 +73,7 @@ export class DataViewEditorService {
     const indexRequests = [];
 
     if (query?.endsWith('*')) {
-      const exactMatchedQuery = dataViews.getIndices({
-        isRollupIndex,
+      const exactMatchedQuery = this.debounceGetIndices({
         pattern: query,
         showAllIndices: allowHidden,
       });
@@ -89,13 +81,11 @@ export class DataViewEditorService {
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
-      const exactMatchQuery = dataViews.getIndices({
-        isRollupIndex,
+      const exactMatchQuery = this.debounceGetIndices({
         pattern: query,
         showAllIndices: allowHidden,
       });
-      const partialMatchQuery = dataViews.getIndices({
-        isRollupIndex,
+      const partialMatchQuery = this.debounceGetIndices({
         pattern: `${query}*`,
         showAllIndices: allowHidden,
       });
@@ -120,16 +110,12 @@ export class DataViewEditorService {
   };
 
   loadIndices = async (title: string, allowHidden: boolean) => {
-    const isRollupIndex = await this.getIsRollupIndex();
-    const allSrcs = await this.dataViews.getIndices({
-      isRollupIndex,
+    const allSrcs = await this.debounceGetIndices({
       pattern: '*',
       showAllIndices: allowHidden,
     });
-    const matchedSet = await this.loadMatchedIndices(title, allowHidden, allSrcs, {
-      isRollupIndex,
-      dataViews: this.dataViews,
-    });
+
+    const matchedSet = await this.loadMatchedIndices(title, allowHidden, allSrcs);
 
     this.isLoadingSources$.next(false);
     const matchedIndices = getMatchedIndices(
@@ -149,6 +135,42 @@ export class DataViewEditorService {
     return dataViewName ? dataViewNames.filter((v) => v !== dataViewName) : dataViewNames;
   };
 
+  private getIndicesMemory: Record<string, Promise<MatchedItem[]>> = {};
+  debounceGetIndices = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
+    const debouncedRequest = debounce(this.dataViews.getIndices, 60000, {
+      leading: true,
+    });
+
+    const key = JSON.stringify(props);
+    this.getIndicesMemory[key] =
+      this.getIndicesMemory[key] ||
+      debouncedRequest({ ...props, isRollupIndex: await this.getIsRollupIndex() });
+    return await this.getIndicesMemory[key];
+  };
+
+  private timeStampOptionsMemory: Record<string, Promise<TimestampOption[]>> = {};
+  private getTimestampOptionsForWildcard = async (
+    getFieldsOptions: GetFieldsOptions,
+    requireTimestampField: boolean
+  ) => {
+    const fields = await ensureMinimumTime(this.dataViews.getFieldsForWildcard(getFieldsOptions));
+    return extractTimeFields(fields as DataViewField[], requireTimestampField);
+  };
+
+  private debounceGetTimestampOptionsForWildcard = async (
+    getFieldsOptions: GetFieldsOptions,
+    requireTimestampField: boolean
+  ) => {
+    const debouncedRequest = debounce(this.getTimestampOptionsForWildcard, 60000, {
+      leading: true,
+    });
+
+    const key = JSON.stringify(getFieldsOptions) + requireTimestampField;
+    this.timeStampOptionsMemory[key] =
+      this.timeStampOptionsMemory[key] || debouncedRequest(getFieldsOptions, requireTimestampField);
+    return await this.timeStampOptionsMemory[key];
+  };
+
   loadTimestampFields = async (
     index: string,
     type: INDEX_PATTERN_TYPE,
@@ -159,7 +181,6 @@ export class DataViewEditorService {
       this.timestampFieldOptions$.next([]);
       return;
     }
-    // console.log('loadTimestampFields', index, type, requireTimestampField, rollupIndex);
     const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
     this.loadingTimestampFields$.next(true);
     const getFieldsOptions: GetFieldsOptions = {
@@ -170,8 +191,10 @@ export class DataViewEditorService {
       getFieldsOptions.rollupIndex = rollupIndex;
     }
 
-    const fields = await ensureMinimumTime(this.dataViews.getFieldsForWildcard(getFieldsOptions));
-    const timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
+    const timestampOptions = await this.debounceGetTimestampOptionsForWildcard(
+      getFieldsOptions,
+      requireTimestampField
+    );
     if (currentLoadingTimestampFieldsIdx === this.currentLoadingTimestampFields) {
       this.timestampFieldOptions$.next(timestampOptions);
       this.loadingTimestampFields$.next(false);
