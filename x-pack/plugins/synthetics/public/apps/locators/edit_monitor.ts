@@ -9,7 +9,7 @@ import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common
 
 async function navigate({ monitorId }: { monitorId: string }) {
   return {
-    app: 'uptime',
+    app: 'synthetics',
     path: `/edit-monitor/${monitorId}`,
     state: {},
   };
