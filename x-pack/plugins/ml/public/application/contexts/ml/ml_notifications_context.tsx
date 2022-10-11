@@ -9,6 +9,7 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { combineLatest, of, timer } from 'rxjs';
 import { catchError, switchMap, map, tap } from 'rxjs/operators';
 import moment from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana } from '../kibana';
 import { useStorage } from '../storage';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
@@ -16,6 +17,8 @@ import { useAsObservable } from '../../hooks';
 import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
 const NOTIFICATIONS_CHECK_INTERVAL = 60000;
+
+const defaultCounts = { info: 0, error: 0, warning: 0 };
 
 export const MlNotificationsContext = React.createContext<{
   notificationsCounts: NotificationsCountResponse;
@@ -25,7 +28,7 @@ export const MlNotificationsContext = React.createContext<{
   latestRequestedAt: number | null;
   setLastCheckedAt: (v: number) => void;
 }>({
-  notificationsCounts: { info: 0, error: 0, warning: 0 },
+  notificationsCounts: defaultCounts,
   lastCheckedAt: null,
   latestRequestedAt: null,
   setLastCheckedAt: () => {},
@@ -43,11 +46,8 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
 
   /** Holds the value used for the actual request */
   const [latestRequestedAt, setLatestRequestedAt] = useState<number | null>(null);
-  const [notificationsCounts, setNotificationsCounts] = useState<NotificationsCountResponse>({
-    info: 0,
-    error: 0,
-    warning: 0,
-  });
+  const [notificationsCounts, setNotificationsCounts] =
+    useState<NotificationsCountResponse>(defaultCounts);
 
   useEffect(function startPollingNotifications() {
     const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
@@ -68,7 +68,7 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
         })
       )
       .subscribe((response) => {
-        setNotificationsCounts(response);
+        setNotificationsCounts(isPopulatedObject(response) ? response : defaultCounts);
       });
 
     return () => {
