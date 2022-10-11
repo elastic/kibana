@@ -73,6 +73,7 @@ describe('dimension editor', () => {
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };

@@ -44,7 +44,7 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
-import { onDropForVisualization } from './buttons/drop_targets_utils';
+import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
 
 const initialActiveDimensionState = {
@@ -219,6 +219,13 @@ export function LayerPanel(
             activeVisualization
           )
         );
+
+        if (isOperation(source) && shouldRemoveSource(source, dropType)) {
+          props.onRemoveDimension({
+            columnId: source.columnId,
+            layerId: source.layerId,
+          });
+        }
       }
     };
   }, [

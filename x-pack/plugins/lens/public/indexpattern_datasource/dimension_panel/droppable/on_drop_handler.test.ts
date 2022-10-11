@@ -764,8 +764,9 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           ...state.layers,
           first: {
             ...state.layers.first,
-            columnOrder: ['col2'],
+            columnOrder: ['col1', 'col2'],
             columns: {
+              col1: state.layers.first.columns.col1,
               col2: state.layers.first.columns.col1,
             },
           },
@@ -799,10 +800,10 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           ...testState.layers,
           first: {
             ...testState.layers.first,
-            incompleteColumns: {},
-            columnOrder: ['col1', 'col3'],
+            columnOrder: ['col1', 'col2', 'col3'],
             columns: {
               col1: testState.layers.first.columns.col2,
+              col2: testState.layers.first.columns.col2,
               col3: testState.layers.first.columns.col3,
             },
           },
@@ -886,11 +887,11 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['newCol', 'col1', 'col3', 'col4'],
+              columnOrder: ['newCol', 'col1', 'col2', 'col3', 'col4'],
               columns: {
                 newCol: testState.layers.first.columns.col2,
                 col1: testState.layers.first.columns.col1,
+                col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
               },
@@ -968,11 +969,11 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['col1', 'col2', 'col4'],
+              columnOrder: ['col1', 'col2', 'col3', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col3,
                 col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
               },
             },
@@ -1039,11 +1040,11 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['col1', 'col2', 'col4', 'col5', 'col6'],
+              columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
               columns: {
                 col1: testState.layers.first.columns.col3,
                 col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
                 col5: expect.objectContaining({
                   dataType: 'number',
@@ -1138,9 +1139,9 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['col2', 'col3', 'newCol', 'col4'],
+              columnOrder: ['col1', 'col2', 'col3', 'newCol', 'col4'],
               columns: {
+                col1: testState.layers.first.columns.col1,
                 newCol: testState.layers.first.columns.col1,
                 col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
@@ -1274,7 +1275,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'newCol', 'col2', 'col3'],
+              columnOrder: ['col1', 'newCol', 'col2', 'col3', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col1,
                 newCol: expect.objectContaining({
@@ -1283,6 +1284,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
                 }),
                 col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
+                col4: testState.layers.first.columns.col4,
               },
               incompleteColumns: {},
             },
@@ -1369,7 +1371,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'col2', 'col3'],
+              columnOrder: ['col1', 'col2', 'col3', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col1,
                 col2: {
@@ -1388,6 +1390,13 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
                   },
                 },
                 col3: testState.layers.first.columns.col3,
+                col4: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Median of bytes',
+                  operationType: 'median',
+                  sourceField: 'bytes',
+                },
               },
               incompleteColumns: {},
             },
@@ -1588,10 +1597,6 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'newCol', 'col5'],
                 columns: {
@@ -1673,10 +1678,6 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5'],
                 columns: {
@@ -1777,10 +1778,6 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5'],
                 columns: {
@@ -1822,10 +1819,6 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5', 'newCol'],
                 columns: {
@@ -1989,9 +1982,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           expect(props.setState).toBeCalledTimes(1);
           expect(props.setState).toHaveBeenCalledWith({
             ...props.state,
-            layers: {
-              ...props.state.layers,
-              first: { ...mockedLayers.emptyLayer(), incompleteColumns: {} },
+            layers: expect.objectContaining({
               second: {
                 ...props.state.layers.second,
                 incompleteColumns: {},
@@ -2017,7 +2008,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
                   },
                 },
               },
-            },
+            }),
           });
         });
         it('combine_incompatible: allows dropping to combine to multiterms', () => {
@@ -2054,9 +2045,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           expect(props.setState).toBeCalledTimes(1);
           expect(props.setState).toHaveBeenCalledWith({
             ...props.state,
-            layers: {
-              ...props.state.layers,
-              first: { ...mockedLayers.emptyLayer(), incompleteColumns: {} },
+            layers: expect.objectContaining({
               second: {
                 ...props.state.layers.second,
                 incompleteColumns: {},
@@ -2082,7 +2071,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
                   },
                 },
               },
-            },
+            }),
           });
         });
       });
@@ -2177,10 +2166,6 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['second', 'secondX0', 'newColumnX0', 'newColumn'],
                 columns: {
@@ -2236,10 +2221,6 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['second', 'secondX0'],
                 columns: {

@@ -52,6 +52,7 @@ describe('metric toolbar', () => {
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-col-id',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
