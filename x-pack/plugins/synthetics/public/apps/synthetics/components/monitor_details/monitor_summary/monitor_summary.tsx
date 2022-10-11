@@ -25,6 +25,7 @@ import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LastTenTestRuns } from './last_ten_test_runs';
+import { MonitorErrorsCount } from './monitor_errors_count';
 
 export const MonitorSummary = () => {
   const { euiTheme } = useEuiTheme();
@@ -56,7 +57,10 @@ export const MonitorSummary = () => {
                 <DurationPanel />
               </EuiFlexItem>
               <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add error metric and sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <MonitorErrorsCount />
+              </EuiFlexItem>
+              <EuiFlexItem>{/* TODO: Add error sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="l" />
