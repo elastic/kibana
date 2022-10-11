@@ -51,13 +51,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
         },
       };
+      let logs: string[] = [];
+      let response: DiagnosticResponse = { success: true, help: [], logs };
 
-      let response: DiagnosticResponse = {
-        success: true,
-        help: [],
-        logs: [],
-      };
-      let logs: string[] | undefined;
       try {
         const result = await lastValueFrom(
           generatePngObservable(reporting, logger, {

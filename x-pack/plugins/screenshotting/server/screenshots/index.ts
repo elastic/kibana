@@ -87,14 +87,6 @@ export interface CaptureResult {
 
   /**
    * Log messages of a screenshotting run
-   * - is sandbox enabled
-   * - type of OS and CPU architecture
-   * - puppeteer launch args
-   * - browser revision & user-agent
-   * - TODO timings of browser launch and other events
-   * - logs from the page console
-   *
-   * NOTE: errors and warnings from the browser process stdout/stderr are not available.
    */
   logs$: Observable<string>;
 }
@@ -127,21 +119,15 @@ export class Screenshots {
     options: ScreenshotObservableOptions
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
-
+    const openUrlTimeout = durationToNumber(this.config.capture.timeouts.openUrl);
     const { width, height } = layout;
+
     return this.browserDriverFactory
-      .createPage(
-        {
-          browserTimezone,
-          openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          viewport: { width, height },
-        },
-        this.logger
-      )
+      .createPage({ browserTimezone, openUrlTimeout, viewport: { width, height } }, this.logger)
       .pipe(
         this.semaphore.acquire(),
         mergeMap(({ driver, error$, logs$, close }) => {
-          const screen: ScreenshotObservableHandler = new ScreenshotObservableHandler(
+          const screen = new ScreenshotObservableHandler(
             driver,
             this.config,
             eventLogger,
