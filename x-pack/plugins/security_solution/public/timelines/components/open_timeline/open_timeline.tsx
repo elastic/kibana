@@ -149,10 +149,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
+      const createRule: ActionTimelineToShow[] = ['createRule'];
       const timelineActions: ActionTimelineToShow[] = [
         'createFrom',
         'duplicate',
-        ...(onCreateRule != null ? ['createRule'] : []),
+        ...(onCreateRule != null ? createRule : []),
       ];
 
       if (timelineStatus !== TimelineStatus.immutable) {

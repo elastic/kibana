@@ -8,6 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { FROM_TIMELINE_ID_URL_PARAM } from '../../../detections/pages/detection_engine/rules/create/use_from_timeline_id';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -278,11 +279,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
     const { navigateTo } = useNavigation();
     const onCreateRule: OnCreateRuleFromTimeline = useCallback(
-      (savedObjectId) =>
+      (savedObjectId) => {
+        console.log('savedObjectId:', savedObjectId);
         navigateTo({
           deepLinkId: SecurityPageName.rulesCreate,
-          path: `?createRuleFromTimelineId=${savedObjectId}`,
-        }),
+          path: `?${FROM_TIMELINE_ID_URL_PARAM}=${savedObjectId}`,
+        });
+      },
       [navigateTo]
     );
 

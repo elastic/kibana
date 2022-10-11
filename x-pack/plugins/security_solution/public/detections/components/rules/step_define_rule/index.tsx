@@ -188,26 +188,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [fromTimelineData, setFieldValue]);
 
   const {
-    index: formIndex,
-    ruleType: formRuleType,
-    queryBar: formQuery,
-    dataViewId: formDataViewId,
-    threatIndex: formThreatIndex,
+    index,
+    ruleType,
+    queryBar,
+    dataViewId,
+    threatIndex,
     threatMapping: formThreatMapping,
-    machineLearningJobId: formMachineLearningJobId,
-    dataSourceType: formDataSourceType,
-    newTermsFields: formNewTermsFields,
+    machineLearningJobId,
+    dataSourceType,
+    newTermsFields,
     shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
   } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
-  const index = formIndex || initialState.index;
-  const dataView = formDataViewId || initialState.dataViewId;
-  const threatIndex = formThreatIndex || initialState.threatIndex;
-  const ruleType = formRuleType || initialState.ruleType;
-  const dataSourceType = formDataSourceType || initialState.dataSourceType;
-  const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
 
   const [isPreviewValid, setIsPreviewValid] = useState(false);
   useEffect(() => {
@@ -221,23 +215,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       isQueryBarValid,
       isThreatQueryBarValid,
       index,
-      dataViewId: formDataViewId,
+      dataViewId,
       dataSourceType,
       threatIndex,
       threatMapping: formThreatMapping,
       machineLearningJobId,
-      queryBar: formQuery ?? initialState.queryBar,
-      newTermsFields: formNewTermsFields,
+      queryBar,
+      newTermsFields,
     });
     setIsPreviewValid(!isDisabled);
   }, [
     dataSourceType,
-    formDataViewId,
-    formNewTermsFields,
-    formQuery,
+    dataViewId,
+    newTermsFields,
     formThreatMapping,
     index,
-    initialState.queryBar,
+    queryBar,
     isQueryBarValid,
     isThreatQueryBarValid,
     machineLearningJobId,
@@ -272,8 +265,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
-        if (dataView != null) {
-          const dv = await data.dataViews.get(dataView);
+        if (dataViewId != null) {
+          const dv = await data.dataViews.get(dataViewId);
           setDataViewTitle(dv.title);
           setIndexPattern(dv);
         }
@@ -281,7 +274,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
       fetchDataView();
     }
-  }, [dataSourceType, isIndexPatternLoading, data, dataView, initIndexPattern]);
+  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -338,8 +331,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
    */
   useEffect(() => {
-    const { queryBar } = getFields();
-    if (queryBar == null) {
+    const { queryBar: currentQuery } = getFields();
+    if (currentQuery == null) {
       return;
     }
 
@@ -355,15 +348,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     //   NOTE: It's important to do a deep object comparison by value.
     //   Don't do it by reference because the forms lib can change it internally.
 
-    // 2. We call queryBar.reset() in both cases to not trigger validation errors
+    // 2. We call currentQuery.reset() in both cases to not trigger validation errors
     // as the user has not entered data into those areas yet.
 
     // If the user switched rule type to "threat_match" from any other one,
     // but hasn't changed the custom query used for normal rules (''),
     // we reset the custom query to the default used for "threat_match" rules ('*:*').
     if (isThreatMatchRule(ruleType) && !isThreatMatchRule(previousRuleType)) {
-      if (isEqual(queryBar.value, defaultCustomQuery.forNormalRules)) {
-        queryBar.reset({
+      if (isEqual(currentQuery.value, defaultCustomQuery.forNormalRules)) {
+        currentQuery.reset({
           defaultValue: defaultCustomQuery.forThreatMatchRules,
         });
         return;
@@ -374,8 +367,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // but hasn't changed the custom query used for "threat_match" rules ('*:*'),
     // we reset the custom query to another default value ('').
     if (!isThreatMatchRule(ruleType) && isThreatMatchRule(previousRuleType)) {
-      if (isEqual(queryBar.value, defaultCustomQuery.forThreatMatchRules)) {
-        queryBar.reset({
+      if (isEqual(currentQuery.value, defaultCustomQuery.forThreatMatchRules)) {
+        currentQuery.reset({
           defaultValue: defaultCustomQuery.forNormalRules,
         });
       }
@@ -754,7 +747,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiSpacer size="s" />
               <RuleTypeEuiFormRow
                 label={i18n.SAVED_QUERY_FORM_ROW_LABEL}
-                $isVisible={Boolean(formQuery?.saved_id && formQuery?.title)}
+                $isVisible={Boolean(queryBar?.saved_id && queryBar?.title)}
                 fullWidth
               >
                 <CommonUseField
@@ -764,8 +757,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
                     euiFieldProps: {
                       disabled: isLoading,
-                      label: formQuery?.title
-                        ? i18n.getSavedQueryCheckboxLabel(formQuery.title)
+                      label: queryBar?.title
+                        ? i18n.getSavedQueryCheckboxLabel(queryBar.title)
                         : undefined,
                     },
                   }}

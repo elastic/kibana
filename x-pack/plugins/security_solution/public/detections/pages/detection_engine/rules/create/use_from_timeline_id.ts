@@ -23,11 +23,13 @@ import { getDataProviderFilter } from '../../../../../timelines/components/timel
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 
+export const FROM_TIMELINE_ID_URL_PARAM = 'createRuleFromTimelineId';
+
 export const useFromTimelineId = (initialState: {
   index: string[];
   queryBar: FieldValueQueryBar;
 }) => {
-  const getInitialUrlParamValue = useGetInitialUrlParamValue<string>('createRuleFromTimelineId');
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(FROM_TIMELINE_ID_URL_PARAM);
 
   const { decodedParam: fromTimelineId } = useMemo(
     () => getInitialUrlParamValue(),

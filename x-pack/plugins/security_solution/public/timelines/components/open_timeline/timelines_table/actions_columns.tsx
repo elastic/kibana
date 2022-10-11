@@ -138,7 +138,6 @@ export const getActionsColumns = ({
     name: i18n.CREATE_RULE_FROM_TIMELINE,
     icon: 'indexEdit',
     onClick: (selectedTimeline: OpenTimelineResult) => {
-      console.log('selectedTimeline', selectedTimeline);
       if (onCreateRule != null && selectedTimeline.savedObjectId)
         onCreateRule(selectedTimeline.savedObjectId);
     },
@@ -151,7 +150,7 @@ export const getActionsColumns = ({
     },
     description: i18n.CREATE_RULE_FROM_TIMELINE,
     'data-test-subj': 'create-rule-from-timeline',
-    available: () => actionTimelineToShow.includes('createRule'),
+    available: () => actionTimelineToShow.includes('createRule') && onCreateRule != null,
   };
 
   return [
