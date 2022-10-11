@@ -82,7 +82,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
   ) : (
-    <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
+    <>
       <CasesTableUtilityBar
         isSelectorView={isSelectorView}
         totalCases={data.total ?? 0}
@@ -127,7 +127,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         sorting={sorting}
         hasActions={false}
       />
-    </Div>
+    </>
   );
 };
 CasesTable.displayName = 'CasesTable';
