@@ -9,5 +9,7 @@
 export { getColumnsFromVis } from './schemas';
 export {
   getPercentageColumnFormulaColumn,
+  getPalette,
+  getPercentageModeConfig,
   createStaticValueColumn,
 } from '../../common/convert_to_lens/lib';

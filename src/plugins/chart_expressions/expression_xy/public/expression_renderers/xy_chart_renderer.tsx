@@ -233,8 +233,8 @@ export const getXyChartRenderer = ({
               onClickValue={onClickValue}
               onSelectRange={onSelectRange}
               renderMode={handlers.getRenderMode()}
-              syncColors={handlers.isSyncColorsEnabled()}
-              syncTooltips={handlers.isSyncTooltipsEnabled()}
+              syncColors={config.syncColors}
+              syncTooltips={config.syncTooltips}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
             />

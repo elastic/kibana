@@ -16,6 +16,8 @@ import { XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
+  syncTooltips: boolean;
+  syncColors: boolean;
   canNavigateToLens?: boolean;
 }
 

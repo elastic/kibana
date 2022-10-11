@@ -6,26 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { PercentageModeConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { VisParams } from '../../types';
-import { getPalette } from './palette';
-
-export const getPercentageModeConfig = (params: VisParams): PercentageModeConfig => {
-  if (!params.metric.percentageMode) {
-    return { isPercentageMode: false };
-  }
-  const { colorsRange } = params.metric;
-  return {
-    isPercentageMode: true,
-    min: colorsRange[0].from,
-    max: colorsRange[colorsRange.length - 1].to,
-  };
-};
 
 export const getConfiguration = (
   layerId: string,
   params: VisParams,
+  palette: PaletteOutput<CustomPaletteParams> | undefined,
   {
     metrics,
     buckets,
@@ -51,7 +39,7 @@ export const getConfiguration = (
   return {
     layerId,
     layerType: 'data',
-    palette: getPalette(params),
+    palette: params.metric.metricColorMode !== 'None' ? palette : undefined,
     metricAccessor,
     breakdownByAccessor,
     collapseFn,
