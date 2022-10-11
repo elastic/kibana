@@ -26,6 +26,7 @@ const iconStyles = {
 const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
   success: 'success',
   failure: 'danger',
+  unknown: 'gray',
   warning: 'warning',
 };
 
