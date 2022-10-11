@@ -29,8 +29,8 @@ import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/action
 const ACTION_TYPE_ID = '.torq';
 
 jest.mock('axios');
-jest.mock('./lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('./lib/axios_utils');
+jest.mock('../../../../../actions/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../../../../../actions/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -123,13 +123,20 @@ describe('config validation', () => {
       logger: mockedLogger,
     });
 
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (_: string) => {
+        throw new Error(`target url is not present in allowedHosts`);
+      },
+    };
+
     // any for testing
     const config: Record<string, string> = {
       webhookIntegrationUrl: 'http://mylisteningserver.com:9200/endpoint',
     };
 
     expect(() => {
-      validateConfig(actionType, config, { configurationUtilities });
+      validateConfig(actionType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring send to Torq action: target url is not present in allowedHosts"`
     );
@@ -182,7 +189,7 @@ describe('execute Torq action', () => {
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "axios": undefined,
+        "axios": [MockFunction],
         "data": "some data",
         "headers": Object {
           "X-Torq-Token": "1234",

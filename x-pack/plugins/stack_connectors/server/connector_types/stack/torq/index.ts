@@ -117,30 +117,31 @@ function validateActionTypeConfig(
   try {
     configureUrlObj = new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring send to Torq action: unable to parse url: {err}',
-      values: {
-        err,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorNoHostname', {
+        defaultMessage: 'error configuring send to Torq action: unable to parse url: {err}',
+        values: {
+          err,
+        },
+      }));
   }
 
   try {
     validatorServices.configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.torq.torqConfigurationError', {
+    throw new Error(i18n.translate('xpack.actions.builtin.torq.torqConfigurationError', {
       defaultMessage: 'error configuring send to Torq action: {message}',
       values: {
         message: allowListError.message,
       },
-    });
+    }));
   }
 
   if (configureUrlObj.hostname !== 'hooks.torq.io') {
-    return i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
+    throw new Error(i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
       defaultMessage:
         'error configuring send to Torq action: url must begin with https://hooks.torq.io',
-    });
+    }));
   }
 }
 
