@@ -42,6 +42,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   },
 };
 
@@ -150,6 +152,38 @@ describe('getOperationTypesForField', () => {
         })
       ).toEqual([]);
     });
+  });
+
+  describe('with partially applicable functions', () => {
+    expect(
+      getOperationTypesForField({
+        type: 'number',
+        name: 'a',
+        displayName: 'aLabel',
+        aggregatable: true,
+        searchable: true,
+        partiallyApplicableFunctions: {
+          median: true,
+          last_value: true,
+          max: true,
+        },
+      })
+    ).toEqual([
+      'range',
+      'terms',
+      'average',
+      'sum',
+      'min',
+      'unique_count',
+      'standard_deviation',
+      'percentile',
+      'percentile_rank',
+      'count',
+      // partially applicable functions are put in the back of the list so they are not auto-picked
+      'median',
+      'max',
+      'last_value',
+    ]);
   });
 
   describe('with restrictions', () => {

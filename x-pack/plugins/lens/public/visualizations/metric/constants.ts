@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const LENS_METRIC_ID = 'lnsMetricNew'; // TODO - rename old one to "legacy"
+export const LENS_METRIC_ID = 'lnsMetric';
 
 export const GROUP_ID = {
   METRIC: 'metric',

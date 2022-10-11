@@ -7,9 +7,10 @@
 import { useMemo } from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
 import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
-import { convertToBuildEsQuery } from '../../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { QUERY_PREVIEW_ERROR } from './translations';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
@@ -19,8 +20,8 @@ interface PreviewHistogramParams {
   endDate: string;
   startDate: string;
   spaceId: string;
-  index: string[];
   ruleType: Type;
+  indexPattern: DataViewBase | undefined;
 }
 
 export const usePreviewHistogram = ({
@@ -28,17 +29,14 @@ export const usePreviewHistogram = ({
   startDate,
   endDate,
   spaceId,
-  index,
   ruleType,
+  indexPattern,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
 
   const [filterQuery, error] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    indexPattern: {
-      fields: [],
-      title: index == null ? '' : index.join(),
-    },
+    indexPattern,
     queries: [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
     filters: [],
   });

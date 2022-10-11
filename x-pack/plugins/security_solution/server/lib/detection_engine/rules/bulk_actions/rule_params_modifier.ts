@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
+import moment from 'moment';
+import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleAlertType } from '../types';
-
-import type { BulkActionEditForRuleParams } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
-
+import type { BulkActionEditForRuleParams } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { invariant } from '../../../../../common/utils/invariant';
-import { isMachineLearningParams } from '../../signals/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -36,7 +37,11 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (!isMachineLearningParams(ruleParams) && action.overwriteDataViews) {
+      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
+        break;
+      }
+
+      if (action.overwrite_data_views) {
         ruleParams.dataViewId = undefined;
       }
 
@@ -49,7 +54,17 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      ruleParams.index = deleteItemsFromArray(ruleParams.index ?? [], action.value);
+      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
+        break;
+      }
+
+      if (action.overwrite_data_views) {
+        ruleParams.dataViewId = undefined;
+      }
+
+      if (ruleParams.index) {
+        ruleParams.index = deleteItemsFromArray(ruleParams.index, action.value);
+      }
       break;
 
     case BulkActionEditType.set_index_patterns:
@@ -57,6 +72,14 @@ const applyBulkActionEditToRuleParams = (
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
+
+      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
+        break;
+      }
+
+      if (action.overwrite_data_views) {
+        ruleParams.dataViewId = undefined;
+      }
 
       ruleParams.index = action.value;
       break;
@@ -69,6 +92,23 @@ const applyBulkActionEditToRuleParams = (
         timelineTitle: action.value.timeline_title || undefined,
       };
       break;
+
+    // update look-back period in from and meta.from fields
+    case BulkActionEditType.set_schedule: {
+      const interval = parseInterval(action.value.interval) ?? moment.duration(0);
+      const parsedFrom = parseInterval(action.value.lookback) ?? moment.duration(0);
+
+      const from = parsedFrom.asSeconds() + interval.asSeconds();
+
+      ruleParams = {
+        ...ruleParams,
+        meta: {
+          ...ruleParams.meta,
+          from: action.value.lookback,
+        },
+        from: `now-${from}s`,
+      };
+    }
   }
 
   return ruleParams;
@@ -90,7 +130,10 @@ export const ruleParamsModifier = (
   );
 
   // increment version even if actions are empty, as attributes can be modified as well outside of ruleParamsModifier
-  modifiedParams.version += 1;
+  // version must not be modified for immutable rule. Otherwise prebuilt rules upgrade flow will be broken
+  if (existingRuleParams.immutable === false) {
+    modifiedParams.version += 1;
+  }
 
   return modifiedParams;
 };

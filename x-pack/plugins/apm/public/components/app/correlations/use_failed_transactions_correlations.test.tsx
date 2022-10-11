@@ -168,9 +168,10 @@ describe('useFailedTransactionsCorrelations', () => {
       );
 
       try {
+        // Each simulated request takes 100ms. After an inital 50ms
+        // we track the internal requests the hook is running and
+        // check the expected progress after these requests.
         jest.advanceTimersByTime(50);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0));
-        jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
         jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
@@ -179,6 +180,28 @@ describe('useFailedTransactionsCorrelations', () => {
           error: undefined,
           isRunning: true,
           loaded: 0.05,
+        });
+        expect(result.current.response).toEqual({
+          ccsWarning: false,
+          fieldStats: undefined,
+          errorHistogram: undefined,
+          failedTransactionsCorrelations: undefined,
+          overallHistogram: [
+            {
+              doc_count: 1234,
+              key: 'the-key',
+            },
+          ],
+          percentileThresholdValue: 1.234,
+        });
+
+        jest.advanceTimersByTime(100);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
+
+        expect(result.current.progress).toEqual({
+          error: undefined,
+          isRunning: true,
+          loaded: 0.1,
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
@@ -200,23 +223,23 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.15));
 
         // field candidates are an implementation detail and
-        // will not be exposed, it will just set loaded to 0.1.
+        // will not be exposed, it will just set loaded to 0.15.
         expect(result.current.progress).toEqual({
           error: undefined,
           isRunning: true,
-          loaded: 0.1,
+          loaded: 0.15,
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(1));
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.9));
 
         expect(result.current.progress).toEqual({
           error: undefined,
           isRunning: true,
-          loaded: 1,
+          loaded: 0.9,
         });
 
         expect(result.current.response).toEqual({
@@ -252,9 +275,7 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() =>
-          expect(result.current.response.fieldStats).toBeDefined()
-        );
+        await waitFor(() => expect(result.current.progress.loaded).toBe(1));
 
         expect(result.current.progress).toEqual({
           error: undefined,

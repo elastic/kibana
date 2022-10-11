@@ -18,7 +18,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -33,6 +33,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
 import {
@@ -41,7 +42,7 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
-import { UserAvatar, useSecurityApiClients } from '../../components';
+import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
   FormChangesProvider,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import type { FrameDatasourceAPI } from '../../../../types';
 import type { CountIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
@@ -19,30 +20,26 @@ import {
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
+import { MovingAverageIndexPatternColumn } from '../calculations';
+
+jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+  loadFieldStats: jest.fn().mockResolvedValue({
+    topValues: {
+      buckets: [
+        {
+          key: 'A',
+        },
+        {
+          key: 'B',
+        },
+      ],
+    },
+  }),
+}));
 
 const indexPattern = createMockedIndexPattern();
-
-const coreMock = {
-  uiSettings: {
-    get: () => undefined,
-  },
-  http: {
-    post: jest.fn(() =>
-      Promise.resolve({
-        topValues: {
-          buckets: [
-            {
-              key: 'A',
-            },
-            {
-              key: 'B',
-            },
-          ],
-        },
-      })
-    ),
-  },
-} as unknown as CoreStart;
+const dataMock = dataPluginMock.createStartContract();
+const coreMock = corePluginMock.createStart();
 
 function getStringBasedOperationColumn(
   field = 'source',
@@ -153,6 +150,32 @@ describe('getDisallowedTermsMessage()', () => {
     ).toBeUndefined();
   });
 
+  it('should return no error for a single dimension shifted which is wrapped in a referencing column', () => {
+    expect(
+      getDisallowedTermsMessage(
+        getLayer(getStringBasedOperationColumn(), [
+          // count will inherit the shift from the moving average
+          getCountOperationColumn({ timeShift: undefined }),
+          {
+            label: 'Moving average',
+            dataType: 'number',
+            operationType: 'moving_average',
+            isBucketed: false,
+            scale: 'ratio',
+            references: ['col2'],
+            timeShift: '3h',
+            params: {
+              window: 5,
+            },
+            customLabel: true,
+          } as MovingAverageIndexPatternColumn,
+        ]),
+        'col1',
+        indexPattern
+      )
+    ).toBeUndefined();
+  });
+
   it('should return no for multiple fields with no shifted dimensions', () => {
     expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toBeUndefined();
     expect(
@@ -212,6 +235,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },
@@ -259,6 +283,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },
@@ -300,6 +325,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },
@@ -340,6 +366,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },

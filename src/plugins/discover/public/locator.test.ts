@@ -20,9 +20,7 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverAppLocatorDefinition({
-    useHash,
-  });
+  const locator = new DiscoverAppLocatorDefinition({ useHash });
 
   return {
     locator,
@@ -57,9 +55,7 @@ describe('Discover url generator', () => {
 
   test('can specify specific data view', async () => {
     const { locator } = await setup();
-    const { path } = await locator.getLocation({
-      indexPatternId: dataViewId,
-    });
+    const { path } = await locator.getLocation({ dataViewId });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
@@ -224,13 +220,31 @@ describe('Discover url generator', () => {
     );
   });
 
+  test('should use legacy locator params', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ dataViewId });
+    const { path: legacyParamsPath } = await locator.getLocation({ indexPatternId: dataViewId });
+
+    expect(path).toEqual(legacyParamsPath);
+  });
+
+  test('should create data view when dataViewSpec is used', async () => {
+    const dataViewSpecMock = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: 'mock-time-field-name',
+    };
+    const { locator } = await setup();
+    const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
+
+    expect(state.dataViewSpec).toEqual(dataViewSpecMock);
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets data view ID in the generated URL', async () => {
         const { locator } = await setup();
-        const { path } = await locator.getLocation({
-          indexPatternId: dataViewId,
-        });
+        const { path } = await locator.getLocation({ dataViewId });
 
         expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
@@ -239,7 +253,7 @@ describe('Discover url generator', () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
           useHash: true,
-          indexPatternId: dataViewId,
+          dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(false);
@@ -250,7 +264,7 @@ describe('Discover url generator', () => {
       test('when using default, does not set data view ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
-          indexPatternId: dataViewId,
+          dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(false);
@@ -260,7 +274,7 @@ describe('Discover url generator', () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
           useHash: false,
-          indexPatternId: dataViewId,
+          dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(true);

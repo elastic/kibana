@@ -9,16 +9,17 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDocByPlugin(
+export async function writeDeprecationDocByPlugin(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   log: ToolingLog
-): void {
+): Promise<void> {
   const tableMdx = Object.keys(deprecationsByPlugin)
     .sort()
     .map((key) => {
@@ -34,7 +35,7 @@ export function writeDeprecationDocByPlugin(
 
       return `
     ## ${key}
-    
+
     | Deprecated API | Reference location(s) | Remove By |
     | ---------------|-----------|-----------|
     ${Object.keys(groupedDeprecationReferences)
@@ -53,7 +54,7 @@ export function writeDeprecationDocByPlugin(
               (ref) =>
                 `[${ref.path.substr(
                   ref.path.lastIndexOf(Path.sep) + 1
-                )}](https://github.com/elastic/kibana/tree/master/${
+                )}](https://github.com/elastic/kibana/tree/main/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
@@ -70,18 +71,18 @@ export function writeDeprecationDocByPlugin(
 
   const mdx = dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsDeprecationsByPlugin
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
-summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
+description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
-${tableMdx}   
+${tableMdx}
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_plugin.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'deprecations_by_plugin.mdx'), mdx);
 }

@@ -173,6 +173,7 @@ export async function buildContextMenuForActions({
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
+      disabled: action.disabled,
     });
   });
   await Promise.all(promises);

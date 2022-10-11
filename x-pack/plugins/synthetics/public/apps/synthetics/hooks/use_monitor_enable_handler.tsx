@@ -6,10 +6,15 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-import React, { useEffect, useState } from 'react';
-import { ConfigKey, EncryptedSyntheticsMonitor } from '../components/monitors_page/overview/types';
-import { fetchUpsertMonitor } from '../state';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { ConfigKey } from '../components/monitors_page/overview/types';
+import {
+  clearMonitorUpsertStatus,
+  fetchUpsertMonitorAction,
+  selectMonitorUpsertStatuses,
+} from '../state';
 
 export interface EnableStateMonitorLabels {
   failureLabel: string;
@@ -19,41 +24,63 @@ export interface EnableStateMonitorLabels {
 
 export function useMonitorEnableHandler({
   id,
-  monitor,
   reloadPage,
   labels,
 }: {
   id: string;
-  monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
   labels?: EnableStateMonitorLabels;
 }) {
+  const dispatch = useDispatch();
+  const upsertStatuses = useSelector(selectMonitorUpsertStatuses);
+  const status = upsertStatuses[id]?.status;
+  const savedObjEnabledState = upsertStatuses[id]?.enabled;
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
-  const { status } = useFetcher(() => {
-    if (isEnabled !== null) {
-      return fetchUpsertMonitor({ id, monitor: { ...monitor, [ConfigKey.ENABLED]: isEnabled } });
-    }
-  }, [isEnabled]);
+  const updateMonitorEnabledState = useCallback(
+    (enabled: boolean) => {
+      dispatch(
+        fetchUpsertMonitorAction({
+          id,
+          monitor: { [ConfigKey.ENABLED]: enabled },
+        })
+      );
+    },
+    [dispatch, id]
+  );
+
   const { notifications } = useKibana();
+
   useEffect(() => {
-    if (status === FETCH_STATUS.FAILURE && labels) {
+    if (status === FETCH_STATUS.SUCCESS && labels) {
+      notifications.toasts.success({
+        title: (
+          <p data-test-subj="uptimeMonitorEnabledUpdateSuccess">
+            {savedObjEnabledState ? labels.enabledSuccessLabel : labels.disabledSuccessLabel}
+          </p>
+        ),
+        toastLifeTimeMs: 3000,
+      });
+      setIsEnabled(!!savedObjEnabledState);
+      dispatch(clearMonitorUpsertStatus(id));
+      reloadPage();
+    } else if (status === FETCH_STATUS.FAILURE && labels) {
       notifications.toasts.danger({
         title: <p data-test-subj="uptimeMonitorEnabledUpdateFailure">{labels.failureLabel}</p>,
         toastLifeTimeMs: 3000,
       });
       setIsEnabled(null);
-    } else if (status === FETCH_STATUS.SUCCESS && labels) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateSuccess">
-            {isEnabled ? labels.enabledSuccessLabel : labels.disabledSuccessLabel}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      reloadPage();
+      dispatch(clearMonitorUpsertStatus(id));
     }
-  }, [status, labels]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    status,
+    labels,
+    notifications.toasts,
+    isEnabled,
+    dispatch,
+    id,
+    reloadPage,
+    savedObjEnabledState,
+  ]);
 
-  return { isEnabled, setIsEnabled, status };
+  return { isEnabled, updateMonitorEnabledState, status };
 }

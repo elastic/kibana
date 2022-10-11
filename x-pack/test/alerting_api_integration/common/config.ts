@@ -26,6 +26,7 @@ interface CreateTestConfigOptions {
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
   testFiles?: string[];
+  useDedicatedTaskRunner: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -69,6 +70,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
+    useDedicatedTaskRunner,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -163,6 +165,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        useDedicatedTaskRunner,
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
@@ -175,6 +178,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          '--xpack.alerting.rules.run.alerts.max=20',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,

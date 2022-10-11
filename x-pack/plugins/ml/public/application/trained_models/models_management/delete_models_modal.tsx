@@ -58,6 +58,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ modelIds, onClos
       );
     }
     onClose(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelIds, trainedModelsApiService]);
 
   return canDeleteModel ? (

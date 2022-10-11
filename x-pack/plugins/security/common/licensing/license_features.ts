@@ -65,6 +65,11 @@ export interface SecurityLicenseFeatures {
   readonly allowSubFeaturePrivileges: boolean;
 
   /**
+   * Indicates whether we allow user profile collaboration features (suggest and privileges checks APIs).
+   */
+  readonly allowUserProfileCollaboration: boolean;
+
+  /**
    * Describes the layout of the login form if it's displayed.
    */
   readonly layout?: LoginLayout;

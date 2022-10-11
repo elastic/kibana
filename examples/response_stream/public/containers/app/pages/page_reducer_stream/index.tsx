@@ -45,7 +45,7 @@ export const PageReducerStream: FC = () => {
 
   const [simulateErrors, setSimulateErrors] = useState(false);
 
-  const { dispatch, start, cancel, data, error, isCancelled, isRunning } = useFetchStream<
+  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream<
     ApiReducerStream,
     typeof basePath
   >(
@@ -65,13 +65,15 @@ export const PageReducerStream: FC = () => {
     }
   };
 
+  // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
   // This is for low level errors on the stream/HTTP level.
   useEffect(() => {
-    if (error) {
-      notifications.toasts.addDanger(error);
+    if (errors.length > 0) {
+      notifications.toasts.addDanger(errors[errors.length - 1]);
     }
-  }, [error, notifications.toasts]);
+  }, [errors, notifications.toasts]);
 
+  // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
   // This is for errors on the application level
   useEffect(() => {
     if (data.errors.length > 0) {

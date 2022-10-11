@@ -51,7 +51,6 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -82,7 +81,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useNetworkDns({
-    docValueFields: docValueFields ?? [],
     endDate,
     filterQuery,
     id: queryId,
@@ -109,7 +107,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       <MatrixHistogram
         id={HISTOGRAM_ID}
         isPtrIncluded={isPtrIncluded}
-        docValueFields={docValueFields}
         endDate={endDate}
         filterQuery={filterQuery}
         indexNames={indexNames}

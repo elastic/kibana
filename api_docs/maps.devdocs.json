@@ -11,6 +11,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -24,6 +25,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -37,6 +39,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -54,6 +57,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -69,6 +73,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -85,6 +90,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -100,6 +106,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -115,6 +122,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -130,6 +138,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -145,6 +154,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -202,10 +212,18 @@
           "MapByValueInput",
           ", ",
           "MapByReferenceInput",
-          ">"
+          ">,",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.FilterableEmbeddable",
+            "text": "FilterableEmbeddable"
+          }
         ],
         "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -215,7 +233,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -225,7 +244,8 @@
             "label": "deferEmbeddableLoad",
             "description": [],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -239,6 +259,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -252,6 +273,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -272,6 +294,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -309,6 +332,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -326,6 +350,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -346,6 +371,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -361,6 +387,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -380,6 +407,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -399,6 +427,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -416,6 +445,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -435,6 +465,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -450,6 +481,43 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | undefined>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -465,6 +533,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -482,6 +551,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -495,6 +565,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -514,6 +585,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -527,6 +599,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -544,6 +617,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -557,6 +631,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -574,6 +649,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -587,6 +663,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -611,6 +688,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -626,6 +704,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -641,6 +720,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -656,6 +736,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -671,6 +752,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -686,6 +768,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -699,6 +782,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -713,6 +797,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -727,6 +812,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -746,6 +832,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -761,6 +848,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -776,6 +864,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -786,6 +875,7 @@
                 "description": [],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "maps",
@@ -795,7 +885,8 @@
                     "label": "forceRefresh",
                     "description": [],
                     "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -814,6 +905,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -827,6 +919,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -846,6 +939,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -859,6 +953,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -884,6 +979,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -904,6 +1000,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -929,6 +1026,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -948,6 +1046,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -967,6 +1066,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -980,6 +1080,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -994,6 +1095,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1008,6 +1110,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1027,6 +1130,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1041,6 +1145,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1055,6 +1160,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1080,6 +1186,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1103,6 +1210,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1114,10 +1222,12 @@
             "label": "_setMapExtentFilter",
             "description": [],
             "signature": [
-              "(() => void) & _.Cancelable"
+              "(() => void) & ",
+              "Cancelable"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -1133,6 +1243,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1148,6 +1259,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1163,6 +1275,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1178,6 +1291,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1191,6 +1305,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1205,6 +1320,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1219,6 +1335,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1236,6 +1353,7 @@
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1254,6 +1372,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -1263,7 +1382,8 @@
             "label": "applyGlobalQuery",
             "description": [],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1273,7 +1393,8 @@
             "label": "applyGlobalTime",
             "description": [],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1287,7 +1408,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1301,7 +1423,26 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.embeddableSearchContext",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableSearchContext",
+            "description": [],
+            "signature": [
+              "{ query?: ",
+              "Query",
+              " | undefined; filters: ",
+              "Filter",
+              "[]; } | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1315,7 +1456,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1328,7 +1470,8 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1342,7 +1485,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1352,7 +1496,8 @@
             "label": "isFeatureEditorOpenForLayer",
             "description": [],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1366,7 +1511,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1380,6 +1526,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -1389,7 +1536,8 @@
             "label": "layerId",
             "description": [],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1399,7 +1547,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1409,7 +1558,8 @@
             "label": "displayName",
             "description": [],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1423,6 +1573,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -1435,7 +1586,8 @@
               "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1449,7 +1601,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1463,6 +1616,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -1477,7 +1631,8 @@
               "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1487,7 +1642,8 @@
             "label": "featureId",
             "description": [],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1500,7 +1656,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1522,6 +1679,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1545,6 +1703,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1560,6 +1719,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1574,7 +1734,8 @@
               "maplibregl.GeoJSONFeature & { layer: Omit<maplibregl.LayerSpecification, \"source\"> & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -1588,6 +1749,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1603,6 +1765,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -1616,6 +1779,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1631,6 +1795,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1646,6 +1811,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1661,6 +1827,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1676,6 +1843,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1691,6 +1859,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1714,6 +1883,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1727,6 +1897,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1751,6 +1922,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1773,6 +1945,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1788,6 +1961,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1805,6 +1979,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1822,6 +1997,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1835,6 +2011,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1854,6 +2031,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1867,6 +2045,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1884,6 +2063,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1899,6 +2079,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1922,6 +2103,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1941,6 +2123,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1960,6 +2143,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -1973,6 +2157,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1990,7 +2175,151 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.IRasterSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "IRasterSource",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.IRasterSource",
+            "text": "IRasterSource"
+          },
+          " extends ",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.ITMSSource",
+            "text": "ITMSSource"
+          }
+        ],
+        "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IRasterSource.canSkipSourceUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "canSkipSourceUpdate",
+            "description": [],
+            "signature": [
+              "(dataRequest: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.DataRequest",
+                "text": "DataRequest"
+              },
+              ", nextRequestMeta: ",
+              "DataRequestMeta",
+              ") => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.canSkipSourceUpdate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataRequest",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.DataRequest",
+                    "text": "DataRequest"
+                  }
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.canSkipSourceUpdate.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "nextRequestMeta",
+                "description": [],
+                "signature": [
+                  "DataRequestMeta"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IRasterSource.isSourceStale",
+            "type": "Function",
+            "tags": [],
+            "label": "isSourceStale",
+            "description": [],
+            "signature": [
+              "(mbSource: maplibregl.RasterTileSource, sourceData: ",
+              "RasterTileSourceData",
+              ") => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.isSourceStale.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "mbSource",
+                "description": [],
+                "signature": [
+                  "maplibregl.RasterTileSource"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.isSourceStale.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "sourceData",
+                "description": [],
+                "signature": [
+                  "RasterTileSourceData"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -2016,6 +2345,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -2031,6 +2361,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2044,6 +2375,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2061,6 +2393,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -2074,6 +2407,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2089,6 +2423,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2104,6 +2439,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2119,6 +2455,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2134,6 +2471,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2151,6 +2489,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2177,6 +2516,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -2190,6 +2530,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2213,6 +2554,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2226,6 +2568,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2253,6 +2596,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2272,6 +2616,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2286,6 +2631,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2327,6 +2673,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2340,6 +2687,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2360,6 +2708,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2374,6 +2723,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2388,6 +2738,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2408,6 +2759,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2433,6 +2785,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2456,6 +2809,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2469,6 +2823,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2494,6 +2849,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2509,6 +2865,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2524,6 +2881,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2539,6 +2897,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2554,6 +2913,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2576,6 +2936,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2586,6 +2947,7 @@
                 "description": [],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "maps",
@@ -2595,7 +2957,8 @@
                     "label": "fieldName",
                     "description": [],
                     "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -2614,6 +2977,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2637,6 +3001,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2652,6 +3017,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2682,6 +3048,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2702,6 +3069,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -2719,6 +3087,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2734,6 +3103,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2749,6 +3119,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2764,6 +3135,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2777,6 +3149,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2791,6 +3164,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2808,6 +3182,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2821,6 +3196,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2854,6 +3230,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -2873,6 +3250,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2890,6 +3268,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -2899,7 +3278,8 @@
             "label": "index",
             "description": [],
             "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -2912,7 +3292,8 @@
               "string | number"
             ],
             "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -2922,7 +3303,8 @@
             "label": "path",
             "description": [],
             "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2936,6 +3318,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -2950,7 +3333,8 @@
               "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -2964,6 +3348,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2985,7 +3370,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -3007,6 +3393,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3030,6 +3417,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3045,6 +3433,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -3058,6 +3447,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3071,7 +3461,8 @@
             "label": "isLocked",
             "description": [],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -3093,6 +3484,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -3103,6 +3495,7 @@
                 "description": [],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "maps",
@@ -3112,7 +3505,8 @@
                     "label": "layerId",
                     "description": [],
                     "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "maps",
@@ -3125,7 +3519,8 @@
                       "{ [name: string]: any; } | null"
                     ],
                     "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -3144,6 +3539,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -3154,6 +3550,7 @@
                 "description": [],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "maps",
@@ -3163,7 +3560,8 @@
                     "label": "layerId",
                     "description": [],
                     "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "maps",
@@ -3176,7 +3574,8 @@
                       "string | number | undefined"
                     ],
                     "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -3197,6 +3596,7 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "maps",
@@ -3210,6 +3610,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3224,6 +3625,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3238,6 +3640,7 @@
                 ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3255,6 +3658,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -3267,7 +3671,8 @@
               "(string | number)[] | undefined"
             ],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -3280,7 +3685,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3294,6 +3700,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "maps",
@@ -3306,7 +3713,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -3316,7 +3724,8 @@
             "label": "areResultsTrimmed",
             "description": [],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "maps",
@@ -3329,7 +3738,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3349,6 +3759,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3363,6 +3774,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3377,6 +3789,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3407,6 +3820,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3421,6 +3835,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3437,6 +3852,7 @@
         ],
         "path": "x-pack/plugins/maps/public/embeddable/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3466,6 +3882,7 @@
         ],
         "path": "x-pack/plugins/maps/public/embeddable/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3480,6 +3897,7 @@
         ],
         "path": "x-pack/plugins/maps/public/locators.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3502,6 +3920,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3522,6 +3941,7 @@
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3535,6 +3955,7 @@
       "description": [],
       "path": "x-pack/plugins/maps/public/api/setup_api.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "maps",
@@ -3556,6 +3977,7 @@
           ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "maps",
@@ -3575,6 +3997,7 @@
               ],
               "path": "x-pack/plugins/maps/public/api/setup_api.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -3594,6 +4017,7 @@
           ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "maps",
@@ -3607,6 +4031,7 @@
               ],
               "path": "x-pack/plugins/maps/public/api/setup_api.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -3625,6 +4050,7 @@
       "description": [],
       "path": "x-pack/plugins/maps/public/api/start_api.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "maps",
@@ -3663,7 +4089,8 @@
             ">; }"
           ],
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "maps",
@@ -3693,6 +4120,7 @@
           ],
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "maps",
@@ -3712,6 +4140,7 @@
               ],
               "path": "x-pack/plugins/maps/public/api/start_api.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -3744,6 +4173,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3755,6 +4185,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3766,6 +4197,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3777,6 +4209,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3788,6 +4221,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3799,6 +4233,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3810,6 +4245,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3821,6 +4257,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3832,6 +4269,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3843,6 +4281,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3854,6 +4293,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3865,6 +4305,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3876,6 +4317,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3887,6 +4329,7 @@
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3903,6 +4346,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3917,6 +4361,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3932,6 +4377,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/source_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3945,7 +4391,7 @@
           "AbstractSourceDescriptor",
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
-          "[]; } & { indexPatternTitle?: string | undefined; term: string; whereQuery?: ",
+          "[]; } & { term: string; whereQuery?: ",
           "Query",
           " | undefined; size?: number | undefined; type: ",
           {
@@ -3959,6 +4405,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/source_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3975,6 +4422,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3988,7 +4436,8 @@
               "string | number | boolean | string[] | null | undefined"
             ],
             "path": "x-pack/plugins/maps/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4025,6 +4474,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4039,6 +4489,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4053,6 +4504,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4067,6 +4519,7 @@
         ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4089,6 +4542,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/map_descriptor.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4103,6 +4557,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/map_descriptor.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4154,10 +4609,11 @@
             "section": "def-common.VectorStyleDescriptor",
             "text": "VectorStyleDescriptor"
           },
-          "; }"
+          "; disableTooltips?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4175,6 +4631,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4194,6 +4651,7 @@
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/style_property_descriptor_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

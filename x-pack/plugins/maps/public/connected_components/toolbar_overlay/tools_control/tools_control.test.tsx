@@ -12,14 +12,6 @@ import { ToolsControl } from './tools_control';
 const defaultProps = {
   initiateDraw: () => {},
   cancelDraw: () => {},
-  geoFields: [
-    {
-      geoFieldName: 'location',
-      geoFieldType: 'geo_point',
-      indexPatternTitle: 'my_index',
-      indexPatternId: '1',
-    },
-  ],
   filterModeActive: false,
   activateDrawFilterMode: () => {},
   deactivateDrawMode: () => {},

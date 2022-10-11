@@ -12,7 +12,7 @@ import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 import { useDebouncedValue } from '../../shared_components';
 
-const supportedFormats: Record<string, { title: string }> = {
+const supportedFormats: Record<string, { title: string; defaultDecimals?: number }> = {
   number: {
     title: i18n.translate('xpack.lens.indexPattern.numberFormatLabel', {
       defaultMessage: 'Number',
@@ -27,6 +27,12 @@ const supportedFormats: Record<string, { title: string }> = {
     title: i18n.translate('xpack.lens.indexPattern.bytesFormatLabel', {
       defaultMessage: 'Bytes (1024)',
     }),
+  },
+  bits: {
+    title: i18n.translate('xpack.lens.indexPattern.bitsFormatLabel', {
+      defaultMessage: 'Bits (1000)',
+    }),
+    defaultDecimals: 0,
   },
 };
 
@@ -51,9 +57,14 @@ const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
   defaultMessage: 'Suffix',
 });
 
+export interface FormatSelectorOptions {
+  disableExtraOptions?: boolean;
+}
+
 interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
+  options?: FormatSelectorOptions;
 }
 
 const RANGE_MIN = 0;
@@ -113,10 +124,13 @@ export function FormatSelector(props: FormatSelectorProps) {
         onChange();
         return;
       }
+      const id = choices[0].value;
+      const defaultDecimals = supportedFormats[id].defaultDecimals;
       onChange({
         id: choices[0].value,
-        params: { decimals },
+        params: { decimals: defaultDecimals ?? decimals },
       });
+      setDecimals(defaultDecimals ?? decimals);
     },
     [onChange, decimals]
   );
@@ -149,9 +163,9 @@ export function FormatSelector(props: FormatSelectorProps) {
             selectedOptions={currentOption}
             onChange={onChangeWrapped}
           />
-          {currentFormat ? (
+          {currentFormat && !props.options?.disableExtraOptions ? (
             <>
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <EuiRange
                 showInput="inputWithPopover"
                 value={decimals}
@@ -175,7 +189,8 @@ export function FormatSelector(props: FormatSelectorProps) {
                 prepend={decimalsLabel}
                 aria-label={decimalsLabel}
               />
-              <EuiSpacer size="xs" />
+
+              <EuiSpacer size="s" />
               <EuiFieldText
                 value={suffix}
                 onChange={(e) => {

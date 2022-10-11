@@ -7,10 +7,20 @@ PKG_REQUIRE_NAME = "@kbn/performance-testing-dataset-extractor"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -56,8 +66,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-dev-cli-errors:npm_module_types",
   "//packages/kbn-dev-cli-runner:npm_module_types",
-  "//packages/kbn-test:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
+  "//packages/kbn-journeys:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@types/node",
   "@npm//@types/jest",
@@ -87,7 +97,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

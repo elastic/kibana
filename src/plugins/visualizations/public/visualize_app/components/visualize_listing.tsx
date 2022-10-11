@@ -18,7 +18,9 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation } from 'react-router-dom';
 
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { useKibana, TableListView, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { TableListView } from '@kbn/content-management-table-list';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
@@ -27,13 +29,52 @@ import {
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from '../..';
+import type { VisualizationListItem } from '../..';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
-import { getTableColumns, getNoItemsMessage } from '../utils';
+import { getNoItemsMessage, getCustomColumn } from '../utils';
+import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
+import { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+
+interface VisualizeUserContent extends VisualizationListItem, UserContentCommonSchema {
+  type: string;
+  attributes: {
+    title: string;
+    description?: string;
+    editApp: string;
+    editUrl: string;
+    error?: string;
+  };
+}
+
+const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
+  return {
+    id: savedObject.id as string,
+    updatedAt: savedObject.updatedAt as string,
+    references: savedObject.references as Array<{ id: string; type: string; name: string }>,
+    type: savedObject.savedObjectType as string,
+    editUrl: savedObject.editUrl as string,
+    editApp: savedObject.editApp as string,
+    icon: savedObject.icon as string,
+    stage: savedObject.stage as VisualizationStage,
+    savedObjectType: savedObject.savedObjectType as string,
+    typeTitle: savedObject.typeTitle as string,
+    title: (savedObject.title as string) ?? '',
+    error: (savedObject.error as string) ?? '',
+    attributes: {
+      title: (savedObject.title as string) ?? '',
+      description: savedObject.description as string,
+      editApp: savedObject.editApp as string,
+      editUrl: savedObject.editUrl as string,
+      error: savedObject.error as string,
+    },
+  };
+};
 
 export const VisualizeListing = () => {
   const {
     services: {
+      core,
       application,
       executionContext,
       chrome,
@@ -41,12 +82,10 @@ export const VisualizeListing = () => {
       toastNotifications,
       stateTransferService,
       savedObjects,
-      savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
       dashboardCapabilities,
       kbnUrlStateStorage,
-      theme,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -95,7 +134,7 @@ export const VisualizeListing = () => {
   }, []);
 
   const editItem = useCallback(
-    ({ editUrl, editApp }) => {
+    ({ attributes: { editUrl, editApp } }: VisualizeUserContent) => {
       if (editApp) {
         application.navigateToApp(editApp, { path: editUrl });
         return;
@@ -107,22 +146,9 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(
-    () => getTableColumns(application, kbnUrlStateStorage, savedObjectsTagging),
-    [application, kbnUrlStateStorage, savedObjectsTagging]
-  );
 
   const fetchItems = useCallback(
-    (filter) => {
-      let searchTerm = filter;
-      let references: SavedObjectsFindOptionsReference[] | undefined;
-
-      if (savedObjectsTagging) {
-        const parsedQuery = savedObjectsTagging.ui.parseSearchQuery(filter, { useName: true });
-        searchTerm = parsedQuery.searchTerm;
-        references = parsedQuery.tagReferences;
-      }
-
+    (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(
         savedObjects.client,
@@ -132,10 +158,12 @@ export const VisualizeListing = () => {
         references
       ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
         total,
-        hits: hits.filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental'),
+        hits: hits
+          .filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental')
+          .map(toTableListViewSavedObject),
       }));
     },
-    [listingLimit, uiSettings, savedObjectsTagging, savedObjects.client]
+    [listingLimit, uiSettings, savedObjects.client]
   );
 
   const deleteItems = useCallback(
@@ -152,12 +180,6 @@ export const VisualizeListing = () => {
     },
     [savedObjects.client, toastNotifications]
   );
-
-  const searchFilters = useMemo(() => {
-    return savedObjectsTagging
-      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-      : [];
-  }, [savedObjectsTagging]);
 
   const calloutMessage = (
     <FormattedMessage
@@ -184,22 +206,19 @@ export const VisualizeListing = () => {
   );
 
   return (
-    <TableListView
+    <TableListView<VisualizeUserContent>
+      id="vis"
       headingId="visualizeListingHeading"
       // we allow users to create visualizations even if they can't save them
       // for data exploration purposes
       createItem={createNewVis}
-      tableCaption={i18n.translate('visualizations.listing.table.listTitle', {
-        defaultMessage: 'Visualize Library',
-      })}
       findItems={fetchItems}
       deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
       editItem={visualizeCapabilities.save ? editItem : undefined}
-      tableColumns={tableColumns}
+      customTableColumn={getCustomColumn()}
       listingLimit={listingLimit}
       initialPageSize={initialPageSize}
       initialFilter={''}
-      rowHeader="title"
       emptyPrompt={noItemsFragment}
       entityName={i18n.translate('visualizations.listing.table.entityName', {
         defaultMessage: 'visualization',
@@ -210,10 +229,9 @@ export const VisualizeListing = () => {
       tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
-      toastNotifications={toastNotifications}
-      searchFilters={searchFilters}
-      theme={theme}
-      application={application}
+      getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
+        getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+      }
     >
       {dashboardCapabilities.createNew && (
         <>

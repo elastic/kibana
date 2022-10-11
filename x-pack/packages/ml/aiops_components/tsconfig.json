@@ -4,7 +4,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": "src",
     "stripInternal": false,
     "types": [
       "@types/d3-brush",
@@ -13,10 +12,12 @@
       "@types/d3-transition",
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.tsx",
   ]
 }

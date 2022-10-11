@@ -87,9 +87,15 @@ function getIndexRecordActionType() {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
-      config: configSchema,
-      secrets: secretsSchema,
+      params: {
+        schema: paramsSchema,
+      },
+      config: {
+        schema: configSchema,
+      },
+      secrets: {
+        schema: secretsSchema,
+      },
     },
     async executor({ config, secrets, params, services, actionId }) {
       await services.scopedClusterClient.index({
@@ -128,9 +134,15 @@ function getDelayedActionType() {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
-      config: configSchema,
-      secrets: secretsSchema,
+      params: {
+        schema: paramsSchema,
+      },
+      config: {
+        schema: configSchema,
+      },
+      secrets: {
+        schema: secretsSchema,
+      },
     },
     async executor({ config, secrets, params, services, actionId }) {
       await new Promise((resolve) => {
@@ -156,7 +168,9 @@ function getFailingActionType() {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, secrets, params, services }) {
       await services.scopedClusterClient.index({
@@ -190,7 +204,9 @@ function getRateLimitedActionType() {
     supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, params, services }) {
       await services.scopedClusterClient.index({
@@ -227,7 +243,9 @@ function getNoAttemptsRateLimitedActionType() {
     supportedFeatureIds: ['alerting'],
     maxAttempts: 0,
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, params, services }) {
       await services.scopedClusterClient.index({
@@ -266,7 +284,9 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ params, services, actionId }) {
       // Call cluster

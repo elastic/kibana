@@ -143,7 +143,20 @@ export function SyntheticsIntegrationPageProvider({
     async confirmAndSave(isEditPage?: boolean) {
       await this.ensureIsOnPackagePage();
       const saveButton = await this.findSaveButton(isEditPage);
-      saveButton.click();
+      await saveButton.click();
+      await this.maybeForceInstall();
+    },
+
+    /**
+     * If the force install modal opens, click force install
+     */
+    async maybeForceInstall() {
+      const confirmForceInstallModalOpen = await testSubjects.exists('confirmForceInstallModal');
+
+      if (confirmForceInstallModalOpen) {
+        const forceInstallBtn = await testSubjects.find('confirmModalConfirmButton');
+        return forceInstallBtn.click();
+      }
     },
 
     /**
@@ -316,6 +329,8 @@ export function SyntheticsIntegrationPageProvider({
         await testSubjects.click('syntheticsSourceTab__inline');
         await this.fillCodeEditor(inlineScript);
         return;
+      } else {
+        await testSubjects.click('syntheticsSourceTab__zipUrl');
       }
       await this.fillTextInputByTestSubj('syntheticsBrowserZipUrl', zipUrl);
       await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlFolder', folder);

@@ -60,6 +60,13 @@ export const ALERTS = (totalAlerts: number) =>
 export const ALERTS_TEXT = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
   defaultMessage: 'Alerts',
 });
+export const ALERTS_BY_SEVERITY_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsBySeverity',
+  {
+    defaultMessage: 'Alerts by Severity',
+  }
+);
+
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
@@ -153,6 +160,24 @@ export const OPEN_RULE_DETAIL_TOOLTIP = i18n.translate(
     defaultMessage: 'Open rule detail',
   }
 );
+export const OPEN_CASE_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openCaseDetailTooltip',
+  {
+    defaultMessage: 'Open case detail',
+  }
+);
+export const OPEN_HOST_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openHostDetailTooltip',
+  {
+    defaultMessage: 'Open host detail',
+  }
+);
+export const OPEN_USER_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openUserDetailTooltip',
+  {
+    defaultMessage: 'Open user detail',
+  }
+);
 
 export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionResponse.openAllAlertsButton',
@@ -228,5 +253,11 @@ export const USER_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionResponse.userSectionTooltip',
   {
     defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
+  }
+);
+export const INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.investigateInTimeline',
+  {
+    defaultMessage: 'Investigate in Timeline',
   }
 );

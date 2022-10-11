@@ -6,13 +6,13 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function lookupServices({
@@ -40,6 +40,7 @@ export async function lookupServices({
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

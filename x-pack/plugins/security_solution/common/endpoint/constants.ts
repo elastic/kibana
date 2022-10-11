@@ -41,6 +41,11 @@ export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default'
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
+// File storage indexes supporting endpoint Upload/download
+export const FILE_STORAGE_METADATA_INDEX = '.fleet-files';
+export const FILE_STORAGE_DATA_INDEX = '.fleet-file_data';
+
+// Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;
@@ -75,11 +80,24 @@ export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 
 /**
- * The list of capabilities, reported by the endpoint in the metadata document, that are
- * needed in order for the Responder UI to be accessible
+ * The list of possible capabilities, reported by the endpoint in the metadata document
  */
 export const RESPONDER_CAPABILITIES = [
+  'isolation',
   'kill_process',
   'suspend_process',
   'running_processes',
 ] as const;
+
+export type ResponderCapabilities = typeof RESPONDER_CAPABILITIES[number];
+
+/** The list of possible responder command names **/
+export const RESPONDER_COMMANDS = [
+  'isolate',
+  'release',
+  'kill-process',
+  'suspend-process',
+  'processes',
+] as const;
+
+export type ResponderCommands = typeof RESPONDER_COMMANDS[number];

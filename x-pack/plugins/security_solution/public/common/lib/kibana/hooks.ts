@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import type { Capabilities, NavigateToAppOptions } from '@kbn/core/public';
 import type { CasesPermissions } from '@kbn/cases-plugin/common/ui';

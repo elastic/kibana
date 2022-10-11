@@ -19,20 +19,17 @@ export const getCasesLinkItems = (): LinkItem => {
     basePath: CASES_PATH,
     extend: {
       [SecurityPageName.case]: {
-        globalNavEnabled: true,
-        globalNavOrder: 5,
+        globalNavPosition: 5,
         capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
       },
       [SecurityPageName.caseConfigure]: {
         capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
         licenseType: 'gold',
         sideNavDisabled: true,
-        hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
         capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
         sideNavDisabled: true,
-        hideTimeline: true,
       },
     },
   });

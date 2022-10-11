@@ -4,6 +4,7 @@ The Embeddables Plugin provides an opportunity to expose reusable interactive wi
 ## Capabilities
 - Framework-agnostic API.
 - Out-of-the-box React support.
+- Integration with Redux.
 - Integration with the [UI Actions](https://github.com/elastic/kibana/tree/HEAD/src/plugins/ui_actions) plugin.
 - Hierarchical structure to enclose multiple widgets.
 - Error handling.
@@ -353,6 +354,251 @@ The plugin provides a set of ready-to-use React components that abstract renderi
 
 Apart from the React components, there is also a way to construct an embeddable object using `useEmbeddableFactory` hook.
 This React hook takes care of producing an embeddable and updating its input state if passed state changes.
+
+### Redux
+The plugin provides an adapter for Redux over the embeddable state.
+It uses the Redux Toolkit library underneath and works as a decorator on top of the [`configureStore`](https://redux-toolkit.js.org/api/configureStore) function.
+In other words, it provides a way to use the full power of the library together with the embeddable plugin features.
+
+The adapter implements a bi-directional sync mechanism between the embeddable instance and the Redux state.
+To perform state mutations, the plugin also exposes a pre-defined state of the actions that can be extended by an additional reducer.
+
+Here is an example of initializing a Redux store:
+```tsx
+import React from 'react';
+import { render } from 'react-dom';
+import { connect, Provider } from 'react-redux';
+import { Embeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { createStore, State } from '@kbn/embeddable-plugin/public/store';
+import { HelloWorldComponent } from './hello_world_component';
+
+export const HELLO_WORLD = 'HELLO_WORLD';
+
+export class HelloWorld extends Embeddable {
+  readonly type = HELLO_WORLD;
+
+  readonly store = createStore(this);
+
+  reload() {}
+
+  render(node: HTMLElement) {
+    const Component = connect((state: State<HelloWorld>) => ({ title: state.input.title }))(
+      HelloWorldComponent
+    );
+
+    render(
+      <Provider store={this.store}>
+        <Component />
+      </Provider>,
+      node
+    );
+  }
+}
+```
+
+Then inside the embedded component, it is possible to use the [`useSelector`](https://react-redux.js.org/api/hooks#useselector) and [`useDispatch`](https://react-redux.js.org/api/hooks#usedispatch) hooks.
+```tsx
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { actions, State } from '@kbn/embeddable-plugin/public/store';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { HelloWorld } from './hello_world';
+
+interface HelloWorldComponentProps {
+  title?: string;
+}
+
+export function HelloWorldComponent({ title }: HelloWorldComponentProps) {
+  const viewMode = useSelector<State<HelloWorld>>(({ input }) => input.viewMode);
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      <h1>{title}</h1>
+      {viewMode === ViewMode.EDIT && (
+        <input
+          type="text"
+          value={title}
+          onChange={({ target }) => dispatch(actions.input.setTitle(target.value))}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+#### Custom Properties
+The `createStore` function provides an option to pass a custom reducer in the second argument.
+That reducer will be merged with the one the embeddable plugin provides.
+That means there is no need to reimplement already existing actions.
+
+```tsx
+import React from 'react';
+import { render } from 'react-dom';
+import { createSlice } from '@reduxjs/toolkit';
+import {
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable
+} from '@kbn/embeddable-plugin/public';
+import { createStore, State } from '@kbn/embeddable-plugin/public/store';
+
+interface HelloWorldInput extends EmbeddableInput {
+  greeting?: string;
+}
+
+interface HelloWorldOutput extends EmbeddableOutput {
+  message?: string;
+}
+
+const input = createSlice({
+  name: 'hello-world-input',
+  initialState: {} as HelloWorldInput,
+  reducers: {
+    setGreeting(state, action: PayloadAction<HelloWorldInput['greeting']>) {
+      state.greeting = action.payload;
+    },
+  },
+});
+
+const output = createSlice({
+  name: 'hello-world-input',
+  initialState: {} as HelloWorldOutput,
+  reducers: {
+    setMessage(state, action: PayloadAction<HelloWorldOutput['message']>) {
+      state.message = action.payload;
+    },
+  },
+});
+
+export const actions = {
+  ...input.actions,
+  ...output.actions,
+};
+
+export class HelloWorld extends Embeddable<HelloWorldInput, HelloWorldOutput> {
+  readonly store = createStore(this, {
+    reducer: {
+      input: input.reducer,
+      output: output.reducer,
+    }
+  });
+
+  // ...
+}
+```
+
+There is a way to provide a custom reducer that will manipulate the root state:
+```typescript
+// ...
+
+import { createAction, createRducer } from '@reduxjs/toolkit';
+
+// ...
+
+const setGreeting = createAction<HelloWorldInput['greeting']>('greeting');
+const setMessage = createAction<HelloWorldOutput['message']>('message');
+const reducer = createReducer({} as State<HelloWorld>, (builder) =>
+  builder
+    .addCase(setGreeting, (state, action) => ({ ...state, input: { ...state.input, greeting: action.payload } }))
+    .addCase(setMessage, (state, action) => ({ ...state, output: { ...state.output, message: action.payload } }))
+);
+
+export const actions = {
+  setGreeting,
+  setMessage,
+};
+
+export class HelloWorld extends Embeddable<HelloWorldInput, HelloWorldOutput> {
+  readonly store = createStore(this, { reducer });
+
+  // ...
+}
+```
+
+#### Custom State
+Sometimes, there is a need to store a custom state next to the embeddable state.
+This can be achieved by passing a custom reducer.
+
+```tsx
+import React from 'react';
+import { render } from 'react-dom';
+import { createSlice } from '@reduxjs/toolkit';
+import { Embeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { createStore, State } from '@kbn/embeddable-plugin/public/store';
+
+interface ComponentState {
+  foo?: string;
+  bar?: string;
+}
+
+export interface HelloWorldState extends State<HelloWorld> {
+  component: ComponentState;
+}
+
+const component = createSlice({
+  name: 'hello-world-component',
+  initialState: {} as ComponentState,
+  reducers: {
+    setFoo(state, action: PayloadAction<ComponentState['foo']>) {
+      state.foo = action.payload;
+    },
+    setBar(state, action: PayloadAction<ComponentState['bar']>) {
+      state.bar = action.payload;
+    },
+  },
+});
+
+export const { actions } = component;
+
+export class HelloWorld extends Embeddable {
+  readonly store = createStore<HelloWorld, HelloWorldState>(this, {
+    preloadedState: {
+      component: {
+        foo: 'bar',
+        bar: 'foo',
+      }
+    },
+    reducer: { component: component.reducer }
+  });
+
+  // ...
+}
+```
+
+#### Typings
+When using the `useSelector` hook, it is convenient to have a `State` type to guarantee type safety and determine types implicitly.
+
+For the state containing input and output substates only, it is enough to use a utility type `State`:
+```typescript
+import { useSelector } from 'react-redux';
+import type { State } from '@kbn/embeddable-plugin/public/store';
+import type { Embeddable } from './some_embeddable';
+
+// ...
+const title = useSelector<State<Embeddable>>((state) => state.input.title);
+```
+
+For the more complex case, the best way would be to define a state type separately:
+```typescript
+import { useSelector } from 'react-redux';
+import type { State } from '@kbn/embeddable-plugin/public/store';
+import type { Embeddable } from './some_embeddable';
+
+interface EmbeddableState extends State<Embeddable> {
+  foo?: string;
+  bar?: Bar;
+}
+
+// ...
+const foo = useSelector<EmbeddableState>((state) => state.foo);
+```
+
+#### Advanced Usage
+In case when there is a need to enhance the produced store in some way (e.g., perform custom serialization or debugging), it is possible to use [parameters](https://redux-toolkit.js.org/api/configureStore#parameters) supported by the `configureStore` function.
+
+In case when custom serialization is needed, that should be done using middleware. The embeddable plugin's `createStore` function does not apply any middleware, so all the synchronization job is done outside the store.
 
 ## API
 Please use automatically generated API reference or generated TypeDoc comments to find the complete documentation.

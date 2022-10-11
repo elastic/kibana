@@ -19,11 +19,13 @@
     "triggersActionsUi",
     "share",
     "unifiedSearch",
-    "dataViews"
+    "dataViews",
+    "advancedSettings"
   ],
   "optionalPlugins": [
     "actions",
     "alerting",
+    "cases",
     "cloud",
     "fleet",
     "home",

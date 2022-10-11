@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { DASHBOARD_CONTAINER } from './test_subjects';
 import { SummarySection } from './dashboard_sections/summary_section';
@@ -30,9 +31,13 @@ export const ComplianceDashboard = () => {
     <CloudPosturePage query={getDashboardData}>
       <EuiPageHeader
         bottomBorder
-        pageTitle={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
-          defaultMessage: 'Cloud Posture',
-        })}
+        pageTitle={
+          <CloudPosturePageTitle
+            title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
+              defaultMessage: 'Cloud Posture',
+            })}
+          />
+        }
       />
       <EuiSpacer />
       <div

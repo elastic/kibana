@@ -7,8 +7,6 @@
 
 import React, { useState } from 'react';
 
-import { generatePath } from 'react-router-dom';
-
 import { useActions, useValues } from 'kea';
 
 import {
@@ -29,9 +27,10 @@ import { i18n } from '@kbn/i18n';
 import { Status } from '../../../../../../common/types/api';
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
 import { ConnectorIndex } from '../../../../../../common/types/indices';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
-import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector_package/update_connector_scheduling_api_logic';
+import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { IngestionStatus } from '../../../types';
@@ -93,8 +92,8 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           </EuiText>
           <EuiSpacer size="s" />
           <EuiButtonTo
-            to={generatePath(SEARCH_INDEX_TAB_PATH, {
-              indexName: index.connector.name,
+            to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+              indexName: index.name,
               tabId: SearchIndexTabId.CONFIGURATION,
             })}
             fill
@@ -178,6 +177,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 setScheduling({ ...scheduling, interval: expression });
                 setHasChanges(true);
               }}
+              frequencyBlockList={['MINUTE']}
             />
           </EuiFlexItem>
           <EuiFlexItem>

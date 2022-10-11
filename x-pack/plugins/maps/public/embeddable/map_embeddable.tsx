@@ -23,6 +23,7 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -35,6 +36,7 @@ import {
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
+  setEmbeddableSearchContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -47,6 +49,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getEmbeddableSearchContext,
   getLayerList,
   getGoto,
   getMapCenter,
@@ -103,7 +106,7 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
@@ -115,6 +118,7 @@ export class MapEmbeddable
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
+  private _prevTimeslice?: [number, number];
   private _prevQuery?: Query;
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
@@ -193,6 +197,21 @@ export class MapEmbeddable
       forceRefresh: false,
     });
 
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
     this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
@@ -248,6 +267,20 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
+  public async getFilters() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext ? embeddableSearchContext.filters : [];
+  }
+
+  public async getQuery() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext?.query;
+  }
+
   public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
@@ -278,6 +311,7 @@ export class MapEmbeddable
   onUpdate() {
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.timeslice, this._prevTimeslice) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
       !compareFilters(this._getFilters(), this._prevFilters) ||
       this._getSearchSessionId() !== this._prevSearchSessionId
@@ -369,6 +403,7 @@ export class MapEmbeddable
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
     const filters = this._getFilters();
     this._prevTimeRange = this.input.timeRange;
+    this._prevTimeslice = this.input.timeslice;
     this._prevQuery = this.input.query;
     this._prevFilters = filters;
     this._prevSearchSessionId = this._getSearchSessionId();
@@ -377,6 +412,9 @@ export class MapEmbeddable
         filters,
         query: this.input.query,
         timeFilters: this.input.timeRange,
+        timeslice: this.input.timeslice
+          ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
+          : undefined,
         forceRefresh,
         searchSessionId: this._getSearchSessionId(),
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())
@@ -735,7 +773,7 @@ export class MapEmbeddable
       ) {
         /**
          * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
-         * This means that the dashboard-loaded event might be fired while a map is still rendering in some cases.
+         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
          * For more details please contact the maps team.
          */
         this.updateOutput({

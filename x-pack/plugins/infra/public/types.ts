@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -27,6 +28,8 @@ import type {
 } from '@kbn/observability-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -62,6 +65,7 @@ export interface InfraClientSetupDeps {
 
 export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   observability: ObservabilityPublicStart;
   spaces: SpacesPluginStart;
@@ -71,6 +75,8 @@ export interface InfraClientStartDeps {
   embeddable?: EmbeddableStart;
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
+  lens: LensPublicStart;
+  storage: IStorageWrapper;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

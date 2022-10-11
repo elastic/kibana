@@ -10,7 +10,7 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 
 import * as is from './is';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
@@ -201,6 +201,25 @@ describe('kuery functions', () => {
           },
         };
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should create a wildcard query for keyword fields', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': 'win*',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);

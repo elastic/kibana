@@ -69,31 +69,54 @@ import {
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
+  ACTIVE_TIMELINE_BOTTOM_BAR,
+  EMPTY_DATA_PROVIDER_AREA,
+  EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
+  GET_TIMELINE_GRID_CELL,
+  HOVER_ACTIONS,
+  TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
+  TIMELINE_SHOWQUERYBARMENU_BUTTON,
+  TIMELINE_LUCENELANGUAGE_BUTTON,
+  TIMELINE_KQLLANGUAGE_BUTTON,
+  TIMELINE_QUERY,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
+import { drag, drop } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
-export const hostExistsQuery = 'host.name: *';
+const hostExistsQuery = 'host.name: *';
 
-export const addDescriptionToTimeline = (description: string) => {
-  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+export const addDescriptionToTimeline = (
+  description: string,
+  modalAlreadyOpen: boolean = false
+) => {
+  if (!modalAlreadyOpen) {
+    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  }
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
-export const addNameToTimeline = (name: string) => {
-  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = false) => {
+  if (!modalAlreadyOpen) {
+    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  }
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
-export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
-  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+export const addNameAndDescriptionToTimeline = (
+  timeline: Timeline,
+  modalAlreadyOpen: boolean = false
+) => {
+  if (!modalAlreadyOpen) {
+    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  }
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
@@ -164,10 +187,20 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
   return cy.get(SAVE_FILTER_BTN).click();
 };
 
+export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
+  cy.get(TIMELINE_SHOWQUERYBARMENU_BUTTON).click();
+  cy.get(TIMELINE_SWITCHQUERYLANGUAGE_BUTTON).click();
+  if (language === 'lucene') {
+    cy.get(TIMELINE_LUCENELANGUAGE_BUTTON).click();
+  } else {
+    cy.get(TIMELINE_KQLLANGUAGE_BUTTON).click();
+  }
+};
+
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.focused().should('have.class', 'euiPopover__panel');
+  cy.get('[data-popover-open]').should('exist');
   cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
@@ -182,6 +215,34 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
   return cy.get(SAVE_DATA_PROVIDER_BTN).click();
+};
+
+export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: number) => {
+  const dragTargetSelector = GET_TIMELINE_GRID_CELL(fieldName);
+  const dragTarget = cy.get(dragTargetSelector);
+  dragTarget.eq(rowNumber).then((currentSubject) => {
+    drag(currentSubject);
+  });
+  let dropTarget: Cypress.Chainable<JQuery<HTMLElement>>;
+
+  cy.get('body').then((body) => {
+    if (body.find(EMPTY_DATA_PROVIDER_AREA).length > 0) {
+      dropTarget = cy.get(EMPTY_DATA_PROVIDER_AREA);
+    } else {
+      dropTarget = cy.get(EMPTY_DROPPABLE_DATA_PROVIDER_GROUP);
+    }
+
+    dropTarget.then((currentEl) => {
+      drop(currentEl);
+    });
+  });
+};
+
+export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
+  const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
+  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
 };
 
 export const addNewCase = () => {
@@ -246,6 +307,10 @@ export const executeTimelineKQL = (query: string) => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
 };
 
+export const executeTimelineSearch = (query: string) => {
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`, { force: true });
+};
+
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
@@ -294,6 +359,10 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
   // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
   // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
   return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
+};
+
+export const openActiveTimeline = () => {
+  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click({ force: true });
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {

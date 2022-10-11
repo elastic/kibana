@@ -6,10 +6,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { IndexPattern, PersistedIndexPatternLayer } from '../../../types';
+import { convertDataViewIntoLensIndexPattern } from '../../../../data_views_service/loader';
+import type { IndexPattern } from '../../../../types';
+import type { PersistedIndexPatternLayer } from '../../../types';
 
 import { insertOrReplaceFormulaColumn } from './parse';
-import { convertDataViewIntoLensIndexPattern } from '../../../loader';
 
 /** @public **/
 export interface FormulaPublicApi {

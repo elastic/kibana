@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -21,10 +22,8 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../common';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
-import type { UserProfileBulkGetParams, UserProfileGetCurrentParams } from './account_management';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
@@ -45,6 +44,7 @@ export interface PluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   share?: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -53,6 +53,7 @@ export interface PluginStartDependencies {
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
+  cloud?: CloudStart;
 }
 
 export class SecurityPlugin
@@ -83,7 +84,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, share }: PluginSetupDependencies
+    { cloud, home, licensing, management, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -108,7 +109,12 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    this.analyticsService.setup({ securityLicense: license });
+    this.analyticsService.setup({
+      analytics: core.analytics,
+      authc: this.authc,
+      cloudId: cloud?.cloudId,
+      securityLicense: license,
+    });
 
     accountManagementApp.create({
       authc: this.authc,
@@ -192,6 +198,9 @@ export class SecurityPlugin
         bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
           this.securityApiClients.userProfiles
         ),
+        suggest: this.securityApiClients.userProfiles.suggest.bind(
+          this.securityApiClients.userProfiles
+        ),
       },
     };
   }
@@ -232,28 +241,7 @@ export interface SecurityPluginStart {
   /**
    * A set of methods to work with Kibana user profiles.
    */
-  userProfiles: {
-    /**
-     * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
-     * users authenticated via authenticating proxies, the `null` value is returned.
-     * @param [params] Get current user profile operation parameters.
-     * @param params.dataPath By default `getCurrent()` returns user information, but does not return any user data. The
-     * optional "dataPath" parameter can be used to return personal data for this user.
-     */
-    getCurrent<D extends UserProfileData>(
-      params?: UserProfileGetCurrentParams
-    ): Promise<UserProfileWithSecurity<D> | null>;
-    /**
-     * Retrieves multiple user profiles by their identifiers.
-     * @param params Bulk get operation parameters.
-     * @param params.uids List of user profile identifiers.
-     * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-     * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
-     */
-    bulkGet<D extends UserProfileData>(
-      params: UserProfileBulkGetParams
-    ): Promise<Array<UserProfile<D>>>;
-  };
+  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
 
   /**
    * Exposes UI components that will be loaded asynchronously.

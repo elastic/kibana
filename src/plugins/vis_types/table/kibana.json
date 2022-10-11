@@ -6,9 +6,12 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data"
+    "fieldFormats",
+    "dataViews",
+    "usageCollection"
   ],
   "requiredBundles": [
+    "data",
     "kibanaUtils",
     "kibanaReact",
     "share",

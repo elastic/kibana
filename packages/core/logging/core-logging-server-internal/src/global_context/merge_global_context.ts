@@ -7,7 +7,7 @@
  */
 
 import { has } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { LogMeta } from '@kbn/logging';
 import { GlobalContext } from './types';
 

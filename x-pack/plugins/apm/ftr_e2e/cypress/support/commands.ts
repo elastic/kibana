@@ -9,22 +9,32 @@ import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
 Cypress.Commands.add('loginAsViewerUser', () => {
-  cy.loginAs({ username: 'viewer', password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme' });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
-  cy.loginAs({ username: 'editor', password: 'changeme' });
+  return cy.loginAs({ username: ApmUsername.editorUser, password: 'changeme' });
+});
+
+Cypress.Commands.add('loginAsMonitorUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmMonitorIndices,
+    password: 'changeme',
+  });
 });
 
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Logging in as ${username}`);
+    // cy.session(username, () => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+    cy.visit('/');
     cy.request({
-      log: false,
+      log: true,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {
@@ -36,13 +46,27 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
+      // });
     });
+    cy.visit('/');
   }
 );
 
+Cypress.Commands.add('getByTestSubj', (selector: string) => {
+  return cy.get(`[data-test-subj="${selector}"]`);
+});
+
 Cypress.Commands.add('changeTimeRange', (value: string) => {
-  cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
+  cy.getByTestSubj('superDatePickerToggleQuickMenuButton').click();
   cy.contains(value).click();
+});
+
+Cypress.Commands.add('visitKibana', (url: string) => {
+  cy.visit(url);
+  cy.getByTestSubj('kbnLoadingMessage').should('exist');
+  cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
+    timeout: 50000,
+  });
 });
 
 Cypress.Commands.add(
@@ -50,13 +74,13 @@ Cypress.Commands.add(
   (start: string, end: string) => {
     const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-    cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
-    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
+    cy.getByTestSubj('superDatePickerAbsoluteDateInput')
       .eq(0)
       .clear({ force: true })
       .type(moment(start).format(format), { force: true });
-    cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
-    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
+    cy.getByTestSubj('superDatePickerAbsoluteDateInput')
       .eq(1)
       .clear({ force: true })
       .type(moment(end).format(format), { force: true });
@@ -80,6 +104,23 @@ Cypress.Commands.add(
       } else {
         expect((interceptions as Interception).request.url).include(value);
       }
+    });
+  }
+);
+
+Cypress.Commands.add(
+  'updateAdvancedSettings',
+  (settings: Record<string, unknown>) => {
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.request({
+      log: false,
+      method: 'POST',
+      url: `${kibanaUrl}/api/kibana/settings`,
+      body: { changes: settings },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
+      auth: { user: 'editor', pass: 'changeme' },
     });
   }
 );

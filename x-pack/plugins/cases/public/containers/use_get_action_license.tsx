@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';
 import { ConnectorTypes } from '../../common/api';
-import { CASE_LICENSE_CACHE_KEY } from './constants';
+import { casesQueriesKeys } from './constants';
 import { ServerError } from '../types';
 
 const MINIMUM_LICENSE_REQUIRED_CONNECTOR = ConnectorTypes.jira;
@@ -18,7 +18,7 @@ const MINIMUM_LICENSE_REQUIRED_CONNECTOR = ConnectorTypes.jira;
 export const useGetActionLicense = () => {
   const toasts = useToasts();
   return useQuery(
-    [CASE_LICENSE_CACHE_KEY],
+    casesQueriesKeys.license(),
     async () => {
       const abortCtrl = new AbortController();
       const response = await getActionLicense(abortCtrl.signal);

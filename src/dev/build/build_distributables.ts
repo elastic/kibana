@@ -20,6 +20,7 @@ export interface BuildOptions {
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
+  buildCanvasShareableRuntime: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
@@ -31,7 +32,7 @@ export interface BuildOptions {
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
-  createExamplePlugins: boolean;
+  buildExamplePlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 
@@ -58,13 +59,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   /**
-   * build example plugins
-   */
-  if (options.createExamplePlugins) {
-    await run(Tasks.BuildKibanaExamplePlugins);
-  }
-
-  /**
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
@@ -74,22 +68,32 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
-    await run(Tasks.BuildXpack);
+    if (options.buildCanvasShareableRuntime) {
+      await run(Tasks.BuildCanvasShareableRuntime);
+    }
     await run(Tasks.BuildKibanaPlatformPlugins);
-    await run(Tasks.TranspileBabel);
+    if (options.buildExamplePlugins) {
+      await run(Tasks.BuildKibanaExamplePlugins);
+    }
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);
-    await run(Tasks.DeleteBazelPackagesFromBuildRoot);
+
+    // Run on all source files
+    // **/packages need to be read
+    // before DeleteBazelPackagesFromBuildRoot
     await run(Tasks.CreateNoticeFile);
+    await run(Tasks.CreateXPackNoticeFile);
+
+    await run(Tasks.DeleteBazelPackagesFromBuildRoot);
     await run(Tasks.UpdateLicenseFile);
     await run(Tasks.RemovePackageJsonDeps);
     await run(Tasks.CleanPackageManagerRelatedFiles);
-    await run(Tasks.CleanTypescript);
     await run(Tasks.CleanExtraFilesFromModules);
     await run(Tasks.CleanEmptyFolders);
     await run(Tasks.FleetDownloadElasticGpgKey);
     await run(Tasks.BundleFleetPackages);
+    await run(Tasks.FetchAgentVersionsList);
   }
 
   /**
@@ -103,8 +107,9 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CleanExtraBinScripts);
     await run(Tasks.CleanNodeBuilds);
 
-    await run(Tasks.PathLength);
-    await run(Tasks.UuidVerification);
+    await run(Tasks.AssertFileTime);
+    await run(Tasks.AssertPathLength);
+    await run(Tasks.AssertNoUUID);
   }
 
   /**

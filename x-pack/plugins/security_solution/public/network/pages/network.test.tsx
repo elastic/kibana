@@ -27,6 +27,7 @@ import { Network } from './network';
 import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { InputsModelId } from '../../common/store/inputs/constants';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -240,7 +241,9 @@ describe('Network page - rendering', () => {
     await waitFor(() => {
       wrapper.update();
 
-      myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+      myStore.dispatch(
+        inputsActions.setSearchBarFilter({ id: InputsModelId.global, filters: newFilters })
+      );
       wrapper.update();
       expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'

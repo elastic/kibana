@@ -112,6 +112,7 @@ Object {
     "some.type": 1,
   },
   "countTotal": 4,
+  "hasErrors": false,
 }
 `);
   });
@@ -130,6 +131,8 @@ Object {
 Object {
   "countByType": Object {},
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });
@@ -194,6 +197,7 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 2,
+  "hasErrors": false,
 }
 `);
   });
@@ -295,6 +299,7 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 4,
+  "hasErrors": false,
 }
 `);
   });
@@ -316,6 +321,8 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 0,
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });
@@ -438,6 +445,7 @@ Object {
     "some.type": 1,
   },
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
@@ -546,6 +554,7 @@ Object {
   },
   "countNamespaces": 1,
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
@@ -645,6 +654,7 @@ Object {
   },
   "countNamespaces": 3,
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
@@ -711,6 +721,36 @@ Object {
               },
             },
           },
+          count_connector_types_by_action_run_outcome_per_day: {
+            actionSavedObjects: {
+              connector_types: {
+                buckets: [
+                  {
+                    key: '.slack',
+                    outcome: {
+                      count: {
+                        buckets: [
+                          { key: 'success', doc_count: 12 },
+                          { key: 'failure', doc_count: 1 },
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    key: '.email',
+                    outcome: {
+                      count: {
+                        buckets: [
+                          { key: 'success', doc_count: 13 },
+                          { key: 'failure', doc_count: 2 },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
         },
       }
     );
@@ -744,6 +784,17 @@ Object {
         __slack: 7,
       },
       countTotal: 120,
+      countRunOutcomeByConnectorType: {
+        __email: {
+          failure: 2,
+          success: 13,
+        },
+        __slack: {
+          failure: 1,
+          success: 12,
+        },
+      },
+      hasErrors: false,
     });
   });
 
@@ -764,7 +815,10 @@ Object {
   "countByType": Object {},
   "countFailed": 0,
   "countFailedByType": Object {},
+  "countRunOutcomeByConnectorType": Object {},
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });

@@ -12,7 +12,7 @@ import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
 import { PolicyList } from './policy_list';
-import { sendGetAgentPolicyList } from '../../../services/policies/ingest';
+import { sendBulkGetAgentPolicyList } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -22,7 +22,7 @@ jest.mock('../../../services/policies/ingest');
 
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
-const getAgentPolicies = sendGetAgentPolicyList as jest.Mock;
+const mockedSendBulkGetAgentPolicies = sendBulkGetAgentPolicyList as jest.Mock;
 
 describe('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -42,7 +42,7 @@ describe('When on the policy list page', () => {
 
   describe('and there are no policies', () => {
     beforeEach(async () => {
-      getPackagePolicies.mockImplementation(() =>
+      getPackagePolicies.mockResolvedValue(
         sendGetEndpointSpecificPackagePoliciesMock({
           page: 1,
           perPage: 20,
@@ -60,36 +60,36 @@ describe('When on the policy list page', () => {
     it('should show the empty page', () => {
       expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
     });
-    it('should show instruction text and a button to add the Endpoint Security integration', () => {
+    it('should show instruction text and a button to add the Endpoint Security integration', async () => {
       expect(
         renderResult.findByText(
-          'From this page, you’ll be able to view and manage the Endpoint and Cloud Security Integration policies in your environment running Endpoint and Cloud Security.'
+          'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
         )
       ).toBeTruthy();
-      expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
+      await waitFor(() => {
+        expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
+      });
     });
   });
 
   describe('and data exists', () => {
-    let policies: GetPolicyListResponse;
+    const policies: GetPolicyListResponse = sendGetEndpointSpecificPackagePoliciesMock();
+
     beforeEach(async () => {
-      policies = await sendGetEndpointSpecificPackagePoliciesMock();
-      getPackagePolicies.mockImplementation(async () => {
-        return policies;
-      });
-      getAgentPolicies.mockResolvedValue({
+      getPackagePolicies.mockReturnValue(policies);
+      mockedSendBulkGetAgentPolicies.mockReturnValue({
         items: [
-          { package_policies: [policies.items[0].id], agents: 4 },
-          { package_policies: [policies.items[1].id], agents: 2 },
-          { package_policies: [policies.items[2].id], agents: 5 },
-          { package_policies: [policies.items[3].id], agents: 1 },
-          { package_policies: [policies.items[4].id], agents: 3 },
+          { package_policies: [{ id: policies.items[0].id }], agents: 4 },
+          { package_policies: [{ id: policies.items[1].id }], agents: 2 },
+          { package_policies: [{ id: policies.items[2].id }], agents: 5 },
+          { package_policies: [{ id: policies.items[3].id }], agents: 1 },
+          { package_policies: [{ id: policies.items[4].id }], agents: 3 },
         ],
       });
       render();
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
-        expect(sendGetAgentPolicyList).toHaveBeenCalled();
+        expect(sendBulkGetAgentPolicyList).toHaveBeenCalled();
       });
     });
     it('should display the policy list table', () => {
@@ -118,11 +118,15 @@ describe('When on the policy list page', () => {
       expect(updatedByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
     });
-    it('should show the correct endpoint count', () => {
+
+    // FLAKY: https://github.com/elastic/kibana/issues/139778
+    it.skip('should show the correct endpoint count', async () => {
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink');
       expect(endpointCount[0].textContent).toBe('4');
     });
-    it('endpoint count link should navigate to the endpoint list filtered by policy', () => {
+
+    // FLAKY: https://github.com/elastic/kibana/issues/140153
+    it.skip('endpoint count link should navigate to the endpoint list filtered by policy', () => {
       const policyId = policies.items[0].id;
       const filterByPolicyQuery = `?admin_query=(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
       const backLink = {
@@ -149,26 +153,31 @@ describe('When on the policy list page', () => {
       render();
     });
   });
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/139207
+  describe.skip('pagination', () => {
     beforeEach(async () => {
-      getPackagePolicies.mockImplementation(async ({ page, perPage }) => {
+      getPackagePolicies.mockImplementation(({ page, perPage }) => {
         // # policies = 100 to trigger UI to show pagination
-        const response = await sendGetEndpointSpecificPackagePoliciesMock({
+        return sendGetEndpointSpecificPackagePoliciesMock({
           page,
           perPage,
           count: 100,
         });
-        return response;
       });
       render();
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
+        expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+        expect(mockedSendBulkGetAgentPolicies).toHaveBeenCalled();
       });
     });
     afterEach(() => {
       getPackagePolicies.mockReset();
     });
     it('should pass the correct page value to the api', async () => {
+      await waitFor(() => {
+        expect(renderResult.getByTestId('pagination-button-next')).toBeTruthy();
+      });
       act(() => {
         renderResult.getByTestId('pagination-button-next').click();
       });
@@ -180,7 +189,12 @@ describe('When on the policy list page', () => {
         perPage: 10,
       });
     });
-    it('should pass the correct pageSize value to the api', async () => {
+
+    // FLAKY: https://github.com/elastic/kibana/issues/139196
+    it.skip('should pass the correct pageSize value to the api', async () => {
+      await waitFor(() => {
+        expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
+      });
       act(() => {
         renderResult.getByTestId('tablePaginationPopoverButton').click();
       });
@@ -197,16 +211,18 @@ describe('When on the policy list page', () => {
         perPage: 20,
       });
     });
-    it('should call the api with the initial pagination values taken from the url', async () => {
+
+    // FLAKY: https://github.com/elastic/kibana/issues/139207
+    it.skip('should call the api with the initial pagination values taken from the url', async () => {
       act(() => {
         history.push('/administration/policies?page=3&pageSize=50');
       });
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalledTimes(2);
-      });
-      expect(getPackagePolicies.mock.calls[1][1].query).toEqual({
-        page: 3,
-        perPage: 50,
+        expect(getPackagePolicies.mock.calls[1][1].query).toEqual({
+          page: 3,
+          perPage: 50,
+        });
       });
     });
     it('should reset page back to 1 if the user is on a page > 1 and they change page size', async () => {
@@ -215,24 +231,23 @@ describe('When on the policy list page', () => {
         history.push('/administration/policies?page=2&pageSize=20');
       });
       await waitFor(() => {
-        expect(getPackagePolicies).toHaveBeenCalledTimes(2);
+        expect(getPackagePolicies).toHaveBeenCalled();
       });
 
       // change pageSize
-      act(() => {
-        renderResult.getByTestId('tablePaginationPopoverButton').click();
+      await act(async () => {
+        (await renderResult.getByTestId('tablePaginationPopoverButton')).click();
       });
       const pageSize10 = await renderResult.findByTestId('tablePagination-10-rows');
       act(() => {
         pageSize10.click();
       });
 
-      await waitFor(() => {
-        expect(getPackagePolicies).toHaveBeenCalledTimes(3);
-      });
-      expect(getPackagePolicies.mock.calls[2][1].query).toEqual({
-        page: 1,
-        perPage: 10,
+      expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(expect.any(Object), {
+        query: {
+          page: 1,
+          perPage: 10,
+        },
       });
     });
     it('should set page to 1 if user tries to force an invalid page number', async () => {

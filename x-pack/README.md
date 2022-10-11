@@ -4,6 +4,17 @@ This directory tree contains files subject to the Elastic License 2.0. The files
 to the Elastic License 2.0 are grouped in this directory to clearly separate them
 from files dual-licensed under the Server Side Public License and the Elastic License 2.0.
 
+## Alert Details page (feature flag)
+
+If you have:
+
+```yaml
+xpack.observability.unsafe.alertDetails.enabled: true
+```
+In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
+
+
+
 # Development
 
 By default, Kibana will run with X-Pack installed as mentioned in the [contributing guide](../CONTRIBUTING.md).

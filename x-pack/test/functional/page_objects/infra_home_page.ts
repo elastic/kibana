@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -353,6 +353,19 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickGuidedSetupButton() {
       await testSubjects.click('guidedSetupButton');
+    },
+
+    async clickQueryBar() {
+      await testSubjects.click('infraSearchField');
+    },
+
+    async inputQueryData() {
+      const queryBar = await testSubjects.find('infraSearchField');
+      await queryBar.type('h');
+    },
+
+    async ensureSuggestionsPanelVisible() {
+      await testSubjects.find('infraSuggestionsPanel');
     },
   };
 }

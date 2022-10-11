@@ -180,6 +180,20 @@ export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ADD_RULE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addRuleActionsTitle',
+  {
+    defaultMessage: 'Add rule actions',
+  }
+);
+
+export const BULK_ACTION_SET_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setScheduleTitle',
+  {
+    defaultMessage: 'Update rule schedules',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
@@ -234,7 +248,7 @@ export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) 
     {
       values: { customRulesCount },
       defaultMessage:
-        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
+        'This action can only be applied to {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
@@ -257,7 +271,7 @@ export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
     {
       values: { customRulesCount },
-      defaultMessage: 'Edit {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+      defaultMessage: 'Edit {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
@@ -267,7 +281,7 @@ export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
     {
       values: { customRulesCount },
       defaultMessage:
-        'Export {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+        'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
@@ -437,10 +451,11 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SHOWING_RULES = (totalRules: number) =>
+export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
-    values: { totalRules },
-    defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    values: { firstInPage, lastOfPage, totalRules },
+    defaultMessage:
+      'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
 
 export const SELECT_ALL_RULES = (totalRules: number) =>
@@ -839,12 +854,6 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   }
 );
 
-export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
-    values: { totalLists },
-    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
-  });
-
 /**
  * Bulk Export
  */
@@ -1074,3 +1083,32 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
     }
   );
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule preview',
+  }
+);
+
+export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
+  {
+    defaultMessage:
+      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
+  }
+);
+
+export const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
+  }
+);

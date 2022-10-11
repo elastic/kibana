@@ -7,11 +7,20 @@ PKG_REQUIRE_NAME = "@kbn/core-analytics-browser-internal"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -30,6 +39,7 @@ RUNTIME_DEPS = [
   "@npm//rxjs",
   "@npm//uuid",
   "//packages/analytics/client",
+  "//packages/kbn-ebt-tools",
   "//packages/core/base/core-base-browser-mocks",
   "//packages/core/injected-metadata/core-injected-metadata-browser-mocks",
 ]
@@ -41,6 +51,7 @@ TYPES_DEPS = [
   "@npm//rxjs",
   "//packages/kbn-logging:npm_module_types",
   "//packages/analytics/client:npm_module_types",
+  "//packages/kbn-ebt-tools:npm_module_types",
   "//packages/core/base/core-base-browser-internal:npm_module_types",
   "//packages/core/injected-metadata/core-injected-metadata-browser-internal:npm_module_types",
   "//packages/core/analytics/core-analytics-browser:npm_module_types",
@@ -79,7 +90,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

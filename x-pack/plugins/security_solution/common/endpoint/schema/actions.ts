@@ -8,6 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
+import {
+  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_STATUS,
+} from '../service/response_actions/constants';
 
 const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
@@ -23,6 +27,8 @@ const BaseActionRequestSchema = {
 export const NoParametersRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
+
+export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
 export const KillOrSuspendProcessRequestSchema = {
   body: schema.object({
@@ -69,19 +75,26 @@ export const ActionDetailsRequestSchema = {
   }),
 };
 
+// TODO: fix the odd TS error
+const commandsSchema = schema.oneOf(
+  // @ts-expect-error TS2769: No overload matches this call
+  RESPONSE_ACTION_COMMANDS.map((command) => schema.literal(command))
+);
+
+// TODO: fix the odd TS error
+// @ts-expect-error TS2769: No overload matches this call
+const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status)));
+
 export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
         schema.string({ minLength: 1 }),
       ])
     ),
     commands: schema.maybe(
-      schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-        schema.string({ minLength: 1 }),
-      ])
+      schema.oneOf([schema.arrayOf(commandsSchema, { minSize: 1 }), commandsSchema])
     ),
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     pageSize: schema.maybe(
@@ -89,6 +102,9 @@ export const EndpointActionListRequestSchema = {
     ),
     startDate: schema.maybe(schema.string()), // date ISO strings or moment date
     endDate: schema.maybe(schema.string()), // date ISO strings or moment date
+    statuses: schema.maybe(
+      schema.oneOf([schema.arrayOf(statusesSchema, { minSize: 1, maxSize: 3 }), statusesSchema])
+    ),
     userIds: schema.maybe(
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),

@@ -19,25 +19,6 @@
   flex-grow: 1;
 }
 
-.lensChartIcon__subdued {
-  fill: $euiTextSubduedColor;
-
-  .lnsLayerChartSwitch__item-isSelected & {
-    fill: currentColor;
-  }
-}
-
-.lensChartIcon__accent {
-  fill: $euiColorVis0;
-
-  .lnsLayerChartSwitch__item-isSelected & {
-    fill: makeGraphicContrastColor($euiColorVis0, $euiColorDarkShade);
-  }
-}
-.lensAnnotationIconNoFill {
-  fill: none;
-}
-
 .lensAnnotationIconFill {
   fill: $euiColorEmptyShade;
 }

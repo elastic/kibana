@@ -6,13 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Query } from '@kbn/es-query';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
-import { LogFilterState } from './log_filter_state';
+import { useLogFilterStateContext } from './log_filter_state';
 
 export const WithLogFilterUrlState: React.FC = () => {
-  const { filterQuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
+  const { filterQuery, applyLogFilterQuery } = useLogFilterStateContext();
 
   return (
     <UrlStateContainer

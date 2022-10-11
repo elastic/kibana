@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'visEditor', 'visChart']);
 
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   describe('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';

@@ -27,10 +27,10 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableInfrastructureView,
   enableServiceGroups,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
+  enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -87,7 +87,7 @@ export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warn
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
-export type { SeriesUrl } from './components/shared/exploratory_view/types';
+export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -115,3 +115,5 @@ export {
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
+
+export type { NavigationSection } from './services/navigation_registry';

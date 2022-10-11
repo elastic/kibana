@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createAssigneesUserActionBuilder } from './assignees';
 import { createCommentUserActionBuilder } from './comment/comment';
 import { createConnectorUserActionBuilder } from './connector';
 import { createDescriptionUserActionBuilder } from './description';
@@ -26,4 +27,5 @@ export const builderMap: UserActionBuilderMap = {
   comment: createCommentUserActionBuilder,
   description: createDescriptionUserActionBuilder,
   settings: createSettingsUserActionBuilder,
+  assignees: createAssigneesUserActionBuilder,
 };

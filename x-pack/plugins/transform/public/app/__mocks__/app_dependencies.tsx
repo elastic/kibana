@@ -14,12 +14,13 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -46,6 +47,7 @@ const appDependencies: AppDependencies = {
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
+  unifiedSearch: {} as jest.Mocked<UnifiedSearchPublicPluginStart>,
 };
 
 export const useAppDependencies = () => {

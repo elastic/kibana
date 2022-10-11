@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 
 import { normalizePath } from './normalize_path.mjs';
 import { REPO_ROOT } from '../../lib/paths.mjs';
@@ -16,7 +16,7 @@ import { convertPluginIdToPackageId } from './plugins.mjs';
 /**
  * @param {import('@kbn/plugin-discovery').KibanaPlatformPlugin[]} plugins
  */
-export function regenerateSyntheticPackageMap(plugins) {
+export async function regenerateSyntheticPackageMap(plugins) {
   /** @type {Array<[string, string]>} */
   const entries = [['@kbn/core', 'src/core']];
 
@@ -27,7 +27,7 @@ export function regenerateSyntheticPackageMap(plugins) {
     ]);
   }
 
-  Fs.writeFileSync(
+  await Fsp.writeFile(
     Path.resolve(REPO_ROOT, 'packages/kbn-synthetic-package-map/synthetic-packages.json'),
     JSON.stringify(entries, null, 2)
   );

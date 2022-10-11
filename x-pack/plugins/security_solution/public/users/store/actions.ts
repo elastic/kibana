@@ -38,3 +38,13 @@ export const updateTableSorting = actionCreator<{
 export const updateUserRiskScoreSeverityFilter = actionCreator<{
   severitySelection: RiskSeverity[];
 }>('UPDATE_USERS_RISK_SEVERITY_FILTER');
+
+export const updateUsersAnomaliesJobIdFilter = actionCreator<{
+  jobIds: string[];
+  usersType: usersModel.UsersType;
+}>('UPDATE_USERS_ANOMALIES_JOB_ID_FILTER');
+
+export const updateUsersAnomaliesInterval = actionCreator<{
+  interval: string;
+  usersType: usersModel.UsersType;
+}>('UPDATE_USERS_ANOMALIES_INTERVAL');

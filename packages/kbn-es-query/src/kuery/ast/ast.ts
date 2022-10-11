@@ -13,7 +13,7 @@ import { KQLSyntaxError } from '../kuery_syntax_error';
 import type { KqlContext, KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
 
 import { parse as parseKuery } from '../grammar';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 
 const fromExpression = (
   expression: string | estypes.QueryDslQueryContainer,

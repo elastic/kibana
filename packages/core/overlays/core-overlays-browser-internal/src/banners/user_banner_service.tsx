@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -72,7 +72,7 @@ export class UserBannerService {
                     </div>
                   }
                 >
-                  <ReactMarkdownLazy renderers={{ root: Fragment }} source={content.trim()} />
+                  <ReactMarkdownLazy>{content.trim()}</ReactMarkdownLazy>
                 </React.Suspense>
 
                 <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>

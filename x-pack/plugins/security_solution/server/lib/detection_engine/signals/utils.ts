@@ -61,8 +61,12 @@ import type {
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+} from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -106,7 +110,7 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<boolean> => {
+}): Promise<{ wroteWarningStatus: boolean; foundNoIndices: boolean }> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
@@ -124,7 +128,7 @@ export const hasTimestampFields = async (args: {
       message: errorString.trimEnd(),
     });
 
-    return true;
+    return { wroteWarningStatus: true, foundNoIndices: true };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -148,10 +152,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return true;
+    return { wroteWarningStatus: true, foundNoIndices: false };
   }
 
-  return false;
+  return { wroteWarningStatus: false, foundNoIndices: false };
 };
 
 export const checkPrivileges = async (
@@ -594,7 +598,7 @@ export const getValidDateFromDoc = ({
     if (tempMoment.isValid()) {
       return tempMoment.toDate();
     } else if (typeof timestampValue === 'string') {
-      // worse case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // worst case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
       // so we try one last time to parse this best we can by converting from string to a number
       const maybeDate = moment(+lastTimestamp);
       if (maybeDate.isValid()) {
@@ -641,12 +645,11 @@ export interface PreviewReturnType {
   warningMessages?: string[] | undefined;
 }
 
-export const createSearchAfterReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
+export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
+  enrichmentTimes,
   bulkCreateTimes,
   lastLookBackDate,
   createdSignalsCount,
@@ -657,6 +660,7 @@ export const createSearchAfterReturnType = <
   success?: boolean | undefined;
   warning?: boolean;
   searchAfterTimes?: string[] | undefined;
+  enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
@@ -668,6 +672,7 @@ export const createSearchAfterReturnType = <
     success: success ?? true,
     warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
+    enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
@@ -699,6 +704,24 @@ export const createSearchResultReturnType = <
   };
 };
 
+/**
+ * Merges the return values from bulk creating alerts into the appropriate fields in the combined return object.
+ */
+export const addToSearchAfterReturn = ({
+  current,
+  next,
+}: {
+  current: SearchAfterAndBulkCreateReturnType;
+  next: GenericBulkCreateResponse<BaseFieldsLatest>;
+}) => {
+  current.success = current.success && next.success;
+  current.createdSignalsCount += next.createdItemsCount;
+  current.createdSignals.push(...next.createdItems);
+  current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.enrichmentTimes.push(next.enrichmentDuration);
+  current.errors = [...new Set([...current.errors, ...next.errors])];
+};
+
 export const mergeReturns = (
   searchAfters: SearchAfterAndBulkCreateReturnType[]
 ): SearchAfterAndBulkCreateReturnType => {
@@ -708,6 +731,7 @@ export const mergeReturns = (
       warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
+      enrichmentTimes: existingEnrichmentTimes,
       lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
@@ -719,6 +743,7 @@ export const mergeReturns = (
       success: newSuccess,
       warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
+      enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
@@ -731,6 +756,7 @@ export const mergeReturns = (
       success: existingSuccess && newSuccess,
       warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
@@ -950,5 +976,16 @@ export const getField = (event: SimpleHit, field: string): SearchTypes | undefin
     return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as SearchTypes | undefined;
+  }
+};
+
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
+  if (unprocessedExceptions.length > 0) {
+    const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
   }
 };

@@ -49,12 +49,13 @@ export function getValueOrName(node: TinymathAST) {
   return node.name;
 }
 
-export function mergeWithGlobalFilter(
+export function mergeWithGlobalFilters(
   operation:
     | OperationDefinition<GenericIndexPatternColumn, 'field'>
     | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   mappedParams: Record<string, string | number>,
-  globalFilter?: Query
+  globalFilter?: Query,
+  globalReducedTimeRange?: string
 ) {
   if (globalFilter && operation.filterable) {
     const languageKey = 'kql' in mappedParams ? 'kql' : 'lucene';
@@ -67,6 +68,10 @@ export function mergeWithGlobalFilter(
       const language = globalFilter.language === 'kuery' ? 'kql' : globalFilter.language;
       mappedParams[language] = globalFilter.query as string;
     }
+  }
+  // Local definition override the global one
+  if (globalReducedTimeRange && operation.canReduceTimeRange && !mappedParams.reducedTimeRange) {
+    mappedParams.reducedTimeRange = globalReducedTimeRange;
   }
   return mappedParams;
 }
@@ -95,6 +100,9 @@ export function getOperationParams(
     if (operation.shiftable && name === 'shift') {
       args[name] = value;
     }
+    if (operation.canReduceTimeRange && name === 'reducedTimeRange') {
+      args.reducedTimeRange = value;
+    }
     return args;
   }, {});
 }
@@ -109,7 +117,6 @@ function getTypeI18n(type: string) {
   return '';
 }
 
-// Todo: i18n everything here
 export const tinymathFunctions: Record<
   string,
   {
@@ -521,6 +528,26 @@ Finds the minimum value between two numbers.
 
 Example: Find the minimum between two fields averages
 \`pick_min(average(bytes), average(memory))\`
+    `,
+    }),
+  },
+  defaults: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.defaultValue', { defaultMessage: 'default' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.defaultFunction.markdown', {
+      defaultMessage: `
+Returns a default numeric value when value is null.
+
+Example: Return -1 when a field has no data
+\`defaults(average(bytes), -1)\`
     `,
     }),
   },

@@ -31,6 +31,7 @@ export const BuildKibanaPlatformPlugins: Task = {
       watch: false,
       dist: true,
       includeCoreBundle: true,
+      inspectWorkers: false,
       limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
     });
 

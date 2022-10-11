@@ -12,7 +12,7 @@ import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { ChangeIndexPattern } from './change_indexpattern';
+import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
 
@@ -136,14 +136,7 @@ const fieldsThree = [
 ];
 
 const initialState: IndexPatternPrivateState = {
-  indexPatternRefs: [
-    { id: '1', title: 'my-fake-index-pattern' },
-    { id: '2', title: 'my-fake-restricted-pattern' },
-    { id: '3', title: 'my-compatible-pattern' },
-  ],
-  existingFields: {},
   currentIndexPatternId: '1',
-  isFirstExistenceFetch: false,
   layers: {
     first: {
       indexPatternId: '1',
@@ -173,32 +166,6 @@ const initialState: IndexPatternPrivateState = {
       },
     },
   },
-  indexPatterns: {
-    '1': {
-      id: '1',
-      title: 'my-fake-index-pattern',
-      timeFieldName: 'timestamp',
-      hasRestrictions: false,
-      fields: fieldsOne,
-      getFieldByName: getFieldByNameFactory(fieldsOne),
-    },
-    '2': {
-      id: '2',
-      title: 'my-fake-restricted-pattern',
-      hasRestrictions: true,
-      timeFieldName: 'timestamp',
-      fields: fieldsTwo,
-      getFieldByName: getFieldByNameFactory(fieldsTwo),
-    },
-    '3': {
-      id: '3',
-      title: 'my-compatible-pattern',
-      timeFieldName: 'timestamp',
-      hasRestrictions: false,
-      fields: fieldsThree,
-      getFieldByName: getFieldByNameFactory(fieldsThree),
-    },
-  },
 };
 describe('Layer Data Panel', () => {
   let defaultProps: IndexPatternLayerPanelProps;
@@ -207,8 +174,48 @@ describe('Layer Data Panel', () => {
     defaultProps = {
       layerId: 'first',
       state: initialState,
-      setState: jest.fn(),
-      onChangeIndexPattern: jest.fn(async () => {}),
+      onChangeIndexPattern: jest.fn(),
+      dataViews: {
+        indexPatternRefs: [
+          { id: '1', title: 'my-fake-index-pattern' },
+          { id: '2', title: 'my-fake-restricted-pattern' },
+          { id: '3', title: 'my-compatible-pattern' },
+        ],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: {
+          '1': {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            timeFieldName: 'timestamp',
+            hasRestrictions: false,
+            fields: fieldsOne,
+            getFieldByName: getFieldByNameFactory(fieldsOne),
+            isPersisted: true,
+            spec: {},
+          },
+          '2': {
+            id: '2',
+            title: 'my-fake-restricted-pattern',
+            hasRestrictions: true,
+            timeFieldName: 'timestamp',
+            fields: fieldsTwo,
+            getFieldByName: getFieldByNameFactory(fieldsTwo),
+            isPersisted: true,
+            spec: {},
+          },
+          '3': {
+            id: '3',
+            title: 'my-compatible-pattern',
+            timeFieldName: 'timestamp',
+            hasRestrictions: false,
+            fields: fieldsThree,
+            getFieldByName: getFieldByNameFactory(fieldsThree),
+            isPersisted: true,
+            spec: {},
+          },
+        },
+      },
     };
   });
 

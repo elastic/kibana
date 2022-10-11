@@ -28,13 +28,14 @@ export default function ({ getService }) {
       return tearDown();
     });
 
-    it('should get data for the entire cluster', async () => {
+    it('should get kibana rules at cluster level', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/SvjwrFv6Rvuqjm9-cSSVEg')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, codePaths: ['all'] })
         .expect(200);
-      expect(body).to.eql(fixture);
+
+      expect(body[0].kibana.rules).to.eql(fixture[0].kibana.rules);
     });
   });
 }

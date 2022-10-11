@@ -38,6 +38,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
+  { id: 'rule.name' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
 ];
 

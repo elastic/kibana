@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -42,7 +43,8 @@
               "\nThe title of the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -54,7 +56,8 @@
               "\nThe description message to be displayed for the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -69,7 +72,8 @@
               "\"warning\" | \"critical\" | \"fetch_error\""
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -84,7 +88,8 @@
               "\"config\" | \"feature\" | undefined"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -99,7 +104,8 @@
               "string | undefined"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -114,7 +120,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -129,7 +136,8 @@
               "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; }"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -160,6 +168,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -169,7 +178,8 @@
             "label": "configPath",
             "description": [],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -182,7 +192,8 @@
               "\"config\""
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -196,6 +207,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -215,7 +227,8 @@
               "[]"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -246,6 +259,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-common",
@@ -258,7 +272,8 @@
               "\"feature\" | undefined"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -292,6 +307,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -313,6 +329,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

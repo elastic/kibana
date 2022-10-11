@@ -13,6 +13,11 @@ import {
   CommentRequest,
 } from '@kbn/cases-plugin/common/api';
 import { expect } from 'expect';
+import {
+  deleteAllCaseItems,
+  findCases,
+  getCase,
+} from '../../../cases_api_integration/common/lib/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const createLogStashDataView = async (
@@ -46,6 +51,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const find = getService('find');
+  const es = getService('es');
+  const common = getPageObject('common');
+  const retry = getService('retry');
 
   const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
     const caseData = await cases.api.createCase({
@@ -197,7 +205,146 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
         await validateAttachment(CommentType.persistableState, attachmentId);
-        expect(await find.existsByCssSelector('.lnsExpressionRenderer')).toBe(true);
+        await retry.waitFor(
+          'actions accordion to exist',
+          async () => await find.existsByCssSelector('.lnsExpressionRenderer')
+        );
+      });
+    });
+
+    /**
+     * The UI of the cases fixture plugin is in x-pack/test/functional_with_es_ssl/fixtures/plugins/cases/public/application.tsx
+     */
+    describe('Attachment hooks', () => {
+      const TOTAL_OWNERS = ['cases', 'securitySolution', 'observability'];
+
+      const ensureFirstCommentOwner = async (caseId: string, owner: string) => {
+        const theCase = await getCase({
+          supertest,
+          caseId,
+          includeComments: true,
+        });
+
+        const comment = theCase.comments![0].owner;
+        expect(comment).toBe(owner);
+      };
+
+      before(async () => {
+        await common.navigateToApp('cases_fixture');
+      });
+
+      describe('Flyout', () => {
+        const openFlyout = async () => {
+          await common.clickAndValidate('case-fixture-attach-to-new-case', 'create-case-flyout');
+        };
+
+        const closeFlyout = async () => {
+          await testSubjects.click('euiFlyoutCloseButton');
+        };
+
+        after(async () => {
+          await deleteAllCaseItems(es);
+        });
+
+        it('renders solutions selection', async () => {
+          await openFlyout();
+
+          for (const owner of TOTAL_OWNERS) {
+            await testSubjects.existOrFail(`${owner}RadioButton`);
+          }
+
+          await closeFlyout();
+        });
+
+        it('attaches correctly', async () => {
+          for (const owner of TOTAL_OWNERS) {
+            await openFlyout();
+
+            /**
+             * The flyout close automatically after submitting a case
+             */
+            await cases.create.createCase({ owner });
+            await cases.common.expectToasterToContain('has been updated');
+          }
+
+          const casesCreatedFromFlyout = await findCases({ supertest });
+
+          for (const owner of TOTAL_OWNERS) {
+            const theCase = casesCreatedFromFlyout.cases.find((c) => c.owner === owner)!;
+            await ensureFirstCommentOwner(theCase.id, owner);
+          }
+        });
+      });
+
+      describe('Modal', () => {
+        const createdCases = new Map<string, string>();
+
+        const openModal = async () => {
+          await common.clickAndValidate('case-fixture-attach-to-existing-case', 'all-cases-modal');
+          await cases.casesTable.waitForTableToFinishLoading();
+        };
+
+        const closeModal = async () => {
+          await find.clickByCssSelector('[data-test-subj="all-cases-modal"] > button');
+        };
+
+        before(async () => {
+          for (const owner of TOTAL_OWNERS) {
+            const theCase = await cases.api.createCase({ owner });
+            createdCases.set(owner, theCase.id);
+          }
+        });
+
+        after(async () => {
+          await deleteAllCaseItems(es);
+        });
+
+        it('renders different solutions', async () => {
+          await openModal();
+
+          await testSubjects.existOrFail('options-filter-popover-button-Solution');
+
+          for (const [owner, caseId] of createdCases.entries()) {
+            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+            await testSubjects.existOrFail(`case-table-column-owner-icon-${owner}`);
+          }
+
+          await closeModal();
+        });
+
+        it('filters correctly', async () => {
+          for (const [owner, currentCaseId] of createdCases.entries()) {
+            await openModal();
+
+            await cases.casesTable.filterByOwner(owner);
+            await cases.casesTable.waitForTableToFinishLoading();
+            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+
+            /**
+             * We ensure that the other cases are not shown
+             */
+            for (const otherCaseId of createdCases.values()) {
+              if (otherCaseId !== currentCaseId) {
+                await testSubjects.missingOrFail(`cases-table-row-${otherCaseId}`);
+              }
+            }
+
+            await closeModal();
+          }
+        });
+
+        it('attaches correctly', async () => {
+          for (const [owner, currentCaseId] of createdCases.entries()) {
+            await openModal();
+
+            await cases.casesTable.waitForTableToFinishLoading();
+            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
+
+            await cases.common.expectToasterToContain('has been updated');
+            await ensureFirstCommentOwner(currentCaseId, owner);
+          }
+        });
       });
     });
   });

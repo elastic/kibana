@@ -6,16 +6,24 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
 import { ConfigKey, MonitorManagementListResult } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { MonitorListPageState } from './models';
-import { fetchMonitorListAction } from './actions';
+import {
+  clearMonitorUpsertStatus,
+  fetchMonitorListAction,
+  fetchUpsertFailureAction,
+  fetchUpsertMonitorAction,
+  fetchUpsertSuccessAction,
+} from './actions';
 
 export interface MonitorListState {
   data: MonitorManagementListResult;
+  monitorUpsertStatuses: Record<string, { status: FETCH_STATUS; enabled?: boolean }>;
   pageState: MonitorListPageState;
   loading: boolean;
   loaded: boolean;
@@ -24,6 +32,7 @@ export interface MonitorListState {
 
 const initialState: MonitorListState = {
   data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [], absoluteTotal: 0 },
+  monitorUpsertStatuses: {},
   pageState: {
     pageIndex: 0,
     pageSize: 10,
@@ -49,7 +58,26 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorListAction.fail, (state, action) => {
       state.loading = false;
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
+    })
+    .addCase(fetchUpsertMonitorAction, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        status: FETCH_STATUS.LOADING,
+      };
+    })
+    .addCase(fetchUpsertSuccessAction, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        status: FETCH_STATUS.SUCCESS,
+        enabled: action.payload.attributes.enabled,
+      };
+    })
+    .addCase(fetchUpsertFailureAction, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = { status: FETCH_STATUS.FAILURE };
+    })
+    .addCase(clearMonitorUpsertStatus, (state, action) => {
+      if (state.monitorUpsertStatuses[action.payload]) {
+        delete state.monitorUpsertStatuses[action.payload];
+      }
     });
 });
 

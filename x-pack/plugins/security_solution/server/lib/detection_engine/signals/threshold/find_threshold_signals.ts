@@ -44,6 +44,7 @@ interface FindThresholdSignalsParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverrideOrUndefined;
+  aggregatableTimestampField: string;
 }
 
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
@@ -65,6 +66,7 @@ export const findThresholdSignals = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  aggregatableTimestampField,
 }: FindThresholdSignalsParams): Promise<{
   buckets: ThresholdBucket[];
   searchDurations: string[];
@@ -85,7 +87,7 @@ export const findThresholdSignals = async ({
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
         aggregations: buildThresholdMultiBucketAggregation({
           threshold,
-          timestampField: primaryTimestamp,
+          aggregatableTimestampField,
           sortKeys,
         }),
         index: inputIndexPattern,
@@ -104,7 +106,7 @@ export const findThresholdSignals = async ({
 
       const searchResultWithAggs = searchResult as ThresholdMultiBucketAggregationResult;
       if (!searchResultWithAggs.aggregations) {
-        throw new Error('expected to find aggregations on search result');
+        throw new Error('Aggregations were missing on threshold rule search result');
       }
 
       searchAfterResults.searchDurations.push(searchDuration);
@@ -121,7 +123,7 @@ export const findThresholdSignals = async ({
     const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
       aggregations: buildThresholdSingleBucketAggregation({
         threshold,
-        timestampField: primaryTimestamp,
+        aggregatableTimestampField,
       }),
       searchAfterSortIds: undefined,
       index: inputIndexPattern,
@@ -140,7 +142,7 @@ export const findThresholdSignals = async ({
 
     const searchResultWithAggs = searchResult as ThresholdSingleBucketAggregationResult;
     if (!searchResultWithAggs.aggregations) {
-      throw new Error('expected to find aggregations on search result');
+      throw new Error('Aggregations were missing on threshold rule search result');
     }
 
     searchAfterResults.searchDurations.push(searchDuration);

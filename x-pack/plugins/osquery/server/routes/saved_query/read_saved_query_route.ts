@@ -40,7 +40,10 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         );
       }
 
-      savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
+      savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        savedQuery.id
+      );
 
       return response.ok({
         body: { data: savedQuery },

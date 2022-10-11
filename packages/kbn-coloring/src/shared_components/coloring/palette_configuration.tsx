@@ -22,7 +22,7 @@ import {
 
 import { toColorRanges } from './utils';
 import { ColorRanges, ColorRangesContext } from './color_ranges';
-import { isAllColorRangesValid } from './color_ranges/color_ranges_validation';
+import { allRangesValid } from './color_ranges/color_ranges_validation';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
 
 export interface CustomizablePaletteProps {
@@ -62,7 +62,10 @@ export const CustomizablePalette = ({
       if (
         (localState.activePalette !== activePalette ||
           colorRangesToShow !== localState.colorRanges) &&
-        isAllColorRangesValid(localState.colorRanges)
+        allRangesValid(
+          localState.colorRanges,
+          localState.activePalette.params?.rangeType === 'percent'
+        )
       ) {
         setPalette(localState.activePalette);
       }
@@ -76,10 +79,8 @@ export const CustomizablePalette = ({
   const styles = useMemo(
     () => css`
       padding: ${euiTheme.size.base};
-      background-color: ${euiTheme.colors.lightestShade};
-      border-bottom: ${euiTheme.border.thin};
     `,
-    [euiTheme.size.base, euiTheme.colors.lightestShade, euiTheme.border.thin]
+    [euiTheme.size.base]
   );
 
   return (

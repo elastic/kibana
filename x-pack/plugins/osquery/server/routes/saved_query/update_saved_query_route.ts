@@ -29,6 +29,8 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             query: schema.string(),
             description: schema.maybe(schema.string()),
             interval: schema.maybe(schema.number()),
+            snapshot: schema.maybe(schema.boolean()),
+            removed: schema.maybe(schema.boolean()),
             platform: schema.maybe(schema.string()),
             version: schema.maybe(schema.string()),
             ecs_mapping: schema.maybe(
@@ -60,11 +62,16 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         query,
         version,
         interval,
+        snapshot,
+        removed,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         ecs_mapping,
       } = request.body;
 
-      const isPrebuilt = await isSavedQueryPrebuilt(osqueryContext, request.params.id);
+      const isPrebuilt = await isSavedQueryPrebuilt(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        request.params.id
+      );
 
       if (isPrebuilt) {
         return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
@@ -94,6 +101,8 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           query,
           version,
           interval,
+          snapshot,
+          removed,
           ecs_mapping: convertECSMappingToArray(ecs_mapping),
           updated_by: currentUser,
           updated_at: new Date().toISOString(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { Datum, NodeColorAccessor, PartialTheme } from '@elastic/charts';
@@ -44,9 +44,8 @@ export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
   fillColor: FillColor;
   height?: number;
-  label: string;
+  label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
-  link?: string | null;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
 }
@@ -71,7 +70,6 @@ export const DonutChart = ({
   height = 90,
   label,
   legendItems,
-  link,
   title,
   totalCount,
 }: DonutChartProps) => {
@@ -83,6 +81,7 @@ export const DonutChart = ({
     }),
     [euiTheme.colors.disabled]
   );
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -100,15 +99,15 @@ export const DonutChart = ({
         >
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
-            {data ? (
-              <EuiText className="eui-textTruncate" size="s">
+            <EuiToolTip content={label}>
+              <EuiText
+                className="eui-textTruncate"
+                size="s"
+                style={data ? undefined : emptyLabelStyle}
+              >
                 {label}
               </EuiText>
-            ) : (
-              <EuiText className="eui-textTruncate" size="s" style={emptyLabelStyle}>
-                {label}
-              </EuiText>
-            )}
+            </EuiToolTip>
           </EuiFlexItem>
         </DonutTextWrapper>
         {data == null || totalCount == null || totalCount === 0 ? (

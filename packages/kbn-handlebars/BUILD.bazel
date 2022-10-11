@@ -8,11 +8,21 @@ TYPES_PKG_REQUIRE_NAME = "@types/kbn__handlebars"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
     "**/__jest__/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -36,6 +46,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//handlebars",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(
@@ -69,7 +80,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

@@ -7,10 +7,19 @@ PKG_REQUIRE_NAME = "@kbn/config-mocks"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -27,12 +36,14 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-config",
+  "//packages/kbn-utils",
 ]
 
 TYPES_DEPS = [
   "@npm//rxjs",
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-config:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
 ]
@@ -61,7 +72,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

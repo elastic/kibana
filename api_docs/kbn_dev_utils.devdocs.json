@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/diff_strings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -52,6 +54,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -72,6 +75,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/extract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -85,6 +89,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/extract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -110,6 +115,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -123,6 +129,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -149,6 +156,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -162,6 +170,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -180,22 +189,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
         "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.runUpdateVscodeConfigCli",
-        "type": "Function",
-        "tags": [],
-        "label": "runUpdateVscodeConfigCli",
-        "description": [],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-dev-utils/src/vscode_config/update_vscode_config_cli.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -212,6 +206,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/ship_ci_stats_cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -235,6 +230,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/streams.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -252,6 +248,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/streams.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -274,6 +271,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/babel.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -287,6 +285,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/babel.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -316,6 +315,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -328,7 +328,8 @@
               "undefined"
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -354,6 +355,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
@@ -367,7 +369,8 @@
               "<T, any>"
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -384,6 +387,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -395,6 +399,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -406,6 +411,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -417,6 +423,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -428,6 +435,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -442,6 +450,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -453,6 +462,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -464,6 +474,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -475,6 +486,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -489,6 +501,7 @@
         ],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -500,6 +513,7 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

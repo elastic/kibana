@@ -21,7 +21,7 @@
     "influencers": [
       "host.name",
       "user.name",
-      "file.Path"
+      "file.path"
     ]
   },
   "allow_lazy_open": true,

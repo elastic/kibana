@@ -28,7 +28,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
@@ -68,6 +68,7 @@ export async function getLensServices(
     fieldFormats,
     spaces,
     discover,
+    unifiedSearch,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -86,6 +87,7 @@ export async function getLensServices(
     attributeService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
+    uiActions: startDependencies.uiActions,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
@@ -96,6 +98,7 @@ export async function getLensServices(
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
     dashboard: startDependencies.dashboard,
+    charts: startDependencies.charts,
     getOriginatingAppName: () => {
       return embeddableEditorIncomingState?.originatingApp
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
@@ -106,6 +109,8 @@ export async function getLensServices(
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
     discover,
+    unifiedSearch,
+    docLinks: coreStart.docLinks,
   };
 }
 
@@ -201,13 +206,20 @@ export async function mountApp(
       });
     }
   };
-  // get state from location, used for nanigating from Visualize/Discover to Lens
+  // get state from location, used for navigating from Visualize/Discover to Lens
   const initialContext =
     historyLocationState &&
     (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
       historyLocationState.type === ACTION_CONVERT_TO_LENS)
       ? historyLocationState.payload
       : undefined;
+
+  if (historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD) {
+    // remove originatingApp from context when visualizing a field in Lens
+    // so Lens does not try to return to the original app on Save
+    // see https://github.com/elastic/kibana/issues/128695
+    delete initialContext?.originatingApp;
+  }
 
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
@@ -223,7 +235,7 @@ export async function mountApp(
   };
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: getPreloadedState(storeDeps) as LensAppState,
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -234,7 +246,7 @@ export async function mountApp(
           useHash: lensServices.uiSettings.get('state:storeInSessionStorage'),
           ...withNotifyOnErrors(lensServices.notifications.toasts),
         });
-        const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+        const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
           data.query,
           kbnUrlStateStorage
         );
@@ -293,7 +305,6 @@ export async function mountApp(
                 initCallback();
               }}
             />
-            ;
           </AnalyticsNoDataPageKibanaProvider>
         );
       }
@@ -375,5 +386,6 @@ export async function mountApp(
     lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
+    stateTransfer.clearEditorState?.(APP_ID);
   };
 }

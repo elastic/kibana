@@ -24,6 +24,7 @@ import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   TimelineStatus,
@@ -48,7 +49,8 @@ import {
   startSelector,
   endSelector,
 } from '../../../../common/components/super_date_picker/selectors';
-import { combineQueries, focusActiveTimelineButton } from '../../timeline/helpers';
+import { focusActiveTimelineButton } from '../../timeline/helpers';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
@@ -172,7 +174,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                   <InspectButton
                     compact
                     queryId={`${timelineId}-${activeTab}`}
-                    inputId="timeline"
+                    inputId={InputsModelId.timeline}
                     inspectIndex={0}
                     isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
                     title={i18n.INSPECT_TIMELINE_TITLE}
@@ -345,7 +347,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererDataView(
+  const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -409,7 +411,6 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
 
   const [loading, kpis] = useTimelineKpis({
     defaultIndex: selectedPatterns,
-    docValueFields,
     timerange,
     isBlankTimeline,
     filterQuery: combinedQueries?.filterQuery ?? '',

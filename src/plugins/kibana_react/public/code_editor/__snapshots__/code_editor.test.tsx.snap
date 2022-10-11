@@ -226,21 +226,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
         </div>
       </mockMonacoEditor>
     </Component>
-    <ResizeDetector
-      handleHeight={true}
-      handleWidth={true}
-      nodeType="div"
-      onResize={[Function]}
-      querySelector={null}
-      refreshMode="debounce"
-      refreshRate={1000}
-      skipOnMount={false}
-      targetDomEl={null}
-    >
-      <ChildWrapper>
-        <div />
-      </ChildWrapper>
-    </ResizeDetector>
   </div>
 </CodeEditor>
 `;

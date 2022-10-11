@@ -45,7 +45,7 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
 
     await page.click('text=Private location monitor');
 
-    await page.click('text=Private location monitorLast 15 minutes1 mRefresh >> span');
+    await page.click('[data-test-subj="superDatePickerApplyTimeButton"]');
   });
   step('Click [placeholder="Find apps, content, and more. Ex: Discover"]', async () => {
     await page.click('[placeholder="Find apps, content, and more. Ex: Discover"]');

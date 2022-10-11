@@ -12,6 +12,7 @@
     "actions",
     "alerting",
     "cases",
+    "cloud",
     "cloudSecurityPosture",
     "dashboard",
     "data",
@@ -33,6 +34,7 @@
     "unifiedSearch"
   ],
   "optionalPlugins": [
+    "cloudExperiments",
     "encryptedSavedObjects",
     "fleet",
     "ml",

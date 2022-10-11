@@ -7,7 +7,7 @@
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX, CONNECTORS_VERSION } from '..';
 
-import { setupConnectorsIndices } from './setup_indices';
+import { defaultConnectorsPipelineMeta, setupConnectorsIndices } from './setup_indices';
 
 describe('Setup Indices', () => {
   const mockClient = {
@@ -29,6 +29,7 @@ describe('Setup Indices', () => {
   const connectorsMappings = {
     _meta: {
       version: CONNECTORS_VERSION,
+      pipeline: defaultConnectorsPipelineMeta,
     },
     properties: {
       api_key_id: {
@@ -45,6 +46,14 @@ describe('Setup Indices', () => {
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
       name: { type: 'keyword' },
+      pipeline: {
+        properties: {
+          extract_binary_content: { type: 'boolean' },
+          name: { type: 'keyword' },
+          reduce_whitespace: { type: 'boolean' },
+          run_ml_inference: { type: 'boolean' },
+        },
+      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },
@@ -63,7 +72,7 @@ describe('Setup Indices', () => {
     },
     properties: {
       completed_at: { type: 'date' },
-      connector: connectorsMappings.properties,
+      connector: { properties: connectorsMappings.properties },
       connector_id: {
         type: 'keyword',
       },
@@ -157,7 +166,7 @@ describe('Setup Indices', () => {
       expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: connectorsIndexName,
         mappings: connectorsMappings,
-        settings: { hidden: true },
+        settings: { auto_expand_replicas: '0-3', hidden: true, number_of_replicas: 0 },
       });
       expect(mockClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
         actions: [
@@ -191,7 +200,7 @@ describe('Setup Indices', () => {
       expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: jobsIndexName,
         mappings: connectorsJobsMappings,
-        settings: { hidden: true },
+        settings: { auto_expand_replicas: '0-3', hidden: true, number_of_replicas: 0 },
       });
       expect(mockClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
         actions: [

@@ -26,6 +26,7 @@ export type {
   DownloadSource,
   DataStream,
   Settings,
+  ActionStatus,
   CurrentUpgrade,
   GetFleetStatusResponse,
   GetAgentPoliciesRequest,
@@ -125,6 +126,7 @@ export type {
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
+  GetAvailableVersionsResponse,
 } from '../../common/types';
 export {
   entries,

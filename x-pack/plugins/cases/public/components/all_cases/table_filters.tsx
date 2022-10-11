@@ -10,17 +10,19 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
-import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
-import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+import { AssigneesFilterPopover } from './assignees_filter';
+import { CurrentUserProfile } from '../types';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -28,11 +30,12 @@ interface CasesTableFiltersProps {
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
-  setFilterRefetch: (val: () => void) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   availableSolutions: string[];
   displayCreateCaseButton?: boolean;
   onCreateCasePressed?: () => void;
+  isLoading: boolean;
+  currentUserProfile: CurrentUserProfile;
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -54,51 +57,29 @@ const CasesTableFiltersComponent = ({
   countInProgressCases,
   onFilterChanged,
   initial = DEFAULT_FILTER_OPTIONS,
-  setFilterRefetch,
   hiddenStatuses,
   availableSolutions,
   displayCreateCaseButton,
   onCreateCasePressed,
+  isLoading,
+  currentUserProfile,
 }: CasesTableFiltersProps) => {
-  const [selectedReporters, setSelectedReporters] = useState(
-    initial.reporters.map((r) => r.full_name ?? r.username ?? '')
-  );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [selectedOwner, setSelectedOwner] = useState(initial.owner);
-  const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
-  const { reporters, respReporters, fetchReporters } = useGetReporters();
+  const [selectedOwner, setSelectedOwner] = useState([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
+  const { data: tags = [] } = useGetTags();
+  const { caseAssignmentAuthorized } = useCasesFeatures();
 
-  const refetch = useCallback(() => {
-    fetchTags();
-    fetchReporters();
-  }, [fetchReporters, fetchTags]);
-
-  useEffect(() => {
-    if (setFilterRefetch != null) {
-      setFilterRefetch(refetch);
-    }
-  }, [refetch, setFilterRefetch]);
-
-  const handleSelectedReporters = useCallback(
-    (newReporters) => {
-      if (!isEqual(newReporters, selectedReporters)) {
-        setSelectedReporters(newReporters);
-        const reportersObj = respReporters.filter(
-          (r) => newReporters.includes(r.username) || newReporters.includes(r.full_name)
-        );
-        onFilterChanged({ reporters: reportersObj });
+  const handleSelectedAssignees = useCallback(
+    (newAssignees: UserProfileWithAvatar[]) => {
+      if (!isEqual(newAssignees, selectedAssignees)) {
+        setSelectedAssignees(newAssignees);
+        onFilterChanged({ assignees: newAssignees.map((assignee) => assignee.uid) });
       }
     },
-    [selectedReporters, respReporters, onFilterChanged]
+    [selectedAssignees, onFilterChanged]
   );
-
-  useEffect(() => {
-    if (selectedReporters.length) {
-      const newReporters = selectedReporters.filter((r) => reporters.includes(r));
-      handleSelectedReporters(newReporters);
-    }
-  }, [handleSelectedReporters, reporters, selectedReporters]);
 
   const handleSelectedTags = useCallback(
     (newTags) => {
@@ -112,7 +93,7 @@ const CasesTableFiltersComponent = ({
 
   const handleSelectedSolution = useCallback(
     (newOwner) => {
-      if (!isEqual(newOwner, selectedOwner) && newOwner.length) {
+      if (!isEqual(newOwner, selectedOwner)) {
         setSelectedOwner(newOwner);
         onFilterChanged({ owner: newOwner });
       }
@@ -202,13 +183,14 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <FilterPopover
-            buttonLabel={i18n.REPORTER}
-            onSelectedOptionsChanged={handleSelectedReporters}
-            selectedOptions={selectedReporters}
-            options={reporters}
-            optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
-          />
+          {caseAssignmentAuthorized ? (
+            <AssigneesFilterPopover
+              selectedAssignees={selectedAssignees}
+              currentUserProfile={currentUserProfile}
+              isLoading={isLoading}
+              onSelectionChange={handleSelectedAssignees}
+            />
+          ) : null}
           <FilterPopover
             buttonLabel={i18n.TAGS}
             onSelectedOptionsChanged={handleSelectedTags}

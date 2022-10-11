@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
   ConnectionNode,
@@ -33,6 +33,7 @@ export async function fetchServicePathsFromTraceIds(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

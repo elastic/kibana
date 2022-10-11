@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { LensPlugin } from './plugin';
 
 export type {
@@ -21,7 +22,7 @@ export type {
   YAxisMode,
   SeriesType,
   YConfig,
-} from './xy_visualization/types';
+} from './visualizations/xy/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -32,15 +33,15 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
-  MetricState,
+  LegacyMetricState as MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
 } from '../common/types';
 
-export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
@@ -101,9 +102,11 @@ export type {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
+
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
-export { layerTypes } from '../common';
+/** @deprecated  Please use LayerTypes from @kbn/expression-xy-plugin **/
+export const layerTypes = LayerTypes;
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

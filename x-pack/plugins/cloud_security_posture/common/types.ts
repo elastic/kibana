@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
@@ -33,8 +33,10 @@ export interface PostureTrend extends Stats {
 export interface Cluster {
   meta: {
     clusterId: string;
+    clusterName?: string;
     benchmarkName: string;
-    lastUpdate: number; // unix epoch time
+    benchmarkId: BenchmarkId;
+    lastUpdate: string;
   };
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
@@ -48,7 +50,7 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
-export type Status =
+export type CspStatusCode =
   | 'indexed' // latest findings index exists and has results
   | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
   | 'index-timeout' // index timeout was surpassed since installation
@@ -57,16 +59,16 @@ export type Status =
 
 interface BaseCspSetupStatus {
   latestPackageVersion: string;
-  installedIntegrations: number;
+  installedPackagePolicies: number;
   healthyAgents: number;
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
-  status: Extract<Status, 'not-installed'>;
+  status: Extract<CspStatusCode, 'not-installed'>;
 }
 
 interface CspSetupInstalledStatus extends BaseCspSetupStatus {
-  status: Exclude<Status, 'not-installed'>;
+  status: Exclude<CspStatusCode, 'not-installed'>;
   // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
   // status can be `indexed` but return with undefined package information in this case
   installedPackageVersion: string | undefined;
@@ -80,21 +82,13 @@ export interface CspRulesStatus {
   disabled: number;
 }
 
+export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
+
 export interface Benchmark {
-  package_policy: Pick<
-    PackagePolicy,
-    | 'id'
-    | 'name'
-    | 'policy_id'
-    | 'namespace'
-    | 'package'
-    | 'updated_at'
-    | 'updated_by'
-    | 'created_at'
-    | 'created_by'
-  >;
-  agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
+  package_policy: PackagePolicy;
+  agent_policy: AgentPolicyStatus;
   rules: CspRulesStatus;
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspRuleMetadata['benchmark']['name'];

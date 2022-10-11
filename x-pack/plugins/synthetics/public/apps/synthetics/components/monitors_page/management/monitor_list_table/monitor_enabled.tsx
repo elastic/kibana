@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
@@ -18,20 +19,31 @@ interface Props {
   monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
   initialLoading?: boolean;
+  isSwitchable?: boolean;
 }
 
-export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
+export const MonitorEnabled = ({
+  id,
+  monitor,
+  reloadPage,
+  initialLoading = false,
+  isSwitchable = true,
+}: Props) => {
   const isDisabled = !useCanEditSynthetics();
 
-  const { isEnabled, setIsEnabled, status } = useMonitorEnableHandler({
+  const monitorName = monitor[ConfigKey.NAME];
+  const statusLabels = useMemo(() => {
+    return {
+      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitorName),
+      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitorName),
+      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitorName),
+    };
+  }, [monitorName]);
+
+  const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
     id,
-    monitor,
     reloadPage,
-    labels: {
-      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME]),
-      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME]),
-      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME]),
-    },
+    labels: statusLabels,
   });
 
   const enabled = isEnabled ?? monitor[ConfigKey.ENABLED];
@@ -39,7 +51,7 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
 
   const handleEnabledChange = (event: EuiSwitchEvent) => {
     const checked = event.target.checked;
-    setIsEnabled(checked);
+    updateMonitorEnabledState(checked);
   };
 
   return (
@@ -47,7 +59,7 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
       {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <EuiSwitch
+        <SwitchWithCursor
           compressed={true}
           checked={enabled}
           disabled={isLoading || isDisabled}
@@ -55,9 +67,16 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
           label={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           title={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           data-test-subj="syntheticsIsMonitorEnabled"
+          isSwitchable={isSwitchable}
           onChange={handleEnabledChange}
         />
       )}
     </>
   );
 };
+
+const SwitchWithCursor = euiStyled(EuiSwitch)<{ isSwitchable: boolean }>`
+  & > button {
+    cursor: ${({ isSwitchable }) => (isSwitchable ? undefined : 'not-allowed')};
+  }
+`;

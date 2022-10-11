@@ -6,22 +6,29 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
-import { fetchMonitorStatusEffect, fetchSyntheticsMonitorEffect } from './monitor_summary';
+import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
-import { fetchMonitorListEffect } from './monitor_list';
-import { fetchMonitorOverviewEffect, quietFetchOverviewEffect } from './overview';
+import { fetchMonitorListEffect, upsertMonitorEffect } from './monitor_list';
+import {
+  fetchMonitorOverviewEffect,
+  quietFetchOverviewEffect,
+  fetchOverviewStatusEffect,
+} from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
+import { browserJourneyEffects } from './browser_journey';
 
 export const rootEffect = function* root(): Generator {
   yield all([
     fork(fetchIndexStatusEffect),
     fork(fetchSyntheticsEnablementEffect),
+    fork(upsertMonitorEffect),
     fork(fetchServiceLocationsEffect),
     fork(fetchMonitorListEffect),
-    fork(fetchMonitorStatusEffect),
     fork(fetchSyntheticsMonitorEffect),
     fork(fetchMonitorOverviewEffect),
     fork(quietFetchOverviewEffect),
+    fork(browserJourneyEffects),
+    fork(fetchOverviewStatusEffect),
   ]);
 };

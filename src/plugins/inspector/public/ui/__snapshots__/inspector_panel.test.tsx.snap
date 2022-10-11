@@ -21,11 +21,11 @@ Array [
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiPopover euiPopover--anchorDownRight"
+          class="euiPopover emotion-euiPopover"
           id="inspectorViewChooser"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <button
               class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"

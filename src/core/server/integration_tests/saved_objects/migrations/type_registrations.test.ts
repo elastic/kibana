@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REMOVED_TYPES } from '../../../saved_objects/migrations/core';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 // Types should NEVER be removed from this array
@@ -49,6 +49,8 @@ const previouslyRegisteredTypes = [
   'event_loop_delays_daily',
   'exception-list',
   'exception-list-agnostic',
+  'file',
+  'fileShare',
   'file-upload-telemetry',
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
@@ -56,7 +58,10 @@ const previouslyRegisteredTypes = [
   'fleet-agents',
   'fleet-enrollment-api-keys',
   'fleet-preconfiguration-deletion-record',
+  'fleet-fleet-server-host',
   'graph-workspace',
+  'guided-setup-state',
+  'guided-onboarding-guide-state',
   'index-pattern',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',

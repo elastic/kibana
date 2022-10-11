@@ -8,7 +8,7 @@
 import type { TinymathAST } from '@kbn/tinymath';
 import { OperationDefinition } from '..';
 import { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../types';
+import { IndexPattern } from '../../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
@@ -72,6 +72,13 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
   },
 };
 
+const optimizableFnsMap: Record<string, string> = {
+  add: '+',
+  subtract: '-',
+  multiply: '*',
+  divide: '/',
+};
+
 function astToString(ast: TinymathAST | string): string | number {
   if (typeof ast === 'number') {
     return ast;
@@ -88,6 +95,10 @@ function astToString(ast: TinymathAST | string): string | number {
       return `${ast.name}='${ast.value}'`;
     }
     return `${ast.name}=${ast.value}`;
+  }
+  if (optimizableFnsMap[ast.name]) {
+    // make sure to preserve the right grouping here adding explicit brackets
+    return `(${ast.args.map(astToString).join(` ${optimizableFnsMap[ast.name]} `)})`;
   }
   return `${getUnprefixedName(ast.name)}(${ast.args.map(astToString).join(',')})`;
 }

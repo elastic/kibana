@@ -28,6 +28,8 @@ export async function getOverallLatencyDistribution({
   kuery,
   query,
   percentileThreshold,
+  durationMinOverride,
+  durationMaxOverride,
   searchMetrics,
 }: {
   chartType: LatencyDistributionChartType;
@@ -38,6 +40,8 @@ export async function getOverallLatencyDistribution({
   kuery: string;
   query: estypes.QueryDslQueryContainer;
   percentileThreshold: number;
+  durationMinOverride?: number;
+  durationMaxOverride?: number;
   searchMetrics: boolean;
 }) {
   return withApmSpan('get_overall_latency_distribution', async () => {
@@ -63,23 +67,25 @@ export async function getOverallLatencyDistribution({
     }
 
     // #2: get histogram range steps
-    const rangeSteps = await fetchDurationHistogramRangeSteps({
-      chartType,
-      setup,
-      start,
-      end,
-      environment,
-      kuery,
-      query,
-      searchMetrics,
-    });
+    const { durationMin, durationMax, rangeSteps } =
+      await fetchDurationHistogramRangeSteps({
+        chartType,
+        setup,
+        start,
+        end,
+        environment,
+        kuery,
+        query,
+        searchMetrics,
+        durationMinOverride,
+        durationMaxOverride,
+      });
 
     if (!rangeSteps) {
       return overallLatencyDistribution;
     }
 
     // #3: get histogram chart data
-
     const { totalDocCount, durationRanges } = await fetchDurationRanges({
       chartType,
       setup,
@@ -92,6 +98,8 @@ export async function getOverallLatencyDistribution({
       searchMetrics,
     });
 
+    overallLatencyDistribution.durationMin = durationMin;
+    overallLatencyDistribution.durationMax = durationMax;
     overallLatencyDistribution.totalDocCount = totalDocCount;
     overallLatencyDistribution.overallHistogram = durationRanges;
 

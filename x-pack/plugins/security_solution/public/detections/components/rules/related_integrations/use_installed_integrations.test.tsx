@@ -9,7 +9,7 @@ jest.mock('../../../containers/detection_engine/rules/api');
 jest.mock('../../../../common/lib/kibana');
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
 import { useInstalledIntegrations } from './use_installed_integrations';

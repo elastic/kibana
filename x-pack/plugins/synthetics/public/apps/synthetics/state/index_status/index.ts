@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { createReducer } from '@reduxjs/toolkit';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
 
 import { getIndexStatus, getIndexStatusSuccess, getIndexStatusFail } from './actions';
@@ -14,7 +14,7 @@ import { getIndexStatus, getIndexStatusSuccess, getIndexStatusFail } from './act
 export interface IndexStatusState {
   data: StatesIndexStatus | null;
   loading: boolean;
-  error: IHttpFetchError<ResponseErrorBody> | null;
+  error: IHttpSerializedFetchError | null;
 }
 
 const initialState: IndexStatusState = {
@@ -33,7 +33,7 @@ export const indexStatusReducer = createReducer(initialState, (builder) => {
       state.loading = false;
     })
     .addCase(getIndexStatusFail, (state, action) => {
-      state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
+      state.error = action.payload;
       state.loading = false;
     });
 });

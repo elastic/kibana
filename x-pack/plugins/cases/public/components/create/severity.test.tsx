@@ -13,6 +13,7 @@ import { Severity } from './severity';
 import { FormProps, schema } from './schema';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 let globalForm: FormHook;
 const MockHookWrapperComponent: React.FC = ({ children }) => {
@@ -62,6 +63,7 @@ describe('Severity form field', () => {
     );
     expect(result.getByTestId('caseSeverity')).toBeTruthy();
     userEvent.click(result.getByTestId('case-severity-selection'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-severity-selection-high'));
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ severity: 'high' });

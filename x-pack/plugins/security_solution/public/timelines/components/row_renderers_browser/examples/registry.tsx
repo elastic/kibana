@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockEndpointRegistryModificationEvent } from '../../../../common/mock/mock_timeline_data';
+import { demoEndpointRegistryModificationEvent } from '../../../../common/demo_data/endpoint/registry_modification_event';
 import { createEndpointRegistryRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { MODIFIED_REGISTRY_KEY } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -22,7 +21,7 @@ const RegistryExampleComponent: React.FC = () => {
   return (
     <>
       {registryRowRenderer.renderRow({
-        data: mockEndpointRegistryModificationEvent,
+        data: demoEndpointRegistryModificationEvent,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}

@@ -208,6 +208,40 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * returns true if field is a TSDB dimension field
+   */
+  public get timeSeriesDimension() {
+    return this.spec.timeSeriesDimension || false;
+  }
+
+  /**
+   * returns type of TSDB metric or undefined
+   */
+  public get timeSeriesMetric() {
+    return this.spec.timeSeriesMetric;
+  }
+
+  /**
+   * returns list of alloeed fixed intervals
+   */
+  public get fixedInterval() {
+    return this.spec.fixedInterval;
+  }
+
+  /**
+   * returns true if the field is of rolled up type
+   */
+  public get isRolledUpField() {
+    return this.esTypes?.includes('aggregate_metric_double');
+  }
+
+  /**
+   * return list of allowed time zones
+   */
+  public get timeZone() {
+    return this.spec.timeZone;
+  }
+  /**
    * Returns true if field is available via doc values
    */
 
@@ -339,7 +373,7 @@ export class DataViewField implements DataViewFieldBase {
   public toSpec(config: ToSpecConfig = {}): FieldSpec {
     const { getFormatterForField } = config;
 
-    return {
+    const spec = {
       count: this.count,
       script: this.script,
       lang: this.lang,
@@ -357,7 +391,16 @@ export class DataViewField implements DataViewFieldBase {
       shortDotsEnable: this.spec.shortDotsEnable,
       runtimeField: this.runtimeField,
       isMapped: this.isMapped,
+      timeSeriesDimension: this.spec.timeSeriesDimension,
+      timeSeriesMetric: this.spec.timeSeriesMetric,
+      timeZone: this.spec.timeZone,
+      fixedInterval: this.spec.fixedInterval,
     };
+
+    // Filter undefined values from the spec
+    return Object.fromEntries(
+      Object.entries(spec).filter(([, v]) => typeof v !== 'undefined')
+    ) as FieldSpec;
   }
 
   /**

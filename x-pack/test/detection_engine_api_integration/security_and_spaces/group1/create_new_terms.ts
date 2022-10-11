@@ -77,6 +77,22 @@ export default ({ getService }: FtrProviderContext) => {
       expect(rule?.execution_summary?.last_execution.status).to.eql('succeeded');
     });
 
+    it('should not be able to create a new terms rule with too small history window', async () => {
+      const rule = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1'),
+        history_window_start: 'now-5m',
+      };
+      const response = await supertest
+        .post(DETECTION_ENGINE_RULES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(rule);
+
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal(
+        "params invalid: History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'"
+      );
+    });
+
     const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {
       if (!alert) {
         return undefined;
@@ -177,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_status': 'open',
         'kibana.alert.depth': 1,
         'kibana.alert.reason':
-          'authentication event by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',
+          'authentication event with source 8.42.77.171 by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',
         'kibana.alert.severity': 'high',
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.parameters': {
@@ -277,8 +293,8 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
-        // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-        history_window_start: '2019-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2019-02-19T20:41:59.000Z',
       };
 
       const createdRule = await createRule(supertest, log, rule);
@@ -328,8 +344,8 @@ export default ({ getService }: FtrProviderContext) => {
           index: ['timestamp-fallback-test', 'myfakeindex-3'],
           new_terms_fields: ['host.name'],
           from: '2020-12-16T16:00:00.000Z',
-          // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-          history_window_start: '2020-12-16T16:00:00.000Z',
+          // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+          history_window_start: '2020-12-16T15:59:00.000Z',
           timestamp_override: 'event.ingested',
         };
 
@@ -352,8 +368,8 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
-        // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-        history_window_start: '2019-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2019-02-19T20:41:59.000Z',
       };
       const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
         [
@@ -390,8 +406,8 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['process.pid'],
         from: '2018-02-19T20:42:00.000Z',
-        // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-        history_window_start: '2018-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2018-02-19T20:41:59.000Z',
         max_signals: maxSignals,
       };
 
@@ -417,6 +433,38 @@ export default ({ getService }: FtrProviderContext) => {
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
       expect(processPids[0]).eql([1]);
+    });
+
+    describe('alerts should be be enriched', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+      });
+
+      it('should be enriched with host risk score', async () => {
+        const rule: NewTermsCreateSchema = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name'],
+          from: '2019-02-19T20:42:00.000Z',
+          history_window_start: '2019-01-19T20:42:00.000Z',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          createdRule.id,
+          RuleExecutionStatus.succeeded
+        );
+
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+        expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
+        expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_score_norm).to.eql(23);
+      });
     });
   });
 };

@@ -246,6 +246,15 @@ export class KbnClientSavedObjects {
       'inventory-view',
       'infrastructure-monitoring-log-view',
       'apm-indices',
+      // Fleet saved object types
+      'ingest-outputs',
+      'ingest-download-sources',
+      'ingest-agent-policies',
+      'ingest-package-policies',
+      'epm-packages',
+      'epm-packages-assets',
+      'fleet-preconfiguration-deletion-record',
+      'fleet-fleet-server-host',
     ];
 
     const newOptions = { types, space: options?.space };

@@ -6,8 +6,8 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { AlertParams } from '../route';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -47,7 +47,7 @@ export async function getTransactionErrorCountChartPreview({
 
   const params = {
     apm: { events: [ProcessorEvent.error] },
-    body: { size: 0, query, aggs },
+    body: { size: 0, track_total_hits: false, query, aggs },
   };
 
   const resp = await apmEventClient.search(

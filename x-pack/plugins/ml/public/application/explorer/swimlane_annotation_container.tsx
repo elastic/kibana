@@ -219,6 +219,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .on('mouseout', () => tooltipService.hide());
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth, domain, annotationsData, tooltipService]);
 
   return <div ref={canvasRef} />;

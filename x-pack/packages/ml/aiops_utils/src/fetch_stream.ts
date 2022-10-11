@@ -44,17 +44,24 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
 ): AsyncGenerator<
   [GeneratorError, ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined]
 > {
-  const stream = await fetch(endpoint, {
-    signal: abortCtrl.current.signal,
-    method: 'POST',
-    headers: {
-      // This refers to the format of the request body,
-      // not the response, which will be a uint8array Buffer.
-      'Content-Type': 'application/json',
-      'kbn-xsrf': 'stream',
-    },
-    ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
-  });
+  let stream: Response;
+
+  try {
+    stream = await fetch(endpoint, {
+      signal: abortCtrl.current.signal,
+      method: 'POST',
+      headers: {
+        // This refers to the format of the request body,
+        // not the response, which will be a uint8array Buffer.
+        'Content-Type': 'application/json',
+        'kbn-xsrf': 'stream',
+      },
+      ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
+    });
+  } catch (error) {
+    yield [error.toString(), undefined];
+    return;
+  }
 
   if (!stream.ok) {
     yield [`Error ${stream.status}: ${stream.statusText}`, undefined];

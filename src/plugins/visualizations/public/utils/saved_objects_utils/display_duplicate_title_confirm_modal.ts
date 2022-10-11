@@ -8,14 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { OverlayStart } from '@kbn/core/public';
-import type { SavedObject } from '@kbn/saved-objects-plugin/public';
+import type { VisSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
-  savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,
+  savedObject: Pick<VisSavedObject, 'title' | 'getDisplayName'>,
   overlays: OverlayStart
-): Promise<true> {
+): Promise<boolean> {
   const confirmMessage = i18n.translate(
     'visualizations.confirmModal.saveDuplicateConfirmationMessage',
     {

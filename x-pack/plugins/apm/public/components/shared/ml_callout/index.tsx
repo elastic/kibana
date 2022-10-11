@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { APMLink } from '../links/apm/apm_link';
+import { LegacyAPMLink } from '../links/apm/apm_link';
 
 export function shouldDisplayMlCallout(
   anomalyDetectionSetupState: AnomalyDetectionSetupState
@@ -58,7 +58,7 @@ export function MLCallout({
 
   const getLearnMoreLink = (color: 'primary' | 'success') => (
     <EuiButton color={color}>
-      <APMLink
+      <LegacyAPMLink
         path="/settings/anomaly-detection"
         style={{ whiteSpace: 'nowrap' }}
         color={color}
@@ -66,7 +66,7 @@ export function MLCallout({
         {i18n.translate('xpack.apm.mlCallout.learnMoreButton', {
           defaultMessage: `Learn more`,
         })}
-      </APMLink>
+      </LegacyAPMLink>
     </EuiButton>
   );
 

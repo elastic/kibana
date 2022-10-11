@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import {
   ApiDeclaration,
@@ -16,14 +16,15 @@ import {
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
 } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDueByTeam(
+export async function writeDeprecationDueByTeam(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   plugins: PluginOrPackage[],
   log: ToolingLog
-): void {
+): Promise<void> {
   const groupedByTeam: ReferencedDeprecationsByPlugin = Object.keys(deprecationsByPlugin).reduce(
     (teamMap: ReferencedDeprecationsByPlugin, pluginId: string) => {
       const dueDeprecations = deprecationsByPlugin[pluginId].filter(
@@ -58,7 +59,7 @@ export function writeDeprecationDueByTeam(
 
       return `
     ## ${key}
-    
+
     | Plugin | Deprecated API | Reference location(s) | Remove By |
     | --------|-------|-----------|-----------|
     ${Object.keys(groupedDeprecationReferences)
@@ -79,7 +80,7 @@ export function writeDeprecationDueByTeam(
               (ref) =>
                 `[${ref.path.substr(
                   ref.path.lastIndexOf(Path.sep) + 1
-                )}](https://github.com/elastic/kibana/tree/master/${
+                )}](https://github.com/elastic/kibana/tree/main/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
@@ -97,18 +98,18 @@ export function writeDeprecationDueByTeam(
 
   const mdx = dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsDeprecationsDueByTeam
 slug: /kibana-dev-docs/api-meta/deprecations-due-by-team
 title: Deprecated APIs due to be removed, by team
-summary: Lists the teams that are referencing deprecated APIs with a remove by date.
+description: Lists the teams that are referencing deprecated APIs with a remove by date.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
-${tableMdx}   
+${tableMdx}
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_team.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'deprecations_by_team.mdx'), mdx);
 }

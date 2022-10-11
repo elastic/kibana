@@ -40,6 +40,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
                 anchorPosition="downLeft"
                 capabilities={core.application.capabilities}
                 navigateToApp={core.application.navigateToApp}
+                navigateToUrl={core.application.navigateToUrl}
               />
             </Suspense>
           </KibanaThemeProvider>

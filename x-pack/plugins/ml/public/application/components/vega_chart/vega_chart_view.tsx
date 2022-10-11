@@ -37,6 +37,7 @@ export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
       .initialize(`#${htmlId}`);
 
     view.runAsync(); // evaluate and render the view
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vegaSpec]);
 
   return <div id={htmlId} className="mlVegaChart" data-test-subj="mlVegaChart" />;

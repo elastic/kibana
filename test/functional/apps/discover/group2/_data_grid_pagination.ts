@@ -18,9 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const security = getService('security');
 
   describe('discover data grid pagination', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await browser.setWindowSize(1200, 2000);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

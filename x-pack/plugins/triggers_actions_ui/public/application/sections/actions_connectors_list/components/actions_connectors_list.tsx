@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -105,6 +105,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const [showWarningText, setShowWarningText] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -137,8 +138,8 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionType: actionTypesIndex[action.actionTypeId]
             ? actionTypesIndex[action.actionTypeId].name
             : action.actionTypeId,
-          featureIds: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].supportedFeatureIds
+          compatibility: actionTypesIndex[action.actionTypeId]
+            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
             : [],
         };
       })
@@ -152,6 +153,20 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
+
+  function setDeleteConnectorWarning(connectors: string[]) {
+    const show = connectors.some((c) => {
+      const action = actions.find((a) => a.id === c);
+      return (action && action.referencedByCount ? action.referencedByCount : 0) > 0;
+    });
+    setShowWarningText(show);
+  }
+
+  function onDelete(items: ActionConnectorTableItem[]) {
+    const itemIds = items.map((item: any) => item.id);
+    setConnectorsToDelete(itemIds);
+    setDeleteConnectorWarning(itemIds);
+  }
 
   async function loadActions() {
     setIsLoadingActions(true);
@@ -257,22 +272,28 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'featureIds',
+      field: 'compatibility',
+      'data-test-subj': 'connectorsTableCell-compatibility',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.compatibility',
         {
-          defaultMessage: 'Availability',
+          defaultMessage: 'Compatibility',
         }
       ),
       sortable: false,
       truncateText: true,
-      render: (availability: string[]) => {
+      render: (compatibility: string[]) => {
         return (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {(availability ?? []).map((featureId: string) => (
-              <EuiFlexItem grow={false} key={featureId}>
-                <EuiBadge data-test-subj="connectorsTableCell-featureIds" color="default">
-                  {getConnectorFeatureName(featureId)}
+          <EuiFlexGroup
+            wrap
+            responsive={false}
+            gutterSize="xs"
+            data-test-subj="compatibility-content"
+          >
+            {compatibility.map((compatibilityItem: string) => (
+              <EuiFlexItem grow={false} key={compatibilityItem}>
+                <EuiBadge data-test-subj="connectorsTableCell-compatibility-badge" color="default">
+                  {compatibilityItem}
                 </EuiBadge>
               </EuiFlexItem>
             ))}
@@ -285,11 +306,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-            <DeleteOperation
-              canDelete={canDelete}
-              item={item}
-              onDelete={() => setConnectorsToDelete([item.id])}
-            />
+            <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {item.isMissingSecrets ? (
               <>
                 {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
@@ -392,9 +409,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                   iconType="trash"
                   color="danger"
                   data-test-subj="bulkDelete"
-                  onClick={() => {
-                    setConnectorsToDelete(selectedItems.map((selected: any) => selected.id));
-                  }}
+                  onClick={() => onDelete(selectedItems)}
                   title={
                     canDelete
                       ? undefined
@@ -435,6 +450,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="actionsList">
       <DeleteModalConfirmation
+        data-test-subj="deleteConnectorsConfirmation"
         onDeleted={(deleted: string[]) => {
           if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
             const updatedActions = actions.filter(
@@ -462,6 +478,17 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         multipleTitle={i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
           { defaultMessage: 'connectors' }
+        )}
+        showWarningText={showWarningText}
+        warningText={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
+          {
+            defaultMessage:
+              '{connectors, plural, one {This connector is} other {Some connectors are}} currently in use.',
+            values: {
+              connectors: connectorsToDelete.length,
+            },
+          }
         )}
         setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />
@@ -498,7 +525,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
           }}
           onConnectorUpdated={(connector) => {
-            setEditConnectorProps({ initialConnector: connector });
+            setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
             loadActions();
           }}
           actionTypeRegistry={actionTypeRegistry}

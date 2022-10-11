@@ -7,6 +7,7 @@
     "bfetch": "src/plugins/bfetch",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
+    "contentManagement": "packages/content-management",
     "core": [
       "src/core",
       "packages/core"
@@ -18,6 +19,7 @@
     "dataViews": "src/plugins/data_views",
     "devTools": "src/plugins/dev_tools",
     "discover": "src/plugins/discover",
+    "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
@@ -39,6 +41,7 @@
     "eventAnnotation": "src/plugins/event_annotation",
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
+    "guidedOnboarding": "src/plugins/guided_onboarding",
     "home": "src/plugins/home",
     "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
@@ -57,17 +60,17 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lists": "packages/kbn-securitysolution-list-utils/src",
+    "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
     "savedObjects": "src/plugins/saved_objects",
+    "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "server": "src/legacy/server",
     "share": "src/plugins/share",
-    "sharedUX": "src/plugins/shared_ux",
-    "sharedUXComponents": "packages/kbn-shared-ux-components/src",
     "sharedUXPackages": "packages/shared-ux",
     "coloring": "packages/kbn-coloring/src",
     "statusPage": "src/legacy/core_plugins/status_page",
@@ -77,6 +80,7 @@
     "uiActionsEnhanced": "src/plugins/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
+    "userProfileComponents": "packages/kbn-user-profile-components",
     "utils": "packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeGauge": "src/plugins/vis_types/gauge",
@@ -91,7 +95,8 @@
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
-    "unifiedSearch": "src/plugins/unified_search"
+    "unifiedSearch": "src/plugins/unified_search",
+    "unifiedFieldList": "src/plugins/unified_field_list"
   },
   "translations": []
 }

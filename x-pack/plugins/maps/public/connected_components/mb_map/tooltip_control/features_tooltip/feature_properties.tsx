@@ -336,9 +336,11 @@ export class FeatureProperties extends Component<Props, State> {
     });
 
     return (
-      <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
-        <tbody>{rows}</tbody>
-      </table>
+      <div className="mapFeatureTooltip_tableWrapper">
+        <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
     );
   }
 }

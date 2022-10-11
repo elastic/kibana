@@ -101,7 +101,7 @@ describe('ResolveAllConflicts', () => {
           </EuiLink>
         }
         closePopover={[Function]}
-        display="inlineBlock"
+        display="inline-block"
         hasArrow={true}
         id="resolveAllConflictsVisibilityPopover"
         isOpen={false}

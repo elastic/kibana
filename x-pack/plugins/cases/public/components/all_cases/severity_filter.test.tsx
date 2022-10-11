@@ -10,6 +10,7 @@ import React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
 describe('Severity form field', () => {
@@ -39,6 +40,7 @@ describe('Severity form field', () => {
   it('selects the correct value when changed', async () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
     userEvent.click(result.getByTestId('case-severity-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-severity-filter-high'));
     await waitFor(() => {
       expect(onSeverityChange).toHaveBeenCalledWith('high');
@@ -48,6 +50,7 @@ describe('Severity form field', () => {
   it('selects the correct value when changed (all)', async () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
     userEvent.click(result.getByTestId('case-severity-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-severity-filter-all'));
     await waitFor(() => {
       expect(onSeverityChange).toHaveBeenCalledWith('all');

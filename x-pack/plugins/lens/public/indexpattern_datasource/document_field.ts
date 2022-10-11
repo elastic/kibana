@@ -7,16 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { DOCUMENT_FIELD_NAME } from '../../common';
-import { IndexPatternField } from './types';
+import type { IndexPatternField } from '../types';
+
+const customLabel = i18n.translate('xpack.lens.indexPattern.records', {
+  defaultMessage: 'Records',
+});
 
 /**
  * This is a special-case field which allows us to perform
  * document-level operations such as count.
  */
 export const documentField: IndexPatternField = {
-  displayName: i18n.translate('xpack.lens.indexPattern.records', {
-    defaultMessage: 'Records',
-  }),
+  displayName: customLabel,
+  customLabel,
   name: DOCUMENT_FIELD_NAME,
   type: 'document',
   aggregatable: true,

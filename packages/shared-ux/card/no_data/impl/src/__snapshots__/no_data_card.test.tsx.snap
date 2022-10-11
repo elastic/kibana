@@ -12,11 +12,11 @@ exports[`NoDataCard props button 1`] = `
         class="euiCard__image"
       >
         <figure
-          class="euiImage euiImage--fullWidth"
+          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
         >
           <img
             alt=""
-            class="euiImage__img"
+            class="euiImage emotion-euiImage-fullWidth"
             src="test-file-stub"
             style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
           />
@@ -86,11 +86,11 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
         class="euiCard__image"
       >
         <figure
-          class="euiImage euiImage--fullWidth"
+          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
         >
           <img
             alt=""
-            class="euiImage__img"
+            class="euiImage emotion-euiImage-fullWidth"
             src="test-file-stub"
             style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
           />
@@ -160,11 +160,11 @@ exports[`NoDataCard props href 1`] = `
         class="euiCard__image"
       >
         <figure
-          class="euiImage euiImage--fullWidth"
+          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
         >
           <img
             alt=""
-            class="euiImage__img"
+            class="euiImage emotion-euiImage-fullWidth"
             src="test-file-stub"
             style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
           />
@@ -234,11 +234,11 @@ exports[`NoDataCard props no access to Fleet 1`] = `
         class="euiCard__image"
       >
         <figure
-          class="euiImage euiImage--fullWidth"
+          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
         >
           <img
             alt=""
-            class="euiImage__img"
+            class="euiImage emotion-euiImage-fullWidth"
             src="test-file-stub"
             style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
           />
@@ -293,11 +293,11 @@ exports[`NoDataCard renders 1`] = `
         class="euiCard__image"
       >
         <figure
-          class="euiImage euiImage--fullWidth"
+          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
         >
           <img
             alt=""
-            class="euiImage__img"
+            class="euiImage emotion-euiImage-fullWidth"
             src="test-file-stub"
             style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
           />

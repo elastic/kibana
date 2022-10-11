@@ -27,6 +27,13 @@ export const createCaseSavedObjectType = (
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
+      assignees: {
+        properties: {
+          uid: {
+            type: 'keyword',
+          },
+        },
+      },
       closed_at: {
         type: 'date',
       },
@@ -39,6 +46,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -55,6 +65,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -101,6 +114,9 @@ export const createCaseSavedObjectType = (
               email: {
                 type: 'keyword',
               },
+              profile_uid: {
+                type: 'keyword',
+              },
             },
           },
           connector_name: {
@@ -141,6 +157,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

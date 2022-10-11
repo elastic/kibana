@@ -115,6 +115,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
         >
           <EuiFieldText
+            data-test-subj="createEnrollmentTokenNameField"
             name="name"
             autoComplete="off"
             placeholder={i18n.translate('xpack.fleet.newEnrollmentKey.placeholder', {
@@ -130,7 +131,12 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
           {...form.policyIdInput.formRowProps}
         >
-          <EuiSelect required={true} {...form.policyIdInput.props} options={selectPolicyOptions} />
+          <EuiSelect
+            data-test-subj="createEnrollmentTokenSelectField"
+            required={true}
+            {...form.policyIdInput.props}
+            options={selectPolicyOptions}
+          />
         </EuiFormRow>
       </form>
     </EuiForm>

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { IndexPattern } from '../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
 import { hasFunctionFieldArgument } from '../validation';
@@ -143,6 +143,32 @@ which lets you convert each grouping into a percent of total:
 
 \`\`\`
 sum(products.base_price) / overall_sum(sum(products.base_price))
+\`\`\`
+        `,
+
+                description:
+                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              }
+            )}
+          />
+        ),
+      },
+      {
+        label: i18n.translate('xpack.lens.formulaDocumentation.recentChange', {
+          defaultMessage: 'Recent change',
+        }),
+        description: (
+          <Markdown
+            markdown={i18n.translate(
+              'xpack.lens.formulaDocumentation.recentChangeDescription.markdown',
+              {
+                defaultMessage: `### Recent change
+
+Use \`reducedTimeRange='30m'\` to add an additional filter on the time range of a metric aligned with the end of the global time range. This can be used to calculate how much a value changed recently.
+
+\`\`\`
+max(system.network.in.bytes, reducedTimeRange="30m")
+ - min(system.network.in.bytes, reducedTimeRange="30m")
 \`\`\`
         `,
 
@@ -494,6 +520,11 @@ export function getFunctionSignatureLabel(
     if (def.shiftable) {
       extraArgs += i18n.translate('xpack.lens.formula.shiftExtraArguments', {
         defaultMessage: '[shift]?: string',
+      });
+    }
+    if (def.canReduceTimeRange) {
+      extraArgs += i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
+        defaultMessage: '[reducedTimeRange]?: string',
       });
     }
     return `${name}(${def.documentation?.signature}${extraArgs})`;

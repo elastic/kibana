@@ -21,3 +21,7 @@ export interface ListResult<T> {
   page: number;
   perPage: number;
 }
+
+export interface BulkGetResult<T> {
+  items: T[];
+}

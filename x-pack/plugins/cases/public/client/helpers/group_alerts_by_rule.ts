@@ -8,7 +8,7 @@
 import { CommentRequestAlertType } from '../../../common/api';
 import { CommentType, Ecs } from '../../../common';
 import { getRuleIdFromEvent } from './get_rule_id_from_event';
-import { CaseAttachments } from '../../types';
+import { CaseAttachmentsWithoutOwner } from '../../types';
 
 type Maybe<T> = T | null;
 interface Event {
@@ -20,25 +20,29 @@ interface EventNonEcsData {
   value?: Maybe<string[]>;
 }
 
-export const groupAlertsByRule = (items: Event[], owner: string): CaseAttachments => {
-  const attachmentsByRule = items.reduce<Record<string, CommentRequestAlertType>>((acc, item) => {
-    const rule = getRuleIdFromEvent(item);
-    if (!acc[rule.id]) {
-      acc[rule.id] = {
-        alertId: [],
-        index: [],
-        owner,
-        type: CommentType.alert as const,
-        rule,
-      };
-    }
-    const alerts = acc[rule.id].alertId;
-    const indexes = acc[rule.id].index;
-    if (Array.isArray(alerts) && Array.isArray(indexes)) {
-      alerts.push(item.ecs._id ?? '');
-      indexes.push(item.ecs._index ?? '');
-    }
-    return acc;
-  }, {});
+type CommentRequestAlertTypeWithoutOwner = Omit<CommentRequestAlertType, 'owner'>;
+
+export const groupAlertsByRule = (items: Event[]): CaseAttachmentsWithoutOwner => {
+  const attachmentsByRule = items.reduce<Record<string, CommentRequestAlertTypeWithoutOwner>>(
+    (acc, item) => {
+      const rule = getRuleIdFromEvent(item);
+      if (!acc[rule.id]) {
+        acc[rule.id] = {
+          alertId: [],
+          index: [],
+          type: CommentType.alert as const,
+          rule,
+        };
+      }
+      const alerts = acc[rule.id].alertId;
+      const indexes = acc[rule.id].index;
+      if (Array.isArray(alerts) && Array.isArray(indexes)) {
+        alerts.push(item.ecs._id ?? '');
+        indexes.push(item.ecs._index ?? '');
+      }
+      return acc;
+    },
+    {}
+  );
   return Object.values(attachmentsByRule);
 };

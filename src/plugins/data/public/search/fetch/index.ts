@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { handleResponse } from './handle_response';
+export { handleWarnings } from './handle_warnings';

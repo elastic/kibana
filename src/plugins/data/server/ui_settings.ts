@@ -493,8 +493,9 @@ export function getUiSettings(
       description: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodText', {
         defaultMessage:
           'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
-          'Elasticsearch terms enum API for improved autocomplete suggestion performance. Select terms_agg to use an ' +
-          'Elasticsearch terms aggregation. {learnMoreLink}',
+          'Elasticsearch terms enum API for improved autocomplete suggestion performance. (Note that terms_enum is ' +
+          'incompatible with Document Level Security.) Select terms_agg to use an Elasticsearch terms aggregation. ' +
+          '{learnMoreLink}',
         values: {
           learnMoreLink:
             `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +

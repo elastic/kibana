@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import {
   EuiConfirmModal,
   EuiComboBox,
@@ -36,6 +37,8 @@ import {
   useStartServices,
   useKibanaVersion,
 } from '../../../../hooks';
+
+import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 
 import {
   FALLBACK_VERSIONS,
@@ -68,33 +71,46 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   isScheduled = false,
 }) => {
   const { notifications } = useStartServices();
-  const kibanaVersion = useKibanaVersion();
+  const kibanaVersion = semverCoerce(useKibanaVersion())?.version || '';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string | undefined>();
+  const [availableVersions, setVersions] = useState<string[]>([]);
 
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   const isSmallBatch = agentCount <= 10;
   const isAllAgents = agents === '';
 
-  const fallbackVersions = useMemo(
-    () => [kibanaVersion].concat(FALLBACK_VERSIONS),
-    [kibanaVersion]
-  );
+  useEffect(() => {
+    const getVersions = async () => {
+      try {
+        const res = await sendGetAgentsAvailableVersions();
+        // if the endpoint returns an error, use the fallback versions
+        const versionsList = res?.data?.items ? res.data.items : FALLBACK_VERSIONS;
+
+        setVersions(versionsList);
+      } catch (err) {
+        return;
+      }
+    };
+
+    getVersions();
+  }, [kibanaVersion]);
 
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
-      return getMinVersion(fallbackVersions);
+      return getMinVersion(availableVersions);
     }
     const versions = (agents as Agent[]).map(
       (agent) => agent.local_metadata?.elastic?.agent?.version
     );
     return getMinVersion(versions);
-  }, [agents, fallbackVersions]);
+  }, [agents, availableVersions]);
 
   const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const displayVersions = minVersion
-      ? fallbackVersions.filter((v) => semverGt(v, minVersion))
-      : fallbackVersions;
+      ? availableVersions.filter((v) => semverGt(v, minVersion))
+      : availableVersions;
+
     const options = displayVersions.map((option) => ({
       label: option,
       value: option,
@@ -103,8 +119,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       return [{ label: '', value: '' }];
     }
     return options;
-  }, [fallbackVersions, minVersion]);
-  const noVersions = versionOptions[0]?.value === '';
+  }, [availableVersions, minVersion]);
+  const noVersions = !availableVersions || versionOptions[0]?.value === '';
 
   const maintenanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
     (option) => ({
@@ -120,7 +136,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       value: option === 0 ? 0 : option * 3600,
     })
   );
-  const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
+  const preselected: Array<EuiComboBoxOptionOption<string>> = [
+    {
+      label: kibanaVersion,
+      value: kibanaVersion,
+    },
+  ];
+  const [selectedVersion, setSelectedVersion] = useState(preselected);
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
@@ -140,7 +162,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
     try {
       setIsSubmitting(true);
-      const { data, error } = isSingleAgent
+      const { error } = isSingleAgent
         ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
             version,
           })
@@ -156,44 +178,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         throw error;
       }
 
-      const counts = Object.entries(data || {}).reduce(
-        (acc, [agentId, result]) => {
-          ++acc.total;
-          ++acc[result.success ? 'success' : 'error'];
-          return acc;
-        },
-        {
-          total: 0,
-          success: 0,
-          error: 0,
-        }
-      );
       setIsSubmitting(false);
 
-      if (isSingleAgent && counts.success === counts.total) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Upgrading {count} agent',
-            values: { count: 1 },
-          })
-        );
-      } else if (counts.error === counts.total) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.upgradeAgents.bulkResultAllErrorsNotificationTitle', {
-            defaultMessage:
-              'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
-            values: { count: isAllAgents || agentCount },
-          })
-        );
-      } else {
-        notifications.toasts.addWarning({
-          text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
-            defaultMessage:
-              '{count} {count, plural, one {agent was} other {agents were}} not successful',
-            values: { count: counts.error },
-          }),
-        });
-      }
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.upgradeAgents.successNotificationTitle', {
+          defaultMessage: 'Upgrading agent(s)',
+        })
+      );
       onClose();
     } catch (error) {
       setIsSubmitting(false);

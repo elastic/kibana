@@ -54,13 +54,13 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             {!downloadSource ? (
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.createTitle"
-                defaultMessage="Add new agent download binary host"
+                defaultMessage="Add new agent binary source"
                 data-test-subj="editDownloadSourcesFlyout.add.title"
               />
             ) : (
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.editTitle"
-                defaultMessage="Edit agent download binary host"
+                defaultMessage="Edit agent binary source"
                 data-test-subj="editDownloadSourcesFlyout.edit.title"
               />
             )}
@@ -116,6 +116,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                 defaultMessage="Host"
               />
             }
+            {...inputs.hostInput.formRowProps}
           >
             <EuiFieldText
               data-test-subj="editDownloadSourcesFlyout.hostInput"

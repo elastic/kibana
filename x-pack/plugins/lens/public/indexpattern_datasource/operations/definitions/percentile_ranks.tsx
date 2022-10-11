@@ -25,6 +25,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile_rank';
@@ -33,7 +34,12 @@ export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatter
   };
 }
 
-function ofName(name: string, value: number, timeShift: string | undefined) {
+function ofName(
+  name: string,
+  value: number,
+  timeShift: string | undefined,
+  reducedTimeRange: string | undefined
+) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileRanksOf', {
       defaultMessage: 'Percentile rank ({value}) of {name}',
@@ -42,7 +48,9 @@ function ofName(name: string, value: number, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    reducedTimeRange
   );
 }
 
@@ -72,8 +80,13 @@ export const percentileRanksOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
+  canReduceTimeRange: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
+    if (
+      supportedFieldTypes.includes(fieldType) &&
+      aggregatable &&
+      (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
+    ) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -88,11 +101,16 @@ export const percentileRanksOperation: OperationDefinition<
       newField &&
         supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
-        !newField.aggregationRestrictions
+        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.params.value, column.timeShift),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.params.value,
+      column.timeShift,
+      column.reducedTimeRange
+    ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileRanksParam =
       previousColumn &&
@@ -104,7 +122,8 @@ export const percentileRanksOperation: OperationDefinition<
       label: ofName(
         getSafeName(field.name, indexPattern),
         newPercentileRanksParam,
-        previousColumn?.timeShift
+        previousColumn?.timeShift,
+        previousColumn?.reducedTimeRange
       ),
       dataType: 'number',
       operationType: 'percentile_rank',
@@ -113,6 +132,7 @@ export const percentileRanksOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         value: newPercentileRanksParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -122,7 +142,12 @@ export const percentileRanksOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.params.value, oldColumn.timeShift),
+      label: ofName(
+        field.displayName,
+        oldColumn.params.value,
+        oldColumn.timeShift,
+        oldColumn.reducedTimeRange
+      ),
       sourceField: field.name,
     };
   },
@@ -144,6 +169,7 @@ export const percentileRanksOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
@@ -170,7 +196,8 @@ export const percentileRanksOperation: OperationDefinition<
                 indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                   currentColumn.sourceField,
                 Number(value),
-                currentColumn.timeShift
+                currentColumn.timeShift,
+                currentColumn.reducedTimeRange
               ),
           params: {
             ...currentColumn.params,
@@ -239,4 +266,12 @@ Example: Get the percentage of values which are below of 100:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.percentileRanks.documentation.quick',
+    {
+      defaultMessage: `
+The percentage of values that are below a specific value. For example, when a value is greater than or equal to 95% of the calculated values, the value is the 95th percentile rank.
+      `,
+    }
+  ),
 };

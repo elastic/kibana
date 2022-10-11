@@ -17,9 +17,8 @@ import {
   TooltipValue,
   BrushEndListener,
 } from '@elastic/charts';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { getChartTheme } from '../../metrics_explorer/components/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -30,6 +29,7 @@ import {
   seriesHasLessThen2DataPoints,
 } from './helpers';
 import { ErrorMessage } from './error_message';
+import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { VisSectionProps } from '../types';
 

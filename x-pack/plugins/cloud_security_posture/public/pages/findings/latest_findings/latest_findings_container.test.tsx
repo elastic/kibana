@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { createReactQueryResponse } from '../../../test/fixtures/react_query';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -23,6 +23,8 @@ import { getPaginationQuery } from '../utils/utils';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
@@ -68,6 +70,8 @@ describe('<LatestFindingsContainer />', () => {
           unifiedSearch: unifiedSearchPluginMock.createStartContract(),
           charts: chartPluginMock.createStartContract(),
           discover: discoverPluginMock.createStartContract(),
+          fleet: fleetMock.createStartMock(),
+          licensing: licensingMock.createStart(),
         }}
       >
         <FindingsEsPitContext.Provider value={{ setPitId, pitIdRef, pitQuery }}>

@@ -7,7 +7,8 @@
 
 import { CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import React, { Suspense } from 'react';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
@@ -15,15 +16,26 @@ import {
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
-  ThreatIntelligenceSecuritySolutionContext,
+  SecuritySolutionPluginContext,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
+import { EnterpriseGuard } from './containers/enterprise_guard';
+import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
+import { IntegrationsGuard } from './containers/integrations_guard';
 
 interface AppProps {
-  securitySolutionContext: ThreatIntelligenceSecuritySolutionContext;
+  securitySolutionContext: SecuritySolutionPluginContext;
 }
 
 const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/indicators_page'));
+
+const IndicatorsPage: VFC = () => (
+  <SecuritySolutionPluginTemplateWrapper>
+    <Suspense fallback={<div />}>
+      <LazyIndicatorsPage />
+    </Suspense>
+  </SecuritySolutionPluginTemplateWrapper>
+);
 
 /**
  * This is used here:
@@ -35,13 +47,17 @@ export const createApp =
   ({ securitySolutionContext }: AppProps) =>
     (
       <IntlProvider>
-        <KibanaContextProvider services={services}>
+        <ReduxStoreProvider store={securitySolutionContext.getSecuritySolutionStore}>
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
-            <Suspense fallback={<div />}>
-              <LazyIndicatorsPage />
-            </Suspense>
+            <KibanaContextProvider services={services}>
+              <EnterpriseGuard>
+                <IntegrationsGuard>
+                  <IndicatorsPage />
+                </IntegrationsGuard>
+              </EnterpriseGuard>
+            </KibanaContextProvider>
           </SecuritySolutionContext.Provider>
-        </KibanaContextProvider>
+        </ReduxStoreProvider>
       </IntlProvider>
     );
 
@@ -64,7 +80,9 @@ export class ThreatIntelligencePlugin implements Plugin<void, void> {
       ...plugins,
     } as Services;
 
-    return { getComponent: createApp(services) };
+    return {
+      getComponent: createApp(services),
+    };
   }
 
   public stop() {}

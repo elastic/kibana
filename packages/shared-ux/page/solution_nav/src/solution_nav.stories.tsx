@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 import { SolutionNav as Component, SolutionNavProps } from './solution_nav';
 
 export default {
-  title: 'Page Template',
+  title: 'Page/Solution Nav',
   description: 'Solution-specific navigation for the sidebar',
 };
 

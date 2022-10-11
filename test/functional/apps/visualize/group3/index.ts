@@ -18,7 +18,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');

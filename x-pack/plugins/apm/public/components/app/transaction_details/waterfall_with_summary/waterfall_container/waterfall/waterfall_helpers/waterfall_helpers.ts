@@ -7,11 +7,11 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 

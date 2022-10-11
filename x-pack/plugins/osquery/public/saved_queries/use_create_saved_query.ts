@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
@@ -14,6 +14,7 @@ import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
+import type { SavedQuerySOFormData } from './form/use_saved_query_form';
 
 interface UseCreateSavedQueryProps {
   withRedirect?: boolean;
@@ -28,7 +29,11 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation<{ data: SavedQuerySO }, { body: { error: string; message: string } }>(
+  return useMutation<
+    { data: SavedQuerySO },
+    { body: { error: string; message: string } },
+    SavedQuerySOFormData
+  >(
     (payload) =>
       http.post('/api/osquery/saved_queries', {
         body: JSON.stringify(payload),
@@ -41,7 +46,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
         });
       },
       onSuccess: (response) => {
-        queryClient.invalidateQueries(SAVED_QUERIES_ID);
+        queryClient.invalidateQueries([SAVED_QUERIES_ID]);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         }

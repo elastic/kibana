@@ -9,11 +9,21 @@ PKG_REQUIRE_NAME = "@kbn/monaco"
 SOURCE_FILES = glob(
   [
     "src/**/*",
+    "**/*.ts",
   ],
   exclude = [
-    "**/__jest__",
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/README.md",
+    "**/*.stories.*",
+    "**/__jest_/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -32,11 +42,11 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
+  "@npm//@babel/runtime",
   "@npm//antlr4ts",
   "@npm//babel-loader",
   "@npm//monaco-editor",
   "@npm//raw-loader",
-  "@npm//regenerator-runtime",
   "@npm//rxjs",
 ]
 
@@ -99,7 +109,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

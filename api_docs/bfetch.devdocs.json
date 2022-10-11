@@ -21,6 +21,7 @@
         ],
         "path": "src/plugins/bfetch/public/streaming/split.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -34,6 +35,7 @@
             ],
             "path": "src/plugins/bfetch/public/streaming/split.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -56,6 +58,7 @@
         ],
         "path": "src/plugins/bfetch/public/batching/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -69,7 +72,8 @@
               "Payload"
             ],
             "path": "src/plugins/bfetch/public/batching/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -82,7 +86,8 @@
               "AbortSignal | undefined"
             ],
             "path": "src/plugins/bfetch/public/batching/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -99,6 +104,7 @@
         ],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -112,6 +118,7 @@
       "description": [],
       "path": "src/plugins/bfetch/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "bfetch",
@@ -129,6 +136,7 @@
           ],
           "path": "src/plugins/bfetch/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "bfetch",
@@ -142,6 +150,7 @@
               ],
               "path": "src/plugins/bfetch/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -169,6 +178,7 @@
           ],
           "path": "src/plugins/bfetch/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "bfetch",
@@ -183,6 +193,7 @@
               ],
               "path": "src/plugins/bfetch/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -216,6 +227,7 @@
         ],
         "path": "src/plugins/bfetch/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -229,6 +241,7 @@
             ],
             "path": "src/plugins/bfetch/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -242,6 +255,7 @@
                 ],
                 "path": "src/plugins/bfetch/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -263,6 +277,7 @@
       "description": [],
       "path": "src/plugins/bfetch/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "bfetch",
@@ -286,6 +301,7 @@
           ],
           "path": "src/plugins/bfetch/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "bfetch",
@@ -299,6 +315,7 @@
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -323,6 +340,7 @@
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -338,7 +356,9 @@
           "signature": [
             "<Payload, Response>(path: string, params: (request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>) => ",
+            "<unknown, unknown, unknown, any>, context: ",
+            "RequestHandlerContext",
+            ") => ",
             {
               "pluginId": "bfetch",
               "scope": "common",
@@ -346,10 +366,17 @@
               "section": "def-common.StreamingResponseHandler",
               "text": "StreamingResponseHandler"
             },
-            "<Payload, Response>) => void"
+            "<Payload, Response>, method?: \"GET\" | \"POST\" | \"PUT\" | \"DELETE\" | undefined, pluginRouter?: ",
+            "IRouter",
+            "<",
+            "RequestHandlerContext",
+            "> | undefined, options?: ",
+            "RouteConfigOptions",
+            "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined) => void"
           ],
           "path": "src/plugins/bfetch/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "bfetch",
@@ -363,6 +390,7 @@
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -375,7 +403,9 @@
               "signature": [
                 "(request: ",
                 "KibanaRequest",
-                "<unknown, unknown, unknown, any>) => ",
+                "<unknown, unknown, unknown, any>, context: ",
+                "RequestHandlerContext",
+                ") => ",
                 {
                   "pluginId": "bfetch",
                   "scope": "common",
@@ -387,7 +417,57 @@
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.BfetchServerSetup.addStreamingResponseRoute.$3",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "method",
+              "description": [],
+              "signature": [
+                "\"GET\" | \"POST\" | \"PUT\" | \"DELETE\" | undefined"
+              ],
+              "path": "src/plugins/bfetch/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            },
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.BfetchServerSetup.addStreamingResponseRoute.$4",
+              "type": "Object",
+              "tags": [],
+              "label": "pluginRouter",
+              "description": [],
+              "signature": [
+                "IRouter",
+                "<",
+                "RequestHandlerContext",
+                "> | undefined"
+              ],
+              "path": "src/plugins/bfetch/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            },
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.BfetchServerSetup.addStreamingResponseRoute.$5",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "RouteConfigOptions",
+                "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined"
+              ],
+              "path": "src/plugins/bfetch/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
@@ -405,6 +485,7 @@
       "description": [],
       "path": "src/plugins/bfetch/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -433,6 +514,7 @@
         ],
         "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -446,6 +528,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -466,6 +549,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -481,7 +565,8 @@
               "\nGet current buffer size."
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -497,6 +582,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -510,6 +596,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -529,6 +616,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -546,6 +634,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -579,6 +668,7 @@
         ],
         "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -592,6 +682,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -612,6 +703,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -629,6 +721,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -642,6 +735,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -659,6 +753,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -674,6 +769,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -694,6 +790,7 @@
         ],
         "path": "src/plugins/bfetch/common/util/query_params.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -707,6 +804,7 @@
             ],
             "path": "src/plugins/bfetch/common/util/query_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -721,6 +819,7 @@
             ],
             "path": "src/plugins/bfetch/common/util/query_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -735,6 +834,7 @@
             ],
             "path": "src/plugins/bfetch/common/util/query_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -769,6 +869,7 @@
         ],
         "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -789,6 +890,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -823,6 +925,7 @@
         ],
         "path": "src/plugins/bfetch/common/util/normalize_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -836,6 +939,7 @@
             ],
             "path": "src/plugins/bfetch/common/util/normalize_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -854,6 +958,7 @@
         ],
         "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -867,6 +972,7 @@
             ],
             "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -894,6 +1000,7 @@
         ],
         "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -907,6 +1014,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -920,6 +1028,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -937,6 +1046,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -950,6 +1060,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -966,7 +1077,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -979,7 +1091,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -993,6 +1106,7 @@
         "description": [],
         "path": "src/plugins/bfetch/common/batch.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1002,7 +1116,8 @@
             "label": "compressed",
             "description": [],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -1012,7 +1127,8 @@
             "label": "payload",
             "description": [],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1036,6 +1152,7 @@
         ],
         "path": "src/plugins/bfetch/common/batch.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1048,7 +1165,8 @@
               "Item[]"
             ],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1072,6 +1190,7 @@
         ],
         "path": "src/plugins/bfetch/common/batch.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1081,7 +1200,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -1094,7 +1214,8 @@
               "Result | undefined"
             ],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -1107,7 +1228,8 @@
               "Error | undefined"
             ],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1121,6 +1243,7 @@
         "description": [],
         "path": "src/plugins/bfetch/common/batch.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1130,7 +1253,8 @@
             "label": "message",
             "description": [],
             "path": "src/plugins/bfetch/common/batch.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1154,6 +1278,7 @@
         ],
         "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1168,7 +1293,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "bfetch",
@@ -1184,6 +1310,7 @@
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -1197,6 +1324,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1224,6 +1352,7 @@
         ],
         "path": "src/plugins/bfetch/common/streaming/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1239,6 +1368,7 @@
             ],
             "path": "src/plugins/bfetch/common/streaming/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "bfetch",
@@ -1252,6 +1382,7 @@
                 ],
                 "path": "src/plugins/bfetch/common/streaming/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1287,6 +1418,7 @@
         ],
         "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "bfetch",
@@ -1301,7 +1433,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1321,6 +1454,7 @@
         ],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1335,6 +1469,7 @@
         ],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

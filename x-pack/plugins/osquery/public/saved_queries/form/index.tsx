@@ -17,25 +17,31 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
+import {
+  IntervalField,
+  QueryIdField,
+  QueryDescriptionField,
+  VersionField,
+  ResultsTypeField,
+} from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
-import { Field, getUseField, UseField } from '../../shared_imports';
-import { CodeEditorField } from './code_editor_field';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
-
-export const CommonUseField = getUseField({ component: Field });
+import { CodeEditorField } from './code_editor_field';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
   hasPlayground?: boolean;
   isValid?: boolean;
+  idSet?: Set<string>;
 }
 
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
   viewMode,
   hasPlayground,
   isValid,
+  idSet,
 }) => {
   const [playgroundVisible, setPlaygroundVisible] = useState(false);
 
@@ -77,11 +83,11 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
 
   return (
     <>
-      <CommonUseField path="id" euiFieldProps={euiFieldProps} />
+      <QueryIdField idSet={idSet} euiFieldProps={euiFieldProps} />
       <EuiSpacer />
-      <CommonUseField path="description" euiFieldProps={euiFieldProps} />
+      <QueryDescriptionField euiFieldProps={euiFieldProps} />
       <EuiSpacer />
-      <UseField path="query" component={CodeEditorField} euiFieldProps={euiFieldProps} />
+      <CodeEditorField euiFieldProps={euiFieldProps} />
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -92,7 +98,10 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="play" onClick={handleTogglePlayground}>
-              Test configuration
+              <FormattedMessage
+                id="xpack.osquery.savedQueries.form.packConfigSection.testConfigButtonLabel"
+                defaultMessage="Test configuration"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -119,16 +128,14 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <CommonUseField path="interval" euiFieldProps={intervalEuiFieldProps} />
+          <IntervalField euiFieldProps={intervalEuiFieldProps} />
           <EuiSpacer size="m" />
-          <CommonUseField path="version" euiFieldProps={versionEuiFieldProps} />
+          <VersionField euiFieldProps={versionEuiFieldProps} />
+          <EuiSpacer size="m" />
+          <ResultsTypeField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <CommonUseField
-            path="platform"
-            component={PlatformCheckBoxGroupField}
-            euiFieldProps={euiFieldProps}
-          />
+          <PlatformCheckBoxGroupField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {playgroundVisible && (

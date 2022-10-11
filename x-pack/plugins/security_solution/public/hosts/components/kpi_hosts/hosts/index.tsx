@@ -40,7 +40,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
@@ -66,7 +66,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
+      updateDateRange={updateDateRange}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}

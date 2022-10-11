@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SearchSourceSearchOptions } from '../../..';
 import { GetConfigFn } from '../../../types';
 import { IKibanaSearchResponse } from '../../types';
 
@@ -15,6 +16,7 @@ import { IKibanaSearchResponse } from '../../types';
  * This type is used when flattenning a SearchSource and passing it down to legacy search.
  * Once legacy search is removed, this type should become internal to `SearchSource`,
  * where `ISearchRequestParams` is used externally instead.
+ * FIXME: replace with estypes.SearchRequest?
  */
 export type SearchRequest = Record<string, any>;
 
@@ -24,7 +26,11 @@ export interface FetchHandlers {
    * Callback which can be used to hook into responses, modify them, or perform
    * side effects like displaying UI errors on the client.
    */
-  onResponse: (request: SearchRequest, response: IKibanaSearchResponse) => IKibanaSearchResponse;
+  onResponse: (
+    request: SearchRequest,
+    response: IKibanaSearchResponse,
+    options: SearchSourceSearchOptions
+  ) => IKibanaSearchResponse;
 }
 
 export interface SearchError {

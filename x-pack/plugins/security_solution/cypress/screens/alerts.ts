@@ -22,8 +22,6 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
-export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
-
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 
@@ -43,6 +41,8 @@ export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$
 export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
+
+export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
 export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj="comboBoxInput"]';
 
@@ -79,6 +79,10 @@ export const SELECT_TABLE = '[data-test-subj="table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
+export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
+
+export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
+
 export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
 
 export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=source\\.ip]';
@@ -92,3 +96,15 @@ export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+
+export const HOST_RISK_HEADER_COLIMN =
+  '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
+
+export const HOST_RISK_COLUMN = '[data-gridcell-column-id="host.risk.calculated_level"]';
+
+export const USER_RISK_HEADER_COLIMN =
+  '[data-test-subj="dataGridHeaderCell-user.risk.calculated_level"]';
+
+export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
+
+export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control-column"]';

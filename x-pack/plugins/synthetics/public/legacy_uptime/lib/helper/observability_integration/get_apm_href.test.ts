@@ -39,14 +39,14 @@ describe('getLegacyApmHref', () => {
   it('creates href with base path when present', () => {
     const result = getLegacyApmHref(summary, 'foo', 'now-15m', 'now');
     expect(result).toMatchInlineSnapshot(
-      `"foo/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
+      `"foo/app/apm/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
     );
   });
 
   it('does not add a base path or extra slash when base path is empty string', () => {
     const result = getLegacyApmHref(summary, '', 'now-15m', 'now');
     expect(result).toMatchInlineSnapshot(
-      `"/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
+      `"/app/apm/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
     );
   });
 
@@ -59,7 +59,7 @@ describe('getLegacyApmHref', () => {
     it('links to the named service', () => {
       const result = getLegacyApmHref(summary, 'foo', 'now-15m', 'now');
       expect(result).toMatchInlineSnapshot(
-        `"foo/app/apm#/services?kuery=service.name:%20%22${serviceName}%22&rangeFrom=now-15m&rangeTo=now"`
+        `"foo/app/apm/services/MyServiceName/overview/?rangeFrom=now-15m&rangeTo=now"`
       );
     });
   });

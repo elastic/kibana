@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
@@ -51,7 +52,6 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 
 export function FallbackCorrelationBadge() {

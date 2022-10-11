@@ -24,6 +24,8 @@ import {
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
+import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+
 interface Properties {
   [key: string]: any;
 }
@@ -40,7 +42,7 @@ export interface CurrentDataStream {
   replicated: boolean;
   indexTemplate: IndexTemplate;
 }
-const DEFAULT_SCALING_FACTOR = 1000;
+
 const DEFAULT_IGNORE_ABOVE = 1024;
 
 // see discussion in https://github.com/elastic/kibana/issues/88307
@@ -103,6 +105,64 @@ export function getTemplate({
  * @param fields
  */
 export function generateMappings(fields: Field[]): IndexTemplateMappings {
+  const dynamicTemplates: Array<Record<string, Properties>> = [];
+  const dynamicTemplateNames = new Set<string>();
+
+  const { properties } = _generateMappings(fields, {
+    addDynamicMapping: (dynamicMapping: {
+      path: string;
+      matchingType: string;
+      pathMatch: string;
+      properties: string;
+    }) => {
+      const name = dynamicMapping.path;
+      if (dynamicTemplateNames.has(name)) {
+        return;
+      }
+
+      const dynamicTemplate: Properties = {
+        mapping: dynamicMapping.properties,
+      };
+
+      if (dynamicMapping.matchingType) {
+        dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
+      }
+
+      if (dynamicMapping.pathMatch) {
+        dynamicTemplate.path_match = dynamicMapping.pathMatch;
+      }
+      dynamicTemplateNames.add(name);
+      dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+    },
+  });
+
+  return dynamicTemplates.length
+    ? {
+        properties,
+        dynamic_templates: dynamicTemplates,
+      }
+    : { properties };
+}
+
+/**
+ * Generate mapping takes the given nested fields array and creates the Elasticsearch
+ * mapping properties out of it.
+ *
+ * This assumes that all fields with dotted.names have been expanded in a previous step.
+ *
+ * @param fields
+ */
+function _generateMappings(
+  fields: Field[],
+  ctx: {
+    addDynamicMapping: any;
+    groupFieldName?: string;
+  }
+): {
+  properties: IndexTemplateMappings['properties'];
+  hasNonDynamicTemplateMappings: boolean;
+} {
+  let hasNonDynamicTemplateMappings = false;
   const props: Properties = {};
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
@@ -111,101 +171,158 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
 
-      let fieldProps = getDefaultProperties(field);
+      if (type === 'object' && field.object_type) {
+        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
+        const pathMatch = path.includes('*') ? path : `${path}.*`;
 
-      switch (type) {
-        case 'group':
-          fieldProps = { ...generateMappings(field.fields!), ...generateDynamicAndEnabled(field) };
-          break;
-        case 'group-nested':
-          fieldProps = {
-            ...generateMappings(field.fields!),
-            ...generateNestedProps(field),
-            type: 'nested',
-          };
-          break;
-        case 'integer':
-          fieldProps.type = 'long';
-          break;
-        case 'scaled_float':
-          fieldProps.type = 'scaled_float';
-          fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
-          if (field.metric_type) {
-            fieldProps.time_series_metric = field.metric_type;
-          }
-          break;
-        case 'text':
-          const textMapping = generateTextMapping(field);
-          fieldProps = { ...fieldProps, ...textMapping, type: 'text' };
-          if (field.multi_fields) {
-            fieldProps.fields = generateMultiFields(field.multi_fields);
-          }
-          break;
-        case 'keyword':
-          const keywordMapping = generateKeywordMapping(field);
-          fieldProps = { ...fieldProps, ...keywordMapping, type: 'keyword' };
-          if (field.multi_fields) {
-            fieldProps.fields = generateMultiFields(field.multi_fields);
-          }
-          break;
-        case 'wildcard':
-          const wildcardMapping = generateWildcardMapping(field);
-          fieldProps = { ...fieldProps, ...wildcardMapping, type: 'wildcard' };
-          if (field.multi_fields) {
-            fieldProps.fields = generateMultiFields(field.multi_fields);
-          }
-          break;
-        case 'constant_keyword':
-          fieldProps.type = field.type;
-          if (field.value) {
-            fieldProps.value = field.value;
-          }
-          break;
-        case 'object':
-          fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
-          break;
-        case 'nested':
-          fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
-          break;
-        case 'array':
-          // this assumes array fields were validated in an earlier step
-          // adding an array field with no object_type would result in an error
-          // when the template is added to ES
-          if (field.object_type) {
-            fieldProps.type = field.object_type;
-          }
-          break;
-        case 'alias':
-          // this assumes alias fields were validated in an earlier step
-          // adding a path to a field that doesn't exist would result in an error
-          // when the template is added to ES.
-          fieldProps.type = 'alias';
-          fieldProps.path = field.path;
-          break;
-        default:
-          fieldProps.type = type;
-      }
+        let dynProperties: Properties = getDefaultProperties(field);
+        let matchingType: string | undefined;
+        switch (field.object_type) {
+          case 'histogram':
+            dynProperties = histogram(field);
+            matchingType = field.object_type_mapping_type ?? '*';
+            break;
+          case 'text':
+            dynProperties.type = field.object_type;
+            matchingType = field.object_type_mapping_type ?? 'string';
+            break;
+          case 'keyword':
+            dynProperties.type = field.object_type;
+            matchingType = field.object_type_mapping_type ?? 'string';
+            break;
+          case 'byte':
+          case 'double':
+          case 'float':
+          case 'long':
+          case 'short':
+          case 'boolean':
+            dynProperties = {
+              type: field.object_type,
+            };
+            matchingType = field.object_type_mapping_type ?? field.object_type;
+          default:
+            break;
+        }
 
-      const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
-      if (fieldHasMetaProps) {
+        if (dynProperties && matchingType) {
+          ctx.addDynamicMapping({
+            path,
+            pathMatch,
+            matchingType,
+            properties: dynProperties,
+          });
+        }
+      } else {
+        let fieldProps = getDefaultProperties(field);
+
         switch (type) {
           case 'group':
-          case 'group-nested':
+            const mappings = _generateMappings(field.fields!, {
+              ...ctx,
+              groupFieldName: ctx.groupFieldName
+                ? `${ctx.groupFieldName}.${field.name}`
+                : field.name,
+            });
+            if (!mappings.hasNonDynamicTemplateMappings) {
+              return;
+            }
+
+            fieldProps = {
+              properties: mappings.properties,
+              ...generateDynamicAndEnabled(field),
+            };
             break;
-          default: {
-            const meta = {};
-            if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
-            if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
-            fieldProps.meta = meta;
+          case 'group-nested':
+            fieldProps = {
+              properties: _generateMappings(field.fields!, {
+                ...ctx,
+                groupFieldName: ctx.groupFieldName
+                  ? `${ctx.groupFieldName}.${field.name}`
+                  : field.name,
+              }).properties,
+              ...generateNestedProps(field),
+              type: 'nested',
+            };
+            break;
+          case 'integer':
+            fieldProps.type = 'long';
+            break;
+          case 'scaled_float':
+            fieldProps = scaledFloat(field);
+            break;
+          case 'text':
+            const textMapping = generateTextMapping(field);
+            fieldProps = { ...fieldProps, ...textMapping, type: 'text' };
+            if (field.multi_fields) {
+              fieldProps.fields = generateMultiFields(field.multi_fields);
+            }
+            break;
+          case 'object':
+            fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
+            break;
+          case 'keyword':
+            fieldProps = keyword(field);
+            if (field.multi_fields) {
+              fieldProps.fields = generateMultiFields(field.multi_fields);
+            }
+            break;
+          case 'wildcard':
+            const wildcardMapping = generateWildcardMapping(field);
+            fieldProps = { ...fieldProps, ...wildcardMapping, type: 'wildcard' };
+            if (field.multi_fields) {
+              fieldProps.fields = generateMultiFields(field.multi_fields);
+            }
+            break;
+          case 'constant_keyword':
+            fieldProps.type = field.type;
+            if (field.value) {
+              fieldProps.value = field.value;
+            }
+            break;
+          case 'nested':
+            fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
+            break;
+          case 'array':
+            // this assumes array fields were validated in an earlier step
+            // adding an array field with no object_type would result in an error
+            // when the template is added to ES
+            if (field.object_type) {
+              fieldProps.type = field.object_type;
+            }
+            break;
+          case 'alias':
+            // this assumes alias fields were validated in an earlier step
+            // adding a path to a field that doesn't exist would result in an error
+            // when the template is added to ES.
+            fieldProps.type = 'alias';
+            fieldProps.path = field.path;
+            break;
+          default:
+            fieldProps.type = type;
+        }
+
+        const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+        if (fieldHasMetaProps) {
+          switch (type) {
+            case 'group':
+            case 'group-nested':
+              break;
+            default: {
+              const meta = {};
+              if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
+              if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+              fieldProps.meta = meta;
+            }
           }
         }
-      }
 
-      props[field.name] = fieldProps;
+        props[field.name] = fieldProps;
+        hasNonDynamicTemplateMappings = true;
+      }
     });
   }
 
-  return { properties: props };
+  return { properties: props, hasNonDynamicTemplateMappings };
 }
 
 function generateDynamicAndEnabled(field: Field) {
@@ -241,7 +358,7 @@ function generateMultiFields(fields: Fields): MultiFields {
           multiFields[f.name] = { ...generateTextMapping(f), type: f.type };
           break;
         case 'keyword':
-          multiFields[f.name] = { ...generateKeywordMapping(f), type: f.type };
+          multiFields[f.name] = keyword(f);
           break;
         case 'long':
         case 'double':
@@ -252,23 +369,6 @@ function generateMultiFields(fields: Fields): MultiFields {
     });
   }
   return multiFields;
-}
-
-function generateKeywordMapping(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {
-    ignore_above: DEFAULT_IGNORE_ABOVE,
-  };
-  if (field.ignore_above) {
-    mapping.ignore_above = field.ignore_above;
-  }
-  if (field.normalizer) {
-    mapping.normalizer = field.normalizer;
-  }
-  if (field.dimension) {
-    mapping.time_series_dimension = field.dimension;
-    delete mapping.ignore_above;
-  }
-  return mapping;
 }
 
 function generateTextMapping(field: Field): IndexTemplateMapping {
@@ -293,22 +393,6 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
     mapping.ignore_above = field.ignore_above;
   }
   return mapping;
-}
-
-function getDefaultProperties(field: Field): Properties {
-  const properties: Properties = {};
-
-  if (field.index !== undefined) {
-    properties.index = field.index;
-  }
-  if (field.doc_values !== undefined) {
-    properties.doc_values = field.doc_values;
-  }
-  if (field.copy_to) {
-    properties.copy_to = field.copy_to;
-  }
-
-  return properties;
 }
 
 /**

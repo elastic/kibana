@@ -6,6 +6,7 @@
  */
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import { chunk } from 'lodash';
 import { transformActionParams } from './transform_action_params';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -60,10 +61,10 @@ export function createExecutionHandler<
   const ruleTypeActionGroups = new Map(
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
+  const CHUNK_SIZE = 1000;
 
   return async ({
     actionGroup,
-    actionSubgroup,
     context,
     state,
     ruleRunMetricsStore,
@@ -90,7 +91,6 @@ export function createExecutionHandler<
             alertInstanceId: alertId,
             alertActionGroup: actionGroup,
             alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             actionId: action.id,
@@ -115,6 +115,8 @@ export function createExecutionHandler<
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
+    const bulkActions = [];
+    const logActions = [];
     for (const action of actions) {
       const { actionTypeId } = action;
 
@@ -188,20 +190,26 @@ export function createExecutionHandler<
           await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
         } catch (err) {
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-            await actionsClient.enqueueExecution(enqueueOptions);
+            bulkActions.push(enqueueOptions);
           }
         }
       } else {
-        await actionsClient.enqueueExecution(enqueueOptions);
+        bulkActions.push(enqueueOptions);
       }
-
-      alertingEventLogger.logAction({
+      logActions.push({
         id: action.id,
         typeId: actionTypeId,
         alertId,
         alertGroup: actionGroup,
-        alertSubgroup: actionSubgroup,
       });
+    }
+
+    for (const c of chunk(bulkActions, CHUNK_SIZE)) {
+      await actionsClient.bulkEnqueueExecution(c);
+    }
+
+    for (const action of logActions) {
+      alertingEventLogger.logAction(action);
     }
   };
 }

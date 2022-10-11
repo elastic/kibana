@@ -5,35 +5,30 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { Position, ScaleType } from '@elastic/charts';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Unit } from '@kbn/datemath';
-import type { Filter } from '@kbn/es-query';
+import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import type { ChartSeriesConfigs } from '../../../../common/components/charts/common';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import type { FieldValueQueryBar } from '../query_bar';
-import type { ESQuery } from '../../../../../common/typed_json';
+import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
  * @param hits Total query search hits
  * @param timeframe Range selected by user (last hour, day...)
  */
-export const isNoisy = (hits: number, timeframe: Unit): boolean => {
-  if (timeframe === 'h') {
-    return hits > 1;
-  } else if (timeframe === 'd') {
-    return hits / 24 > 1;
-  } else if (timeframe === 'w') {
-    return hits / 168 > 1;
-  } else if (timeframe === 'M') {
-    return hits / 30 > 1;
-  }
-
-  return false;
+export const isNoisy = (hits: number, timeframe: TimeframePreviewOptions): boolean => {
+  const oneHour = 1000 * 60 * 60;
+  const durationInHours = Math.max(
+    (timeframe.timeframeEnd.valueOf() - timeframe.timeframeStart.valueOf()) / oneHour,
+    1.0
+  );
+  return hits / durationInHours > 1;
 };
 
 /**
@@ -62,52 +57,6 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'M', text: i18n.LAST_MONTH },
     ];
-  }
-};
-
-/**
- * Quick little helper to extract the query info from the
- * queryBar object.
- * @param queryBar Object containing all query info
- * @param index Indices searched
- * @param ruleType
- */
-export const getInfoFromQueryBar = (
-  queryBar: FieldValueQueryBar,
-  index: string[],
-  ruleType: Type
-): {
-  queryString: string;
-  language: Language;
-  filters: Filter[];
-  queryFilter: ESQuery | undefined;
-} => {
-  const queryString = typeof queryBar.query.query === 'string' ? queryBar.query.query : '';
-  const language = queryBar.query.language as Language;
-  const filters = queryBar.filters;
-
-  // hm?? Why a try catch here? Because if the
-  // query is invalid, it throws an error and
-  // entire UI shows gross KQLSyntax error screen
-  try {
-    const queryFilter =
-      ruleType !== 'eql'
-        ? getQueryFilter(queryString, language, filters, index, [], true)
-        : undefined;
-
-    return {
-      queryString,
-      language,
-      filters,
-      queryFilter,
-    };
-  } catch {
-    return {
-      queryString,
-      language,
-      filters,
-      queryFilter: undefined,
-    };
   }
 };
 
@@ -165,6 +114,7 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid,
   index,
   dataViewId,
+  dataSourceType,
   threatIndex,
   threatMapping,
   machineLearningJobId,
@@ -176,14 +126,20 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid: boolean;
   index: string[];
   dataViewId: string | undefined;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   newTermsFields: string[];
 }) => {
-  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+  if (
+    !isQueryBarValid ||
+    (dataSourceType === DataSourceType.DataView && !dataViewId) ||
+    (dataSourceType === DataSourceType.IndexPatterns && index.length === 0)
+  ) {
     return true;
+  }
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
@@ -198,7 +154,7 @@ export const getIsRulePreviewDisabled = ({
     return machineLearningJobId.length === 0;
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
-    return queryBar.query.query.length === 0;
+    return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {
     return newTermsFields.length === 0;

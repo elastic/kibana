@@ -19,9 +19,10 @@ import {
   INDEX_PATTERN_TYPES,
   STANDALONE_CLUSTER_CLUSTER_UUID,
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
+  DS_INDEX_PATTERN_METRICS,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 import type { Metric } from '../metrics/metrics';
 
@@ -173,7 +174,7 @@ async function fetchSeries(
     };
   }
 
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     ccs: req.payload.ccs,
@@ -291,7 +292,7 @@ function handleSeries(
       bucketSizeInSeconds * 1000
     );
     let internalIndicesFound = false;
-    let mbIndicesFound = false;
+    let ecsIndicesFound = false;
     let data: Array<[string | number, number | null]> = [];
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
@@ -308,8 +309,11 @@ function handleSeries(
         // map buckets to X/Y coords for Flot charting
         if (bucket.indices) {
           for (const indexBucket of bucket.indices.buckets) {
-            if (indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
-              mbIndicesFound = true;
+            if (
+              indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+              indexBucket.key.includes(DS_INDEX_PATTERN_METRICS)
+            ) {
+              ecsIndicesFound = true;
             } else {
               internalIndicesFound = true;
             }
@@ -327,7 +331,7 @@ function handleSeries(
       ? {
           indices_found: {
             internal: internalIndicesFound,
-            metricbeat: mbIndicesFound,
+            ecs: ecsIndicesFound,
           },
         }
       : {};

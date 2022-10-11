@@ -7,11 +7,19 @@ PKG_REQUIRE_NAME = "@kbn/core-elasticsearch-server-internal"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -44,6 +52,7 @@ RUNTIME_DEPS = [
   "//packages/core/http/core-http-server-mocks",
   "//packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
   "//packages/core/config/core-config-server-internal",
+  "//packages/core/test-helpers/core-test-helpers-deprecations-getters",
 ]
 
 TYPES_DEPS = [
@@ -61,12 +70,14 @@ TYPES_DEPS = [
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/core/base/core-base-common:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/status/core-status-common:npm_module_types",
   "//packages/core/analytics/core-analytics-server:npm_module_types",
   "//packages/core/http/core-http-server:npm_module_types",
   "//packages/core/http/core-http-server-internal:npm_module_types",
   "//packages/core/execution-context/core-execution-context-server-internal:npm_module_types",
   "//packages/core/elasticsearch/core-elasticsearch-server:npm_module_types",
   "//packages/core/elasticsearch/core-elasticsearch-client-server-internal:npm_module_types",
+  "//packages/core/test-helpers/core-test-helpers-deprecations-getters:npm_module_types"
 ]
 
 jsts_transpiler(
@@ -93,7 +104,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

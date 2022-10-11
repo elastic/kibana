@@ -13,6 +13,7 @@ import {
   QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import type { EventLogTypeStatusAggs, RuleSearchResult } from '../types';
 import type { EventLogStatusMetric } from '../detections/rules/types';
@@ -92,6 +93,7 @@ const _getEventLogByTypeAndStatus = async ({
       QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
       SAVED_QUERY_RULE_TYPE_ID,
+      NEW_TERMS_RULE_TYPE_ID,
     ],
   });
 

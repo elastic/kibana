@@ -25,14 +25,17 @@ export const ScrollSizeInput: FC = () => {
   useEffect(() => {
     jobCreator.scrollSize = scrollSizeString === '' ? null : +scrollSizeString;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollSizeString]);
 
   useEffect(() => {
     setScrollSize(jobCreator.scrollSize === null ? '' : `${jobCreator.scrollSize}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdate]);
 
   useEffect(() => {
     setValidation(jobValidator.scrollSize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (

@@ -8,7 +8,9 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { useUserDetails } from '../../../../users/containers/users/details';
@@ -57,6 +59,7 @@ export const ExpandableUserDetails = ({
 }: ExpandableUserProps & { contextID: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
+  const dispatch = useDispatch();
 
   const [loading, { userDetails }] = useUserDetails({
     endDate: to,
@@ -65,6 +68,20 @@ export const ExpandableUserDetails = ({
     indexNames: selectedPatterns,
     skip: isInitializing,
   });
+
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
 
   return (
     <AnomalyTableProvider
@@ -86,14 +103,7 @@ export const ExpandableUserDetails = ({
           isLoadingAnomaliesData={isLoadingAnomaliesData}
           startDate={from}
           endDate={to}
-          narrowDateRange={(score, interval) => {
-            const fromTo = scoreIntervalToDateTime(score, interval);
-            setAbsoluteRangeDatePicker({
-              id: 'global',
-              from: fromTo.from,
-              to: fromTo.to,
-            });
-          }}
+          narrowDateRange={narrowDateRange}
           indexPatterns={selectedPatterns}
         />
       )}

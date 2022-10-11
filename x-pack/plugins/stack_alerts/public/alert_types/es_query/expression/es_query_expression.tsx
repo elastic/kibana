@@ -10,14 +10,11 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { XJsonMode } from '@kbn/ace';
-import 'brace/theme/github';
-
 import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 
-import { EuiCodeEditor, XJson } from '@kbn/es-ui-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { hasExpressionValidationErrors } from '../validation';
@@ -29,7 +26,6 @@ import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
 
 const { useXJsonMode } = XJson;
-const xJsonMode = new XJsonMode();
 
 interface KibanaDeps {
   http: HttpSetup;
@@ -48,6 +44,7 @@ export const EsQueryExpression: React.FC<
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    excludeHitsFromPreviousRun,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -61,6 +58,7 @@ export const EsQueryExpression: React.FC<
     size: size ?? DEFAULT_VALUES.SIZE,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
     searchType: SearchType.esQuery,
+    excludeHitsFromPreviousRun: excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
   });
 
   const setParam = useCallback(
@@ -194,6 +192,7 @@ export const EsQueryExpression: React.FC<
       <EuiSpacer size="s" />
       <EuiFormRow
         id="queryEditor"
+        data-test-subj="queryJsonEditor"
         fullWidth
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
@@ -206,19 +205,26 @@ export const EsQueryExpression: React.FC<
           </EuiLink>
         }
       >
-        <EuiCodeEditor
-          mode={xJsonMode}
+        <CodeEditor
+          languageId="xjson"
           width="100%"
           height="200px"
-          theme="github"
-          data-test-subj="queryJsonEditor"
-          aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
-            defaultMessage: 'Elasticsearch query editor',
-          })}
           value={xJson}
           onChange={(xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
+          }}
+          options={{
+            ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
+              defaultMessage: 'Elasticsearch query editor',
+            }),
+            wordWrap: 'off',
+            tabSize: 2,
+            lineNumbers: 'off',
+            lineNumbersMinChars: 0,
+            folding: false,
+            lineDecorationsWidth: 0,
+            overviewRulerBorder: false,
           }}
         />
       </EuiFormRow>
@@ -247,6 +253,10 @@ export const EsQueryExpression: React.FC<
         errors={errors}
         hasValidationErrors={hasValidationErrors()}
         onTestFetch={onTestQuery}
+        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        onChangeExcludeHitsFromPreviousRun={(exclude) => {
+          setParam('excludeHitsFromPreviousRun', exclude);
+        }}
       />
 
       <EuiSpacer />

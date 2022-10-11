@@ -557,6 +557,18 @@
                           ]
                         },
                         "savedObject": {
+                          "type": "object"
+                        },
+                        "latestVersion": {
+                          "type": "string"
+                        },
+                        "keepPoliciesUpToDate": {
+                          "type": "boolean"
+                        },
+                        "notice": {
+                          "type": "string"
+                        },
+                        "licensePath": {
                           "type": "string"
                         }
                       },
@@ -594,6 +606,14 @@
           "name": "pkgVersion",
           "in": "path",
           "required": true
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ],
       "post": {
@@ -1232,19 +1252,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1273,6 +1284,16 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/bulk_upgrade_agents"
+              },
+              "example": {
+                "version": "8.4.0",
+                "source_uri": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
+                "rollout_duration_seconds": 3600,
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "start_time": "2022-08-03T14:00:00.000Z"
               }
             }
           }
@@ -1335,6 +1356,104 @@
           }
         },
         "operationId": "agents-current-upgrades"
+      }
+    },
+    "/agents/action_status": {
+      "get": {
+        "summary": "Agents - Action status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "actionId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "COMPLETE",
+                              "EXPIRED",
+                              "CANCELLED",
+                              "FAILED",
+                              "IN_PROGRESS"
+                            ]
+                          },
+                          "nbAgentsActioned": {
+                            "type": "number"
+                          },
+                          "nbAgentsActionCreated": {
+                            "type": "number"
+                          },
+                          "nbAgentsAck": {
+                            "type": "number"
+                          },
+                          "nbAgentsFailed": {
+                            "type": "number"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "startTime": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "expiration": {
+                            "type": "string"
+                          },
+                          "completionTime": {
+                            "type": "string"
+                          },
+                          "cancellationTime": {
+                            "type": "string"
+                          },
+                          "newPolicyId": {
+                            "type": "string"
+                          },
+                          "creationTime": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "actionId",
+                          "complete",
+                          "nbAgentsActioned",
+                          "nbAgentsActionCreated",
+                          "nbAgentsAck",
+                          "nbAgentsFailed",
+                          "status",
+                          "creationTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agents-action-status"
       }
     },
     "/agents/{agentId}": {
@@ -1713,19 +1832,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1745,18 +1855,21 @@
                 "type": "object",
                 "properties": {
                   "policy_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "new agent policy id"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
@@ -1765,6 +1878,10 @@
                   "policy_id",
                   "agents"
                 ]
+              },
+              "example": {
+                "policy_id": "policy_id",
+                "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
               }
             }
           }
@@ -1782,19 +1899,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1814,27 +1922,39 @@
                 "type": "object",
                 "properties": {
                   "revoke": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Revokes API keys of agents"
                   },
                   "force": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Unenroll hosted agents too"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "revoke": true,
+                "force": false,
+                "agents": [
+                  "agent1",
+                  "agent2"
                 ]
               }
             }
@@ -1853,19 +1973,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1888,7 +1999,7 @@
                     "oneOf": [
                       {
                         "type": "string",
-                        "description": "KQL query string, can be empty"
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
@@ -1917,6 +2028,18 @@
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "tagsToAdd": [
+                  "newTag"
+                ],
+                "tagsToRemove": [
+                  "existingTag"
                 ]
               }
             }
@@ -1992,6 +2115,14 @@
           },
           {
             "$ref": "#/components/parameters/kuery"
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "full",
+            "description": "When set to true, retrieve the related package policies for each agent policy."
           }
         ],
         "description": ""
@@ -2172,6 +2303,66 @@
           },
           "description": ""
         }
+      }
+    },
+    "/agent_policies/_bulk_get": {
+      "post": {
+        "summary": "Agent policies - Bulk Get",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of agent policy ids"
+                  },
+                  "full": {
+                    "type": "boolean",
+                    "description": "get full policies with package policies populated"
+                  },
+                  "ignoreMissing": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/agent_policy"
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-get-agent-policies",
+        "security": [],
+        "parameters": []
       }
     },
     "/agent_policies/delete": {
@@ -2630,28 +2821,37 @@
           }
         },
         "requestBody": {
+          "description": "You should use inputs as an object and not use the deprecated inputs array.",
           "content": {
             "application/json": {
               "schema": {
-                "allOf": [
+                "oneOf": [
                   {
-                    "$ref": "#/components/schemas/new_package_policy"
+                    "$ref": "#/components/schemas/simplified_package_policy"
                   },
                   {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
+                    "deprecated": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/new_package_policy"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "force": {
+                            "type": "boolean"
+                          }
+                        }
                       }
-                    }
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "force": {
-                        "type": "boolean"
-                      }
-                    }
+                    ]
                   }
                 ]
               }
@@ -2663,6 +2863,62 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      }
+    },
+    "/package_policies/_bulk_get": {
+      "post": {
+        "summary": "Package policies - Bulk Get",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of package policy ids"
+                  },
+                  "ignoreMissing": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/package_policy"
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-get-package-policies",
+        "security": [],
+        "parameters": []
       }
     },
     "/package_policies/delete": {
@@ -2897,18 +3153,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/components/schemas/package_policy"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/simplified_package_policy"
                     },
-                    "sucess": {
-                      "type": "boolean"
+                    {
+                      "type": "object",
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/package_policy"
+                        },
+                        "sucess": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "item",
+                        "sucess"
+                      ]
                     }
-                  },
-                  "required": [
-                    "item",
-                    "sucess"
                   ]
                 }
               }
@@ -2918,6 +3181,48 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Package policy - Delete",
+        "tags": [],
+        "operationId": "delete-package-policy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "packagePolicyId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "force",
+            "in": "query"
           }
         ]
       }
@@ -3401,6 +3706,230 @@
           }
         ]
       }
+    },
+    "/fleet_server_hosts": {
+      "get": {
+        "summary": "Fleet Server Hosts - List",
+        "description": "Return a list of Fleet server host",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/fleet_server_host"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-fleet-server-hosts"
+      },
+      "post": {
+        "summary": "Fleet Server Hosts - Create",
+        "description": "Create a new Fleet Server Host",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/fleet_server_host"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "host_urls"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-server-hosts"
+      }
+    },
+    "/fleet_server_hosts/{itemId}": {
+      "get": {
+        "summary": "Fleet Server Hosts - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/fleet_server_host"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-one-fleet-server-hosts"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "itemId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Fleet Server Hosts - Delete",
+        "operationId": "delete-fleet-server-hosts",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Fleet Server Hosts - Update",
+        "operationId": "update-fleet-server-hosts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/fleet_server_host"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -3672,9 +4201,6 @@
           "has_seen_add_data_notice": {
             "type": "boolean"
           },
-          "has_seen_fleet_migration_notice": {
-            "type": "boolean"
-          },
           "fleet_server_hosts": {
             "type": "array",
             "items": {
@@ -3873,6 +4399,26 @@
           "version": {
             "type": "string"
           },
+          "release": {
+            "type": "string",
+            "enum": [
+              "experimental",
+              "beta",
+              "ga"
+            ]
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "license": {
+                "type": "string",
+                "enum": [
+                  "Apache-2.0",
+                  "Elastic-2.0"
+                ]
+              }
+            }
+          },
           "readme": {
             "type": "string"
           },
@@ -3888,34 +4434,32 @@
               "type": "string"
             }
           },
-          "requirement": {
-            "oneOf": [
-              {
+          "conditions": {
+            "type": "object",
+            "properties": {
+              "kibana": {
+                "type": "object",
                 "properties": {
-                  "kibana": {
-                    "type": "object",
-                    "properties": {
-                      "versions": {
-                        "type": "string"
-                      }
-                    }
+                  "versions": {
+                    "type": "string"
                   }
                 }
               },
-              {
+              "elasticsearch": {
+                "type": "object",
                 "properties": {
-                  "elasticsearch": {
-                    "type": "object",
-                    "properties": {
-                      "versions": {
-                        "type": "string"
-                      }
-                    }
+                  "subscription": {
+                    "type": "string",
+                    "enum": [
+                      "basic",
+                      "gold",
+                      "platinum",
+                      "enterprise"
+                    ]
                   }
                 }
               }
-            ],
-            "type": "object"
+            }
           },
           "screenshots": {
             "type": "array",
@@ -4019,6 +4563,22 @@
           },
           "path": {
             "type": "string"
+          },
+          "elasticsearch": {
+            "type": "object",
+            "properties": {
+              "privileges": {
+                "type": "object",
+                "properties": {
+                  "cluster": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "required": [
@@ -4028,7 +4588,7 @@
           "description",
           "type",
           "categories",
-          "requirement",
+          "conditions",
           "assets",
           "format_version",
           "download",
@@ -4136,6 +4696,72 @@
           "warning"
         ]
       },
+      "agent_component_status": {
+        "title": "Agent component status",
+        "type": "string",
+        "enum": [
+          "starting",
+          "configuring",
+          "healthy",
+          "degraded",
+          "failed",
+          "stopping",
+          "stopped"
+        ]
+      },
+      "agent_component_unit_type": {
+        "title": "Agent component unit type",
+        "type": "string",
+        "enum": [
+          "input",
+          "output"
+        ]
+      },
+      "agent_component_unit": {
+        "title": "Agent component unit",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/agent_component_unit_type"
+          },
+          "status": {
+            "$ref": "#/components/schemas/agent_component_status"
+          },
+          "message": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          }
+        }
+      },
+      "agent_component": {
+        "title": "Agent component",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/agent_component_status"
+          },
+          "message": {
+            "type": "string"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent_component_unit"
+            }
+          }
+        }
+      },
       "agent": {
         "title": "Agent",
         "type": "object",
@@ -4187,6 +4813,12 @@
           },
           "default_api_key": {
             "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent_component"
+            }
           }
         },
         "required": [
@@ -4236,29 +4868,39 @@
         "type": "object",
         "properties": {
           "version": {
-            "type": "string"
+            "type": "string",
+            "description": "version to upgrade to"
           },
           "source_uri": {
-            "type": "string"
+            "type": "string",
+            "description": "alternative upgrade binary download url"
           },
           "rollout_duration_seconds": {
-            "type": "number"
+            "type": "number",
+            "description": "rolling upgrade window duration in seconds"
           },
           "start_time": {
-            "type": "string"
+            "type": "string",
+            "description": "start time of upgrade in ISO 8601 format"
           },
           "agents": {
             "oneOf": [
               {
+                "type": "string",
+                "description": "KQL query string, leave empty to action all agents"
+              },
+              {
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
-              },
-              {
-                "type": "string"
+                },
+                "description": "list of agent IDs"
               }
             ]
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
           }
         },
         "required": [
@@ -4268,32 +4910,21 @@
       },
       "upgrade_agent": {
         "title": "Upgrade agent",
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "version"
-            ]
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string"
-              },
-              "source_uri": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "version"
-            ]
+          "source_uri": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
           }
+        },
+        "required": [
+          "version"
         ]
       },
       "agent_action": {
@@ -4310,7 +4941,6 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "POLICY_CHANGE",
                   "UNENROLL",
                   "UPGRADE",
                   "POLICY_REASSIGN"
@@ -4423,7 +5053,8 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",
@@ -4519,21 +5150,12 @@
                   "inactive"
                 ]
               },
-              "packagePolicies": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/package_policy"
-                    }
-                  }
-                ]
+              "package_policies": {
+                "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/package_policy"
+                }
               },
               "updated_on": {
                 "type": "string",
@@ -4641,6 +5263,96 @@
           "api_key",
           "active",
           "created_at"
+        ]
+      },
+      "simplified_package_policy": {
+        "title": "Simplified Package Policy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Package policy unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Package policy name (should be unique)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Package policy description"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "namespace by default \"default\""
+          },
+          "policy_id": {
+            "type": "string",
+            "description": "Agent policy ID where that package policy will be added"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Package name"
+              },
+              "version": {
+                "type": "string",
+                "description": "Package version"
+              }
+            },
+            "required": [
+              "name",
+              "version"
+            ]
+          },
+          "vars": {
+            "type": "object",
+            "description": "Package root level variable (see integration documentation for more information)"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Package policy inputs (see integration documentation to know what inputs are available)",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "enable or disable that input, (default to true)"
+                },
+                "vars": {
+                  "type": "object",
+                  "description": "Input level variable (see integration documentation for more information)"
+                },
+                "streams": {
+                  "type": "object",
+                  "description": "Input streams (see integration documentation to know what streams are available)",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "enable or disable that stream, (default to true)"
+                      },
+                      "vars": {
+                        "type": "object",
+                        "description": "Stream level variable (see integration documentation for more information)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force package policy creation even if package is not verified, or if the agent policy is managed."
+          }
+        },
+        "required": [
+          "name",
+          "policy_id",
+          "package"
         ]
       },
       "upgrade_diff": {
@@ -4833,7 +5545,9 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Not supported output can be set at the agent policy level only",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",
@@ -4976,6 +5690,37 @@
           "is_default",
           "name",
           "host"
+        ]
+      },
+      "fleet_server_host": {
+        "title": "Fleet Server Host",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "type": "boolean"
+          },
+          "host_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id",
+          "is_default",
+          "is_preconfigured",
+          "host_urls"
         ]
       }
     }

@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip, EuiIconTip } from '@elastic/eui';
-import { SortOrder } from './helpers';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
 interface Props {

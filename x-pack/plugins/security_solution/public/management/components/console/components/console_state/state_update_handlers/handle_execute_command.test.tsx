@@ -145,6 +145,28 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
+  it('should show error if unknown arguments are used along with the `--help` argument', async () => {
+    render();
+    enterCommand('cmd2 one two three --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
+        /Unsupported argument/
+      );
+    });
+  });
+
+  it('should show error if values are given to the `--help` argument', async () => {
+    render();
+    enterCommand('cmd2 --help one --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
+        /Unsupported argument/
+      );
+    });
+  });
+
   it('should show error if any required option is not set', async () => {
     render();
     enterCommand('cmd2 --ext one');
@@ -204,7 +226,7 @@ describe('When a Console command is entered by the user', () => {
     const cmd1Definition = commands.find((command) => command.name === 'cmd1');
 
     if (!cmd1Definition) {
-      throw new Error('cmd1 defintion not fount');
+      throw new Error('cmd1 defintion not found');
     }
 
     cmd1Definition.validate = () => 'command is invalid';
@@ -213,7 +235,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd1');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
         'command is invalid'
       );
     });

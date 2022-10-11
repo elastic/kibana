@@ -25,8 +25,11 @@ import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { LocalStorageMock } from './local_storage_mock';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { dataViewsMock } from './data_views';
 const dataPlugin = dataPluginMock.createStartContract();
 const expressionsPlugin = expressionsPluginMock.createStartContract();
+
+dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
 
 export const discoverServiceMock = {
   core: coreMock.createStart(),
@@ -52,12 +55,15 @@ export const discoverServiceMock = {
   },
   fieldFormats: fieldFormatsMock,
   filterManager: dataPlugin.query.filterManager,
+  inspector: {
+    open: jest.fn(),
+  },
   uiSettings: {
     get: jest.fn((key: string) => {
       if (key === 'fields:popularLimit') {
         return 5;
       } else if (key === DEFAULT_COLUMNS_SETTING) {
-        return [];
+        return ['default_column'];
       } else if (key === UI_SETTINGS.META_FIELDS) {
         return [];
       } else if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
@@ -111,6 +117,11 @@ export const discoverServiceMock = {
   toastNotifications: {
     addInfo: jest.fn(),
     addWarning: jest.fn(),
+    addDanger: jest.fn(),
+    addSuccess: jest.fn(),
   },
   expressions: expressionsPlugin,
+  savedObjectsTagging: {},
+  dataViews: dataViewsMock,
+  timefilter: { createFilter: jest.fn() },
 } as unknown as DiscoverServices;

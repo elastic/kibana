@@ -9,6 +9,7 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
+  BarSeries,
   Chart,
   CurveType,
   LegendItemListener,
@@ -16,6 +17,8 @@ import {
   LineSeries,
   niceTimeFormatter,
   Position,
+  RectAnnotation,
+  RectAnnotationStyle,
   ScaleType,
   SeriesIdentifier,
   Settings,
@@ -23,7 +26,7 @@ import {
   XYChartSeriesIdentifier,
   YDomainRange,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -70,6 +73,12 @@ interface Props {
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
 }
+
+const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
+  defaultMessage:
+    'The selected time range does not include this entire bucket. It might contain partial data.',
+});
+
 export function TimeseriesChart({
   id,
   height = unit * 16,
@@ -125,6 +134,7 @@ export function TimeseriesChart({
     );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+
   const xValuesExpectedBounds =
     anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
       data.map(({ x }) => x)
@@ -151,6 +161,28 @@ export function TimeseriesChart({
         return 1;
       }
     : undefined;
+
+  const endZoneColor = theme.darkMode
+    ? theme.eui.euiColorLightShade
+    : theme.eui.euiColorDarkShade;
+  const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
+    stroke: endZoneColor,
+    fill: endZoneColor,
+    strokeWidth: 0,
+    opacity: theme.darkMode ? 0.6 : 0.2,
+  };
+
+  function getChartType(type: string) {
+    switch (type) {
+      case 'area':
+        return AreaSeries;
+      case 'bar':
+        return BarSeries;
+      default:
+        return LineSeries;
+    }
+  }
+
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -160,7 +192,33 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
-          tooltip={{ stickTo: 'top', showNullValues: false }}
+          tooltip={{
+            stickTo: 'top',
+            showNullValues: false,
+            headerFormatter: ({ value }) => {
+              const formattedValue = xFormatter(value);
+              if (max === value) {
+                return (
+                  <>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      responsive={false}
+                      gutterSize="xs"
+                      style={{ fontWeight: 'normal' }}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="iInCircle" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="xs" />
+                    {formattedValue}
+                  </>
+                );
+              }
+              return formattedValue;
+            },
+          }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -222,8 +280,20 @@ export function TimeseriesChart({
           />
         )}
 
+        <RectAnnotation
+          id="__endzones__"
+          zIndex={2}
+          dataValues={[
+            {
+              coordinates: { x0: xValues[xValues.length - 2] },
+              details: END_ZONE_LABEL,
+            },
+          ]}
+          style={endZoneRectAnnotationStyle}
+        />
+
         {allSeries.map((serie) => {
-          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
+          const Series = getChartType(serie.type);
 
           return (
             <Series

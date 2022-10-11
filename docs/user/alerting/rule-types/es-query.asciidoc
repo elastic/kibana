@@ -1,6 +1,5 @@
-[role="xpack"]
 [[rule-type-es-query]]
-=== {es} query
+== {es} query
 
 The {es} query rule type runs a user-configured query, compares the number of 
 matches to a configured threshold, and schedules actions to run when the 
@@ -8,27 +7,27 @@ threshold condition is met.
 
 
 [float]
-==== Create the rule
+=== Create the rule
 
 Fill in the <<defining-rules-general-details, rule details>>, then select 
 *{es} query*.
 
 
 [float]
-==== Define the conditions
+=== Define the conditions
 
 Define properties to detect the condition.
 
 [role="screenshot"]
-image::user/alerting/images/rule-types-es-query-conditions.png[Five clauses define the condition to detect]
+image::user/alerting/images/rule-types-es-query-conditions.png[Six clauses define the condition to detect]
 
 Index:: Specifies an *index or data view* and a *time field* that is used for 
 the *time window*.
 Size:: Specifies the number of documents to pass to the configured actions when 
 the threshold condition is met.
 {es} query:: Specifies the ES DSL query. The number of documents that 
-match this query is evaluated against the threshold condition. Only the `query` 
-field is used, other DSL fields are not considered. 
+match this query is evaluated against the threshold condition. Only the `query`, `fields`, `_source` and `runtime_mappings`
+fields are used, other DSL fields are not considered. 
 Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
 `is above or equals`, `is below`, `is below or equals`, or `is between`). The 
 number of documents that match the specified query is compared to this 
@@ -37,11 +36,12 @@ Time window:: Defines how far back to search for documents, using the
 *time field* set in the *index* clause. Generally this value should be set to a 
 value higher than the *check every* value in the 
 <<defining-rules-general-details, general rule details>>, to avoid gaps in 
-detection. 
-
+detection.
+Exclude matches from previous run:: Turn on to avoid alert duplication by
+excluding documents that have already been detected by the previous rule run.
 
 [float]
-==== Add action variables
+=== Add action variables
 
 <<defining-rules-actions-details, Add an action>> to run when the rule condition 
 is met. The following variables are specific to the {es} query rule. You can 
@@ -74,10 +74,41 @@ over these hits to get values from the ES documents into your actions.
 +
 [role="screenshot"]
 image::images/rule-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
-
++
+The documents returned by `context.hits` include the {ref}/mapping-source-field.html[`_source`] field.
+If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, 
+which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter as the following example shows:
++
+--
+[source]
+--------------------------------------------------
+{{#context.hits}}
+timestamp: {{_source.@timestamp}}
+day of the week: {{fields.day_of_week}} <1>
+{{/context.hits}}
+--------------------------------------------------
+// NOTCONSOLE
+<1> The `fields` parameter here is used to access the `day_of_week` runtime field.
+--
++
+As the {ref}/search-fields.html#search-fields-response[`fields`] response always returns an array of values for each field, 
+the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions as the following example shows:
++
+--
+[source]
+--------------------------------------------------
+{{#context.hits}}
+Labels:
+{{#fields.labels}}
+- {{.}}
+{{/fields.labels}}
+{{/context.hits}}
+--------------------------------------------------
+// NOTCONSOLE
+--
 
 [float]
-==== Test your query
+=== Test your query
 
 Use the *Test query* feature to verify that your query DSL is valid.
 
@@ -93,11 +124,12 @@ image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query return
 image::user/alerting/images/rule-types-es-query-invalid.png[Test {es} query shows error when invalid]
 
 [float]
-==== Handling multiple matches of the same document
+=== Handling multiple matches of the same document
 
-This rule type checks for duplication of document matches across multiple runs.
-If you configure the rule with a schedule interval smaller than the time window,
-and a document matches a query in multiple runs, it is alerted on only once.
+By default, *Exclude matches from previous run* is turned on and the rule checks
+for duplication of document matches across multiple runs. If you configure the
+rule with a schedule interval smaller than the time window and a document
+matches a query in multiple runs, it is alerted on only once.
 
 The rule uses the timestamp of the matches to avoid alerting on the same match 
 multiple times. The timestamp of the latest match is used for evaluating the 

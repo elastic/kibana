@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy } from 'lodash';
+import { isArray, isEmpty, pickBy, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
+import { usePacks } from '../packs/use_packs';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -33,7 +35,18 @@ interface ActionTableResultsButtonProps {
 const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
-  return <EuiButtonIcon iconType="visTable" {...navProps} />;
+  const detailsText = i18n.translate(
+    'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
+    {
+      defaultMessage: 'Details',
+    }
+  );
+
+  return (
+    <EuiToolTip position="top" content={detailsText}>
+      <EuiButtonIcon iconType="visTable" {...navProps} aria-label={detailsText} />
+    </EuiToolTip>
+  );
 };
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
@@ -44,11 +57,18 @@ const ActionsTableComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
+  const { data: packsData } = usePacks({});
+
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
     direction: Direction.desc,
     sortField: '@timestamp',
+    filterQuery: {
+      exists: {
+        field: 'user_id',
+      },
+    },
   });
 
   const onTableChange = useCallback(({ page = {} }) => {
@@ -92,7 +112,7 @@ const ActionsTableComponent = () => {
   );
 
   const handlePlayClick = useCallback(
-    (item) => {
+    (item) => () => {
       const packId = item._source.pack_id;
 
       if (packId) {
@@ -131,9 +151,41 @@ const ActionsTableComponent = () => {
     },
     [push]
   );
+  const renderPlayButton = useCallback(
+    (item, enabled) => {
+      const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
+        defaultMessage: 'Run query',
+      });
+
+      return (
+        <EuiToolTip position="top" content={playText}>
+          <EuiButtonIcon
+            iconType="play"
+            onClick={handlePlayClick(item)}
+            isDisabled={!enabled}
+            aria-label={playText}
+          />
+        </EuiToolTip>
+      );
+    },
+    [handlePlayClick]
+  );
+
+  const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
+
   const isPlayButtonAvailable = useCallback(
-    () => !!(permissions.runSavedQueries || permissions.writeLiveQueries),
-    [permissions.runSavedQueries, permissions.writeLiveQueries]
+    (item) => {
+      if (item.fields.pack_id?.length) {
+        return (
+          existingPackIds.includes(item.fields.pack_id[0]) &&
+          permissions.runSavedQueries &&
+          permissions.readPacks
+        );
+      }
+
+      return !!(permissions.runSavedQueries || permissions.writeLiveQueries);
+    },
+    [permissions, existingPackIds]
   );
 
   const columns = useMemo(
@@ -176,10 +228,8 @@ const ActionsTableComponent = () => {
         }),
         actions: [
           {
-            type: 'icon',
-            icon: 'play',
-            onClick: handlePlayClick,
             available: isPlayButtonAvailable,
+            render: renderPlayButton,
           },
           {
             render: renderActionsColumn,
@@ -188,11 +238,11 @@ const ActionsTableComponent = () => {
       },
     ],
     [
-      handlePlayClick,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
+      renderPlayButton,
       renderQueryColumn,
       renderTimestampColumn,
     ]

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const browser = getService('browser');
 
   const testUsers = [
     { user: USER.ML_VIEWER, discoverAvailable: true },
@@ -56,6 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display tabs in the ML app correctly', async () => {
           await ml.testExecution.logTestStep('should load the ML app');
           await ml.navigation.navigateToMl();
+
+          await ml.testExecution.logTestStep('should redirect to the "Data Visualizer" page');
+          const browserURl = await browser.getCurrentUrl();
+          expect(browserURl).to.contain('/ml/datavisualizer');
 
           await ml.testExecution.logTestStep('should display the disabled "Overview" tab');
           await ml.navigation.assertOverviewTabEnabled(false);

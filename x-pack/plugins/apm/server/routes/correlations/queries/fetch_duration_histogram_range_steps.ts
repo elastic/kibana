@@ -32,14 +32,35 @@ export const fetchDurationHistogramRangeSteps = async ({
   kuery,
   query,
   searchMetrics,
+  durationMinOverride,
+  durationMaxOverride,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   setup: Setup;
   searchMetrics: boolean;
-}): Promise<number[]> => {
+  durationMinOverride?: number;
+  durationMaxOverride?: number;
+}): Promise<{
+  durationMin?: number;
+  durationMax?: number;
+  rangeSteps: number[];
+}> => {
+  const steps = 100;
+
+  if (durationMinOverride && durationMaxOverride) {
+    return {
+      durationMin: durationMinOverride,
+      durationMax: durationMaxOverride,
+      rangeSteps: getHistogramRangeSteps(
+        durationMinOverride,
+        durationMaxOverride,
+        steps
+      ),
+    };
+  }
+
   const { apmEventClient } = setup;
 
-  const steps = 100;
   const durationField = getDurationField(chartType, searchMetrics);
 
   // when using metrics data, ensure we filter by docs with the appropriate duration field
@@ -54,6 +75,7 @@ export const fetchDurationHistogramRangeSteps = async ({
         events: [getEventType(chartType, searchMetrics)],
       },
       body: {
+        track_total_hits: 1,
         size: 0,
         query: getCommonCorrelationsQuery({
           start,
@@ -71,7 +93,7 @@ export const fetchDurationHistogramRangeSteps = async ({
   );
 
   if (resp.hits.total.value === 0) {
-    return getHistogramRangeSteps(0, 1, 100);
+    return { rangeSteps: getHistogramRangeSteps(0, 1, 100) };
   }
 
   if (
@@ -81,11 +103,15 @@ export const fetchDurationHistogramRangeSteps = async ({
       isFiniteNumber(resp.aggregations.duration_max.value)
     )
   ) {
-    return [];
+    return { rangeSteps: [] };
   }
 
-  const min = resp.aggregations.duration_min.value;
-  const max = resp.aggregations.duration_max.value * 2;
+  const durationMin = resp.aggregations.duration_min.value;
+  const durationMax = resp.aggregations.duration_max.value * 2;
 
-  return getHistogramRangeSteps(min, max, steps);
+  return {
+    durationMin,
+    durationMax,
+    rangeSteps: getHistogramRangeSteps(durationMin, durationMax, steps),
+  };
 };

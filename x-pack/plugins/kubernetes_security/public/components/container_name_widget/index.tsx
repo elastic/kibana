@@ -171,7 +171,7 @@ export const ContainerNameWidget = ({
             return aggsData?.buckets.map((aggData) => {
               return {
                 name: aggData.key as string,
-                count: addCommasToNumber(aggData.count_by_aggs.value),
+                count: addCommasToNumber(aggData.count_by_aggs?.value ?? 0),
               };
             });
           })
@@ -232,11 +232,11 @@ export const ContainerNameWidget = ({
     },
   });
 
-  const cellProps = () => {
+  const cellProps = useMemo(() => {
     return {
       css: styles.cellPad,
     };
-  };
+  }, [styles.cellPad]);
 
   return (
     <div

@@ -94,7 +94,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
         expect(http.get).toHaveBeenNthCalledWith(
           1,
-          '/internal/enterprise_search/engines/some-engine/crawler/domain_configs',
+          '/internal/app_search/engines/some-engine/crawler/domain_configs',
           {
             query: {
               'page[current]': 1,
@@ -104,7 +104,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
         );
         expect(http.get).toHaveBeenNthCalledWith(
           2,
-          '/internal/enterprise_search/engines/some-engine/crawler/domain_configs',
+          '/internal/app_search/engines/some-engine/crawler/domain_configs',
           {
             query: {
               'page[current]': 2,

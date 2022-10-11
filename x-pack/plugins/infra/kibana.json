@@ -14,7 +14,9 @@
     "alerting",
     "triggersActionsUi",
     "observability",
-    "ruleRegistry"
+    "ruleRegistry",
+    "unifiedSearch",
+    "lens"
   ],
   "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,

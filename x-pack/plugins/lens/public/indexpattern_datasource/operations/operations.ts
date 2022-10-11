@@ -6,7 +6,7 @@
  */
 
 import { memoize } from 'lodash';
-import { OperationMetadata } from '../../types';
+import type { IndexPattern, IndexPatternField, OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -15,7 +15,6 @@ import {
   renameOperationsMapping,
   BaseIndexPatternColumn,
 } from './definitions';
-import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
 import { hasField } from '../pure_utils';
 
@@ -63,6 +62,18 @@ export function getSortScoreByPriority(
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
 }
 
+export const getSortScoreByPriorityForField =
+  (field?: IndexPatternField) => (a: GenericOperationDefinition, b: GenericOperationDefinition) => {
+    if (
+      field?.partiallyApplicableFunctions?.[a.type] !==
+      field?.partiallyApplicableFunctions?.[b.type]
+    ) {
+      if (field?.partiallyApplicableFunctions?.[a.type]) return 1;
+      return -1;
+    }
+    return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
+  };
+
 export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColumn) {
   if (!hasField(targetColumn)) {
     return [];
@@ -100,7 +111,8 @@ export function hasOperationSupportForMultipleFields(
  */
 export function getOperationTypesForField(
   field: IndexPatternField,
-  filterOperations?: (operation: OperationMetadata) => boolean
+  filterOperations?: (operation: OperationMetadata) => boolean,
+  alreadyUsedOperations?: Set<string>
 ): OperationType[] {
   return operationDefinitions
     .filter((operationDefinition) => {
@@ -112,7 +124,16 @@ export function getOperationTypesForField(
         ? possibleOperation && filterOperations(possibleOperation)
         : possibleOperation;
     })
-    .sort(getSortScoreByPriority)
+    .sort(getSortScoreByPriorityForField(field))
+    .sort((a, b) => {
+      if (!alreadyUsedOperations) return 0;
+      // if some operations are used already, order them so the unused operations come first
+      const aAlreadyUsed = alreadyUsedOperations.has(a.type);
+      const bAlreadyUsed = alreadyUsedOperations.has(b.type);
+      if (aAlreadyUsed === bAlreadyUsed) return 0;
+      if (aAlreadyUsed) return 1;
+      return -1;
+    })
     .map(({ type }) => type);
 }
 

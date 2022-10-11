@@ -17,7 +17,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 
 const RemovePopover = createGlobalStyle`
-div.euiPopover__panel-isOpen {
+div[data-popover-open] {
   display: none;
 }
 `;

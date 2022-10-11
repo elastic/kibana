@@ -10,6 +10,7 @@ import type { SecurityAlertTypeReturnValue } from '../types';
 
 export const createResultObject = <TState extends RuleTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {
+    enrichmentTimes: [],
     bulkCreateTimes: [],
     createdSignalsCount: 0,
     createdSignals: [],
@@ -26,3 +27,4 @@ export const createResultObject = <TState extends RuleTypeState>(state: TState) 
 
 export * from './get_list_client';
 export * from './validate_mutated_params';
+export * from './build_timestamp_runtime_mapping';

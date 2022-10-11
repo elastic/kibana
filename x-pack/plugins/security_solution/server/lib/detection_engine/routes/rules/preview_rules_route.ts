@@ -88,6 +88,8 @@ export const previewRulesRoute = async (
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
+        const { getQueryRuleAdditionalOptions: queryRuleAdditionalOptions } =
+          await context.securitySolution;
 
         const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;
@@ -180,11 +182,14 @@ export const previewRulesRoute = async (
               | 'getState'
               | 'replaceState'
               | 'scheduleActions'
-              | 'scheduleActionsWithSubGroup'
               | 'setContext'
               | 'getContext'
               | 'hasContext'
             >;
+            alertLimit: {
+              getValue: () => number;
+              setLimitReached: () => void;
+            };
             done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
@@ -277,19 +282,28 @@ export const previewRulesRoute = async (
 
         switch (previewRuleParams.type) {
           case 'query':
-            const queryAlertType = previewRuleTypeWrapper(createQueryAlertType(ruleOptions));
+            const queryAlertType = previewRuleTypeWrapper(
+              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+            );
             await runExecutors(
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'saved_query':
             const savedQueryAlertType = previewRuleTypeWrapper(
-              createSavedQueryAlertType(ruleOptions)
+              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
             );
             await runExecutors(
               savedQueryAlertType.executor,
@@ -297,7 +311,14 @@ export const previewRulesRoute = async (
               savedQueryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'threshold':
@@ -310,7 +331,14 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'threat_match':
@@ -323,7 +351,14 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'eql':
@@ -334,7 +369,14 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'machine_learning':
@@ -345,7 +387,14 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'new_terms':
@@ -356,7 +405,14 @@ export const previewRulesRoute = async (
               newTermsAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           default:

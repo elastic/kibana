@@ -64,7 +64,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -74,6 +73,27 @@ jest.mock('../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
+    useNavigation: () => ({
+      getAppUrl: jest.fn,
+    }),
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        timelines: {
+          getUseDraggableKeyboardWrapper: () => () => ({
+            onBlur: jest.fn,
+            onKeyDown: jest.fn,
+          }),
+        },
+      },
+    }),
+  };
+});
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

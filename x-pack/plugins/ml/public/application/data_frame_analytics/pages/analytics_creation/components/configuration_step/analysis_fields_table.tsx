@@ -128,6 +128,7 @@ export const AnalysisFieldsTable: FC<{
         });
       }
       setMinimumFieldsRequiredMessage(undefined);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableItems]);
 
     useEffect(() => {

@@ -22,16 +22,24 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
-import { IngestionStatus } from '../../types';
+import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { IndicesLogic } from './indices_logic';
 
 const DEFAULT_VALUES = {
   data: undefined,
+  deleteModalIndex: null,
+  deleteModalIndexName: '',
+  deleteModalIngestionMethod: IngestionMethod.API,
+  deleteStatus: Status.IDLE,
   hasNoIndices: false,
   indices: [],
-  isLoading: false,
+  isDeleteLoading: false,
+  isDeleteModalVisible: false,
+  isFirstRequest: true,
+  isLoading: true,
   meta: DEFAULT_META,
+  searchParams: { meta: DEFAULT_META, returnHiddenIndices: false },
   status: Status.IDLE,
 };
 
@@ -63,11 +71,77 @@ describe('IndicesLogic', () => {
               current: 3,
             },
           },
+          searchParams: {
+            ...DEFAULT_VALUES.searchParams,
+            meta: { page: { ...DEFAULT_META.page, current: 3 } },
+          },
         });
+      });
+    });
+    describe('openDeleteModal', () => {
+      it('should set deleteIndexName and set isDeleteModalVisible to true', () => {
+        IndicesLogic.actions.openDeleteModal(connectorIndex);
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteModalIndex: connectorIndex,
+          deleteModalIndexName: 'connector',
+          deleteModalIngestionMethod: IngestionMethod.CONNECTOR,
+          isDeleteModalVisible: true,
+        });
+      });
+    });
+    describe('closeDeleteModal', () => {
+      it('should set deleteIndexName to empty and set isDeleteModalVisible to false', () => {
+        IndicesLogic.actions.openDeleteModal(connectorIndex);
+        IndicesLogic.actions.closeDeleteModal();
+        expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
       });
     });
   });
   describe('reducers', () => {
+    describe('isFirstRequest', () => {
+      it('should update to true on setIsFirstRequest', () => {
+        IndicesLogic.actions.setIsFirstRequest();
+        expect(IndicesLogic.values).toEqual({ ...DEFAULT_VALUES, isFirstRequest: true });
+      });
+      it('should update to false on apiError', () => {
+        IndicesLogic.actions.setIsFirstRequest();
+        IndicesLogic.actions.apiError({} as HttpError);
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          hasNoIndices: false,
+          indices: [],
+          isFirstRequest: false,
+          isLoading: false,
+          status: Status.ERROR,
+        });
+      });
+      it('should update to false on apiSuccess', () => {
+        IndicesLogic.actions.setIsFirstRequest();
+        IndicesLogic.actions.apiSuccess({
+          indices: [],
+          isInitialRequest: false,
+          meta: DEFAULT_VALUES.meta,
+          returnHiddenIndices: false,
+        });
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          data: {
+            indices: [],
+            isInitialRequest: false,
+            meta: DEFAULT_VALUES.meta,
+            returnHiddenIndices: false,
+          },
+          hasNoIndices: false,
+          indices: [],
+          isFirstRequest: false,
+          isLoading: false,
+          status: Status.SUCCESS,
+        });
+      });
+    });
     describe('meta', () => {
       it('updates when apiSuccess listener triggered', () => {
         const newMeta = {
@@ -83,17 +157,28 @@ describe('IndicesLogic', () => {
           indices,
           isInitialRequest: true,
           meta: newMeta,
+          returnHiddenIndices: true,
+          searchQuery: 'a',
         });
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices,
             isInitialRequest: true,
             meta: newMeta,
+            returnHiddenIndices: true,
+            searchQuery: 'a',
           },
           hasNoIndices: false,
           indices: elasticsearchViewIndices,
+          isFirstRequest: false,
           isLoading: false,
           meta: newMeta,
+          searchParams: {
+            meta: newMeta,
+            returnHiddenIndices: true,
+            searchQuery: 'a',
+          },
           status: Status.SUCCESS,
         });
       });
@@ -113,17 +198,25 @@ describe('IndicesLogic', () => {
           indices: [],
           isInitialRequest: true,
           meta,
+          returnHiddenIndices: false,
         });
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: [],
             isInitialRequest: true,
             meta,
+            returnHiddenIndices: false,
           },
           hasNoIndices: true,
           indices: [],
+          isFirstRequest: false,
           isLoading: false,
           meta,
+          searchParams: {
+            ...DEFAULT_VALUES.searchParams,
+            meta,
+          },
           status: Status.SUCCESS,
         });
       });
@@ -141,18 +234,56 @@ describe('IndicesLogic', () => {
           indices: [],
           isInitialRequest: false,
           meta,
+          returnHiddenIndices: false,
         });
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: [],
             isInitialRequest: false,
             meta,
+            returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: [],
+          isFirstRequest: false,
           isLoading: false,
           meta,
+          searchParams: {
+            ...DEFAULT_VALUES.searchParams,
+            meta,
+          },
           status: Status.SUCCESS,
+        });
+      });
+    });
+    describe('deleteRequest', () => {
+      it('should update isDeleteLoading to true on deleteIndex', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.LOADING,
+          isDeleteLoading: true,
+        });
+      });
+      it('should update isDeleteLoading to to false on apiError', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteError({} as HttpError);
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should update isDeleteLoading to to false on apiSuccess', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteSuccess();
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.SUCCESS,
+          isDeleteLoading: false,
         });
       });
     });
@@ -167,6 +298,21 @@ describe('IndicesLogic', () => {
       IndicesLogic.actions.apiError({} as HttpError);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
+    });
+    it('calls flashAPIErrors on deleteError', () => {
+      IndicesLogic.actions.deleteError({} as HttpError);
+      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
+      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
+    });
+    it('calls flashSuccessToast, closeDeleteModal and fetchIndices on deleteSuccess', () => {
+      IndicesLogic.actions.fetchIndices = jest.fn();
+      IndicesLogic.actions.closeDeleteModal = jest.fn();
+      IndicesLogic.actions.deleteSuccess();
+      expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
+      expect(IndicesLogic.actions.fetchIndices).toHaveBeenCalledWith(
+        IndicesLogic.values.searchParams
+      );
+      expect(IndicesLogic.actions.closeDeleteModal).toHaveBeenCalled();
     });
     it('calls makeRequest on fetchIndices', async () => {
       jest.useFakeTimers();
@@ -219,16 +365,20 @@ describe('IndicesLogic', () => {
           indices: elasticsearchViewIndices,
           isInitialRequest: true,
           meta: DEFAULT_META,
+          returnHiddenIndices: false,
         });
 
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: elasticsearchViewIndices,
             isInitialRequest: true,
             meta: DEFAULT_META,
+            returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: elasticsearchViewIndices,
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,
@@ -251,9 +401,11 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          returnHiddenIndices: false,
         });
 
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: [
               {
@@ -267,6 +419,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: [
@@ -280,6 +433,7 @@ describe('IndicesLogic', () => {
               ingestionStatus: IngestionStatus.ERROR,
             },
           ],
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,
@@ -296,9 +450,11 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          returnHiddenIndices: false,
         });
 
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: [
               {
@@ -308,6 +464,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: [
@@ -320,6 +477,7 @@ describe('IndicesLogic', () => {
               ingestionStatus: IngestionStatus.CONNECTED,
             },
           ],
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,
@@ -336,9 +494,11 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          returnHiddenIndices: false,
         });
 
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: [
               {
@@ -348,6 +508,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: [
@@ -357,6 +518,7 @@ describe('IndicesLogic', () => {
               ingestionStatus: IngestionStatus.ERROR,
             },
           ],
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,
@@ -377,9 +539,11 @@ describe('IndicesLogic', () => {
           ],
           isInitialRequest: true,
           meta: DEFAULT_META,
+          returnHiddenIndices: false,
         });
 
         expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
           data: {
             indices: [
               {
@@ -393,6 +557,7 @@ describe('IndicesLogic', () => {
             ],
             isInitialRequest: true,
             meta: DEFAULT_META,
+            returnHiddenIndices: false,
           },
           hasNoIndices: false,
           indices: [
@@ -406,6 +571,7 @@ describe('IndicesLogic', () => {
               ingestionStatus: IngestionStatus.SYNC_ERROR,
             },
           ],
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,

@@ -64,7 +64,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
   return (
     <>
       <EuiTitle size="s">
-        <h4>
+        <h4 data-test-subj="fleetServerHostHeader">
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostSectionTitle"
             defaultMessage="Fleet server hosts"

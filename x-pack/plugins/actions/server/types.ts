@@ -20,13 +20,10 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
+import { ActionsConfigurationUtilities } from './actions_config';
 
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
-export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
-export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
-export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
-export type { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
@@ -65,6 +62,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   params: Params;
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -93,8 +91,15 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-interface ValidatorType<Type> {
-  validate(value: unknown): Type;
+export interface ValidatorType<Type> {
+  schema: {
+    validate(value: unknown): Type;
+  };
+  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+}
+
+export interface ValidatorServices {
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ActionValidationService {
@@ -102,6 +107,12 @@ export interface ActionValidationService {
 
   isUriAllowed(uri: string): boolean;
 }
+
+export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  params: Params,
+  variables: Record<string, unknown>,
+  actionId?: string
+) => Params;
 
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -121,11 +132,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
 
-  renderParameterTemplates?(
-    params: Params,
-    variables: Record<string, unknown>,
-    actionId?: string
-  ): Params;
+  renderParameterTemplates?: RenderParameterTemplates<Params>;
 
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

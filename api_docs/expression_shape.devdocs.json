@@ -22,6 +22,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -58,6 +59,7 @@
         ],
         "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -74,6 +76,7 @@
             ],
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -112,6 +115,7 @@
         ],
         "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -128,6 +132,7 @@
             ],
             "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -178,6 +183,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/progress/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -191,7 +197,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -240,6 +247,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/shape/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -253,7 +261,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -267,13 +276,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
+          "CoreSetup",
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -294,6 +297,7 @@
         ],
         "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -303,17 +307,12 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -329,13 +328,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
+          "CoreSetup",
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -356,6 +349,7 @@
         ],
         "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -365,17 +359,12 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -393,6 +382,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -405,7 +395,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -418,7 +409,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -431,7 +423,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -445,6 +438,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/shape/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -454,7 +448,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -464,7 +459,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -478,6 +474,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -487,7 +484,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -497,7 +495,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -521,6 +520,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -533,7 +533,8 @@
               "\"shape\""
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -547,6 +548,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -556,7 +558,8 @@
             "label": "borderOffset",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -566,7 +569,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -576,7 +580,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -590,6 +595,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -602,7 +608,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -612,10 +619,11 @@
             "label": "strokeLinecap",
             "description": [],
             "signature": [
-              "\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"
+              "\"butt\" | \"round\" | \"square\" | \"inherit\" | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -629,6 +637,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -641,7 +650,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -651,10 +661,11 @@
             "label": "strokeLinejoin",
             "description": [],
             "signature": [
-              "\"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined"
+              "\"round\" | \"inherit\" | \"miter\" | \"bevel\" | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -668,6 +679,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -677,7 +689,8 @@
             "label": "barColor",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -687,7 +700,8 @@
             "label": "barWeight",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -706,7 +720,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -719,7 +734,8 @@
               "string | boolean"
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -729,7 +745,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -748,7 +765,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -758,7 +776,8 @@
             "label": "valueColor",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -768,7 +787,8 @@
             "label": "valueWeight",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -782,6 +802,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -794,7 +815,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -807,7 +829,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -820,7 +843,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -833,7 +857,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -847,6 +872,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -859,7 +885,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -872,7 +899,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -885,7 +913,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -898,7 +927,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -918,7 +948,8 @@
               " | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -931,7 +962,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -944,7 +976,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -975,6 +1008,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/shape/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -988,6 +1022,7 @@
             ],
             "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -1002,7 +1037,8 @@
               "HTMLElement"
             ],
             "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1016,6 +1052,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1028,7 +1065,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1041,7 +1079,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1054,7 +1093,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1067,7 +1107,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1080,7 +1121,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1094,6 +1136,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1114,6 +1157,7 @@
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1129,6 +1173,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1138,7 +1183,8 @@
             "label": "border",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1148,7 +1194,8 @@
             "label": "borderWidth",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1167,7 +1214,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1177,7 +1225,8 @@
             "label": "fill",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1187,7 +1236,8 @@
             "label": "maintainAspect",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1201,6 +1251,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1220,7 +1271,8 @@
               " | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1239,7 +1291,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1267,7 +1320,8 @@
               " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1287,7 +1341,8 @@
               " | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1301,6 +1356,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1310,7 +1366,8 @@
             "label": "minX",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1320,7 +1377,8 @@
             "label": "minY",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1330,7 +1388,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1340,7 +1399,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1356,6 +1416,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1367,6 +1428,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1378,6 +1440,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1444,6 +1507,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1494,6 +1558,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1510,6 +1575,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1531,6 +1597,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1552,6 +1619,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1606,6 +1674,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1676,6 +1745,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1722,6 +1792,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1752,6 +1823,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/shape_factory.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1796,6 +1868,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1810,6 +1883,7 @@
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1826,6 +1900,7 @@
       ],
       "path": "src/plugins/expression_shape/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1849,6 +1924,7 @@
       ],
       "path": "src/plugins/expression_shape/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1876,6 +1952,7 @@
         ],
         "path": "src/plugins/expression_shape/common/lib/available_shapes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1900,6 +1977,7 @@
         ],
         "path": "src/plugins/expression_shape/common/lib/available_shapes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1915,6 +1993,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1924,7 +2003,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -1934,7 +2014,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1958,6 +2039,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1970,7 +2052,8 @@
               "\"shape\""
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1984,6 +2067,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -1993,7 +2077,8 @@
             "label": "borderOffset",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2003,7 +2088,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2013,7 +2099,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2027,6 +2114,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -2036,7 +2124,8 @@
             "label": "barColor",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2046,7 +2135,8 @@
             "label": "barWeight",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2065,7 +2155,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2078,7 +2169,8 @@
               "string | boolean"
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2088,7 +2180,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2107,7 +2200,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2117,7 +2211,8 @@
             "label": "valueColor",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2127,7 +2222,8 @@
             "label": "valueWeight",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2141,6 +2237,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -2150,7 +2247,8 @@
             "label": "border",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2160,7 +2258,8 @@
             "label": "borderWidth",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2179,7 +2278,8 @@
               }
             ],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2189,7 +2289,8 @@
             "label": "fill",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2199,7 +2300,8 @@
             "label": "maintainAspect",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2213,6 +2315,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionShape",
@@ -2222,7 +2325,8 @@
             "label": "minX",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2232,7 +2336,8 @@
             "label": "minY",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2242,7 +2347,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionShape",
@@ -2252,7 +2358,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2268,6 +2375,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2279,6 +2387,7 @@
         "description": [],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2295,6 +2404,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2309,6 +2419,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2323,6 +2434,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2387,6 +2499,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -2437,6 +2550,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -2453,6 +2567,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2467,6 +2582,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2481,6 +2597,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2495,6 +2612,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2509,6 +2627,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2530,6 +2649,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2551,6 +2671,7 @@
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2565,6 +2686,7 @@
         ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

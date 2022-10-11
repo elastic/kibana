@@ -10,15 +10,19 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import {
+  UiSettingsCommon,
+  SavedObjectsClientCommon,
+  SavedObject,
+  DataViewSpec,
+  IDataViewsApiClient,
+} from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
-const createFieldsFetcher = jest.fn().mockImplementation(() => ({
-  getFieldsForWildcard: jest.fn().mockImplementation(() => {
-    return new Promise((resolve) => resolve([]));
-  }),
-  every: jest.fn(),
-}));
+const createFieldsFetcher = () =>
+  ({
+    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: [] })),
+  } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
 let object: any = {};
@@ -52,6 +56,7 @@ describe('IndexPatterns', () => {
   let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
+  let apiClient: IDataViewsApiClient;
   const uiSettings = {
     get: () => Promise.resolve(false),
     getAll: () => {},
@@ -93,10 +98,12 @@ describe('IndexPatterns', () => {
         };
       });
 
+    apiClient = createFieldsFetcher();
+
     indexPatterns = new DataViewsService({
       uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -108,7 +115,7 @@ describe('IndexPatterns', () => {
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -217,11 +224,11 @@ describe('IndexPatterns', () => {
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
-    pattern.title = 'foo2';
+    pattern.setIndexPattern('foo2');
     await indexPatterns.updateSavedObject(pattern);
 
     // This should not be able to recover
-    samePattern.title = 'foo3';
+    samePattern.setIndexPattern('foo3');
 
     let result;
     try {
@@ -234,18 +241,18 @@ describe('IndexPatterns', () => {
   });
 
   test('create', async () => {
-    const title = 'kibana-*';
+    const indexPattern = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title }, true);
-    expect(indexPattern).toBeInstanceOf(DataView);
-    expect(indexPattern.title).toBe(title);
+    const dataView = await indexPatterns.create({ title: indexPattern }, true);
+    expect(dataView).toBeInstanceOf(DataView);
+    expect(dataView.getIndexPattern()).toBe(indexPattern);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title });
+    await indexPatterns.create({ title: indexPattern });
     expect(indexPatterns.refreshFields).toBeCalled();
-    expect(indexPattern.id).toBeDefined();
-    expect(indexPattern.isPersisted()).toBe(false);
+    expect(dataView.id).toBeDefined();
+    expect(dataView.isPersisted()).toBe(false);
   });
 
   test('createSavedObject', async () => {
@@ -260,14 +267,14 @@ describe('IndexPatterns', () => {
       version,
       attributes: {
         ...savedObject.attributes,
-        title: dataView.title,
+        title: dataView.getIndexPattern(),
       },
     });
 
     const indexPattern = await indexPatterns.createSavedObject(dataView);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.id).toBe(dataView.id);
-    expect(indexPattern.title).toBe(title);
+    expect(indexPattern.getIndexPattern()).toBe(title);
     expect(indexPattern.isPersisted()).toBe(true);
   });
 
@@ -341,6 +348,26 @@ describe('IndexPatterns', () => {
 
     // successful subsequent request
     expect(async () => await indexPatterns.get(id)).toBeDefined();
+  });
+
+  test('can set and remove field format', async () => {
+    const id = 'id';
+    setDocsourcePayload(id, savedObject);
+    const dataView = await indexPatterns.get(id);
+    dataView.setFieldFormat('field', { id: 'formatId' });
+    await indexPatterns.updateSavedObject(dataView);
+    let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    let [, , attrs] = lastCall;
+    expect(attrs).toHaveProperty('fieldFormatMap');
+    expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{\\"field\\":{\\"id\\":\\"formatId\\"}}"`);
+    dataView.deleteFieldFormat('field');
+    await indexPatterns.updateSavedObject(dataView);
+    lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    [, , attrs] = lastCall;
+
+    // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
+    expect(attrs).toHaveProperty('fieldFormatMap');
+    expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
   describe('getDefaultDataView', () => {
@@ -436,6 +463,44 @@ describe('IndexPatterns', () => {
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
       expect(defaultDataViewResult?.id).toBe('id1');
       expect(uiSettings.set).toBeCalledTimes(0);
+    });
+  });
+
+  describe('refreshFields', () => {
+    beforeEach(() => {
+      // preserve mocked functionality
+      jest.clearAllMocks();
+    });
+
+    test('refreshFields includes runtimeFields', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        runtimeFieldMap: {
+          a: {
+            type: 'keyword',
+            script: {
+              source: "emit('a');",
+            },
+          },
+        },
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+      await indexPatterns.refreshFields(indexPattern);
+      expect(indexPattern.fields.length).toBe(1);
+    });
+
+    test('refreshFields properly includes allowNoIndex', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        allowNoIndex: true,
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+
+      indexPatterns.refreshFields(indexPattern);
+      // @ts-expect-error
+      expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
     });
   });
 });

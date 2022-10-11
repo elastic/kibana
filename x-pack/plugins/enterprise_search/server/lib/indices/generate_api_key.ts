@@ -9,13 +9,14 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument } from '../../../common/types/connectors';
+import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
 export const generateApiKey = async (client: IScopedClusterClient, indexName: string) => {
   const apiKeyResult = await client.asCurrentUser.security.createApiKey({
     name: `${indexName}-connector`,
     role_descriptors: {
-      [`${indexName}-connector-role`]: {
-        cluster: [],
+      [`${toAlphanumeric(indexName)}-connector-role`]: {
+        cluster: ['monitor'],
         index: [
           {
             names: [indexName, `${CONNECTORS_INDEX}*`],

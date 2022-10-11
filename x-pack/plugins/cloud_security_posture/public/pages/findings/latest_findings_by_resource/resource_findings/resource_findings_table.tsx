@@ -15,13 +15,13 @@ import {
   type EuiBasicTableProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import {
   baseFindingsColumns,
   createColumnWithFilters,
   getExpandColumn,
   type OnAddFilter,
 } from '../../layout/findings_layout';
-import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 
 interface Props {
@@ -49,23 +49,16 @@ const ResourceFindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      baseFindingsColumns['resource.id'],
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(
-        { ...baseFindingsColumns['resource.sub_type'], sortable: false },
-        { onAddFilter }
-      ),
-      createColumnWithFilters(
-        { ...baseFindingsColumns['resource.name'], sortable: false },
-        { onAddFilter }
-      ),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+      baseFindingsColumns['rule.tags'],
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
   );
+
   if (!loading && !items.length)
     return (
       <EuiEmptyPrompt

@@ -37,7 +37,12 @@ import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
+import {
+  RuleDetailsPathParams,
+  EVENT_LOG_LIST_TAB,
+  ALERT_LIST_TAB,
+  RULE_DETAILS_PAGE_ID,
+} from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -49,10 +54,9 @@ import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+
 export function RuleDetailsPage() {
   const {
-    cases,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -153,15 +157,10 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const userPermissions = useGetUserCasesPermissions();
   const alertStateProps = {
-    cases: {
-      ui: cases.ui,
-      permissions: userPermissions,
-    },
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
-    id: `case-details-alerts-o11y`,
+    id: RULE_DETAILS_PAGE_ID,
     flyoutSize: 's' as EuiFlyoutSize,
     featureIds: [features] as AlertConsumers[],
     query: {
@@ -186,7 +185,7 @@ export function RuleDetailsPage() {
       }),
       'data-test-subj': 'eventLogListTab',
       content: getRuleEventLogList<'default'>({
-        rule,
+        ruleId: rule?.id,
         ruleType,
       } as RuleEventLogListProps),
     },

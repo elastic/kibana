@@ -15,7 +15,6 @@ import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
 import type {
-  DocValueFields,
   NetworkDnsRequestOptions,
   NetworkDnsEdges,
   PageInfoPaginated,
@@ -41,7 +40,6 @@ export interface NetworkDnsResponse {
 
 interface UseNetworkDns {
   id: string;
-  docValueFields: DocValueFields[];
   indexNames: string[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -50,7 +48,6 @@ interface UseNetworkDns {
 }
 
 export const useNetworkDns = ({
-  docValueFields,
   endDate,
   filterQuery,
   id,
@@ -119,7 +116,6 @@ export const useNetworkDns = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         isPtrIncluded,
         factoryQueryType: NetworkQueries.dns,
         filterQuery: createFilter(filterQuery),
@@ -136,17 +132,7 @@ export const useNetworkDns = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    indexNames,
-    endDate,
-    filterQuery,
-    limit,
-    startDate,
-    sort,
-    isPtrIncluded,
-    docValueFields,
-  ]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, isPtrIncluded]);
 
   useEffect(() => {
     if (!skip && networkDnsRequest) {

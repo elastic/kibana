@@ -7,6 +7,11 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AvgActionRunOutcomeByConnectorTypeBucket,
+  parseActionRunOutcomeByConnectorTypesBucket,
+} from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
 
@@ -43,7 +48,6 @@ export async function getTotalCount(
       `,
     },
   };
-
   try {
     const searchResult = await esClient.search({
       index: kibanaIndex,
@@ -78,6 +82,7 @@ export async function getTotalCount(
       }
     }
     return {
+      hasErrors: false,
       countTotal:
         Object.keys(aggs).reduce(
           (total: number, key: string) => parseInt(aggs[key], 10) + total,
@@ -86,8 +91,13 @@ export async function getTotalCount(
       countByType,
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+
     logger.warn(`Error executing actions telemetry task: getTotalCount - ${JSON.stringify(err)}`);
+
     return {
+      hasErrors: true,
+      errorMessage,
       countTotal: 0,
       countByType: {},
     };
@@ -101,6 +111,8 @@ export async function getInUseTotalCount(
   referenceType?: string,
   preconfiguredActions?: PreConfiguredAction[]
 ): Promise<{
+  hasErrors: boolean;
+  errorMessage?: string;
   countTotal: number;
   countByType: Record<string, number>;
   countByAlertHistoryConnectorType: number;
@@ -363,6 +375,7 @@ export async function getInUseTotalCount(
     }
 
     return {
+      hasErrors: false,
       countTotal: aggs.total + (preconfiguredActionsAggs?.total ?? 0),
       countByType: countByActionTypeId,
       countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
@@ -370,10 +383,14 @@ export async function getInUseTotalCount(
       countNamespaces: namespacesList.size,
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+
     logger.warn(
       `Error executing actions telemetry task: getInUseTotalCount - ${JSON.stringify(err)}`
     );
     return {
+      hasErrors: true,
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countByAlertHistoryConnectorType: 0,
@@ -383,22 +400,7 @@ export async function getInUseTotalCount(
   }
 }
 
-export async function getInUseByAlertingTotalCounts(
-  esClient: ElasticsearchClient,
-  kibanaIndex: string,
-  logger: Logger,
-  preconfiguredActions?: PreConfiguredAction[]
-): Promise<{
-  countTotal: number;
-  countByType: Record<string, number>;
-  countByAlertHistoryConnectorType: number;
-  countEmailByService: Record<string, number>;
-  countNamespaces: number;
-}> {
-  return await getInUseTotalCount(esClient, kibanaIndex, logger, 'alert', preconfiguredActions);
-}
-
-function replaceFirstAndLastDotSymbols(strToReplace: string) {
+export function replaceFirstAndLastDotSymbols(strToReplace: string) {
   const hasFirstSymbolDot = strToReplace.startsWith('.');
   const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
   const hasLastSymbolDot = strToReplace.endsWith('.');
@@ -410,12 +412,15 @@ export async function getExecutionsPerDayCount(
   eventLogIndex: string,
   logger: Logger
 ): Promise<{
+  hasErrors: boolean;
+  errorMessage?: string;
   countTotal: number;
   countByType: Record<string, number>;
   countFailed: number;
   countFailedByType: Record<string, number>;
   avgExecutionTime: number;
   avgExecutionTimeByType: Record<string, number>;
+  countRunOutcomeByConnectorType: Record<string, number>;
 }> {
   const scriptedMetric = {
     scripted_metric: {
@@ -537,6 +542,35 @@ export async function getExecutionsPerDayCount(
               },
             },
           },
+          count_connector_types_by_action_run_outcome_per_day: {
+            nested: {
+              path: 'kibana.saved_objects',
+            },
+            aggs: {
+              actionSavedObjects: {
+                filter: { term: { 'kibana.saved_objects.type': 'action' } },
+                aggs: {
+                  connector_types: {
+                    terms: {
+                      field: 'kibana.saved_objects.type_id',
+                    },
+                    aggs: {
+                      outcome: {
+                        reverse_nested: {},
+                        aggs: {
+                          count: {
+                            terms: {
+                              field: 'event.outcome',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -565,7 +599,16 @@ export async function getExecutionsPerDayCount(
       {}
     );
 
+    const aggsCountConnectorTypeByActionRun = actionResults.aggregations as {
+      count_connector_types_by_action_run_outcome_per_day: {
+        actionSavedObjects: {
+          connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
+        };
+      };
+    };
+
     return {
+      hasErrors: false,
       countTotal: aggsExecutions.total,
       countByType: Object.entries(aggsExecutions.connectorTypes).reduce(
         (res: Record<string, number>, [key, value]) => {
@@ -586,18 +629,26 @@ export async function getExecutionsPerDayCount(
       ),
       avgExecutionTime: aggsAvgExecutionTime,
       avgExecutionTimeByType,
+      countRunOutcomeByConnectorType: parseActionRunOutcomeByConnectorTypesBucket(
+        aggsCountConnectorTypeByActionRun.count_connector_types_by_action_run_outcome_per_day
+          .actionSavedObjects.connector_types.buckets
+      ),
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
       `Error executing actions telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`
     );
     return {
+      hasErrors: true,
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countFailed: 0,
       countFailedByType: {},
       avgExecutionTime: 0,
       avgExecutionTimeByType: {},
+      countRunOutcomeByConnectorType: {},
     };
   }
 }

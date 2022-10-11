@@ -7,9 +7,11 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,6 +20,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
@@ -111,6 +114,8 @@ export function FormulaEditor({
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
+
+  const { euiTheme } = useEuiTheme();
 
   const visibleOperationsMap = useMemo(
     () => filterByVisibleOperation(operationDefinitionMap),
@@ -534,7 +539,8 @@ export function FormulaEditor({
             tokenInfo.ast.type !== 'namedArgument' ||
             (tokenInfo.ast.name !== 'kql' &&
               tokenInfo.ast.name !== 'lucene' &&
-              tokenInfo.ast.name !== 'shift') ||
+              tokenInfo.ast.name !== 'shift' &&
+              tokenInfo.ast.name !== 'reducedTimeRange') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -554,7 +560,11 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'" && tokenInfo.ast.name !== 'shift') {
+          if (
+            char === "'" &&
+            tokenInfo.ast.name !== 'shift' &&
+            tokenInfo.ast.name !== 'reducedTimeRange'
+          ) {
             editOperation = {
               range: {
                 ...currentPosition,
@@ -603,7 +613,7 @@ export function FormulaEditor({
     value: text ?? '',
     onChange: setText,
     options: {
-      automaticLayout: false,
+      automaticLayout: true,
       fontSize: 14,
       folding: false,
       lineNumbers: 'off',
@@ -651,7 +661,26 @@ export function FormulaEditor({
         'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
       })}
     >
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      {!isFullscreen && (
+        <EuiFormLabel
+          css={css`
+            margin-top: ${euiTheme.size.base};
+            margin-bottom: ${euiTheme.size.xs};
+          `}
+        >
+          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingFormula', {
+            defaultMessage: 'Formula',
+          })}
+        </EuiFormLabel>
+      )}
+      <div
+        className="lnsIndexPatternDimensionEditor--shaded"
+        css={css`
+          border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
+          border-radius: ${!isFullscreen ? euiTheme.border.radius.medium : 0};
+          height: ${isFullscreen ? '100%' : 'auto'};
+        `}
+      >
         <div className="lnsFormula">
           <div className="lnsFormula__editor">
             <div className="lnsFormula__editorHeader">
@@ -816,7 +845,6 @@ export function FormulaEditor({
                         anchorPosition="leftCenter"
                         isOpen={isHelpOpen}
                         closePopover={() => setIsHelpOpen(false)}
-                        ownFocus={false}
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"

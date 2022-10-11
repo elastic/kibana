@@ -9,7 +9,7 @@
 import React, { FC, useContext } from 'react';
 import type {
   NoDataViewsPromptServices,
-  NoDataViewsPromptKibanaServices,
+  NoDataViewsPromptKibanaDependencies,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 const NoDataViewsPromptContext = React.createContext<NoDataViewsPromptServices | null>(null);
@@ -37,7 +37,7 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaServices> = ({
+export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependencies> = ({
   children,
   ...services
 }) => {

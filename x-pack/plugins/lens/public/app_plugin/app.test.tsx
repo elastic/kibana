@@ -141,12 +141,27 @@ describe('Lens App', () => {
 
   it('renders the editor frame', async () => {
     const { frame } = await mountWith({});
-    expect(frame.EditorFrameContainer.mock.calls).toMatchSnapshot();
+    expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
+      {
+        indexPatternService: expect.any(Object),
+        lensInspector: {
+          adapters: {
+            expression: expect.any(Object),
+            requests: expect.any(Object),
+            tables: expect.any(Object),
+          },
+          close: expect.any(Function),
+          inspect: expect.any(Function),
+        },
+        showNoDataPopover: expect.any(Function),
+      },
+      {}
+    );
   });
 
   it('updates global filters with store state', async () => {
     const services = makeDefaultServicesForApp();
-    const indexPattern = { id: 'index1' } as unknown as DataView;
+    const indexPattern = { id: 'index1', isPersisted: () => true } as unknown as DataView;
     const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
     const pinnedFilter = buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
@@ -187,7 +202,7 @@ describe('Lens App', () => {
         },
       });
       const navigationComponent = services.navigation.ui
-        .TopNavMenu as unknown as React.ReactElement;
+        .AggregateQueryTopNavMenu as unknown as React.ReactElement;
       const extraEntry = instance.find(navigationComponent).prop('config')[0];
       expect(extraEntry.label).toEqual('My entry');
       expect(extraEntry.run).toBe(runFn);
@@ -227,7 +242,7 @@ describe('Lens App', () => {
           topNavMenuEntryGenerators: [getterFn],
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
         },
         preloadedState,
@@ -237,7 +252,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
           visualizationState: preloadedState.visualization.state,
           visualizationId: preloadedState.visualization.activeId,
@@ -348,9 +363,11 @@ describe('Lens App', () => {
       const customServices = makeDefaultServicesForApp();
       customServices.dataViews.get = jest
         .fn()
-        .mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true } as DataView));
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
+        );
       const { services } = await mountWith({ services: customServices });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
       );
@@ -359,11 +376,13 @@ describe('Lens App', () => {
       const customServices = makeDefaultServicesForApp();
       customServices.dataViews.get = jest
         .fn()
-        .mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true } as DataView));
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
+        );
       const customProps = makeDefaultProps();
       customProps.datasourceMap.testDatasource.isTimeBased = () => true;
       const { services } = await mountWith({ props: customProps, services: customServices });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
       );
@@ -372,11 +391,13 @@ describe('Lens App', () => {
       const customServices = makeDefaultServicesForApp();
       customServices.dataViews.get = jest
         .fn()
-        .mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true } as DataView));
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
+        );
       const customProps = makeDefaultProps();
       customProps.datasourceMap.testDatasource.isTimeBased = () => false;
       const { services } = await mountWith({ props: customProps, services: customServices });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: false }),
         {}
       );
@@ -384,39 +405,6 @@ describe('Lens App', () => {
   });
 
   describe('TopNavMenu#dataViewPickerProps', () => {
-    it('calls the nav component with the correct dataview picker props if no permissions are given', async () => {
-      const { instance, lensStore } = await mountWith({ preloadedState: {} });
-      const document = {
-        savedObjectId: defaultSavedObjectId,
-        state: {
-          query: 'fake query',
-          filters: [{ query: { match_phrase: { src: 'test' } } }],
-        },
-        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown as Document;
-
-      act(() => {
-        lensStore.dispatch(
-          setState({
-            query: 'fake query' as unknown as Query,
-            persistedDoc: document,
-          })
-        );
-      });
-      instance.update();
-      const props = instance
-        .find('[data-test-subj="lnsApp_topNav"]')
-        .prop('dataViewPickerComponentProps') as TopNavMenuData[];
-      expect(props).toEqual(
-        expect.objectContaining({
-          currentDataViewId: 'mockip',
-          onChangeDataView: expect.any(Function),
-          onDataViewCreated: undefined,
-          onAddField: undefined,
-        })
-      );
-    });
-
     it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
       services.dataViewEditor.userPermissions.editDataView = () => true;
@@ -474,10 +462,18 @@ describe('Lens App', () => {
       });
       instance.update();
 
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
-          indexPatterns: [{ id: 'mockip', isTimeBased: expect.any(Function) }],
+          indexPatterns: [
+            {
+              id: 'mockip',
+              isTimeBased: expect.any(Function),
+              fields: [],
+              isPersisted: expect.any(Function),
+              toSpec: expect.any(Function),
+            },
+          ],
         }),
         {}
       );
@@ -489,7 +485,7 @@ describe('Lens App', () => {
         .mockImplementation((id) => Promise.reject({ reason: 'Could not locate that data view' }));
       const customProps = makeDefaultProps();
       const { services } = await mountWith({ props: customProps, services: customServices });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ indexPatterns: [] }),
         {}
       );
@@ -604,7 +600,9 @@ describe('Lens App', () => {
         expect(getButton(instance).disableButton).toEqual(false);
 
         await act(async () => {
-          const topNavMenuConfig = instance.find(services.navigation.ui.TopNavMenu).prop('config');
+          const topNavMenuConfig = instance
+            .find(services.navigation.ui.AggregateQueryTopNavMenu)
+            .prop('config');
           expect(topNavMenuConfig).not.toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
           );
@@ -642,7 +640,9 @@ describe('Lens App', () => {
         });
 
         await act(async () => {
-          const topNavMenuConfig = instance.find(services.navigation.ui.TopNavMenu).prop('config');
+          const topNavMenuConfig = instance
+            .find(services.navigation.ui.AggregateQueryTopNavMenu)
+            .prop('config');
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
           );
@@ -670,7 +670,9 @@ describe('Lens App', () => {
         });
 
         await act(async () => {
-          const topNavMenuConfig = instance.find(services.navigation.ui.TopNavMenu).prop('config');
+          const topNavMenuConfig = instance
+            .find(services.navigation.ui.AggregateQueryTopNavMenu)
+            .prop('config');
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
           );
@@ -823,7 +825,7 @@ describe('Lens App', () => {
       });
 
       it('saves app filters and does not save pinned filters', async () => {
-        const indexPattern = { id: 'index1' } as unknown as DataView;
+        const indexPattern = { id: 'index1', isPersisted: () => true } as unknown as DataView;
         const field = { name: 'myfield' } as unknown as FieldSpec;
         const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
         const unpinned = buildExistsFilter(field, indexPattern);
@@ -882,8 +884,7 @@ describe('Lens App', () => {
           });
         });
         expect(checkForDuplicateTitle).toHaveBeenCalledWith(
-          expect.objectContaining({ id: '123' }),
-          false,
+          expect.objectContaining({ id: '123', isTitleDuplicateConfirmed: false }),
           onTitleDuplicate,
           expect.anything()
         );
@@ -974,7 +975,7 @@ describe('Lens App', () => {
   describe('query bar state management', () => {
     it('uses the default time and query language settings', async () => {
       const { lensStore, services } = await mountWith({});
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'lucene' },
           dateRangeFrom: 'now-7d',
@@ -1001,13 +1002,13 @@ describe('Lens App', () => {
         max: moment('2021-01-09T08:00:00.000Z'),
       });
       await act(async () =>
-        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
         })
       );
       instance.update();
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
           dateRangeFrom: 'now-14d',
@@ -1033,7 +1034,7 @@ describe('Lens App', () => {
 
     it('updates the filters when the user changes them', async () => {
       const { instance, services, lensStore } = await mountWith({});
-      const indexPattern = { id: 'index1' } as unknown as DataView;
+      const indexPattern = { id: 'index1', isPersisted: () => true } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
@@ -1061,7 +1062,7 @@ describe('Lens App', () => {
       });
 
       act(() =>
-        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: '', language: 'lucene' },
         })
@@ -1075,7 +1076,7 @@ describe('Lens App', () => {
       });
       // trigger again, this time changing just the query
       act(() =>
-        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
         })
@@ -1086,7 +1087,7 @@ describe('Lens App', () => {
           searchSessionId: `sessionId-3`,
         }),
       });
-      const indexPattern = { id: 'index1' } as unknown as DataView;
+      const indexPattern = { id: 'index1', isPersisted: () => true } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
         services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
@@ -1111,7 +1112,7 @@ describe('Lens App', () => {
         },
       };
       await mountWith({ services });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showSaveQuery: false }),
         {}
       );
@@ -1119,7 +1120,7 @@ describe('Lens App', () => {
 
     it('persists the saved query ID when the query is saved', async () => {
       const { instance, services } = await mountWith({});
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           showSaveQuery: true,
           savedQuery: undefined,
@@ -1130,7 +1131,7 @@ describe('Lens App', () => {
         {}
       );
       act(() => {
-        instance.find(services.navigation.ui.TopNavMenu).prop('onSaved')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSaved')!({
           id: '1',
           attributes: {
             title: '',
@@ -1139,7 +1140,7 @@ describe('Lens App', () => {
           },
         });
       });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: {
             id: '1',
@@ -1157,7 +1158,7 @@ describe('Lens App', () => {
     it('changes the saved query ID when the query is updated', async () => {
       const { instance, services } = await mountWith({});
       act(() => {
-        instance.find(services.navigation.ui.TopNavMenu).prop('onSaved')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSaved')!({
           id: '1',
           attributes: {
             title: '',
@@ -1167,16 +1168,18 @@ describe('Lens App', () => {
         });
       });
       act(() => {
-        instance.find(services.navigation.ui.TopNavMenu).prop('onSavedQueryUpdated')!({
-          id: '2',
-          attributes: {
-            title: 'new title',
-            description: '',
-            query: { query: '', language: 'lucene' },
-          },
-        });
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSavedQueryUpdated')!(
+          {
+            id: '2',
+            attributes: {
+              title: 'new title',
+              description: '',
+              query: { query: '', language: 'lucene' },
+            },
+          }
+        );
       });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: {
             id: '2',
@@ -1194,16 +1197,18 @@ describe('Lens App', () => {
     it('updates the query if saved query is selected', async () => {
       const { instance, services } = await mountWith({});
       act(() => {
-        instance.find(services.navigation.ui.TopNavMenu).prop('onSavedQueryUpdated')!({
-          id: '2',
-          attributes: {
-            title: 'new title',
-            description: '',
-            query: { query: 'abc:def', language: 'lucene' },
-          },
-        });
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSavedQueryUpdated')!(
+          {
+            id: '2',
+            attributes: {
+              title: 'new title',
+              description: '',
+              query: { query: 'abc:def', language: 'lucene' },
+            },
+          }
+        );
       });
-      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'abc:def', language: 'lucene' },
         }),
@@ -1214,12 +1219,12 @@ describe('Lens App', () => {
     it('clears all existing unpinned filters when the active saved query is cleared', async () => {
       const { instance, services, lensStore } = await mountWith({});
       act(() =>
-        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = { id: 'index1' } as unknown as DataView;
+      const indexPattern = { id: 'index1', isPersisted: () => true } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = buildExistsFilter(field, indexPattern);
@@ -1227,7 +1232,9 @@ describe('Lens App', () => {
       FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
-      act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
+      act(() =>
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onClearSavedQuery')!()
+      );
       instance.update();
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
@@ -1241,7 +1248,7 @@ describe('Lens App', () => {
     it('updates the searchSessionId when the query is updated', async () => {
       const { instance, lensStore, services } = await mountWith({});
       act(() => {
-        instance.find(services.navigation.ui.TopNavMenu).prop('onSaved')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSaved')!({
           id: '1',
           attributes: {
             title: '',
@@ -1251,14 +1258,16 @@ describe('Lens App', () => {
         });
       });
       act(() => {
-        instance.find(services.navigation.ui.TopNavMenu).prop('onSavedQueryUpdated')!({
-          id: '2',
-          attributes: {
-            title: 'new title',
-            description: '',
-            query: { query: '', language: 'lucene' },
-          },
-        });
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSavedQueryUpdated')!(
+          {
+            id: '2',
+            attributes: {
+              title: 'new title',
+              description: '',
+              query: { query: '', language: 'lucene' },
+            },
+          }
+        );
       });
       instance.update();
       expect(lensStore.getState()).toEqual({
@@ -1271,12 +1280,12 @@ describe('Lens App', () => {
     it('updates the searchSessionId when the active saved query is cleared', async () => {
       const { instance, services, lensStore } = await mountWith({});
       act(() =>
-        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = { id: 'index1' } as unknown as DataView;
+      const indexPattern = { id: 'index1', isPersisted: () => true } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = buildExistsFilter(field, indexPattern);
@@ -1284,7 +1293,9 @@ describe('Lens App', () => {
       FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
-      act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
+      act(() =>
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onClearSavedQuery')!()
+      );
       instance.update();
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
@@ -1296,7 +1307,7 @@ describe('Lens App', () => {
     it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
       const { instance, services, lensStore } = await mountWith({});
       act(() =>
-        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+        instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-7d', to: 'now' },
         })
       );
@@ -1416,7 +1427,8 @@ describe('Lens App', () => {
           layers: [
             {
               indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-              timeFieldName: 'order_date',
+              xFieldName: 'order_date',
+              xMode: 'date_histogram',
               chartType: 'area',
               axisPosition: 'left',
               palette: {

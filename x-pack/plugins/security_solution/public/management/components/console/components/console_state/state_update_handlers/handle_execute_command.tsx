@@ -25,6 +25,7 @@ import type { ParsedCommandInterface } from '../../../service/parsed_command_inp
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
+import { ValidationError } from '../../validation_error';
 import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
@@ -46,7 +47,7 @@ const getUnknownArguments = (
   const response: string[] = [];
 
   Object.keys(inputArgs).forEach((argName) => {
-    if (!argDefinitions || !argDefinitions[argName]) {
+    if (argName !== 'help' && (!argDefinitions || !argDefinitions[argName])) {
       response.push(argName);
     }
   });
@@ -188,6 +189,21 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
+      if (
+        Object.keys(parsedInput.args).length > 1 ||
+        parsedInput.args.help.length > 1 ||
+        parsedInput.args.help[0] !== true
+      ) {
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            undefined,
+            false
+          )
+        );
+      }
+
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
@@ -217,7 +233,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       );
     }
 
-    // no unknown arguments allowed?
+    // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
     if (unknownInputArgs.length) {
@@ -299,7 +315,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
     // Validate each argument given to the command
     for (const argName of Object.keys(parsedInput.args)) {
-      const argDefinition = commandDefinition.args[argName];
+      const argDefinition = commandDefinition.args?.[argName];
       const argInput = parsedInput.args[argName];
 
       // Unknown argument
@@ -438,7 +454,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
             errorMessage: validationResult,
           }),

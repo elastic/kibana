@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'lens',
     'timePicker',
-    'unifiedSearch',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -37,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
     });
 
     after(async () => {
@@ -114,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(lensTag)}`
       );
       // click elsewhere to close the filter dropdown
-      const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
+      const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
       await searchFilter.click();
       // wait until the table refreshes
       await listingTable.waitUntilTableIsLoaded();

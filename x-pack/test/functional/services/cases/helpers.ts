@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { CaseConnector, CasePostRequest } from '@kbn/cases-plugin/common/api';
 import uuid from 'uuid';
 
-export function generateRandomCaseWithoutConnector() {
+export function generateRandomCaseWithoutConnector(): CasePostRequest {
   return {
     title: 'random-' + uuid.v4(),
     tags: ['test', uuid.v4()],
@@ -17,7 +18,7 @@ export function generateRandomCaseWithoutConnector() {
       name: 'none',
       type: '.none',
       fields: null,
-    },
+    } as CaseConnector,
     settings: {
       syncAlerts: false,
     },

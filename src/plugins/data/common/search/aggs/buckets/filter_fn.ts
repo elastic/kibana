@@ -71,6 +71,14 @@ export const aggFilter = (): FunctionDefinition => ({
           'Filter results based on a kql or lucene query. Do not use together with geo_bounding_box',
       }),
     },
+    timeWindow: {
+      types: ['string'],
+      help: '',
+    },
+    timeShift: {
+      types: ['string'],
+      help: '',
+    },
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.filter.json.help', {

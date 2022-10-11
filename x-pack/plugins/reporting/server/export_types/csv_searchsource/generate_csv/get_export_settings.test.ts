@@ -22,7 +22,7 @@ import { getExportSettings } from './get_export_settings';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config = createMockConfig(createMockConfigSchema({}));
+  const config = createMockConfig(createMockConfigSchema({})).get('csv');
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
@@ -55,8 +55,8 @@ describe('getExportSettings', () => {
         "includeFrozen": false,
         "maxSizeBytes": undefined,
         "scroll": Object {
-          "duration": undefined,
-          "size": undefined,
+          "duration": "30s",
+          "size": 500,
         },
         "separator": ",",
         "timezone": "UTC",

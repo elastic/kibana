@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { ServerError } from '../types';
 import { getTags } from './api';
-import { CASE_TAGS_CACHE_KEY } from './constants';
+import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
 
-export const useGetTags = (cacheKey?: string) => {
+export const useGetTags = () => {
   const toasts = useToasts();
   const { owner } = useCasesContext();
-  const key = [...(cacheKey ? [cacheKey] : []), CASE_TAGS_CACHE_KEY];
   return useQuery(
-    key,
+    casesQueriesKeys.tags(),
     () => {
       const abortCtrl = new AbortController();
       return getTags(abortCtrl.signal, owner);

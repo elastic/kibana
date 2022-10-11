@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-plugin/common';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Subscription } from 'rxjs';
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useQuery } from '@tanstack/react-query';
+import { EuiDataGridSorting } from '@elastic/eui';
+import { useInspector } from '../../../hooks/use_inspector';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
+import { useSourcererDataView } from './use_sourcerer_data_view';
+import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -25,58 +22,64 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZES[1];
 export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
+  sorting: EuiDataGridSorting['columns'];
 }
 
 export interface UseIndicatorsValue {
   handleRefresh: () => void;
+
+  /**
+   * Array of {@link Indicator} ready to render inside the IndicatorTable component
+   */
   indicators: Indicator[];
   indicatorCount: number;
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  firstLoad: boolean;
-  loading: boolean;
-}
 
-export interface RawIndicatorsResponse {
-  hits: {
-    hits: any[];
-    total: number;
-  };
-}
+  /**
+   * No data loaded yet
+   */
+  isLoading: boolean;
 
-interface Pagination {
-  pageSize: number;
-  pageIndex: number;
-  pageSizeOptions: number[];
-}
+  /**
+   * Data loading is in progress (see docs on `isFetching` here: https://tanstack.com/query/v4/docs/guides/queries)
+   */
+  isFetching: boolean;
 
-const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';
+  dataUpdatedAt: number;
+}
 
 export const useIndicators = ({
   filters,
   filterQuery,
+  sorting,
   timeRange,
 }: UseIndicatorsParams): UseIndicatorsValue => {
   const {
     services: {
       data: { search: searchService },
-      uiSettings,
     },
   } = useKibana();
-  const defaultThreatIndices = useMemo(
-    () => uiSettings.get(DEFAULT_THREAT_INDEX_KEY),
-    [uiSettings]
+  const { selectedPatterns } = useSourcererDataView();
+
+  const { inspectorAdapters } = useInspector();
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) =>
+      setPagination((currentPagination) => ({
+        ...currentPagination,
+        pageSize,
+        pageIndex: 0,
+      })),
+    []
   );
 
-  const searchSubscription$ = useRef<Subscription>();
-  const abortController = useRef(new AbortController());
-
-  const [indicators, setIndicators] = useState<Indicator[]>([]);
-  const [indicatorCount, setIndicatorCount] = useState<number>(0);
-  const [firstLoad, setFirstLoad] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const onChangePage = useCallback(
+    (pageIndex) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
+    []
+  );
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -84,127 +87,53 @@ export const useIndicators = ({
     pageSizeOptions: PAGE_SIZES,
   });
 
-  const queryToExecute = useMemo(
-    () =>
-      buildEsQuery(
-        undefined,
-        [
-          {
-            query: THREAT_QUERY_BASE,
-            language: 'kuery',
-          },
-          {
-            query: filterQuery.query as string,
-            language: 'kuery',
-          },
-        ],
-        [
-          ...filters,
-          {
-            query: {
-              range: {
-                ['@timestamp']: {
-                  gte: timeRange?.from,
-                  lte: timeRange?.to,
-                },
-              },
-            },
-            meta: {},
-          },
-        ]
-      ),
-    [filterQuery, filters, timeRange?.from, timeRange?.to]
+  // Go to first page after filters are changed
+  useEffect(() => {
+    onChangePage(0);
+  }, [filters, filterQuery, timeRange, sorting, onChangePage]);
+
+  const fetchIndicators = useMemo(
+    () => createFetchIndicators({ searchService, inspectorAdapter: inspectorAdapters.requests }),
+    [inspectorAdapters, searchService]
   );
 
-  const loadData = useCallback(
-    async (from: number, size: number) => {
-      abortController.current = new AbortController();
-
-      setLoading(true);
-
-      searchSubscription$.current = searchService
-        .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(
-          {
-            params: {
-              index: defaultThreatIndices,
-              body: {
-                size,
-                from,
-                fields: [{ field: '*', include_unmapped: true }],
-                query: queryToExecute,
-              },
-            },
-          },
-          {
-            abortSignal: abortController.current.signal,
-          }
-        )
-        .subscribe({
-          next: (response) => {
-            setIndicators(response.rawResponse.hits.hits);
-            setIndicatorCount(response.rawResponse.hits.total || 0);
-
-            if (isCompleteResponse(response)) {
-              searchSubscription$.current?.unsubscribe();
-            } else if (isErrorResponse(response)) {
-              searchSubscription$.current?.unsubscribe();
-            }
-
-            setFirstLoad(false);
-            setLoading(false);
-          },
-          error: (msg) => {
-            searchService.showError(msg);
-            searchSubscription$.current?.unsubscribe();
-
-            setFirstLoad(false);
-            setLoading(false);
-          },
-        });
-    },
-    [queryToExecute, defaultThreatIndices, searchService]
-  );
-
-  const onChangeItemsPerPage = useCallback(
-    async (pageSize) => {
-      setPagination((currentPagination) => ({
-        ...currentPagination,
-        pageSize,
-        pageIndex: 0,
-      }));
-
-      loadData(0, pageSize);
-    },
-    [loadData]
-  );
-
-  const onChangePage = useCallback(
-    async (pageIndex) => {
-      setPagination((currentPagination) => ({ ...currentPagination, pageIndex }));
-      loadData(pageIndex * pagination.pageSize, pagination.pageSize);
-    },
-    [loadData, pagination.pageSize]
+  const { isLoading, isFetching, data, refetch, dataUpdatedAt } = useQuery(
+    [
+      'indicatorsTable',
+      {
+        timeRange,
+        filterQuery,
+        filters,
+        selectedPatterns,
+        sorting,
+        pagination,
+      },
+    ],
+    ({ signal, queryKey: [_key, queryParams] }) =>
+      fetchIndicators(queryParams as FetchParams, signal),
+    {
+      /**
+       * See https://tanstack.com/query/v4/docs/guides/paginated-queries
+       * This is essential for our ux
+       */
+      keepPreviousData: true,
+    }
   );
 
   const handleRefresh = useCallback(() => {
     onChangePage(0);
-  }, [onChangePage]);
-
-  // Initial data load (on mount)
-  useEffect(() => {
-    handleRefresh();
-
-    return () => abortController.current.abort();
-  }, [handleRefresh]);
+    refetch();
+  }, [onChangePage, refetch]);
 
   return {
-    indicators,
-    indicatorCount,
+    indicators: data?.indicators || [],
+    indicatorCount: data?.total || 0,
     pagination,
     onChangePage,
     onChangeItemsPerPage,
-    firstLoad,
-    loading,
+    isLoading,
+    isFetching,
     handleRefresh,
+    dataUpdatedAt,
   };
 };

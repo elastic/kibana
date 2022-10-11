@@ -6,9 +6,9 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getSearchAggregatedTransactions } from '.';
 import { Setup } from '../setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 
@@ -64,6 +64,7 @@ async function getHasTransactions({
       events: [ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: 1,
       size: 0,
       query: {
         bool: {

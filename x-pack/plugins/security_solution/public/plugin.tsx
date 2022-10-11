@@ -60,8 +60,10 @@ import { ExperimentalFeaturesService } from './common/experimental_features_serv
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
+import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
@@ -125,9 +127,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * This is a promise because these aren't available until the `start` lifecycle phase but they are referenced
      * in the `setup` lifecycle phase.
      */
-    const startServices: Promise<StartServices> = (async () => {
+    const startServices = async (params: AppMountParameters<unknown>): Promise<StartServices> => {
       const [coreStart, startPluginsDeps] = await core.getStartServices();
       const { apm } = await import('@elastic/apm-rum');
+      const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
 
       const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
@@ -137,10 +140,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
-        security: plugins.security,
+        security: startPluginsDeps.security,
+        onAppLeave: params.onAppLeave,
+        securityLayout: {
+          getPluginWrapper: () => SecuritySolutionTemplateWrapper,
+        },
       };
       return services;
-    })();
+    };
 
     core.application.register({
       id: APP_UI_ID,
@@ -164,7 +171,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
           ...params,
-          services: await startServices,
+          services: await startServices(params),
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
@@ -227,12 +234,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           view: 'package-policy-response',
           Component: getLazyEndpointPolicyResponseExtension(core, plugins),
         });
+        registerExtension({
+          package: 'endpoint',
+          view: 'package-generic-errors-list',
+          Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+        });
       }
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
         Component: LazyEndpointPolicyCreateExtension,
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-create-multi-step',
+        Component: LazyEndpointPolicyCreateMultiStepExtension,
       });
 
       registerExtension({

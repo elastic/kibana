@@ -6,6 +6,12 @@
 
 Adds a comment or alert to a case.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `POST <kibana host>:<port>/api/cases/<case_id>/comments`
@@ -29,6 +35,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `alertId`::

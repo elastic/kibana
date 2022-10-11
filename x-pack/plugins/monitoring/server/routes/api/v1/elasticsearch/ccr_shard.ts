@@ -12,7 +12,10 @@ import {
 } from '../../../../../common/http_api/elasticsearch';
 import { TimeRange } from '../../../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
-import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import {
+  getIndexPatterns,
+  getElasticsearchDataset,
+} from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
@@ -97,7 +100,7 @@ export function ccrShardRoute(server: MonitoringCore) {
       const shardId = req.params.shardId;
       const moduleType = 'elasticsearch';
       const dataset = 'ccr';
-      const esIndexPattern = getNewIndexPatterns({
+      const esIndexPattern = getIndexPatterns({
         config: Globals.app.config,
         ccs: req.payload.ccs,
         moduleType,
@@ -108,7 +111,7 @@ export function ccrShardRoute(server: MonitoringCore) {
         {
           bool: {
             should: [
-              { term: { 'data_stream.dataset': { value: `${moduleType}.${dataset}` } } },
+              { term: { 'data_stream.dataset': { value: getElasticsearchDataset(dataset) } } },
               {
                 term: {
                   'metricset.name': {

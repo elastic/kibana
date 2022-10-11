@@ -30,6 +30,7 @@ import {
   Suggestion,
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { showMemoizedErrorNotification } from '../../../lens_ui_errors';
 import {
   insertLayer,
   removeLayers,
@@ -106,11 +107,23 @@ function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
 }
 
+function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn): TReturn {
+  try {
+    return action();
+  } catch (error) {
+    showMemoizedErrorNotification(error);
+    return defaultReturnValue;
+  }
+}
+
 function getCurrentVisualizationId(
   activeVisualization: Visualization,
   visualizationState: unknown
 ) {
-  return activeVisualization.getVisualizationTypeId(visualizationState);
+  return safeFnCall(
+    () => activeVisualization.getVisualizationTypeId(visualizationState),
+    undefined
+  );
 }
 
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
@@ -150,18 +163,27 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     subVisualizationId: string
   ): VisualizationSelection {
     const newVisualization = props.visualizationMap[visualizationId];
-    const switchVisType =
-      props.visualizationMap[visualizationId].switchVisualizationType ||
-      ((_type: string, initialState: unknown) => initialState);
+    const switchVisType = (type: string, state: unknown) => {
+      if (props.visualizationMap[visualizationId].switchVisualizationType) {
+        return safeFnCall(
+          () => props.visualizationMap[visualizationId].switchVisualizationType!(type, state),
+          state
+        );
+      }
+      return state;
+    };
     const layers = Object.entries(props.framePublicAPI.datasourceLayers);
     const containsData = layers.some(
-      ([_layerId, datasource]) => datasource.getTableSpec().length > 0
+      ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
     );
     // Always show the active visualization as a valid selection
     if (
       visualization.activeId === visualizationId &&
       visualization.state &&
-      newVisualization.getVisualizationTypeId(visualization.state) === subVisualizationId
+      safeFnCall(
+        () => newVisualization.getVisualizationTypeId(visualization.state) === subVisualizationId,
+        false
+      )
     ) {
       return {
         visualizationId,
@@ -190,7 +212,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       dataLoss = 'everything';
     } else if (layers.length > 1 && layers.length !== topSuggestion.keptLayerIds.length) {
       dataLoss = 'layers';
-    } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
+    } else if (topSuggestion.columns !== layers[0][1]?.getTableSpec().length) {
       dataLoss = 'columns';
     } else {
       dataLoss = 'nothing';
@@ -496,22 +518,24 @@ function getTopSuggestion(
     subVisualizationId,
     activeData: props.framePublicAPI.activeData,
     mainPalette,
+    dataViews: props.framePublicAPI.dataViews,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return (
       suggestion.changeType !== 'extended' &&
-      newVisualization.getVisualizationTypeId(suggestion.visualizationState) === subVisualizationId
+      safeFnCall(
+        () =>
+          newVisualization.getVisualizationTypeId(suggestion.visualizationState) ===
+          subVisualizationId,
+        false
+      )
     );
   });
 
-  // We prefer unchanged or reduced suggestions when switching
-  // charts since that allows you to switch from A to B and back
-  // to A with the greatest chance of preserving your original state.
   return (
-    suggestions.find((s) => s.changeType === 'unchanged') ||
-    suggestions.find((s) => s.changeType === 'reduced') ||
+    suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
     suggestions[0]
   );
 }

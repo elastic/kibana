@@ -109,7 +109,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h4 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"
@@ -182,6 +182,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectLogsCheckbox',
               label: (
                 <>
                   <FormattedMessage
@@ -204,6 +205,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             },
             {
               id: `${dataTypes.Metrics}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectMetricsCheckbox',
               label: (
                 <>
                   <FormattedMessage

@@ -6,42 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultControlGroupInput } from '.';
-import { ControlGroupInput } from './control_group/types';
-
-export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): ControlGroupInput => ({
-  id: 'mocked_control_group',
-  ...getDefaultControlGroupInput(),
-  ...{
-    panels: {
-      control1: {
-        order: 0,
-        width: 'medium',
-        grow: true,
-        type: 'mockedOptionsList',
-        explicitInput: {
-          id: 'control1',
-        },
-      },
-      control2: {
-        order: 1,
-        width: 'large',
-        grow: true,
-        type: 'mockedRangeSlider',
-        explicitInput: {
-          id: 'control2',
-        },
-      },
-      control3: {
-        order: 2,
-        width: 'small',
-        grow: true,
-        type: 'mockedOptionsList',
-        explicitInput: {
-          id: 'control3',
-        },
-      },
-    },
-  },
-  ...(partial ?? {}),
-});
+export * from './control_group/mocks';
+export * from './options_list/mocks';

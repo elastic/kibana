@@ -12,8 +12,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
-import { useFetchAlertDetail } from './use_fetch_alert_detail';
-import { useFetchAlertData } from './use_fetch_alert_data';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { useFetchAlertData } from '../../hooks/use_fetch_alert_data';
 import { paths } from '../../config';
 import { ObservabilityAppServices } from '../../application/types';
 

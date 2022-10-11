@@ -8,8 +8,8 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { euiLightVars } from '@kbn/ui-theme';
-import { layerTypes } from '../..';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import {
   DatasourceLayers,
@@ -61,7 +61,7 @@ describe('metric visualization', () => {
     test('returns a default state', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       });
     });
 
@@ -100,6 +100,24 @@ describe('metric visualization', () => {
 
       expect(
         visualization.getConfiguration({
+          state: { ...fullState, palette: undefined, color: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[0].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "#0077cc",
+            "columnId": "metric-col-id",
+            "triggerIcon": "color",
+          },
+        ]
+      `);
+    });
+
+    test('static coloring', () => {
+      expect(
+        visualization.getConfiguration({
           state: { ...fullState, palette: undefined },
           layerId: fullState.layerId,
           frame: mockFrameApi,
@@ -107,9 +125,25 @@ describe('metric visualization', () => {
       ).toMatchInlineSnapshot(`
         Array [
           Object {
+            "color": "static-color",
             "columnId": "metric-col-id",
-            "palette": undefined,
-            "triggerIcon": undefined,
+            "triggerIcon": "color",
+          },
+        ]
+      `);
+
+      expect(
+        visualization.getConfiguration({
+          state: { ...fullState, color: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[0].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "metric-col-id",
+            "palette": Array [],
+            "triggerIcon": "colorBy",
           },
         ]
       `);
@@ -474,21 +508,17 @@ describe('metric visualization', () => {
               },
               datasourceLayers
             ) as ExpressionAstExpression
-          ).chain[1].arguments.color
-        ).toEqual([]);
+          ).chain[1].arguments.color[0]
+        ).toEqual(euiThemeVars.euiColorLightestShade);
       });
     });
   });
 
   it('clears a layer', () => {
-    expect(visualization.clearLayer(fullState, 'some-id')).toMatchInlineSnapshot(`
+    expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
-        "color": "static-color",
         "layerId": "first",
         "layerType": "data",
-        "maxCols": 5,
-        "progressDirection": "vertical",
-        "subtitle": "subtitle",
       }
     `);
   });
@@ -600,6 +630,7 @@ describe('metric visualization', () => {
 
       expect(removed).not.toHaveProperty('metricAccessor');
       expect(removed).not.toHaveProperty('palette');
+      expect(removed).not.toHaveProperty('color');
     });
     it('removes secondary metric dimension', () => {
       const removed = visualization.removeDimension({
@@ -617,6 +648,7 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('maxAccessor');
+      expect(removed).not.toHaveProperty('progressDirection');
     });
     it('removes breakdown-by dimension', () => {
       const removed = visualization.removeDimension({
@@ -626,6 +658,7 @@ describe('metric visualization', () => {
 
       expect(removed).not.toHaveProperty('breakdownByAccessor');
       expect(removed).not.toHaveProperty('collapseFn');
+      expect(removed).not.toHaveProperty('maxCols');
     });
   });
 

@@ -12,7 +12,7 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
@@ -25,6 +25,7 @@ import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { ApmIndicesConfig } from '../../../common/typings';
+import { ConfigSchema } from '../../plugin';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -74,6 +75,12 @@ const withCore = makeDecorator({
       },
     } as unknown as Partial<CoreStart>);
 
+    const config = {
+      unsafe: {
+        alertDetails: { enabled: false },
+      },
+    } as ConfigSchema;
+
     return (
       <MemoryRouter>
         <KibanaReactContext.Provider>
@@ -82,6 +89,7 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
+              config,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}

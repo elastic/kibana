@@ -6,9 +6,9 @@
  */
 
 import { getSuggestions } from './suggestions';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { MetricVisualizationState } from './visualization';
-import { LensIconChartMetric } from '../../assets/chart_metric';
+import { IconChartMetric } from '@kbn/chart-icons';
 
 const metricColumn = {
   columnId: 'metric-column',
@@ -79,6 +79,10 @@ describe('metric suggestions', () => {
                 ...metricColumn,
                 columnId: 'metric-column2',
               },
+              {
+                ...metricColumn,
+                columnId: 'metric-column3',
+              },
             ],
             changeType: 'unchanged',
           },
@@ -99,6 +103,10 @@ describe('metric suggestions', () => {
                 ...metricColumn,
                 columnId: 'metric-column2',
               },
+              {
+                ...metricColumn,
+                columnId: 'metric-column3',
+              },
             ],
             changeType: 'unchanged',
           },
@@ -117,7 +125,7 @@ describe('metric suggestions', () => {
         },
         state: {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
         } as MetricVisualizationState,
         keptLayerIds: ['first'],
       };
@@ -138,7 +146,7 @@ describe('metric suggestions', () => {
             },
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
             } as MetricVisualizationState,
             keptLayerIds: ['first'],
           })
@@ -146,13 +154,13 @@ describe('metric suggestions', () => {
           {
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               // should ignore bucketed column for initial drag
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.51,
           },
         ]);
@@ -169,7 +177,7 @@ describe('metric suggestions', () => {
             },
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
             } as MetricVisualizationState,
             keptLayerIds: ['first'],
           })
@@ -177,12 +185,12 @@ describe('metric suggestions', () => {
           {
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               breakdownByAccessor: bucketColumn.columnId,
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.51,
           },
         ]);
@@ -199,7 +207,7 @@ describe('metric suggestions', () => {
             },
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               metricAccessor: 'non_existent',
             } as MetricVisualizationState,
             keptLayerIds: ['first'],
@@ -208,13 +216,13 @@ describe('metric suggestions', () => {
           {
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               metricAccessor: undefined,
               breakdownByAccessor: bucketColumn.columnId,
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.51,
           },
         ]);
@@ -230,7 +238,7 @@ describe('metric suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             secondaryMetricAccessor: 'some-accessor',
             maxAccessor: 'some-accessor',
           } as MetricVisualizationState,
@@ -252,7 +260,7 @@ describe('metric suggestions', () => {
             },
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
             } as MetricVisualizationState,
             keptLayerIds: ['first'],
           })
@@ -272,7 +280,7 @@ describe('metric suggestions', () => {
             },
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               breakdownByAccessor: bucketColumn.columnId,
             } as MetricVisualizationState,
             keptLayerIds: ['first'],
@@ -281,13 +289,13 @@ describe('metric suggestions', () => {
           {
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.52,
           },
         ]);
@@ -304,7 +312,7 @@ describe('metric suggestions', () => {
             },
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
             } as MetricVisualizationState,
             keptLayerIds: ['first'],
@@ -313,13 +321,13 @@ describe('metric suggestions', () => {
           {
             state: {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
             },
             title: 'Metric',
             hide: true,
-            previewIcon: LensIconChartMetric,
+            previewIcon: IconChartMetric,
             score: 0.52,
           },
         ]);
@@ -344,13 +352,13 @@ describe('metric suggestions', () => {
         {
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             metricAccessor: metricColumn.columnId,
             breakdownByAccessor: bucketColumn.columnId,
           },
           title: 'Metric',
           hide: true,
-          previewIcon: LensIconChartMetric,
+          previewIcon: IconChartMetric,
           score: 0.52,
         },
       ]);

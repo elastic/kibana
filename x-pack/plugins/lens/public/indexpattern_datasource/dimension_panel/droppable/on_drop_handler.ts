@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isDraggedDataViewField } from '../../../utils';
 import {
   DatasourceDimensionDropHandlerProps,
   DragDropOperation,
   DropType,
+  IndexPatternMap,
   isOperation,
   StateSetter,
   VisualizationDimensionGroupConfig,
+  DraggedField,
 } from '../../../types';
 import {
   insertOrReplaceColumn,
@@ -24,9 +27,8 @@ import {
   deleteColumnInLayers,
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
-import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
-import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
+import { IndexPatternPrivateState, DataViewDragDropOperation } from '../../types';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: IndexPatternPrivateState;
@@ -41,20 +43,22 @@ interface DropHandlerProps<T = DataViewDragDropOperation> {
   dropType?: DropType;
   source: T;
   target: DataViewDragDropOperation;
+  indexPatterns: IndexPatternMap;
 }
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
-  const { target, source, dropType, state } = props;
+  const { target, source, dropType, state, indexPatterns } = props;
 
-  if (isDraggedField(source) && isFieldDropType(dropType)) {
+  if (isDraggedDataViewField(source) && isFieldDropType(dropType)) {
     return onFieldDrop(
       {
         ...props,
         target: {
           ...target,
-          dataView: state.indexPatterns[state.layers[target.layerId].indexPatternId],
+          dataView: indexPatterns[state.layers[target.layerId].indexPatternId],
         },
         source,
+        indexPatterns,
       },
       dropType === 'field_combine'
     );
@@ -63,8 +67,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   if (!isOperation(source)) {
     return false;
   }
-  const sourceDataView = state.indexPatterns[state.layers[source.layerId].indexPatternId];
-  const targetDataView = state.indexPatterns[state.layers[target.layerId].indexPatternId];
+  const sourceDataView = indexPatterns[state.layers[source.layerId].indexPatternId];
+  const targetDataView = indexPatterns[state.layers[target.layerId].indexPatternId];
   if (sourceDataView !== targetDataView) {
     return false;
   }
@@ -79,6 +83,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       ...source,
       dataView: sourceDataView,
     },
+    indexPatterns,
   };
   if (dropType === 'reorder') {
     return onReorder(operationProps);
@@ -111,21 +116,34 @@ const isFieldDropType = (dropType: DropType) =>
   ['field_add', 'field_replace', 'field_combine'].includes(dropType);
 
 function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boolean) {
-  const { setState, state, source, target, dimensionGroups } = props;
+  const { setState, state, source, target, dimensionGroups, indexPatterns } = props;
 
   const prioritizedOperation = dimensionGroups.find(
     (g) => g.groupId === target.groupId
   )?.prioritizedOperation;
 
   const layer = state.layers[target.layerId];
-  const indexPattern = state.indexPatterns[layer.indexPatternId];
+  const indexPattern = indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[target.columnId];
+  // discourage already used operations for a field
+  const alreadyUsedOperations = new Set(
+    Object.values(layer.columns)
+      .filter((column) => 'sourceField' in column && column.sourceField === source.field.name)
+      .map((column) => column.operationType)
+  );
+
   const newOperation = shouldAddField
     ? targetColumn.operationType
-    : getNewOperation(source.field, target.filterOperations, targetColumn, prioritizedOperation);
+    : getNewOperation(
+        source.field,
+        target.filterOperations,
+        targetColumn,
+        prioritizedOperation,
+        alreadyUsedOperations
+      );
 
   if (
-    !isDraggedField(source) ||
+    !isDraggedDataViewField(source) ||
     !newOperation ||
     (shouldAddField &&
       !hasOperationSupportForMultipleFields(indexPattern, targetColumn, undefined, source.field))
@@ -233,13 +251,20 @@ function onReorder({
 }
 
 function onMoveIncompatible(
-  { setState, state, source, dimensionGroups, target }: DropHandlerProps<DataViewDragDropOperation>,
+  {
+    setState,
+    state,
+    source,
+    dimensionGroups,
+    target,
+    indexPatterns,
+  }: DropHandlerProps<DataViewDragDropOperation>,
   shouldDeleteSource?: boolean
 ) {
   const targetLayer = state.layers[target.layerId];
   const targetColumn = targetLayer.columns[target.columnId] || null;
   const sourceLayer = state.layers[source.layerId];
-  const indexPattern = state.indexPatterns[sourceLayer.indexPatternId];
+  const indexPattern = indexPatterns[sourceLayer.indexPatternId];
   const sourceColumn = sourceLayer.columns[source.columnId];
   const sourceField = getField(sourceColumn, indexPattern);
   const newOperation = getNewOperation(sourceField, target.filterOperations, targetColumn);
@@ -304,10 +329,11 @@ function onSwapIncompatible({
   source,
   dimensionGroups,
   target,
+  indexPatterns,
 }: DropHandlerProps<DragDropOperation>) {
   const targetLayer = state.layers[target.layerId];
   const sourceLayer = state.layers[source.layerId];
-  const indexPattern = state.indexPatterns[targetLayer.indexPatternId];
+  const indexPattern = indexPatterns[targetLayer.indexPatternId];
   const sourceColumn = sourceLayer.columns[source.columnId];
   const targetColumn = targetLayer.columns[target.columnId];
 
@@ -453,11 +479,12 @@ function onCombine({
   source,
   target,
   dimensionGroups,
+  indexPatterns,
 }: DropHandlerProps<DataViewDragDropOperation>) {
   const targetLayer = state.layers[target.layerId];
   const targetColumn = targetLayer.columns[target.columnId];
   const targetField = getField(targetColumn, target.dataView);
-  const indexPattern = state.indexPatterns[targetLayer.indexPatternId];
+  const indexPattern = indexPatterns[targetLayer.indexPatternId];
 
   const sourceLayer = state.layers[source.layerId];
   const sourceColumn = sourceLayer.columns[source.columnId];

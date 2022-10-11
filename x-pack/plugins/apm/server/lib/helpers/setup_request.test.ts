@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
 jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
@@ -102,7 +102,7 @@ describe('setupRequest', () => {
       const { apmEventClient } = await setupRequest(mockResources);
       await apmEventClient.search('foo', {
         apm: { events: [ProcessorEvent.transaction] },
-        body: { size: 10 },
+        body: { track_total_hits: 10_000, size: 10 },
       });
 
       expect(
@@ -111,6 +111,7 @@ describe('setupRequest', () => {
         {
           index: ['apm-*'],
           body: {
+            track_total_hits: 10000,
             size: 10,
             query: {
               bool: {
@@ -166,7 +167,7 @@ describe('with includeFrozen=false', () => {
       apm: {
         events: [],
       },
-      body: { size: 10 },
+      body: { track_total_hits: 10_000, size: 10 },
     });
 
     const params =
@@ -188,7 +189,7 @@ describe('with includeFrozen=true', () => {
 
     await apmEventClient.search('foo', {
       apm: { events: [] },
-      body: { size: 10 },
+      body: { track_total_hits: 10_000, size: 10 },
     });
 
     const params =

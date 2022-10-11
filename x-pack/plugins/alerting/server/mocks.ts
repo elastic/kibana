@@ -104,6 +104,10 @@ const createRuleExecutorServicesMock = <
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
+      alertLimit: {
+        getValue: jest.fn().mockReturnValue(1000),
+        setLimitReached: jest.fn(),
+      },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),

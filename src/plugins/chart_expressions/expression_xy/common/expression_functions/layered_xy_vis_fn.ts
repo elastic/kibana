@@ -8,7 +8,7 @@
 
 import { XY_VIS_RENDERER } from '../constants';
 import { LayeredXyVisFn } from '../types';
-import { logDatatables } from '../utils';
+import { logDatatables, logDatatable } from '../utils';
 import {
   validateMarkSizeRatioLimits,
   validateAddTimeMarker,
@@ -21,10 +21,20 @@ import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
-
-  logDatatables(layers, handlers);
-
   const dataLayers = getDataLayers(layers);
+
+  if (args.singleTable) {
+    logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
+  } else {
+    logDatatables(
+      layers,
+      handlers,
+      args.splitColumnAccessor,
+      args.splitRowAccessor,
+      args.annotations
+    );
+  }
+
   const hasBar = hasBarLayer(dataLayers);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMarkSizeRatioLimits(args.markSizeRatio);
@@ -51,6 +61,8 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
+      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
     },
   };
 };

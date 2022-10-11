@@ -125,14 +125,14 @@ describe('policy_config and licenses', () => {
 
     it('allows advanced rollback option when Platinum', () => {
       const policy = policyFactory();
-      policy.windows.advanced = { alerts: { rollback: { remediation: { enabled: true } } } }; // make policy change
+      policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
 
     it('blocks advanced rollback option when below Platinum', () => {
       const policy = policyFactory();
-      policy.windows.advanced = { alerts: { rollback: { remediation: { enabled: true } } } }; // make policy change
+      policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
 
@@ -515,7 +515,7 @@ describe('policy_config and licenses', () => {
       policy.windows.advanced = {
         alerts: {
           rollback: {
-            remediation: {
+            self_healing: {
               enabled: true,
             },
           },

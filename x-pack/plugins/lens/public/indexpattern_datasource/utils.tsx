@@ -14,10 +14,16 @@ import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape } from 'lodash';
+import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import type { FramePublicAPI, StateSetter } from '../types';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
+import { renewIDs } from '../utils';
+import type {
+  IndexPatternLayer,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -33,12 +39,13 @@ import {
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn, isQueryValid } from './operations/definitions/filters';
+import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
-import { getOriginalId } from '../../common/expressions';
+import { getOriginalId } from '../../common/expressions/datatable/transpose_helpers';
+import { isQueryValid } from '../shared_components';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -159,10 +166,50 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   />
 );
 
+export function getTSDBRollupWarningMessages(
+  state: IndexPatternPersistedState,
+  warning: SearchResponseWarning
+) {
+  if (state) {
+    const hasTSDBRollupWarnings =
+      warning.type === 'shard_failure' &&
+      warning.reason.type === 'unsupported_aggregation_on_downsampled_index';
+    if (!hasTSDBRollupWarnings) {
+      return [];
+    }
+    return Object.values(state.layers).flatMap((layer) =>
+      uniq(
+        Object.values(layer.columns)
+          .filter((col) =>
+            [
+              'median',
+              'percentile',
+              'percentile_rank',
+              'last_value',
+              'unique_count',
+              'standard_deviation',
+            ].includes(col.operationType)
+          )
+          .map((col) => col.label)
+      ).map((label) =>
+        i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+          defaultMessage:
+            '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+          values: {
+            label,
+          },
+        })
+      )
+    );
+  }
+
+  return [];
+}
+
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
   state: IndexPatternPrivateState,
-  { activeData }: FramePublicAPI,
+  { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
   setState: StateSetter<IndexPatternPrivateState>
 ) {
@@ -181,7 +228,7 @@ export function getPrecisionErrorWarningMessages(
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
-          const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
+          const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
           // currentColumnIsTerms is mostly a type guard. If there's a precision error,
           // we already know that we're dealing with a terms-based operation (at least for now).
           const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(
@@ -568,3 +615,22 @@ export function getFiltersInLayer(
     },
   };
 }
+
+export const cloneLayer = (
+  layers: Record<string, IndexPatternLayer>,
+  layerId: string,
+  newLayerId: string,
+  getNewId: (id: string) => string
+) => {
+  if (layers[layerId]) {
+    return {
+      ...layers,
+      [newLayerId]: renewIDs(
+        layers[layerId],
+        Object.keys(layers[layerId]?.columns ?? {}),
+        getNewId
+      ),
+    };
+  }
+  return layers;
+};

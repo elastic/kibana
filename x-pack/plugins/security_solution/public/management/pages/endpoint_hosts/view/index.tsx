@@ -323,7 +323,7 @@ export const EndpointList = () => {
 
   const setTableRowProps = useCallback((endpoint: HostInfo) => {
     return {
-      'data-endpoint-Id': endpoint.metadata.agent.id,
+      'data-endpoint-id': endpoint.metadata.agent.id,
     };
   }, []);
 
@@ -692,7 +692,7 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running endpoint security"
+          defaultMessage="Hosts running Elastic Defend"
         />
       }
       headerBackComponent={routeState.backLink && backToPolicyList}

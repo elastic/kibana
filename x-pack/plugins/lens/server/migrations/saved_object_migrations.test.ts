@@ -22,12 +22,17 @@ import {
   VisState810,
   VisState820,
   VisState830,
+  LensDocShape850,
+  XYVisStatePre850,
+  VisState850,
 } from './types';
-import { layerTypes, MetricState } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
+import { LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
-  const migrations = getAllMigrations({}, {});
+  const migrations = getAllMigrations({}, {}, {});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -1060,7 +1065,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
-          expect(layer.layerType).toEqual(layerTypes.DATA);
+          expect(layer.layerType).toEqual(LayerTypes.DATA);
         }
       }
     });
@@ -1088,7 +1093,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
-          expect(layer.layerType).toEqual(layerTypes.DATA);
+          expect(layer.layerType).toEqual(LayerTypes.DATA);
         }
       }
     });
@@ -1105,7 +1110,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
     it('should add layer info to a datatable visualization', () => {
@@ -1121,7 +1126,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
     it('should add layer info to a heatmap visualization', () => {
@@ -1137,7 +1142,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
   });
@@ -1623,6 +1628,7 @@ describe('Lens migrations', () => {
           }));
         },
       },
+      {},
       {}
     );
 
@@ -1649,6 +1655,61 @@ describe('Lens migrations', () => {
     });
   });
 
+  test('should properly apply a data view migration within a lens visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'A name',
+            },
+          },
+        },
+      },
+    };
+
+    const migrationFunctionsObject = getAllMigrations(
+      {},
+      {
+        [migrationVersion]: (dataView: DataViewSpec) => {
+          return {
+            ...dataView,
+            name: dataView.id,
+          };
+        },
+      },
+      {}
+    );
+
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+              name: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'def',
+            },
+          },
+        },
+      },
+    });
+  });
+
   test('should properly apply a custom visualization migration', () => {
     const migrationVersion = 'some-version';
 
@@ -1666,6 +1727,7 @@ describe('Lens migrations', () => {
     }));
 
     const migrationFunctionsObject = getAllMigrations(
+      {},
       {},
       {
         abc: () => ({
@@ -2086,7 +2148,7 @@ describe('Lens migrations', () => {
       const result = migrations['8.3.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const visState = result.attributes.state.visualization as MetricState;
+      const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('center');
       expect(visState.titlePosition).toBe('bottom');
       expect(visState.size).toBe('xl');
@@ -2109,7 +2171,7 @@ describe('Lens migrations', () => {
         },
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
-      const visState = result.attributes.state.visualization as MetricState;
+      const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('right');
       expect(visState.titlePosition).toBe('top');
       expect(visState.size).toBe('s');
@@ -2230,6 +2292,75 @@ describe('Lens migrations', () => {
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as VisState830;
       expect(visState.valueLabels).toBe('hide');
+    });
+  });
+
+  describe('8.5.0 Add Annotation event type and ignore filters flag', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            layers: [
+              { layerType: 'data' },
+              {
+                layerType: 'annotations',
+                annotations: [{ id: 'annotation-id' }],
+              },
+            ],
+          },
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape850<XYVisStatePre850>>;
+
+    it('migrates existing annotation events as manual type', () => {
+      const result = migrations['8.5.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const visState = result.attributes.state.visualization as VisState850;
+      const [dataLayer, annotationLayer] = visState.layers;
+      expect(dataLayer).toEqual({ layerType: 'data' });
+      expect(annotationLayer).toEqual({
+        layerType: 'annotations',
+        annotations: [{ id: 'annotation-id', type: 'manual' }],
+        ignoreGlobalFilters: true,
+      });
+    });
+  });
+
+  describe('8.5.0 migrates metric IDs', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsMetric',
+        state: {},
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('lnsMetric => lnsLegacyMetric', () => {
+      const result = migrations['8.5.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result.attributes.visualizationType).toBe('lnsLegacyMetric');
+    });
+
+    it('lnsMetricNew => lnsMetric', () => {
+      const result = migrations['8.5.0'](
+        { ...example, attributes: { ...example.attributes, visualizationType: 'lnsMetricNew' } },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      expect(result.attributes.visualizationType).toBe('lnsMetric');
     });
   });
 });

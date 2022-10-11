@@ -7,6 +7,7 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 import {
   ConfigKey,
@@ -96,7 +97,7 @@ describe('<MonitorManagementList />', () => {
     expect(screen.getByText(monitor.attributes.schedule.number)).toBeInTheDocument();
   });
 
-  it('handles changing per page', () => {
+  it('handles changing per page', async () => {
     render(
       <MonitorManagementList
         onUpdate={onUpdate}
@@ -108,6 +109,7 @@ describe('<MonitorManagementList />', () => {
     );
 
     userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+    await waitForEuiPopoverOpen();
 
     userEvent.click(screen.getByText('10 rows'));
 

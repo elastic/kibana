@@ -21,6 +21,7 @@ describe('getLayerMetaInfo', () => {
         createMockDatasource('testDatasource'),
         {},
         undefined,
+        {},
         undefined,
         capabilities
       ).error
@@ -36,6 +37,7 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         capabilities
       ).error
@@ -43,7 +45,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, undefined, capabilities).error).toBe(
+    expect(getLayerMetaInfo(undefined, {}, undefined, {}, undefined, capabilities).error).toBe(
       'Visualization has no data available to show'
     );
   });
@@ -53,6 +55,7 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
         undefined,
+        {},
         {},
         undefined,
         capabilities
@@ -78,10 +81,11 @@ describe('getLayerMetaInfo', () => {
       getSourceId: jest.fn(),
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(),
+      isTextBasedLanguage: jest.fn(() => false),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, undefined, capabilities)
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {}, undefined, capabilities)
         .error
     ).toBe('Visualization has no data available to show');
   });
@@ -96,6 +100,7 @@ describe('getLayerMetaInfo', () => {
       getSourceId: jest.fn(),
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
+      isTextBasedLanguage: jest.fn(() => false),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -105,6 +110,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         capabilities
       ).error
@@ -112,14 +118,27 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should not be visible if discover is not available', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'indexpattern',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
+      getFilters: jest.fn(() => ({ error: 'filters error' })),
+      isTextBasedLanguage: jest.fn(() => false),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     // both capabilities should be enabled to enable discover
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         {
           navLinks: { discover: false },
@@ -129,11 +148,12 @@ describe('getLayerMetaInfo', () => {
     ).toBeFalsy();
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         {
           navLinks: { discover: true },
@@ -152,6 +172,7 @@ describe('getLayerMetaInfo', () => {
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
       getMaxPossibleNumValues: jest.fn(),
+      isTextBasedLanguage: jest.fn(() => false),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
@@ -167,6 +188,7 @@ describe('getLayerMetaInfo', () => {
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
+      {},
       undefined,
       capabilities
     );

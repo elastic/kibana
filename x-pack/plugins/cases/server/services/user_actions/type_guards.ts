@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { isPlainObject, isString } from 'lodash';
+import { isString } from 'lodash';
+import { CaseAssignees, CaseAssigneesRt } from '../../../common/api/cases/assignee';
 
 export const isStringArray = (value: unknown): value is string[] => {
   return Array.isArray(value) && value.every((val) => isString(val));
 };
 
-export const isObjectArray = (value: unknown): value is Array<Record<string, unknown>> => {
-  return Array.isArray(value) && value.every((val) => isPlainObject(val));
+export const isAssigneesArray = (value: unknown): value is CaseAssignees => {
+  return CaseAssigneesRt.is(value);
 };

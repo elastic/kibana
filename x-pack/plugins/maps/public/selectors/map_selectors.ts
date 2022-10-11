@@ -54,10 +54,10 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { ISource } from '../classes/sources/source';
-import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import { IRasterSource } from '../classes/sources/raster_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
@@ -78,7 +78,7 @@ export function createLayerInstance(
 
   switch (layerDescriptor.type) {
     case LAYER_TYPE.RASTER_TILE:
-      return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
+      return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
       return new EmsVectorTileLayer({
         layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
@@ -198,6 +198,9 @@ export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapSt
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
+export const getEmbeddableSearchContext = ({ map }: MapStoreState) =>
+  map.mapState.embeddableSearchContext;
+
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
 
@@ -239,6 +242,7 @@ export const getDataFilters = createSelector(
   getTimeslice,
   getQuery,
   getFilters,
+  getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
@@ -250,6 +254,7 @@ export const getDataFilters = createSelector(
     timeslice,
     query,
     filters,
+    embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly
@@ -262,6 +267,7 @@ export const getDataFilters = createSelector(
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       isReadOnly,
     };

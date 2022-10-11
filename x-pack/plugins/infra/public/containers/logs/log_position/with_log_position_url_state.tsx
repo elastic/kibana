@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { pickTimeKey } from '../../../../common/time';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
-import { LogPositionState, LogPositionStateParams } from './log_position_state';
+import { useLogPositionStateContext, LogPositionStateParams } from './log_position_state';
 import { isValidDatemath, datemathToEpochMillis } from '../../../utils/datemath';
 
 /**
@@ -35,7 +35,7 @@ export const WithLogPositionUrlState = () => {
     endDateExpression,
     updateDateRange,
     initialize,
-  } = useContext(LogPositionState.Context);
+  } = useLogPositionStateContext();
   const urlState = useMemo(
     () => ({
       position: visibleMidpoint ? pickTimeKey(visibleMidpoint) : null,

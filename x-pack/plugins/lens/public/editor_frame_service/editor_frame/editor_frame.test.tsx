@@ -49,6 +49,8 @@ import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { toExpression } from '@kbn/interpreter';
+import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -60,6 +62,17 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       changeType: 'unchanged',
     },
     keptLayerIds: ['first'],
+  };
+}
+
+function wrapDataViewsContract() {
+  const dataViewsContract = dataViewPluginMocks.createStartContract();
+  return {
+    ...dataViewsContract,
+    getIdsWithTitle: jest.fn(async () => [
+      { id: '1', title: 'IndexPatternTitle' },
+      { id: '2', title: 'OtherIndexPatternTitle' },
+    ]),
   };
 }
 
@@ -80,10 +93,12 @@ function getDefaultProps() {
       data: mockDataPlugin(),
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      dataViews: wrapDataViewsContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
+    indexPatternService: createIndexPatternServiceMock(),
   };
   return defaultProps;
 }
@@ -361,6 +376,7 @@ describe('editor_frame', () => {
         getSourceId: jest.fn(),
         getFilters: jest.fn(),
         getMaxPossibleNumValues: jest.fn(),
+        isTextBasedLanguage: jest.fn(() => false),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -386,7 +402,7 @@ describe('editor_frame', () => {
   describe('datasource public api communication', () => {
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
-      mockDatasource.initialize.mockResolvedValue(datasourceState);
+      mockDatasource.initialize.mockReturnValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
       const props = {
@@ -414,6 +430,7 @@ describe('editor_frame', () => {
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
         state: datasourceState,
         layerId: 'first',
+        indexPatterns: {},
       });
     });
   });
@@ -480,41 +497,6 @@ describe('editor_frame', () => {
 
     afterEach(() => {
       instance.unmount();
-    });
-
-    it('should initialize other datasource on switch', async () => {
-      await act(async () => {
-        instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
-      });
-      await act(async () => {
-        (
-          document.querySelector(
-            '[data-test-subj="datasource-switch-testDatasource2"]'
-          ) as HTMLButtonElement
-        ).click();
-      });
-      instance.update();
-      expect(mockDatasource2.initialize).toHaveBeenCalled();
-    });
-
-    it('should call datasource render with new state on switch', async () => {
-      const initialState = {};
-      mockDatasource2.initialize.mockResolvedValue(initialState);
-
-      instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
-
-      await act(async () => {
-        (
-          document.querySelector(
-            '[data-test-subj="datasource-switch-testDatasource2"]'
-          ) as HTMLButtonElement
-        ).click();
-      });
-
-      expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({ state: initialState })
-      );
     });
 
     it('should initialize other visualization on switch', async () => {

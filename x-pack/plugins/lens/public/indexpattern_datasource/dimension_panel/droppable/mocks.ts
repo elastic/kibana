@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPatternLayer } from '../../types';
 import { documentField } from '../../document_field';
-import { OperationMetadata } from '../../../types';
+import { IndexPatternMap, OperationMetadata } from '../../../types';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -17,7 +17,7 @@ import {
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../id_generator');
 
-export const mockDataViews = (): Record<string, IndexPattern> => {
+export const mockDataViews = (): IndexPatternMap => {
   const fields = [
     {
       name: 'timestamp',
@@ -77,6 +77,8 @@ export const mockDataViews = (): Record<string, IndexPattern> => {
       hasRestrictions: false,
       fields,
       getFieldByName: getFieldByNameFactory(fields),
+      isPersisted: true,
+      spec: {},
     },
     second: {
       id: 'second',
@@ -85,6 +87,8 @@ export const mockDataViews = (): Record<string, IndexPattern> => {
       timeFieldName: 'timestamp',
       fields: [fields[0]],
       getFieldByName: getFieldByNameFactory([fields[0]]),
+      isPersisted: true,
+      spec: {},
     },
   };
 };
@@ -237,6 +241,7 @@ export const mockedDndOperations = {
     columnId: 'col1',
     id: 'col1',
     humanData: { label: 'Column 1' },
+    indexPatternId: 'first',
   },
   metric: {
     layerId: 'first',
@@ -245,6 +250,7 @@ export const mockedDndOperations = {
     filterOperations: (op: OperationMetadata) => !op.isBucketed,
     id: 'col1',
     humanData: { label: 'Column 1' },
+    indexPatternId: 'first',
   },
   numericalOnly: {
     layerId: 'first',
@@ -253,6 +259,7 @@ export const mockedDndOperations = {
     filterOperations: (op: OperationMetadata) => op.dataType === 'number',
     id: 'col1',
     humanData: { label: 'Column 1' },
+    indexPatternId: 'first',
   },
   bucket: {
     columnId: 'col2',
@@ -261,6 +268,7 @@ export const mockedDndOperations = {
     id: 'col2',
     humanData: { label: 'Column 2' },
     filterOperations: (op: OperationMetadata) => op.isBucketed,
+    indexPatternId: 'first',
   },
   staticValue: {
     columnId: 'col1',
@@ -269,6 +277,7 @@ export const mockedDndOperations = {
     id: 'col1',
     humanData: { label: 'Column 2' },
     filterOperations: (op: OperationMetadata) => !!op.isStaticValue,
+    indexPatternId: 'first',
   },
   bucket2: {
     columnId: 'col3',
@@ -278,6 +287,7 @@ export const mockedDndOperations = {
     humanData: {
       label: '',
     },
+    indexPatternId: 'first',
   },
   metricC: {
     columnId: 'col4',
@@ -288,5 +298,6 @@ export const mockedDndOperations = {
       label: '',
     },
     filterOperations: (op: OperationMetadata) => !op.isBucketed,
+    indexPatternId: 'first',
   },
 };

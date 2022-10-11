@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import styled from 'styled-components';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useInProgressImage } from './use_in_progress_image';
@@ -23,11 +23,9 @@ import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
 import { formatCaptionContent } from './translations';
 
-const StepDiv = styled.div`
-  figure.euiImage {
-    div.stepArrowsFullScreen {
-      display: none;
-    }
+const StepDiv = euiStyled.div`
+  figcaption {
+    display: none;
   }
 `;
 
@@ -43,7 +41,7 @@ export const PingTimestamp = ({
   label,
   checkGroup,
   stepStatus,
-  allStepsLoaded,
+  allStepsLoaded = true,
   initialStepNo = 1,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
@@ -65,8 +63,11 @@ export const PingTimestamp = ({
 
   const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
 
+  const isScreenshotRefValid = Boolean(
+    screenshotRef && screenshotRef?.ref?.screenshotRef?.synthetics?.step?.index === stepNumber
+  );
   const { data, loading } = useInProgressImage({
-    hasImage: Boolean(stepImages[stepNumber - 1]) || Boolean(screenshotRef),
+    hasImage: Boolean(stepImages[stepNumber - 1]) || isScreenshotRefValid,
     hasIntersected: Boolean(intersection && intersection.intersectionRatio === 1),
     stepStatus,
     imgPath,

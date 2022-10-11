@@ -6,8 +6,8 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../common/utils/maybe';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
 
@@ -31,6 +31,7 @@ export async function getMetadataForDependency({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: 1,
         query: {
           bool: {

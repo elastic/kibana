@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get, isEmpty } from 'lodash/fp';
 import { toObjectArrayOfStrings } from '../../../common/utils/to_array';
 

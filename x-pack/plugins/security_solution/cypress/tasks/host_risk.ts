@@ -8,6 +8,7 @@
 import {
   HOST_BY_RISK_TABLE_FILTER,
   HOST_BY_RISK_TABLE_FILTER_CRITICAL,
+  HOST_BY_RISK_TABLE_FILTER_LOW,
   HOST_BY_RISK_TABLE_PERPAGE_BUTTON,
   HOST_BY_RISK_TABLE_PERPAGE_OPTIONS,
   LOADING_SPINNER,
@@ -23,9 +24,16 @@ export const openRiskTableFilterAndSelectTheCriticalOption = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER).click();
   cy.get(HOST_BY_RISK_TABLE_FILTER_CRITICAL).click();
 };
+
+export const openRiskTableFilterAndSelectTheLowOption = () => {
+  cy.get(HOST_BY_RISK_TABLE_FILTER).click();
+  cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
+};
+
 export const removeCritialFilter = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER_CRITICAL).click();
 };
+
 export const selectFiveItemsPerPageOption = () => {
   cy.get(HOST_BY_RISK_TABLE_PERPAGE_BUTTON).click();
   cy.get(HOST_BY_RISK_TABLE_PERPAGE_OPTIONS).first().click();

@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import type { Query, AggregateQuery } from '@kbn/es-query';
+
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
@@ -22,11 +24,24 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
-import { LayerType, layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LayerType } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
+import { AddLayerButton } from './add_layer';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...original,
+    Storage: class Storage {
+      get = () => ({ skipDeleteModal: true });
+    },
+  };
+});
 
 const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -57,7 +72,8 @@ describe('ConfigPanel', () => {
 
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
-    customStoreProps?: Partial<MountStoreProps>
+    customStoreProps?: Partial<MountStoreProps>,
+    query?: Query | AggregateQuery
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
     return mountWithProvider(
@@ -71,6 +87,7 @@ describe('ConfigPanel', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
+          query: query as Query,
         },
         storeDeps: mockStoreDeps({
           datasourceMap: props.datasourceMap,
@@ -107,6 +124,7 @@ describe('ConfigPanel', () => {
           state: 'state',
         },
       },
+      indexPatternService: createIndexPatternServiceMock(),
       visualizationState: 'state',
       updateVisualization: jest.fn(),
       updateDatasource: jest.fn(),
@@ -164,12 +182,10 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -191,12 +207,10 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -217,12 +231,10 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--1"]').first().simulate('click');
       });
       instance.update();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
-      });
+
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -255,7 +267,7 @@ describe('ConfigPanel', () => {
   describe('initial default value', () => {
     function clickToAddLayer(
       instance: ReactWrapper,
-      layerType: LayerType = layerTypes.REFERENCELINE
+      layerType: LayerType = LayerTypes.REFERENCELINE
     ) {
       act(() => {
         instance.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
@@ -284,9 +296,9 @@ describe('ConfigPanel', () => {
       const visualizationMap = mockVisualizationMap();
 
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        { type: layerTypes.DATA, label: 'Data Layer' },
+        { type: LayerTypes.DATA, label: 'Data Layer' },
         {
-          type: layerTypes.REFERENCELINE,
+          type: LayerTypes.REFERENCELINE,
           label: 'Reference layer',
         },
       ]);
@@ -307,7 +319,7 @@ describe('ConfigPanel', () => {
 
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         {
-          type: layerTypes.DATA,
+          type: LayerTypes.DATA,
           label: 'Data Layer',
           initialDimensions: [
             {
@@ -318,7 +330,7 @@ describe('ConfigPanel', () => {
           ],
         },
         {
-          type: layerTypes.REFERENCELINE,
+          type: LayerTypes.REFERENCELINE,
           label: 'Reference layer',
         },
       ]);
@@ -334,9 +346,9 @@ describe('ConfigPanel', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        { type: layerTypes.DATA, label: 'Data Layer' },
+        { type: LayerTypes.DATA, label: 'Data Layer' },
         {
-          type: layerTypes.REFERENCELINE,
+          type: LayerTypes.REFERENCELINE,
           label: 'Reference layer',
           initialDimensions: [
             {
@@ -354,11 +366,16 @@ describe('ConfigPanel', () => {
       await clickToAddLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith({}, 'newId', {
-        columnId: 'myColumn',
-        groupId: 'testGroup',
-        staticValue: 100,
-      });
+      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+        {},
+        'newId',
+        frame.dataViews.indexPatterns,
+        {
+          columnId: 'myColumn',
+          groupId: 'testGroup',
+          staticValue: 100,
+        }
+      );
     });
 
     it('should add an initial dimension value when clicking on the empty dimension button', async () => {
@@ -367,7 +384,7 @@ describe('ConfigPanel', () => {
       const visualizationMap = mockVisualizationMap();
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         {
-          type: layerTypes.DATA,
+          type: LayerTypes.DATA,
           label: 'Data Layer',
           initialDimensions: [
             {
@@ -388,6 +405,7 @@ describe('ConfigPanel', () => {
       expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
         'state',
         'first',
+        frame.dataViews.indexPatterns,
         {
           groupId: 'a',
           columnId: 'newId',
@@ -403,7 +421,7 @@ describe('ConfigPanel', () => {
       visualizationMap.testVis.setDimension = jest.fn();
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         {
-          type: layerTypes.DATA,
+          type: LayerTypes.DATA,
           label: 'Data Layer',
           initialDimensions: [
             {
@@ -414,11 +432,11 @@ describe('ConfigPanel', () => {
           ],
         },
         {
-          type: layerTypes.REFERENCELINE,
+          type: LayerTypes.REFERENCELINE,
           label: 'Reference layer',
         },
         {
-          type: layerTypes.ANNOTATIONS,
+          type: LayerTypes.ANNOTATIONS,
           label: 'Annotations Layer',
           noDatasource: true,
           initialDimensions: [
@@ -434,7 +452,7 @@ describe('ConfigPanel', () => {
       datasourceMap.testDatasource.initializeDimension = jest.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
-      await clickToAddLayer(instance, layerTypes.ANNOTATIONS);
+      await clickToAddLayer(instance, LayerTypes.ANNOTATIONS);
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
 
       expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith({
@@ -445,12 +463,37 @@ describe('ConfigPanel', () => {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
+          dataViews: expect.anything(),
         },
         groupId: 'a',
         layerId: 'newId',
         prevState: undefined,
       });
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('text based languages', () => {
+    it('should not allow to add a new layer', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: LayerTypes.DATA, label: 'Data Layer' },
+        {
+          type: LayerTypes.REFERENCELINE,
+          label: 'Reference layer',
+        },
+      ]);
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      const props = getDefaultProps({ datasourceMap, visualizationMap });
+
+      const { instance } = await prepareAndMountComponent(
+        props,
+        {},
+        { sql: 'SELECT * from "foo"' }
+      );
+      expect(instance.find(AddLayerButton).exists()).toBe(false);
     });
   });
 });

@@ -58,7 +58,7 @@
  *    `appSearchSource`.
  */
 
-import { setWith } from '@elastic/safer-lodash-set';
+import { setWith } from '@kbn/safer-lodash-set';
 import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
 import {
   catchError,
@@ -86,18 +86,13 @@ import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 
-import {
-  AggConfigs,
-  EsQuerySortValue,
-  IEsSearchResponse,
-  ISearchGeneric,
-  ISearchOptions,
-} from '../..';
+import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
   SearchSourceFields,
   SearchSourceOptions,
+  SearchSourceSearchOptions,
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
@@ -108,6 +103,7 @@ import {
   IKibanaSearchResponse,
   isErrorResponse,
   isPartialResponse,
+  isCompleteResponse,
   UI_SETTINGS,
 } from '../..';
 import { AggsStart } from '../aggs';
@@ -155,7 +151,7 @@ export class SearchSource {
   private overwriteDataViewType?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -336,9 +332,8 @@ export class SearchSource {
    * Set a searchSource that this source should inherit from
    * @param  {SearchSource} parent - the parent searchSource
    * @param  {SearchSourceOptions} options - the inherit options
-   * @return {this} - chainable
    */
-  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
+  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}): this {
     this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
@@ -346,9 +341,8 @@ export class SearchSource {
 
   /**
    * Get the parent of this SearchSource
-   * @return {undefined|searchSource}
    */
-  getParent() {
+  getParent(): SearchSource | undefined {
     return this.parent;
   }
 
@@ -356,9 +350,9 @@ export class SearchSource {
    * Fetch this source from Elasticsearch, returning an observable over the response(s)
    * @param options
    */
-  fetch$(
-    options: ISearchOptions = {}
-  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
+  fetch$<T = {}>(
+    options: SearchSourceSearchOptions = {}
+  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -371,34 +365,36 @@ export class SearchSource {
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-        if (!response || (response as any).error) {
+        if (!response || (response as unknown as { error: string }).error) {
           throw new RequestFailure(null, response);
         }
       }),
       shareReplay()
     );
 
-    return this.inspectSearch(s$, options);
+    return this.inspectSearch(s$, options) as Observable<
+      IKibanaSearchResponse<estypes.SearchResponse<T>>
+    >;
   }
 
   /**
    * Fetch this source and reject the returned Promise on error
    * @deprecated Use the `fetch$` method instead
    */
-  fetch(options: ISearchOptions = {}) {
-    return lastValueFrom(this.fetch$(options)).then((r) => {
-      return r.rawResponse as estypes.SearchResponse<any>;
-    });
+  async fetch(
+    options: SearchSourceSearchOptions = {}
+  ): Promise<estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>> {
+    const r = await lastValueFrom(this.fetch$(options));
+    return r.rawResponse as estypes.SearchResponse<unknown>;
   }
 
   /**
    *  Add a handler that will be notified whenever requests start
    *  @param  {Function} handler
-   *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
-  ) {
+    handler: (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
+  ): void {
     this.requestStartHandlers.push(handler);
   }
 
@@ -411,9 +407,8 @@ export class SearchSource {
 
   /**
    * Completely destroy the SearchSource.
-   * @return {undefined}
    */
-  destroy() {
+  destroy(): void {
     this.requestStartHandlers.length = 0;
   }
 
@@ -421,7 +416,10 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
-  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
+  private inspectSearch(
+    s$: Observable<IKibanaSearchResponse<unknown>>,
+    options: SearchSourceSearchOptions
+  ) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
 
     const requestResponder = adapter?.start(title, {
@@ -464,7 +462,8 @@ export class SearchSource {
         last(undefined, null),
         tap((finalResponse) => {
           if (finalResponse) {
-            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse, this));
+            const resp = finalResponse.rawResponse as estypes.SearchResponse<unknown>;
+            requestResponder?.stats(getResponseInspectorStats(resp, this));
             requestResponder?.ok({ json: finalResponse });
           }
         }),
@@ -488,7 +487,7 @@ export class SearchSource {
     }
   }
 
-  private postFlightTransform(response: IEsSearchResponse<any>) {
+  private postFlightTransform(response: IEsSearchResponse<unknown>) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       return aggs.postFlightTransform(response);
@@ -497,7 +496,10 @@ export class SearchSource {
     }
   }
 
-  private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
+  private async fetchOthers(
+    response: estypes.SearchResponse<unknown>,
+    options: SearchSourceSearchOptions
+  ) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       for (const agg of aggs.aggs) {
@@ -519,9 +521,11 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Observable<SearchResponse<any>>}
    */
-  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(
+    searchRequest: SearchRequest,
+    options: SearchSourceSearchOptions
+  ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -530,7 +534,7 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
-        return new Observable<IKibanaSearchResponse<any>>((obs) => {
+        return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
@@ -568,16 +572,20 @@ export class SearchSource {
           }
         });
       }),
-      map((response) => onResponse(searchRequest, response))
+      map((response) => {
+        if (!isCompleteResponse(response)) {
+          return response;
+        }
+        return onResponse(searchRequest, response, options);
+      })
     );
   }
 
   /**
    *  Called by requests of this search source when they are started
    *  @param options
-   *  @return {Promise<undefined>}
    */
-  private requestIsStarting(options: ISearchOptions = {}) {
+  private requestIsStarting(options: SearchSourceSearchOptions = {}): Promise<unknown[]> {
     const handlers = [...this.requestStartHandlers];
     // If callParentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.
@@ -599,13 +607,12 @@ export class SearchSource {
    * @param  {object} data - the current merged data
    * @param  {*} val - the value at `key`
    * @param  {*} key - The key of `val`
-   * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
     data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
-  ) {
+  ): false | void {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
@@ -660,7 +667,7 @@ export class SearchSource {
         );
         return addToBody(key, sort);
       case 'aggs':
-        if ((val as any) instanceof AggConfigs) {
+        if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
         } else {
           return addToBody('aggs', val);
@@ -673,10 +680,9 @@ export class SearchSource {
   /**
    * Walk the inheritance chain of a source and return its
    * flat representation (taking into account merging rules)
-   * @returns {Promise}
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
+  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
@@ -690,8 +696,8 @@ export class SearchSource {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
-  private readonly getFieldName = (fld: string | Record<string, any>): string =>
-    typeof fld === 'string' ? fld : fld.field;
+  private readonly getFieldName = (fld: SearchFieldValue): string =>
+    typeof fld === 'string' ? fld : (fld.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
@@ -807,9 +813,7 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
-        this.getFieldName(field)
-      );
+      const bodyFieldNames = body.fields.map((field: SearchFieldValue) => this.getFieldName(field));
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
       if (!uniqFieldNames.includes('*')) {
@@ -848,7 +852,7 @@ export class SearchSource {
             return (
               fieldsFromSource.includes(this.getFieldName(fld)) &&
               !(body.docvalue_fields || [])
-                .map((d: string | Record<string, any>) => this.getFieldName(d))
+                .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
                 .includes(this.getFieldName(fld))
             );
           }),
@@ -992,7 +996,6 @@ export class SearchSource {
    * The produced expression from the returned AST will return the `datatable` structure.
    * If the `asDatatable` option is truthy or omitted, the generator will use the `esdsl` function to perform the search.
    * When the `aggs` field is present, it will use the `esaggs` function instead.
-   * @returns The expression AST.
    */
   toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
     const searchRequest = this.mergeProps();

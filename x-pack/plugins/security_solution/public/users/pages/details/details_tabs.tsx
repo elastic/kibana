@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
+import { RiskDetailsTabBody } from '../../../risk_score/components/risk_details_tab_body';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
 import type { UsersDetailsTabsProps } from './types';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
-import type { Anomaly } from '../../../common/components/ml/types';
 import { usersDetailsPagePath } from '../constants';
 import { TimelineId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
-import { UserRiskTabBody } from '../navigation/user_risk_tab_body';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -33,37 +31,9 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     setQuery,
     to,
     type,
-    setAbsoluteRangeDatePicker,
     detailName,
     pageFilters = [],
   }) => {
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -73,8 +43,6 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      narrowDateRange,
-      updateDateRange,
       userName: detailName,
     };
 
@@ -100,7 +68,11 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <UserRiskTabBody {...tabProps} />
+          <RiskDetailsTabBody
+            {...tabProps}
+            riskEntity={RiskScoreEntity.user}
+            entityName={tabProps.userName}
+          />
         </Route>
       </Switch>
     );

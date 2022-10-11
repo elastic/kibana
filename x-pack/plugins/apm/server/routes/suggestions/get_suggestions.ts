@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 

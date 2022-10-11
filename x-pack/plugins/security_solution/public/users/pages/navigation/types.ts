@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DocValueFields } from '@kbn/timelines-plugin/common';
 import type { UsersTableType, UsersType } from '../../store/model';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import type { ESTermQuery } from '../../../../common/typed_json';
@@ -22,7 +21,6 @@ export interface QueryTabBodyProps {
 
 export type UsersComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
-  docValueFields?: DocValueFields[];
   indexNames: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];

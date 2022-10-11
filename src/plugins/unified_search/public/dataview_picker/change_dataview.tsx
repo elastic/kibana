@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
@@ -18,48 +18,25 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   EuiIcon,
-  EuiLink,
   EuiText,
-  EuiTourStep,
   EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from '.';
 import { DataViewsList } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import { changeDataViewStyles } from './change_dataview.styles';
 
-const hideAnnouncementsUISetting = 'hideAnnouncements';
-// local storage key for the tour component
-const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
-
-const newMenuTourTitle = i18n.translate('unifiedSearch.query.dataViewMenu.newMenuTour.title', {
-  defaultMessage: 'A better data view menu',
-});
-
-const newMenuTourDescription = i18n.translate(
-  'unifiedSearch.query.dataViewMenu.newMenuTour.description',
-  {
-    defaultMessage:
-      'This menu now offers all the tools you need to create, find, and edit your data views.',
-  }
-);
-
-const newMenuTourDismissLabel = i18n.translate(
-  'unifiedSearch.query.dataViewMenu.newMenuTour.dismissLabel',
-  {
-    defaultMessage: 'Got it',
-  }
-);
 
 const Fallback = () => <div />;
 
@@ -84,19 +61,25 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
   trigger,
   selectableProps,
-  showNewMenuTour = false,
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  isDisabled,
+  onEditDataView,
+  onCreateDefaultAdHocDataView,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [noDataViewMatches, setNoDataViewMatches] = useState(false);
+  const [dataViewSearchString, setDataViewSearchString] = useState('');
+  const [indexMatches, setIndexMatches] = useState(0);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
@@ -105,41 +88,12 @@ export function ChangeDataView({
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
-  const kibana = useKibana<IDataPluginServices>();
-  const { application, data, storage, uiSettings } = kibana.services;
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
-  const isHideAnnouncementSettingsOn = Boolean(uiSettings.get(hideAnnouncementsUISetting));
-
-  const [isTourDismissed, setIsTourDismissed] = useState(() =>
-    Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
-  );
-  const [isTourOpen, setIsTourOpen] = useState(false);
-
-  useEffect(() => {
-    if (
-      showNewMenuTour &&
-      !isTourDismissed &&
-      !isHideAnnouncementSettingsOn &&
-      !isTextBasedLangSelected
-    ) {
-      setIsTourOpen(true);
-    }
-  }, [
-    isHideAnnouncementSettingsOn,
-    isTextBasedLangSelected,
-    isTourDismissed,
-    setIsTourOpen,
-    showNewMenuTour,
-  ]);
-
-  const onTourDismiss = () => {
-    storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);
-    setIsTourDismissed(true);
-    setIsTourOpen(false);
-  };
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
@@ -147,10 +101,39 @@ export function ChangeDataView({
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      if (adHocDataViews?.length) {
+        adHocDataViews.forEach((adHocDataView) => {
+          if (adHocDataView.id) {
+            dataViewsRefs.push({
+              title: adHocDataView.title,
+              name: adHocDataView.name,
+              id: adHocDataView.id,
+            });
+          }
+        });
+      }
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId]);
+  }, [data, currentDataViewId, adHocDataViews]);
+
+  const pendingIndexMatch = useRef<undefined | NodeJS.Timeout>();
+  useEffect(() => {
+    async function checkIndices() {
+      if (dataViewSearchString !== '' && noDataViewMatches) {
+        const matches = await kibana.services.dataViews.getIndices({
+          pattern: dataViewSearchString,
+          isRollupIndex: () => false,
+          showAllIndices: false,
+        });
+        setIndexMatches(matches.length);
+      }
+    }
+    if (pendingIndexMatch.current) {
+      clearTimeout(pendingIndexMatch.current);
+    }
+    pendingIndexMatch.current = setTimeout(checkIndices, 250);
+  }, [dataViewSearchString, kibana.services.dataViews, noDataViewMatches]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -176,14 +159,13 @@ export function ChangeDataView({
         data-test-subj={dataTestSubj}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
-          setIsTourOpen(false);
-          // onTourDismiss(); TODO: Decide if opening the menu should also dismiss the tour
         }}
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        title={title}
+        title={triggerLabel}
         fullWidth={fullWidth}
+        disabled={isDisabled}
         {...rest}
       >
         {triggerLabel}
@@ -208,21 +190,35 @@ export function ChangeDataView({
             defaultMessage: 'Add a field to this data view',
           })}
         </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          key="manage"
-          icon="indexSettings"
-          data-test-subj="indexPattern-manage-field"
-          onClick={() => {
-            setPopoverIsOpen(false);
-            application.navigateToApp('management', {
-              path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-            });
-          }}
-        >
-          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
-            defaultMessage: 'Manage this data view',
-          })}
-        </EuiContextMenuItem>,
+        onEditDataView || dataViewEditor.userPermissions.editDataView() ? (
+          <EuiContextMenuItem
+            key="manage"
+            icon="indexSettings"
+            data-test-subj="indexPattern-manage-field"
+            onClick={async () => {
+              if (onEditDataView) {
+                const dataView = await dataViews.get(currentDataViewId!);
+                dataViewEditor.openEditor({
+                  editData: dataView,
+                  onSave: (updatedDataView) => {
+                    onEditDataView(updatedDataView);
+                  },
+                });
+              } else {
+                application.navigateToApp('management', {
+                  path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+                });
+              }
+              setPopoverIsOpen(false);
+            }}
+          >
+            {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
+              defaultMessage: 'Manage this data view',
+            })}
+          </EuiContextMenuItem>
+        ) : (
+          <React.Fragment />
+        ),
         <EuiHorizontalRule margin="none" />
       );
     }
@@ -277,6 +273,16 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
+                  // go to dataview mode
+                  if (isTextBasedLangSelected) {
+                    setIsTextBasedLangSelected(false);
+                    // clean up the Text based language query
+                    onTextLangQuerySubmit?.({
+                      language: 'kuery',
+                      query: '',
+                    });
+                    setTriggerLabel(trigger.label);
+                  }
                 }}
                 size="xs"
                 iconType="plusInCircleFilled"
@@ -304,7 +310,7 @@ export function ChangeDataView({
               setIsTextBasedLangSelected(false);
               // clean up the Text based language query
               onTextLangQuerySubmit?.({
-                language: 'kql',
+                language: 'kuery',
                 query: '',
               });
               onChangeDataView(newId);
@@ -314,10 +320,57 @@ export function ChangeDataView({
             }
           }}
           currentDataViewId={currentDataViewId}
-          selectableProps={selectableProps}
+          selectableProps={{
+            ...(selectableProps || {}),
+            // @ts-expect-error Some EUI weirdness
+            searchProps: {
+              ...(selectableProps?.searchProps || {}),
+              onChange: (value, matches) => {
+                selectableProps?.searchProps?.onChange?.(value, matches);
+                setNoDataViewMatches(matches.length === 0 && dataViewsList.length > 0);
+                setDataViewSearchString(value);
+              },
+            },
+          }}
           searchListInputId={searchListInputId}
           isTextBasedLangSelected={isTextBasedLangSelected}
         />
+        {onCreateDefaultAdHocDataView && noDataViewMatches && indexMatches > 0 && (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            justifyContent="spaceBetween"
+            data-test-subj="select-text-based-language-panel"
+            css={css`
+              margin: ${euiTheme.size.s};
+              margin-bottom: 0;
+            `}
+          >
+            <EuiFlexItem grow={true}>
+              <EuiButton
+                fullWidth
+                size="s"
+                onClick={() => {
+                  setPopoverIsOpen(false);
+                  onCreateDefaultAdHocDataView(dataViewSearchString);
+                }}
+              >
+                {i18n.translate(
+                  'unifiedSearch.query.queryBar.indexPattern.createForMatchingIndices',
+                  {
+                    defaultMessage: `Explore {indicesLength, plural,
+            one {# matching index}
+            other {# matching indices}}`,
+                    values: {
+                      indicesLength: indexMatches,
+                    },
+                  }
+                )}
+              </EuiButton>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </>
     );
 
@@ -377,7 +430,7 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(false);
       // clean up the Text based language query
       onTextLangQuerySubmit?.({
-        language: 'kql',
+        language: 'kuery',
         query: '',
       });
       if (selectedDataViewId) {
@@ -427,47 +480,23 @@ export function ChangeDataView({
 
   return (
     <>
-      <EuiTourStep
-        title={
-          <>
-            <EuiIcon type="bell" size="s" /> &nbsp; {newMenuTourTitle}
-          </>
-        }
-        content={
-          <EuiText css={styles.popoverContent}>
-            <p>{newMenuTourDescription}</p>
-          </EuiText>
-        }
-        isStepOpen={isTourOpen}
-        onFinish={onTourDismiss}
-        step={1}
-        stepsTotal={1}
-        footerAction={
-          <EuiLink data-test-subj="dataViewPickerTourLink" onClick={onTourDismiss}>
-            {newMenuTourDismissLabel}
-          </EuiLink>
-        }
-        repositionOnScroll
+      <EuiPopover
+        panelClassName="changeDataViewPopover"
+        button={createTrigger()}
+        panelProps={{
+          ['data-test-subj']: 'changeDataViewPopover',
+        }}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverIsOpen(false)}
+        panelPaddingSize="none"
+        initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : undefined}
         display="block"
+        buffer={8}
       >
-        <EuiPopover
-          panelClassName="changeDataViewPopover"
-          button={createTrigger()}
-          panelProps={{
-            ['data-test-subj']: 'changeDataViewPopover',
-          }}
-          isOpen={isPopoverOpen}
-          closePopover={() => setPopoverIsOpen(false)}
-          panelPaddingSize="none"
-          initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : false}
-          display="block"
-          buffer={8}
-        >
-          <div css={styles.popoverContent}>
-            <EuiContextMenuPanel size="s" items={getPanelItems()} />
-          </div>
-        </EuiPopover>
-      </EuiTourStep>
+        <div css={styles.popoverContent}>
+          <EuiContextMenuPanel size="s" items={getPanelItems()} />
+        </div>
+      </EuiPopover>
       {modal}
     </>
   );

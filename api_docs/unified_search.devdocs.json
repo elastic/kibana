@@ -11,25 +11,27 @@
         "label": "DataViewPicker",
         "description": [],
         "signature": [
-          "({ isMissingCurrent, currentDataViewId, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, showNewMenuTour, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, }: ",
+          "({ isMissingCurrent, currentDataViewId, adHocDataViews, onChangeDataView, onEditDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, onCreateDefaultAdHocDataView, isDisabled, }: ",
           "DataViewPickerPropsExtended",
           ") => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  showNewMenuTour,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n}",
+            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  adHocDataViews,\n  onChangeDataView,\n  onEditDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n  onCreateDefaultAdHocDataView,\n  isDisabled,\n}",
             "description": [],
             "signature": [
               "DataViewPickerPropsExtended"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -50,6 +52,7 @@
         ],
         "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -63,6 +66,7 @@
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -75,7 +79,9 @@
         "type": "Function",
         "tags": [],
         "label": "FilterItem",
-        "description": [],
+        "description": [
+          "\nRenders a single filter pill"
+        ],
         "signature": [
           "(props: ",
           "FilterItemProps",
@@ -83,6 +89,7 @@
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -96,6 +103,74 @@
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.FilterItems",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterItems",
+        "description": [
+          "\nRenders a group of filter pills"
+        ],
+        "signature": [
+          "(props: Pick<",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.FilterItemsProps",
+            "text": "FilterItemsProps"
+          },
+          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.FilterItemsProps",
+            "text": "FilterItemsProps"
+          },
+          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+        ],
+        "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItems.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.FilterItemsProps",
+                "text": "FilterItemsProps"
+              },
+              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.FilterItemsProps",
+                "text": "FilterItemsProps"
+              },
+              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -108,7 +183,9 @@
         "type": "Function",
         "tags": [],
         "label": "FilterLabel",
-        "description": [],
+        "description": [
+          "\nRenders the label for a single filter pill"
+        ],
         "signature": [
           "(props: ",
           "FilterLabelProps",
@@ -116,6 +193,7 @@
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -129,6 +207,7 @@
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -155,6 +234,7 @@
         ],
         "path": "src/plugins/unified_search/public/query_string_input/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -174,6 +254,7 @@
             ],
             "path": "src/plugins/unified_search/public/query_string_input/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -206,6 +287,7 @@
         ],
         "path": "src/plugins/unified_search/public/search_bar/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -216,9 +298,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ dataTestSubj?: string | undefined; query?: ",
+              "{ query?: ",
               "Query",
-              " | QT | undefined; filters?: ",
+              " | QT | undefined; dataTestSubj?: string | undefined; filters?: ",
               "Filter",
               "[] | undefined; savedQuery?: ",
               {
@@ -238,7 +320,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined; isLoading?: boolean | undefined; timeHistory?: ",
+              "[] | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -284,14 +366,15 @@
               },
               " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
               "OnSaveTextLanguageQueryProps",
-              ") => void) | undefined; showSubmitButton?: boolean | undefined; suggestionsSize?: ",
+              ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
               " | undefined; isScreenshotMode?: boolean | undefined; onFiltersUpdated?: ((filters: ",
               "Filter",
               "[]) => void) | undefined; onRefreshChange?: ((options: { isPaused: boolean; refreshInterval: number; }) => void) | undefined; }"
             ],
             "path": "src/plugins/unified_search/public/search_bar/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -307,6 +390,7 @@
         "description": [],
         "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -320,7 +404,8 @@
               "[]"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -333,20 +418,45 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
             "id": "def-public.ApplyGlobalFilterActionContext.embeddable",
-            "type": "Unknown",
+            "type": "Object",
             "tags": [],
             "label": "embeddable",
             "description": [],
             "signature": [
-              "unknown"
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -359,7 +469,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -373,6 +484,7 @@
         "description": [],
         "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -388,7 +500,8 @@
               " & { label: string; title?: string | undefined; }"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -403,7 +516,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -419,6 +533,7 @@
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -432,6 +547,55 @@
                 ],
                 "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.onEditDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditDataView",
+            "description": [
+              "\nCallback that is called when the user edits the current data view via flyout.\nThe first parameter is the updated data view stub without fetched fields"
+            ],
+            "signature": [
+              "((updatedDataViewStub: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.DataViewPickerProps.onEditDataView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "updatedDataViewStub",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -450,7 +614,31 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.adHocDataViews",
+            "type": "Array",
+            "tags": [],
+            "label": "adHocDataViews",
+            "description": [
+              "\nThe adHocDataviews."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -466,7 +654,8 @@
               "<{}> | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -482,6 +671,7 @@
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -499,23 +689,41 @@
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "unifiedSearch",
-            "id": "def-public.DataViewPickerProps.showNewMenuTour",
-            "type": "CompoundType",
+            "id": "def-public.DataViewPickerProps.onCreateDefaultAdHocDataView",
+            "type": "Function",
             "tags": [],
-            "label": "showNewMenuTour",
-            "description": [
-              "\nFlag to show the tour component for the first time."
-            ],
+            "label": "onCreateDefaultAdHocDataView",
+            "description": [],
             "signature": [
-              "boolean | undefined"
+              "((pattern: string) => void) | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.DataViewPickerProps.onCreateDefaultAdHocDataView.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -531,7 +739,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -549,6 +758,7 @@
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -562,10 +772,432 @@
                 ],
                 "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "\nMakes the picker disabled by disabling the popover trigger"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.FilterItemsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterItemsProps",
+        "description": [
+          "\nProperties for the filter items component, which will render a single filter pill for every filter that is sent in\nas part of the `Filter[]` property."
+        ],
+        "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "Array of filters that will be rendered as filter pills"
+            ],
+            "signature": [
+              "Filter",
+              "[]"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.readOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readOnly",
+            "description": [
+              "Optional property that controls whether or not clicking the filter pill opens a popover *and* whether\nor not the `x` button to remove the filter is rendered."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.onFiltersUpdated",
+            "type": "Function",
+            "tags": [],
+            "label": "onFiltersUpdated",
+            "description": [
+              "If not read only, this is called whenever a filter is removed and/or updated"
+            ],
+            "signature": [
+              "((filters: ",
+              "Filter",
+              "[]) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.FilterItemsProps.onFiltersUpdated.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  "[]"
+                ],
+                "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [
+              "A list of all dataviews that are used for the filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.intl",
+            "type": "Object",
+            "tags": [],
+            "label": "intl",
+            "description": [
+              "This is injected by the lazer loader"
+            ],
+            "signature": [
+              "ReactIntl.InjectedIntl"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.timeRangeForSuggestionsOverride",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeRangeForSuggestionsOverride",
+            "description": [
+              "Controls whether or not filter suggestions are influenced by the global time"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.hiddenPanelOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "hiddenPanelOptions",
+            "description": [
+              "Array of panel options that controls the styling of each filter pill"
+            ],
+            "signature": [
+              "FilterPanelOption",
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.IUnifiedSearchPluginServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "IUnifiedSearchPluginServices",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.IUnifiedSearchPluginServices",
+            "text": "IUnifiedSearchPluginServices"
+          },
+          " extends Partial<",
+          "CoreStart",
+          ">"
+        ],
+        "path": "src/plugins/unified_search/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              "{ autocomplete: { getQuerySuggestions: ",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchAutocompletePluginApi",
+                "section": "def-public.QuerySuggestionGetFn",
+                "text": "QuerySuggestionGetFn"
+              },
+              "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+              "ValueSuggestionsGetFn",
+              "; }; }"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.appName",
+            "type": "string",
+            "tags": [],
+            "label": "appName",
+            "description": [],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "SavedObjectsStart"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              "NotificationsStart"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStorageWrapper",
+                "text": "IStorageWrapper"
+              },
+              "<any, void>"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              "DocLinksStart"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionStart",
+                "text": "UsageCollectionStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -579,6 +1211,7 @@
         "description": [],
         "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -599,7 +1232,8 @@
               ")[]"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -612,7 +1246,8 @@
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -625,7 +1260,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -638,7 +1274,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -651,7 +1288,8 @@
               "any"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -671,7 +1309,8 @@
               "<any> | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -684,7 +1323,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -697,7 +1337,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -710,7 +1351,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -723,7 +1365,8 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -737,6 +1380,7 @@
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -754,6 +1398,7 @@
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -767,6 +1412,7 @@
                 ],
                 "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -784,6 +1430,7 @@
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -797,6 +1444,7 @@
                 ],
                 "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -816,6 +1464,7 @@
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -829,6 +1478,7 @@
                 ],
                 "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -845,7 +1495,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -858,7 +1509,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -872,7 +1524,8 @@
               " | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -885,7 +1538,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -898,7 +1552,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -911,7 +1566,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -925,7 +1581,47 @@
               " | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.appName",
+            "type": "string",
+            "tags": [],
+            "label": "appName",
+            "description": [],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.deps",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "QueryStringInputDependencies"
+            ],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -938,7 +1634,8 @@
               "\"text\" | \"lucene\" | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -951,7 +1648,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -964,7 +1662,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -979,7 +1678,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -999,6 +1699,7 @@
         ],
         "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1012,12 +1713,13 @@
           "Omit",
           "<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"onChange\" | \"selectedOptions\" | \"options\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
+          "<any>, \"options\" | \"onChange\" | \"selectedOptions\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"onChange\" | \"selectedOptions\" | \"options\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
+          "<any>, \"options\" | \"onChange\" | \"selectedOptions\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
         ],
         "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1034,6 +1736,7 @@
         ],
         "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1049,6 +1752,7 @@
         ],
         "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1063,6 +1767,7 @@
         ],
         "path": "src/plugins/unified_search/public/actions/update_filter_references_action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1077,6 +1782,7 @@
         ],
         "path": "src/plugins/unified_search/public/triggers/update_filter_references_trigger.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1092,6 +1798,7 @@
       ],
       "path": "src/plugins/unified_search/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "unifiedSearch",
@@ -1116,7 +1823,8 @@
             "; }"
           ],
           "path": "src/plugins/unified_search/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "unifiedSearch",
@@ -1125,13 +1833,14 @@
           "tags": [],
           "label": "ui",
           "description": [
-            "\nprewired UI components\n{@link DataPublicPluginStartUi}"
+            "\nprewired UI components\n{@link UnifiedSearchPublicPluginStartUi}"
           ],
           "signature": [
             "UnifiedSearchPublicPluginStartUi"
           ],
           "path": "src/plugins/unified_search/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -1146,6 +1855,7 @@
       "description": [],
       "path": "src/plugins/unified_search/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "unifiedSearch",
@@ -1166,7 +1876,8 @@
             "; getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
           ],
           "path": "src/plugins/unified_search/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1210,6 +1921,7 @@
         ],
         "path": "src/plugins/unified_search/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -1223,6 +1935,7 @@
             ],
             "path": "src/plugins/unified_search/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -1243,6 +1956,7 @@
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1280,6 +1994,7 @@
             ],
             "path": "src/plugins/unified_search/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -1310,6 +2025,7 @@
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1324,6 +2040,7 @@
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1351,6 +2068,7 @@
             ],
             "path": "src/plugins/unified_search/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedSearch",
@@ -1370,6 +2088,7 @@
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1384,6 +2103,7 @@
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1401,6 +2121,7 @@
             ],
             "path": "src/plugins/unified_search/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1419,6 +2140,7 @@
         "description": [],
         "path": "src/plugins/unified_search/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }
@@ -1435,6 +2157,7 @@
       "description": [],
       "path": "src/plugins/unified_search/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "unifiedSearch",
@@ -1447,7 +2170,8 @@
             "{ getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
           ],
           "path": "src/plugins/unified_search/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",

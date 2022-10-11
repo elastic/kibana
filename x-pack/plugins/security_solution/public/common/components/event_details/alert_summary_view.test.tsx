@@ -74,7 +74,7 @@ describe('AlertSummaryView', () => {
         </TestProviders>
       );
 
-      ['host.name', 'user.name', i18n.RULE_TYPE, 'query'].forEach((fieldId) => {
+      ['host.name', 'user.name', i18n.RULE_TYPE, 'query', 'rule.name'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });

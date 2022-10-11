@@ -22,7 +22,6 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  docValueFields,
   deleteQuery,
   userName,
 }: AuthenticationsUserTableProps) => {
@@ -47,7 +46,6 @@ export const AuthenticationsQueryTabBody = ({
         startDate={startDate}
         type={type}
         skip={skip}
-        docValueFields={docValueFields}
         userName={userName}
       />
     </>

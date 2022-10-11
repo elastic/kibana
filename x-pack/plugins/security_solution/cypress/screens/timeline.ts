@@ -215,6 +215,14 @@ export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]'
 
 export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
 
+export const TIMELINE_SHOWQUERYBARMENU_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="showQueryBarMenu"]`;
+
+export const TIMELINE_SWITCHQUERYLANGUAGE_BUTTON = '[data-test-subj="switchQueryLanguageButton"]';
+
+export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMenuItem"]';
+
+export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
+
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
@@ -227,6 +235,8 @@ export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
 export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-button-icon"]';
 
+export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
+
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
@@ -235,7 +245,7 @@ export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
-export const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
+const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
 
 export const TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN = `[data-test-subj="disable-all"]`;
 
@@ -267,3 +277,33 @@ export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
 export const EDIT_TIMELINE_BTN = '[data-test-subj="save-timeline-button-icon"]';
 
 export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
+
+export const ALERT_TABLE_SEVERITY_VALUES =
+  '[data-test-subj="formatted-field-kibana.alert.severity"]';
+
+export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
+
+export const ALERT_TABLE_FILE_NAME_VALUES =
+  '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
+
+export const ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE = '[data-test-subj="add-to-timeline"]';
+
+export const ACTIVE_TIMELINE_BOTTOM_BAR =
+  '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
+
+export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
+  `[data-test-subj="draggable-content-${fieldName}"]`;
+
+export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
+
+export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders"]';
+
+export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
+
+export const HOVER_ACTIONS = {
+  ADD_TO_TIMELINE: '[data-test-subj="add-to-timeline"]',
+  FILTER_FOR: '[data-test-subj="filter-for-value"]',
+  FILTER_OUT: '[data-test-subj="filter-out-value"]',
+  COPY: '[data-test-subj="clipboard"]',
+  SHOW_TOP: 'show-top-field',
+};

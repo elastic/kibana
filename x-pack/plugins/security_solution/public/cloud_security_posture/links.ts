@@ -18,8 +18,7 @@ const commonLinkProperties: Partial<LinkItem> = {
 
 export const rootLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('findings'),
-  globalNavEnabled: true,
-  globalNavOrder: 3,
+  globalNavPosition: 3,
   ...commonLinkProperties,
 };
 

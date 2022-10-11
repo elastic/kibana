@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
@@ -21,24 +22,30 @@ import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
-  InitializationOptions,
   OperationDescriptor,
   FramePublicAPI,
+  IndexPatternField,
+  IndexPattern,
+  IndexPatternRef,
 } from '../types';
 import {
-  loadInitialState,
   changeIndexPattern,
   changeLayerIndexPattern,
   extractReferences,
   injectReferences,
-  loadIndexPatterns,
+  loadInitialState,
+  onRefreshIndexPattern,
+  renameIndexPattern,
+  triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -55,8 +62,15 @@ import {
   getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
-import { getFiltersInLayer, getVisualDefaultsForLayer, isColumnInvalid } from './utils';
-import { normalizeOperationDataType, isDraggedField } from './pure_utils';
+import {
+  getFiltersInLayer,
+  getTSDBRollupWarningMessages,
+  getVisualDefaultsForLayer,
+  isColumnInvalid,
+  cloneLayer,
+} from './utils';
+import { isDraggedDataViewField } from '../utils';
+import { normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
@@ -67,14 +81,9 @@ import {
   TermsIndexPatternColumn,
 } from './operations';
 import { getReferenceRoot } from './operations/layer_helpers';
-import {
-  IndexPatternField,
-  IndexPatternPrivateState,
-  IndexPatternPersistedState,
-  IndexPattern,
-} from './types';
+import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { mergeLayer } from './state_helpers';
-import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
+import { Datasource, VisualizeEditorContext } from '../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
@@ -104,6 +113,9 @@ export function columnToOperation(
         ? 'version'
         : undefined,
     hasTimeShift: Boolean(timeShift),
+    interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+      ? column.params.interval
+      : undefined,
   };
 }
 
@@ -120,6 +132,7 @@ export function getIndexPatternDatasource({
   storage,
   data,
   unifiedSearch,
+  discover,
   dataViews,
   fieldFormats,
   charts,
@@ -130,6 +143,7 @@ export function getIndexPatternDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  discover?: DiscoverStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -137,57 +151,33 @@ export function getIndexPatternDatasource({
   uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
-  const onIndexPatternLoadError = (err: Error) =>
-    core.notifications.toasts.addError(err, {
-      title: i18n.translate('xpack.lens.indexPattern.dataViewLoadError', {
-        defaultMessage: 'Error loading data view',
-      }),
-    });
 
-  const indexPatternsService = dataViews;
-
-  const handleChangeIndexPattern = (
-    id: string,
-    state: IndexPatternPrivateState,
-    setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
-  ) => {
-    changeIndexPattern({
-      id,
-      state,
-      setState,
-      onError: onIndexPatternLoadError,
-      storage,
-      indexPatternsService,
-    });
-  };
+  const DATASOURCE_ID = 'indexpattern';
 
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
-    id: 'indexpattern',
+    id: DATASOURCE_ID,
 
-    async initialize(
+    initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-      options?: InitializationOptions
+      indexPatternRefs?: IndexPatternRef[],
+      indexPatterns?: Record<string, IndexPattern>
     ) {
       return loadInitialState({
         persistedState,
         references,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
-        indexPatternsService,
         initialContext,
-        options,
+        indexPatternRefs,
+        indexPatterns,
       });
     },
 
     getPersistableState(state: IndexPatternPrivateState) {
       return extractReferences(state);
-    },
-
-    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
-      return state.currentIndexPatternId;
     },
 
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
@@ -197,6 +187,20 @@ export function getIndexPatternDatasource({
           ...state.layers,
           [newLayerId]: blankLayer(state.currentIndexPatternId),
         },
+      };
+    },
+
+    createEmptyLayer(indexPatternId: string) {
+      return {
+        currentIndexPatternId: indexPatternId,
+        layers: {},
+      };
+    },
+
+    cloneLayer(state, layerId, newLayerId, getNewId) {
+      return {
+        ...state,
+        layers: cloneLayer(state.layers, layerId, newLayerId, getNewId),
       };
     },
 
@@ -221,11 +225,11 @@ export function getIndexPatternDatasource({
     },
 
     getLayers(state: IndexPatternPrivateState) {
-      return Object.keys(state.layers);
+      return Object.keys(state?.layers);
     },
 
-    removeColumn({ prevState, layerId, columnId }) {
-      const indexPattern = prevState.indexPatterns[prevState.layers[layerId]?.indexPatternId];
+    removeColumn({ prevState, layerId, columnId, indexPatterns }) {
+      const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
       return mergeLayer({
         state: prevState,
         layerId,
@@ -237,8 +241,8 @@ export function getIndexPatternDatasource({
       });
     },
 
-    initializeDimension(state, layerId, { columnId, groupId, staticValue }) {
-      const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
+    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, staticValue }) {
+      const indexPattern = indexPatterns[state.layers[layerId]?.indexPatternId];
       if (staticValue == null) {
         return state;
       }
@@ -259,26 +263,40 @@ export function getIndexPatternDatasource({
       });
     },
 
-    toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
+    toExpression: (state, layerId, indexPatterns) =>
+      toExpression(state, layerId, indexPatterns, uiSettings),
 
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
+      const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
-            <IndexPatternDataPanel
-              changeIndexPattern={handleChangeIndexPattern}
-              data={data}
-              dataViews={dataViews}
-              fieldFormats={fieldFormats}
-              charts={charts}
-              indexPatternFieldEditor={dataViewFieldEditor}
-              {...props}
-              core={core}
-              uiActions={uiActions}
-            />
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                discover,
+              }}
+            >
+              <IndexPatternDataPanel
+                data={data}
+                dataViews={dataViews}
+                fieldFormats={fieldFormats}
+                charts={charts}
+                indexPatternFieldEditor={dataViewFieldEditor}
+                {...otherProps}
+                core={core}
+                uiActions={uiActions}
+                onIndexPatternRefresh={onRefreshIndexPattern}
+              />
+            </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
         domElement
@@ -304,7 +322,6 @@ export function getIndexPatternDatasource({
         counts[uniqueLabel] = 0;
         return uniqueLabel;
       };
-
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
@@ -317,10 +334,10 @@ export function getIndexPatternDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
+    isValidColumn: (state, indexPatterns, layerId, columnId) => {
       const layer = state.layers[layerId];
 
-      return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
+      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId]);
     },
 
     renderDimensionTrigger: (
@@ -341,6 +358,7 @@ export function getIndexPatternDatasource({
                 fieldFormats,
                 savedObjects: core.savedObjects,
                 docLinks: core.docLinks,
+                unifiedSearch,
               }}
             >
               <IndexPatternDimensionTrigger
@@ -373,11 +391,13 @@ export function getIndexPatternDatasource({
                 savedObjects: core.savedObjects,
                 docLinks: core.docLinks,
                 http: core.http,
+                unifiedSearch,
               }}
             >
               <IndexPatternDimensionEditor
                 uiSettings={uiSettings}
                 storage={storage}
+                fieldFormats={fieldFormats}
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
@@ -397,23 +417,20 @@ export function getIndexPatternDatasource({
       domElement: Element,
       props: DatasourceLayerPanelProps<IndexPatternPrivateState>
     ) => {
+      const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <LayerPanel
             onChangeIndexPattern={(indexPatternId) => {
-              changeLayerIndexPattern({
+              triggerActionOnIndexPatternChange({
                 indexPatternId,
-                setState: props.setState,
                 state: props.state,
                 layerId: props.layerId,
-                onError: onIndexPatternLoadError,
-                replaceIfPossible: true,
-                storage,
-                indexPatternsService,
                 uiActions,
               });
+              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
             }}
-            {...props}
+            {...otherProps}
           />
         </KibanaThemeProvider>,
         domElement
@@ -427,11 +444,16 @@ export function getIndexPatternDatasource({
     getDropProps,
     onDrop,
 
-    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+    getCustomWorkspaceRenderer: (
+      state: IndexPatternPrivateState,
+      dragging: DraggingIdentifier,
+      indexPatterns: Record<string, IndexPattern>
+    ) => {
       if (dragging.field === undefined || dragging.indexPatternId === undefined) {
         return undefined;
       }
 
+      const indexPattern = indexPatterns[dragging.indexPatternId as string];
       const draggedField = dragging as DraggingIdentifier & {
         field: IndexPatternField;
         indexPatternId: string;
@@ -447,7 +469,7 @@ export function getIndexPatternDatasource({
               <GeoFieldWorkspacePanel
                 uiActions={uiActions}
                 fieldType={geoFieldType}
-                indexPatternId={draggedField.indexPatternId}
+                indexPattern={indexPattern}
                 fieldName={draggedField.field.name}
               />
             );
@@ -456,16 +478,36 @@ export function getIndexPatternDatasource({
     },
 
     updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
-      handleChangeIndexPattern(indexPatternId, state, setState);
+      setState({
+        ...state,
+        currentIndexPatternId: indexPatternId,
+      });
     },
 
+    onRefreshIndexPattern,
+    onIndexPatternChange(state, indexPatterns, indexPatternId, layerId) {
+      if (layerId) {
+        return changeLayerIndexPattern({
+          indexPatternId,
+          layerId,
+          state,
+          replaceIfPossible: true,
+          storage,
+          indexPatterns,
+        });
+      }
+      return changeIndexPattern({ indexPatternId, state, storage, indexPatterns });
+    },
+    onIndexPatternRename: (state, oldIndexPatternId, newIndexPatternId) => {
+      return renameIndexPattern({ state, oldIndexPatternId, newIndexPatternId });
+    },
     getRenderEventCounters(state: IndexPatternPrivateState): string[] {
       const additionalEvents = {
         time_shift: false,
         filter: false,
       };
       const operations = flatten(
-        Object.values(state.layers ?? {}).map((l) =>
+        Object.values(state?.layers ?? {}).map((l) =>
           Object.values(l.columns).map((c) => {
             if (c.timeShift) {
               additionalEvents.time_shift = true;
@@ -489,26 +531,6 @@ export function getIndexPatternDatasource({
       ].map((item) => `dimension_${item}`);
     },
 
-    refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
-      const newlyMappedIndexPattern = await loadIndexPatterns({
-        indexPatternsService: dataViews,
-        cache: {},
-        patterns: [indexPatternId],
-      });
-      const indexPatternRefs = await dataViews.getIdsWithTitle();
-      const indexPattern = newlyMappedIndexPattern[indexPatternId];
-      setState((s) => {
-        return {
-          ...s,
-          indexPatterns: {
-            ...s.indexPatterns,
-            [indexPattern.id]: indexPattern,
-          },
-          indexPatternRefs,
-        };
-      });
-    },
-
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId }) => {
@@ -523,13 +545,13 @@ export function getIndexPatternDatasource({
       });
     },
 
-    getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
+    getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
       const layer = state.layers[layerId];
       const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
-        datasourceId: 'indexpattern',
+        datasourceId: DATASOURCE_ID,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column
@@ -553,27 +575,31 @@ export function getIndexPatternDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
+        isTextBasedLanguage: () => false,
         getOperationForColumnId: (columnId: string) => {
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(
                 layer.columns[columnId],
                 columnLabelMap[columnId],
-                state.indexPatterns[layer.indexPatternId]
+                indexPatterns[layer.indexPatternId]
               );
             }
           }
           return null;
         },
-        getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
-          getFiltersInLayer(
+        getSourceId: () => {
+          return layer.indexPatternId;
+        },
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
+          return getFiltersInLayer(
             layer,
             visibleColumnIds,
             activeData?.[layerId],
-            state.indexPatterns[layer.indexPatternId],
+            indexPatterns[layer.indexPatternId],
             timeRange
-          ),
+          );
+        },
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
           if (layer && layer.columns[columnId]) {
@@ -586,12 +612,13 @@ export function getIndexPatternDatasource({
         },
       };
     },
-    getDatasourceSuggestionsForField(state, draggedField, filterLayers) {
-      return isDraggedField(draggedField)
+    getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
+      return isDraggedDataViewField(draggedField)
         ? getDatasourceSuggestionsForField(
             state,
             draggedField.indexPatternId,
             draggedField.field,
+            indexPatterns,
             filterLayers
           )
         : [];
@@ -600,22 +627,23 @@ export function getIndexPatternDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getErrorMessages(state) {
+    getErrorMessages(state, indexPatterns) {
       if (!state) {
         return;
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
       const layerErrors = Object.entries(state.layers)
-        .filter(([_, layer]) => !!state.indexPatterns[layer.indexPatternId])
+        .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
         .map(([layerId, layer]) =>
           (
             getErrorMessages(
               layer,
-              state.indexPatterns[layer.indexPatternId],
+              indexPatterns[layer.indexPatternId],
               state,
               layerId,
-              core
+              core,
+              data
             ) ?? []
           ).map((message) => ({
             shortMessage: '', // Not displayed currently
@@ -657,7 +685,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: (state, frame, setState) => {
+    getWarningMessages: (state, frame, adapters, setState) => {
       return [
         ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
         ...getPrecisionErrorWarningMessages(
@@ -669,13 +697,56 @@ export function getIndexPatternDatasource({
         ),
       ];
     },
-    checkIntegrity: (state) => {
-      const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
-      return ids.filter((id) => !state.indexPatterns[id]);
+    getSearchWarningMessages: (state, warning) => {
+      return [...getTSDBRollupWarningMessages(state, warning)];
     },
-    isTimeBased: (state) => {
+    getDeprecationMessages: () => {
+      const deprecatedMessages: React.ReactNode[] = [];
+      const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
+      const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
+
+      if (isUsingSampling) {
+        deprecatedMessages.push(
+          <EuiCallOut
+            color="warning"
+            iconType="alert"
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
+                defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
+                values={{
+                  version: '8.6.0',
+                  link: (
+                    <EuiLink
+                      onClick={() => {
+                        core.application.navigateToApp('management', {
+                          path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
+                        });
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
+                        defaultMessage="Advanced Settings"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
+        );
+      }
+
+      return deprecatedMessages;
+    },
+    checkIntegrity: (state, indexPatterns) => {
+      const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
+      return ids.filter((id) => !indexPatterns[id]);
+    },
+    isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
-      const { layers, indexPatterns } = state;
+      const { layers } = state;
       return (
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
@@ -704,8 +775,14 @@ export function getIndexPatternDatasource({
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
-    getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
+    getUsedDataView: (state: IndexPatternPrivateState, layerId?: string) => {
+      if (!layerId) {
+        return state.currentIndexPatternId;
+      }
       return state.layers[layerId].indexPatternId;
+    },
+    getUsedDataViews: (state) => {
+      return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
   };
 

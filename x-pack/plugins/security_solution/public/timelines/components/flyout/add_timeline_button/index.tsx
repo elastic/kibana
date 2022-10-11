@@ -57,6 +57,9 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
           anchorPosition="downRight"
           button={PopoverButtonIcon}
           id="timelineSettingsPopover"
+          panelProps={{
+            'data-test-subj': 'timeline-addPopupPanel',
+          }}
           isOpen={showActions}
           closePopover={onClosePopover}
           ownFocus

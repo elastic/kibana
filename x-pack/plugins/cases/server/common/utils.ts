@@ -40,6 +40,7 @@ import {
   parseCommentString,
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
+import { dedupAssignees } from '../client/cases/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -69,6 +70,7 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
+  assignees: dedupAssignees(newCase.assignees) ?? [],
 });
 
 export const transformCases = ({
@@ -187,6 +189,7 @@ type NewCommentArgs = CommentRequest & {
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
+  profile_uid?: string;
 };
 
 export const transformNewComment = ({
@@ -195,12 +198,13 @@ export const transformNewComment = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
+  profile_uid: profileUid,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
   return {
     ...comment,
     created_at: createdDate,
-    created_by: { email, full_name, username },
+    created_by: { email, full_name, username, profile_uid: profileUid },
     pushed_at: null,
     pushed_by: null,
     updated_at: null,

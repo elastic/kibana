@@ -15,9 +15,12 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DistributiveOmit } from '@elastic/eui';
+import type { ApmBase } from '@elastic/apm-rum';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -25,6 +28,8 @@ import type {
   CasesMetricsRequest,
   CasesStatusRequest,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceNoSOType,
+  CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -52,11 +57,14 @@ export interface CasesPluginSetup {
 export interface CasesPluginStart {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  licensing?: LicensingPluginStart;
   lens: LensPublicStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
+  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  apm?: ApmBase;
 }
 
 /**
@@ -65,10 +73,7 @@ export interface CasesPluginStart {
  * Leaving it out currently in lieu of RBAC changes
  */
 
-export type StartServices = CoreStart &
-  CasesPluginStart & {
-    security: SecurityPluginSetup;
-  };
+export type StartServices = CoreStart & CasesPluginStart;
 
 export interface RenderAppProps {
   mountParams: ManagementAppMountParams;
@@ -145,7 +150,14 @@ export interface CasesUiStart {
   };
 }
 
-export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
+export type SupportedCaseAttachment =
+  | CommentRequestAlertType
+  | CommentRequestUserType
+  | CommentRequestPersistableStateType
+  | CommentRequestExternalReferenceNoSOType;
+
 export type CaseAttachments = SupportedCaseAttachment[];
+export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
+export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

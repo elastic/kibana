@@ -95,12 +95,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
-      await PageObjects.lens.switchToVisualization('lnsMetric');
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 
     it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
@@ -503,6 +503,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.editDimensionFormat('Number');
       await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.waitForVisualization();
 
       const values = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))

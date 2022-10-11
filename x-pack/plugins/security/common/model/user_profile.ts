@@ -11,6 +11,15 @@ import type { AuthenticatedUser } from './authenticated_user';
 import { getUserDisplayName } from './user';
 
 /**
+ * IMPORTANT:
+ *
+ * The types in this file are duplicated at
+ * `packages/kbn-user-profile-components/src/user_profile.ts`
+ *
+ * When making changes please ensure to keep both files in sync.
+ */
+
+/**
  * Describes basic properties stored in user profile.
  */
 export interface UserProfile<D extends UserProfileData = UserProfileData> {
@@ -51,10 +60,6 @@ export interface UserProfileUserInfo {
    * Optional full name of the user.
    */
   full_name?: string;
-  /**
-   * Optional display name of the user.
-   */
-  display_name?: string;
 }
 
 /**
@@ -142,11 +147,11 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  * If a color is present on the user profile itself, then that is used.
  * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
  *
- * @param {UserProfileUserInfoWithSecurity} user User info
+ * @param {UserProfileUserInfo} user User info
  * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarColor(
-  user: Pick<UserProfileUserInfoWithSecurity, 'username' | 'full_name'>,
+  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
   avatar?: UserProfileAvatarData
 ) {
   if (avatar && avatar.color) {
@@ -163,11 +168,11 @@ export function getUserAvatarColor(
  * If initials are present on the user profile itself, then that is used.
  * Otherwise, the initials are calculated based off the words in the display name, with a max length of 2 characters.
  *
- * @param {UserProfileUserInfoWithSecurity} user User info
+ * @param {UserProfileUserInfo} user User info
  * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarInitials(
-  user: Pick<UserProfileUserInfoWithSecurity, 'username' | 'full_name'>,
+  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
   avatar?: UserProfileAvatarData
 ) {
   if (avatar && avatar.initials) {

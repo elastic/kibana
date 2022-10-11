@@ -7,9 +7,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
-import { identity, range } from 'lodash';
-import * as Rx from 'rxjs';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -21,14 +19,17 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { Writable } from 'stream';
-import { ReportingConfig } from '../../..';
+import { identity, range } from 'lodash';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+import type { DeepPartial } from 'utility-types';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
+import { ReportingConfigType } from '../../../config';
 import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
@@ -39,12 +40,16 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
 
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
-let mockConfig: ReportingConfig;
+let mockConfig: ReportingConfigType['csv'];
+let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
 let content: string;
 
-const searchSourceMock = { ...searchSourceInstanceMock };
+const searchSourceMock = {
+  ...searchSourceInstanceMock,
+  getSearchRequestBody: jest.fn(() => ({})),
+};
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
@@ -75,6 +80,11 @@ const mockFieldFormatsRegistry = {
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
 } as unknown as FieldFormatsRegistry;
 
+const getMockConfig = (properties: DeepPartial<ReportingConfigType> = {}) => {
+  const config = createMockConfig(createMockConfigSchema(properties));
+  return config.get('csv');
+};
+
 beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
@@ -96,16 +106,14 @@ beforeEach(async () => {
     }
   });
 
-  mockConfig = createMockConfig(
-    createMockConfigSchema({
-      csv: {
-        checkForFormulas: true,
-        escapeFormulaValues: true,
-        maxSizeBytes: 180000,
-        scroll: { size: 500, duration: '30s' },
-      },
-    })
-  );
+  mockConfig = getMockConfig({
+    csv: {
+      checkForFormulas: true,
+      escapeFormulaValues: true,
+      maxSizeBytes: 180000,
+      scroll: { size: 500, duration: '30s' },
+    },
+  });
 
   searchSourceMock.getField = jest.fn((key: string) => {
     switch (key) {
@@ -120,9 +128,9 @@ beforeEach(async () => {
         };
     }
   });
-});
 
-const logger = loggingSystemMock.createLogger();
+  mockLogger = loggingSystemMock.createLogger();
+});
 
 it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
@@ -138,7 +146,7 @@ it('formats an empty search result to CSV content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -178,7 +186,7 @@ it('formats a search result to CSV content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -217,7 +225,7 @@ it('calculates the bytes of the content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -227,17 +235,14 @@ it('calculates the bytes of the content', async () => {
 
 it('warns if max size was reached', async () => {
   const TEST_MAX_SIZE = 500;
-
-  mockConfig = createMockConfig(
-    createMockConfigSchema({
-      csv: {
-        checkForFormulas: true,
-        escapeFormulaValues: true,
-        maxSizeBytes: TEST_MAX_SIZE,
-        scroll: { size: 500, duration: '30s' },
-      },
-    })
-  );
+  mockConfig = getMockConfig({
+    csv: {
+      checkForFormulas: true,
+      escapeFormulaValues: true,
+      maxSizeBytes: TEST_MAX_SIZE,
+      scroll: { size: 500, duration: '30s' },
+    },
+  });
 
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
@@ -269,7 +274,7 @@ it('warns if max size was reached', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -296,6 +301,7 @@ it('uses the scrollId to page all the data', async () => {
       },
     })
   );
+
   mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
     hits: {
       hits: range(0, HITS_TOTAL / 10).map(() => ({
@@ -321,7 +327,7 @@ it('uses the scrollId to page all the data', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -330,8 +336,8 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
-    { strategy: 'es' }
+    { params: { body: {}, ignore_throttled: undefined, scroll: '30s', size: 500 } },
+    { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
   );
 
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
@@ -345,6 +351,73 @@ it('uses the scrollId to page all the data', async () => {
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
     scroll_id: ['awesome-scroll-hero'],
   });
+});
+
+it('keeps order of the columns during the scroll', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() =>
+    Rx.of({
+      rawResponse: {
+        _scroll_id: 'awesome-scroll-hero',
+        hits: {
+          hits: [
+            {
+              fields: {
+                a: ['a1'],
+                b: ['b1'],
+              },
+            },
+          ],
+          total: 3,
+        },
+      },
+    })
+  );
+
+  mockEsClient.asCurrentUser.scroll = jest
+    .fn()
+    .mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            fields: {
+              b: ['b2'],
+            },
+          },
+        ],
+      },
+    })
+    .mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            fields: {
+              a: ['a3'],
+              c: ['c3'],
+            },
+          },
+        ],
+      },
+    });
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({ searchSource: {}, columns: [] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    mockLogger,
+    stream
+  );
+  await generateCsv.generateData();
+
+  expect(content).toMatchSnapshot();
 });
 
 describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
@@ -382,7 +455,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -434,7 +507,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -493,7 +566,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -540,7 +613,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -583,7 +656,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -626,7 +699,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -671,7 +744,7 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -714,7 +787,7 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -725,16 +798,14 @@ describe('formulas', () => {
   });
 
   it('can check for formulas, without escaping them', async () => {
-    mockConfig = createMockConfig(
-      createMockConfigSchema({
-        csv: {
-          checkForFormulas: true,
-          escapeFormulaValues: false,
-          maxSizeBytes: 180000,
-          scroll: { size: 500, duration: '30s' },
-        },
-      })
-    );
+    mockConfig = getMockConfig({
+      csv: {
+        checkForFormulas: true,
+        escapeFormulaValues: false,
+        maxSizeBytes: 180000,
+        scroll: { size: 500, duration: '30s' },
+      },
+    });
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {
@@ -767,7 +838,7 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -793,15 +864,22 @@ it('can override ignoring frozen indices', async () => {
     { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
     { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
 
   await generateCsv.generateData();
 
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
-    { strategy: 'es' }
+    {
+      params: {
+        body: {},
+        ignore_throttled: false,
+        scroll: '30s',
+        size: 500,
+      },
+    },
+    { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
   );
 });
 
@@ -827,7 +905,7 @@ it('will return partial data if the scroll or search fails', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
@@ -843,9 +921,20 @@ it('will return partial data if the scroll or search fails', async () => {
             },
             "warnings": Array [
               "Received a 500 response from Elasticsearch: my error",
+              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
             ],
           }
         `);
+  expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "CSV export scan error: ResponseError: my error",
+      ],
+      Array [
+        [ResponseError: my error],
+      ],
+    ]
+  `);
 });
 
 it('handles unknown errors', async () => {
@@ -865,7 +954,7 @@ it('handles unknown errors', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
@@ -881,6 +970,7 @@ it('handles unknown errors', async () => {
             },
             "warnings": Array [
               "Encountered an unknown error: An unknown error",
+              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
             ],
           }
         `);
@@ -923,7 +1013,7 @@ describe('error codes', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -932,6 +1022,18 @@ describe('error codes', () => {
     expect(warnings).toMatchInlineSnapshot(`
       Array [
         "This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.",
+        "Encountered an error with the number of CSV rows generated from the search: expected 10, received 5.",
+      ]
+    `);
+
+    expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "CSV export scroll error: ResponseError: Response Error",
+        ],
+        Array [
+          [ResponseError: Response Error],
+        ],
       ]
     `);
   });

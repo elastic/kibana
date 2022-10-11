@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const defaultSettings = {
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sql view', async function () {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
@@ -51,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('toggleFieldFilterButton')).to.be(true);
         expect(await testSubjects.exists('fieldTypesHelpButton')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
-        expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(true);
+        expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
         await PageObjects.discover.selectTextBaseLang('SQL');
 

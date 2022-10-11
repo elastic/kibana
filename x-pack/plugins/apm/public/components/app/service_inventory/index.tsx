@@ -24,7 +24,6 @@ import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
-import { INITIAL_PAGE_SIZE } from '../../shared/managed_table';
 
 const initialData = {
   requestId: '',
@@ -32,6 +31,8 @@ const initialData = {
   hasHistoricalData: true,
   hasLegacyData: false,
 };
+
+const INITIAL_PAGE_SIZE = 25;
 
 function useServicesMainStatisticsFetcher() {
   const {
@@ -309,6 +310,7 @@ export function ServiceInventory() {
             }}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
+            initialPageSize={INITIAL_PAGE_SIZE}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

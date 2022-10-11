@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
 
@@ -40,13 +40,13 @@ export default ({ getService }: FtrProviderContext) => {
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
     histogramFilter: 'add_change_points_histogram',
-    errorFilter: 'error',
+    errorFilter: 'add_error',
     changePoints: [
       {
         fieldName: 'day_of_week',
         fieldValue: 'Wednesday',
         doc_count: 145,
-        bg_count: 145,
+        bg_count: 142,
         score: 36.31595998561873,
         pValue: 1.6911377077437753e-16,
         normalizedScore: 0.8055203624020835,
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
         fieldName: 'day_of_week',
         fieldValue: 'Thursday',
         doc_count: 157,
-        bg_count: 157,
+        bg_count: 224,
         score: 20.366950718358762,
         pValue: 1.428057484826135e-9,
         normalizedScore: 0.7661649691018979,
@@ -222,9 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
       const errorActions = data.filter((d) => d.type === expected.errorFilter);
       expect(errorActions.length).to.be(1);
 
-      expect(errorActions[0].payload).to.be(
-        'ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [does_not_exist]'
-      );
+      expect(errorActions[0].payload).to.be('Failed to fetch field candidates.');
     });
   });
 };

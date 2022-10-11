@@ -7,7 +7,7 @@
  */
 
 import { buildFilter, FilterStateStore, FILTERS } from '.';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 import { fields as stubFields } from '../stubs';
 
 describe('buildFilter', () => {

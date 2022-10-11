@@ -306,7 +306,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clearFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
     });
@@ -319,7 +319,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
     await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
@@ -328,7 +328,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clearScriptedFieldLanguageFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('scriptedFieldLanguageFilterDropdown');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
     });
@@ -344,8 +344,10 @@ export class SettingsPageObject extends FtrService {
 
   async setScriptedFieldLanguageFilter(language: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
-      return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(
+        'scriptedFieldLanguageFilterDropdown'
+      );
+      return await this.find.byCssSelector('div.euiPopover__panel[data-popover-open]');
     });
     await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
@@ -358,7 +360,7 @@ export class SettingsPageObject extends FtrService {
 
   async filterField(name: string) {
     const input = await this.testSubjects.find('indexPatternFieldFilter');
-    await input.clearValue();
+    await input.clearValueWithKeyboard();
     await input.type(name);
   }
 
@@ -453,12 +455,6 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
-      const exists = await this.hasIndexPattern(indexPatternName);
-
-      if (exists) {
-        await this.clickIndexPatternByName(indexPatternName);
-        return;
-      }
 
       await this.header.waitUntilLoadingHasFinished();
       const flyOut = await this.testSubjects.exists('createAnyway');
@@ -500,8 +496,10 @@ export class SettingsPageObject extends FtrService {
 
     if (!isStandardIndexPattern) {
       const badges = await this.find.allByCssSelector('.euiBadge__text');
-      const text = await badges[0].getVisibleText();
-      expect(text).to.equal('Rollup');
+      const rollupBadge = badges.filter(async (badge) => {
+        return (await badge.getVisibleText()) === 'Rollup';
+      });
+      expect(rollupBadge.length).to.equal(1);
     }
 
     return await this.getIndexPatternIdFromUrl();
@@ -702,6 +700,25 @@ export class SettingsPageObject extends FtrService {
     if (script) {
       await this.setFieldScript(script);
     }
+
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
+  }
+
+  async addCompositeRuntimeField(
+    name: string,
+    script: string,
+    doSaveField = true,
+    subfieldCount = 0
+  ) {
+    await this.clickAddField();
+    await this.setFieldName(name);
+    await this.setFieldTypeComposite();
+    await this.setCompositeScript(script);
+    if (subfieldCount > 0) {
+      await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
+    }
     if (doSaveField) {
       await this.clickSaveField();
     }
@@ -767,10 +784,22 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.setValue('typeField', type);
   }
 
+  async setFieldTypeComposite() {
+    this.log.debug('set type = Composite');
+    await this.testSubjects.setValue('typeField', 'Composite');
+    await this.browser.pressKeys(this.browser.keys.RETURN);
+  }
+
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
     await this.toggleRow('valueRow');
     await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
+  }
+
+  async setCompositeScript(script: string) {
+    this.log.debug('set composite script = ' + script);
+    await this.monacoEditor.waitCodeEditorReady('scriptFieldRow');
     await this.monacoEditor.setCodeEditorValue(script);
   }
 

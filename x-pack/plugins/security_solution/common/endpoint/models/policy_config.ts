@@ -111,6 +111,7 @@ export const policyFactory = (): PolicyConfig => {
         file: true,
         network: true,
         session_data: false,
+        tty_io: false,
       },
       malware: {
         mode: ProtectionModes.prevent,
@@ -153,7 +154,7 @@ export const policyFactoryWithoutPaidFeatures = (
 ): PolicyConfig => {
   const rollbackConfig = {
     rollback: {
-      remediation: {
+      self_healing: {
         enabled: false,
       },
     },

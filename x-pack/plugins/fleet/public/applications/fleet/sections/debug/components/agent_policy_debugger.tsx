@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +52,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   // TODO: Depending on the number of agent policies, this might need to be switched to
   // `useInfinite` query with an infinite scrolling approach in the dropdown options.
-  const { data, status } = useQuery('debug-agent-policies', fetchAgentPolicies);
+  const { data, status } = useQuery(['debug-agent-policies'], fetchAgentPolicies);
 
   const agentPolicies = data?.data?.items ?? [];
   const comboBoxOptions = agentPolicies.map((policy) => ({
@@ -68,7 +68,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   const onDelete = () => {
     setSelectedPolicyId(undefined);
-    queryClient.invalidateQueries('debug-agent-policies');
+    queryClient.invalidateQueries(['debug-agent-policies']);
   };
 
   if (status === 'error') {

@@ -14,8 +14,8 @@ import * as i18n from '../../../translations';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../../common/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
-import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
-import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 
 import type { FormSchema } from '../../../../../../../shared_imports';
 import {
@@ -118,7 +118,7 @@ const IndexPatternsFormComponent = ({
     const payload = {
       value: data.index,
       type: data.overwrite ? BulkActionEditType.set_index_patterns : editAction,
-      overwriteDataViews: data.overwriteDataViews,
+      overwrite_data_views: data.overwriteDataViews,
     };
 
     onConfirm(payload);

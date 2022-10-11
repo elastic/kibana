@@ -7,7 +7,7 @@
 
 import type {
   SecurityActivateUserProfileRequest,
-  SecuritySuggestUserProfilesResponse,
+  SecurityUserProfileWithMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -15,6 +15,7 @@ import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type {
+  SecurityLicense,
   UserProfile,
   UserProfileData,
   UserProfileLabels,
@@ -28,7 +29,7 @@ import { getPrintableSessionId } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
-const ACTIVATION_MAX_RETRIES = 3;
+const ACTIVATION_MAX_RETRIES = 10;
 const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
 const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
@@ -62,12 +63,12 @@ export interface UserProfileServiceStart {
   ): Promise<Array<UserProfile<D>>>;
 
   /**
-   * Retrieves a single user profile by identifier.
+   * Suggests multiple user profiles by search criteria.
    * @param params Suggest operation parameters.
-   * @param params.name Query string used to match name-related fields in user profiles. The following fields are
-   * treated as name-related: username, full_name and email.
-   * @param params.dataPath By default API returns user information, but does not return any user data. The optional
-   * "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace).
+   * @param params.name Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email.
+   * @param params.size Desired number of suggestion to return. The default value is 10.
+   * @param params.dataPath By default, suggest API returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace only).
+   * @param params.requiredPrivileges The set of the privileges that users associated with the suggested user profile should have in the specified space. If not specified, privileges check isn't performed and all matched profiles are returned irrespective to the privileges of the associated users.
    */
   suggest<D extends UserProfileData>(
     params: UserProfileSuggestParams
@@ -91,6 +92,7 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
 
 export interface UserProfileServiceSetupParams {
   authz: AuthorizationServiceSetupInternal;
+  license: SecurityLicense;
 }
 
 export interface UserProfileServiceStartParams {
@@ -179,8 +181,10 @@ function parseUserProfile<D extends UserProfileData>(
 ): UserProfile<D> {
   return {
     uid: rawUserProfile.uid,
-    // @ts-expect-error @elastic/elasticsearch SecurityActivateUserProfileResponse.enabled: boolean
-    enabled: rawUserProfile.enabled,
+    // Get User Profile API returns `enabled` property, but Suggest User Profile API doesn't since it's assumed that the
+    // API returns only enabled profiles. To simplify the API in Kibana we use the same interfaces for user profiles
+    // irrespective to the source they are coming from, so we need to "normalize" `enabled` property here.
+    enabled: rawUserProfile.enabled ?? true,
     data: rawUserProfile.data?.[KIBANA_DATA_ROOT] ?? {},
     user: {
       username: rawUserProfile.user.username,
@@ -188,8 +192,6 @@ function parseUserProfile<D extends UserProfileData>(
       email: rawUserProfile.user.email ?? undefined,
       // @elastic/elasticsearch types support `null` values for the `full_name`, but we don't.
       full_name: rawUserProfile.user.full_name ?? undefined,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.display_name?: string
-      display_name: rawUserProfile.user.display_name ?? undefined,
     },
   };
 }
@@ -214,10 +216,12 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
 
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
+  private license?: SecurityLicense;
   constructor(private readonly logger: Logger) {}
 
-  setup({ authz }: UserProfileServiceSetupParams) {
+  setup({ authz, license }: UserProfileServiceSetupParams) {
     this.authz = authz;
+    this.license = license;
   }
 
   start({ clusterClient, session }: UserProfileServiceStartParams) {
@@ -315,12 +319,13 @@ export class UserProfileService {
       return null;
     }
 
+    let body;
     try {
-      const body = await clusterClient.asInternalUser.security.getUserProfile({
+      // @ts-expect-error Invalid response format.
+      body = (await clusterClient.asInternalUser.security.getUserProfile({
         uid: userSession.userProfileId,
         data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-      });
-      return parseUserProfileWithSecurity<D>(body[userSession.userProfileId]!);
+      })) as { profiles: SecurityUserProfileWithMetadata[] };
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
@@ -329,6 +334,17 @@ export class UserProfileService {
       );
       throw error;
     }
+
+    if (body.profiles.length === 0) {
+      this.logger.error(
+        `The user profile for the current user [sid=${getPrintableSessionId(
+          userSession.sid
+        )}] is not found.`
+      );
+      throw new Error(`User profile is not found.`);
+    }
+
+    return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }
 
   /**
@@ -343,41 +359,13 @@ export class UserProfileService {
     }
 
     try {
-      // Use `transport.request` since `.security.suggestUserProfiles` implementation doesn't accept `hint` as a body
-      // parameter yet.
-      const body =
-        await clusterClient.asInternalUser.transport.request<SecuritySuggestUserProfilesResponse>({
-          method: 'POST',
-          path: '_security/profile/_suggest',
-          body: {
-            hint: { uids: [...uids] },
-            // We need at most as many results as requested uids.
-            size: uids.size,
-            data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-          },
-        });
+      // @ts-expect-error Invalid response format.
+      const body = (await clusterClient.asInternalUser.security.getUserProfile({
+        uid: [...uids].join(','),
+        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+      })) as { profiles: SecurityUserProfileWithMetadata[] };
 
-      // Using `_suggest` API to simulate `_bulk_get` API has two important shortcomings:
-      // 1. "uids" parameter is just a hint that asks Elasticsearch to put user profiles with the requested uids on the
-      // top of the returned list, but if Elasticsearch cannot find user profiles for all requested uids it might
-      // include other "matched" user profiles as well. We should filter those non-requested profiles out.
-      // 2. The `_suggest` API is supposed to sort results by relevance i.e. first by the search score (if `name`
-      // parameter is specified which isn't the case here) and then by the activation time. The `_bulk_get` API, on the
-      // contrary, should always return results in the order the consumer specified UIDs in (in our case, the insertion
-      // order for the `Set` we use as the UIDs parameter). That's why we're manually sorting profiles here.
-      const rawUserProfiles = new Map(
-        body.profiles.map((rawUserProfile) => [rawUserProfile.uid, rawUserProfile])
-      );
-
-      const parsedUserProfiles = [];
-      for (const uid of uids) {
-        const rawUserProfile = rawUserProfiles.get(uid);
-        if (rawUserProfile) {
-          parsedUserProfiles.push(parseUserProfile<D>(rawUserProfile));
-        }
-      }
-
-      return parsedUserProfiles;
+      return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
       throw error;
@@ -412,6 +400,10 @@ export class UserProfileService {
     clusterClient: IClusterClient,
     params: UserProfileSuggestParams
   ): Promise<Array<UserProfile<D>>> {
+    if (!this.license?.getFeatures().allowUserProfileCollaboration) {
+      throw Error("Current license doesn't support user profile collaboration APIs.");
+    }
+
     const { name, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
     if (size > MAX_SUGGESTIONS_COUNT) {
       throw Error(
@@ -493,7 +485,7 @@ export class UserProfileService {
         // but still iterate through entire batch to collect and report all unknown uids.
         if (filteredProfile && filteredProfiles.length < requiredSize) {
           filteredProfiles.push(filteredProfile);
-        } else {
+        } else if (!filteredProfile) {
           unknownUids.push(profileUid);
         }
       }

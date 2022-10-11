@@ -10,10 +10,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 
-export type StartServices = CoreStart &
-  ObservabilityPublicPluginsStart & {
+export type StartServices<AdditionalServices extends object = {}> = CoreStart &
+  ObservabilityPublicPluginsStart &
+  AdditionalServices & {
     storage: Storage;
   };
-const useTypedKibana = () => useKibana<StartServices>();
+const useTypedKibana = <AdditionalServices extends object = {}>() =>
+  useKibana<StartServices<AdditionalServices>>();
 
 export { useTypedKibana as useKibana };

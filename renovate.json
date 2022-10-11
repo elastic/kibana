@@ -27,7 +27,7 @@
       "matchPackageNames": ["@elastic/charts"],
       "reviewers": ["team:datavis", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "auto-backport", "Team:DataVis"],
+      "labels": ["release_note:skip", "backport:skip", "Team:DataVis"],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,
@@ -125,7 +125,7 @@
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Security", "release_note:skip", "auto-backport"],
+      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
       "enabled": true
     },
     {
@@ -168,7 +168,7 @@
     },
     {
       "groupName": "react-query",
-      "packageNames": ["react-query"],
+      "packageNames": ["@tanstack/react-query", "@tanstack/react-query-devtools"],
       "reviewers": [
         "team:response-ops",
         "team:kibana-cloud-security-posture",
@@ -180,6 +180,51 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "react-hook-form",
+      "packageNames": ["react-hook-form"],
+      "reviewers": [
+        "team:security-asset-management",
+        "team:uptime"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "enabled": true
+    },
+    {
+      "groupName": "redux",
+      "packageNames": ["redux", "react-redux"],
+      "reviewers":[
+        "team:enterprise-search-frontend",
+        "team:kibana-presentation",
+        "team:kibana-data-discovery",
+        "team:platform-deployment-management",
+        "team:infra-monitoring-ui",
+        "team:kibana-gis",
+        "team:security-solution"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "enabled": true
+    },
+    {
+      "groupName": "Profiling",
+      "matchPackageNames": ["peggy", "@types/dagre"],
+      "reviewers": ["team:profiling-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "TTY Output",
+      "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
+      "reviewers": ["team:awp-viz"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }

@@ -17,7 +17,6 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type {
-  ThreatMapping,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -26,8 +25,11 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import type { Rule } from '../../../../containers/detection_engine/rules';
+import {
+  transformAlertToRuleAction,
+  transformAlertToRuleResponseAction,
+} from '../../../../../../common/detection_engine/transform_actions';
+
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -39,20 +41,14 @@ import type {
   ActionsStepRuleJson,
   RuleStepsFormData,
   RuleStep,
-  AdvancedPreviewOptions,
 } from '../types';
 import { DataSourceType } from '../types';
-import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
 import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
-import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
-import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
-import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
-import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
-export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
-  const timeObj = {
-    unit: '',
+export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
+  const timeObj: { unit: Unit; value: number } = {
+    unit: 'ms',
     value: 0,
   };
   const filterTimeVal = time.match(/\d+/g);
@@ -65,7 +61,7 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     filterTimeType != null &&
     ['s', 'm', 'h'].includes(filterTimeType[0])
   ) {
-    timeObj.unit = filterTimeType[0];
+    timeObj.unit = filterTimeType[0] as Unit;
   }
   return timeObj;
 };
@@ -443,9 +439,17 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-        ...(ruleType === 'query' &&
-          ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
+        saved_id: undefined,
+        type: 'query' as Type,
+        // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
+        ...(['query', 'saved_query'].includes(ruleType) &&
+          ruleFields.queryBar?.saved_id &&
+          ruleFields.shouldLoadQueryDynamically && {
+            type: 'saved_query' as Type,
+            query: undefined,
+            filters: undefined,
+            saved_id: ruleFields.queryBar.saved_id,
+          }),
       };
   return {
     ...baseFields,
@@ -461,8 +465,8 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
       formatScheduleData.interval
     );
     const { unit: fromUnit, value: fromValue } = getTimeTypeValue(formatScheduleData.from);
-    const duration = moment.duration(intervalValue, intervalUnit as 's' | 'm' | 'h');
-    duration.add(fromValue, fromUnit as 's' | 'm' | 'h');
+    const duration = moment.duration(intervalValue, intervalUnit);
+    duration.add(fromValue, fromUnit);
     formatScheduleData.from = `now-${duration.asSeconds()}s`;
     formatScheduleData.to = 'now';
   }
@@ -545,6 +549,7 @@ export const formatAboutStepData = (
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const {
     actions = [],
+    responseActions,
     enabled,
     kibanaSiemAppUrl,
     throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -552,6 +557,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
 
   return {
     actions: actions.map(transformAlertToRuleAction),
+    response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
@@ -568,86 +574,38 @@ export const formatRule = <T>(
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
-  rule?: Rule | null
+  exceptionsList?: List[]
 ): T =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
-    formatAboutStepData(aboutStepData, rule?.exceptions_list),
+    formatAboutStepData(aboutStepData, exceptionsList),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]) as unknown as T;
 
 export const formatPreviewRule = ({
-  index,
-  dataViewId,
-  query,
-  threatIndex,
-  threatQuery,
-  ruleType,
-  threatMapping,
-  timeFrame,
-  threshold,
-  machineLearningJobId,
-  anomalyThreshold,
-  eqlOptions,
-  newTermsFields,
-  historyWindowSize,
-  advancedOptions,
+  defineRuleData,
+  aboutRuleData,
+  scheduleRuleData,
+  exceptionsList,
 }: {
-  index: string[];
-  dataViewId?: string;
-  threatIndex: string[];
-  query: FieldValueQueryBar;
-  threatQuery: FieldValueQueryBar;
-  ruleType: Type;
-  threatMapping: ThreatMapping;
-  timeFrame: Unit;
-  threshold: FieldValueThreshold;
-  machineLearningJobId: string[];
-  anomalyThreshold: number;
-  eqlOptions: EqlOptionsSelected;
-  newTermsFields: string[];
-  historyWindowSize: string;
-  advancedOptions?: AdvancedPreviewOptions;
+  defineRuleData: DefineStepRule;
+  aboutRuleData: AboutStepRule;
+  scheduleRuleData: ScheduleStepRule;
+  exceptionsList?: List[];
 }): CreateRulesSchema => {
-  const defineStepData = {
-    ...stepDefineDefaultValue,
-    index,
-    dataViewId,
-    queryBar: query,
-    ruleType,
-    threatIndex,
-    threatQueryBar: threatQuery,
-    threatMapping,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
-    eqlOptions,
-    newTermsFields,
-    historyWindowSize,
-  };
   const aboutStepData = {
-    ...stepAboutDefaultValue,
+    ...aboutRuleData,
     name: 'Preview Rule',
     description: 'Preview Rule',
   };
-  let scheduleStepData = {
-    from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
-    interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
-  };
-  if (advancedOptions) {
-    scheduleStepData = {
-      interval: advancedOptions.interval,
-      from: advancedOptions.lookback,
-    };
-  }
   return {
     ...formatRule<CreateRulesSchema>(
-      defineStepData,
+      defineRuleData,
       aboutStepData,
-      scheduleStepData,
-      stepActionsDefaultValue
+      scheduleRuleData,
+      stepActionsDefaultValue,
+      exceptionsList
     ),
-    ...(!advancedOptions ? scheduleStepData : {}),
   };
 };

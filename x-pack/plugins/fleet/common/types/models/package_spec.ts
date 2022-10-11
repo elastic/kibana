@@ -15,7 +15,10 @@ export interface PackageSpecManifest {
   description: string;
   version: string;
   license?: 'basic';
-  type?: 'integration';
+  source?: {
+    license: string;
+  };
+  type?: 'integration' | 'input';
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
@@ -25,6 +28,8 @@ export interface PackageSpecManifest {
   vars?: RegistryVarsEntry[];
   owner: { github: string };
 }
+
+export type PackageSpecPackageType = 'integration' | 'input';
 
 export type PackageSpecCategory =
   | 'aws'
@@ -37,6 +42,7 @@ export type PackageSpecCategory =
   | 'datastore'
   | 'elastic_stack'
   | 'google_cloud'
+  | 'infrastructure'
   | 'kubernetes'
   | 'languages'
   | 'message_queue'
@@ -52,12 +58,14 @@ export type PackageSpecCategory =
   | 'version_control'
   | 'web';
 
-export type PackageSpecConditions = Record<
-  'kibana',
-  {
+export interface PackageSpecConditions {
+  kibana: {
     version: string;
-  }
->;
+  };
+  elastic?: {
+    subscription: string;
+  };
+}
 
 export interface PackageSpecIcon {
   src: string;

@@ -7,8 +7,11 @@
 
 export {
   addChangePointsAction,
+  addChangePointsGroupAction,
+  addChangePointsGroupHistogramAction,
   addChangePointsHistogramAction,
-  errorAction,
+  addErrorAction,
+  pingAction,
   resetAction,
   updateLoadingStateAction,
   API_ACTION_NAME,

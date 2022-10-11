@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
   EuiSwitch,

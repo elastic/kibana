@@ -25,8 +25,9 @@ import {
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { mountReactNode } from '@kbn/core/public/utils';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 
+import { InputsModelId } from '../../../../../../common/store/inputs/constants';
 import { RuleDetailTabs } from '..';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
 import type {
@@ -148,7 +149,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     if (isAbsoluteTimeRange(cachedGlobalQueryState.current.timerange)) {
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: cachedGlobalQueryState.current.timerange.from,
           to: cachedGlobalQueryState.current.timerange.to,
         })
@@ -156,7 +157,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     } else if (isRelativeTimeRange(cachedGlobalQueryState.current.timerange)) {
       dispatch(
         setRelativeRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: cachedGlobalQueryState.current.timerange.from,
           fromStr: cachedGlobalQueryState.current.timerange.fromStr,
           to: cachedGlobalQueryState.current.timerange.to,
@@ -167,7 +168,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
     dispatch(
       setFilterQuery({
-        id: 'global',
+        id: InputsModelId.global,
         query: cachedGlobalQueryState.current.query.query,
         language: cachedGlobalQueryState.current.query.language,
       })
@@ -281,14 +282,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         );
         dispatch(
           setAbsoluteRangeDatePicker({
-            id: 'global',
+            id: InputsModelId.global,
             from: moment(executionStart).subtract(1, 'days').toISOString(),
             to: moment(executionStart).add(1, 'days').toISOString(),
           })
         );
         filterManager.removeAll();
         filterManager.addFilters(filter);
-        dispatch(setFilterQuery({ id: 'global', query: '', language: 'kuery' }));
+        dispatch(setFilterQuery({ id: InputsModelId.global, query: '', language: 'kuery' }));
         selectAlertsTab();
         successToastId.current = addSuccess(
           {

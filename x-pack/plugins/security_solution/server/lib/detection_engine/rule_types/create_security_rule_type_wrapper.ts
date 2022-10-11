@@ -13,6 +13,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -36,6 +37,8 @@ import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from '../signals/get_input_output_index';
+import { TIMESTAMP_RUNTIME_FIELD } from './constants';
+import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -137,6 +140,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ? TIMESTAMP
               : undefined;
 
+          // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
+          // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
+          // runtime field, so we just use @timestamp directly.
+          const { aggregatableTimestampField, timestampRuntimeMappings } =
+            secondaryTimestamp && timestampOverride
+              ? {
+                  aggregatableTimestampField: TIMESTAMP_RUNTIME_FIELD,
+                  timestampRuntimeMappings: buildTimestampRuntimeMapping({
+                    timestampOverride,
+                  }),
+                }
+              : {
+                  aggregatableTimestampField: primaryTimestamp,
+                  timestampRuntimeMappings: undefined,
+                };
+
           /**
            * Data Views Logic
            * Use of data views is supported for all rules other than ML.
@@ -176,6 +195,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
+          let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
@@ -196,17 +216,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                         : [primaryTimestamp],
                       include_unmapped: true,
                       runtime_mappings: runtimeMappings,
+                      ignore_unavailable: true,
                     },
                     { meta: true }
                   )
                 );
 
-                wroteWarningStatus = await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices: inputIndex,
-                  ruleExecutionLogger,
-                });
+                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
+                  await hasTimestampFields({
+                    timestampField: primaryTimestamp,
+                    timestampFieldCapsResponse: timestampFieldCaps,
+                    inputIndices: inputIndex,
+                    ruleExecutionLogger,
+                  });
+                wroteWarningStatus = wroteWarningStatusResult;
+                skipExecution = foundNoIndices;
               }
             }
           } catch (exc) {
@@ -277,45 +301,74 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               indicesToQuery: inputIndex,
             });
 
-            for (const tuple of tuples) {
-              const runResult = await type.executor({
-                ...options,
-                services,
-                state: runState,
-                runOpts: {
-                  completeRule,
-                  inputIndex,
-                  exceptionItems,
-                  runtimeMappings,
-                  searchAfterSize,
-                  tuple,
-                  bulkCreate,
-                  wrapHits,
-                  wrapSequences,
-                  listClient,
-                  ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
-                  mergeStrategy,
-                  primaryTimestamp,
-                  secondaryTimestamp,
-                  ruleExecutionLogger,
-                },
-              });
+            const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
+              alias: null,
+              excludeExceptions: true,
+              chunkSize: 10,
+              lists: exceptionItems,
+              listClient,
+            });
 
-              const createdSignals = result.createdSignals.concat(runResult.createdSignals);
-              const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+            if (!skipExecution) {
+              for (const tuple of tuples) {
+                const runResult = await type.executor({
+                  ...options,
+                  services,
+                  state: runState,
+                  runOpts: {
+                    completeRule,
+                    inputIndex,
+                    exceptionFilter,
+                    unprocessedExceptions,
+                    runtimeMappings: {
+                      ...runtimeMappings,
+                      ...timestampRuntimeMappings,
+                    },
+                    searchAfterSize,
+                    tuple,
+                    bulkCreate,
+                    wrapHits,
+                    wrapSequences,
+                    listClient,
+                    ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                    mergeStrategy,
+                    primaryTimestamp,
+                    secondaryTimestamp,
+                    ruleExecutionLogger,
+                    aggregatableTimestampField,
+                  },
+                });
+
+                const createdSignals = result.createdSignals.concat(runResult.createdSignals);
+                const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+                result = {
+                  bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+                  enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
+                  createdSignals,
+                  createdSignalsCount: createdSignals.length,
+                  errors: result.errors.concat(runResult.errors),
+                  lastLookbackDate: runResult.lastLookBackDate,
+                  searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
+                  state: runResult.state,
+                  success: result.success && runResult.success,
+                  warning: warningMessages.length > 0,
+                  warningMessages,
+                };
+                runState = runResult.state;
+              }
+            } else {
               result = {
-                bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
-                createdSignals,
-                createdSignalsCount: createdSignals.length,
-                errors: result.errors.concat(runResult.errors),
-                lastLookbackDate: runResult.lastLookBackDate,
-                searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
-                state: runResult.state,
-                success: result.success && runResult.success,
-                warning: warningMessages.length > 0,
-                warningMessages,
+                bulkCreateTimes: [],
+                enrichmentTimes: [],
+                createdSignals: [],
+                createdSignalsCount: 0,
+                errors: [],
+                searchAfterTimes: [],
+                state,
+                success: true,
+                warning: false,
+                warningMessages: [],
               };
-              runState = runResult.state;
             }
 
             if (result.warningMessages.length) {
@@ -383,6 +436,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
                   },
                 });
               }
@@ -401,6 +455,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
                 },
               });
             }
@@ -413,6 +468,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
+                enrichmentDurations: result.enrichmentTimes,
               },
             });
 

@@ -12,6 +12,7 @@ import { useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
+import { ESINDEX_QUERY_PARAMETER } from '../../../shared/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
@@ -25,14 +26,18 @@ import { SelectEngineType } from './select_engine_type';
 
 export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;
-  const { method } = parseQueryParams(search);
+  const { method, ...params } = parseQueryParams(search);
 
   const { engineType, currentEngineCreationStep } = useValues(EngineCreationLogic);
-  const { setIngestionMethod } = useActions(EngineCreationLogic);
+  const { setIngestionMethod, initializeWithESIndex } = useActions(EngineCreationLogic);
 
   useEffect(() => {
     if (typeof method === 'string') {
       setIngestionMethod(method);
+    }
+    const esIndexParam = params[ESINDEX_QUERY_PARAMETER];
+    if (typeof esIndexParam === 'string') {
+      initializeWithESIndex(esIndexParam);
     }
   }, []);
 

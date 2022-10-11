@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -27,6 +28,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
@@ -372,14 +374,14 @@ describe('filters', () => {
         );
         expect(
           instance
-            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
             .at(0)
             .text()
         ).toEqual('More than one');
         expect(
           instance
-            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(3)
+            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .at(1)
             .text()
         ).toEqual('src : 2');
       });
@@ -397,8 +399,8 @@ describe('filters', () => {
         );
 
         instance
-          .find('[data-test-subj="lns-customBucketContainer-remove"]')
-          .at(2)
+          .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
+          .at(0)
           .simulate('click');
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,

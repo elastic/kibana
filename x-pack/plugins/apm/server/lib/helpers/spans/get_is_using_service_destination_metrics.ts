@@ -11,6 +11,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRICSET_NAME,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
@@ -18,7 +19,6 @@ import {
   SPAN_DURATION,
   SPAN_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../setup_request';
 
 export function getProcessorEventForServiceDestinationStatistics(
@@ -78,6 +78,7 @@ export async function getIsUsingServiceDestinationMetrics({
           events: [getProcessorEventForServiceDestinationStatistics(true)],
         },
         body: {
+          track_total_hits: 1,
           size: 1,
           terminate_after: 1,
           query: {

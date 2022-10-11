@@ -24,6 +24,7 @@ import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { TIME_SLIDER_CONTROL } from '../../../common';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -49,8 +50,9 @@ export const ControlFrame = ({
   const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   // Controls Services Context
-  const { overlays } = pluginServices.getHooks();
-  const { openConfirm } = overlays.useService();
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
 
   const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
 
@@ -86,7 +88,7 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
-      {!hasFatalError && (
+      {!hasFatalError && embeddableType !== TIME_SLIDER_CONTROL && (
         <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
           <EditControlButton embeddableId={embeddableId} />
         </EuiToolTip>
@@ -120,6 +122,20 @@ export const ControlFrame = ({
     'controlFrame--fatalError': hasFatalError,
   });
 
+  function renderEmbeddablePrepend() {
+    if (typeof embeddable?.renderPrepend === 'function') {
+      return embeddable.renderPrepend();
+    }
+
+    return usingTwoLineLayout ? undefined : (
+      <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+        <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+          {title}
+        </EuiFormLabel>
+      </EuiToolTip>
+    );
+  }
+
   const form = (
     <EuiFormControlLayout
       className={classNames('controlFrame__formControlLayout', {
@@ -129,13 +145,7 @@ export const ControlFrame = ({
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}
-          {usingTwoLineLayout ? undefined : (
-            <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-              <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-                {title}
-              </EuiFormLabel>
-            </EuiToolTip>
-          )}
+          {renderEmbeddablePrepend()}
         </>
       }
     >

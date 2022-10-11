@@ -47,7 +47,7 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 
 [IMPORTANT]
 ============================================================================
-API keys are intended for programatic access to {kib} and {es). Do not use API keys to authenticate access via a web browser.
+API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
 ============================================================================
 
 [float]

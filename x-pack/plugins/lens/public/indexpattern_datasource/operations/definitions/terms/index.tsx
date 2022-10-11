@@ -19,6 +19,8 @@ import {
   EuiButtonGroup,
   EuiText,
   useEuiTheme,
+  EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -40,7 +42,7 @@ import {
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../types';
+import type { IndexPatternField } from '../../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
@@ -109,7 +111,11 @@ function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) 
 
 const idPrefix = htmlIdGenerator()();
 
-export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
+export const termsOperation: OperationDefinition<
+  TermsIndexPatternColumn,
+  'field',
+  TermsIndexPatternColumn['params']
+> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top values',
@@ -202,7 +208,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ layer, field, indexPattern }) {
+  buildColumn({ layer, field, indexPattern }, columnParams) {
     const existingMetricColumn = Object.entries(layer.columns)
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
@@ -219,17 +225,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
-        orderBy: existingMetricColumn
-          ? {
-              type: 'column',
-              columnId: existingMetricColumn,
-            }
-          : { type: 'alphabetical', fallback: true },
-        orderDirection: existingMetricColumn ? 'desc' : 'asc',
-        otherBucket: !indexPattern.hasRestrictions,
-        missingBucket: false,
-        parentFormat: { id: 'terms' },
+        size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
+        orderBy:
+          columnParams?.orderBy ??
+          (existingMetricColumn
+            ? {
+                type: 'column',
+                columnId: existingMetricColumn,
+              }
+            : { type: 'alphabetical', fallback: true }),
+        orderAgg: columnParams?.orderBy.type === 'custom' ? columnParams?.orderAgg : undefined,
+        orderDirection: columnParams?.orderDirection ?? (existingMetricColumn ? 'desc' : 'asc'),
+        otherBucket: (columnParams?.otherBucket ?? true) && !indexPattern.hasRestrictions,
+        missingBucket: columnParams?.missingBucket ?? false,
+        parentFormat: columnParams?.parentFormat ?? { id: 'terms' },
+        include: columnParams?.include ?? [],
+        exclude: columnParams?.exclude ?? [],
+        includeIsRegex: columnParams?.includeIsRegex ?? false,
+        excludeIsRegex: columnParams?.excludeIsRegex ?? false,
+        secondaryFields: columnParams?.secondaryFields,
       },
     };
   },
@@ -251,7 +265,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
-    let orderBy: string = '_key';
+    let orderBy = '_key';
 
     if (column.params?.orderBy.type === 'column') {
       const orderColumn = layer.columns[column.params.orderBy.columnId];
@@ -543,6 +557,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       </EuiFormRow>
     );
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.terms.documentation.quick', {
+    defaultMessage: `
+The top values of a specified field ranked by the chosen metric.
+      `,
+  }),
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,
@@ -916,44 +935,33 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         </EuiFormRow>
         {!hasRestrictions && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiAccordion
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
               buttonContent={
-                <EuiText size="s" color={euiTheme.colors.primary}>
-                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                    defaultMessage: 'Advanced',
-                  })}
-                </EuiText>
+                <EuiTitle size="xxs">
+                  <h5>
+                    <EuiTextColor color={euiTheme.colors.primary}>
+                      {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                        defaultMessage: 'Advanced',
+                      })}
+                    </EuiTextColor>
+                  </h5>
+                </EuiTitle>
               }
               data-test-subj="indexPattern-terms-advanced"
+              className="lnsIndexPatternDimensionEditor-advancedOptions"
             >
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                  defaultMessage: 'Group other values as "Other"',
-                })}
-                compressed
-                data-test-subj="indexPattern-terms-other-bucket"
-                checked={Boolean(currentColumn.params.otherBucket)}
-                disabled={currentColumn.params.orderBy.type === 'rare'}
-                onChange={(e: EuiSwitchEvent) =>
-                  paramEditorUpdater(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'otherBucket',
-                      value: e.target.checked,
-                    })
-                  )
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
+                      defaultMessage: 'Include documents without the selected field',
+                    })}
+                  </EuiText>
                 }
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
-                  defaultMessage: 'Include documents without this field',
-                })}
                 compressed
                 disabled={
                   !currentColumn.params.otherBucket ||
@@ -973,10 +981,34 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 label={
-                  <>
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                      defaultMessage: 'Group remaining values as "Other"',
+                    })}
+                  </EuiText>
+                }
+                compressed
+                data-test-subj="indexPattern-terms-other-bucket"
+                checked={Boolean(currentColumn.params.otherBucket)}
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                onChange={(e: EuiSwitchEvent) =>
+                  paramEditorUpdater(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'otherBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
                     {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
                       defaultMessage: 'Enable accuracy mode',
                     })}{' '}
@@ -992,7 +1024,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       size="s"
                       type="questionInCircle"
                     />
-                  </>
+                  </EuiText>
                 }
                 compressed
                 disabled={currentColumn.params.orderBy.type === 'rare'}

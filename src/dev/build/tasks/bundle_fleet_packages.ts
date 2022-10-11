@@ -7,15 +7,22 @@
  */
 
 import JSON5 from 'json5';
+import fs from 'fs/promises';
+import { safeLoad, safeDump } from 'js-yaml';
 
 import { readCliArgs } from '../args';
-import { Task, read, downloadToDisk } from '../lib';
+import { Task, read, downloadToDisk, unzipBuffer, createZipFile } from '../lib';
 
 const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
+
+// APM needs to directly request its versions from Package Storage v2 - this should
+// be removed when Package Storage v2 is in production
+const PACKAGE_STORAGE_V2_URL = 'https://epr-v2.ea-web.elastic.dev';
 
 interface FleetPackage {
   name: string;
   version: string;
+  forceAlignStackVersion?: boolean;
 }
 
 export const BundleFleetPackages: Task = {
@@ -25,8 +32,7 @@ export const BundleFleetPackages: Task = {
     log.info('Fetching fleet packages from package registry');
     log.indent(4);
 
-    // Support the `--use-snapshot-epr` command line argument to fetch from the snapshot registry
-    // in development or test environments
+    // Support the `--epr-registry` command line argument to fetch from the snapshot or production registry
     const { buildOptions } = readCliArgs(process.argv);
     const eprUrl =
       buildOptions?.eprRegistry === 'snapshot'
@@ -40,14 +46,34 @@ export const BundleFleetPackages: Task = {
 
     log.debug(
       `Found configured bundled packages: ${parsedFleetPackages
-        .map((fleetPackage) => `${fleetPackage.name}-${fleetPackage.version}`)
+        .map((fleetPackage) => `${fleetPackage.name}-${fleetPackage.version || 'latest'}`)
         .join(', ')}`
     );
 
     await Promise.all(
       parsedFleetPackages.map(async (fleetPackage) => {
-        const archivePath = `${fleetPackage.name}-${fleetPackage.version}.zip`;
-        const archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+        const stackVersion = config.getBuildVersion();
+
+        let versionToWrite = fleetPackage.version;
+
+        // If `forceAlignStackVersion` is set, we will rewrite the version specified in the config
+        // to the version of the stack when writing the bundled package to disk. This allows us
+        // to support some unique package development workflows, e.g. APM.
+        if (fleetPackage.forceAlignStackVersion) {
+          versionToWrite = stackVersion;
+
+          log.debug(
+            `Bundling ${fleetPackage.name}-${fleetPackage.version} as ${fleetPackage.name}-${stackVersion} to align with stack version`
+          );
+        }
+
+        const archivePath = `${fleetPackage.name}-${versionToWrite}.zip`;
+        let archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+
+        // Point APM to package storage v2
+        if (fleetPackage.name === 'apm') {
+          archiveUrl = `${PACKAGE_STORAGE_V2_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+        }
 
         const destination = build.resolvePath(BUNDLED_PACKAGES_DIR, archivePath);
 
@@ -61,9 +87,42 @@ export const BundleFleetPackages: Task = {
             skipChecksumCheck: true,
             maxAttempts: 3,
           });
+
+          // If we're force aligning the version, we need to
+          // 1. Unzip the downloaded archive
+          // 2. Edit the `manifest.yml` file to include the updated `version` value
+          // 3. Re-zip the archive and replace it on disk
+          if (fleetPackage.forceAlignStackVersion) {
+            const buffer = await fs.readFile(destination);
+            const zipEntries = await unzipBuffer(buffer);
+
+            const manifestPath = `${fleetPackage.name}-${fleetPackage.version}/manifest.yml`;
+            const manifestEntry = zipEntries.find((entry) => entry.path === manifestPath);
+
+            if (!manifestEntry || !manifestEntry.buffer) {
+              log.debug(
+                `Unable to find manifest.yml for stack aligned package ${fleetPackage.name}`
+              );
+
+              return;
+            }
+
+            const manifestYml = await safeLoad(manifestEntry.buffer.toString('utf8'));
+            manifestYml.version = stackVersion;
+
+            const newManifestYml = safeDump(manifestYml);
+            manifestEntry.buffer = Buffer.from(newManifestYml, 'utf8');
+
+            // Update all paths to use the new version
+            zipEntries.forEach(
+              (entry) => (entry.path = entry.path.replace(fleetPackage.version, versionToWrite!))
+            );
+
+            await createZipFile(zipEntries, destination);
+          }
         } catch (error) {
-          log.warning(`Failed to download bundled package archive ${archivePath}`);
-          log.warning(error);
+          log.error(`Failed to download bundled package archive ${archivePath}`);
+          throw error;
         }
       })
     );

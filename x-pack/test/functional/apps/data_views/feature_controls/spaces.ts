@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   describe('spaces', () => {
     before(async () => {
@@ -25,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
 
         await spacesService.create({
           id: 'custom_space',
@@ -36,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('shows Management navlink', async () => {
@@ -58,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -68,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it(`redirects to management home`, async () => {

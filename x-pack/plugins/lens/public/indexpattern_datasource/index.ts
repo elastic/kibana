@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -17,7 +18,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart, FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { EditorFrameSetup } from '../types';
 
-export type { PersistedIndexPatternLayer, IndexPattern, FormulaPublicApi } from './types';
+export type { PersistedIndexPatternLayer, FormulaPublicApi } from './types';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
@@ -30,6 +31,7 @@ export interface IndexPatternDatasourceSetupPlugins {
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  discover?: DiscoverStart;
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
@@ -62,7 +64,7 @@ export class IndexPatternDatasource {
 
       const [
         coreStart,
-        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch },
+        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch, discover },
       ] = await core.getStartServices();
 
       return getIndexPatternDatasource({
@@ -71,6 +73,7 @@ export class IndexPatternDatasource {
         storage: new Storage(localStorage),
         data,
         unifiedSearch,
+        discover,
         dataViews,
         charts,
         dataViewFieldEditor,

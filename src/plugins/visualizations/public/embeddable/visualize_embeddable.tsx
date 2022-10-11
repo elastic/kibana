@@ -18,12 +18,14 @@ import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { Warnings } from '@kbn/charts-plugin/public';
 import {
   Adapters,
   AttributeService,
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  FilterableEmbeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
@@ -37,6 +39,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -74,6 +77,7 @@ export interface VisualizeInput extends EmbeddableInput {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
+  timeslice?: [number, number];
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -94,7 +98,9 @@ export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeIn
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+  implements
+    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
+    FilterableEmbeddable
 {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -110,6 +116,7 @@ export class VisualizeEmbeddable
   private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
+  private warningDomNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
@@ -188,6 +195,36 @@ export class VisualizeEmbeddable
     return this.vis.description;
   }
 
+  public getVis() {
+    return this.vis;
+  }
+
+  /**
+   * Gets the Visualize embeddable's local filters
+   * @returns Local/panel-level array of filters for Visualize embeddable
+   */
+  public async getFilters() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+    // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
+    return mapAndFlattenFilters(_.cloneDeep(filters));
+  }
+
+  /**
+   * Gets the Visualize embeddable's local query
+   * @returns Local/panel-level query for Visualize embeddable
+   */
+  public async getQuery() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    return input.savedVis?.data.searchSource?.query;
+  }
+
   public getInspectorAdapters = () => {
     if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {
       return undefined;
@@ -245,8 +282,16 @@ export class VisualizeEmbeddable
     let dirty = false;
 
     // Check if timerange has changed
-    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
-      this.timeRange = _.cloneDeep(this.input.timeRange);
+    const nextTimeRange =
+      this.input.timeslice !== undefined
+        ? {
+            from: new Date(this.input.timeslice[0]).toISOString(),
+            to: new Date(this.input.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : this.input.timeRange;
+    if (!_.isEqual(nextTimeRange, this.timeRange)) {
+      this.timeRange = _.cloneDeep(nextTimeRange);
       dirty = true;
     }
 
@@ -289,6 +334,31 @@ export class VisualizeEmbeddable
     return dirty;
   }
 
+  private handleWarnings() {
+    const warnings: React.ReactNode[] = [];
+    if (this.getInspectorAdapters()?.requests) {
+      this.deps
+        .start()
+        .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
+          if (
+            warning.type === 'shard_failure' &&
+            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
+          ) {
+            warnings.push(warning.reason.reason || warning.message);
+            return true;
+          }
+          if (this.vis.type.suppressWarnings?.()) {
+            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
+            return true;
+          }
+        });
+    }
+
+    if (this.warningDomNode) {
+      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+    }
+  }
+
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
   hasInspector = () => Boolean(this.getInspectorAdapters());
@@ -304,6 +374,7 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
+    this.handleWarnings();
     this.updateOutput({
       ...this.getOutput(),
       loading: false,
@@ -342,6 +413,11 @@ export class VisualizeEmbeddable
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
+
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'visPanel__warnings';
+    domNode.appendChild(warningDiv);
+    this.warningDomNode = warningDiv;
 
     this.domNode = div;
     super.render(this.domNode);
@@ -489,9 +565,11 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+        disableShardWarnings: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),
+        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,

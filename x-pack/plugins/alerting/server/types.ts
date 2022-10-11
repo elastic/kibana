@@ -19,7 +19,6 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -44,6 +43,7 @@ import {
   MappedParams,
   RuleSnooze,
 } from '../common';
+import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -68,20 +68,16 @@ export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
  * @internal
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
-
 export interface RuleExecutorServices<
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
-  alertFactory: {
-    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
-    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
-  };
+  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
 }

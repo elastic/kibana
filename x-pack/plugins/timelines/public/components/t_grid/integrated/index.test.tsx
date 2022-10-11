@@ -41,9 +41,6 @@ jest.mock('../helpers', () => {
         filter: [],
       },
     }),
-    buildCombinedQuery: () => ({
-      filterQuery: '{"bool":{"must":[],"filter":[]}}',
-    }),
   };
 });
 const defaultProps: TGridIntegratedProps = tGridIntegratedProps;

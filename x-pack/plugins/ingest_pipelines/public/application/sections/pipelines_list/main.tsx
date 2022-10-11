@@ -14,7 +14,7 @@ import { parse } from 'query-string';
 import {
   EuiPageHeader,
   EuiButtonEmpty,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
   EuiButton,
   EuiSpacer,

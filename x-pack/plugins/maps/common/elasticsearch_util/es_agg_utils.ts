@@ -18,8 +18,8 @@ export function getField(indexPattern: DataView, fieldName: string): DataViewFie
   if (!field) {
     throw new Error(
       i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
-        values: { fieldName, indexPatternTitle: indexPattern.title },
+        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternName}'.`,
+        values: { fieldName, indexPatternName: indexPattern.getName() },
       })
     );
   }

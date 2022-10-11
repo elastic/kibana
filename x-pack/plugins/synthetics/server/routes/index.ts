@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createGetMonitorStatusRoute } from './monitor_summary/monitor_status';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
@@ -26,10 +25,15 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { SyntheticsRestApiRouteFactory } from '../legacy_uptime/routes';
+import { syntheticsGetPingsRoute } from './pings';
+import { createGetCurrentStatusRoute } from './status/current_status';
+import {
+  SyntheticsRestApiRouteFactory,
+  SyntheticsStreamingRouteFactory,
+} from '../legacy_uptime/routes';
+import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
-  addSyntheticsProjectMonitorRoute,
   addSyntheticsMonitorRoute,
   getSyntheticsEnablementRoute,
   deleteSyntheticsMonitorRoute,
@@ -45,5 +49,11 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   testNowMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
-  createGetMonitorStatusRoute,
+  syntheticsGetPingsRoute,
+  getHasZipUrlMonitorRoute,
+  createGetCurrentStatusRoute,
+];
+
+export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
+  addSyntheticsProjectMonitorRoute,
 ];

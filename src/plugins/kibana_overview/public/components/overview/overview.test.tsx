@@ -13,16 +13,16 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { AnalyticsNoDataPageKibanaProvider } from '@kbn/shared-ux-page-analytics-no-data';
 import { hasESData, hasUserDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
-jest.mock('@kbn/shared-ux-components', () => {
+jest.mock('@kbn/shared-ux-page-kibana-template', () => {
   const MockedComponent: string = 'MockedKibanaPageTemplate';
   const mockedModule = {
-    ...jest.requireActual('@kbn/shared-ux-components'),
+    ...jest.requireActual('@kbn/shared-ux-page-kibana-template'),
     KibanaPageTemplate: () => {
       return <MockedComponent />;
     },

@@ -24,6 +24,8 @@ describe('streamReducer', () => {
       loaded: 50,
       loadingState: 'Loaded 50%',
       changePoints: [],
+      changePointsGroups: [],
+      errors: [],
     });
   });
 
@@ -36,6 +38,8 @@ describe('streamReducer', () => {
           fieldValue: 'the-field-value',
           doc_count: 10,
           bg_count: 100,
+          total_doc_count: 1000,
+          total_bg_count: 10000,
           score: 0.1,
           pValue: 0.01,
           normalizedScore: 0.123,

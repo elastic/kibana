@@ -71,6 +71,5 @@ export const useSecuritySolutionNavigation = () => {
   return usePrimaryNavigation({
     navTabs: enabledNavTabs,
     pageName,
-    tabName,
   });
 };

@@ -26,20 +26,23 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/types';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { FlyoutProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
-export default function AlertsFlyoutBody(props: FlyoutProps) {
-  const alert = props.alert;
+export default function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
   const { services } = useKibana();
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
   const prepend = http?.basePath.prepend;
-  const ruleId = get(props.alert.fields, ALERT_RULE_UUID) ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.observability.ruleDetails(ruleId)) : null;
+  const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
+  const linkToRule =
+    pageId !== RULE_DETAILS_PAGE_ID && ruleId && prepend
+      ? prepend(paths.observability.ruleDetails(ruleId))
+      : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,

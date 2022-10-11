@@ -470,7 +470,7 @@ export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
 export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
   ${({ $view, theme }) => ($view === 'gridView' ? `margin-right: ${theme.eui.euiSizeXL};` : '')}
   position: absolute;
-  z-index: ${({ theme }) => theme.eui.euiZLevel1};
+  z-index: ${({ theme }) => theme.eui.euiZLevel1 - 3};
   right: 0px;
 `;
 

@@ -5,19 +5,29 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { unitSuffixesLong } from '../../../common/suffix_formatter';
 import type { TimeScaleUnit } from '../../../common/expressions';
-import type { IndexPatternLayer } from '../types';
-import type { GenericIndexPatternColumn } from './definitions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
-function getSuffix(scale: TimeScaleUnit | undefined, shift: string | undefined) {
+function getSuffix(
+  scale: TimeScaleUnit | undefined,
+  shift: string | undefined,
+  reducedTimeRange: string | undefined
+) {
   return (
     (shift || scale ? ' ' : '') +
     (scale ? unitSuffixesLong[scale] : '') +
     (shift && scale ? ' ' : '') +
-    (shift ? `-${shift}` : '')
+    (shift ? `-${shift}` : '') +
+    (reducedTimeRange ? ' ' : '') +
+    (reducedTimeRange
+      ? i18n.translate('xpack.lens.reducedTimeRangeSuffix', {
+          defaultMessage: 'last {reducedTimeRange}',
+          values: { reducedTimeRange },
+        })
+      : '')
   );
 }
 
@@ -26,51 +36,22 @@ export function adjustTimeScaleLabelSuffix(
   previousTimeScale: TimeScaleUnit | undefined,
   newTimeScale: TimeScaleUnit | undefined,
   previousShift: string | undefined,
-  newShift: string | undefined
+  newShift: string | undefined,
+  previousReducedTimeRange: string | undefined,
+  newReducedTimeRange: string | undefined
 ) {
   let cleanedLabel = oldLabel;
   // remove added suffix if column had a time scale previously
-  if (previousTimeScale || previousShift) {
-    const suffix = getSuffix(previousTimeScale, previousShift);
+  if (previousTimeScale || previousShift || previousReducedTimeRange) {
+    const suffix = getSuffix(previousTimeScale, previousShift, previousReducedTimeRange);
     const suffixPosition = oldLabel.lastIndexOf(suffix);
     if (suffixPosition !== -1) {
       cleanedLabel = oldLabel.substring(0, suffixPosition);
     }
   }
-  if (!newTimeScale && !newShift) {
+  if (!newTimeScale && !newShift && !newReducedTimeRange) {
     return cleanedLabel;
   }
   // add new suffix if column has a time scale now
-  return `${cleanedLabel}${getSuffix(newTimeScale, newShift)}`;
-}
-
-export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPatternColumn>(
-  layer: IndexPatternLayer,
-  thisColumnId: string
-): T {
-  const columns = layer.columns;
-  const column = columns[thisColumnId] as T;
-  if (!column.timeScale) {
-    return column;
-  }
-  const hasDateHistogram = Object.values(columns).some(
-    (col) => col?.operationType === 'date_histogram'
-  );
-  if (hasDateHistogram) {
-    return column;
-  }
-  if (column.customLabel) {
-    return column;
-  }
-  return {
-    ...column,
-    timeScale: undefined,
-    label: adjustTimeScaleLabelSuffix(
-      column.label,
-      column.timeScale,
-      undefined,
-      column.timeShift,
-      column.timeShift
-    ),
-  };
+  return `${cleanedLabel}${getSuffix(newTimeScale, newShift, newReducedTimeRange)}`;
 }

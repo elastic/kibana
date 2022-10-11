@@ -76,6 +76,10 @@ export const createRuleTypeMocks = (
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions })),
+      alertLimit: {
+        getValue: jest.fn(() => 1000),
+        setLimitReached: jest.fn(() => {}),
+      },
       done: jest.fn().mockResolvedValue({}),
     },
     findAlerts: jest.fn(), // TODO: does this stay?

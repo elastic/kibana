@@ -15,6 +15,8 @@ import { load as loadYaml } from 'js-yaml';
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
+import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
 const getRequiredEnv = (name: string) => {
@@ -161,7 +163,7 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
     ? parseFloat(process.env.JEST_MAX_MINUTES)
-    : 50;
+    : 40;
   if (Number.isNaN(JEST_MAX_MINUTES)) {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
@@ -220,6 +222,7 @@ export async function pickTestGroupRunOrder() {
     ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
+        ignore: DISABLED_JEST_CONFIGS,
       })
     : [];
 

@@ -16,18 +16,20 @@ const COMMON_REQUEST_HEADERS = {
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Allows indices configuration', () => {
@@ -46,6 +48,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      it('renders the correct page title', async () => {
+        await pageObjects.infraLogs.navigateToTab('settings');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const documentTitle = await browser.getTitle();
+
+        expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {

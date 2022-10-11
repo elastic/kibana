@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
@@ -17,7 +18,6 @@ import {
 import { hasPrefixToInclude } from '../../../../common/correlations/utils';
 
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 const SUPPORTED_ES_FIELD_TYPES = [
@@ -65,6 +65,7 @@ export const fetchDurationFieldCandidates = async ({
         events: [eventType],
       },
       body: {
+        track_total_hits: false,
         fields: ['*'],
         _source: false,
         query: getCommonCorrelationsQuery({

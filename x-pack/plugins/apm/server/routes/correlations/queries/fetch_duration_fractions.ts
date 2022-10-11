@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
@@ -39,6 +39,7 @@ export const fetchDurationFractions = async ({
       events: [eventType],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: getCommonCorrelationsQuery({
         start,

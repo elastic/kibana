@@ -13,6 +13,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
+import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 
 export const MonitorDetailsLink = ({
   basePath,
@@ -30,13 +31,11 @@ export const MonitorDetailsLink = ({
   const locationId =
     lastSelectedLocationId && monitorHasLocation ? lastSelectedLocationId : firstMonitorLocationId;
 
-  const locationUrlQueryParam = locationId ? `?locationId=${locationId}` : '';
+  const monitorDetailLinkUrl = useMonitorDetailLocator({ monitorId: monitor.id, locationId });
 
   return (
     <>
-      <EuiLink href={`${basePath}/app/synthetics/monitor/${monitor.id}${locationUrlQueryParam}`}>
-        {monitor.name}
-      </EuiLink>
+      <EuiLink href={monitorDetailLinkUrl}>{monitor.name}</EuiLink>
     </>
   );
 };

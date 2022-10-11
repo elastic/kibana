@@ -101,7 +101,7 @@ export class DockerServersService {
 
   private async startServer(server: DockerServer) {
     const { log, lifecycle } = this;
-    const { image, name, waitFor, waitForLogLine } = server;
+    const { image, name, waitFor, waitForLogLine, waitForLogLineTimeoutMs } = server;
 
     // pull image from registry
     log.info(`[docker:${name}] pulling docker image "${image}"`);
@@ -200,7 +200,8 @@ export class DockerServersService {
                   : line.includes(waitForLogLine)
               )
             ),
-            `waitForLogLine didn't emit anything`
+            `waitForLogLine didn't emit anything`,
+            waitForLogLineTimeoutMs
           )
     ).toPromise();
   }

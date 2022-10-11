@@ -14,19 +14,30 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } f
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { LayerType } from '../../../common';
+import { IconChartMetric } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
-import { LensIconChartMetric } from '../../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
-import { layerTypes } from '../../../common';
+import {
+  Visualization,
+  OperationMetadata,
+  DatasourceLayers,
+  AccessorConfig,
+  Suggestion,
+} from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
+import { FormatSelectorOptions } from '../../indexpattern_datasource/dimension_panel/format_selector';
+import { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
+
+export const getDefaultColor = (hasMax: boolean) =>
+  hasMax ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -44,6 +55,16 @@ export interface MetricVisualizationState {
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
+}
+
+interface MetricDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface MetricSuggestion extends Suggestion {
+  datasourceState: MetricDatasourceState;
+  visualizationState: MetricVisualizationState;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -75,7 +96,7 @@ const toExpression = (
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
-      ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+      ? datasource?.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
   const getCollapseFnArguments = () => {
@@ -88,7 +109,7 @@ const toExpression = (
         return state.collapseFn;
       } else {
         const isMaxStatic = Boolean(
-          datasource.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
+          datasource?.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
         );
         // we do this because the user expects the static value they set to be the same
         // even if they define a collapse on the breakdown by
@@ -122,17 +143,14 @@ const toExpression = (
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
-          secondaryPrefix: state.secondaryPrefix ? [state.secondaryPrefix] : [],
+          secondaryPrefix:
+            typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
           max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: state.color
-            ? [state.color]
-            : state.maxAccessor
-            ? [euiLightVars.euiColorPrimary]
-            : [],
+          color: [state.color || getDefaultColor(!!state.maxAccessor)],
           palette: state.palette?.params
             ? [
                 paletteService
@@ -155,6 +173,28 @@ const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
 });
 
+const removeMetricDimension = (state: MetricVisualizationState) => {
+  delete state.metricAccessor;
+  delete state.palette;
+  delete state.color;
+};
+
+const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
+  delete state.secondaryMetricAccessor;
+  delete state.secondaryPrefix;
+};
+
+const removeMaxDimension = (state: MetricVisualizationState) => {
+  delete state.maxAccessor;
+  delete state.progressDirection;
+};
+
+const removeBreakdownByDimension = (state: MetricVisualizationState) => {
+  delete state.breakdownByAccessor;
+  delete state.collapseFn;
+  delete state.maxCols;
+};
+
 export const getMetricVisualization = ({
   paletteService,
   theme,
@@ -167,7 +207,7 @@ export const getMetricVisualization = ({
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
       groupLabel: metricGroupLabel,
       showExperimentalBadge: true,
@@ -181,14 +221,13 @@ export const getMetricVisualization = ({
 
   clearLayer(state) {
     const newState = { ...state };
-    delete newState.metricAccessor;
-    delete newState.secondaryMetricAccessor;
-    delete newState.secondaryPrefix;
-    delete newState.breakdownByAccessor;
-    delete newState.collapseFn;
-    delete newState.maxAccessor;
-    delete newState.palette;
-    // TODO - clear more?
+    delete newState.subtitle;
+
+    removeMetricDimension(newState);
+    removeSecondaryMetricDimension(newState);
+    removeMaxDimension(newState);
+    removeBreakdownByDimension(newState);
+
     return newState;
   },
 
@@ -198,7 +237,7 @@ export const getMetricVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
     };
   },
@@ -209,7 +248,7 @@ export const getMetricVisualization = ({
     return (
       state ?? {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         palette: mainPalette,
       }
     );
@@ -217,43 +256,78 @@ export const getMetricVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
-    const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
     const isSupportedMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType);
 
     const isSupportedDynamicMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
 
+    const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+      const stops = props.state.palette?.params?.stops || [];
+      const hasStaticColoring = !!props.state.color;
+      const hasDynamicColoring = !!props.state.palette;
+      return hasDynamicColoring
+        ? {
+            triggerIcon: 'colorBy',
+            palette: stops.map(({ color }) => color),
+          }
+        : hasStaticColoring
+        ? {
+            triggerIcon: 'color',
+            color: props.state.color,
+          }
+        : {
+            triggerIcon: 'color',
+            color: getDefaultColor(!!props.state.maxAccessor),
+          };
+    };
+
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
+    const formatterOptions: FormatSelectorOptions = {
+      disableExtraOptions: true,
+    };
+
     return {
       groups: [
         {
           groupId: GROUP_ID.METRIC,
+          dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
             defaultMessage: 'Primary metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.metricAccessor
             ? [
                 {
                   columnId: props.state.metricAccessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+                  ...getPrimaryAccessorDisplayConfig(),
                 },
               ]
             : [],
           supportsMoreColumns: !props.state.metricAccessor,
           filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
-          required: true,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
+          requiredMinDimensionCount: 1,
         },
         {
           groupId: GROUP_ID.SECONDARY_METRIC,
+          dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
             defaultMessage: 'Secondary metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.secondaryMetricAccessor
             ? [
@@ -265,12 +339,19 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
           filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
-          required: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
+          requiredMinDimensionCount: 0,
         },
         {
           groupId: GROUP_ID.MAX,
+          dataTestSubj: 'lnsMetric_maxDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.maxAccessor
             ? [
@@ -282,9 +363,11 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
+          formatSelectorOptions: formatterOptions,
           supportStaticValue: true,
-          required: false,
+          prioritizedOperation: 'max',
+          requiredMinDimensionCount: 0,
           groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
             defaultMessage:
               'If the maximum value is specified, the minimum value is fixed at zero.',
@@ -292,6 +375,7 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.BREAKDOWN_BY,
+          dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
             defaultMessage: 'Break down by',
           }),
@@ -307,8 +391,9 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.breakdownByAccessor,
           filterOperations: isBucketed,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
-          required: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
+          requiredMinDimensionCount: 0,
         },
       ],
     };
@@ -317,7 +402,7 @@ export const getMetricVisualization = ({
   getSupportedLayers(state) {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.metric.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -364,23 +449,20 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  removeDimension({ prevState, layerId, columnId }) {
+  removeDimension({ prevState, columnId }) {
     const updated = { ...prevState };
 
     if (prevState.metricAccessor === columnId) {
-      delete updated.metricAccessor;
-      delete updated.palette;
+      removeMetricDimension(updated);
     }
     if (prevState.secondaryMetricAccessor === columnId) {
-      delete updated.secondaryMetricAccessor;
-      delete updated.secondaryPrefix;
+      removeSecondaryMetricDimension(updated);
     }
     if (prevState.maxAccessor === columnId) {
-      delete updated.maxAccessor;
+      removeMaxDimension(updated);
     }
     if (prevState.breakdownByAccessor === columnId) {
-      delete updated.breakdownByAccessor;
-      delete updated.collapseFn;
+      removeBreakdownByDimension(updated);
     }
 
     return updated;
@@ -417,6 +499,27 @@ export const getMetricVisualization = ({
     return {
       noPanelTitle: true,
       noPadding: true,
+    };
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as MetricSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
     };
   },
 });

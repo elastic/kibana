@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   getNumExecutions,
   getExecutionLogAggregation,
@@ -12,6 +13,8 @@ import {
   formatSortForBucketSort,
   formatSortForTermSort,
   ExecutionUuidAggResult,
+  getExecutionKPIAggregation,
+  formatExecutionKPIResult,
 } from './get_execution_log_aggregation';
 
 describe('formatSortForBucketSort', () => {
@@ -142,7 +145,35 @@ describe('getExecutionLogAggregation', () => {
           },
         },
         aggs: {
-          executionUuidCardinality: { cardinality: { field: 'kibana.alert.rule.execution.uuid' } },
+          executionUuidCardinality: {
+            aggs: {
+              executionUuidCardinality: {
+                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
+              },
+            },
+            filter: {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'event.action': 'execute',
+                          },
+                        },
+                        {
+                          match: {
+                            'event.provider': 'alerting',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
@@ -175,12 +206,28 @@ describe('getExecutionLogAggregation', () => {
                 },
                 aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
               },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
               ruleExecution: {
                 filter: {
                   bool: {
                     must: [
-                      { match: { 'event.action': 'execute' } },
-                      { match: { 'event.provider': 'alerting' } },
+                      {
+                        bool: {
+                          must: [
+                            { match: { 'event.action': 'execute' } },
+                            { match: { 'event.provider': 'alerting' } },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
@@ -227,7 +274,424 @@ describe('getExecutionLogAggregation', () => {
                     top_hits: {
                       size: 1,
                       _source: {
-                        includes: ['event.outcome', 'message', 'error.message', 'kibana.version'],
+                        includes: [
+                          'event.outcome',
+                          'message',
+                          'error.message',
+                          'kibana.version',
+                          'rule.id',
+                          'rule.name',
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute-timeout' } },
+                      { match: { 'event.provider': 'alerting' } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should correctly generate aggregation with a defined filter in the form of a string', () => {
+    expect(
+      getExecutionLogAggregation({
+        page: 2,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
+        filter: 'test:test',
+      })
+    ).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuidCardinality: {
+            aggs: {
+              executionUuidCardinality: {
+                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
+              },
+            },
+            filter: {
+              bool: {
+                filter: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: {
+                          test: 'test',
+                        },
+                      },
+                    ],
+                  },
+                },
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'event.action': 'execute',
+                          },
+                        },
+                        {
+                          match: {
+                            'event.provider': 'alerting',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+              order: [
+                { 'ruleExecution>executeStartTime': 'asc' },
+                { 'ruleExecution>executionDuration': 'desc' },
+              ],
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  sort: [
+                    { 'ruleExecution>executeStartTime': { order: 'asc' } },
+                    { 'ruleExecution>executionDuration': { order: 'desc' } },
+                  ],
+                  from: 10,
+                  size: 10,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute' } },
+                      { match: { 'event.provider': 'actions' } },
+                    ],
+                  },
+                },
+                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            { match: { 'event.action': 'execute' } },
+                            { match: { 'event.provider': 'alerting' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  executeStartTime: { min: { field: 'event.start' } },
+                  scheduleDelay: {
+                    max: {
+                      field: 'kibana.task.schedule_delay',
+                    },
+                  },
+                  totalSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
+                  },
+                  esSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms' },
+                  },
+                  numTriggeredActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                    },
+                  },
+                  numGeneratedActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    },
+                  },
+                  numActiveAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    },
+                  },
+                  numNewAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                    },
+                  },
+                  executionDuration: { max: { field: 'event.duration' } },
+                  outcomeAndMessage: {
+                    top_hits: {
+                      size: 1,
+                      _source: {
+                        includes: [
+                          'event.outcome',
+                          'message',
+                          'error.message',
+                          'kibana.version',
+                          'rule.id',
+                          'rule.name',
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute-timeout' } },
+                      { match: { 'event.provider': 'alerting' } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should correctly generate aggregation with a defined filter in the form of a KueryNode', () => {
+    expect(
+      getExecutionLogAggregation({
+        page: 2,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
+        filter: fromKueryExpression('test:test'),
+      })
+    ).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuidCardinality: {
+            aggs: {
+              executionUuidCardinality: {
+                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
+              },
+            },
+            filter: {
+              bool: {
+                filter: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: {
+                          test: 'test',
+                        },
+                      },
+                    ],
+                  },
+                },
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'event.action': 'execute',
+                          },
+                        },
+                        {
+                          match: {
+                            'event.provider': 'alerting',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+              order: [
+                { 'ruleExecution>executeStartTime': 'asc' },
+                { 'ruleExecution>executionDuration': 'desc' },
+              ],
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  sort: [
+                    { 'ruleExecution>executeStartTime': { order: 'asc' } },
+                    { 'ruleExecution>executionDuration': { order: 'desc' } },
+                  ],
+                  from: 10,
+                  size: 10,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute' } },
+                      { match: { 'event.provider': 'actions' } },
+                    ],
+                  },
+                },
+                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            { match: { 'event.action': 'execute' } },
+                            { match: { 'event.provider': 'alerting' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  executeStartTime: { min: { field: 'event.start' } },
+                  scheduleDelay: {
+                    max: {
+                      field: 'kibana.task.schedule_delay',
+                    },
+                  },
+                  totalSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
+                  },
+                  esSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms' },
+                  },
+                  numTriggeredActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                    },
+                  },
+                  numGeneratedActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    },
+                  },
+                  numActiveAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    },
+                  },
+                  numNewAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                    },
+                  },
+                  executionDuration: { max: { field: 'event.duration' } },
+                  outcomeAndMessage: {
+                    top_hits: {
+                      size: 1,
+                      _source: {
+                        includes: [
+                          'event.outcome',
+                          'message',
+                          'error.message',
+                          'kibana.version',
+                          'rule.id',
+                          'rule.name',
+                        ],
                       },
                     },
                   },
@@ -317,6 +781,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -400,6 +865,8 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
+
                             event: {
                               outcome: 'success',
                             },
@@ -448,7 +915,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 374,
+            executionUuidCardinality: {
+              value: 374,
+            },
           },
         },
       },
@@ -475,6 +944,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3074,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -495,6 +966,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });
@@ -549,6 +1022,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'failure',
                             },
@@ -635,6 +1109,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -683,7 +1158,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 374,
+            executionUuidCardinality: {
+              value: 374,
+            },
           },
         },
       },
@@ -710,6 +1187,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3074,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -730,6 +1209,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });
@@ -784,6 +1265,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'dJkWa38B1ylB1EvsAckB',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -862,6 +1344,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -910,7 +1393,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 374,
+            executionUuidCardinality: {
+              value: 374,
+            },
           },
         },
       },
@@ -937,6 +1422,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: true,
           schedule_delay_ms: 3074,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -957,6 +1444,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });
@@ -1011,6 +1500,7 @@ describe('formatExecutionLogResult', () => {
                           _id: '7xKcb38BcntAq5ycFwiu',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1094,6 +1584,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'zRKbb38BcntAq5ycOwgk',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1142,7 +1633,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 417,
+            executionUuidCardinality: {
+              value: 417,
+            },
           },
         },
       },
@@ -1169,6 +1662,8 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '61bb867b-661a-471f-bf92-23471afa10b3',
@@ -1189,8 +1684,591 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3133,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
+    });
+  });
+});
+
+describe('getExecutionKPIAggregation', () => {
+  test('should correctly generate aggregation', () => {
+    expect(getExecutionKPIAggregation()).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  from: 0,
+                  size: 1000,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'actions',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  actionOutcomes: {
+                    terms: {
+                      field: 'event.outcome',
+                      size: 2,
+                    },
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  numTriggeredActions: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                      missing: 0,
+                    },
+                  },
+                  numGeneratedActions: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                      missing: 0,
+                    },
+                  },
+                  numActiveAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                      missing: 0,
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                      missing: 0,
+                    },
+                  },
+                  numNewAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                      missing: 0,
+                    },
+                  },
+                  ruleExecutionOutcomes: {
+                    terms: {
+                      field: 'event.outcome',
+                      size: 2,
+                    },
+                  },
+                },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should correctly generate aggregation with a defined filter in the form of a string', () => {
+    expect(getExecutionKPIAggregation('test:test')).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  from: 0,
+                  size: 1000,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'actions',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  actionOutcomes: {
+                    terms: {
+                      field: 'event.outcome',
+                      size: 2,
+                    },
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  numTriggeredActions: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                      missing: 0,
+                    },
+                  },
+                  numGeneratedActions: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                      missing: 0,
+                    },
+                  },
+                  numActiveAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                      missing: 0,
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                      missing: 0,
+                    },
+                  },
+                  numNewAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                      missing: 0,
+                    },
+                  },
+                  ruleExecutionOutcomes: {
+                    terms: {
+                      field: 'event.outcome',
+                      size: 2,
+                    },
+                  },
+                },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should correctly generate aggregation with a defined filter in the form of a KueryNode', () => {
+    expect(getExecutionKPIAggregation(fromKueryExpression('test:test'))).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  from: 0,
+                  size: 1000,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'actions',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  actionOutcomes: {
+                    terms: {
+                      field: 'event.outcome',
+                      size: 2,
+                    },
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  numTriggeredActions: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                      missing: 0,
+                    },
+                  },
+                  numGeneratedActions: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                      missing: 0,
+                    },
+                  },
+                  numActiveAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                      missing: 0,
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                      missing: 0,
+                    },
+                  },
+                  numNewAlerts: {
+                    sum: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                      missing: 0,
+                    },
+                  },
+                  ruleExecutionOutcomes: {
+                    terms: {
+                      field: 'event.outcome',
+                      size: 2,
+                    },
+                  },
+                },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+});
+
+describe('formatExecutionKPIAggBuckets', () => {
+  test('should return empty results if aggregations are undefined', () => {
+    expect(
+      formatExecutionKPIResult({
+        aggregations: undefined,
+      })
+    ).toEqual({
+      activeAlerts: 0,
+      erroredActions: 0,
+      failure: 0,
+      newAlerts: 0,
+      recoveredAlerts: 0,
+      success: 0,
+      triggeredActions: 0,
+      unknown: 0,
+    });
+  });
+
+  test('should format results correctly', () => {
+    const results = {
+      aggregations: {
+        excludeExecuteStart: {
+          meta: {},
+          doc_count: 875,
+          executionUuid: {
+            meta: {},
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 3,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
+                  },
+                  ruleExecutionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'success',
+                        doc_count: 3,
+                      },
+                    ],
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 5,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'success',
+                        doc_count: 5,
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 2,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
+                  },
+                  ruleExecutionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'success',
+                        doc_count: 2,
+                      },
+                    ],
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 3,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'failure',
+                        doc_count: 3,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    expect(formatExecutionKPIResult(results)).toEqual({
+      success: 5,
+      unknown: 0,
+      failure: 0,
+      activeAlerts: 10,
+      newAlerts: 10,
+      recoveredAlerts: 0,
+      erroredActions: 3,
+      triggeredActions: 10,
     });
   });
 });

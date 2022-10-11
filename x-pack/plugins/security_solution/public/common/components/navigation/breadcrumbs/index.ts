@@ -15,7 +15,6 @@ import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../n
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
-import { getTrailingBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import type {
   RouteSpyState,
@@ -105,18 +104,6 @@ export const getBreadcrumbsForRoute = (
     ? newMenuLeadingBreadcrumbs
     : [siemRootBreadcrumb, pageBreadcrumb];
 
-  // Admin URL works differently. All admin pages are under '/administration'
-  if (isAdminRoutes(spyState)) {
-    if (isGroupedNavigationEnabled) {
-      return emptyLastBreadcrumbUrl([...leadingBreadcrumbs, ...getAdminBreadcrumbs(spyState)]);
-    } else {
-      return [
-        ...(siemRootBreadcrumb ? [siemRootBreadcrumb] : []),
-        ...getAdminBreadcrumbs(spyState),
-      ];
-    }
-  }
-
   return emptyLastBreadcrumbUrl([
     ...leadingBreadcrumbs,
     ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl),
@@ -162,9 +149,6 @@ const isCaseRoutes = (spyState: RouteSpyState) => spyState.pageName === Security
 
 const isKubernetesRoutes = (spyState: RouteSpyState) =>
   spyState.pageName === SecurityPageName.kubernetes;
-
-const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
-  spyState.pageName === SecurityPageName.administration;
 
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState.pageName === SecurityPageName.rules ||

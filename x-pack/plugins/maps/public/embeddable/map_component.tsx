@@ -16,6 +16,7 @@ import type { LazyLoadedMapModules } from '../lazy_load_bundle';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 interface Props {
+  title: string;
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -81,7 +82,7 @@ export class MapComponent extends Component<Props, State> {
       {
         id: uuid(),
         attributes: {
-          title: '',
+          title: this.props.title,
           layerListJSON: JSON.stringify([
             mapModules.createBasemapLayerDescriptor(),
             ...this.props.getLayerDescriptors({

@@ -9,17 +9,24 @@ export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
 
 export { formatDurationFromTimeUnitChar } from './utils/formatters';
 
+export { ProcessorEvent } from './processor_event';
+
 export {
+  enableNewSyntheticsView,
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
-  enableInfrastructureView,
   defaultApmServiceEnvironment,
-  apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,
+  enableServiceGroups,
+  apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  apmLabsButton,
+  enableInfrastructureHostsView,
+  enableServiceMetrics,
+  enableAwsLambdaMetrics,
 } from './ui_settings_keys';
 
 export {

@@ -11,7 +11,10 @@ import type { HostMetadata, MaybeImmutable } from '../../../../common/endpoint/t
 export const useDoesEndpointSupportResponder = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): boolean => {
-  return RESPONDER_CAPABILITIES.every((capability) =>
-    endpointMetadata?.Endpoint.capabilities?.includes(capability)
-  );
+  if (endpointMetadata) {
+    return RESPONDER_CAPABILITIES.every((capability) =>
+      endpointMetadata?.Endpoint.capabilities?.includes(capability)
+    );
+  }
+  return false;
 };

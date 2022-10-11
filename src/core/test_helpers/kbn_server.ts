@@ -24,7 +24,7 @@ import { CliArgs, Env } from '@kbn/config';
 import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
 import { Root } from '../server/root';
 
-export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
+export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -157,6 +157,7 @@ export const request: Record<
   head: (root, path) => getSupertest(root, 'head', path),
   post: (root, path) => getSupertest(root, 'post', path),
   put: (root, path) => getSupertest(root, 'put', path),
+  patch: (root, path) => getSupertest(root, 'patch', path),
 };
 
 export interface TestElasticsearchUtils {

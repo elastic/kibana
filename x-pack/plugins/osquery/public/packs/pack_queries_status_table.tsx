@@ -116,7 +116,7 @@ function getLensAttributes(
         layerId: 'layer1',
         metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
         numberDisplay: 'percent',
-        groups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
+        primaryGroups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
         categoryDisplay: 'default',
       },
     ],
@@ -492,7 +492,7 @@ const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionI
     interval,
   });
   if (isLoading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={'docsLoading'} />;
   }
 
   if (!lastResultsData) {
@@ -531,7 +531,7 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   }
 
   if (!errorsData?.total) {
-    return <>{'-'}</>;
+    return <span data-test-subj="packResultsErrorsEmpty">{'-'}</span>;
   }
 
   return (

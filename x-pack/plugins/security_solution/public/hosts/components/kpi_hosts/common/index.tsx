@@ -35,19 +35,19 @@ interface KpiBaseComponentProps {
   id: string;
   from: string;
   to: string;
-  narrowDateRange: UpdateDateRange;
+  updateDateRange: UpdateDateRange;
   setQuerySkip: (skip: boolean) => void;
 }
 
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, setQuerySkip }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, updateDateRange, setQuerySkip }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
       data,
       id,
       from,
       to,
-      narrowDateRange,
+      updateDateRange,
       setQuerySkip,
       loading
     );
@@ -66,7 +66,7 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
     prevProps.loading === nextProps.loading &&
     prevProps.from === nextProps.from &&
     prevProps.to === nextProps.to &&
-    prevProps.narrowDateRange === nextProps.narrowDateRange &&
+    prevProps.updateDateRange === nextProps.updateDateRange &&
     deepEqual(prevProps.data, nextProps.data)
 );
 

@@ -14,24 +14,41 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   let agentCount = 0;
-
+  let pkgVersion: string;
   describe('fleet_telemetry', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     setupFleetAndAgents(providerContext);
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      if (pkgVersion) {
+        await supertest.delete(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`);
+      }
     });
 
     before(async () => {
+      // we must first force install the fleet_server package to override package verification error on policy create
+      // https://github.com/elastic/kibana/issues/137450
+      const getPkRes = await supertest
+        .get(`/api/fleet/epm/packages/fleet_server`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      pkgVersion = getPkRes.body.item.version;
+      await supertest
+        .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       // create agent policies
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)

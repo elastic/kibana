@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
@@ -13,9 +14,8 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
@@ -47,6 +47,7 @@ export async function getServicesFromErrorAndMetricDocuments({
         events: [ProcessorEvent.metric, ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

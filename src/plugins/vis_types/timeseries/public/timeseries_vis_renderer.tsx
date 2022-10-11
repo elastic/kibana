@@ -62,11 +62,8 @@ export const getTimeseriesVisRenderer: (deps: {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-    const { visParams: model, visData, syncColors, syncTooltips } = config;
+    const { visParams: model, visData, syncColors, syncTooltips, canNavigateToLens } = config;
     const showNoResult = !checkIfDataExists(visData, model);
-
-    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
-    const canNavigateToLens = await triggerTSVBtoLensConfiguration(model);
 
     const renderComplete = () => {
       const usageCollection = getUsageCollectionStart();

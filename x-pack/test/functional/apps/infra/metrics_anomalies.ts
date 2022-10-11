@@ -17,10 +17,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('with no anomalies present', () => {

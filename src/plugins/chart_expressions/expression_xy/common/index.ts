@@ -9,6 +9,8 @@
 export const PLUGIN_ID = 'expressionXy';
 export const PLUGIN_NAME = 'expressionXy';
 
+export { LayerTypes } from './constants';
+
 export type {
   XYArgs,
   EndValue,
@@ -34,7 +36,7 @@ export type {
   DataLayerConfig,
   FittingFunction,
   AxisExtentConfig,
-  CollectiveConfig,
+  MergedAnnotation,
   LegendConfigResult,
   AxesSettingsConfig,
   XAxisConfigResult,
@@ -47,6 +49,7 @@ export type {
   ReferenceLineLayerArgs,
   CommonXYDataLayerConfig,
   ReferenceLineLayerConfig,
+  DataDecorationConfigResult,
   AvailableReferenceLineIcon,
   XYExtendedLayerConfigResult,
   CommonXYAnnotationLayerConfig,

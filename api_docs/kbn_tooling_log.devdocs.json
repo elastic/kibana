@@ -30,6 +30,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -43,6 +44,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -63,6 +65,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -84,6 +87,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -103,6 +107,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -118,6 +123,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -131,6 +137,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -145,6 +152,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -162,6 +170,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -175,6 +184,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -192,6 +202,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -205,6 +216,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -222,6 +234,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -235,6 +248,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -252,6 +266,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -265,6 +280,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -282,6 +298,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -295,6 +312,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -312,6 +330,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -325,6 +344,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -342,6 +362,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -355,6 +376,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -380,6 +402,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -403,6 +426,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -423,6 +447,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -450,6 +475,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -474,6 +500,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -489,6 +516,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -523,6 +551,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -535,7 +564,8 @@
               "string[]"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -549,6 +579,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -558,10 +589,11 @@
                 "label": "level",
                 "description": [],
                 "signature": [
-                  "\"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+                  "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -589,6 +621,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -608,6 +641,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -642,6 +676,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -651,10 +686,11 @@
             "label": "level",
             "description": [],
             "signature": [
-              "{ name: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; success: boolean; warning: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+              "{ name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -667,7 +703,8 @@
               "{ write(msg: string): void; }"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -681,6 +718,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -700,6 +738,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -725,6 +764,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -744,6 +784,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -769,6 +810,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -782,6 +824,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -796,6 +839,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -816,6 +860,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -838,6 +883,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -851,6 +897,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -865,10 +912,11 @@
         "label": "parseLogLevel",
         "description": [],
         "signature": [
-          "(name: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; success: boolean; warning: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+          "(name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -878,10 +926,11 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+              "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -896,10 +945,11 @@
         "label": "pickLevelFromFlags",
         "description": [],
         "signature": [
-          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -913,6 +963,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -924,6 +975,7 @@
             "description": [],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -933,10 +985,11 @@
                 "label": "default",
                 "description": [],
                 "signature": [
-                  "\"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+                  "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
                 ],
                 "path": "packages/kbn-tooling-log/src/log_levels.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -957,6 +1010,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/message.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -968,10 +1022,11 @@
               "level/type of message"
             ],
             "signature": [
-              "\"error\" | \"success\" | \"warning\" | \"write\" | \"info\" | \"debug\" | \"verbose\""
+              "\"error\" | \"warning\" | \"success\" | \"write\" | \"info\" | \"debug\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -983,7 +1038,8 @@
               "indentation intended when message written to a text log"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -998,7 +1054,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1013,7 +1070,8 @@
               "any[]"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1027,6 +1085,7 @@
         "description": [],
         "path": "packages/kbn-tooling-log/src/tooling_log.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1041,7 +1100,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1063,7 +1123,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1077,6 +1138,7 @@
         "description": [],
         "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1088,10 +1150,11 @@
               "\nLog level, messages below this level will be ignored"
             ],
             "signature": [
-              "\"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+              "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1106,7 +1169,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1121,7 +1185,8 @@
               "{ write(s: string): void; }"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1137,6 +1202,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/writer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/tooling-log",
@@ -1160,6 +1226,7 @@
             ],
             "path": "packages/kbn-tooling-log/src/writer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/tooling-log",
@@ -1181,6 +1248,7 @@
                 ],
                 "path": "packages/kbn-tooling-log/src/writer.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1204,6 +1272,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1218,6 +1287,7 @@
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1228,10 +1298,11 @@
         "label": "LogLevel",
         "description": [],
         "signature": [
-          "\"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+          "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1242,10 +1313,11 @@
         "label": "ParsedLogLevel",
         "description": [],
         "signature": [
-          "{ name: \"error\" | \"success\" | \"warning\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; success: boolean; warning: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+          "{ name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
         ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

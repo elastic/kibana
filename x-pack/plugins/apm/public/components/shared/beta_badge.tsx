@@ -19,6 +19,9 @@ export function BetaBadge({ icon }: Props) {
       label={i18n.translate('xpack.apm.betaBadgeLabel', {
         defaultMessage: 'Beta',
       })}
+      title={i18n.translate('xpack.apm.betaBadgeLabel', {
+        defaultMessage: 'Beta',
+      })}
       tooltipContent={i18n.translate('xpack.apm.betaBadgeDescription', {
         defaultMessage:
           'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,7 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useResizeObserver } from '@elastic/eui';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -79,7 +80,10 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = serializedFieldFormat?.id ?? 'number';
+  const formatId =
+    (serializedFieldFormat?.id === 'suffix'
+      ? serializedFieldFormat.params?.id
+      : serializedFieldFormat?.id) ?? 'number';
 
   if (
     !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
@@ -159,16 +163,11 @@ const getColor = (
   data: Datatable,
   rowNumber: number
 ) => {
-  let minBound = paletteParams.rangeMin;
-  let maxBound = paletteParams.rangeMax;
-
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-  minBound = min;
-  maxBound = max;
 
   return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-    min: minBound,
-    max: maxBound,
+    min,
+    max,
   });
 };
 
@@ -243,6 +242,7 @@ export const MetricVis = ({
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
+    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
     return {
       value,
       valueFormatter: formatPrimaryMetric,
@@ -250,9 +250,9 @@ export const MetricVis = ({
       subtitle,
       extra: (
         <span>
-          {config.metric.secondaryPrefix}
+          {secondaryPrefix}
           {secondaryMetricColumn
-            ? `${config.metric.secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
                 row[secondaryMetricColumn.id]
               )}`
             : undefined}
@@ -307,53 +307,72 @@ export const MetricVis = ({
     pixelWidth = grid[0]?.length * maxTileSideLength;
   }
 
-  // force chart to re-render to circumvent a charts bug
-  const magicKey = useRef(0);
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+
+  const {
+    metric: { minHeight },
+  } = getThemeService().useChartsBaseTheme();
+
   useEffect(() => {
-    magicKey.current++;
-  }, [data]);
+    const minimumRequiredVerticalSpace = minHeight * grid.length;
+    setScrollChildHeight(
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+        ? '100%'
+        : `${minimumRequiredVerticalSpace}px`
+    );
+  }, [grid.length, minHeight, scrollDimensions.height]);
 
   return (
     <div
+      ref={scrollContainerRef}
       css={css`
         height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
         width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
         max-height: 100%;
         max-width: 100%;
+        overflow-y: auto;
       `}
     >
-      <Chart key={magicKey.current}>
-        <Settings
-          theme={[
-            {
-              background: { color: 'transparent' },
-              metric: {
-                background: defaultColor,
-                barBackground: euiThemeVars.euiColorLightShade,
+      <div
+        css={css`
+          height: ${scrollChildHeight};
+        `}
+      >
+        <Chart>
+          <Settings
+            theme={[
+              {
+                background: { color: 'transparent' },
+                metric: {
+                  background: defaultColor,
+                  barBackground: euiThemeVars.euiColorLightShade,
+                },
               },
-            },
-            chartTheme,
-          ]}
-          onRenderChange={onRenderChange}
-          onElementClick={(events) => {
-            if (!filterable) {
-              return;
-            }
-            events.forEach((event) => {
-              if (isMetricElementEvent(event)) {
-                const colIdx = breakdownByColumn
-                  ? data.columns.findIndex((col) => col === breakdownByColumn)
-                  : data.columns.findIndex((col) => col === primaryMetricColumn);
-                const rowLength = grid[0].length;
-                fireEvent(
-                  buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
-                );
+              chartTheme,
+            ]}
+            onRenderChange={onRenderChange}
+            onElementClick={(events) => {
+              if (!filterable) {
+                return;
               }
-            });
-          }}
-        />
-        <Metric id="metric" data={grid} />
-      </Chart>
+              events.forEach((event) => {
+                if (isMetricElementEvent(event)) {
+                  const colIdx = breakdownByColumn
+                    ? data.columns.findIndex((col) => col === breakdownByColumn)
+                    : data.columns.findIndex((col) => col === primaryMetricColumn);
+                  const rowLength = grid[0].length;
+                  fireEvent(
+                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
+                  );
+                }
+              });
+            }}
+          />
+          <Metric id="metric" data={grid} />
+        </Chart>
+      </div>
     </div>
   );
 };

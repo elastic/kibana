@@ -12,12 +12,13 @@ import { noop } from 'lodash/fp';
 
 import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
 
-import { CommentRequest, CommentType } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
+import { CaseAttachmentWithoutOwner } from '../../types';
 
 jest.mock('../../containers/use_create_attachments');
 
@@ -41,10 +42,9 @@ const defaultResponse = {
   createAttachments,
 };
 
-const sampleData: CommentRequest = {
+const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
-  type: CommentType.user,
-  owner: SECURITY_SOLUTION_OWNER,
+  type: CommentType.user as const,
 };
 
 describe('AddComment ', () => {
@@ -73,6 +73,7 @@ describe('AddComment ', () => {
       expect(onCommentSaving).toBeCalled();
       expect(createAttachments).toBeCalledWith({
         caseId: addCommentProps.caseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: [sampleData],
         updateCase: onCommentPosted,
       });

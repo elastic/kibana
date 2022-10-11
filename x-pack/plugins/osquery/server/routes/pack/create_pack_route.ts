@@ -20,7 +20,7 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -39,6 +39,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               schema.object({
                 query: schema.string(),
                 interval: schema.maybe(schema.number()),
+                snapshot: schema.maybe(schema.boolean()),
+                removed: schema.maybe(schema.boolean()),
                 platform: schema.maybe(schema.string()),
                 version: schema.maybe(schema.string()),
                 ecs_mapping: schema.maybe(
@@ -142,7 +144,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
+                    queries: convertSOQueriesToPack(queries, {
+                      removeMultiLines: true,
+                      removeResultType: true,
+                    }),
                   });
 
                   return draft;

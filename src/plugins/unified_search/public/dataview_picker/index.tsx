@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -41,9 +42,18 @@ export interface DataViewPickerProps {
    */
   onChangeDataView: (newId: string) => void;
   /**
+   * Callback that is called when the user edits the current data view via flyout.
+   * The first parameter is the updated data view stub without fetched fields
+   */
+  onEditDataView?: (updatedDataViewStub: DataView) => void;
+  /**
    * The id of the selected dataview.
    */
   currentDataViewId?: string;
+  /**
+   * The adHocDataviews.
+   */
+  adHocDataViews?: DataView[];
   /**
    * EuiSelectable properties.
    */
@@ -58,10 +68,8 @@ export interface DataViewPickerProps {
    * Also works as a flag to show the create dataview button.
    */
   onDataViewCreated?: () => void;
-  /**
-   * Flag to show the tour component for the first time.
-   */
-  showNewMenuTour?: boolean;
+
+  onCreateDefaultAdHocDataView?: (pattern: string) => void;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
@@ -72,6 +80,11 @@ export interface DataViewPickerProps {
    * Callback that is called when the user clicks the Save and switch transition modal button
    */
   onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
+
+  /**
+   * Makes the picker disabled by disabling the popover trigger
+   */
+  isDisabled?: boolean;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
@@ -88,31 +101,37 @@ export interface DataViewPickerPropsExtended extends DataViewPickerProps {
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
+  onEditDataView,
   onAddField,
   onDataViewCreated,
   trigger,
   selectableProps,
-  showNewMenuTour,
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  onCreateDefaultAdHocDataView,
+  isDisabled,
 }: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
       isMissingCurrent={isMissingCurrent}
       currentDataViewId={currentDataViewId}
       onChangeDataView={onChangeDataView}
+      onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
+      adHocDataViews={adHocDataViews}
       selectableProps={selectableProps}
-      showNewMenuTour={showNewMenuTour}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
       textBasedLanguage={textBasedLanguage}
+      isDisabled={isDisabled}
     />
   );
 };

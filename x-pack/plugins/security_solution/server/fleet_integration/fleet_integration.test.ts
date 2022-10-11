@@ -43,7 +43,7 @@ import { Manifest } from '../endpoint/lib/artifacts';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import type { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
-import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
@@ -82,6 +82,7 @@ describe('ingest_integration tests ', () => {
       enabled: true,
       streams: [],
       config: {
+        integration_config: {},
         policy: { value: policyFactory() },
         artifact_manifest: { value: manifest },
       },
@@ -247,8 +248,13 @@ describe('ingest_integration tests ', () => {
       expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
-  });
 
+    it.todo('should override policy config with endpoint settings');
+    it.todo('should override policy config with cloud settings');
+  });
+  describe('package policy post create callback', () => {
+    it.todo('should create Event Filters given valid parameter on integration config');
+  });
   describe('package policy update callback (when the license is below platinum)', () => {
     beforeEach(() => {
       licenseEmitter.next(Gold); // set license level to gold

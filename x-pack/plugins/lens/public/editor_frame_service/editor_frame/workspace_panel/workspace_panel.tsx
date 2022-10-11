@@ -18,14 +18,13 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiPageContentBody,
   EuiButton,
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
-import type { CoreStart, ApplicationStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -35,6 +34,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { DropIllustration } from '@kbn/chart-icons';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import {
   FramePublicAPI,
@@ -51,7 +51,6 @@ import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import { DropIllustration } from '../../../assets/drop_illustration';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import {
@@ -79,11 +78,11 @@ import {
   selectChangesApplied,
   VisualizationState,
   DatasourceStates,
+  DataViewsState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField } from '../../../utils';
+import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -179,7 +178,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization: VisualizationState;
     visualizationMap: VisualizationMap;
     datasourceLayers: DatasourceLayers;
+    dataViews: DataViewsState;
   }>();
+
+  const { dataViews } = framePublicAPI;
 
   renderDeps.current = {
     datasourceMap,
@@ -187,17 +189,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization,
     visualizationMap,
     datasourceLayers,
+    dataViews,
   };
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
-        (acc, datasource) => [
-          ...acc,
-          ...(datasource.getRenderEventCounters?.(
-            renderDeps.current!.datasourceStates[datasource.id].state
-          ) ?? []),
-        ],
+        (acc, datasource) => {
+          if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
+          return [
+            ...acc,
+            ...(datasource.getRenderEventCounters?.(
+              renderDeps.current!.datasourceStates[datasource.id]?.state
+            ) ?? []),
+          ];
+        },
         []
       );
       let visualizationEvents: string[] = [];
@@ -207,8 +213,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             renderDeps.current.visualization.activeId
           ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
       }
+      const events = ['vis_editor', ...datasourceEvents, ...visualizationEvents];
 
-      trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
+      const adHocDataViews = Object.values(renderDeps.current.dataViews.indexPatterns || {}).filter(
+        (indexPattern) => !indexPattern.isPersisted
+      );
+      adHocDataViews.forEach(() => {
+        events.push('ad_hoc_data_view');
+      });
+
+      trackUiCounterEvents(events);
     }
   }, []);
 
@@ -217,22 +231,34 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
 
+        const requestWarnings: string[] = [];
+        const datasource = Object.values(renderDeps.current?.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current?.datasourceStates)[0].state;
+        if (adapters?.requests) {
+          plugins.data.search.showWarnings(adapters.requests, (warning) => {
+            const warningMessage = datasource.getSearchWarningMessages?.(datasourceState, warning);
+
+            requestWarnings.push(...(warningMessage || []));
+            if (warningMessage && warningMessage.length) return true;
+          });
+        }
         if (adapters && adapters.tables) {
           dispatchLens(
-            onActiveDataChange(
-              Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+            onActiveDataChange({
+              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
                 (acc, [key, value], index, tables) => ({
                   ...acc,
                   [tables.length === 1 ? defaultLayerId : key]: value,
                 }),
                 {}
-              )
-            )
+              ),
+              requestWarnings,
+            })
           );
         }
       }
     },
-    [dispatchLens]
+    [dispatchLens, plugins.data.search]
   );
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
@@ -242,7 +268,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+    dataViews.indexPatterns
   );
 
   const missingRefsErrors = missingIndexPatterns.length
@@ -289,6 +316,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceMap,
           datasourceStates,
           datasourceLayers,
+          indexPatterns: dataViews.indexPatterns,
         });
 
         if (ast) {
@@ -330,6 +358,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     missingRefsErrors.length,
     unknownVisError,
     visualization.activeId,
+    dataViews.indexPatterns,
   ]);
 
   useEffect(() => {
@@ -543,7 +572,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
-        application={core.application}
+        core={core}
         activeDatasourceId={activeDatasourceId}
         onRender$={onRender$}
         onData$={onData$}
@@ -559,7 +588,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       dragDropContext.dragging
         ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
-            dragDropContext.dragging
+            dragDropContext.dragging,
+            dataViews.indexPatterns
           )
         : undefined;
 
@@ -587,9 +617,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderWorkspaceContents()}
-        </EuiPageContentBody>
+        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
       </DragDrop>
     );
   };
@@ -603,6 +631,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
+      lensInspector={lensInspector}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>
@@ -618,7 +647,7 @@ export const VisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
-  application,
+  core,
   activeDatasourceId,
   onRender$,
   onData$,
@@ -639,7 +668,7 @@ export const VisualizationWrapper = ({
     unknownVisError?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
-  application: ApplicationStart;
+  core: CoreStart;
   activeDatasourceId: string | null;
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
@@ -653,6 +682,7 @@ export const VisualizationWrapper = ({
         to: context.dateRange.toDate,
       },
       filters: context.filters,
+      disableShardWarnings: true,
     }),
     [context]
   );
@@ -762,18 +792,18 @@ export const VisualizationWrapper = ({
 
   if (localState.missingRefsErrors?.length) {
     // Check for access to both Management app && specific indexPattern section
-    const { management: isManagementEnabled } = application.capabilities.navLinks;
+    const { management: isManagementEnabled } = core.application.capabilities.navLinks;
     const isIndexPatternManagementEnabled =
-      application.capabilities.management.kibana.indexPatterns;
+      core.application.capabilities.management.kibana.indexPatterns;
     return (
       <EuiFlexGroup data-test-subj="configuration-failure">
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={
               isManagementEnabled && isIndexPatternManagementEnabled ? (
-                <RedirectAppLinks application={application}>
+                <RedirectAppLinks coreStart={core}>
                   <a
-                    href={application.getUrlForApp('management', {
+                    href={core.application.getUrlForApp('management', {
                       path: '/kibana/indexPatterns/create',
                     })}
                     data-test-subj="configuration-failure-reconfigure-indexpatterns"

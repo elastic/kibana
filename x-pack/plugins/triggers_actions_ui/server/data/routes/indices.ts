@@ -66,15 +66,24 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
 
-    const result = { indices: uniqueCombined(aliases, indices, MAX_INDICES) };
+    let dataStreams: string[] = [];
+    try {
+      dataStreams = await getDataStreamsFromPattern(esClient, pattern);
+    } catch (err) {
+      logger.warn(
+        `route ${path} error getting data streams from pattern "${pattern}": ${err.message}`
+      );
+    }
+
+    const result = { indices: uniqueCombined(aliases, indices, dataStreams, MAX_INDICES) };
 
     logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }
 
-function uniqueCombined(list1: string[], list2: string[], limit: number) {
-  const set = new Set(list1.concat(list2));
+function uniqueCombined(list1: string[], list2: string[], list3: string[], limit: number) {
+  const set = new Set(list1.concat(list2).concat(list3));
   const result = Array.from(set);
   result.sort((string1, string2) => string1.localeCompare(string2));
   return result.slice(0, limit);
@@ -137,6 +146,18 @@ async function getAliasesFromPattern(
   }
 
   return result;
+}
+
+async function getDataStreamsFromPattern(
+  esClient: ElasticsearchClient,
+  pattern: string
+): Promise<string[]> {
+  const params = {
+    name: pattern,
+  };
+
+  const { data_streams: response } = await esClient.indices.getDataStream(params);
+  return response.map((r) => r.name);
 }
 
 interface IndiciesAggregation {

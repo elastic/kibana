@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   HOST_NAME,
@@ -16,7 +17,6 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
   environmentQuery,
   serviceNodeNameQuery,
@@ -45,6 +45,7 @@ export async function getServiceNodeMetadata({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

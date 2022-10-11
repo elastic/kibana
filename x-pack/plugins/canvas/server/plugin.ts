@@ -17,7 +17,6 @@ import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { ReportingSetup } from '@kbn/reporting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { ESSQL_SEARCH_STRATEGY } from '../common/lib/constants';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
@@ -26,7 +25,6 @@ import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
 import { initializeTemplates } from './templates';
-import { essqlSearchStrategyProvider } from './lib/essql_strategy';
 import { getUISettings } from './ui_settings';
 import { CanvasRouteHandlerContext, createWorkpadRouteContext } from './workpad_route_context';
 
@@ -94,11 +92,6 @@ export class CanvasPlugin implements Plugin {
     // we need the kibana index for the Canvas usage collector
     const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
-
-    coreSetup.getStartServices().then(([_, depsStart]) => {
-      const strategy = essqlSearchStrategyProvider();
-      plugins.data.search.registerSearchStrategy(ESSQL_SEARCH_STRATEGY, strategy);
-    });
   }
 
   public start(coreStart: CoreStart) {

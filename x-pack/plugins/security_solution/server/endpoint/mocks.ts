@@ -45,7 +45,7 @@ import { createEndpointMetadataServiceTestContextMock } from './services/metadat
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
-import { createFeatureUsageServiceMock } from './services/feature_usage';
+import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -135,6 +135,10 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
+    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+      jest.fn(() => ({ privileges: { kibana: [] } }))
+    );
+
     return {
       agentService,
       agentPolicyService,
@@ -158,6 +162,7 @@ export const createMockEndpointAppContextServiceStartContract =
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
       featureUsageService: createFeatureUsageServiceMock(),
+      experimentalFeatures: createMockConfig().experimentalFeatures,
     };
   };
 

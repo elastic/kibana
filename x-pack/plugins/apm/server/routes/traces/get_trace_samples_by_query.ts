@@ -9,10 +9,10 @@ import {
   kqlQuery,
   termsQuery,
 } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Environment } from '../../../common/environment_rt';
 import { Setup } from '../../lib/helpers/setup_request';
 import { TraceSearchType } from '../../../common/trace_explorer';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   PARENT_ID,
@@ -54,6 +54,7 @@ export async function getTraceSamplesByQuery({
             ],
           },
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {
@@ -121,6 +122,7 @@ export async function getTraceSamplesByQuery({
         events: [ProcessorEvent.transaction],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

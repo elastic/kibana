@@ -57,6 +57,7 @@ describe('getDataFilters', () => {
   const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
   const timeslice = undefined;
   const query = undefined;
+  const embeddableSearchContext = undefined;
   const filters: Filter[] = [];
   const searchSessionId = '12345';
   const searchSessionMapBuffer = {
@@ -76,6 +77,7 @@ describe('getDataFilters', () => {
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
       isReadOnly
@@ -92,6 +94,7 @@ describe('getDataFilters', () => {
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       undefined,
       isReadOnly

@@ -18,7 +18,7 @@ import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_bu
 import { SimpleAlertTable } from './simple_alert_table';
 import { getEnrichedFieldInfo } from '../helpers';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { SESSION_LOADING, SESSION_ERROR, SESSION_COUNT } from './translations';
+import { SESSION_LOADING, SESSION_EMPTY, SESSION_ERROR, SESSION_COUNT } from './translations';
 
 interface Props {
   browserFields: BrowserFields;
@@ -43,6 +43,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
       timelineId: timelineId ?? '',
       signalIndexName: null,
       includeAlertIds: true,
+      ignoreTimerange: true,
     });
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
@@ -64,9 +65,20 @@ export const RelatedAlertsBySession = React.memo<Props>(
       fieldType: fieldFromBrowserField?.type,
     });
 
+    const isEmpty = count === 0;
+
+    let state: InsightAccordionState = 'loading';
+    if (error) {
+      state = 'error';
+    } else if (alertIds || isEmpty) {
+      state = 'success';
+    }
+
     const renderContent = useCallback(() => {
       if (!alertIds || !cellData?.dataProviders) {
         return null;
+      } else if (isEmpty && state !== 'loading') {
+        return SESSION_EMPTY;
       }
       return (
         <>
@@ -80,16 +92,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
           </InvestigateInTimelineButton>
         </>
       );
-    }, [alertIds, cellData?.dataProviders]);
-
-    let state: InsightAccordionState = 'loading';
-    if (error) {
-      state = 'error';
-    } else if (count === 0) {
-      state = 'empty';
-    } else if (alertIds) {
-      state = 'success';
-    }
+    }, [alertIds, cellData?.dataProviders, isEmpty, state]);
 
     return (
       <InsightAccordion
@@ -111,7 +114,6 @@ function getTextFromState(state: InsightAccordionState, count: number | undefine
     case 'error':
       return SESSION_ERROR;
     case 'success':
-    case 'empty':
       return SESSION_COUNT(count);
     default:
       return '';

@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -13,7 +14,6 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
@@ -73,6 +73,7 @@ export function getServiceMapDependencyNodeInfo({
           events: [ProcessorEvent.metric],
         },
         body: {
+          track_total_hits: false,
           size: 0,
           query: {
             bool: {

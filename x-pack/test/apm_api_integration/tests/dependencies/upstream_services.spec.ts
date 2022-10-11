@@ -47,28 +47,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Dependency upstream services',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded', () => {
-        before(async () => {
-          await generateData({ synthtraceEsClient, start, end });
-        });
-        after(() => synthtraceEsClient.clean());
-
-        it('returns a list of upstream services for the dependency', async () => {
-          const { status, body } = await callApi();
-
-          expect(status).to.be(200);
-          expect(body.services.map(({ location }) => (location as ServiceNode).serviceName)).to.eql(
-            ['synth-go']
-          );
-
-          const currentStatsLatencyValues = body.services[0].currentStats.latency.timeseries;
-          expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
-        });
+  registry.when('Dependency upstream services', { config: 'basic', archives: [] }, () => {
+    describe('when data is loaded', () => {
+      before(async () => {
+        await generateData({ synthtraceEsClient, start, end });
       });
-    }
-  );
+      after(() => synthtraceEsClient.clean());
+
+      it('returns a list of upstream services for the dependency', async () => {
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.services.map(({ location }) => (location as ServiceNode).serviceName)).to.eql([
+          'synth-go',
+        ]);
+
+        const currentStatsLatencyValues = body.services[0].currentStats.latency.timeseries;
+        expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
+      });
+    });
+  });
 }

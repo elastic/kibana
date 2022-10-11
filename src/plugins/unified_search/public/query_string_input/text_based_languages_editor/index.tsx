@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,10 +36,17 @@ import {
   EDITOR_MIN_HEIGHT,
 } from './text_based_languages_editor.styles';
 import { MemoizedDocumentation, DocumentationSections } from './documentation';
-import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
+import {
+  useDebounceWithOptions,
+  parseErrors,
+  getInlineEditorText,
+  getDocumentationSections,
+} from './helpers';
 import { EditorFooter } from './editor_footer';
+import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
+import { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -47,12 +55,16 @@ export interface TextBasedLanguagesEditorProps {
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   errors?: Error[];
+  isDisabled?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
 const EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS = 220;
+
+const KEYCODE_ARROW_UP = 38;
+const KEYCODE_ARROW_DOWN = 40;
 
 const languageId = (language: string) => {
   switch (language) {
@@ -74,6 +86,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   expandCodeEditor,
   isCodeEditorExpanded,
   errors,
+  isDisabled,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -88,12 +101,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [userDrags, setUserDrags] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [editorErrors, setEditorErrors] = useState<
     Array<{ startLineNumber: number; message: string }>
   >([]);
   const [documentationSections, setDocumentationSections] = useState<DocumentationSections>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { uiSettings } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -103,6 +117,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(errors?.length),
     isCodeEditorExpandedFocused
   );
+  const isDark = uiSettings.get('theme:darkMode');
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
@@ -115,7 +130,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
-    (mouseDownEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    (mouseDownEvent) => {
       const startSize = editorHeight;
       const startPosition = mouseDownEvent.pageY;
 
@@ -123,15 +138,29 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const height = startSize - startPosition + mouseMoveEvent.pageY;
         const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
         setEditorHeight(validatedHeight);
-        setUserDrags(true);
       }
       function onMouseUp() {
         document.body.removeEventListener('mousemove', onMouseMove);
-        setUserDrags(false);
       }
 
       document.body.addEventListener('mousemove', onMouseMove);
       document.body.addEventListener('mouseup', onMouseUp, { once: true });
+    },
+    [editorHeight]
+  );
+
+  const onKeyDownResizeHandler = useCallback(
+    (keyDownEvent) => {
+      let height = editorHeight;
+      if (
+        keyDownEvent.keyCode === KEYCODE_ARROW_UP ||
+        keyDownEvent.keyCode === KEYCODE_ARROW_DOWN
+      ) {
+        const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
+        height = height + step;
+        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+        setEditorHeight(validatedHeight);
+      }
     },
     [editorHeight]
   );
@@ -228,8 +257,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (hasLines && !updateLinesFromModel) {
           setLines(queryString.split(/\r|\n/).length);
         }
-        const trimmedText = queryString.replace(/\r?\n|\r/g, '');
-        const text = hasLines ? trimmedText : queryString;
+        const text = getInlineEditorText(queryString, Boolean(hasLines));
         const queryLength = text.length;
         const unusedSpace =
           errors && errors.length
@@ -303,7 +331,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: 'vs',
+    theme: isDark ? 'vs-dark' : 'vs',
     lineDecorationsWidth: 12,
     autoIndent: 'none',
     wrappingIndent: 'none',
@@ -315,6 +343,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       horizontal: 'hidden',
     },
     overviewRulerBorder: false,
+    readOnly: isDisabled,
   };
 
   if (isCompactFocused) {
@@ -464,7 +493,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
-                        color="default"
+                        color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
@@ -537,7 +566,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     data-test-subj="unifiedTextLangEditor-expand"
                     css={{
                       borderRadius: 0,
-                      backgroundColor: '#e9edf3',
+                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                     }}
                   />
@@ -573,7 +602,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={{
                           borderTopLeftRadius: 0,
                           borderBottomLeftRadius: 0,
-                          backgroundColor: '#e9edf3',
+                          backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
                           borderLeft: 'transparent !important',
                         }}
@@ -592,17 +621,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
       )}
       {isCodeEditorExpanded && (
-        <div css={styles.dragResizeContainer} onMouseDown={onMouseDownResizeHandler}>
-          {!userDrags && (
-            <EuiButtonIcon
-              color="primary"
-              iconType="grab"
-              aria-label="Resize editor"
-              data-test-subj="unifiedTextLangEditor-resize"
-              css={styles.dragResizeButton}
-            />
-          )}
-        </div>
+        <ResizableButton
+          onMouseDownResizeHandler={onMouseDownResizeHandler}
+          onKeyDownResizeHandler={onKeyDownResizeHandler}
+        />
       )}
     </>
   );

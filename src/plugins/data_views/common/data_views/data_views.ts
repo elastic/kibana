@@ -468,7 +468,7 @@ export class DataViewsService {
    * Checks if current user has a user created index pattern ignoring fleet's server default index patterns.
    */
   async hasUserDataView(): Promise<boolean> {
-    return this.apiClient.hasUserIndexPattern();
+    return this.apiClient.hasUserDataView();
   }
 
   /**
@@ -478,7 +478,7 @@ export class DataViewsService {
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return this.apiClient.getFieldsForWildcard({
+    const { fields } = await this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
@@ -486,6 +486,7 @@ export class DataViewsService {
       allowNoIndex: options.allowNoIndex,
       filter: options.filter,
     });
+    return fields;
   };
 
   /**
@@ -500,9 +501,33 @@ export class DataViewsService {
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
+      allowNoIndex: indexPattern.allowNoIndex,
       ...options,
       pattern: indexPattern.title as string,
     });
+
+  private getFieldsAndIndicesForDataView = async (dataView: DataView) => {
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    return this.apiClient.getFieldsForWildcard({
+      type: dataView.type,
+      rollupIndex: dataView?.typeMeta?.params?.rollup_index,
+      allowNoIndex: dataView.allowNoIndex,
+      pattern: dataView.getIndexPattern(),
+      metaFields,
+    });
+  };
+
+  private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    return await this.apiClient.getFieldsForWildcard({
+      pattern: options.pattern,
+      metaFields,
+      type: options.type,
+      rollupIndex: options.rollupIndex,
+      allowNoIndex: options.allowNoIndex,
+      filter: options.filter,
+    });
+  };
 
   /**
    * Refresh field list for a given index pattern.
@@ -510,19 +535,28 @@ export class DataViewsService {
    */
   refreshFields = async (indexPattern: DataView) => {
     try {
-      const fields = (await this.getFieldsForIndexPattern(indexPattern)) as FieldSpec[];
+      const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
       fields.forEach((field) => (field.isMapped = true));
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       const fieldAttrs = indexPattern.getFieldAttrs();
       const fieldsWithSavedAttrs = Object.values(
         this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
       );
-      indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
+      const runtimeFieldsMap = this.getRuntimeFields(
+        indexPattern.getRuntimeMappings() as Record<string, RuntimeFieldSpec>,
+        indexPattern.getFieldAttrs()
+      );
+      const runtimeFieldsArray = Object.values(runtimeFieldsMap).filter(
+        (runtimeField) =>
+          !fieldsWithSavedAttrs.find((mappedField) => mappedField.name === runtimeField.name)
+      );
+      indexPattern.fields.replaceAll([...runtimeFieldsArray, ...fieldsWithSavedAttrs]);
+      indexPattern.matchedIndices = indices;
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
           { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${indexPattern.title}`
+          `refreshFields:${indexPattern.getIndexPattern()}`
         );
       }
 
@@ -531,10 +565,10 @@ export class DataViewsService {
         {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: indexPattern.id, title: indexPattern.title },
+            values: { id: indexPattern.id, title: indexPattern.getIndexPattern() },
           }),
         },
-        indexPattern.title
+        indexPattern.getIndexPattern()
       );
     }
   };
@@ -558,7 +592,7 @@ export class DataViewsService {
     const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
       let updatedFieldList: FieldSpec[];
-      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
       newFields.forEach((field) => (field.isMapped = true));
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
@@ -569,7 +603,7 @@ export class DataViewsService {
         updatedFieldList = fieldsAsArr;
       }
 
-      return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
+      return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
@@ -684,8 +718,10 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
+    let matchedIndices: string[] = [];
+
     try {
-      spec.fields = await this.refreshFieldSpecMap(
+      const { fields, indices } = await this.refreshFieldSpecMap(
         spec.fields || {},
         savedObject.id,
         spec.title as string,
@@ -699,38 +735,12 @@ export class DataViewsService {
         spec.fieldAttrs
       );
 
-      const addRuntimeFieldToSpecFields = (
-        name: string,
-        fieldType: RuntimeType,
-        runtimeField: RuntimeFieldSpec
-      ) => {
-        spec.fields![name] = {
-          name,
-          type: castEsToKbnFieldTypeName(fieldType),
-          esTypes: [fieldType],
-          runtimeField,
-          aggregatable: true,
-          searchable: true,
-          readFromDocValues: false,
-          customLabel: spec.fieldAttrs?.[name]?.customLabel,
-          count: spec.fieldAttrs?.[name]?.count,
-        };
-      };
+      spec.fields = fields;
+      matchedIndices = indices || [];
 
-      // CREATE RUNTIME FIELDS
-      for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
-        // do not create runtime field if mapped field exists
-        if (!spec.fields[name]) {
-          // For composite runtime field we add the subFields, **not** the composite
-          if (runtimeField.type === 'composite') {
-            Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
-              addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
-            });
-          } else {
-            addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
-          }
-        }
-      }
+      const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
+      // mapped fields overwrite runtime fields
+      spec.fields = { ...runtimeFieldSpecs, ...spec.fields };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
@@ -760,8 +770,53 @@ export class DataViewsService {
       : {};
 
     const indexPattern = await this.create(spec, true);
+    indexPattern.matchedIndices = matchedIndices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
+  };
+
+  private getRuntimeFields = (
+    runtimeFieldMap: Record<string, RuntimeFieldSpec> | undefined = {},
+    fieldAttrs: FieldAttrs | undefined = {}
+  ) => {
+    const spec: DataViewFieldMap = {};
+
+    const addRuntimeFieldToSpecFields = (
+      name: string,
+      fieldType: RuntimeType,
+      runtimeField: RuntimeFieldSpec,
+      parentName?: string
+    ) => {
+      spec[name] = {
+        name,
+        type: castEsToKbnFieldTypeName(fieldType),
+        esTypes: [fieldType],
+        runtimeField,
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: false,
+        customLabel: fieldAttrs?.[name]?.customLabel,
+        count: fieldAttrs?.[name]?.count,
+      };
+
+      if (parentName) {
+        spec[name].parentName = parentName;
+      }
+    };
+
+    // CREATE RUNTIME FIELDS
+    for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
+      // For composite runtime field we add the subFields, **not** the composite
+      if (runtimeField.type === 'composite') {
+        Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
+          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField, name);
+        });
+      } else {
+        addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+      }
+    }
+
+    return spec;
   };
 
   /**
@@ -945,7 +1000,7 @@ export class DataViewsService {
 
             this.onNotification(
               { title, color: 'danger' },
-              `updateSavedObject:${indexPattern.title}`
+              `updateSavedObject:${indexPattern.getIndexPattern()}`
             );
             throw err;
           }

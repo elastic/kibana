@@ -21,6 +21,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./delete_list_items'));
     loadTestFile(require.resolve('./find_lists'));
     loadTestFile(require.resolve('./find_list_items'));
+    loadTestFile(require.resolve('./find_lists_by_size'));
+    loadTestFile(require.resolve('./get_exception_filter'));
     loadTestFile(require.resolve('./import_exceptions'));
     loadTestFile(require.resolve('./import_list_items'));
     loadTestFile(require.resolve('./export_list_items'));

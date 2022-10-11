@@ -136,10 +136,10 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 className="euiTableSortMobile"
               >
                 <div
-                  className="euiPopover euiPopover--anchorDownRight"
+                  className="euiPopover emotion-euiPopover"
                 >
                   <div
-                    className="euiPopover__anchor"
+                    className="euiPopover__anchor css-16vtueo-render"
                   >
                     <button
                       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
@@ -877,10 +877,10 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              className="euiPopover euiPopover--anchorUpRight"
+              className="euiPopover emotion-euiPopover"
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-16vtueo-render"
               >
                 <button
                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"

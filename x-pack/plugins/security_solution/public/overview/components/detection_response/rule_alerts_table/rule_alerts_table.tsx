@@ -22,7 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import type { RuleAlertsItem } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
@@ -31,7 +31,8 @@ import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
@@ -55,7 +56,12 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
     render: (name: string, { id }) => {
       const url = getAppUrl({ deepLinkId: SecurityPageName.rules, path: `id/${id}` });
       return (
-        <EuiToolTip data-test-subj={`${id}-tooltip`} content={i18n.OPEN_RULE_DETAIL_TOOLTIP}>
+        <EuiToolTip
+          data-test-subj={`${id}-tooltip`}
+          title={i18n.OPEN_RULE_DETAIL_TOOLTIP}
+          content={name}
+          anchorClassName="eui-textTruncate"
+        >
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
             data-test-subj="severityRuleAlertsTable-name"
@@ -120,7 +126,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   return (
-    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+    <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
       <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}

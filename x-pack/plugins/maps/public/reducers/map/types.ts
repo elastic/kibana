@@ -41,6 +41,10 @@ export type MapContext = Partial<MapViewContext> & {
   timeslice?: Timeslice;
   query?: Query;
   filters: Filter[];
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   drawState?: DrawState;
   editState?: EditState;
   searchSessionId?: string;

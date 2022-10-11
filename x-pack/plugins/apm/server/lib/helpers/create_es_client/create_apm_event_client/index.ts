@@ -14,15 +14,11 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
@@ -46,6 +42,7 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 
@@ -68,7 +65,6 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  profile: Profile;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =

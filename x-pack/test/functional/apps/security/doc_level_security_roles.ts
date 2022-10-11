@@ -17,10 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const screenshot = getService('screenshots');
   const security = getService('security');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('dls', function () {
     before('initialize tests', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
       await browser.setWindowSize(1600, 1000);
 

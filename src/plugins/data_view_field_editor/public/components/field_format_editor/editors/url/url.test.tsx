@@ -104,7 +104,7 @@ describe('UrlFormatEditor', () => {
     userEvent.selectOptions(getByLabelText('Type'), 'img');
     expect(sampleImageUrlTemplate).toContain(MY_BASE_PATH);
     expect(sampleImageUrlTemplate).toMatchInlineSnapshot(
-      `"my-base-path/plugins/indexPatternManagement/assets/icons/{{value}}.png"`
+      `"my-base-path/plugins/dataViewFieldEditor/assets/icons/{{value}}.png"`
     );
   });
 });

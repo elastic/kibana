@@ -26,6 +26,7 @@ import {
 } from '../../types';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
+import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -58,9 +59,8 @@ const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
   id: 'aaabbb',
-  message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup'; actionSubGroup: 'bSubGroup'`,
+  message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
-  subgroup: 'bSubgroup',
   state: {
     start: '2020-01-01T02:00:00.000Z',
     end: '2020-01-01T03:00:00.000Z',
@@ -73,7 +73,6 @@ const action = {
   typeId: '.email',
   alertId: '123',
   alertGroup: 'aGroup',
-  alertSubgroup: 'bSubgroup',
 };
 
 describe('AlertingEventLogger', () => {
@@ -653,6 +652,7 @@ describe('AlertingEventLogger', () => {
           numSearches: 6,
           esSearchDurationMs: 3300,
           totalSearchDurationMs: 10333,
+          hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
       });
@@ -679,6 +679,118 @@ describe('AlertingEventLogger', () => {
                   number_of_searches: 6,
                   es_search_duration_ms: 3300,
                   total_search_duration_ms: 10333,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
+    test('should set fields from execution timings if provided', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.done({
+        timings: {
+          [TaskRunnerTimerSpan.StartTaskRun]: 10,
+          [TaskRunnerTimerSpan.TotalRunDuration]: 20,
+          [TaskRunnerTimerSpan.PrepareRule]: 30,
+          [TaskRunnerTimerSpan.RuleTypeRun]: 40,
+          [TaskRunnerTimerSpan.ProcessAlerts]: 50,
+          [TaskRunnerTimerSpan.TriggerActions]: 60,
+          [TaskRunnerTimerSpan.ProcessRuleRun]: 70,
+        },
+      });
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const loggedEvent = {
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                metrics: {
+                  claim_to_start_duration_ms: 10,
+                  total_run_duration_ms: 20,
+                  prepare_rule_duration_ms: 30,
+                  rule_type_run_duration_ms: 40,
+                  process_alerts_duration_ms: 50,
+                  trigger_actions_duration_ms: 60,
+                  process_rule_duration_ms: 70,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
+    test('should set fields from execution metrics and timings if both provided', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.done({
+        metrics: {
+          numberOfTriggeredActions: 1,
+          numberOfGeneratedActions: 2,
+          numberOfActiveAlerts: 3,
+          numberOfNewAlerts: 4,
+          numberOfRecoveredAlerts: 5,
+          numSearches: 6,
+          esSearchDurationMs: 3300,
+          totalSearchDurationMs: 10333,
+          hasReachedAlertLimit: false,
+          triggeredActionsStatus: ActionsCompletion.COMPLETE,
+        },
+        timings: {
+          [TaskRunnerTimerSpan.StartTaskRun]: 10,
+          [TaskRunnerTimerSpan.TotalRunDuration]: 20,
+          [TaskRunnerTimerSpan.PrepareRule]: 30,
+          [TaskRunnerTimerSpan.RuleTypeRun]: 40,
+          [TaskRunnerTimerSpan.ProcessAlerts]: 50,
+          [TaskRunnerTimerSpan.TriggerActions]: 60,
+          [TaskRunnerTimerSpan.ProcessRuleRun]: 70,
+        },
+      });
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const loggedEvent = {
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                metrics: {
+                  number_of_triggered_actions: 1,
+                  number_of_generated_actions: 2,
+                  alert_counts: {
+                    active: 3,
+                    new: 4,
+                    recovered: 5,
+                  },
+                  number_of_searches: 6,
+                  es_search_duration_ms: 3300,
+                  total_search_duration_ms: 10333,
+                  claim_to_start_duration_ms: 10,
+                  total_run_duration_ms: 20,
+                  prepare_rule_duration_ms: 30,
+                  rule_type_run_duration_ms: 40,
+                  process_alerts_duration_ms: 50,
+                  trigger_actions_duration_ms: 60,
+                  process_rule_duration_ms: 70,
                 },
               },
             },
@@ -892,14 +1004,13 @@ describe('createAlertRecord', () => {
     expect(record.event?.end).toEqual(alert.state.end);
     expect(record.event?.duration).toEqual(alert.state.duration);
     expect(record.message).toEqual(
-      `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup'; actionSubGroup: 'bSubGroup'`
+      `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`
     );
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
     expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
     expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
-    expect(record.kibana?.alerting?.action_subgroup).toEqual(alert.subgroup);
     expect(record.kibana?.saved_objects).toEqual([
       {
         id: contextWithName.ruleId,
@@ -945,14 +1056,13 @@ describe('createActionExecuteRecord', () => {
     expect(record.event?.kind).toEqual('alert');
     expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
     expect(record.message).toEqual(
-      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup(subgroup): 'aGroup(bSubgroup)' action: .email:abc`
+      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup: 'aGroup' action: .email:abc`
     );
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
     expect(record.kibana?.alerting?.instance_id).toEqual(action.alertId);
     expect(record.kibana?.alerting?.action_group_id).toEqual(action.alertGroup);
-    expect(record.kibana?.alerting?.action_subgroup).toEqual(action.alertSubgroup);
     expect(record.kibana?.saved_objects).toEqual([
       {
         id: contextWithName.ruleId,

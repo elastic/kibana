@@ -7,28 +7,14 @@
 import React from 'react';
 import { MetricItem } from './metric_item';
 import { useLast50DurationChart } from '../../../../hooks';
+import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 
-export const OverviewGridItem = ({
-  monitorId,
-  monitorName,
-  locationId,
-  isMonitorEnabled,
-}: {
-  monitorId: string;
-  monitorName: string;
-  locationId: string;
-  isMonitorEnabled: boolean;
-}) => {
-  const { data, loading, averageDuration } = useLast50DurationChart({ locationId, monitorId });
+export const OverviewGridItem = ({ monitor }: { monitor: MonitorOverviewItem }) => {
+  const { data, loading, averageDuration } = useLast50DurationChart({
+    locationId: monitor.location?.id,
+    monitorId: monitor.id,
+  });
   return (
-    <MetricItem
-      monitorId={monitorId}
-      monitorName={monitorName}
-      isMonitorEnabled={isMonitorEnabled}
-      locationId={locationId}
-      data={data}
-      loaded={!loading}
-      averageDuration={averageDuration}
-    />
+    <MetricItem monitor={monitor} data={data} loaded={!loading} averageDuration={averageDuration} />
   );
 };

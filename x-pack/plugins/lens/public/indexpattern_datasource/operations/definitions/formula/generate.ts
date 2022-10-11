@@ -87,6 +87,16 @@ export function generateFormula(
     }
     previousFormula += `shift='${previousColumn.timeShift}'`;
   }
+  if (previousColumn.reducedTimeRange) {
+    if (
+      previousColumn.operationType !== 'count' ||
+      previousColumn.filter ||
+      previousColumn.timeShift
+    ) {
+      previousFormula += ', ';
+    }
+    previousFormula += `reducedTimeRange='${previousColumn.reducedTimeRange}'`;
+  }
   if (previousFormula) {
     // close the formula at the end
     previousFormula += ')';

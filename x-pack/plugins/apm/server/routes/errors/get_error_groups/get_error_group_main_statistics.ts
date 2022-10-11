@@ -11,6 +11,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -22,7 +23,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -70,6 +70,7 @@ export async function getErrorGroupMainStatistics({
         events: [ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

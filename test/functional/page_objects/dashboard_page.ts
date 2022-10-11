@@ -12,6 +12,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+import { CommonPageObject } from './common_page';
 
 interface SaveDashboardOptions {
   /**
@@ -98,6 +99,8 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
+    // TODO: Replace every instance of `exitFullScreenModeLogo` with `exitFullScreenModeButton` once the new Shared UX
+    // full screen button can be used (i.e. after https://github.com/elastic/kibana/issues/140311 is resolved)
     return await this.testSubjects.exists('exitFullScreenModeLogo');
   }
 
@@ -333,7 +336,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -355,7 +358,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
       await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -367,11 +370,11 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('createDashboardPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getCreateDashboardPromptExists() {
-    return await this.testSubjects.exists('createDashboardPromptButton');
+    return this.testSubjects.exists('emptyListPrompt');
   }
 
   public async isOptionsOpen() {
@@ -426,6 +429,31 @@ export class DashboardPageObject extends FtrService {
   public async gotoDashboardEditMode(dashboardName: string) {
     await this.loadSavedDashboard(dashboardName);
     await this.switchToEditMode();
+  }
+
+  public async gotoDashboardURL({
+    id,
+    args,
+    editMode,
+  }: {
+    id?: string;
+    editMode?: boolean;
+    args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
+  } = {}) {
+    let dashboardLocation = `/create`;
+    if (id) {
+      const edit = editMode ? `?_a=(viewMode:edit)` : '';
+      dashboardLocation = `/view/${id}${edit}`;
+    }
+    this.common.navigateToActualUrl('dashboard', dashboardLocation, args);
+  }
+
+  public async gotoDashboardListingURL({
+    args,
+  }: {
+    args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
+  } = {}) {
+    await this.common.navigateToActualUrl('dashboard', '/list', args);
   }
 
   public async renameDashboard(dashboardName: string) {
@@ -562,7 +590,7 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
+    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 

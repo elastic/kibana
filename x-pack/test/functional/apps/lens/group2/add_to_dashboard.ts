@@ -34,10 +34,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       field: 'bytes',
     });
 
-    await PageObjects.lens.switchToVisualization('lnsMetric');
+    await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
     await PageObjects.lens.waitForVisualization('legacyMtrVis');
-    await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+    await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
   };
 
   const createAndSaveDashboard = async (dashboardName: string) => {
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
     await PageObjects.lens.goToTimeRange();
     await PageObjects.lens.waitForVisualization('legacyMtrVis');
-    await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+    await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
   };
 
   describe('lens add-to-dashboards tests', () => {
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'New Lens from Modal'
       );
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'Artistpreviouslyknownaslens Copy'
       );
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'New Lens from Modal'
       );
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'Artistpreviouslyknownaslens Copy'
       );
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'New by ref Lens from Modal'
       );
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'Artistpreviouslyknownaslens by ref'
       );
@@ -201,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'New Lens by ref from Modal'
       );
@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
         'Artistpreviouslyknownaslens by ref 2'
       );
@@ -301,10 +301,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             field: 'bytes',
           });
 
-          await PageObjects.lens.switchToVisualization('lnsMetric');
+          await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
           await PageObjects.lens.waitForVisualization('legacyMtrVis');
-          await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+          await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
 
           await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await testSubjects.click('lnsApp_saveButton');
@@ -347,10 +347,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             field: 'bytes',
           });
 
-          await PageObjects.lens.switchToVisualization('lnsMetric');
+          await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
           await PageObjects.lens.waitForVisualization('legacyMtrVis');
-          await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+          await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
 
           await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await testSubjects.click('lnsApp_saveButton');

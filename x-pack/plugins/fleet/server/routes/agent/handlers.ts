@@ -5,18 +5,29 @@
  * 2.0.
  */
 
+import { readFile } from 'fs/promises';
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
 import { uniq } from 'lodash';
+import semverGte from 'semver/functions/gte';
+import semverGt from 'semver/functions/gt';
+import semverCoerce from 'semver/functions/coerce';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
+import { appContextService } from '../../services';
+
+const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
-  PostBulkAgentReassignResponse,
-  PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
+  GetAvailableVersionsResponse,
+  GetActionStatusResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -29,8 +40,9 @@ import type {
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
 export const getAgentHandler: RequestHandler<
@@ -52,7 +64,7 @@ export const getAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -78,7 +90,7 @@ export const deleteAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -112,7 +124,7 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -137,17 +149,9 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -184,7 +188,7 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -206,7 +210,7 @@ export const getAgentTagsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -229,7 +233,7 @@ export const putAgentsReassignHandler: RequestHandler<
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -253,17 +257,9 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       request.body.policy_id
     );
 
-    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -284,7 +280,7 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -310,10 +306,59 @@ export const getAgentDataHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
+
+// Read a static file generated at build time
+export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
+  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
+  let versionsToDisplay: string[] = [];
+
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
+
+  try {
+    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
+
+    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+    // De-dup and sort in descending order
+    const data: string[] = JSON.parse(file);
+
+    const versions = data
+      .map((item: any) => semverCoerce(item)?.version || '')
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+    const parsedVersions = uniq(versions) as string[];
+
+    // Add current version if not already present
+    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
+    versionsToDisplay = !hasCurrentVersion
+      ? [kibanaVersionCoerced].concat(parsedVersions)
+      : parsedVersions;
+    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getActionStatusHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetActionStatusRequestSchema.query>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
+    const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};

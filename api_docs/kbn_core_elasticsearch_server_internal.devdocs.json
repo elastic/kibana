@@ -25,6 +25,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -35,6 +36,7 @@
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -44,7 +46,61 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "{ name: string | symbol; transform: ",
+                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "GetResponse",
+                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; }; delete: { (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; cluster: ",
+                  "default",
+                  "; eql: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -78,11 +134,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; cluster: ",
-                  "default",
-                  "; eql: ",
-                  "default",
-                  "; create: { <TDocument = unknown>(this: That, params: ",
+                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -138,33 +190,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; get: { <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "GetResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
                   "<TDocument, TPartialDocument> | ",
                   "UpdateRequest",
@@ -190,33 +216,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; delete: { (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -1176,6 +1176,8 @@
                   "TermvectorsResponse",
                   ">; }; textStructure: ",
                   "default",
+                  "; transform: ",
+                  "default",
                   "; updateByQuery: { (this: That, params: ",
                   "UpdateByQueryRequest",
                   " | ",
@@ -1235,7 +1237,8 @@
                   "; }"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1257,6 +1260,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1267,6 +1271,7 @@
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1279,7 +1284,8 @@
                   "number | null"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1292,7 +1298,8 @@
                   "Record<string, string | string[] | undefined> | null"
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1316,6 +1323,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1331,6 +1339,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1369,6 +1378,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1388,6 +1398,7 @@
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1405,6 +1416,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1414,7 +1426,8 @@
             "label": "version",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1424,7 +1437,8 @@
             "label": "ip",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1437,7 +1451,8 @@
               "{ publish_address: string; } | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1447,7 +1462,8 @@
             "label": "name",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1461,6 +1477,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1481,7 +1498,8 @@
               "; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1495,6 +1513,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1504,7 +1523,8 @@
             "label": "isCompatible",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1517,7 +1537,8 @@
               "string | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1537,7 +1558,8 @@
               "[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1557,7 +1579,8 @@
               "[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1567,7 +1590,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1580,7 +1604,8 @@
               "Error | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1594,6 +1619,7 @@
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -1603,7 +1629,61 @@
             "label": "internalClient",
             "description": [],
             "signature": [
-              "{ name: string | symbol; transform: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; }; delete: { (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -1637,11 +1717,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; cluster: ",
-              "default",
-              "; eql: ",
-              "default",
-              "; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -1697,33 +1773,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; get: { <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "GetResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "GetResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "GetResponse",
-              "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
               "UpdateRequest",
               "<TDocument, TPartialDocument> | ",
               "UpdateRequest",
@@ -1749,33 +1799,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; delete: { (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -2735,6 +2759,8 @@
               "TermvectorsResponse",
               ">; }; textStructure: ",
               "default",
+              "; transform: ",
+              "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
               " | ",
@@ -2794,7 +2820,8 @@
               "; }"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -2807,7 +2834,8 @@
               "Logger"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -2817,7 +2845,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -2827,7 +2856,8 @@
             "label": "ignoreVersionMismatch",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
@@ -2837,7 +2867,8 @@
             "label": "esVersionCheckInterval",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2853,10 +2884,11 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; }>; readonly customHeaders: Record<string, string>; readonly hosts: string | string[]; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly compression: boolean; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly requestTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly apiVersion: string; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; }"
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly requestTimeout: moment.Duration; readonly compression: boolean; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; }>; readonly customHeaders: Record<string, string>; readonly hosts: string | string[]; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly apiVersion: string; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; }"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2882,7 +2914,11 @@
           "Type",
           "<string | string[]>; maxSockets: ",
           "Type",
-          "<number>; compression: ",
+          "<number>; maxIdleSockets: ",
+          "Type",
+          "<number>; idleSocketTimeout: ",
+          "Type",
+          "<moment.Duration>; compression: ",
           "Type",
           "<boolean>; username: ",
           "Type",
@@ -2942,6 +2978,7 @@
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

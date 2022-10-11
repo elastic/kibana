@@ -13,12 +13,16 @@ import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
+import {
+  FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
+  TIMELINE_OVERRIDES_CSS_STYLESHEET,
+} from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
 } from '../../../timelines/components/timeline/styles';
-import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -62,6 +66,11 @@ const OverlayRootContainer = styled.div`
     padding: ${({ theme: { eui } }) => eui.euiSizeXL};
   }
 
+  &.fullScreen {
+    top: 0;
+    height: 100%;
+  }
+
   .fullHeight {
     height: 100%;
   }
@@ -70,6 +79,7 @@ const OverlayRootContainer = styled.div`
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
 const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
 const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
+const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
 
 const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
@@ -77,7 +87,18 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   }
 
   //-------------------------------------------------------------------------------------------
+  // Style overrides for when Page Overlay is in full screen mode
+  //-------------------------------------------------------------------------------------------
+  // Needs to override some position of EUI components to ensure they are displayed correctly
+  // when the top Kibana header is not visible
+  //-------------------------------------------------------------------------------------------
+  body.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME} {
+    ${FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET}
+  }
+
+  //-------------------------------------------------------------------------------------------
   // TIMELINE SPECIFIC STYLES
+  //-------------------------------------------------------------------------------------------
   // The timeline overlay uses a custom z-index, which causes issues with any other content that
   // is normally appended to the 'document.body' directly (like popups, masks, flyouts, etc).
   // The styles below will be applied anytime the timeline is opened/visible and attempts to
@@ -111,6 +132,14 @@ const setDocumentBodyLock = () => {
 
 const unSetDocumentBodyLock = () => {
   document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME);
+};
+
+const setDocumentBodyFullScreen = () => {
+  document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME);
+};
+
+const unSetDocumentBodyFullScreen = () => {
+  document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME);
 };
 
 export interface PageOverlayProps {
@@ -182,6 +211,7 @@ export const PageOverlay = memo<PageOverlayProps>(
   }) => {
     const { pathname } = useLocation();
     const isMounted = useIsMounted();
+    const showInFullScreen = useHasFullScreenContent();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
     const portalEleRef = useRef<Node>();
 
@@ -204,6 +234,7 @@ export const PageOverlay = memo<PageOverlayProps>(
         [PAGE_OVERLAY_CSS_CLASSNAME]: true,
         scrolling: enableScrolling,
         hidden: isHidden,
+        fullScreen: showInFullScreen,
         'eui-scrollBar': enableScrolling,
         'padding-xs': paddingSize === 'xs',
         'padding-s': paddingSize === 's',
@@ -211,11 +242,11 @@ export const PageOverlay = memo<PageOverlayProps>(
         'padding-l': paddingSize === 'l',
         'padding-xl': paddingSize === 'xl',
       });
-    }, [enableScrolling, isHidden, paddingSize]);
+    }, [enableScrolling, isHidden, paddingSize, showInFullScreen]);
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         setOpenedOnPathName((prevState) => {
           if (isHidden) {
             return null;
@@ -239,7 +270,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     // If `hideOnUrlPathNameChange` is true, then determine if the pathname changed and if so, call `onHide()`
     useEffect(() => {
       if (
-        isMounted &&
+        isMounted() &&
         onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
@@ -252,15 +283,20 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();
+          unSetDocumentBodyFullScreen();
         } else {
           setDocumentBodyOverlayIsVisible();
 
           if (lockDocumentBody) {
             setDocumentBodyLock();
+          }
+
+          if (showInFullScreen) {
+            setDocumentBodyFullScreen();
           }
         }
       }
@@ -268,8 +304,9 @@ export const PageOverlay = memo<PageOverlayProps>(
       return () => {
         unSetDocumentBodyLock();
         unSetDocumentBodyOverlayIsVisible();
+        unSetDocumentBodyFullScreen();
       };
-    }, [isHidden, isMounted, lockDocumentBody]);
+    }, [isHidden, isMounted, lockDocumentBody, showInFullScreen]);
 
     return (
       <EuiPortal portalRef={setPortalEleRef}>

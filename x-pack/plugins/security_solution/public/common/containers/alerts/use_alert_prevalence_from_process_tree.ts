@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useHttp } from '../../lib/kibana';
 import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
 
@@ -18,13 +18,25 @@ interface UserAlertPrevalenceFromProcessTreeResult {
 }
 
 interface ProcessTreeAlertPrevalenceResponse {
-  alertIds: string[];
+  alertIds: string[] | undefined;
 }
 
 interface EntityResponse {
   id: string;
   name: string;
   schema: object;
+}
+
+interface UseAlertPrevalenceFromProcessTree {
+  processEntityId: string;
+  documentId: string;
+  timelineId: string;
+  indices: string[];
+}
+
+interface UseAlertDocumentAnalyzerSchema {
+  documentId: string;
+  indices: string[];
 }
 
 interface TreeResponse {
@@ -42,12 +54,12 @@ interface TreeResponse {
   alertIds: string[];
 }
 
-function useAlertDocumentAnalyzerSchema(processEntityId: string, indices: string[]) {
+function useAlertDocumentAnalyzerSchema({ documentId, indices }: UseAlertDocumentAnalyzerSchema) {
   const http = useHttp();
-  const query = useQuery<EntityResponse[]>(['getAlertPrevalenceSchema', processEntityId], () => {
+  const query = useQuery<EntityResponse[]>(['getAlertPrevalenceSchema', documentId], () => {
     return http.get<EntityResponse[]>(`/api/endpoint/resolver/entity`, {
       query: {
-        _id: processEntityId,
+        _id: documentId,
         indices,
       },
     });
@@ -59,7 +71,7 @@ function useAlertDocumentAnalyzerSchema(processEntityId: string, indices: string
       id: null,
       schema: null,
     };
-  } else if (query.data) {
+  } else if (query.data && query.data.length > 0) {
     const {
       data: [{ schema, id }],
     } = query;
@@ -79,15 +91,20 @@ function useAlertDocumentAnalyzerSchema(processEntityId: string, indices: string
   }
 }
 
-export function useAlertPrevalenceFromProcessTree(
-  processEntityId: string,
-  timelineId: string | undefined
-): UserAlertPrevalenceFromProcessTreeResult {
+export function useAlertPrevalenceFromProcessTree({
+  processEntityId,
+  documentId,
+  timelineId,
+  indices,
+}: UseAlertPrevalenceFromProcessTree): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
-  const { selectedPatterns, to, from } = useTimelineDataFilters(timelineId);
-
-  const { loading, id, schema } = useAlertDocumentAnalyzerSchema(processEntityId, selectedPatterns);
+  const { selectedPatterns } = useTimelineDataFilters(timelineId);
+  const alertAndOriginalIndices = [...new Set(selectedPatterns.concat(indices))];
+  const { loading, id, schema } = useAlertDocumentAnalyzerSchema({
+    documentId,
+    indices: alertAndOriginalIndices,
+  });
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
     ['getAlertPrevalenceFromProcessTree', id],
     () => {
@@ -96,9 +113,8 @@ export function useAlertPrevalenceFromProcessTree(
           schema,
           ancestors: 200,
           descendants: 500,
-          indexPatterns: selectedPatterns,
+          indexPatterns: alertAndOriginalIndices,
           nodes: [id],
-          timeRange: { from, to },
           includeHits: true,
         }),
       });

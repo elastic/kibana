@@ -7,14 +7,16 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { buildTimestampRuntimeMapping } from '../../rule_types/utils';
+import { TIMESTAMP_RUNTIME_FIELD } from '../../rule_types/constants';
+import { getQueryFilter } from '../get_query_filter';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
-const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn(async () => ({
   searchResult: {
     ...sampleEmptyDocSearchResults(),
@@ -28,6 +30,8 @@ const mockSingleSearchAfter = jest.fn(async () => ({
   searchErrors: [],
 }));
 
+let filter: ESBoolQuery;
+
 describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
@@ -36,6 +40,14 @@ describe('findThresholdSignals', () => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
     mockService = alertsMock.createRuleExecutorServices();
+    const queryFilter = getQueryFilter({
+      query: '',
+      language: 'kuery',
+      filters: [],
+      index: ['*'],
+      exceptionFilter: undefined,
+    });
+    filter = queryFilter;
   });
 
   it('should generate a threshold signal query when only a value is provided', async () => {
@@ -46,7 +58,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: [],
         value: 100,
@@ -54,6 +66,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -81,7 +94,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: ['host.name'],
         value: 100,
@@ -89,6 +102,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -141,7 +155,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
@@ -150,6 +164,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -209,7 +224,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
@@ -223,6 +238,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -295,7 +311,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         cardinality: [
           {
@@ -309,6 +325,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -326,6 +343,64 @@ describe('findThresholdSignals', () => {
           min_timestamp: {
             min: {
               field: '@timestamp',
+            },
+          },
+        },
+      })
+    );
+  });
+
+  it('should generate a threshold signal query with timestamp override', async () => {
+    const timestampOverride = 'event.ingested';
+    const { aggregatableTimestampField, timestampRuntimeMappings } = {
+      aggregatableTimestampField: TIMESTAMP_RUNTIME_FIELD,
+      timestampRuntimeMappings: buildTimestampRuntimeMapping({
+        timestampOverride,
+      }),
+    };
+
+    await findThresholdSignals({
+      from: 'now-6m',
+      to: 'now',
+      maxSignals: 100,
+      inputIndexPattern: ['*'],
+      services: mockService,
+      ruleExecutionLogger,
+      filter,
+      threshold: {
+        cardinality: [
+          {
+            field: 'source.ip',
+            value: 5,
+          },
+        ],
+        field: [],
+        value: 200,
+      },
+      runtimeMappings: timestampRuntimeMappings,
+      primaryTimestamp: timestampOverride,
+      secondaryTimestamp: TIMESTAMP,
+      aggregatableTimestampField,
+    });
+    expect(mockSingleSearchAfter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryTimestamp: timestampOverride,
+        secondaryTimestamp: TIMESTAMP,
+        runtimeMappings: buildTimestampRuntimeMapping({ timestampOverride }),
+        aggregations: {
+          cardinality_count: {
+            cardinality: {
+              field: 'source.ip',
+            },
+          },
+          max_timestamp: {
+            max: {
+              field: TIMESTAMP_RUNTIME_FIELD,
+            },
+          },
+          min_timestamp: {
+            min: {
+              field: TIMESTAMP_RUNTIME_FIELD,
             },
           },
         },

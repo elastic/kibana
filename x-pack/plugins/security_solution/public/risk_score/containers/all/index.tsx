@@ -5,265 +5,211 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { useCallback, useEffect, useMemo } from 'react';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useRiskScoreFeatureStatus } from '../feature_status';
 import { createFilter } from '../../../common/containers/helpers';
-import { useKibana } from '../../../common/lib/kibana';
-import type {
-  RiskScoreStrategyResponse,
-  HostsRiskScore,
-  UsersRiskScore,
-  RiskScoreSortField,
-  RiskScoreRequestOptions,
-} from '../../../../common/search_strategy';
+import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
-  getHostRiskIndex,
   RiskQueries,
   getUserRiskIndex,
+  RiskScoreEntity,
+  getHostRiskIndex,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { getInspectResponse } from '../../../helpers';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { inputsModel } from '../../../common/store';
-import { useSpaceId } from '../common';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
-export interface RiskScoreState<RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]> {
-  data?: RiskScoreType;
+export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
+  data:
+    | undefined
+    | StrategyResponseType<
+        T extends RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore
+      >['data'];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  isModuleEnabled: boolean | undefined;
+  isModuleEnabled: boolean;
+  isLicenseValid: boolean;
+  isDeprecated: boolean;
+  loading: boolean;
 }
 
-interface UseRiskScore {
-  sort?: RiskScoreSortField;
+export interface UseRiskScoreParams {
   filterQuery?: ESQuery | string;
-  skip?: boolean;
-  timerange?: { to: string; from: string };
   onlyLatest?: boolean;
-  pagination?: RiskScoreRequestOptions['pagination'];
-  featureEnabled: boolean;
-  defaultIndex: string | undefined;
+  pagination?:
+    | {
+        cursorStart: number;
+        querySize: number;
+      }
+    | undefined;
+  skip?: boolean;
+  sort?: RiskScoreSortField;
+  timerange?: { to: string; from: string };
 }
 
-type UseHostRiskScore = Omit<UseRiskScore, 'featureEnabled' | 'defaultIndex'>;
+interface UseRiskScore<T> extends UseRiskScoreParams {
+  riskEntity: T;
+}
 
-type UseUserRiskScore = Omit<UseRiskScore, 'featureEnabled' | 'defaultIndex'>;
-
-const isRecord = (item: unknown): item is Record<string, unknown> =>
-  typeof item === 'object' && !!item;
-
-export const isRiskScoreHit = (item: unknown): item is HostsRiskScore | UsersRiskScore =>
-  isRecord(item) &&
-  (isRecord(item.host) || isRecord(item.user)) &&
-  isRecord(item.risk_stats) &&
-  typeof item.risk_stats?.risk_score === 'number' &&
-  typeof item.risk === 'string';
-
-export const useHostRiskScore = ({
-  timerange,
-  onlyLatest,
-  filterQuery,
-  sort,
-  skip = false,
-  pagination,
-}: UseHostRiskScore): [boolean, RiskScoreState<HostsRiskScore[]>] => {
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
-
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  return useRiskScore<HostsRiskScore[]>({
-    timerange,
-    onlyLatest,
-    filterQuery,
-    sort,
-    skip,
-    pagination,
-    featureEnabled: riskyHostsFeatureEnabled,
-    defaultIndex,
-  });
+export const initialResult: Omit<
+  StrategyResponseType<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>,
+  'rawResponse'
+> = {
+  totalCount: 0,
+  data: undefined,
 };
 
-export const useUserRiskScore = ({
-  timerange,
-  onlyLatest,
-  filterQuery,
-  sort,
-  skip = false,
-  pagination,
-}: UseUserRiskScore): [boolean, RiskScoreState<UsersRiskScore[]>] => {
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
-
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
-  return useRiskScore<UsersRiskScore[]>({
-    timerange,
-    onlyLatest,
-    filterQuery,
-    sort,
-    skip,
-    pagination,
-    featureEnabled: riskyUsersFeatureEnabled,
-    defaultIndex,
-  });
-};
-
-export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]>({
+export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
   timerange,
   onlyLatest = true,
   filterQuery,
   sort,
   skip = false,
   pagination,
-  featureEnabled,
-  defaultIndex,
-}: UseRiskScore): [boolean, RiskScoreState<RiskScoreType>] => {
+  riskEntity,
+}: UseRiskScore<T>): RiskScoreState<T> => {
+  const spaceId = useSpaceId();
+  const defaultIndex = spaceId
+    ? riskEntity === RiskScoreEntity.host
+      ? getHostRiskIndex(spaceId, onlyLatest)
+      : getUserRiskIndex(spaceId, onlyLatest)
+    : undefined;
+  const factoryQueryType =
+    riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
+
   const { querySize, cursorStart } = pagination || {};
-  const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription = useRef(new Subscription());
 
-  const [loading, setLoading] = useState<boolean>(featureEnabled);
-  const [riskScoreRequest, setRiskScoreRequest] = useState<RiskScoreRequestOptions | null>(null);
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
-  const [riskScoreResponse, setRiskScoreResponse] = useState<RiskScoreState<RiskScoreType>>({
-    data: undefined,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    refetch: refetch.current,
-    totalCount: 0,
-    isModuleEnabled: undefined,
+  const {
+    isDeprecated,
+    isEnabled,
+    isLicenseValid,
+    isLoading: isDeprecatedLoading,
+    refetch: refetchDeprecated,
+  } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
+
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+    error,
+  } = useSearchStrategy<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
+    factoryQueryType,
+    initialResult,
+    abort: skip,
+    showErrorToast: false,
   });
+  const refetchAll = useCallback(() => {
+    if (defaultIndex) {
+      refetchDeprecated(defaultIndex);
+      refetch();
+    }
+  }, [defaultIndex, refetch, refetchDeprecated]);
 
-  const riskScoreSearch = useCallback(
-    (request: RiskScoreRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
+  // since query does not take timerange arg, we need to manually refetch when time range updates
+  // the results can be different if the user has run the ML for the first time since pressing refresh
+  useEffect(() => {
+    refetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerange?.to, timerange?.from]);
 
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
+  const riskScoreResponse = useMemo(
+    () => ({
+      data: response.data,
+      inspect,
+      refetch: refetchAll,
+      totalCount: response.totalCount,
+      isLicenseValid,
+      isDeprecated,
+      isModuleEnabled: isEnabled,
+      isInspected: false,
+    }),
+    [
+      inspect,
+      isDeprecated,
+      isEnabled,
+      isLicenseValid,
+      refetchAll,
+      response.data,
+      response.totalCount,
+    ]
+  );
 
-        searchSubscription.current = data.search
-          .search<RiskScoreRequestOptions, RiskScoreStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                const hits = response?.rawResponse?.hits?.hits;
+  const requestTimerange = useMemo(
+    () => (timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined),
+    [timerange]
+  );
 
-                setRiskScoreResponse((prevResponse) => ({
-                  ...prevResponse,
-                  data: isRiskScoreHit(hits?.[0]?._source)
-                    ? (hits?.map((hit) => hit._source) as RiskScoreType)
-                    : ([] as unknown as RiskScoreType),
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  refetch: refetch.current,
-                  totalCount: response.totalCount,
-                  isModuleEnabled: true,
-                }));
-                searchSubscription.current.unsubscribe();
-                setLoading(false);
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_RISK_SCORE);
-                searchSubscription.current.unsubscribe();
-              }
-            },
-            error: (error) => {
-              setLoading(false);
-              if (isIndexNotFoundError(error)) {
-                setRiskScoreResponse((prevResponse) =>
-                  !prevResponse
-                    ? prevResponse
-                    : {
-                        ...prevResponse,
-                        isModuleEnabled: false,
-                      }
-                );
-
-                setLoading(false);
-              } else {
-                addError(error, { title: i18n.FAIL_RISK_SCORE });
-              }
-
-              searchSubscription.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription.current.unsubscribe();
-      abortCtrl.current.abort();
-      if (featureEnabled) {
-        asyncSearch();
-      }
-
-      refetch.current = asyncSearch;
-    },
-    [data.search, addError, addWarning, skip, featureEnabled]
+  const riskScoreRequest = useMemo(
+    () =>
+      defaultIndex
+        ? {
+            defaultIndex: [defaultIndex],
+            factoryQueryType,
+            filterQuery: createFilter(filterQuery),
+            pagination:
+              cursorStart !== undefined && querySize !== undefined
+                ? {
+                    cursorStart,
+                    querySize,
+                  }
+                : undefined,
+            sort,
+            timerange: onlyLatest ? undefined : requestTimerange,
+          }
+        : null,
+    [
+      cursorStart,
+      defaultIndex,
+      factoryQueryType,
+      filterQuery,
+      querySize,
+      sort,
+      requestTimerange,
+      onlyLatest,
+    ]
   );
 
   useEffect(() => {
-    if (defaultIndex) {
-      setRiskScoreRequest((prevRequest) => {
-        const myRequest = {
-          ...(prevRequest ?? {}),
-          defaultIndex: [defaultIndex],
-          factoryQueryType: RiskQueries.riskScore,
-          filterQuery: createFilter(filterQuery),
-          pagination:
-            cursorStart !== undefined && querySize !== undefined
-              ? {
-                  cursorStart,
-                  querySize,
-                }
-              : undefined,
-          timerange: timerange
-            ? { to: timerange.to, from: timerange.from, interval: '' }
-            : undefined,
-          sort,
-        };
-
-        if (!deepEqual(prevRequest, myRequest)) {
-          return myRequest;
-        }
-        return prevRequest;
-      });
+    if (error) {
+      if (!isIndexNotFoundError(error)) {
+        addError(error, { title: i18n.FAIL_RISK_SCORE });
+      }
     }
-  }, [filterQuery, onlyLatest, timerange, cursorStart, querySize, sort, defaultIndex]);
+  }, [addError, error]);
 
   useEffect(() => {
-    riskScoreSearch(riskScoreRequest);
-    return () => {
-      searchSubscription.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [riskScoreRequest, riskScoreSearch]);
-
-  useEffect(() => {
-    if (skip) {
-      setLoading(false);
-      searchSubscription.current.unsubscribe();
-      abortCtrl.current.abort();
+    if (
+      !skip &&
+      !isDeprecatedLoading &&
+      riskScoreRequest != null &&
+      isLicenseValid &&
+      isEnabled &&
+      !isDeprecated
+    ) {
+      search(riskScoreRequest);
     }
-  }, [skip]);
+  }, [
+    isEnabled,
+    isDeprecated,
+    isLicenseValid,
+    isDeprecatedLoading,
+    riskScoreRequest,
+    search,
+    skip,
+  ]);
 
-  return [loading, riskScoreResponse];
+  return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
 };

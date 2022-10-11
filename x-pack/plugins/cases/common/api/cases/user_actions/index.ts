@@ -24,6 +24,7 @@ import { SettingsUserActionRt } from './settings';
 import { StatusUserActionRt } from './status';
 import { DeleteCaseUserActionRt } from './delete_case';
 import { SeverityUserActionRt } from './severity';
+import { AssigneesUserActionRt } from './assignees';
 
 export * from './common';
 export * from './comment';
@@ -36,6 +37,7 @@ export * from './settings';
 export * from './status';
 export * from './tags';
 export * from './title';
+export * from './assignees';
 
 const CommonUserActionsRt = rt.union([
   DescriptionUserActionRt,
@@ -45,6 +47,7 @@ const CommonUserActionsRt = rt.union([
   SettingsUserActionRt,
   StatusUserActionRt,
   SeverityUserActionRt,
+  AssigneesUserActionRt,
 ]);
 
 export const UserActionsRt = rt.union([

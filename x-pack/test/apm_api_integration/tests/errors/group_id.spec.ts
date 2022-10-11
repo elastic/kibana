@@ -58,35 +58,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      const { bananaTransaction } = config;
-      describe('error group id', () => {
+  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+    const { bananaTransaction } = config;
+    describe('error group id', () => {
+      before(async () => {
+        await generateData({ serviceName, start, end, synthtraceEsClient });
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('return correct data', () => {
+        let errorsDistribution: ErrorsDistribution;
         before(async () => {
-          await generateData({ serviceName, start, end, synthtraceEsClient });
+          const response = await callApi({
+            path: { groupId: '0000000000000000000000000Error 1' },
+          });
+          errorsDistribution = response.body;
         });
 
-        after(() => synthtraceEsClient.clean());
-
-        describe('return correct data', () => {
-          let errorsDistribution: ErrorsDistribution;
-          before(async () => {
-            const response = await callApi({
-              path: { groupId: '0000000000000000000000000Error 1' },
-            });
-            errorsDistribution = response.body;
-          });
-
-          it('displays correct number of occurrences', () => {
-            const numberOfBuckets = 15;
-            expect(errorsDistribution.occurrencesCount).to.equal(
-              bananaTransaction.failureRate * numberOfBuckets
-            );
-          });
+        it('displays correct number of occurrences', () => {
+          const numberOfBuckets = 15;
+          expect(errorsDistribution.occurrencesCount).to.equal(
+            bananaTransaction.failureRate * numberOfBuckets
+          );
         });
       });
-    }
-  );
+    });
+  });
 }

@@ -30,7 +30,7 @@ const DEFAULT_COMBOBOX_WIDTH = 305;
 const COMBOBOX_PADDINGS = 90;
 const DEFAULT_FONT = '14px Inter';
 
-export function FieldPicker<T extends FieldOptionValue>({
+export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
   selectedOptions,
   options,
   onChoose,
@@ -101,7 +101,7 @@ export function FieldPicker<T extends FieldOptionValue>({
         isClearable={false}
         data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
         placeholder={i18n.translate('xpack.lens.fieldPicker.fieldPlaceholder', {
-          defaultMessage: 'Field',
+          defaultMessage: 'Select a field',
         })}
         options={styledOptions}
         isInvalid={fieldIsInvalid}

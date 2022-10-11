@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 
 export const Sidebar = () => {
   const history = useHistory();
   return (
-    <EuiPageSideBar>
+    <EuiPageSidebar>
       <EuiSideNav
         items={[
           {
@@ -59,10 +59,15 @@ export const Sidebar = () => {
                 name: 'Rule Status Filter',
                 onClick: () => history.push(`/rule_status_filter`),
               },
+              {
+                id: 'alerts table',
+                name: 'Alert Table',
+                onClick: () => history.push('/alerts_table'),
+              },
             ],
           },
         ]}
       />
-    </EuiPageSideBar>
+    </EuiPageSidebar>
   );
 };

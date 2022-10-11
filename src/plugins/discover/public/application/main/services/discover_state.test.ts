@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
 import {
   getState,
   GetStateReturn,
@@ -14,16 +13,13 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedSearch } from '../../../services/saved_searches';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 let history: History;
 let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
-
-const uiSettingsMock = {
-  get: <T>(key: string) => (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
-} as IUiSettingsClient;
 
 describe('Test discover state', () => {
   let stopSync = () => {};
@@ -32,9 +28,9 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getState({
-      getStateDefaults: () => ({ index: 'test' }),
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
       history,
-      uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
     stopSync = state.startSync();
@@ -46,7 +42,9 @@ describe('Test discover state', () => {
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
     state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:modified)"`);
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+    );
   });
 
   test('changing URL to be propagated to appState', async () => {
@@ -60,11 +58,9 @@ describe('Test discover state', () => {
   test('URL navigation to url without _a, state should not change', async () => {
     history.push('/#?_a=(index:modified)');
     history.push('/');
-    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
-      Object {
-        "index": "modified",
-      }
-    `);
+    expect(state.appStateContainer.getState()).toEqual({
+      index: 'modified',
+    });
   });
 
   test('isAppStateDirty returns  whether the current state has changed', async () => {
@@ -89,46 +85,45 @@ describe('Test discover state', () => {
   });
 });
 describe('Test discover initial state sort handling', () => {
-  test('Non-empty sort in URL should not fallback to state defaults', async () => {
+  test('Non-empty sort in URL should not be overwritten by saved search sort', async () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!(!(order_date,desc)))');
 
     state = getState({
-      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      savedSearch: { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] } },
+      services: discoverServiceMock,
       history,
-      uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
     const stopSync = state.startSync();
-    expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "order_date",
-          "desc",
-        ],
-      ]
-    `);
+    expect(state.appStateContainer.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
   });
-  test('Empty sort in URL should allow fallback state defaults', async () => {
+  test('Empty sort in URL should use saved search sort for state', async () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
-
+    const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
     state = getState({
-      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      savedSearch: nextSavedSearch,
+      services: discoverServiceMock,
       history,
-      uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
     const stopSync = state.startSync();
-    expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "fallback",
-          "desc",
-        ],
-      ]
-    `);
+    expect(state.appStateContainer.getState().sort).toEqual([['bytes', 'desc']]);
+    stopSync();
+  });
+  test('Empty sort in URL and saved search should sort by timestamp', async () => {
+    history = createBrowserHistory();
+    history.push('/#?_a=(sort:!())');
+    state = getState({
+      savedSearch: savedSearchMockWithTimeField,
+      services: discoverServiceMock,
+      history,
+    });
+    await state.replaceUrlAppState({});
+    const stopSync = state.startSync();
+    expect(state.appStateContainer.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
   });
 });
@@ -140,20 +135,17 @@ describe('Test discover state with legacy migration', () => {
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
     state = getState({
-      getStateDefaults: () => ({ index: 'test' }),
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
       history,
-      uiSettings: uiSettingsMock,
     });
-    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
+    expect(state.appStateContainer.getState().query).toMatchInlineSnapshot(`
       Object {
-        "index": "test",
+        "language": "lucene",
         "query": Object {
-          "language": "lucene",
-          "query": Object {
-            "query_string": Object {
-              "analyze_wildcard": true,
-              "query": "type:nice name:\\"yeah\\"",
-            },
+          "query_string": Object {
+            "analyze_wildcard": true,
+            "query": "type:nice name:\\"yeah\\"",
           },
         },
       }
@@ -167,8 +159,9 @@ describe('createSearchSessionRestorationDataProvider', () => {
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
     appStateContainer: getState({
-      history: createBrowserHistory(),
-      uiSettings: uiSettingsMock,
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+      history,
     }).appStateContainer,
     getSavedSearch: () => mockSavedSearch,
   });
@@ -217,12 +210,10 @@ describe('createSearchSessionRestorationDataProvider', () => {
     test('restoreState has paused autoRefresh', async () => {
       const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.refreshInterval).toBe(undefined);
-      expect(restoreState.refreshInterval).toMatchInlineSnapshot(`
-        Object {
-          "pause": true,
-          "value": 0,
-        }
-      `);
+      expect(restoreState.refreshInterval).toEqual({
+        pause: true,
+        value: 0,
+      });
     });
   });
 });

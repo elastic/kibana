@@ -22,6 +22,8 @@ export interface PackSavedObjectAttributes {
     name: string;
     query: string;
     interval: number;
+    snapshot?: boolean;
+    removed?: boolean;
     ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;
@@ -34,3 +36,20 @@ export interface PackSavedObjectAttributes {
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
+
+export interface SavedQuerySavedObjectAttributes {
+  id: string;
+  description: string | undefined;
+  query: string;
+  interval: number | string;
+  snapshot?: boolean;
+  removed?: boolean;
+  platform: string;
+  ecs_mapping?: Array<Record<string, unknown>>;
+  created_at: string;
+  created_by: string | undefined;
+  updated_at: string;
+  updated_by: string | undefined;
+}
+
+export type SavedQuerySavedObject = SavedObject<PackSavedObjectAttributes>;

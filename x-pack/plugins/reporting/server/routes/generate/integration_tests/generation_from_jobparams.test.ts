@@ -155,6 +155,20 @@ describe('POST /api/reporting/generate', () => {
       );
   });
 
+  it('returns 400 on invalid browser timezone', async () => {
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/printablePdf')
+      .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+      );
+  });
+
   it('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 

@@ -78,6 +78,8 @@ export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as cons
 export const CASES_INTERNAL_URL = '/internal/cases' as const;
 export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
+export const INTERNAL_SUGGEST_USER_PROFILES_URL =
+  `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 
 /**
  * Action routes
@@ -101,14 +103,17 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
   },
   [OBSERVABILITY_OWNER]: {
+    appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
   },
   [GENERAL_CASES_OWNER]: {
+    appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',
   },
@@ -155,3 +160,15 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
+
+/**
+ * User profiles
+ */
+
+export const DEFAULT_USER_SIZE = 10;
+export const MAX_ASSIGNEES_PER_CASE = 10;
+
+/**
+ * Delays
+ */
+export const SEARCH_DEBOUNCE_MS = 500;
