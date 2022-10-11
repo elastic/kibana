@@ -191,14 +191,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // trigger data view id update
-      await retry.try(async () => {
-        await PageObjects.discover.editField('_bytes-runtimefield');
-        await fieldEditor.setName('_bytes-runtimefield-edited', true);
-        await fieldEditor.save();
-        await fieldEditor.confirmSave();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitForDocTableLoadingComplete();
-      });
+      await dataGrid.clickEditField('_bytes-runtimefield');
+      await fieldEditor.setName('_bytes-runtimefield-edited', true);
+      await fieldEditor.save();
+      await fieldEditor.confirmSave();
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(prevDataViewId).not.to.equal(newDataViewId);
