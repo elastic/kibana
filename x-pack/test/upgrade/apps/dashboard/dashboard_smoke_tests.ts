@@ -42,6 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
             await PageObjects.home.launchSampleDashboard(name);
+            await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
             await PageObjects.header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
             const todayYearMonthDay = moment().format('MMM D, YYYY');
