@@ -57,16 +57,14 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
     queryFn: () => client.list({ kind, perPage }),
     retry: false,
   });
+  const fixedWidth = Boolean(data?.files.length)
+    ? css`
+        width: 75vw;
+      `
+    : undefined;
 
   return (
-    <EuiModal
-      className="filesFilePicker"
-      css={css`
-        width: 75vw;
-      `}
-      maxWidth="75vw"
-      onClose={onClose}
-    >
+    <EuiModal className="filesFilePicker" css={fixedWidth} maxWidth="75vw" onClose={onClose}>
       <EuiModalHeader>
         <Title />
       </EuiModalHeader>
