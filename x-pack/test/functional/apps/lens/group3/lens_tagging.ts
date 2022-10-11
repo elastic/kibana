@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // open the filter dropdown
       const filterButton = await find.byCssSelector(
-        '.euiFilterGroup .euiFilterButton:nth-child(2)'
+        '.euiFilterGroup .euiPopover:nth-child(2) .euiFilterButton'
       );
       await filterButton.click();
       await testSubjects.click(
