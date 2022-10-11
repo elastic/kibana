@@ -10,7 +10,7 @@ import React from 'react';
 
 import {
   goToRuleEditPage,
-  executeRulesBulkAction,
+  performTrackableBulkAction,
   bulkExportRules,
 } from '../../../pages/detection_engine/rules/all/actions';
 import { RuleActionsOverflow } from '.';
@@ -33,7 +33,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 jest.mock('../../../pages/detection_engine/rules/all/actions');
 
-const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
+const performTrackableBulkActionMock = performTrackableBulkAction as jest.Mock;
 const bulkExportRulesMock = bulkExportRules as jest.Mock;
 
 const flushPromises = () => new Promise(setImmediate);
@@ -194,9 +194,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-duplicate-rule"] button').simulate('click');
       wrapper.update();
-      expect(executeRulesBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'duplicate' })
-      );
+      expect(performTrackableBulkAction).toHaveBeenCalledWith('duplicate', ['id']);
     });
 
     test('it calls duplicate action with the rule and rule.id when rules-details-duplicate-rule is clicked', () => {
@@ -208,16 +206,14 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-duplicate-rule"] button').simulate('click');
       wrapper.update();
-      expect(executeRulesBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'duplicate', search: { ids: ['id'] } })
-      );
+      expect(performTrackableBulkAction).toHaveBeenCalledWith('duplicate', ['id']);
     });
   });
 
   test('it navigates to edit page after the rule is duplicated', async () => {
     const rule = mockRule('id');
     const ruleDuplicate = mockRule('newRule');
-    executeRulesBulkActionMock.mockImplementation(() =>
+    performTrackableBulkActionMock.mockImplementation(() =>
       Promise.resolve({ attributes: { results: { created: [ruleDuplicate] } } })
     );
     const wrapper = mount(
@@ -229,9 +225,7 @@ describe('RuleActionsOverflow', () => {
     wrapper.update();
     await flushPromises();
 
-    expect(executeRulesBulkAction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'duplicate' })
-    );
+    expect(performTrackableBulkAction).toHaveBeenCalledWith('duplicate', ['id']);
     expect(goToRuleEditPage).toHaveBeenCalledWith(ruleDuplicate.id, expect.anything());
   });
 
@@ -251,12 +245,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       await flushPromises();
 
-      expect(bulkExportRulesMock).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'export' })
-      );
-      expect(bulkExportRulesMock).toHaveBeenCalledWith(
-        expect.not.objectContaining({ onSuccess: expect.any })
-      );
+      expect(bulkExportRulesMock).toHaveBeenCalledWith(['id'], undefined);
     });
     test('it does not open the popover when rules-details-popover-button-icon is clicked and the user does not have permission', () => {
       const rule = mockRule('id');
@@ -353,9 +342,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-delete-rule"] button').simulate('click');
       wrapper.update();
-      expect(executeRulesBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'delete' })
-      );
+      expect(performTrackableBulkAction).toHaveBeenCalledWith('delete', ['id']);
     });
 
     test('it calls deleteRulesAction with the rule.id when rules-details-delete-rule is clicked', () => {
@@ -367,9 +354,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-delete-rule"] button').simulate('click');
       wrapper.update();
-      expect(executeRulesBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'delete', search: { ids: ['id'] } })
-      );
+      expect(performTrackableBulkAction).toHaveBeenCalledWith('delete', ['id']);
     });
   });
 });
