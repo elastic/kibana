@@ -173,15 +173,16 @@ export interface IEmbeddable<
   /**
    * Renders the embeddable at the given node.
    * @param domNode
+   * @returns A React node to mount or void in the case when rendering is done without React.
    */
   render(domNode: HTMLElement | Element): N | void;
 
   /**
    * Renders a custom embeddable error at the given node.
    * @param domNode
-   * @returns A callback that will be called on error destroy.
+   * @returns A React node or callback that will be called on error destroy.
    */
-  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
+  renderError?(domNode: HTMLElement | Element, error: ErrorLike): N | (() => void);
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

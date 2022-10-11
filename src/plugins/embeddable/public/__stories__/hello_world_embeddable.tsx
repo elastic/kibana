@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Embeddable, IEmbeddable } from '..';
+import { Embeddable } from '..';
 import { createStore, State } from '../store';
 
 export class HelloWorldEmbeddable extends Embeddable {
@@ -18,7 +18,7 @@ export class HelloWorldEmbeddable extends Embeddable {
 
   readonly type = 'hello-world';
 
-  renderError: IEmbeddable['renderError'];
+  renderError?: (node: unknown, error: Error) => ReactNode;
 
   reload() {}
 
@@ -30,9 +30,5 @@ export class HelloWorldEmbeddable extends Embeddable {
         <HelloWorld />
       </Provider>
     );
-  }
-
-  setErrorRenderer(renderer: IEmbeddable['renderError']) {
-    this.renderError = renderer;
   }
 }

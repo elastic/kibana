@@ -268,6 +268,21 @@ describe('HelloWorldContainer in error state', () => {
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.children.length).toBeGreaterThan(0);
   });
+
+  test('renders a React node', () => {
+    (embeddable.renderError as jest.Mock).mockReturnValueOnce(<div>Something</div>);
+    embeddable.triggerError(new Error('something'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddable.renderError).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      new Error('something')
+    );
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('Something');
+  });
 });
 
 const renderInEditModeAndOpenContextMenu = async (
