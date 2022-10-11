@@ -29,10 +29,9 @@ import {
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { ObservabilityAppServices } from '../../../application/types';
+import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';
 import { observabilityAppId } from '../../../../common';
 import { tourStepsConfig } from './steps_config';
 
@@ -159,25 +158,22 @@ export function ObservabilityTour({
   isPageDataLoaded,
   showTour,
   prependBasePath,
+  guidedOnboardingApi,
 }: {
   children: ({ isTourVisible }: { isTourVisible: boolean }) => ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
   isPageDataLoaded: boolean;
   showTour: boolean;
   prependBasePath?: (imageName: string) => string;
+  guidedOnboardingApi?: GuidedOnboardingApi;
 }) {
   const prevActiveStep = localStorage.getItem(observTourStepStorageKey);
   const initialActiveStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
 
-  const { services } = useKibana<ObservabilityAppServices>();
-
   const isGuidedOnboardingActive = useObservable(
     // if guided onboarding is not available, return false
-    services.guidedOnboarding.guidedOnboardingApi
-      ? services.guidedOnboarding.guidedOnboardingApi.isGuideStepActive$(
-          'observability',
-          'tour_observability'
-        )
+    guidedOnboardingApi
+      ? guidedOnboardingApi.isGuideStepActive$('observability', 'tour_observability')
       : of(false)
   );
 
@@ -196,15 +192,12 @@ export function ObservabilityTour({
 
   const endTour = useCallback(async () => {
     // Mark the onboarding guide step as complete
-    if (services.guidedOnboarding.guidedOnboardingApi) {
-      await services.guidedOnboarding.guidedOnboardingApi.completeGuideStep(
-        'observability',
-        'tour_observability'
-      );
+    if (guidedOnboardingApi) {
+      await guidedOnboardingApi.completeGuideStep('observability', 'tour_observability');
     }
     // Reset EuiTour step state
     setActiveStep(1);
-  }, [services.guidedOnboarding?.guidedOnboardingApi]);
+  }, [guidedOnboardingApi]);
 
   /**
    * The tour should only be visible if the following conditions are met:

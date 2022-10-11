@@ -22,6 +22,7 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
+import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
@@ -72,7 +73,7 @@ export function ObservabilityPageTemplate({
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
 
-  const { services } = useKibana();
+  const { services } = useKibana<ObservabilityAppServices>();
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
@@ -141,6 +142,7 @@ export function ObservabilityPageTemplate({
       <ObservabilityTour
         navigateToApp={navigateToApp}
         prependBasePath={services?.http?.basePath.prepend}
+        guidedOnboardingApi={services?.guidedOnboarding?.guidedOnboardingApi}
         isPageDataLoaded={isPageDataLoaded}
         // The tour is dependent on the solution nav, and should not render if it is not visible
         showTour={showSolutionNav}
