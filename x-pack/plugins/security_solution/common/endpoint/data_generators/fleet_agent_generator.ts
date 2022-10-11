@@ -14,7 +14,7 @@ import type {
   FleetServerAgent,
   FleetServerAgentComponentStatus,
 } from '@kbn/fleet-plugin/common';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { FleetServerAgentComponentStatuses, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import moment from 'moment';
 import { BaseDataGenerator } from './base_data_generator';
 
