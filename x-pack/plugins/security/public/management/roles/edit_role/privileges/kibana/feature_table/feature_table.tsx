@@ -7,10 +7,11 @@
 
 import './feature_table.scss';
 
-import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiAccordionProps,
   EuiButtonGroup,
+  EuiButtonGroupOptionProps,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -216,7 +217,6 @@ export class FeatureTable extends Component<Props, State> {
       extraAction: EuiAccordionProps['extraAction'],
       infoIcon: JSX.Element
     ) => {
-      const { canCustomizeSubFeaturePrivileges } = this.props;
       const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
 
       return (
@@ -228,12 +228,8 @@ export class FeatureTable extends Component<Props, State> {
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
               extraAction={extraAction}
-              forceState={
-                canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges ? undefined : 'closed'
-              }
-              arrowDisplay={
-                canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges ? 'left' : 'none'
-              }
+              forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
+              arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}
               onToggle={(isOpen: boolean) => {
                 if (isOpen) {
                   this.state.expandedPrivilegeControls.add(feature.id);
@@ -256,6 +252,9 @@ export class FeatureTable extends Component<Props, State> {
                     this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
                   }
                   disabled={this.props.disabled}
+                  licenseAllowsSubFeatPrivCustomization={
+                    this.props.canCustomizeSubFeaturePrivileges
+                  }
                 />
               </div>
             </EuiAccordion>
@@ -335,14 +334,10 @@ export class FeatureTable extends Component<Props, State> {
       );
     }
 
-    const { canCustomizeSubFeaturePrivileges } = this.props;
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
-
-    const showAccordionArrow = canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges;
-
     const buttonContent = (
       <>
-        {!showAccordionArrow && <EuiIcon type="empty" size="l" />}{' '}
+        {!hasSubFeaturePrivileges && <EuiIcon type="empty" size="l" />}{' '}
         <FeatureTableCell feature={feature} />
       </>
     );

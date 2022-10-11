@@ -141,7 +141,7 @@ function usePrivileges(
   );
   useEffect(() => {
     Promise.all([
-      privilegesAPIClient.getAll({ includeActions: true }),
+      privilegesAPIClient.getAll({ includeActions: true, respectLicenseLevel: false }),
       privilegesAPIClient.getBuiltIn(),
     ]).then(
       ([kibanaPrivileges, builtInESPrivileges]) =>

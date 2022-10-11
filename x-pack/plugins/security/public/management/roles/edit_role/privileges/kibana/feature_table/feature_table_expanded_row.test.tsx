@@ -25,6 +25,75 @@ const createRole = (kibana: Role['kibana'] = []): Role => {
 };
 
 describe('FeatureTableExpandedRow', () => {
+  it('indicates sub-feature privileges are not customizable when licenseAllowsSubFeatPrivCustomization is false', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['minimal_read'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
+
+    const wrapper = mountWithIntl(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={['minimal_read']}
+        onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={false}
+      />
+    );
+
+    expect(
+      wrapper.find('EuiSwitch[data-test-subj="customizeSubFeaturePrivileges"]').props()
+    ).toMatchObject({
+      disabled: true,
+      checked: false,
+    });
+
+    expect(wrapper.find('EuiIconTip[data-test-subj="subFeaturesTip"]').length).toBe(1);
+  });
+
+  it('indicates sub-feature privileges can be customized when licenseAllowsSubFeatPrivCustomization is true', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['minimal_read'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
+
+    const wrapper = mountWithIntl(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={['none']}
+        onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={true}
+      />
+    );
+
+    expect(
+      wrapper.find('EuiIconTip[data-test-subj="cannotCustomizeSubFeaturesTooltip"]').length
+    ).toBe(0);
+  });
+
   it('indicates sub-feature privileges are being customized if a minimal feature privilege is set', () => {
     const role = createRole([
       {
@@ -48,6 +117,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read']}
         onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -82,6 +152,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
         onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -114,6 +185,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
         onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -150,6 +222,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['read']}
         onChange={onChange}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
@@ -189,6 +262,7 @@ describe('FeatureTableExpandedRow', () => {
         privilegeCalculator={calculator}
         selectedFeaturePrivileges={['minimal_read', 'cool_read', 'cool_toggle_2']}
         onChange={onChange}
+        licenseAllowsSubFeatPrivCustomization={true}
       />
     );
 
