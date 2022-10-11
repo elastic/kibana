@@ -85,10 +85,7 @@ export const useNavigationProps = ({
     () => getCurrentBreadcrumb(history?.location?.search),
     [history?.location?.search]
   );
-  const contextSearchHash = useMemo(
-    () => getContextHash(columns, filterManager),
-    [columns, filterManager]
-  );
+  const contextSearchHash = getContextHash(columns, filterManager);
 
   const singleDocHref = addBasePath(
     `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`

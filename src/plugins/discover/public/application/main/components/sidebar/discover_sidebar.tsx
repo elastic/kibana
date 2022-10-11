@@ -326,7 +326,7 @@ export function DiscoverSidebarComponent({
       selectedDataView,
       aggregateQuery
     );
-  }, [columns, selectedDataView, state.query]);
+  }, [columns, selectedDataView, query]);
 
   if (!selectedDataView) {
     return null;

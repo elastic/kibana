@@ -59,7 +59,6 @@ export async function changeDataView(
     getUrlTracker().setTrackingEnabled(trackingEnabled);
 
     addLog('Change data view next app state', nextAppState);
-    console.log('1:: change data view update state', nextAppState);
     return { nextDataView, nextAppState };
   }
 }
