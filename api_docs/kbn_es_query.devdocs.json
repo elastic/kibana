@@ -106,6 +106,47 @@
     "functions": [
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.buildCombinedFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "buildCombinedFilter",
+        "description": [
+          "\nBuilds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a\ncondition."
+        ],
+        "signature": [
+          "(filters: ",
+          "FilterItem",
+          "[]) => ",
+          "CombinedFilter"
+        ],
+        "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.buildCombinedFilter.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "An array of CombinedFilterItem"
+            ],
+            "signature": [
+              "FilterItem",
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.buildCustomFilter",
         "type": "Function",
         "tags": [],
@@ -760,47 +801,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.buildOrFilter",
-        "type": "Function",
-        "tags": [],
-        "label": "buildOrFilter",
-        "description": [
-          "\nBuilds an OR filter. An OR filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a\ncondition."
-        ],
-        "signature": [
-          "(filters: ",
-          "FilterItem",
-          "[]) => ",
-          "OrFilter"
-        ],
-        "path": "packages/kbn-es-query/src/filters/build_filters/or_filter.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.buildOrFilter.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "An array of OrFilterItem"
-            ],
-            "signature": [
-              "FilterItem",
-              "[]"
-            ],
-            "path": "packages/kbn-es-query/src/filters/build_filters/or_filter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2251,6 +2251,53 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isCombinedFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isCombinedFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isCombinedFilter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/filters/build_filters/combined_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.isDataViewFieldSubtypeMulti",
         "type": "Function",
         "tags": [],
@@ -2735,53 +2782,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.isOrFilter",
-        "type": "Function",
-        "tags": [],
-        "label": "isOrFilter",
-        "description": [],
-        "signature": [
-          "(filter: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          ") => boolean"
-        ],
-        "path": "packages/kbn-es-query/src/filters/build_filters/or_filter.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.isOrFilter.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              }
-            ],
-            "path": "packages/kbn-es-query/src/filters/build_filters/or_filter.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],

@@ -7207,6 +7207,28 @@
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.syncTooltips",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.syncColors",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncColors",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9142,15 +9164,75 @@
         "parentPluginId": "lens",
         "id": "def-public.layerTypes",
         "type": "Object",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "layerTypes",
         "description": [],
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
         ],
-        "path": "x-pack/plugins/lens/common/constants.ts",
-        "deprecated": false,
+        "path": "x-pack/plugins/lens/public/index.ts",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          }
+        ],
         "initialIsOpen": false
       }
     ]
@@ -11459,22 +11541,6 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-common.CustomPaletteParamsConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "CustomPaletteParamsConfig",
-        "description": [],
-        "signature": [
-          "CustomPaletteParams",
-          " & { maxSteps?: number | undefined; }"
-        ],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.DOC_TYPE",
         "type": "string",
         "tags": [],
@@ -11782,21 +11848,6 @@
         "description": [],
         "signature": [
           "{ readonly DEFAULT: \"default\"; readonly INSIDE: \"inside\"; readonly HIDE: \"hide\"; }"
-        ],
-        "path": "x-pack/plugins/lens/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.layerTypes",
-        "type": "Object",
-        "tags": [],
-        "label": "layerTypes",
-        "description": [],
-        "signature": [
-          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
         "deprecated": false,

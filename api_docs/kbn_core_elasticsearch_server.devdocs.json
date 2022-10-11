@@ -66,6 +66,31 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -2247,6 +2272,35 @@
             "label": "maxSockets",
             "description": [
               "\nThe maximum number of sockets that can be used for communications with elasticsearch."
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [
+              "\nThe maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed."
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [
+              "\nThe timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed."
+            ],
+            "signature": [
+              "moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
             "deprecated": false,

@@ -24614,6 +24614,31 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
