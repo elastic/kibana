@@ -57,6 +57,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         help: [],
         logs: [],
       };
+      let logs: string[] | undefined;
       try {
         const result = await lastValueFrom(
           generatePngObservable(reporting, logger, {
@@ -70,7 +71,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         assert(result, 'PNG result is undefined');
         assert(result.buffer, 'PNG result buffer is undefined');
 
-        const logs = await lastValueFrom(result.logs$.pipe(toArray()));
+        logs = result.logs$ ? await lastValueFrom(result.logs$.pipe(toArray())) : [];
 
         if (result.warnings.length) {
           response.success = false;
@@ -88,7 +89,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
               defaultMessage: `We couldn't screenshot your Kibana install.`,
             }),
           ],
-          logs: [err.message],
+          logs: logs != null ? [err.message].concat(logs) : [err.message],
         };
       }
 

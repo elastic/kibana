@@ -18,7 +18,7 @@ interface PngResult {
   buffer: Buffer;
   metrics?: PngMetrics;
   warnings: string[];
-  logs$: Rx.Observable<string>;
+  logs$?: Rx.Observable<string>;
 }
 
 export function generatePngObservable(
