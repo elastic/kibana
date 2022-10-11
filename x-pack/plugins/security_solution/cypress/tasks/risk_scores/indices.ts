@@ -13,7 +13,7 @@ export const getPivotTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId
 export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`;
 
-export const getRiskScoreMapping = (riskScoreEntity: RiskScoreEntity) => {
+export const getLegacyRiskScoreMapping = (riskScoreEntity: RiskScoreEntity) => {
   return {
     properties: {
       [`${riskScoreEntity}.name`]: {
@@ -53,7 +53,7 @@ export const getLegacyRiskScoreIndicesOptions = ({
 }) => {
   return {
     index: getPivotTransformIndex(riskScoreEntity, spaceId),
-    mappings: getRiskScoreMapping(riskScoreEntity),
+    mappings: getLegacyRiskScoreMapping(riskScoreEntity),
   };
 };
 
@@ -66,6 +66,6 @@ export const getLegacyRiskScoreLatestIndicesOptions = ({
 }) => {
   return {
     index: getLatestTransformIndex(riskScoreEntity, spaceId),
-    mappings: getRiskScoreMapping(riskScoreEntity),
+    mappings: getLegacyRiskScoreMapping(riskScoreEntity),
   };
 };
