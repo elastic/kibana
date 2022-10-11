@@ -24,15 +24,6 @@ export const deleteSavedObjects = (
   });
 };
 
-export const createSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDashboards`) => {
-  return cy.request({
-    method: 'post',
-    url: `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_create/${templateName}`,
-    failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-  });
-};
-
 export const findSavedObjects = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') => {
   const search = getRiskScoreTagName(riskScoreEntity, spaceId);
 

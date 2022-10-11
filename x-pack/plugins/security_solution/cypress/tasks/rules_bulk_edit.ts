@@ -48,12 +48,12 @@ export const clickApplyTimelineTemplatesMenuItem = () => {
   cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).click().should('not.exist');
 };
 
-export const clickIndexPatternsMenuItem = () => {
+const clickIndexPatternsMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click().should('not.exist');
 };
 
-export const clickTagsMenuItem = () => {
+const clickTagsMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
 };
@@ -71,11 +71,6 @@ export const clickUpdateScheduleMenuItem = () => {
 export const clickAddIndexPatternsMenuItem = () => {
   clickIndexPatternsMenuItem();
   cy.get(ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
-};
-
-export const clickDeleteIndexPatternsMenuItem = () => {
-  clickIndexPatternsMenuItem();
-  cy.get(DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click().should('not.exist');
 };
 
 export const openBulkEditAddIndexPatternsForm = () => {

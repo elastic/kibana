@@ -22,7 +22,8 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).click();
   cy.get(SOURCERER.wrapper).should('be.visible');
 };
-export const openTimelineSourcerer = () => {
+
+const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
   cy.get(SOURCERER.triggerTimeline).should('be.visible');
   cy.get(SOURCERER.triggerTimeline).first().click();
@@ -33,7 +34,7 @@ export const openAdvancedSettings = () => {
   cy.get(SOURCERER.advancedSettings).click();
 };
 
-export const clickOutOfSelector = () => {
+const clickOutOfSelector = () => {
   return cy.get(SOURCERER.popoverTitle).first().click();
 };
 
@@ -128,7 +129,7 @@ export const deleteAlertsIndex = () => {
   });
 };
 
-export const refreshUntilAlertsIndexExists = async () => {
+const refreshUntilAlertsIndexExists = async () => {
   cy.waitUntil(
     () => {
       cy.reload();
