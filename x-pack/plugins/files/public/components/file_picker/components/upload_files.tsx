@@ -17,6 +17,11 @@ interface Props {
 export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
   const { state } = useFilePickerContext();
   return (
-    <UploadFile kind={kind} immediate onDone={(file) => state.addFile(file.map(({ id }) => id))} />
+    <UploadFile
+      kind={kind}
+      immediate
+      fullWidth
+      onDone={(file) => state.addFile(file.map(({ id }) => id))}
+    />
   );
 };

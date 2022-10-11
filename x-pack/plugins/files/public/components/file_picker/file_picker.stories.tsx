@@ -45,4 +45,4 @@ export default {
 
 const Template: ComponentStory<typeof FilePicker> = (props) => <FilePicker {...props} />;
 
-export const Basic = Template.bind({});
+export const Empty = Template.bind({});

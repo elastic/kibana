@@ -25,6 +25,7 @@ import { useUploadState } from './context';
 export interface Props {
   meta?: unknown;
   accept?: string;
+  fullWidth?: boolean;
   immediate?: boolean;
   allowClear?: boolean;
   initialFilePromptText?: string;
@@ -33,7 +34,7 @@ export interface Props {
 const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
-  ({ meta, accept, immediate, allowClear = false, initialFilePromptText }, ref) => {
+  ({ meta, accept, immediate, allowClear = false, initialFilePromptText, fullWidth }, ref) => {
     const uploadState = useUploadState();
     const uploading = useBehaviorSubject(uploadState.uploading$);
     const error = useBehaviorSubject(uploadState.error$);
@@ -48,10 +49,11 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
       <div
         data-test-subj="filesUploadFile"
         css={css`
-          max-width: ${euiFormMaxWidth};
+          max-width: ${fullWidth ? '100%' : euiFormMaxWidth};
         `}
       >
         <EuiFilePicker
+          fullWidth={fullWidth}
           aria-label={i18nTexts.defaultPickerLabel}
           id={id}
           ref={ref}
@@ -75,6 +77,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           alignItems="flexStart"
           direction="rowReverse"
           gutterSize="m"
+          responsive={false}
         >
           <EuiFlexItem grow={false}>
             <ControlButton

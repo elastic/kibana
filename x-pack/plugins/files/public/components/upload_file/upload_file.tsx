@@ -52,6 +52,10 @@ export interface Props<Kind extends string = string> {
    */
   meta?: Record<string, unknown>;
   /**
+   * Whether to display the file picker with width 100%;
+   */
+  fullWidth?: boolean;
+  /**
    * Whether this component should display a "done" state after processing an
    * upload or return to the initial state to allow for another upload.
    *
@@ -79,6 +83,7 @@ export const UploadFile = <Kind extends string = string>({
   meta,
   onDone,
   onError,
+  fullWidth,
   allowClear,
   kind: kindId,
   immediate = false,
@@ -121,6 +126,7 @@ export const UploadFile = <Kind extends string = string>({
         meta={meta}
         immediate={immediate}
         allowClear={allowClear}
+        fullWidth={fullWidth}
       />
     </context.Provider>
   );
