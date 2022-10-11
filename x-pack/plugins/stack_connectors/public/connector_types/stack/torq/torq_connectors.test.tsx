@@ -8,9 +8,9 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TorqActionConnectorFields from './torq_connectors';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../../lib/test_utils';
 
 const EMPTY_FUNC = () => {};
 

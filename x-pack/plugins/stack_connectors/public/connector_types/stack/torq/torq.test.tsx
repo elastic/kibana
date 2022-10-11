@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '..';
-import { ActionTypeModel } from '../../../../types';
-import { registrationServicesMock } from '../../../../mocks';
+import { registrationServicesMock } from "@kbn/stack-connectors-plugin/public/mocks";
+import { registerConnectorTypes } from "../../";
+import { ActionTypeModel } from "@kbn/triggers-actions-ui-plugin/public";
+import { TypeRegistry } from "@kbn/triggers-actions-ui-plugin/public/application/type_registry";
 
 const ACTION_TYPE_ID = '.torq';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
+  const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
+  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }

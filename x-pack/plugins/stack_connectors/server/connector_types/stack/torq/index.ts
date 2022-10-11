@@ -13,17 +13,16 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { isOk, promiseResult, Result } from './lib/result_type';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { request } from './lib/axios_utils';
-import { renderMustacheString } from '../lib/mustache_renderer';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '../../common';
+import { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { AlertingConnectorFeatureId, UptimeConnectorFeatureId, SecurityConnectorFeatureId, ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { getRetryAfterIntervalFromHeaders } from '../../lib/http_response_retry_header';
+import { promiseResult, isOk, Result } from '../../lib/result_type';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+
+
 
 export type TorqActionType = ActionType<
   ActionTypeConfigType,
@@ -68,14 +67,12 @@ export const ActionTypeId = '.torq';
 // action type definition
 export function getActionType({
   logger,
-  configurationUtilities,
 }: {
   logger: Logger;
-  configurationUtilities: ActionsConfigurationUtilities;
 }): TorqActionType {
   return {
     id: ActionTypeId,
-    minimumLicenseRequired: 'basic',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.torqTitle', {
       defaultMessage: 'Torq',
     }),
@@ -85,14 +82,19 @@ export function getActionType({
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: ParamsSchema,
+      config: {
+        schema: schema.object(configSchemaProps),
+        customValidator: validateActionTypeConfig,
+      },
+      secrets: {
+        schema: SecretsSchema
+      },
+      params: {
+        schema: ParamsSchema
+      },
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger, configurationUtilities }),
+    executor: curry(executor)({ logger }),
   };
 }
 
@@ -107,8 +109,8 @@ function renderParameterTemplates(
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: ActionTypeConfigType,
+  validatorServices: ValidatorServices,
 ) {
   const configuredUrl = configObject.webhookIntegrationUrl;
   let configureUrlObj: URL;
@@ -124,7 +126,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
+    validatorServices.configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.torq.torqConfigurationError', {
       defaultMessage: 'error configuring send to Torq action: {message}',
@@ -146,13 +148,13 @@ function validateActionTypeConfig(
 export async function executor(
   {
     logger,
-    configurationUtilities,
-  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
+  }: { logger: Logger; },
   execOptions: TorqActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const { webhookIntegrationUrl } = execOptions.config;
   const { body: data } = execOptions.params;
+  const configurationUtilities = execOptions.configurationUtilities;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const token = secrets.token;

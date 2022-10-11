@@ -15,6 +15,7 @@ import {
   getServiceNowITOMConnectorType,
   getSlackConnectorType,
   getTeamsConnectorType,
+  getTorqConnectorType,
   getWebhookConnectorType,
   getXmattersConnectorType,
 } from './stack';
@@ -36,6 +37,7 @@ export type {
   TeamsActionParams,
   WebhookActionParams,
   XmattersActionParams,
+  TorqActionParams,
 } from './stack';
 export {
   EmailConnectorTypeId,
@@ -86,4 +88,5 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType({ logger }));
   actions.registerType(getResilientConnectorType({ logger }));
   actions.registerType(getTeamsConnectorType({ logger }));
+  actions.registerType(getTorqConnectorType({ logger }));
 }

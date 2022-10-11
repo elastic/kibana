@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Services } from '../types';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { actionsConfigMock } from '../actions_config.mock';
-import { createActionTypeRegistry } from './index.test';
+
+
 import { Logger } from '@kbn/core/server';
-import { actionsMock } from '../mocks';
+
 import axios from 'axios';
 import {
   ActionParamsType,
@@ -18,9 +16,15 @@ import {
   ActionTypeSecretsType,
   getActionType,
   TorqActionType,
-} from './torq';
+} from '.';
 
-import * as utils from './lib/axios_utils';
+import * as utils from '../../../../../actions/server/lib/axios_utils';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { Services } from '@kbn/actions-plugin/server/types';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { loggerMock } from '@kbn/logging-mocks';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
 const ACTION_TYPE_ID = '.torq';
 
@@ -41,16 +45,12 @@ axios.create = jest.fn(() => axios);
 const services: Services = actionsMock.createServices();
 
 let actionType: TorqActionType;
-let mockedLogger: jest.Mocked<Logger>;
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<
-    ActionTypeConfigType,
-    ActionTypeSecretsType,
-    ActionParamsType
-  >(ACTION_TYPE_ID);
-  mockedLogger = logger;
+  actionType = getActionType({ logger: mockedLogger });
+  configurationUtilities = actionsConfigMock.create();
 });
 
 describe('actionType', () => {
@@ -65,12 +65,12 @@ describe('secrets validation', () => {
     const secrets: Record<string, string> = {
       token: 'jfi2fji3ofeaiw34if',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual(secrets);
   });
 
   test('fails when secret token is not provided', () => {
     expect(() => {
-      validateSecrets(actionType, {});
+      validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: token is required"`
     );
@@ -84,7 +84,7 @@ describe('config validation', () => {
     const config: Record<string, string | boolean> = {
       webhookIntegrationUrl: 'https://hooks.torq.io/v1/test',
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -113,7 +113,7 @@ describe('config validation', () => {
         webhookIntegrationUrl: url,
       };
       expect(() => {
-        validateConfig(actionType, config);
+        validateConfig(actionType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(errorMsg);
     });
   });
@@ -121,12 +121,6 @@ describe('config validation', () => {
   test("config validation returns an error if the specified URL isn't added to allowedHosts", () => {
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (_) => {
-          throw new Error(`target url is not present in allowedHosts`);
-        },
-      },
     });
 
     // any for testing
@@ -135,7 +129,7 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring send to Torq action: target url is not present in allowedHosts"`
     );
@@ -147,7 +141,7 @@ describe('params validation', () => {
     const params: Record<string, string> = {
       body: '{"message": "Hello"}',
     };
-    expect(validateParams(actionType, params)).toEqual({
+    expect(validateParams(actionType, params, { configurationUtilities })).toEqual({
       ...params,
     });
   });
@@ -158,7 +152,6 @@ describe('execute Torq action', () => {
     requestMock.mockReset();
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
     });
   });
 
@@ -183,6 +176,7 @@ describe('execute Torq action', () => {
       config,
       secrets: { token: '1234' },
       params: { body: 'some data' },
+      configurationUtilities: configurationUtilities
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;

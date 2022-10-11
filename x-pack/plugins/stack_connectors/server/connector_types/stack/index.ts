@@ -54,3 +54,9 @@ export {
   ConnectorTypeId as XmattersConnectorTypeId,
 } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
+
+export {
+  getActionType as getTorqConnectorType,
+  ActionTypeId as TorqConnectorTypeId,
+} from './torq';
+export type { ActionParamsType as TorqActionParams } from './torq';

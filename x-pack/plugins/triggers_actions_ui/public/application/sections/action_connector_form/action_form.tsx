@@ -365,7 +365,6 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
-              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group, false)}
               recoveryActionGroup={recoveryActionGroup}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}

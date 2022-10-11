@@ -6,9 +6,10 @@
  */
 
 import { lazy } from 'react';
-import { ActionTypeModel, GenericValidationResult } from '../../../../types';
-import { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
+import { ActionTypeModel, GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { TorqActionParams, TorqConfig, TorqSecrets } from '../../types';
 import * as i18n from './translations';
+import { torqDefaultBody } from '../../lib/default_params';
 
 function replaceReferencesWithNumbers(body: string) {
   return body.replace(/\{\{[.\w]+\}\}/gm, "42");
@@ -42,5 +43,8 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
     validateParams,
     actionConnectorFields: lazy(() => import('./torq_connectors')),
     actionParamsFields: lazy(() => import('./torq_params')),
+    defaultActionParams: {
+      body: torqDefaultBody,
+    }
   };
 }

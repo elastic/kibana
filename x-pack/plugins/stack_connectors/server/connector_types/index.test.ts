@@ -20,6 +20,7 @@ const ACTION_TYPE_IDS = [
   '.teams',
   '.webhook',
   '.xmatters',
+  '.torq',
 ];
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

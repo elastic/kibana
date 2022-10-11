@@ -78,7 +78,6 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
 import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
-import { getDefaultsForActionParams } from './application/lib/get_defaults_for_action_params';
 import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 
@@ -150,12 +149,12 @@ interface PluginsStart {
 
 export class Plugin
   implements
-    CorePlugin<
-      TriggersAndActionsUIPublicPluginSetup,
-      TriggersAndActionsUIPublicPluginStart,
-      PluginsSetup,
-      PluginsStart
-    >
+  CorePlugin<
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+  PluginsSetup,
+  PluginsStart
+  >
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
@@ -274,7 +273,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
-          getDefaultActionParams: getDefaultsForActionParams,
+          // getDefaultActionParams: getDefaultsForActionParams,
         });
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
@@ -363,5 +362,5 @@ export class Plugin
     };
   }
 
-  public stop() {}
+  public stop() { }
 }
