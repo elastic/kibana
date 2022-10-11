@@ -119,7 +119,22 @@ describe('OpsgenieConnector', () => {
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...defaultCreateAlertExpect,
-      data: { message: 'hello', alias: sha256Hash.digest('hex') },
+      data: { message: 'hello', alias: `sha-${sha256Hash.digest('hex')}` },
+    });
+  });
+
+  it('calls request with the sha256 hash of the alias when it is greater than 512 characters when closing an alert', async () => {
+    const alias = 'a'.repeat(513);
+
+    const hasher = crypto.createHash('sha256');
+    const sha256Hash = hasher.update(alias);
+
+    await connector.closeAlert({ alias });
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...createCloseAlertExpect(`sha-${sha256Hash.digest('hex')}`),
+      data: {},
     });
   });
 

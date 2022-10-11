@@ -62,17 +62,23 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
       return {};
     }
 
+    const newAlias = OpsgenieConnector.createAlias(alias);
+
+    return { alias: newAlias };
+  }
+
+  private static createAlias(alias: string) {
     // opsgenie v2 requires that the alias length be no more than 512 characters
     // see their docs for more details https://docs.opsgenie.com/docs/alert-api#create-alert
     if (alias.length <= 512) {
-      return { alias };
+      return alias;
     }
 
     // To give preference to avoiding collisions we're using sha256 over of md5 but we are compromising on speed a bit here
     const hasher = crypto.createHash('sha256');
     const sha256Hash = hasher.update(alias);
 
-    return { alias: sha256Hash.digest('hex') };
+    return `sha-${sha256Hash.digest('hex')}`;
   }
 
   private createHeaders() {
@@ -80,7 +86,9 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async closeAlert(params: CloseAlertParams) {
-    const fullURL = this.concatPathToURL(`v2/alerts/${params.alias}/close`);
+    const newAlias = OpsgenieConnector.createAlias(params.alias);
+
+    const fullURL = this.concatPathToURL(`v2/alerts/${newAlias}/close`);
     fullURL.searchParams.set('identifierType', 'alias');
 
     const { alias, ...paramsWithoutAlias } = params;

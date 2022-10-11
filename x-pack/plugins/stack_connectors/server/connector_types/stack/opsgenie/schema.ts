@@ -111,7 +111,7 @@ const FailureResponse = schema.object(
 export const Response = schema.oneOf([SuccessfulResponse, FailureResponse]);
 
 export const CloseAlertParamsSchema = schema.object({
-  alias: schema.string({ maxLength: 512 }),
+  alias: schema.string(),
   user: schema.maybe(schema.string({ maxLength: 100 })),
   source: schema.maybe(schema.string({ maxLength: 100 })),
   note: schema.maybe(schema.string({ maxLength: 25000 })),
