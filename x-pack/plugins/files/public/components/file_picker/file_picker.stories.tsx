@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import type { FileJSON } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
 import { FilesContext } from '../context';
@@ -47,3 +48,36 @@ export default {
 const Template: ComponentStory<typeof FilePicker> = (props) => <FilePicker {...props} />;
 
 export const Empty = Template.bind({});
+
+const d = new Date();
+function createFileJSON(): FileJSON {
+  return {
+    alt: '',
+    created: d.toISOString(),
+    updated: d.toISOString(),
+    extension: 'png',
+    fileKind: kind,
+    id: '1',
+    meta: {},
+    mimeType: 'image/png',
+    name: 'my file',
+    size: 1,
+    status: 'READY',
+  };
+}
+export const Basic = Template.bind({});
+Basic.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          list: async (): Promise<FilesClientResponses['list']> => ({
+            files: [createFileJSON(), createFileJSON(), createFileJSON(), createFileJSON()],
+          }),
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
