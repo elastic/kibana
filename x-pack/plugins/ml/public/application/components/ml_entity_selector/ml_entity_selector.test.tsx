@@ -132,12 +132,13 @@ describe('MlEntitySelector', () => {
 
   test('display a toast on error', async () => {
     const displayErrorToast = jest.fn();
+    const sampleError = new Error('try a bit later');
 
     (useMlApiContext as jest.MockedFunction<typeof useMlApiContext>).mockImplementationOnce(() => {
       return {
         jobs: {
           getAllJobAndGroupIds: jest.fn(() => {
-            throw new Error('try a bit later');
+            throw sampleError;
           }),
         },
       } as unknown as jest.Mocked<MlApiServices>;
@@ -157,5 +158,6 @@ describe('MlEntitySelector', () => {
     });
 
     expect(displayErrorToast).toHaveBeenCalledTimes(1);
+    expect(displayErrorToast).toHaveBeenCalledWith(sampleError, 'Failed to fetch ML entities');
   });
 });
