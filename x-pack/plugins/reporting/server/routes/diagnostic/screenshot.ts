@@ -10,7 +10,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import assert from 'assert';
-import { firstValueFrom, lastValueFrom, mergeMap, toArray } from 'rxjs';
+import { lastValueFrom, toArray } from 'rxjs';
 import { DiagnosticResponse } from '.';
 import { incrementApiUsageCounter } from '..';
 import { ReportingCore } from '../..';
@@ -43,10 +43,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
 
       // Hack the layout to make the base/login page work
       const layout: LayoutParams<'preserve_layout'> = {
-        dimensions: {
-          width: 1440,
-          height: 2024,
-        },
+        dimensions: { width: 800, height: 600 },
         selectors: {
           screenshot: `.${APP_WRAPPER_CLASS}`,
           renderComplete: `.${APP_WRAPPER_CLASS}`,
@@ -67,18 +64,14 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             request: req,
             browserTimezone: 'UTC',
             urls: [hashUrl],
-          }).pipe(
-            mergeMap(async ({ logs$, ...rest }) => ({
-              logs: await firstValueFrom(logs$.pipe(toArray())),
-              ...rest,
-            }))
-          )
+          }).pipe()
         );
 
         assert(result, 'PNG result is undefined');
         assert(result.buffer, 'PNG result buffer is undefined');
 
-        const logs = result.logs ?? [];
+        const logs = await lastValueFrom(result.logs$.pipe(toArray()));
+
         if (result.warnings.length) {
           response.success = false;
           response.logs = result.warnings.concat(logs);

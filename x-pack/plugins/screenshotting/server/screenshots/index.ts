@@ -96,7 +96,7 @@ export interface CaptureResult {
    *
    * NOTE: errors and warnings from the browser process stdout/stderr are not available.
    */
-  logs$: Observable<string | Error>;
+  logs$: Observable<string>;
 }
 
 export type ScreenshotOptions = PdfScreenshotOptions | PngScreenshotOptions;
