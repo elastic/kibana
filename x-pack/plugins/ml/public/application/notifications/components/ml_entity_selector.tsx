@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
 import { useMlApiContext } from '../../contexts/kibana';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 type EntityType = 'anomaly_detector' | 'data_frame_analytics' | 'trained_models';
 
@@ -43,6 +44,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   handleDuplicates = false,
 }) => {
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
+  const { displayErrorToast } = useToastNotificationService();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -107,12 +109,23 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
       }
 
       setOptions(newOptions);
-    } catch (e) {
-      // TODO add error handling
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.mlEntitySelector.fetchError', {
+          defaultMessage: 'Failed to fetch ML entities',
+        })
+      );
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobsApi, trainedModels, dataFrameAnalytics]);
+  }, [
+    jobsApi,
+    trainedModels,
+    dataFrameAnalytics,
+    entityTypes,
+    visColorsBehindText,
+    displayErrorToast,
+  ]);
 
   const selectedEntities = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     return (selectedOptions ?? []).flatMap((o) => {
