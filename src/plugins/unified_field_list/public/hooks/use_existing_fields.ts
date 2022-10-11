@@ -86,7 +86,9 @@ export const useExistingFieldsFetcher = (
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
       const dataView = await dataViews.get(dataViewId);
 
-      if (!dataView) {
+      // console.log('fetching', dataViewId, dataView);
+
+      if (!dataView?.title) {
         return;
       }
 
@@ -95,8 +97,6 @@ export const useExistingFieldsFetcher = (
         ...unknownInfo,
         numberOfFetches,
       };
-
-      // console.log('fetching', dataViewId);
 
       try {
         if (hasRestrictions) {

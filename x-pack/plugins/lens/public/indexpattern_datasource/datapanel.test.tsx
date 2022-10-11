@@ -373,7 +373,7 @@ describe('IndexPattern Data Panel', () => {
     const frame = getFrameAPIMock();
     defaultProps = {
       data: dataPluginMock.createStartContract(),
-      dataViews: dataViewPluginMocks.createStartContract(),
+      dataViews,
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onIndexPatternRefresh: jest.fn(),
@@ -431,9 +431,6 @@ describe('IndexPattern Data Panel', () => {
           return [];
         }
       });
-      dataViews.getFieldsForIndexPattern.mockImplementation((dataView) => {
-        return Promise.resolve(dataView.fields) as Promise<FieldSpec[]>;
-      });
       dataViews.get.mockImplementation(async (id: string) => {
         return [indexPatterns.a, indexPatterns.b].find(
           (indexPattern) => indexPattern.id === id
@@ -456,7 +453,6 @@ describe('IndexPattern Data Panel', () => {
           indexPatterns: indexPatterns as unknown as DataViewsState['indexPatterns'],
           existingFields: existingFieldsByDataViewMap ?? {},
         }),
-        activeIndexPatterns: [indexPatterns[currentIndexPatternId]],
         state: {
           currentIndexPatternId,
           layers: {
@@ -485,7 +481,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
         expect.objectContaining({
-          dataViews: props.activeIndexPatterns,
+          dataViews: [indexPatterns.a],
           query: props.query,
           filters: props.filters,
           fromDate: props.dateRange.fromDate,
@@ -515,7 +511,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
         expect.objectContaining({
-          dataViews: props.activeIndexPatterns,
+          dataViews: [indexPatterns.b],
           query: props.query,
           filters: props.filters,
           fromDate: props.dateRange.fromDate,
@@ -550,7 +546,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
         expect.objectContaining({
-          dataViews: props.activeIndexPatterns,
+          dataViews: [indexPatterns.b],
           fromDate: props.dateRange.fromDate,
           toDate: props.dateRange.toDate,
         })
@@ -581,6 +577,7 @@ describe('IndexPattern Data Panel', () => {
       (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(
         originalUseExistingFieldsFetcher
       );
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
       let inst: ReactWrapper;
 
       await act(async () => {
@@ -590,16 +587,19 @@ describe('IndexPattern Data Panel', () => {
 
       expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
         expect.objectContaining({
-          dataViews: props.activeIndexPatterns,
+          dataViews: [indexPatterns.a],
           fromDate: props.dateRange.fromDate,
           toDate: props.dateRange.toDate,
         })
       );
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
       expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
         expect.objectContaining({
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           dslQuery,
+          dataView: indexPatterns.a,
+          timeFieldName: indexPatterns.a.timeFieldName,
         })
       );
 
@@ -614,66 +614,95 @@ describe('IndexPattern Data Panel', () => {
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
           dslQuery,
+          dataView: indexPatterns.a,
+          timeFieldName: indexPatterns.a.timeFieldName,
         })
       );
     });
 
     it('loads existence data if layer index pattern changes', async () => {
-      const updateIndexPatterns = jest.fn();
-      await testExistenceLoading(testProps(updateIndexPatterns), {
-        layers: {
-          1: {
-            indexPatternId: 'b',
-            columnOrder: [],
-            columns: {},
+      const props = testProps({
+        currentIndexPatternId: 'a',
+        existingFieldsByDataViewMap: {
+          a: {
+            [indexPatterns.a.fields[0].name]: true,
+            [indexPatterns.a.fields[1].name]: true,
+          },
+          b: {
+            [indexPatterns.b.fields[0].name]: true,
           },
         },
       });
-
-      expect(updateIndexPatterns).toHaveBeenCalledTimes(2);
-
-      const secondCall = dataViews.getFieldsForIndexPattern.mock.calls[1];
-      expect(secondCall[0]).toEqual(indexPatterns.a);
-      expect(secondCall[1]?.filter?.bool?.filter).toContainEqual(dslQuery);
-      expect(secondCall[1]?.filter?.bool?.filter).toContainEqual({
-        range: {
-          atime: {
-            format: 'strict_date_optional_time',
-            gte: '2019-01-01',
-            lte: '2020-01-01',
-          },
-        },
-      });
-
-      const thirdCall = dataViews.getFieldsForIndexPattern.mock.calls[2];
-      expect(thirdCall[0]).toEqual(indexPatterns.b);
-      expect(thirdCall[1]?.filter?.bool?.filter).toContainEqual(dslQuery);
-      expect(thirdCall[1]?.filter?.bool?.filter).toContainEqual({
-        range: {
-          btime: {
-            format: 'strict_date_optional_time',
-            gte: '2019-01-01',
-            lte: '2020-01-01',
-          },
-        },
-      });
-
-      expect(updateIndexPatterns).toHaveBeenCalledWith(
-        {
-          existingFields: {
-            aaa: {
-              aaa_field_1: true,
-              aaa_field_2: true,
-            },
-            bbb: {
-              bbb_field_1: true,
-              bbb_field_2: true,
-            },
-          },
-          isFirstExistenceFetch: false,
-        },
-        { applyImmediately: true }
+      (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(
+        originalUseExistingFieldsFetcher
       );
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
+      let inst: ReactWrapper;
+
+      await act(async () => {
+        inst = await mountWithIntl(<IndexPatternDataPanel {...props} />);
+        inst.update();
+      });
+
+      expect(UseExistingFieldsApi.useExistingFieldsFetcher).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViews: [indexPatterns.a],
+          fromDate: props.dateRange.fromDate,
+          toDate: props.dateRange.toDate,
+        })
+      );
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+          dslQuery,
+          dataView: indexPatterns.a,
+          timeFieldName: indexPatterns.a.timeFieldName,
+        })
+      );
+
+      expect(
+        inst!
+          .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
+          .first()
+          .text()
+      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+
+      await act(async () => {
+        await inst!.setProps({
+          currentIndexPatternId: 'b',
+          state: {
+            currentIndexPatternId: 'b',
+            layers: {
+              1: {
+                indexPatternId: 'b',
+                columnOrder: [],
+                columns: {},
+              },
+            },
+          } as IndexPatternPrivateState,
+        });
+        await inst!.update();
+      });
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+          dslQuery,
+          dataView: indexPatterns.b,
+          timeFieldName: indexPatterns.b.timeFieldName,
+        })
+      );
+
+      expect(
+        inst!
+          .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
+          .first()
+          .text()
+      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('shows a loading indicator when loading', async () => {
