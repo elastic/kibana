@@ -50,7 +50,7 @@ describe('validate bundled packages', () => {
       bundledPackages
         .filter((pkg) => !EXCLUDED_PACKAGES.includes(pkg.name))
         .map(async (bundledPackage) => {
-          const registryPackage = await Registry.getRegistryPackage(
+          const registryPackage = await Registry.getPackage(
             bundledPackage.name,
             bundledPackage.version
           );

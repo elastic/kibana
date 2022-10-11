@@ -302,7 +302,7 @@ async function installPackageFromRegistry({
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
       }),
-      Registry.getRegistryPackage(pkgName, pkgVersion, {
+      Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,
       }),
     ]);

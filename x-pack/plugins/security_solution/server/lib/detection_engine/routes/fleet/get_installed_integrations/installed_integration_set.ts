@@ -6,7 +6,7 @@
  */
 
 import { capitalize, flatten } from 'lodash';
-import type { PackagePolicy, RegistryPackage } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, ArchivePackage } from '@kbn/fleet-plugin/common';
 import type {
   InstalledIntegration,
   InstalledIntegrationArray,
@@ -18,7 +18,7 @@ import type {
 
 export interface IInstalledIntegrationSet {
   addPackagePolicy(policy: PackagePolicy): void;
-  addRegistryPackage(registryPackage: RegistryPackage): void;
+  addRegistryPackage(registryPackage: ArchivePackage): void;
 
   getPackages(): InstalledPackageArray;
   getIntegrations(): InstalledIntegrationArray;
@@ -56,7 +56,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
     }
   };
 
-  const addRegistryPackage = (registryPackage: RegistryPackage): void => {
+  const addRegistryPackage = (registryPackage: ArchivePackage): void => {
     const policyTemplates = registryPackage.policy_templates ?? [];
     const packageKey = `${registryPackage.name}:${registryPackage.version}`;
     const existingPackageInfo = packageMap.get(packageKey);
