@@ -9,6 +9,8 @@ export { getEmailConnectorType } from './email';
 export { getIndexConnectorType } from './es_index';
 export { getPagerDutyConnectorType } from './pagerduty';
 export { getServerLogConnectorType } from './server_log';
+export { getServiceNowITOMConnectorType } from './servicenow_itom';
 export { getSlackConnectorType } from './slack';
 export { getTeamsConnectorType } from './teams';
 export { getWebhookConnectorType } from './webhook';
+export { getXmattersConnectorType } from './xmatters';
