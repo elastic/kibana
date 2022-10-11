@@ -18,8 +18,6 @@ const flushPayloadSize = 4 * 1024;
 const highWaterMark = 512 * 1024;
 const zLibChunkSize = 512 * 1024;
 
-const flushPayload = crypto.randomBytes(flushPayloadSize).toString('hex');
-
 // We need this otherwise Kibana server will crash with a 'ERR_METHOD_NOT_IMPLEMENTED' error.
 class ResponseStream extends Stream.PassThrough {
   flush() {}
@@ -136,7 +134,9 @@ export function streamFactory<T = unknown>(
           ? `${JSON.stringify({
               ...d,
               // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-              ...(flushFix ? { flushPayload } : {}),
+              ...(flushFix
+                ? { flushPayload: crypto.randomBytes(flushPayloadSize).toString('hex') }
+                : {}),
             })}${DELIMITER}`
           : d;
       waitForCallbacks.push(1);
