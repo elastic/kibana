@@ -20,6 +20,7 @@ const IndexPatternFlyoutContentContainer = ({
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
+  showManagementLink,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
@@ -30,7 +31,7 @@ const IndexPatternFlyoutContentContainer = ({
       let saveResponse;
       if (editData) {
         const { name = '', timeFieldName, title = '' } = dataViewSpec;
-        editData.title = title;
+        editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
         saveResponse = editData.isPersisted()
@@ -68,6 +69,7 @@ const IndexPatternFlyoutContentContainer = ({
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
       editData={editData}
+      showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
     />
   );

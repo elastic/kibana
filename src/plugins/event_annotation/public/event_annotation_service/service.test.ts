@@ -19,44 +19,6 @@ describe('Event Annotation Service', () => {
       expect(eventAnnotationService.toExpression([])).toEqual([]);
     });
 
-    it('should skip hidden annotations', () => {
-      expect(
-        eventAnnotationService.toExpression([
-          {
-            id: 'myEvent',
-            type: 'manual',
-            key: {
-              type: 'point_in_time',
-              timestamp: '2022',
-            },
-            label: 'Hello',
-            isHidden: true,
-          },
-          {
-            id: 'myRangeEvent',
-            type: 'manual',
-            key: {
-              type: 'range',
-              timestamp: '2021',
-              endTimestamp: '2022',
-            },
-            label: 'Hello Range',
-            isHidden: true,
-          },
-          {
-            id: 'myEvent',
-            type: 'query',
-            timeField: '@timestamp',
-            key: {
-              type: 'point_in_time',
-            },
-            label: 'Hello Range',
-            isHidden: true,
-            filter: { type: 'kibana_query', query: '', language: 'kuery' },
-          },
-        ])
-      ).toEqual([]);
-    });
     it('should process manual point annotations', () => {
       expect(
         eventAnnotationService.toExpression([
@@ -79,6 +41,7 @@ describe('Event Annotation Service', () => {
               function: 'manual_point_event_annotation',
               arguments: {
                 id: ['myEvent'],
+                isHidden: [false],
                 time: ['2022'],
                 label: ['Hello'],
                 color: ['#f04e98'],
@@ -115,6 +78,7 @@ describe('Event Annotation Service', () => {
               function: 'manual_range_event_annotation',
               arguments: {
                 id: ['myEvent'],
+                isHidden: [false],
                 time: ['2021'],
                 endTime: ['2022'],
                 label: ['Hello'],
@@ -149,6 +113,7 @@ describe('Event Annotation Service', () => {
               function: 'query_point_event_annotation',
               arguments: {
                 id: ['myEvent'],
+                isHidden: [false],
                 timeField: ['@timestamp'],
                 label: ['Hello'],
                 color: ['#f04e98'],
@@ -221,6 +186,7 @@ describe('Event Annotation Service', () => {
               function: 'manual_point_event_annotation',
               arguments: {
                 id: ['myEvent'],
+                isHidden: [false],
                 time: ['2022'],
                 label: ['Hello'],
                 color: ['#f04e98'],
@@ -240,6 +206,7 @@ describe('Event Annotation Service', () => {
               function: 'manual_range_event_annotation',
               arguments: {
                 id: ['myRangeEvent'],
+                isHidden: [false],
                 time: ['2021'],
                 endTime: ['2022'],
                 label: ['Hello Range'],
@@ -257,6 +224,7 @@ describe('Event Annotation Service', () => {
               function: 'query_point_event_annotation',
               arguments: {
                 id: ['myEvent'],
+                isHidden: [false],
                 timeField: ['@timestamp'],
                 label: ['Hello'],
                 color: ['#f04e98'],
@@ -320,6 +288,7 @@ describe('Event Annotation Service', () => {
                 function: 'query_point_event_annotation',
                 arguments: {
                   id: ['myEvent'],
+                  isHidden: [false],
                   timeField: ['@timestamp'],
                   label: ['Hello'],
                   color: ['#f04e98'],

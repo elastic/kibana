@@ -21,6 +21,11 @@ export const securityConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      integration: 'endpoint',
+      location: {
+        appID: 'integrations',
+        path: '/browse/security',
+      },
     },
     {
       id: 'rules',
@@ -32,17 +37,8 @@ export const securityConfig: GuideConfig = {
       ],
     },
     {
-      id: 'alerts',
-      title: 'View Alerts',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
-    },
-    {
-      id: 'cases',
-      title: 'Cases and investigations',
+      id: 'alertsCases',
+      title: 'Alerts and cases',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
