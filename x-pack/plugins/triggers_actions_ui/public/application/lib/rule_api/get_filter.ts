@@ -19,11 +19,11 @@ export const getFilter = ({
 
   if (message) {
     const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
-    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
+    filter.push(`(message: "${escapedMessage}" OR error.message: "${escapedMessage}")`);
   }
 
   if (outcomeFilter && outcomeFilter.length) {
-    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
+    filter.push(`(event.outcome: ${outcomeFilter.join(' or ')})`);
   }
 
   if (runId) {
