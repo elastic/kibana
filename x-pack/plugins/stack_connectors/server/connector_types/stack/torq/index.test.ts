@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
@@ -183,7 +181,7 @@ describe('execute Torq action', () => {
       config,
       secrets: { token: '1234' },
       params: { body: 'some data' },
-      configurationUtilities: configurationUtilities
+      configurationUtilities: configurationUtilities,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
@@ -199,20 +197,10 @@ describe('execute Torq action', () => {
           "debug": [MockFunction] {
             "calls": Array [
               Array [
-                "torq action result: {
-        tag: 'ok',
-        value: { status: 200, statusText: '', data: '', headers: [], config: {} }
-      }",
-              ],
-              Array [
                 "response from Torq action \\"some-id\\": [HTTP 200] ",
               ],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
               Object {
                 "type": "return",
                 "value": undefined,

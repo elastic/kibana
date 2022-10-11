@@ -176,8 +176,6 @@ export async function executor(
     })
   );
 
-  logger.debug(`torq action result: ${inspect(result)}`);
-
   if (isOk(result)) {
     const {
       value: { status, statusText },
