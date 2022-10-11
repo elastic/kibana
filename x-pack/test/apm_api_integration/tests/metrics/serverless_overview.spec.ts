@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
