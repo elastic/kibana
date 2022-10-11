@@ -4,6 +4,9 @@ on:
       - closed
       - labeled
 
+env:
+  NODE_ENV: kibana-github-action
+
 jobs:
   on-merge:
     name: 'Label and Backport'
