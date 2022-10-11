@@ -161,7 +161,10 @@ export const DiscoverMainContent = ({
           isTimeBased={isTimeBased}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
           onResetChartHeight={
-            panelsMode === DISCOVER_PANELS_MODE.RESIZABLE ? resetTopPanelHeight : undefined
+            topPanelHeight !== defaultTopPanelHeight &&
+            panelsMode === DISCOVER_PANELS_MODE.RESIZABLE
+              ? resetTopPanelHeight
+              : undefined
           }
         />
       </InPortal>
