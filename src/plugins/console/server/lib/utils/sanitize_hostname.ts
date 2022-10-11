@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { encodePath } from './encode_path';
-export { toURL } from './to_url';
-export { streamToJSON } from './stream_to_json';
-export { sanitizeHostname } from './sanitize_hostname';
+/**
+ * Node http request library does not expect there to be trailing "[" or "]"
+ * characters in ipv6 host names.
+ */
+export const sanitizeHostname = (hostName: string): string =>
+  hostName.trim().replace(/^\[/, '').replace(/\]$/, '');

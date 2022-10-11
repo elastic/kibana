@@ -19,7 +19,6 @@ import type {
   IndicesGetTemplateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import { send } from '../lib/es';
 import {
   Alias,
   DataStream,
@@ -103,21 +102,25 @@ export class AutocompleteInfo {
     ]).then((response) => {
       const errors = response.filter((result) => result.status === 'rejected');
       if (errors.length) {
-        // Notify the user if mapping size is too large
-        const isMappingResponseExceededError = errors.some((error) => {
+        let path;
+        // Notify the user if response size is too large
+        const isResponseSizeTooLarge = errors.some((error) => {
           if ('reason' in error) {
-            return error.reason?.body?.message === 'Maximum size of mappings response exceeded';
+            const url = new URL(error.reason.request?.url);
+            path = url.searchParams.get('path');
+
+            return error.reason.body?.message === 'Response size is too large';
           }
         });
 
-        if (isMappingResponseExceededError) {
+        if (isResponseSizeTooLarge) {
           this.notifications.toasts.addWarning({
-            title: i18n.translate('console.autocomplete.mappingResponseExceededTitle', {
-              defaultMessage: 'Maximum size of mappings response exceeded',
+            title: i18n.translate('console.autocomplete.responseSizeTooLargeWarningTitle', {
+              defaultMessage: `Response size for {path} is too large`,
+              values: { path },
             }),
-            text: i18n.translate('console.autocomplete.mappingResponseExceededText', {
-              defaultMessage:
-                'Some autocomplete suggestions may be missing. Disable autocomplete suggestions for fields in Settings to optimize performance.',
+            text: i18n.translate('console.autocomplete.responseSizeTooLargeWarningText', {
+              defaultMessage: 'Some autocomplete suggestions may be missing.',
             }),
           });
         }
@@ -148,11 +151,8 @@ export class AutocompleteInfo {
 
     // Fetch autocomplete info if setting is enabled and if user has made changes.
     if (settingsToRetrieve[settingsKey]) {
-      return send({
-        http: this.http,
-        method: 'GET',
-        // pretty=false to compress the response and save bandwidth by avoiding whitespace
-        path: `${settingKeyToPathMap[settingsKey]}?pretty=false`,
+      return this.http.get(`/api/console/autocomplete_entities`, {
+        query: { path: settingKeyToPathMap[settingsKey] },
         asSystemRequest: true,
       });
     } else {
