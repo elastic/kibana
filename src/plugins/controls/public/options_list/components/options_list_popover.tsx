@@ -25,9 +25,10 @@ import {
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { getIpRangeQuery } from '../../../common/options_list/ip_search';
 import { optionsListReducers } from '../options_list_reducers';
-import { OptionsListStrings } from './options_list_strings';
 import { OptionsListReduxState } from '../types';
+import { OptionsListStrings } from './options_list_strings';
 
 export interface OptionsListPopoverProps {
   width: number;
@@ -80,6 +81,11 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
             >
               <EuiFlexItem>
                 <EuiFieldSearch
+                  isInvalid={
+                    field?.type === 'ip' &&
+                    Boolean(searchString) &&
+                    getIpRangeQuery(searchString).length === 0
+                  }
                   compressed
                   disabled={showOnlySelected}
                   fullWidth

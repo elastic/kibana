@@ -7,15 +7,19 @@
  */
 
 import { get, isEmpty } from 'lodash';
-
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
 import { OptionsListRequestBody } from '../../common/options_list/types';
-
+import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 export interface OptionsListAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
   parse: (response: SearchResponse) => string[];
+}
+
+interface EsBucket {
+  key: string;
+  doc_count: number;
 }
 
 /**
@@ -56,6 +60,7 @@ export const getSuggestionAggregationBuilder = ({
   textFieldName,
   searchString,
 }: OptionsListRequestBody) => {
+  // console.log(fieldSpec);
   if (textFieldName && fieldSpec?.aggregatable && searchString) {
     return suggestionAggSubtypes.keywordAndText;
   }
@@ -73,6 +78,16 @@ export const getSuggestionAggregationBuilder = ({
 
 const getEscapedQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
+
+const combineIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
+  const results = get(
+    rawEsResult,
+    `aggregations.suggestions.buckets.${type}.filteredSuggestions.buckets`
+  );
+  if (results) {
+    results.forEach((suggestion: EsBucket) => combinedBuckets.push(suggestion));
+  }
+};
 
 const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = {
   /**
@@ -147,32 +162,29 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    */
   ip: {
     buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
-      let rangeQuery: { from: string; to: string } | { mask: string } = {
-        from: '0.0.0.0',
-        to: '255.255.255.255',
-      };
+      let rangeQuery: IpRangeQuery = [
+        {
+          key: 'ipv6',
+          from: '::',
+          to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+        },
+      ];
       if (searchString) {
-        const ipSegments = searchString
-          .replace(/[^\d.]/g, '') // remove any non-numeric characters, excluding periods
-          .split('.')
-          .filter((segment) => segment !== '' && parseInt(segment, 10) <= 255); // prevent invalid IP search
-        if (ipSegments.length === 4) {
-          // if a full IP is given, then use CIDR mask to generate the proper range
-          // i.e. if the search string is `a.b.c.d` then `a.b.c.d\32` is equivalent to the range `a.b.c.d` to `a.b.c.(d+1)`
-          rangeQuery = { mask: searchString + '/32' };
-        } else {
-          // if a partial IP is provided as a search string, then find IPs that **start** with the given partial IP
-          // i.e. if the search string is `a.b` then do a search for IPs in the range `a.b.0.0` to `a.b.255.255`
-          const minIp = ipSegments.concat(Array(4 - ipSegments.length).fill('0')).join('.');
-          const maxIp = ipSegments.concat(Array(4 - ipSegments.length).fill('255')).join('.');
-          rangeQuery = { from: minIp, to: maxIp };
-        }
+        rangeQuery = getIpRangeQuery(searchString);
       }
+
+      if (rangeQuery.length === 0)
+        // CLEAN THIS UP??? JUST PREVENTS ERROR WHEN RUNNING INVALID SEARCH
+        return {
+          terms: {
+            field: fieldName,
+          },
+        };
 
       return {
         ip_range: {
           field: fieldName,
-          ranges: [{ key: 'rangeResults', ...rangeQuery }],
+          ranges: rangeQuery,
           keyed: true,
         },
         aggs: {
@@ -181,16 +193,20 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
+              size: searchString ? 5 : 10,
             },
           },
         },
       };
     },
-    parse: (rawEsResult) =>
-      get(
-        rawEsResult,
-        'aggregations.suggestions.buckets.rangeResults.filteredSuggestions.buckets'
-      )?.map((suggestion: { key: string }) => suggestion.key),
+    parse: (rawEsResult) => {
+      const buckets: EsBucket[] = [];
+      combineIpBuckets(rawEsResult, buckets, 'ipv4');
+      combineIpBuckets(rawEsResult, buckets, 'ipv6');
+      return buckets
+        .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
+        .map((bucket: EsBucket) => bucket.key);
+    },
   },
 
   /**
