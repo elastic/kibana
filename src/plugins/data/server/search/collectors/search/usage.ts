@@ -87,11 +87,11 @@ export function searchUsageObserver(
   return {
     next(response: IEsSearchResponse) {
       if (isRestore || !isCompleteResponse(response)) return;
-      logger.debug(`trackSearchStatus:next  ${response.rawResponse.took}`);
+      logger.debug(`trackSearchStatus:success, took:${response.rawResponse.took}`);
       usage?.trackSuccess(response.rawResponse.took);
     },
-    error() {
-      logger.debug(`trackSearchStatus:error`);
+    error(e: Error) {
+      logger.debug(`trackSearchStatus:error, ${e}`);
       usage?.trackError();
     },
   };
