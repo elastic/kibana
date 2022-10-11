@@ -9,3 +9,4 @@
 export { KibanaMigrator, mergeTypes } from './kibana_migrator';
 export type { KibanaMigratorOptions } from './kibana_migrator';
 export { buildActiveMappings } from './core';
+export { DocumentMigrator } from './core';

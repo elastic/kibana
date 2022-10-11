@@ -91,7 +91,7 @@ export class RulesClientFactory {
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
-        excludedWrappers: ['security'],
+        excludedExtensions: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
       authorization: this.authorization.create(request),

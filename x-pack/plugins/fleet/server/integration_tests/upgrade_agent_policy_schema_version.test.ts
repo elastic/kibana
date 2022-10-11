@@ -120,7 +120,7 @@ describe('upgrade agent policy schema version', () => {
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedWrappers: ['security'],
+        excludedExtensions: ['security'],
       });
       esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
     });

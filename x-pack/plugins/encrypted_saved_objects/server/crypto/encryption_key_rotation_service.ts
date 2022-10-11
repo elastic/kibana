@@ -107,7 +107,7 @@ export class EncryptionKeyRotationService {
     const user = this.options.security?.authc.getCurrentUser(request) ?? undefined;
     const retrieveClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,
-      excludedWrappers: ['encryptedSavedObjects'],
+      excludedExtensions: ['encryptedSavedObjects'],
     });
     const updateClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,

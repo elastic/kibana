@@ -161,7 +161,7 @@ class AppContextService {
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: ['security'],
     });
   }
 

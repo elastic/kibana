@@ -163,7 +163,7 @@ describe('copy to space', () => {
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedWrappers: ['spaces'],
+        excludedExtensions: ['spaces'],
       });
     });
 
@@ -326,7 +326,7 @@ describe('copy to space', () => {
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedWrappers: ['spaces'],
+        excludedExtensions: ['spaces'],
       });
     });
 

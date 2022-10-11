@@ -363,7 +363,7 @@ export class FleetPlugin
             get internalSoClient() {
               return appContextService
                 .getSavedObjects()
-                .getScopedClient(request, { excludedWrappers: ['security'] });
+                .getScopedClient(request, { excludedExtensions: ['security'] });
             },
           },
           get spaceId() {

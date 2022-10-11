@@ -154,7 +154,7 @@ describe('Uprade package install version', () => {
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedWrappers: ['security'],
+        excludedExtensions: ['security'],
       });
 
       const res = await soClient.find<Installation>({

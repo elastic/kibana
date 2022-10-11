@@ -95,7 +95,7 @@ test('creates a rules client with proper constructor arguments when security is 
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedWrappers: ['security'],
+    excludedExtensions: ['security'],
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
@@ -137,7 +137,7 @@ test('creates a rules client with proper constructor arguments', async () => {
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedWrappers: ['security'],
+    excludedExtensions: ['security'],
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
