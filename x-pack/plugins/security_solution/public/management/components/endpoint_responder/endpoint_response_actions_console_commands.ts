@@ -168,8 +168,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 0,
       helpDisabled: doesEndpointSupportCommand('isolate') === false,
-      helpHidden:
-        getRbacControl({ commandName: 'isolate', privileges: endpointPrivileges }) === false,
+      helpHidden: !getRbacControl({ commandName: 'isolate', privileges: endpointPrivileges }),
     },
     {
       name: 'release',
@@ -199,8 +198,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 1,
       helpDisabled: doesEndpointSupportCommand('release') === false,
-      helpHidden:
-        getRbacControl({ commandName: 'release', privileges: endpointPrivileges }) === false,
+      helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
     {
       name: 'kill-process',
@@ -255,8 +253,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 4,
       helpDisabled: doesEndpointSupportCommand('kill-process') === false,
-      helpHidden:
-        getRbacControl({ commandName: 'kill-process', privileges: endpointPrivileges }) === false,
+      helpHidden: !getRbacControl({ commandName: 'kill-process', privileges: endpointPrivileges }),
     },
     {
       name: 'suspend-process',
@@ -314,9 +311,10 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 5,
       helpDisabled: doesEndpointSupportCommand('suspend-process') === false,
-      helpHidden:
-        getRbacControl({ commandName: 'suspend-process', privileges: endpointPrivileges }) ===
-        false,
+      helpHidden: !getRbacControl({
+        commandName: 'suspend-process',
+        privileges: endpointPrivileges,
+      }),
     },
     {
       name: 'status',
@@ -362,8 +360,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
-      helpHidden:
-        getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }) === false,
+      helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
   ];
 };
