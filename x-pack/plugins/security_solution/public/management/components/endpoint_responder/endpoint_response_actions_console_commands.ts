@@ -91,7 +91,7 @@ const capabilitiesAndPrivilegesValidator = (command: Command): true | string => 
     errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
   }
 
-  if (errorMessage.length > 0) {
+  if (errorMessage.length) {
     return errorMessage;
   }
 
