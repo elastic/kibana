@@ -51,6 +51,7 @@ export function fetchStreaming({
 
   // Send the payload to the server
   xhr.send(body);
+  console.log('=============>fetch stream:', JSON.stringify({ url, xhr, signal }));
 
   // Return a stream of chunked decompressed messages
   const stream$ = stream.pipe(

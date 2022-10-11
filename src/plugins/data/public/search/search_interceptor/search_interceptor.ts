@@ -360,6 +360,10 @@ export class SearchInterceptor {
         }) as Promise<IKibanaSearchResponse>;
     } else {
       const { executionContext, ...rest } = options || {};
+      console.log(
+        '=============>runSearch> batchedFetch:',
+        JSON.stringify({ request, abortSignal })
+      );
       return this.batchedFetch(
         {
           request,

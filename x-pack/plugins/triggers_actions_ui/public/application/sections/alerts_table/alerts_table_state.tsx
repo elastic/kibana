@@ -165,9 +165,9 @@ const AlertsTableState = ({
   });
 
   useEffect(() => {
-    console.log(`=${new Date()}=============>mount`);
+    console.log(`=============>mount`);
     return () => {
-      console.log(`=${new Date()}=============>unmount`);
+      console.log(`=============>unmount`);
     };
   }, []);
 
@@ -189,7 +189,6 @@ const AlertsTableState = ({
     sort,
     skip: false,
   });
-  console.log(`=${new Date()}=============>isLoading`, isLoading);
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
@@ -302,7 +301,8 @@ const AlertsTableState = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshNow]);
 
-  console.log(`=${new Date()}=============>alertsCount:`, alertsCount);
+  console.log(`=============>isLoading:`, isLoading);
+  console.log(`=============>alertsCount:`, alertsCount);
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && <EmptyState />}

@@ -173,12 +173,13 @@ const useFetchAlerts = ({
         prevAlertRequest.current = request;
         abortCtrl.current = new AbortController();
         if (data && data.search) {
-          console.log(`=${new Date()}=============>loading: true`);
+          console.log(`=============>loading set to true`);
           dispatch({ type: 'loading', loading: true });
           console.log(
-            `=${new Date()}=============>abortCtrl.current.signal.aborted`,
+            `=============>abortCtrl.current.signal.aborted`,
             abortCtrl.current.signal.aborted
           );
+          searchSubscription$.current.unsubscribe();
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
               { ...request, featureIds, fields: undefined, query },
@@ -189,7 +190,7 @@ const useFetchAlerts = ({
             )
             .subscribe({
               next: (response) => {
-                console.log(`=${new Date()}=============>response:`, JSON.stringify(response));
+                console.log(`=============>response:`, JSON.stringify(response));
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
@@ -223,17 +224,17 @@ const useFetchAlerts = ({
                   data.search.showError(new Error(i18n.ERROR_FETCH_ALERTS));
                   searchSubscription$.current.unsubscribe();
                 } else {
-                  console.log(
-                    `=${new Date()}=============>else response:`,
-                    JSON.stringify(response)
-                  );
+                  console.log(`=============>else response:`, JSON.stringify(response));
                 }
               },
               error: (msg) => {
-                console.log(`=${new Date()}=============>error response:`, JSON.stringify(msg));
+                console.log(`=============>error response:`, JSON.stringify(msg));
                 dispatch({ type: 'loading', loading: false });
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
+              },
+              complete: () => {
+                console.log(`=============>complete`);
               },
             });
         }
@@ -271,9 +272,9 @@ const useFetchAlerts = ({
 
   useEffect(() => {
     if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {
-      console.log(`=${new Date()}=============>alertRequest`, JSON.stringify(alertRequest));
+      console.log(`=============>alertRequest`, JSON.stringify(alertRequest));
       console.log(
-        `=${new Date()}=============>prevAlertRequest.current`,
+        `=============>prevAlertRequest.current`,
         JSON.stringify(prevAlertRequest.current)
       );
       fetchAlerts(alertRequest);
