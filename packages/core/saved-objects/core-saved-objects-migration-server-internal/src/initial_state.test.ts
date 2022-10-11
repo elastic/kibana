@@ -40,6 +40,7 @@ describe('createInitialState', () => {
     expect(
       createInitialState({
         kibanaVersion: '8.1.0',
+        waitForMigrationCompletion: false,
         targetMappings: {
           dynamic: 'strict',
           properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -216,6 +217,7 @@ describe('createInitialState', () => {
         },
         "versionAlias": ".kibana_task_manager_8.1.0",
         "versionIndex": ".kibana_task_manager_8.1.0_001",
+        "waitForMigrationCompletion": false,
       }
     `);
   });
@@ -236,6 +238,7 @@ describe('createInitialState', () => {
 
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -263,6 +266,7 @@ describe('createInitialState', () => {
 
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -282,6 +286,7 @@ describe('createInitialState', () => {
     const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -305,6 +310,7 @@ describe('createInitialState', () => {
       Option.isNone(
         createInitialState({
           kibanaVersion: '8.1.0',
+          waitForMigrationCompletion: false,
           targetMappings: {
             dynamic: 'strict',
             properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -324,6 +330,7 @@ describe('createInitialState', () => {
     expect(
       createInitialState({
         kibanaVersion: '8.1.0',
+        waitForMigrationCompletion: false,
         targetMappings: {
           dynamic: 'strict',
           properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -378,6 +385,7 @@ describe('createInitialState', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -398,6 +406,7 @@ describe('createInitialState', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -423,6 +432,7 @@ describe('createInitialState', () => {
   it('initializes the `discardUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -445,6 +455,7 @@ describe('createInitialState', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -470,6 +481,7 @@ describe('createInitialState', () => {
   it('initializes the `discardCorruptObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },

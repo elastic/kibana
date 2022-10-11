@@ -23,11 +23,19 @@ const createInternalPrebootContractMock = () => {
   return prebootContract;
 };
 
-const createInternalStartContractMock = () => {
+const createInternalStartContractMock = (
+  {
+    ui,
+    backgroundTasks,
+  }: {
+    ui: boolean;
+    backgroundTasks: boolean;
+  } = { ui: true, backgroundTasks: true }
+) => {
   const startContract: jest.Mocked<InternalNodeServiceStart> = {
     roles: {
-      backgroundTasks: true,
-      ui: true,
+      backgroundTasks,
+      ui,
     },
   };
   return startContract;
@@ -48,4 +56,5 @@ const createMock = () => {
 export const nodeServiceMock = {
   create: createMock,
   createInternalPrebootContract: createInternalPrebootContractMock,
+  createInternalStartContract: createInternalStartContractMock,
 };
