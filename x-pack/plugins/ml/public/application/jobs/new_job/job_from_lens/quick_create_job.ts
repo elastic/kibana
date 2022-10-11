@@ -361,7 +361,7 @@ export class QuickJobCreator {
     };
     const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
     const encodedUrl = dashboardLocator ? await dashboardLocator.getUrl(params) : '';
-    const url = decodeURIComponent(encodedUrl);
+    const url = decodeURIComponent(encodedUrl).replace(/^.+dashboards/, 'dashboards');
 
     const dashboardName = dashboard.getOutput().title;
 
