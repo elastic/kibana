@@ -31,8 +31,6 @@ import { withProfilingSpan } from '../utils/with_profiling_span';
 import { DownsampledEventsIndex } from './downsampling';
 import { ProjectTimeQuery } from './query';
 
-const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
-
 const BASE64_FRAME_ID_LENGTH = 32;
 
 export type EncodedStackTrace = DedotObject<{
@@ -235,6 +233,8 @@ export async function searchEventsGroupByStackTrace({
   return { totalCount, stackTraceEvents };
 }
 
+const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
+
 export async function mgetStackTraces({
   logger,
   client,
@@ -244,6 +244,33 @@ export async function mgetStackTraces({
   client: ProfilingESClient;
   events: Map<StackTraceID, number>;
 }) {
+  const stackTraceIDs = new Set([...events.keys()]);
+  const stackTraces = new Map<StackTraceID, StackTrace>();
+
+  let totalFrames = 0;
+  const stackFrameDocIDs = new Set<string>();
+  const executableDocIDs = new Set<string>();
+
+  for (const stackTraceID of stackTraceIDs) {
+    const stackTrace = traceLRU.get(stackTraceID);
+    if (stackTrace) {
+      stackTraceIDs.delete(stackTraceID);
+      stackTraces.set(stackTraceID, stackTrace);
+
+      totalFrames += stackTrace.FrameIDs.length;
+      for (const frameID of stackTrace.FrameIDs) {
+        stackFrameDocIDs.add(frameID);
+      }
+      for (const fileID of stackTrace.FileIDs) {
+        executableDocIDs.add(fileID);
+      }
+    }
+  }
+
+  if (stackTraceIDs.size === 0) {
+    return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
+  }
+
   const stackResponses = await client.mget<
     PickFlattened<
       ProfilingStackTrace,
@@ -251,15 +278,10 @@ export async function mgetStackTraces({
     >
   >('mget_stacktraces', {
     index: INDEX_TRACES,
-    ids: [...events.keys()],
+    ids: [...stackTraceIDs],
     realtime: true,
     _source_includes: [ProfilingESField.StacktraceFrameIDs, ProfilingESField.StacktraceFrameTypes],
   });
-
-  let totalFrames = 0;
-  const stackTraces = new Map<StackTraceID, StackTrace>();
-  const stackFrameDocIDs = new Set<string>();
-  const executableDocIDs = new Set<string>();
 
   const t0 = Date.now();
 
@@ -273,14 +295,12 @@ export async function mgetStackTraces({
       // Also, ES doesn't know about transactions.
       if (trace.found) {
         const traceid = trace._id as StackTraceID;
-        let stackTrace = traceLRU.get(traceid) as StackTrace;
-        if (!stackTrace) {
-          stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
-          traceLRU.set(traceid, stackTrace);
-        }
+        const stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
+
+        stackTraces.set(traceid, stackTrace);
+        traceLRU.set(traceid, stackTrace);
 
         totalFrames += stackTrace.FrameIDs.length;
-        stackTraces.set(traceid, stackTrace);
         for (const frameID of stackTrace.FrameIDs) {
           stackFrameDocIDs.add(frameID);
         }
