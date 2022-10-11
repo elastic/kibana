@@ -84,6 +84,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
   const columns = [...result.columns, maxColumn];
   const layerId = uuid();
   const indexPatternId = dataView.id!;
+
   return {
     type: 'lnsMetric',
     layers: [
@@ -96,6 +97,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
     ],
     configuration: getConfiguration(
       layerId,
+      vis.params,
       getPalette(vis.params.gauge, percentageModeConfig, true),
       {
         ...result,

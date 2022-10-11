@@ -6,8 +6,47 @@
  * Side Public License, v 1.
  */
 
+import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { GaugeVisParams } from '../../types';
 import { getConfiguration } from './goal';
+
+const params: GaugeVisParams = {
+  addTooltip: false,
+  addLegend: false,
+  isDisplayWarning: true,
+  gauge: {
+    type: 'meter',
+    orientation: 'vertical',
+    alignment: 'automatic',
+    gaugeType: 'Arc',
+    scale: {
+      color: 'rgba(105,112,125,0.2)',
+      labels: false,
+      show: false,
+    },
+    gaugeStyle: 'Full',
+    extendRange: false,
+    backStyle: 'Full',
+    percentageMode: false,
+    percentageFormatPattern: '',
+    colorSchema: ColorSchemas.Greys,
+    colorsRange: [
+      { type: 'range', from: 0, to: 100 },
+      { type: 'range', from: 100, to: 200 },
+    ],
+    labels: {},
+    invertColors: false,
+    style: {
+      bgFill: '',
+      bgColor: false,
+      labelColor: false,
+      subText: '',
+      fontSize: 10,
+    },
+  },
+  type: 'gauge',
+};
 
 describe('getConfiguration', () => {
   const palette = {
@@ -25,7 +64,7 @@ describe('getConfiguration', () => {
     const maxAccessor = 'max-accessor-id';
     const collapseFn = 'sum';
     expect(
-      getConfiguration(layerId, palette, {
+      getConfiguration(layerId, params, palette, {
         metrics,
         buckets,
         maxAccessor,

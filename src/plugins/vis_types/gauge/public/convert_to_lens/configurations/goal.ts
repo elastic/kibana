@@ -8,9 +8,11 @@
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { GaugeVisParams } from '../../types';
 
 export const getConfiguration = (
   layerId: string,
+  { gauge }: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
   {
     metrics,
@@ -36,5 +38,6 @@ export const getConfiguration = (
     breakdownByAccessor,
     maxAccessor,
     collapseFn: Object.values(bucketCollapseFn ?? {})[0],
+    subtitle: gauge.labels.show && gauge.style.subText ? gauge.style.subText : undefined,
   };
 };
