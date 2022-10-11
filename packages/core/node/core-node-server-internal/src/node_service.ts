@@ -71,7 +71,7 @@ export class NodeService {
 
   public async start(): Promise<InternalNodeServiceStart> {
     if (this.roles == null) {
-      throw new Error('Roles are not available before preboot');
+      throw new Error('NodeService#start() can only be called after NodeService#preboot()');
     }
     return { roles: this.roles };
   }
