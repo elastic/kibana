@@ -174,6 +174,7 @@ function LocationSelect({
             <EuiPopover
               button={
                 <EuiButtonIcon
+                  aria-label={LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL}
                   onClick={() => setIsOpen(true)}
                   color="primary"
                   iconType="arrowDown"
@@ -500,5 +501,13 @@ const GO_TO_LOCATIONS_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.flyoutHeader.goToLocations',
   {
     defaultMessage: 'Go to location',
+  }
+);
+
+const LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.flyout.locationSelect.iconButton.label',
+  {
+    defaultMessage:
+      "This icon button opens a context menu that will allow you to change the monitor's selected location. If you change the location, the flyout will display metrics for the monitor's performance in that location.",
   }
 );
