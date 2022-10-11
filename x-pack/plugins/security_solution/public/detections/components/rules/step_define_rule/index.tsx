@@ -573,6 +573,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   euiFieldProps: {
                     fullWidth: true,
                     placeholder: '',
+                    isDisabled: fromTimelineData.loading,
+                    isLoading: fromTimelineData.loading,
                   },
                 }}
               />
@@ -582,6 +584,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       </RuleTypeEuiFormRow>
     );
   }, [
+    fromTimelineData.loading,
     dataSourceType,
     onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
@@ -614,9 +617,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
-            isDisabled: isLoading || formShouldLoadQueryDynamically,
+            isDisabled: isLoading || formShouldLoadQueryDynamically || fromTimelineData.loading,
             resetToSavedQuery: formShouldLoadQueryDynamically,
-            isLoading: isIndexPatternLoading,
+            isLoading: isIndexPatternLoading || fromTimelineData.loading,
             dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
             openTimelineSearch,
             onValidityChange: setIsQueryBarValid,
@@ -628,6 +631,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [
       browserFields,
+      fromTimelineData.loading,
       handleCloseTimelineSearch,
       handleOpenTimelineSearch,
       indexPattern,
