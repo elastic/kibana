@@ -55,11 +55,7 @@ export function BucketNestingEditor({
       operationType: c.operationType,
     }));
 
-  const groupHandlesMultipleColumns = Boolean(
-    visualizationGroup?.supportsMoreColumns || visualizationGroup?.accessors.length
-  );
-
-  if (!column || !column.isBucketed || !aggColumns.length || groupHandlesMultipleColumns) {
+  if (!column || !column.isBucketed || !aggColumns.length || visualizationGroup?.hideGrouping) {
     return null;
   }
 
