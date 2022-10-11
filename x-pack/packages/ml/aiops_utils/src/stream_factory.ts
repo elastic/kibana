@@ -33,7 +33,7 @@ type StreamType = 'string' | 'ndjson';
 interface StreamFactoryReturnType<T = unknown> {
   DELIMITER: string;
   end: () => void;
-  push: (d: T) => void;
+  push: (d: T, drain?: boolean) => void;
   responseWithHeaders: {
     body: zlib.Gzip | ResponseStream;
     headers?: ResponseHeaders;
@@ -84,11 +84,13 @@ export function streamFactory<T = unknown>(
 
   const backPressureBuffer: T[] = [];
   let waitForDrain = false;
+  const waitForCallbacks: number[] = [];
   let tryToEnd = false;
 
   function end() {
     tryToEnd = true;
     logger.info(`backPressureBuffer BEFORE END: ${backPressureBuffer.length}`);
+    logger.info(`waitForCallbacks BEFORE END: ${waitForCallbacks.length}`);
     // Before ending the stream, we need to empty the backPressureBuffer
     if (backPressureBuffer.length > 0) {
       const el = backPressureBuffer.shift();
@@ -97,8 +99,11 @@ export function streamFactory<T = unknown>(
       }
       return;
     }
-    logger.info('ENDENDENDENDENDENDENDEND');
-    stream.end();
+
+    if (waitForCallbacks.length === 0) {
+      logger.info('ENDENDENDENDENDENDENDEND');
+      stream.end();
+    }
   }
 
   function push(d: T, drain = false) {
@@ -119,7 +124,7 @@ export function streamFactory<T = unknown>(
       return;
     }
 
-    if (waitForDrain) {
+    if (!drain && waitForDrain) {
       logger.info('BACKPRESSURE!!');
       backPressureBuffer.push(d);
       return;
@@ -134,7 +139,9 @@ export function streamFactory<T = unknown>(
               ...(flushFix ? { flushPayload } : {}),
             })}${DELIMITER}`
           : d;
+      waitForCallbacks.push(1);
       const writeResult = stream.write(line, () => {
+        waitForCallbacks.pop();
         // The data has been passed to zlib, but the compression algorithm may
         // have decided to buffer the data for more efficient compression.
         // Calling .flush() will make the data available as soon as the client
@@ -144,6 +151,10 @@ export function streamFactory<T = unknown>(
         // make zlib return as much output as currently possible.
         if (typeof stream.flush === 'function') {
           stream.flush();
+        }
+
+        if (tryToEnd && waitForCallbacks.length === 0) {
+          end();
         }
       });
       logger.info(`writeResult: ${writeResult}`);
@@ -169,8 +180,6 @@ export function streamFactory<T = unknown>(
         if (el !== undefined) {
           push(el, true);
         }
-      } else if (writeResult && tryToEnd) {
-        end();
       }
     } catch (e) {
       logger.error(`Could not serialize or stream data chunk: ${e.toString()}`);
