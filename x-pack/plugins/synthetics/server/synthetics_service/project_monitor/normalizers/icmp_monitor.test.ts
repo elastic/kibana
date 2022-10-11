@@ -8,7 +8,7 @@
 import { Locations, LocationStatus, PrivateLocation } from '../../../../common/runtime_types';
 import { normalizeProjectMonitors } from '.';
 
-describe('http normalizers', () => {
+describe('icmp normalizers', () => {
   describe('normalize push monitors', () => {
     const projectId = 'test-project-id';
     const locations: Locations = [
@@ -81,7 +81,7 @@ describe('http normalizers', () => {
       },
     ];
 
-    it('properly normalizes http monitors', () => {
+    it('properly normalizes icmp monitors', () => {
       const actual = normalizeProjectMonitors({
         locations,
         privateLocations,
@@ -127,6 +127,7 @@ describe('http normalizers', () => {
             timeout: '60',
             type: 'icmp',
             wait: '30',
+            id: '',
           },
           unsupportedKeys: [],
         },
@@ -166,6 +167,7 @@ describe('http normalizers', () => {
             timeout: '16',
             type: 'icmp',
             wait: '60',
+            id: '',
           },
           unsupportedKeys: [],
         },
@@ -218,6 +220,7 @@ describe('http normalizers', () => {
             timeout: '16',
             type: 'icmp',
             wait: '1',
+            id: '',
           },
           unsupportedKeys: ['unsupportedKey.nestedUnsupportedKey'],
         },

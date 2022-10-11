@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import jestExpect from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
@@ -142,26 +143,29 @@ export default function ({ getService }: FtrProviderContext) {
           ? ['kibana_admin', 'superuser_anonymous']
           : ['kibana_admin'];
 
-        await supertest
+        const spnegoResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(200, {
-            username: 'tester@TEST.ELASTIC.CO',
-            roles: expectedUserRoles,
-            full_name: null,
-            email: null,
-            metadata: {
-              kerberos_user_principal_name: 'tester@TEST.ELASTIC.CO',
-              kerberos_realm: 'TEST.ELASTIC.CO',
-            },
-            enabled: true,
-            authentication_realm: { name: 'kerb1', type: 'kerberos' },
-            lookup_realm: { name: 'kerb1', type: 'kerberos' },
-            authentication_provider: { type: 'kerberos', name: 'kerberos' },
-            authentication_type: 'token',
-            elastic_cloud_user: false,
-          });
+          .expect(200);
+
+        jestExpect(spnegoResponse.body).toEqual({
+          username: 'tester@TEST.ELASTIC.CO',
+          roles: expectedUserRoles,
+          full_name: null,
+          email: null,
+          metadata: {
+            kerberos_user_principal_name: 'tester@TEST.ELASTIC.CO',
+            kerberos_realm: 'TEST.ELASTIC.CO',
+          },
+          enabled: true,
+          authentication_realm: { name: 'kerb1', type: 'kerberos' },
+          lookup_realm: { name: 'kerb1', type: 'kerberos' },
+          authentication_provider: { type: 'kerberos', name: 'kerberos' },
+          authentication_type: 'token',
+          elastic_cloud_user: false,
+          profile_uid: jestExpect.any(String),
+        });
       });
 
       it('should re-initiate SPNEGO handshake if token is rejected with 401', async () => {

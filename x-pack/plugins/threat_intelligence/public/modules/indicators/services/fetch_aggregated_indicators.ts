@@ -9,7 +9,6 @@ import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
@@ -54,6 +53,24 @@ export interface FetchAggregatedIndicatorsParams {
   timeRange: TimeRange;
   field: string;
 }
+
+/**
+ * Converts data received from an Elastic search with date_histogram aggregation enabled to something usable in the "@elastic/chart" BarChart component
+ * @param aggregations An array of {@link Aggregation} objects to process
+ * @returns An array of  {@link ChartSeries} directly usable in a BarChart component
+ */
+export const convertAggregationToChartSeries = (aggregations: Aggregation[]): ChartSeries[] =>
+  aggregations.reduce(
+    (accumulated: ChartSeries[], current: Aggregation) =>
+      accumulated.concat(
+        current.events.buckets.map((val: AggregationValue) => ({
+          x: val.key_as_string,
+          y: val.doc_count,
+          g: current.key,
+        }))
+      ),
+    []
+  );
 
 export const createFetchAggregatedIndicators =
   ({

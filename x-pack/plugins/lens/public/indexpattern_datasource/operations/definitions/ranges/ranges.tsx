@@ -267,4 +267,9 @@ export const rangeOperation: OperationDefinition<
       />
     );
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.ranges.documentation.quick', {
+    defaultMessage: `
+    Buckets values along defined numeric ranges.
+      `,
+  }),
 };

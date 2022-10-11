@@ -85,7 +85,7 @@ describe('discover sidebar', function () {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     props = getCompProps();
     mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
       .fn()
@@ -95,11 +95,14 @@ describe('discover sidebar', function () {
       return { ...dataView, isPersisted: () => true };
     });
 
-    comp = mountWithIntl(
+    comp = await mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
         <DiscoverSidebar {...props} />
       </KibanaContextProvider>
     );
+    // wait for lazy modules
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -126,8 +129,10 @@ describe('discover sidebar', function () {
     expect(props.editField).toHaveBeenCalledWith();
   });
 
-  it('should render "Edit field" button', () => {
+  it('should render "Edit field" button', async () => {
     findTestSubject(comp, 'field-bytes').simulate('click');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');
@@ -193,5 +198,15 @@ describe('discover sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
+  });
+
+  it('should render the Visualize in Lens button in text based languages mode', () => {
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} onAddFilter={undefined} />
+      </KibanaContextProvider>
+    );
+    const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
+    expect(visualizeField.length).toBe(1);
   });
 });

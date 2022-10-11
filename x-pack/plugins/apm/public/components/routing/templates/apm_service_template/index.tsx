@@ -267,9 +267,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgent(runtimeName) ? (
+      append: isServerlessAgent(runtimeName) && (
         <TechnicalPreviewBadge icon="beaker" />
-      ) : undefined,
+      ),
       hidden: isMetricsTabHidden({
         agentName,
         runtimeName,
@@ -318,6 +318,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
+      append: isServerlessAgent(runtimeName) && (
+        <TechnicalPreviewBadge icon="beaker" />
+      ),
       hidden:
         !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },

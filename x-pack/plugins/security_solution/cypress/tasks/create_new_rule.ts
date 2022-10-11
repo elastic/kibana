@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EmailConnector } from '../objects/connector';
-import { getEmailConnector } from '../objects/connector';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -14,6 +12,7 @@ import type {
   ThreatIndicatorRule,
   ThresholdRule,
   NewTermsRule,
+  Mitre,
 } from '../objects/rule';
 import { getMachineLearningRule } from '../objects/rule';
 import {
@@ -29,7 +28,6 @@ import {
   AT_LEAST_ONE_VALID_MATCH,
   BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
-  COMBO_BOX_INPUT,
   CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
@@ -58,7 +56,6 @@ import {
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
   QUERY_BAR,
-  QUERY_PREVIEW_BUTTON,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
   RISK_MAPPING_OVERRIDE_OPTION,
@@ -92,13 +89,6 @@ import {
   THREAT_MATCH_QUERY_INPUT,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  CONNECTOR_NAME_INPUT,
-  EMAIL_CONNECTOR_FROM_INPUT,
-  EMAIL_CONNECTOR_HOST_INPUT,
-  EMAIL_CONNECTOR_PORT_INPUT,
-  EMAIL_CONNECTOR_USER_INPUT,
-  EMAIL_CONNECTOR_PASSWORD_INPUT,
-  EMAIL_CONNECTOR_SERVICE_SELECTOR,
   PREVIEW_HISTOGRAM,
   DATA_VIEW_COMBO_BOX,
   DATA_VIEW_OPTION,
@@ -106,15 +96,21 @@ import {
   NEW_TERMS_HISTORY_SIZE,
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
+  ACTIONS_THROTTLE_INPUT,
 } from '../screens/create_new_rule';
+import {
+  INDEX_SELECTOR,
+  CREATE_ACTION_CONNECTOR_BTN,
+  EMAIL_ACTION_BTN,
+} from '../screens/common/rule_actions';
+import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
+import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
-  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
@@ -126,34 +122,41 @@ export const fillAboutRule = (
 ) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
-
-  cy.get(SEVERITY_DROPDOWN).click({ force: true });
-  cy.get(`#${rule.severity.toLowerCase()}`).click();
-
-  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
-
-  rule.tags.forEach((tag) => {
-    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
-  });
-
+  if (rule.severity) {
+    fillSeverity(rule.severity);
+  }
+  if (rule.riskScore) {
+    fillRiskScore(rule.riskScore);
+  }
+  if (rule.tags) {
+    fillRuleTags(rule.tags);
+  }
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
-  rule.referenceUrls.forEach((url, index) => {
-    cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
-    cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
-  });
+  if (rule.referenceUrls) {
+    fillReferenceUrls(rule.referenceUrls);
+  }
 
-  rule.falsePositivesExamples.forEach((falsePositive, index) => {
-    cy.get(FALSE_POSITIVES_INPUT)
-      .eq(index)
-      .clear({ force: true })
-      .type(falsePositive, { force: true });
-    cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
-  });
+  if (rule.falsePositivesExamples) {
+    fillFalsePositiveExamples(rule.falsePositivesExamples);
+  }
 
+  if (rule.mitre) {
+    fillMitre(rule.mitre);
+  }
+  if (rule.note) {
+    fillNote(rule.note);
+  }
+};
+
+const fillNote = (note: string) => {
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
+};
+
+const fillMitre = (mitreAttacks: Mitre[]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
-  rule.mitre.forEach((mitre, tacticIndex) => {
+  mitreAttacks.forEach((mitre, tacticIndex) => {
     cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
@@ -175,8 +178,38 @@ export const fillAboutRule = (
 
     cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
+};
 
-  cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(rule.note, { force: true });
+const fillFalsePositiveExamples = (falsePositives: string[]) => {
+  falsePositives.forEach((falsePositive, index) => {
+    cy.get(FALSE_POSITIVES_INPUT)
+      .eq(index)
+      .clear({ force: true })
+      .type(falsePositive, { force: true });
+    cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
+  });
+};
+
+const fillSeverity = (severity: string) => {
+  cy.get(SEVERITY_DROPDOWN).click({ force: true });
+  cy.get(`#${severity.toLowerCase()}`).click();
+};
+
+const fillRiskScore = (riskScore: string) => {
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
+};
+
+const fillRuleTags = (tags: string[]) => {
+  tags.forEach((tag) => {
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
+  });
+};
+
+const fillReferenceUrls = (referenceUrls: string[]) => {
+  referenceUrls.forEach((url, index) => {
+    cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
+    cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
+  });
 };
 
 export const fillAboutRuleAndContinue = (
@@ -200,8 +233,9 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
       });
   });
 
-  cy.get(SEVERITY_DROPDOWN).click({ force: true });
-  cy.get(`#${rule.severity.toLowerCase()}`).click();
+  if (rule.severity) {
+    fillSeverity(rule.severity);
+  }
 
   cy.get(RISK_MAPPING_OVERRIDE_OPTION).click();
   cy.get(RISK_OVERRIDE).within(() => {
@@ -210,48 +244,24 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
 
-  rule.tags.forEach((tag) => {
-    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
-  });
+  if (rule.tags) {
+    fillRuleTags(rule.tags);
+  }
 
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
-  rule.referenceUrls.forEach((url, index) => {
-    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url, { force: true });
-    cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
-  });
-
-  rule.falsePositivesExamples.forEach((falsePositive, index) => {
-    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive, { force: true });
-    cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
-  });
-
-  let techniqueIndex = 0;
-  let subtechniqueInputIndex = 0;
-  rule.mitre.forEach((mitre, tacticIndex) => {
-    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
-    cy.contains(MITRE_TACTIC, mitre.tactic).click();
-
-    mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
-      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
-      cy.contains(MITRE_TACTIC, technique.name).click();
-
-      technique.subtechniques.forEach((subtechnique) => {
-        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
-        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
-          .eq(subtechniqueInputIndex)
-          .click({ force: true });
-        cy.contains(MITRE_TACTIC, subtechnique).click();
-        subtechniqueInputIndex++;
-      });
-      techniqueIndex++;
-    });
-
-    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
-  });
-
-  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
+  if (rule.referenceUrls) {
+    fillReferenceUrls(rule.referenceUrls);
+  }
+  if (rule.falsePositivesExamples) {
+    fillFalsePositiveExamples(rule.falsePositivesExamples);
+  }
+  if (rule.mitre) {
+    fillMitre(rule.mitre);
+  }
+  if (rule.note) {
+    fillNote(rule.note);
+  }
 
   cy.get(RULE_NAME_OVERRIDE).within(() => {
     cy.get(COMBO_BOX_INPUT).type(`${rule.nameOverride}{enter}`);
@@ -264,51 +274,58 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillDefineCustomRuleWithImportedQueryAndContinue = (
-  rule: CustomRule | OverrideRule
-) => {
+const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
+  if (rule.timeline?.id) {
+    cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+    cy.get(TIMELINE(rule.timeline.id)).click();
+    cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+  } else {
+    cy.get(CUSTOM_QUERY_INPUT)
+      .first()
+      .type(rule.customQuery || '');
+  }
+};
+
+export const fillDefineCustomRuleAndContinue = (rule: CustomRule | OverrideRule) => {
   if (rule.dataSource.type === 'dataView') {
     cy.get(DATA_VIEW_OPTION).click();
     cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.dataSource.dataView}{enter}`);
   }
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id)).click();
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-
+  fillCustomQuery(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
-  cy.get(RUNS_EVERY_INTERVAL).type('{selectall}').type(rule.runsEvery.interval);
-  cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
-  cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(rule.lookBack.interval);
-  cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
+  if (rule.runsEvery) {
+    cy.get(RUNS_EVERY_INTERVAL).type('{selectall}').type(rule.runsEvery.interval);
+    cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
+  }
+  if (rule.lookBack) {
+    cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(rule.lookBack.interval);
+    cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
+  }
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
-export const fillDefineThresholdRule = (rule: ThresholdRule) => {
-  const thresholdField = 0;
-  const threshold = 1;
-
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id)).click();
-  cy.get(COMBO_BOX_CLEAR_BTN).first().click();
-
-  if (rule.dataSource.type === 'indexPatterns') {
-    rule.dataSource.index.forEach((index) => {
-      cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
+export const fillRuleAction = (rule: CustomRule) => {
+  if (rule.actions) {
+    cy.get(ACTIONS_THROTTLE_INPUT).select(rule.actions.throttle);
+    rule.actions?.connectors.forEach((connector) => {
+      switch (connector.type) {
+        case 'index':
+          cy.get(INDEX_SELECTOR).click();
+          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+          fillIndexConnectorForm(connector);
+          break;
+        case 'email':
+          cy.get(EMAIL_ACTION_BTN).click();
+          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+          fillEmailConnectorForm(connector);
+          break;
+      }
     });
   }
-
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-  cy.get(THRESHOLD_INPUT_AREA)
-    .find(INPUT)
-    .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
-      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
-      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
-    });
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
@@ -318,9 +335,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const typeThresholdField = ($el: Cypress.ObjectLike) =>
     cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id)).click();
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+  fillCustomQuery(rule);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -360,9 +375,7 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
 };
 
 export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRule) => {
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id)).click();
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+  fillCustomQuery(rule);
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.newTermsFields[0], { delay: 35 });
   cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
@@ -439,16 +452,6 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
-export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
-  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
-  cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
-  cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
-  cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
-  cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
-  cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
-};
-
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
 export const getIndicatorIndexComboField = (row = 1) =>
   cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 2);
@@ -477,7 +480,7 @@ export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST
 export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
-export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
@@ -566,10 +569,6 @@ export const selectThresholdRuleType = () => {
 
 export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
-};
-
-export const previewResults = () => {
-  cy.get(QUERY_PREVIEW_BUTTON).click();
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {

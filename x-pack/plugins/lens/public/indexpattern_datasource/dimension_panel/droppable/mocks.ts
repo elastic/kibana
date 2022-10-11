@@ -241,6 +241,7 @@ export const mockedDndOperations = {
     columnId: 'col1',
     id: 'col1',
     humanData: { label: 'Column 1' },
+    indexPatternId: 'first',
   },
   metric: {
     layerId: 'first',
@@ -249,6 +250,7 @@ export const mockedDndOperations = {
     filterOperations: (op: OperationMetadata) => !op.isBucketed,
     id: 'col1',
     humanData: { label: 'Column 1' },
+    indexPatternId: 'first',
   },
   numericalOnly: {
     layerId: 'first',
@@ -257,6 +259,7 @@ export const mockedDndOperations = {
     filterOperations: (op: OperationMetadata) => op.dataType === 'number',
     id: 'col1',
     humanData: { label: 'Column 1' },
+    indexPatternId: 'first',
   },
   bucket: {
     columnId: 'col2',
@@ -265,6 +268,7 @@ export const mockedDndOperations = {
     id: 'col2',
     humanData: { label: 'Column 2' },
     filterOperations: (op: OperationMetadata) => op.isBucketed,
+    indexPatternId: 'first',
   },
   staticValue: {
     columnId: 'col1',
@@ -273,6 +277,7 @@ export const mockedDndOperations = {
     id: 'col1',
     humanData: { label: 'Column 2' },
     filterOperations: (op: OperationMetadata) => !!op.isStaticValue,
+    indexPatternId: 'first',
   },
   bucket2: {
     columnId: 'col3',
@@ -282,6 +287,7 @@ export const mockedDndOperations = {
     humanData: {
       label: '',
     },
+    indexPatternId: 'first',
   },
   metricC: {
     columnId: 'col4',
@@ -292,5 +298,6 @@ export const mockedDndOperations = {
       label: '',
     },
     filterOperations: (op: OperationMetadata) => !op.isBucketed,
+    indexPatternId: 'first',
   },
 };
