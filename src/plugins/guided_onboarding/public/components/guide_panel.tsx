@@ -159,6 +159,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
   const stepNumber = getStepNumber(guideState);
   const stepsCompleted = getProgress(guideState);
+  const isGuideReadyToComplete = guideState?.status === 'ready_to_complete';
 
   return (
     <>
@@ -198,7 +199,13 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
             </EuiButtonEmpty>
 
             <EuiTitle size="m">
-              <h2>{guideConfig?.title}</h2>
+              <h2>
+                {isGuideReadyToComplete
+                  ? i18n.translate('guidedOnboarding.dropdownPanel.completeGuideFlyoutTitle', {
+                      defaultMessage: 'Well done!',
+                    })
+                  : guideConfig.title}
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -208,7 +215,19 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
             <div>
               <EuiText size="m">
-                <p>{guideConfig?.description}</p>
+                <p>
+                  {isGuideReadyToComplete
+                    ? i18n.translate(
+                        'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',
+                        {
+                          defaultMessage: `You've completed the Elastic {guideName} guide.`,
+                          values: {
+                            guideName: guideConfig.guideName,
+                          },
+                        }
+                      )
+                    : guideConfig.description}
+                </p>
               </EuiText>
 
               {guideConfig.docs && (
@@ -228,9 +247,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                   <EuiSpacer size="xl" />
                   <EuiProgress
                     data-test-subj="guideProgress"
-                    label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
-                      defaultMessage: 'Progress',
-                    })}
+                    label={
+                      isGuideReadyToComplete
+                        ? i18n.translate('guidedOnboarding.dropdownPanel.completedLabel', {
+                            defaultMessage: 'Completed',
+                          })
+                        : i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+                            defaultMessage: 'Progress',
+                          })
+                    }
                     value={stepsCompleted}
                     valueText={i18n.translate('guidedOnboarding.dropdownPanel.progressValueLabel', {
                       defaultMessage: '{stepCount} steps',
@@ -266,7 +291,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                 }
               })}
 
-              {guideState?.status === 'ready_to_complete' && (
+              {isGuideReadyToComplete && (
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiButton onClick={completeGuide} fill data-test-subj="useElasticButton">
