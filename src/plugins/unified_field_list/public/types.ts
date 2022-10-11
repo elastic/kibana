@@ -14,4 +14,8 @@ export interface UnifiedFieldListPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginStart {}
 
-export type AddFieldFilterHandler = (field: DataViewField, value: unknown, type: '+' | '-') => void;
+export type AddFieldFilterHandler = (
+  field: DataViewField | '_exists_',
+  value: unknown,
+  type: '+' | '-'
+) => void;
