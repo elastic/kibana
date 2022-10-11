@@ -13,7 +13,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { performBulkExportAction } from '../../../../../containers/detection_engine/rules';
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   BulkAction,
@@ -27,13 +26,11 @@ import * as i18n from '../../translations';
 import {
   showBulkSuccessToast,
   showBulkErrorToast,
-  downloadRules,
   performTrackableBulkAction,
+  bulkExportRules,
 } from '../actions';
-import { getExportedRulesCounts, getExportedRulesDetails } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
@@ -242,30 +239,11 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
         setLoadingRules({ ids: selectedRuleIds, action });
 
-        try {
-          const rulesBlob = await performBulkExportAction(
-            isAllSelected ? filterQuery : selectedRuleIds
-          );
-
-          const details = await getExportedRulesDetails(rulesBlob);
-
-          // if there are failed exported rules, show modal window to users.
-          // they can either cancel action or proceed with export of succeeded rules
-          const hasActionBeenConfirmed = await showBulkActionConfirmation(
-            transformExportDetailsToDryRunResult(details),
-            BulkAction.export
-          );
-
-          if (hasActionBeenConfirmed === false) {
-            return;
-          }
-
-          downloadRules(rulesBlob);
-
-          showBulkSuccessToast(toasts, action, await getExportedRulesCounts(rulesBlob));
-        } catch (e) {
-          showBulkErrorToast(toasts, action, e);
-        }
+        await bulkExportRules(
+          isAllSelected ? filterQuery : selectedRuleIds,
+          toasts,
+          showBulkActionConfirmation
+        );
 
         setLoadingRules({ ids: [], action: null });
       };

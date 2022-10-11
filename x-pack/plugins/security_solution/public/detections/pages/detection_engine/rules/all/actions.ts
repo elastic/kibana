@@ -6,7 +6,8 @@
  */
 
 import type { NavigateToAppOptions } from '@kbn/core/public';
-import { APP_UI_ID } from '../../../../../../common/constants';
+import type { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
+import { APP_UI_ID, BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { HTTPError } from '../../../../../../common/detection_engine/types';
@@ -24,7 +25,8 @@ import {
   performBulkExportAction,
 } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
-import { getExportedRulesCounts } from './helpers';
+import type { BulkActionForConfirmation, DryRunResult } from './bulk_actions/types';
+import { getExportedRulesCounts, getExportedRulesDetails } from './helpers';
 
 export const goToRuleEditPage = (
   ruleId: string,
@@ -49,22 +51,33 @@ export async function performTrackableBulkAction(
   return response;
 }
 
-export function downloadRules(rulesBlob: Blob): void {
-  downloadBlob(rulesBlob, `${i18n.EXPORT_FILENAME}.ndjson`);
-}
-
 /**
  * executes bulk export action and downloads exported rules
  * @param params - {@link ExportRulesBulkActionArgs}
  */
 export async function bulkExportRules(
   queryOrIds: string | string[],
-  toasts: UseAppToasts
+  toasts: UseAppToasts,
+  onFailure: (
+    result: DryRunResult | undefined,
+    action: BulkActionForConfirmation
+  ) => Promise<boolean> = async () => true
 ): Promise<void> {
   try {
     const rulesBlob = await performBulkExportAction(queryOrIds);
+    const details = await getExportedRulesDetails(rulesBlob);
+    const dryRunResult = transformExportDetailsToDryRunResult(details);
 
-    downloadRules(rulesBlob);
+    if (
+      Array.isArray(queryOrIds) &&
+      queryOrIds.length > 1 &&
+      (dryRunResult.failedRulesCount ?? 0) > 0 &&
+      !(await onFailure(transformExportDetailsToDryRunResult(details), BulkAction.export))
+    ) {
+      return;
+    }
+
+    downloadBlob(rulesBlob, `${i18n.EXPORT_FILENAME}.ndjson`);
 
     showBulkSuccessToast(toasts, BulkAction.export, await getExportedRulesCounts(rulesBlob));
   } catch (e) {
@@ -92,6 +105,28 @@ export function showBulkErrorToast(
     title: summarizeBulkError(action),
     toastMessage: explainBulkError(action, error),
   });
+}
+
+/**
+ * transform rules export details {@link ExportRulesDetails} to dry run result format {@link DryRunResult}
+ * @param details - {@link ExportRulesDetails} rules export details
+ * @returns transformed to {@link DryRunResult}
+ */
+function transformExportDetailsToDryRunResult(details: ExportRulesDetails): DryRunResult {
+  return {
+    succeededRulesCount: details.exported_rules_count,
+    failedRulesCount: details.missing_rules_count,
+    // if there are rules that can't be exported, it means they are immutable. So we can safely put error code as immutable
+    ruleErrors: details.missing_rules.length
+      ? [
+          {
+            errorCode: BulkActionsDryRunErrCode.IMMUTABLE,
+            message: "Prebuilt rules can't be exported.",
+            ruleIds: details.missing_rules.map(({ rule_id: ruleId }) => ruleId),
+          },
+        ]
+      : [],
+  };
 }
 
 function summarizeBulkSuccess(action: BulkAction): string {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { BulkActionsDryRunErrCode } from '../../../../../../../../common/constants';
-import type { ExportRulesDetails } from '../../../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
 import type { BulkActionResponse } from '../../../../../../containers/detection_engine/rules';
 
 import type { DryRunResult } from '../types';
@@ -29,26 +27,4 @@ export const processDryRunResult = (response: BulkActionResponse | undefined): D
   };
 
   return processed;
-};
-
-/**
- * transform rules export details {@link ExportRulesDetails} to dry run result format {@link DryRunResult}
- * @param details - {@link ExportRulesDetails} rules export details
- * @returns transformed to {@link DryRunResult}
- */
-export const transformExportDetailsToDryRunResult = (details: ExportRulesDetails): DryRunResult => {
-  return {
-    succeededRulesCount: details.exported_rules_count,
-    failedRulesCount: details.missing_rules_count,
-    // if there are rules that can't be exported, it means they are immutable. So we can safely put error code as immutable
-    ruleErrors: details.missing_rules.length
-      ? [
-          {
-            errorCode: BulkActionsDryRunErrCode.IMMUTABLE,
-            message: "Prebuilt rules can't be exported.",
-            ruleIds: details.missing_rules.map(({ rule_id: ruleId }) => ruleId),
-          },
-        ]
-      : [],
-  };
 };
