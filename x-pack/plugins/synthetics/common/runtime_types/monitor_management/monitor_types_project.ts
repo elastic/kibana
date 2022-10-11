@@ -21,6 +21,7 @@ export const ProjectMonitorCodec = t.intersection([
     name: t.string,
     schedule: t.number,
     locations: t.array(t.string),
+    hash: t.string,
   }),
   t.partial({
     content: t.string,

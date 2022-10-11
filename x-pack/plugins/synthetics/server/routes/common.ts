@@ -23,6 +23,9 @@ const querySchema = schema.object({
   monitorType: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  fields: schema.maybe(schema.arrayOf(schema.string())),
+  aggs: schema.any(),
+  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 type MonitorsQuery = TypeOf<typeof querySchema>;
@@ -42,6 +45,9 @@ export const getMonitors = (
     monitorType,
     locations,
     filter = '',
+    fields,
+    aggs,
+    searchAfter,
   } = request as MonitorsQuery;
 
   const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
@@ -60,6 +66,9 @@ export const getMonitors = (
     searchFields: ['name', 'tags.text', 'locations.id.text', 'urls'],
     search: query ? `${query}*` : undefined,
     filter: filters + filter,
+    fields,
+    aggs,
+    searchAfter,
   });
 };
 
