@@ -36,7 +36,7 @@ image::images/cases-connectors.png[]
 
 . Enter your required settings. Refer to <<resilient-action-type>>,
 <<jira-action-type>>, <<servicenow-action-type>>, <<servicenow-sir-action-type>>,
-<<swimlane-action-type>>, <<torq-action-type>>, or <<cases-webhook-action-type>> for connector
+<<swimlane-action-type>>, or <<cases-webhook-action-type>> for connector
 configuration details.
 
 . Click *Save*.
