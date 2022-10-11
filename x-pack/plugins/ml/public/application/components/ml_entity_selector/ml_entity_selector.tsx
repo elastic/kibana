@@ -74,7 +74,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
         const { jobIds: jobIdOptions } = await jobsApi.getAllJobAndGroupIds();
 
         newOptions.push({
-          label: i18n.translate('xpack.ml.mlEntitySelector.jobOptionsLabel', {
+          label: i18n.translate('xpack.ml.mlEntitySelector.adOptionsLabel', {
             defaultMessage: 'Anomaly detection jobs',
           }),
           isGroupLabelOption: true,
