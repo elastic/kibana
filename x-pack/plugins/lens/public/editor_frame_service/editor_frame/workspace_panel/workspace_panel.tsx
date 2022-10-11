@@ -46,6 +46,7 @@ import {
   DatasourceFixAction,
   Suggestion,
   DatasourceLayers,
+  isLensMultiFilterEvent,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -405,7 +406,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           },
         });
       }
-      if (isLensFilterEvent(event)) {
+      if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
@@ -431,7 +432,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         // ui actions not available, not handling event...
         return false;
       }
-      if (!isLensFilterEvent(event)) {
+      if (!isLensFilterEvent(event) && !isLensMultiFilterEvent(event)) {
         return false;
       }
       return (

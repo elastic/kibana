@@ -9,6 +9,7 @@
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
   contextMenuTrigger,
+  multiValueClickTrigger,
   panelBadgeTrigger,
   panelNotificationTrigger,
   selectRangeTrigger,
@@ -25,4 +26,5 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(panelNotificationTrigger);
   uiActions.registerTrigger(selectRangeTrigger);
   uiActions.registerTrigger(valueClickTrigger);
+  uiActions.registerTrigger(multiValueClickTrigger);
 };

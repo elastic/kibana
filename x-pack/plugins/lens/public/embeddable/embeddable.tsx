@@ -64,7 +64,12 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+  Warnings,
+} from '@kbn/charts-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
@@ -80,6 +85,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  isLensMultiFilterEvent,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -114,7 +120,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -700,7 +706,11 @@ export class Embeddable
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
+    if (
+      isLensTableRowContextMenuClickEvent(event) ||
+      isLensFilterEvent(event) ||
+      isLensMultiFilterEvent(event)
+    ) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
@@ -775,7 +785,7 @@ export class Embeddable
         this.input.onBrushEnd(event.data);
       }
     }
-    if (isLensFilterEvent(event)) {
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,

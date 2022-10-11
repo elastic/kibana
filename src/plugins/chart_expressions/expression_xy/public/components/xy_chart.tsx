@@ -48,7 +48,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
+import type { FilterEvent, BrushEvent, FormatFactory, MultiFilterEvent } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
@@ -122,6 +122,7 @@ export type XYChartRenderProps = XYChartProps & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  onClickMultiValue: (data: MultiFilterEvent['data']) => void;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
@@ -167,7 +168,7 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
 
 function createSplitPoint(
   accessor: string | number,
-  value: string | number | string[],
+  value: string | number,
   rows: Datatable['rows'],
   table: Datatable
 ) {
@@ -181,15 +182,8 @@ function createSplitPoint(
     return {
       row: splitPointRowIndex,
       column: table.columns.findIndex((column) => column.id === accessor),
-      value: Array.isArray(value) ? value : table.rows[splitPointRowIndex][accessor],
-      table: Array.isArray(value)
-        ? {
-            ...table,
-            rows: table.rows.map((r, i) =>
-              i === splitPointRowIndex ? { ...r, [accessor]: value } : r
-            ),
-          }
-        : table,
+      value: table.rows[splitPointRowIndex][accessor],
+      table,
     };
   }
 }
@@ -214,6 +208,7 @@ export function XYChart({
   renderComplete,
   uiState,
   timeFormat,
+  onClickMultiValue,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -713,44 +708,16 @@ export function XYChart({
     const { table } = layer;
 
     if (layer.splitAccessors?.length !== 1) return;
-    const xColumn = layer.xAccessor && getColumnByAccessor(layer.xAccessor, table.columns);
-    const xAccessor = layer.xAccessor
-      ? getAccessorByDimension(layer.xAccessor, table.columns)
-      : undefined;
-
-    const xFormat = xColumn ? fieldFormats[layer.layerId].xAccessors[xColumn.id] : undefined;
-    const currentXFormatter =
-      xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
-        ? formatFactory(xFormat)
-        : xAxisFormatter;
-
-    const rowIndex = table.rows.findIndex((row) => {
-      if (xAccessor) {
-        if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
-          // stringify the value to compare with the chart value
-          return (
-            currentXFormatter.convert(row[xAccessor]) ===
-            values[0].datum[values[0].seriesIdentifier.xAccessor]
-          );
-        }
-        return row[xAccessor] === values[0].datum[values[0].seriesIdentifier.xAccessor];
-      }
-    });
 
     const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
-    const point = createSplitPoint(
-      splitAccessor,
-      values.map((v) => v.datum[splitAccessor]),
-      formattedDatatables[layer.layerId].table.rows,
-      table
-    );
 
-    if (!point) return;
-
-    const context: FilterEvent['data'] = {
-      data: [point],
-    };
-    onClickValue(context);
+    onClickMultiValue({
+      data: {
+        column: table.columns.findIndex((column) => column.id === splitAccessor),
+        value: values.map((v: any) => v.datum[splitAccessor]),
+        table,
+      },
+    });
   };
 
   const brushHandler = ({ x }: XYBrushEvent) => {
@@ -883,7 +850,7 @@ export function XYChart({
             actions={[
               {
                 label: () => 'Filter selected series',
-                onSelect: (values) => {
+                onSelect: (values: any) => {
                   multiClickHandler(values);
                 },
               },

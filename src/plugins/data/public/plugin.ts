@@ -41,6 +41,7 @@ import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
+import { createMultiValueClickAction } from './actions/multi_value_click_action';
 
 export class DataPublicPlugin
   implements
@@ -151,6 +152,13 @@ export class DataPublicPlugin
       'VALUE_CLICK_TRIGGER',
       createValueClickAction(() => ({
         uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'MULTI_VALUE_CLICK_TRIGGER',
+      createMultiValueClickAction(() => ({
+        filterManager: query.filterManager,
       }))
     );
 

@@ -11,7 +11,11 @@ import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type {
+  MultiValueClickContext,
+  RangeSelectContext,
+  ValueClickContext,
+} from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
 export interface SetupDeps {
@@ -31,6 +35,11 @@ export type ExpressionXyPluginStart = void;
 export interface FilterEvent {
   name: 'filter';
   data: ValueClickContext['data'];
+}
+
+export interface MultiFilterEvent {
+  name: 'multiFilter';
+  data: MultiValueClickContext['data'];
 }
 
 export interface BrushEvent {
