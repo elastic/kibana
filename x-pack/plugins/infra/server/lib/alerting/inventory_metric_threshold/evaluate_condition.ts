@@ -16,26 +16,13 @@ import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 
-interface AdditionalContextField {
-  [x: string]: any;
-}
-
-export interface AdditionalContext {
-  cloud?: AdditionalContextField;
-  host?: AdditionalContextField;
-  container?: AdditionalContextField;
-  orchestrator?: AdditionalContextField;
-  labels?: AdditionalContextField;
-  tags?: AdditionalContextField;
-}
-
 export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;
   shouldWarn: boolean;
   currentValue: number;
   isNoData: boolean;
   isError: boolean;
-  context: AdditionalContext;
+  context: [x: string];
 };
 
 export const evaluateCondition = async ({

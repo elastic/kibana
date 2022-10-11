@@ -17,12 +17,15 @@ import {
 } from '../../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../../metrics/types';
 import { InfraSource } from '../../../sources';
-import { AdditionalContext } from '../evaluate_condition';
 import { createRequest } from './create_request';
 
 interface BucketKey {
   node: string;
 }
+
+type AdditionalContext = {
+  [x: string]: any;
+};
 
 type Response = Record<
   string,
