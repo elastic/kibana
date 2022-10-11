@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { Switch, Route, Redirect, Router, useLocation } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,11 +31,17 @@ import {
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import {
+  Section,
+  routeToRuleDetails,
+  legacyRouteToRuleDetails,
+  routeToConnectors,
+} from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
+import { CONNECTORS_PLUGIN_ID } from '../common/constants';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -97,6 +103,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   const {
     actions: { validateEmailAddresses },
   } = useKibana().services;
+  const location = useLocation();
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
@@ -114,6 +121,19 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={legacyRouteToRuleDetails}
           render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
         />
+        <Route
+          exact
+          path={routeToConnectors}
+          render={() => {
+            const newPath = window.location.pathname.replace(
+              `triggersActions${location.pathname}`,
+              CONNECTORS_PLUGIN_ID
+            );
+            window.location.pathname = newPath;
+            return null;
+          }}
+        />
+
         <Redirect from={'/'} to="rules" />
         <Redirect from={'/alerts'} to="rules" />
       </Switch>
