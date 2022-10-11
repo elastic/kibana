@@ -79,18 +79,20 @@ export function LayerPanels(
     [activeVisualization, dispatchLens]
   );
   const updateDatasource = useMemo(
-    () => (datasourceId: string | undefined, newState: unknown) => {
-      if (datasourceId) {
-        dispatchLens(
-          updateDatasourceState({
-            updater: (prevState: unknown) =>
-              typeof newState === 'function' ? newState(prevState) : newState,
-            datasourceId,
-            clearStagedPreview: false,
-          })
-        );
-      }
-    },
+    () =>
+      (datasourceId: string | undefined, newState: unknown, dontSyncLinkedDimensions?: boolean) => {
+        if (datasourceId) {
+          dispatchLens(
+            updateDatasourceState({
+              updater: (prevState: unknown) =>
+                typeof newState === 'function' ? newState(prevState) : newState,
+              datasourceId,
+              clearStagedPreview: false,
+              dontSyncLinkedDimensions,
+            })
+          );
+        }
+      },
     [dispatchLens]
   );
   const updateDatasourceAsync = useMemo(

@@ -876,6 +876,7 @@ describe('metric visualization', () => {
       { groupId: GROUP_ID.MAX, accessor: 'maxAccessor' },
       { groupId: GROUP_ID.BREAKDOWN_BY, accessor: 'breakdownByAccessor' },
       { groupId: GROUP_ID.TREND_METRIC, accessor: 'trendlineMetricAccessor' },
+      { groupId: GROUP_ID.TREND_SECONDARY_METRIC, accessor: 'trendlineSecondaryMetricAccessor' },
       { groupId: GROUP_ID.TREND_TIME, accessor: 'trendlineTimeAccessor' },
       { groupId: GROUP_ID.TREND_BREAKDOWN_BY, accessor: 'trendlineBreakdownByAccessor' },
     ];
@@ -987,6 +988,14 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('trendlineMetricAccessor');
+    });
+    it('removes trend secondary metric dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullStateWTrend.trendlineSecondaryMetricAccessor,
+      });
+
+      expect(removed).not.toHaveProperty('trendlineSecondaryMetricAccessor');
     });
     it('removes trend breakdown-by dimension', () => {
       const removed = visualization.removeDimension({

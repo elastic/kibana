@@ -60,7 +60,11 @@ export function LayerPanel(
     isOnlyLayer: boolean;
     addLayer: (layerType: LayerType) => void;
     updateVisualization: StateSetter<unknown>;
-    updateDatasource: (datasourceId: string | undefined, newState: unknown) => void;
+    updateDatasource: (
+      datasourceId: string | undefined,
+      newState: unknown,
+      dontSyncLinkedDimensions?: boolean
+    ) => void;
     updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
     updateAll: (
       datasourceId: string | undefined,
@@ -183,7 +187,8 @@ export function LayerPanel(
           layerDatasource?.onDrop({
             state: layerDatasourceState,
             setState: (newState: unknown) => {
-              updateDatasource(datasourceId, newState);
+              // we don't sync linked dimension here because that would trigger an onDrop routine within an onDrop routine
+              updateDatasource(datasourceId, newState, true);
             },
             source,
             target: {
@@ -221,12 +226,12 @@ export function LayerPanel(
     setNextFocusedButtonId,
     layerDatasourceState,
     dimensionGroups,
+    framePublicAPI,
     updateDatasource,
     datasourceId,
     activeVisualization,
     updateVisualization,
-    props.visualizationState,
-    framePublicAPI,
+    props,
   ]);
 
   const isDimensionPanelOpen = Boolean(activeId);

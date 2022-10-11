@@ -560,6 +560,9 @@ export const getMetricVisualization = ({
       case GROUP_ID.TREND_METRIC:
         updated.trendlineMetricAccessor = columnId;
         break;
+      case GROUP_ID.TREND_SECONDARY_METRIC:
+        updated.trendlineSecondaryMetricAccessor = columnId;
+        break;
       case GROUP_ID.TREND_BREAKDOWN_BY:
         updated.trendlineBreakdownByAccessor = columnId;
         break;
@@ -589,6 +592,9 @@ export const getMetricVisualization = ({
     }
     if (prevState.trendlineMetricAccessor === columnId) {
       delete updated.trendlineMetricAccessor;
+    }
+    if (prevState.trendlineSecondaryMetricAccessor === columnId) {
+      delete updated.trendlineSecondaryMetricAccessor;
     }
     if (prevState.trendlineBreakdownByAccessor === columnId) {
       delete updated.trendlineBreakdownByAccessor;

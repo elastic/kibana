@@ -113,6 +113,7 @@ export const updateDatasourceState = createAction<{
   updater: unknown | ((prevState: unknown) => unknown);
   datasourceId: string;
   clearStagedPreview?: boolean;
+  dontSyncLinkedDimensions?: boolean;
 }>('lens/updateDatasourceState');
 export const updateVisualizationState = createAction<{
   visualizationId: string;
@@ -244,6 +245,7 @@ export const lensActions = {
   replaceIndexpattern,
   changeIndexPattern,
   removeDimension,
+  syncLinkedDimensions,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -582,6 +584,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           updater: unknown | ((prevState: unknown) => unknown);
           datasourceId: string;
           clearStagedPreview?: boolean;
+          dontSyncLinkedDimensions: boolean;
         };
       }
     ) => {
@@ -601,6 +604,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         },
         stagedPreview: payload.clearStagedPreview ? undefined : currentState.stagedPreview,
       };
+
+      if (payload.dontSyncLinkedDimensions) {
+        return newAppState;
+      }
 
       const {
         datasourceState: syncedDatasourceState,
