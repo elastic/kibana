@@ -7,6 +7,8 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
+import { EVENT_ACTION } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { ENTRY_SESSION_ENTITY_ID_FIELD } from '../../../../common/constants';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -29,9 +31,9 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           bool: {
             // show sessions table results by filtering events where event.action is fork, exec, or end
             should: [
-              { match_phrase: { 'event.action': 'exec' } },
-              { match_phrase: { 'event.action': 'fork' } },
-              { match_phrase: { 'event.action': 'end' } },
+              { term: { [EVENT_ACTION]: 'exec' } },
+              { term: { [EVENT_ACTION]: 'fork' } },
+              { term: { [EVENT_ACTION]: 'end' } },
             ],
           },
         },
@@ -39,7 +41,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           bool: {
             filter: {
               exists: {
-                field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
+                field: ENTRY_SESSION_ENTITY_ID_FIELD, // to exclude any records which have no entry_leader.entity_id
               },
             },
           },
@@ -50,7 +52,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   meta: {
     alias: null,
     disabled: false,
-    key: 'process.entry_leader.entity_id',
+    key: ENTRY_SESSION_ENTITY_ID_FIELD,
     negate: false,
     params: {},
     type: 'string',

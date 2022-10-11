@@ -469,3 +469,5 @@ export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
+
+export const ENTRY_SESSION_ENTITY_ID_FIELD = 'process.entry_leader.entity_id';
