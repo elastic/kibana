@@ -103,7 +103,12 @@ export function RuleComponent({
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'ruleAlertListTab',
-      content: renderRuleAlertList(),
+      content: (
+        <>
+          <EuiSpacer />
+          {renderRuleAlertList()}
+        </>
+      ),
     },
     {
       id: EVENT_LOG_LIST_TAB,

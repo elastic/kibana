@@ -1711,13 +1711,18 @@ describe('getExecutionKPIAggregation', () => {
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              order: [
+                {
+                  'ruleExecution>executeStartTime': 'desc',
+                },
+              ],
+              size: 10000,
             },
             aggs: {
               executionUuidSorted: {
                 bucket_sort: {
                   from: 0,
-                  size: 1000,
+                  size: 10000,
                   gap_policy: 'insert_zeros',
                 },
               },
@@ -1777,6 +1782,11 @@ describe('getExecutionKPIAggregation', () => {
                   },
                 },
                 aggs: {
+                  executeStartTime: {
+                    min: {
+                      field: 'event.start',
+                    },
+                  },
                   numTriggeredActions: {
                     sum: {
                       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
@@ -1850,13 +1860,18 @@ describe('getExecutionKPIAggregation', () => {
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              order: [
+                {
+                  'ruleExecution>executeStartTime': 'desc',
+                },
+              ],
+              size: 10000,
             },
             aggs: {
               executionUuidSorted: {
                 bucket_sort: {
                   from: 0,
-                  size: 1000,
+                  size: 10000,
                   gap_policy: 'insert_zeros',
                 },
               },
@@ -1928,6 +1943,11 @@ describe('getExecutionKPIAggregation', () => {
                   },
                 },
                 aggs: {
+                  executeStartTime: {
+                    min: {
+                      field: 'event.start',
+                    },
+                  },
                   numTriggeredActions: {
                     sum: {
                       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
@@ -2001,13 +2021,18 @@ describe('getExecutionKPIAggregation', () => {
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              order: [
+                {
+                  'ruleExecution>executeStartTime': 'desc',
+                },
+              ],
+              size: 10000,
             },
             aggs: {
               executionUuidSorted: {
                 bucket_sort: {
                   from: 0,
-                  size: 1000,
+                  size: 10000,
                   gap_policy: 'insert_zeros',
                 },
               },
@@ -2079,6 +2104,11 @@ describe('getExecutionKPIAggregation', () => {
                   },
                 },
                 aggs: {
+                  executeStartTime: {
+                    min: {
+                      field: 'event.start',
+                    },
+                  },
                   numTriggeredActions: {
                     sum: {
                       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
