@@ -38,7 +38,7 @@ const chartBase: ChartBase = {
   ),
 };
 
-export function getColdStartDurationChart({
+export async function getColdStartDurationChart({
   environment,
   kuery,
   setup,

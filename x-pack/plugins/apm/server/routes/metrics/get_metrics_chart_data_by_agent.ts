@@ -51,7 +51,7 @@ export async function getMetricsChartDataByAgent({
   }
 
   if (serverlessAgent) {
-    return getServerlessAgentMetricCharts(options);
+    return getServerlessAgentMetricsCharts(options);
   }
 
   return getDefaultMetricsCharts(options);
