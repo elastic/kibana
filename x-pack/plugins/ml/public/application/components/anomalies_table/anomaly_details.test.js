@@ -63,7 +63,7 @@ const props = {
 };
 
 describe('AnomalyDetails', () => {
-  test('Renders with category tab selected when index set to 1', () => {
+  test('Renders two tabs', () => {
     const categoryTabProps = {
       ...props,
       tabIndex: 1,
