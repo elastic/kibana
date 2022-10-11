@@ -117,7 +117,13 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
   };
 
   const button = (
-    <EuiFilterButton iconType="arrowDown" iconSide="right" onClick={togglePopOver} grow>
+    <EuiFilterButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopOver}
+      data-test-subj="tableSortSelectBtn"
+      grow
+    >
       {selectedOptionLabel}
     </EuiFilterButton>
   );
@@ -163,6 +169,7 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
           aria-label="some aria label"
           options={options}
           onChange={onSelectChange}
+          data-test-subj="sortSelect"
         >
           {(list) => list}
         </EuiSelectable>
