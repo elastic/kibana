@@ -32,9 +32,9 @@ import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
-import type { AppState } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -266,12 +266,6 @@ export interface DiscoverFieldProps {
    * Optionally show or hide field stats in the popover
    */
   showFieldStats?: boolean;
-
-  /**
-   * Discover App State
-   */
-  state: AppState;
-
   /**
    * Columns
    */
@@ -292,13 +286,14 @@ function DiscoverFieldComponent({
   onEditField,
   onDeleteField,
   showFieldStats,
-  state,
   contextualFields,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
   const { data } = services;
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
+  const query = useAppStateSelector((state) => state.query);
+  const filters = useAppStateSelector((state) => state.filters);
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -487,8 +482,8 @@ function DiscoverFieldComponent({
             {Boolean(dateRange) && (
               <FieldStats
                 services={services}
-                query={state.query!}
-                filters={state.filters!}
+                query={query!}
+                filters={filters!}
                 fromDate={dateRange.from}
                 toDate={dateRange.to}
                 dataViewOrDataViewId={dataView}
