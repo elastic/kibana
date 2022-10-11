@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { FC, useCallback, useState, useMemo } from 'react';
 import {
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
+import useMount from 'react-use/lib/useMount';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
@@ -22,7 +23,7 @@ type EntityType = 'anomaly_detector' | 'data_frame_analytics' | 'trained_models'
 type EntitiesSelection = Array<{ id: string; type: EntityType }>;
 
 export interface MlEntitySelectorProps {
-  entityTypes?: Record<EntityType, boolean>;
+  entityTypes?: Partial<{ [key in EntityType]: boolean }>;
   multiSelect?: boolean;
   /**
    * Array of selected ids
@@ -36,8 +37,14 @@ export interface MlEntitySelectorProps {
   handleDuplicates?: boolean;
 }
 
+const defaultEntities = {
+  anomaly_detector: true,
+  data_frame_analytics: true,
+  trained_models: true,
+};
+
 export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
-  entityTypes = { anomaly_detector: true, data_frame_analytics: true, trained_models: true },
+  entityTypes = defaultEntities,
   multiSelect = true,
   selectedOptions,
   onSelectionChange,
@@ -45,11 +52,10 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
 }) => {
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
+  const visColorsBehindText = euiPaletteColorBlindBehindText();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-
-  const visColorsBehindText = euiPaletteColorBlindBehindText();
 
   const fetchOptions = useCallback(async () => {
     try {
@@ -63,11 +69,13 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
           }),
           isGroupLabelOption: true,
           color: visColorsBehindText[0],
-          options: jobIdOptions.map((v) => ({
-            label: v,
-            value: v,
-            key: `anomaly_detector:${v}`,
+          options: jobIdOptions.map((adId) => ({
+            label: adId,
+            value: adId,
+            id: `anomaly_detector:${adId}`,
+            key: `anomaly_detector:${adId}`,
             color: visColorsBehindText[0],
+            'data-test-subj': `mlAdJobOption`,
           })),
         });
       }
@@ -80,11 +88,13 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
               defaultMessage: 'Data frame analytics',
             }),
             isGroupLabelOption: true,
-            options: dfa.data_frame_analytics.map((v) => ({
-              label: v.id,
-              value: v.id,
-              key: `data_frame_analytics:${v.id}`,
+            options: dfa.data_frame_analytics.map(({ id: dfaId }) => ({
+              label: dfaId,
+              value: dfaId,
+              id: `data_frame_analytics:${dfaId}`,
+              key: `data_frame_analytics:${dfaId}`,
               color: visColorsBehindText[2],
+              'data-test-subj': `mlDfaJobOption`,
             })),
           });
         }
@@ -98,11 +108,13 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
               defaultMessage: 'Trained models',
             }),
             isGroupLabelOption: true,
-            options: models.map((v) => ({
-              label: v.model_id,
-              value: v.model_id,
-              key: `trained_models:${v.model_id}`,
+            options: models.map(({ model_id: modelId }) => ({
+              label: modelId,
+              value: modelId,
+              id: `trained_models:${modelId}`,
+              key: `trained_models:${modelId}`,
               color: visColorsBehindText[3],
+              'data-test-subj': `mlTrainedModelOption`,
             })),
           });
         }
@@ -127,6 +139,10 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
     displayErrorToast,
   ]);
 
+  useMount(function fetchOptionsOnMount() {
+    fetchOptions();
+  });
+
   const selectedEntities = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     return (selectedOptions ?? []).flatMap((o) => {
       const fromOptions = options
@@ -134,16 +150,16 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
         .filter((op): op is EuiComboBoxOptionOption<string> => op!.value === o.id);
       return fromOptions.length > 0
         ? fromOptions
-        : [{ value: o.id, label: o.id, key: `unknown:${o.id}` }];
+        : [
+            {
+              value: o.id,
+              label: o.id,
+              key: `unknown:${o.id}`,
+              'data-test-subj': `mlUnknownOption ${o.id}`,
+            },
+          ];
     });
   }, [options, selectedOptions]);
-
-  useEffect(
-    function fetchOptionsOnMount() {
-      fetchOptions();
-    },
-    [fetchOptions]
-  );
 
   const onChange = useCallback<Exclude<EuiComboBoxProps<string>['onChange'], undefined>>(
     (selection) => {
@@ -179,7 +195,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
       options={options}
       onChange={onChange}
       fullWidth
-      data-test-subj={'mlEntitySelector'}
+      data-test-subj={`mlEntitySelector_${isLoading ? 'loading' : 'loaded'}`}
       isInvalid={false}
     />
   );
