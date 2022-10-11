@@ -68,6 +68,23 @@ export function mergeMigrationMappingPropertyHashes(
   };
 }
 
+/**
+ * If `.kibana` and the version specific aliases both exists and
+ * are pointing to the same index. This version's migration has already
+ * been completed.
+ */
+export function versionMigrationCompleted(
+  currentAlias: string,
+  versionAlias: string,
+  aliases: Record<string, string>
+): boolean {
+  return (
+    aliases[currentAlias] != null &&
+    aliases[versionAlias] != null &&
+    aliases[currentAlias] === aliases[versionAlias]
+  );
+}
+
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;

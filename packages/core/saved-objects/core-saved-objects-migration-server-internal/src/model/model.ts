@@ -38,6 +38,7 @@ import {
   mergeMigrationMappingPropertyHashes,
   throwBadControlState,
   throwBadResponse,
+  versionMigrationCompleted,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -98,12 +99,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       const aliases = aliasesRes.right;
 
       if (
-        // `.kibana` and the version specific aliases both exists and
-        // are pointing to the same index. This version's migration has already
-        // been completed.
-        aliases[stateP.currentAlias] != null &&
-        aliases[stateP.versionAlias] != null &&
-        aliases[stateP.currentAlias] === aliases[stateP.versionAlias]
+        // This version's migration has already been completed.
+        versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
       ) {
         return {
           ...stateP,
@@ -135,6 +132,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           } alias is pointing to a newer version of Kibana: v${indexVersion(
             aliases[stateP.currentAlias]
           )}`,
+        };
+      } else if (
+        // Don't actively participate in this migration but wait for another instance to complete it
+        stateP.waitForMigrationCompletion === true
+      ) {
+        return {
+          ...stateP,
+          controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
+          // Wait for 2s before checking again if the migration has completed
+          retryDelay: 2000,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'info',
+              message: `Migration required. Waiting until another Kibana instance completes the migration.`,
+            },
+          ],
         };
       } else if (
         // If the `.kibana` alias exists
@@ -218,6 +232,48 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    const indices = res.right;
+    const aliasesRes = getAliases(indices);
+    if (
+      // If this version's migration has already been completed we can proceed
+      Either.isRight(aliasesRes) &&
+      versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliasesRes.right)
+    ) {
+      return {
+        ...stateP,
+        // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
+        // installed / enabled we can transform any old documents and update
+        // the mappings for this plugin's types.
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        // Source is a none because we didn't do any migration from a source
+        // index
+        sourceIndex: Option.none,
+        targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          stateP.targetIndexMappings,
+          indices[aliasesRes.right[stateP.currentAlias]].mappings
+        ),
+        versionIndexReadyActions: Option.none,
+      };
+    } else {
+      // When getAliases returns a left 'multiple_indices_per_alias' error or
+      // the migration is not yet up to date just continue waiting
+      return {
+        ...stateP,
+        controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
+        // Wait for 2s before checking again if the migration has completed
+        retryDelay: 2000,
+        logs: [
+          ...stateP.logs,
+          {
+            level: 'info',
+            message: `Migration required. Waiting until another Kibana instance completes the migration.`,
+          },
+        ],
+      };
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -938,27 +994,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, res.left);
       }
     }
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
-        updateTargetMappingsTaskId: res.right.taskId,
-      };
-    } else {
-      throwBadResponse(stateP, res as never);
-    }
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
@@ -975,6 +1010,27 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS',
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        updateTargetMappingsTaskId: res.right.taskId,
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
