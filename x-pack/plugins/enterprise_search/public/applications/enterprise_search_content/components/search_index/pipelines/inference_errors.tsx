@@ -43,7 +43,6 @@ export const InferenceErrors: React.FC = () => {
         { defaultMessage: 'Inference error' }
       ),
       textOnly: true,
-      width: '70%',
     },
     {
       dataType: 'number',
@@ -77,7 +76,12 @@ export const InferenceErrors: React.FC = () => {
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
-          <EuiBasicTable columns={errorsColumns} items={inferenceErrors} rowHeader="message" />
+          <EuiBasicTable
+            tableLayout="auto"
+            columns={errorsColumns}
+            items={inferenceErrors}
+            rowHeader="message"
+          />
         )}
       </DataPanel>
     </>

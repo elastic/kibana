@@ -40,6 +40,7 @@ describe('InferenceErrors', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
     const table = wrapper.find(EuiBasicTable);
+    expect(table.prop('tableLayout')).toEqual('auto');
     expect(table.prop('columns')).toEqual([
       {
         dataType: 'date',
@@ -51,7 +52,6 @@ describe('InferenceErrors', () => {
         field: 'message',
         name: expect.any(String),
         textOnly: true,
-        width: '70%',
       },
       {
         dataType: 'number',
