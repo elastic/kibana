@@ -11,6 +11,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import type {
+  ConsoleResponseActionCommands,
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -132,10 +133,7 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
  */
 export const getUiCommand = (
   command: ResponseActionsApiCommandNames
-):
-  | Exclude<ResponseActionsApiCommandNames, 'unisolate' | 'running-processes'>
-  | 'release'
-  | 'processes' => {
+): ConsoleResponseActionCommands => {
   if (command === 'unisolate') {
     return 'release';
   } else if (command === 'running-processes') {
@@ -151,10 +149,7 @@ export const getUiCommand = (
  * processes -> running-processes
  */
 export const getCommandKey = (
-  uiCommand:
-    | Exclude<ResponseActionsApiCommandNames, 'unisolate' | 'running-processes'>
-    | 'release'
-    | 'processes'
+  uiCommand: ConsoleResponseActionCommands
 ): ResponseActionsApiCommandNames => {
   if (uiCommand === 'release') {
     return 'unisolate';

@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
@@ -24,11 +25,7 @@ interface UrlParamsActionsLogFilters {
 }
 
 interface ActionsLogFiltersFromUrlParams {
-  commands?: Array<
-    | Exclude<ResponseActionsApiCommandNames, 'unisolate' | 'running-processes'>
-    | 'release'
-    | 'processes'
-  >;
+  commands?: ConsoleResponseActionCommands[];
   hosts?: string[];
   statuses?: ResponseActionStatus[];
   startDate?: string;
