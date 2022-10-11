@@ -26,8 +26,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      // Activate the Observability guide, step 3, in order to trigger the EuiTour
       await supertest
-        .put(`/api/guided_onboarding`)
+        .put(`/api/guided_onboarding/state`)
         .set('kbn-xsrf', 'true')
         .send({
           status: 'in_progress',
