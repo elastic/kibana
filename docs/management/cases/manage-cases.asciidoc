@@ -10,11 +10,14 @@ Open a new case to keep track of issues and share their details with colleagues.
 
 . Go to *Management > {stack-manage-app} > Cases*, then click *Create case*.
 
-. Give the case a name, add any relevant tags and a description.
+. Give the case a name, severity, and description.
 +
 TIP: In the `Description` area, you can use
 https://www.markdownguide.org/cheat-sheet[Markdown] syntax to create formatted
 text.
+
+. Optionally, add assignees and tags. You can add users only if they meet
+the necessary <<setup-cases,prerequisites>>.
 
 . For *External incident management system*, select a connector. For more
 information, refer to <<add-case-connectors>>.
@@ -61,10 +64,12 @@ To view a case, click on its name. You can then:
 
 * Add a new comment.
 * Edit existing comments and the description.
+* Add or remove assignees.
 * Add a connector.
 * Send updates to external systems (if external connections are configured).
 * Edit tags.
 * Refresh the case to retrieve the latest updates.
 * Change the status.
+* Change the severity.
 * Close or delete the case.
 * Reopen a closed case.

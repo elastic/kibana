@@ -18,6 +18,12 @@ a|
 NOTE: The *Actions and Connectors* feature privilege is required to create, add,
 delete, and modify case connectors and to send updates to external systems.
 
+| Give assignee access to cases
+a| `All` for the *Cases* feature under *Management*.
+
+NOTE: Before a user can be assigned to a case, they must log into {kib} at
+least once, which creates a user profile.
+
 | Give view-only access for cases | `Read` for the *Cases* feature under *Management*.
 
 | Give access to view and delete cases | `Read` for the *Cases* feature under
