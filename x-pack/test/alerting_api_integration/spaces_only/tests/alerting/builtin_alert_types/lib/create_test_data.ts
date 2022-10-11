@@ -106,6 +106,7 @@ async function createEsDocument(
     date: new Date(epochMillis).toISOString(),
     date_epoch_millis: epochMillis,
     testedValue,
+    testedValueFloat: 234.2534643,
     testedValueUnsigned: '18446744073709551615',
     '@timestamp': new Date(epochMillis).toISOString(),
     ...(group ? { group } : {}),
