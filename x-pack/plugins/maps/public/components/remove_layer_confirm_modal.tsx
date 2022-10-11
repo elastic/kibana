@@ -18,17 +18,28 @@ export interface Props {
 }
 
 export function RemoveLayerConfirmModal(props: Props) {
+  function getChildrenCount(layerGroup: LayerGroup) {
+    let count = 0;
+    layerGroup.getChildren().forEach((childLayer) => {
+      count++;
+      if (isLayerGroup(childLayer)) {
+        count = count + getChildrenCount(childLayer as LayerGroup);
+      }
+    });
+    return count;
+  }
+
   function renderMultiLayerWarning() {
     if (!isLayerGroup(props.layer)) {
       return null;
     }
 
-    const children = (props.layer as LayerGroup).getChildren();
-    return children.length > 0 ? (
+    const numChildren = getChildrenCount(props.layer as LayerGroup);
+    return numChildren > 0 ? (
       <p>
         {i18n.translate('xpack.maps.deleteLayerConfirmModal.multiLayerWarning', {
           defaultMessage: `Removing this layer will also remove {numChildren} nested layers.`,
-          values: { numChildren: children.length },
+          values: { numChildren },
         })}
       </p>
     ) : null;

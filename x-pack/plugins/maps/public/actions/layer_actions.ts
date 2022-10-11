@@ -341,7 +341,7 @@ export function showThisLayerOnly(layerId: string) {
       }
     });
 
-    // show target layer after hiding all other layers 
+    // show target layer after hiding all other layers
     // since hiding layer group will hide its children
     const targetLayer = getLayerById(layerId, getState());
     if (targetLayer && !targetLayer.isVisible()) {
