@@ -85,6 +85,10 @@ export interface DimensionEditorProps extends FormBasedDimensionEditorProps {
 
 const operationDisplay = getOperationDisplay();
 
+function getHelpMessage(flag?: boolean | { helpMessage: string }) {
+  return flag && typeof flag !== 'boolean' ? flag.helpMessage : null;
+}
+
 export function DimensionEditor(props: DimensionEditorProps) {
   const {
     selectedColumn,
@@ -135,55 +139,58 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [layerId, setState]
   );
 
-  const setStateWrapper = (
-    setter:
-      | FormBasedLayer
-      | ((prevLayer: FormBasedLayer) => FormBasedLayer)
-      | GenericIndexPatternColumn,
-    options: { forceRender?: boolean } = {}
-  ) => {
-    const layer = state.layers[layerId];
-    let hypotethicalLayer: FormBasedLayer;
-    if (isColumn(setter)) {
-      hypotethicalLayer = {
-        ...layer,
-        columns: {
-          ...layer.columns,
-          [columnId]: setter,
-        },
-      };
-    } else {
-      hypotethicalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
-    }
-    const isDimensionComplete = Boolean(hypotethicalLayer.columns[columnId]);
-
-    setState(
-      (prevState) => {
-        let outputLayer: FormBasedLayer;
-        const prevLayer = prevState.layers[layerId];
-        if (isColumn(setter)) {
-          outputLayer = {
-            ...prevLayer,
-            columns: {
-              ...prevLayer.columns,
-              [columnId]: setter,
-            },
-          };
-        } else {
-          outputLayer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
-        }
-        return mergeLayer({
-          state: prevState,
-          layerId,
-          newLayer: adjustColumnReferencesForChangedColumn(outputLayer, columnId),
-        });
-      },
-      {
-        isDimensionComplete,
-        ...options,
+  const setStateWrapper = useCallback(
+    (
+      setter:
+        | FormBasedLayer
+        | ((prevLayer: FormBasedLayer) => FormBasedLayer)
+        | GenericIndexPatternColumn,
+      options: { forceRender?: boolean } = {}
+    ) => {
+      const layer = state.layers[layerId];
+      let hypotethicalLayer: FormBasedLayer;
+      if (isColumn(setter)) {
+        hypotethicalLayer = {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            [columnId]: setter,
+          },
+        };
+      } else {
+        hypotethicalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
       }
-    );
-  };
+      const isDimensionComplete = Boolean(hypotethicalLayer.columns[columnId]);
+
+      setState(
+        (prevState) => {
+          let outputLayer: FormBasedLayer;
+          const prevLayer = prevState.layers[layerId];
+          if (isColumn(setter)) {
+            outputLayer = {
+              ...prevLayer,
+              columns: {
+                ...prevLayer.columns,
+                [columnId]: setter,
+              },
+            };
+          } else {
+            outputLayer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
+          }
+          return mergeLayer({
+            state: prevState,
+            layerId,
+            newLayer: adjustColumnReferencesForChangedColumn(outputLayer, columnId),
+          });
+        },
+        {
+          isDimensionComplete,
+          ...options,
+        }
+      );
+    },
+    [columnId, layerId, setState, state.layers]
+  );
 
   const setIsCloseable = (isCloseable: boolean) => {
     setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
@@ -963,6 +970,30 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [layerId, selectedColumn, props.indexPatterns, state.layers]
   );
 
+  /**
+   * Advanced options can cause side effects on other columns (i.e. formulas)
+   * so before updating the layer the full insertOrReplaceColumn needs to be performed
+   */
+  const updateAdvancedOption = useCallback(
+    (newLayer) => {
+      if (selectedColumn) {
+        setStateWrapper(
+          // formula need to regenerate from scratch
+          selectedColumn.operationType === formulaOperationName
+            ? insertOrReplaceColumn({
+                op: selectedColumn.operationType,
+                layer: newLayer,
+                columnId,
+                indexPattern: currentIndexPattern,
+                visualizationGroups: dimensionGroups,
+              })
+            : newLayer
+        );
+      }
+    },
+    [columnId, currentIndexPattern, dimensionGroups, selectedColumn, setStateWrapper]
+  );
+
   const shouldDisplayAdvancedOptions =
     !isFullscreen &&
     !currentFieldIsInvalid &&
@@ -1018,7 +1049,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   layer={state.layers[layerId]}
-                  updateLayer={setStateWrapper}
+                  updateLayer={updateAdvancedOption}
                 />
               ) : null,
             },
@@ -1030,13 +1061,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   layer={state.layers[layerId]}
-                  updateLayer={setStateWrapper}
-                  helpMessage={
-                    selectedOperationDefinition.filterable &&
-                    typeof selectedOperationDefinition.filterable !== 'boolean'
-                      ? selectedOperationDefinition.filterable.helpMessage
-                      : null
-                  }
+                  updateLayer={updateAdvancedOption}
+                  helpMessage={getHelpMessage(selectedOperationDefinition.filterable)}
                 />
               ) : null,
             },
@@ -1048,7 +1074,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId={columnId}
                   indexPattern={currentIndexPattern}
                   layer={state.layers[layerId]}
-                  updateLayer={setStateWrapper}
+                  updateLayer={updateAdvancedOption}
+                  skipLabelUpdate={hasFormula}
+                  helpMessage={getHelpMessage(selectedOperationDefinition.canReduceTimeRange)}
                 />
               ) : null,
             },
@@ -1067,7 +1095,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   layer={state.layers[layerId]}
-                  updateLayer={setStateWrapper}
+                  updateLayer={updateAdvancedOption}
                   activeData={props.activeData}
                   layerId={layerId}
                 />

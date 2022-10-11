@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { IndexPattern } from '../../../../../types';
-import { LayerType, layerTypes } from '../../../../../../common';
+import { LayerType } from '../../../../../../common';
 import type { TimeScaleUnit } from '../../../../../../common/expressions';
 import type { FormBasedLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
@@ -33,7 +34,7 @@ export const buildLabelFunction =
   };
 
 export function checkForDataLayerType(layerType: LayerType, name: string) {
-  if (layerType === layerTypes.REFERENCELINE) {
+  if (layerType === LayerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
         defaultMessage: '{name} is disabled for this type of layer.',

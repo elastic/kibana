@@ -21,9 +21,10 @@ import {
   offsetToRowColumn,
   getInfoAtZeroIndexedPosition,
 } from './math_completion';
+import { createOperationDefinitionMock } from '../mocks/operation_mocks';
 
-const buildGenericColumn = (type: string) => {
-  return ({ field }: { field?: IndexPatternField }) => {
+const buildGenericColumn = <T extends 'field' | 'fullReference' = 'field'>(type: string) => {
+  return (({ field }: { field?: IndexPatternField }) => {
     return {
       label: type,
       dataType: 'number',
@@ -33,44 +34,39 @@ const buildGenericColumn = (type: string) => {
       scale: 'ratio',
       timeScale: false,
     };
-  };
+  }) as unknown as Extract<GenericOperationDefinition, { input: T }>['buildColumn'];
 };
 
-const numericOperation = () => ({ dataType: 'number', isBucketed: false });
-const stringOperation = () => ({ dataType: 'string', isBucketed: true });
+// Mind the OperationMetadata shape here, it is very important for the field suggestions;
+// internally they are serialized and compared as strings
+const numericOperation = (): OperationMetadata => ({ dataType: 'number', isBucketed: false });
+const stringOperation = (): OperationMetadata => ({ dataType: 'string', isBucketed: true });
 
 // Only one of each type is needed
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  sum: {
-    type: 'sum',
-    input: 'field',
-    buildColumn: buildGenericColumn('sum'),
-    getPossibleOperationForField: (field: IndexPatternField) =>
-      field.type === 'number' ? numericOperation() : null,
+  sum: createOperationDefinitionMock('sum', {
+    getPossibleOperationForField: jest.fn((field: IndexPatternField) =>
+      field.type === 'number' ? numericOperation() : undefined
+    ),
     documentation: {
       section: 'elasticsearch',
       signature: 'field: string',
       description: 'description',
     },
-  } as unknown as GenericOperationDefinition,
-  count: {
-    type: 'count',
-    input: 'field',
-    buildColumn: buildGenericColumn('count'),
+  }),
+  count: createOperationDefinitionMock('count', {
     getPossibleOperationForField: (field: IndexPatternField) =>
-      field.name === '___records___' ? numericOperation() : null,
-  } as unknown as GenericOperationDefinition,
-  last_value: {
-    type: 'last_value',
-    input: 'field',
+      field.name === '___records___' ? numericOperation() : undefined,
+  }),
+  last_value: createOperationDefinitionMock('last_value', {
     buildColumn: buildGenericColumn('last_value'),
-    getPossibleOperationForField: (field: IndexPatternField) => ({
-      dataType: field.type,
-      isBucketed: false,
-    }),
-  } as unknown as GenericOperationDefinition,
-  moving_average: {
-    type: 'moving_average',
+    getPossibleOperationForField: (field: IndexPatternField) =>
+      ({
+        dataType: field.type,
+        isBucketed: false,
+      } as OperationMetadata),
+  }),
+  moving_average: createOperationDefinitionMock('moving_average', {
     input: 'fullReference',
     requiredReferences: [
       {
@@ -80,20 +76,21 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       },
     ],
     operationParams: [{ name: 'window', type: 'number', required: true }],
-    buildColumn: buildGenericColumn('moving_average'),
-    getPossibleOperation: numericOperation,
-  } as unknown as GenericOperationDefinition,
-  cumulative_sum: {
-    type: 'cumulative_sum',
+    buildColumn: buildGenericColumn<'fullReference'>('moving_average'),
+  }),
+  cumulative_sum: createOperationDefinitionMock('cumulative_sum', {
     input: 'fullReference',
-    buildColumn: buildGenericColumn('cumulative_sum'),
-    getPossibleOperation: numericOperation,
-  } as unknown as GenericOperationDefinition,
-  terms: {
-    type: 'terms',
-    input: 'field',
-    getPossibleOperationForField: stringOperation,
-  } as unknown as GenericOperationDefinition,
+    buildColumn: buildGenericColumn<'fullReference'>('cumulative_sum'),
+  }),
+  terms: createOperationDefinitionMock(
+    'terms',
+    {
+      getPossibleOperationForField: stringOperation,
+    },
+    {
+      scale: 'ordinal',
+    }
+  ),
 };
 
 describe('math completion', () => {

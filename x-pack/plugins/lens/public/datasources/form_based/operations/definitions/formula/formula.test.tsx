@@ -6,16 +6,21 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '..';
-import { FormulaIndexPatternColumn } from './formula';
+import {
+  formulaOperation,
+  type GenericOperationDefinition,
+  type GenericIndexPatternColumn,
+} from '..';
+import type { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
-import { IndexPattern, IndexPatternField } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
 import { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
+import { createOperationDefinitionMock } from './mocks/operation_mocks';
 
 jest.mock('../../layer_helpers', () => {
   return {
@@ -26,89 +31,41 @@ jest.mock('../../layer_helpers', () => {
   };
 });
 
-interface PartialColumnParams {
-  kql?: string;
-  lucene?: string;
-  shift?: string;
-}
-
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  average: {
-    input: 'field',
-    buildColumn: ({ field }: { field: IndexPatternField }) => ({
-      label: 'avg',
-      dataType: 'number',
-      operationType: 'average',
-      sourceField: field.name,
-      isBucketed: false,
-      scale: 'ratio',
-      timeScale: false,
-    }),
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-  } as unknown as GenericOperationDefinition,
-  terms: {
-    input: 'field',
-    getPossibleOperationForField: () => ({ scale: 'ordinal' }),
-  } as unknown as GenericOperationDefinition,
-  sum: {
-    input: 'field',
-    filterable: true,
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-  } as unknown as GenericOperationDefinition,
-  last_value: {
-    input: 'field',
-    getPossibleOperationForField: ({ type }) => ({
+  average: createOperationDefinitionMock('average', {}, { label: 'avg' }),
+  terms: createOperationDefinitionMock('terms', {}, { scale: 'ordinal' }),
+  sum: createOperationDefinitionMock('sum', { filterable: true }),
+  last_value: createOperationDefinitionMock('last_value', {
+    getPossibleOperationForField: jest.fn(({ type }) => ({
       scale: type === 'string' ? 'ordinal' : 'ratio',
-    }),
-  } as GenericOperationDefinition,
-  max: {
-    input: 'field',
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-  } as unknown as GenericOperationDefinition,
-  count: {
-    input: 'field',
-    filterable: true,
-    buildColumn: ({ field }: { field: IndexPatternField }, columnsParams: PartialColumnParams) => ({
-      label: 'avg',
-      dataType: 'number',
-      operationType: 'count',
-      sourceField: field.name,
       isBucketed: false,
-      scale: 'ratio',
-      timeScale: false,
-      filter: getFilter(undefined, columnsParams),
-    }),
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-  } as unknown as GenericOperationDefinition,
-  derivative: {
-    input: 'fullReference',
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-  } as unknown as GenericOperationDefinition,
-  moving_average: {
+      dataType: type === 'string' ? type : 'number',
+    })),
+  }),
+  max: createOperationDefinitionMock('max'),
+  count: createOperationDefinitionMock('count', {
+    filterable: true,
+    canReduceTimeRange: true,
+  }),
+  derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
+  moving_average: createOperationDefinitionMock('moving_average', {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
-    buildColumn: (
-      { references }: { references: string[] },
-      columnsParams: PartialColumnParams
-    ) => ({
+    filterable: true,
+    getErrorMessage: jest.fn(() => ['mock error']),
+    buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
       scale: 'ratio',
-      timeScale: false,
+      timeScale: undefined,
       params: { window: 5 },
-      references,
+      references: referenceIds,
       filter: getFilter(undefined, columnsParams),
     }),
-    getErrorMessage: () => ['mock error'],
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-    filterable: true,
-  } as unknown as GenericOperationDefinition,
-  cumulative_sum: {
-    input: 'fullReference',
-    getPossibleOperationForField: () => ({ scale: 'ratio' }),
-  } as unknown as GenericOperationDefinition,
+  }),
+  cumulative_sum: createOperationDefinitionMock('cumulative_sum', { input: 'fullReference' }),
 };
 
 describe('formula', () => {
@@ -550,7 +507,7 @@ describe('formula', () => {
             operationType: 'average',
             scale: 'ratio',
             sourceField: 'bytes',
-            timeScale: false,
+            timeScale: undefined,
           },
         },
       });
@@ -831,6 +788,99 @@ describe('formula', () => {
               ...filter,
               query: `(${filter.query}) AND (${innerFilter})`,
             },
+          }),
+        })
+      );
+    });
+
+    it('add the formula reducedTimeRange to supported operations', () => {
+      const reducedTimeRange = '1h';
+      const mergedColumn = { ...currentColumn, reducedTimeRange };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = 'moving_average(average(bytes), window=7) + count()';
+
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
+        'col1',
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
+      );
+
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            reducedTimeRange,
+          }),
+          // Moving average column
+          col1X1: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            reducedTimeRange,
+          }),
+        })
+      );
+
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1X0: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+          col1X3: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+        })
+      );
+    });
+
+    it('skip formula reducedTimeRange assignment to supported operations with already defined value', () => {
+      const reducedTimeRange = '1h';
+      const mergedColumn = { ...currentColumn, reducedTimeRange };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = `moving_average(average(bytes), window=7) + count(reducedTimeRange='1s')`;
+
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
+        'col1',
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
+      );
+
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            reducedTimeRange,
+          }),
+          // Moving average column
+          col1X1: expect.not.objectContaining({
+            reducedTimeRange,
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            reducedTimeRange: '1s',
           }),
         })
       );

@@ -8,7 +8,7 @@
 import { checkReferences, checkForDataLayerType } from './utils';
 import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
-import { layerTypes } from '../../../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 
 // Mock prevents issue with circular loading
@@ -22,7 +22,7 @@ describe('utils', () => {
 
   describe('checkForDataLayerType', () => {
     it('should return an error if the layer is of the wrong type', () => {
-      expect(checkForDataLayerType(layerTypes.REFERENCELINE, 'Operation')).toEqual([
+      expect(checkForDataLayerType(LayerTypes.REFERENCELINE, 'Operation')).toEqual([
         'Operation is disabled for this type of layer.',
       ]);
     });

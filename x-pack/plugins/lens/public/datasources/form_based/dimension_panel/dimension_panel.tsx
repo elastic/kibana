@@ -7,17 +7,18 @@
 
 import React, { memo, useMemo } from 'react';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnInvalid } from '../utils';
 import { FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import { DateRange, layerTypes } from '../../../../common';
+import { DateRange } from '../../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 import { DimensionTrigger } from '../../../shared_components/dimension_trigger';
 
@@ -94,7 +95,7 @@ export const FormBasedDimensionEditorComponent = function FormBasedDimensionPane
   return (
     <DimensionEditor
       {...props}
-      layerType={props.layerType || layerTypes.DATA}
+      layerType={props.layerType || LayerTypes.DATA}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
       operationSupportMatrix={operationSupportMatrix}

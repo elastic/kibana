@@ -7,6 +7,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
@@ -35,7 +36,7 @@ import {
   LensDocShape850,
   LensDocShape860,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
+import { DOCUMENT_FIELD_NAME, LegacyMetricState } from '../../common';
 import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
@@ -112,11 +113,11 @@ export const commonUpdateVisLayerType = (
   const newAttributes = cloneDeep(attributes);
   const visState = (newAttributes as LensDocShape715<VisStatePost715>).state.visualization;
   if ('layerId' in visState) {
-    visState.layerType = layerTypes.DATA;
+    visState.layerType = LayerTypes.DATA;
   }
   if ('layers' in visState) {
     for (const layer of visState.layers) {
-      layer.layerType = layerTypes.DATA;
+      layer.layerType = LayerTypes.DATA;
     }
   }
   return newAttributes as LensDocShape715<VisStatePost715>;
