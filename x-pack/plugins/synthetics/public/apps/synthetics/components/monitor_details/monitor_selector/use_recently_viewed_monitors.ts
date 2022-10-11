@@ -8,7 +8,6 @@
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { isEqual } from 'lodash';
 import { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
@@ -29,7 +28,10 @@ export const useRecentlyViewedMonitors = () => {
       ...new Set([...(monitorId ? [monitorId] : []), ...(recentlyViewed ?? [])]),
     ].slice(0, 5);
 
-    if (!isEqual(newRecentlyViewed.sort(), recentlyViewed?.sort())) {
+    if (
+      newRecentlyViewed?.[0] !== recentlyViewed?.[0] ||
+      newRecentlyViewed.length !== recentlyViewed?.length
+    ) {
       setRecentlyViewed(newRecentlyViewed);
     }
   }, [monitorId, recentlyViewed, setRecentlyViewed]);
