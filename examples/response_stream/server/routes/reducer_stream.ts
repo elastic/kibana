@@ -28,7 +28,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
       },
     },
     async (context, request, response) => {
-      const maxTimeoutMs = request.body.timeout ?? 250;
+      // const maxTimeoutMs = request.body.timeout ?? 250;
       const simulateError = request.body.simulateErrors ?? false;
 
       let logMessageCounter = 1;
