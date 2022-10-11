@@ -85,7 +85,7 @@ import { drag, drop } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
-export const hostExistsQuery = 'host.name: *';
+const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (
   description: string,
