@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export enum OpsgenieSubActions {
-  CreateAlert = 'createAlert',
-  CloseAlert = 'closeAlert',
-}
+import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 
-export const OpsgenieConnectorTypeId = '.opsgenie';
+export const DEFAULT_ALIAS = `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`;

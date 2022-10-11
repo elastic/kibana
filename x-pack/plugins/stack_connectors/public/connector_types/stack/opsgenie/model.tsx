@@ -9,7 +9,6 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel as ConnectorTypeModel,
-  AlertProvidedActionVariables,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RecursivePartial } from '@elastic/eui';
@@ -19,6 +18,7 @@ import type {
   OpsgenieActionParams,
   OpsgenieActionSecrets,
 } from '../../../../server/connector_types/stack';
+import { DEFAULT_ALIAS } from './constants';
 
 const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.selectMessageText',
@@ -31,8 +31,6 @@ const SELECT_MESSAGE = i18n.translate(
 const TITLE = i18n.translate('xpack.stackConnectors.components.opsgenie.connectorTypeTitle', {
   defaultMessage: 'Opsgenie',
 });
-
-const defaultAlias = `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`;
 
 export const getConnectorType = (): ConnectorTypeModel<
   OpsgenieActionConfig,
@@ -78,13 +76,13 @@ export const getConnectorType = (): ConnectorTypeModel<
     defaultActionParams: {
       subAction: OpsgenieSubActions.CreateAlert,
       subActionParams: {
-        alias: defaultAlias,
+        alias: DEFAULT_ALIAS,
       },
     },
     defaultRecoveredActionParams: {
       subAction: OpsgenieSubActions.CloseAlert,
       subActionParams: {
-        alias: defaultAlias,
+        alias: DEFAULT_ALIAS,
       },
     },
   };

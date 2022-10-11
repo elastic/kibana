@@ -11,8 +11,8 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { OpsgenieConnectorTypeId } from '.';
 import { OpsgenieConnector } from './connector';
+import { OpsgenieConnectorTypeId } from '../../../../common';
 
 describe('OpsgenieConnector', () => {
   let connector: OpsgenieConnector;

@@ -74,7 +74,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private createHeaders() {
-    return { Authorization: `GenieKey ${this.secrets.apiKey}`, 'Content-Type': 'application/json' };
+    return { Authorization: `GenieKey ${this.secrets.apiKey}` };
   }
 
   public async closeAlert(params: CloseAlertParams) {
