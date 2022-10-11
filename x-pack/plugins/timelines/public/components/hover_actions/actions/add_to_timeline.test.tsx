@@ -9,7 +9,11 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import AddToTimelineButton, { ADD_TO_TIMELINE_KEYBOARD_SHORTCUT } from './add_to_timeline';
+import AddToTimelineButton, {
+  ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
+  SuccessMessageProps,
+  AddSuccessMessage,
+} from './add_to_timeline';
 import { DataProvider, IS_OPERATOR } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { TestProviders } from '../../../mock';
@@ -391,7 +395,11 @@ describe('add to timeline', () => {
 
       fireEvent.click(screen.getByRole('button'));
 
-      expect(mockAddSuccess).toBeCalledWith('Added a to timeline');
+      const message: SuccessMessageProps = {
+        children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, true),
+      };
+      const wrapper = render(<AddSuccessMessage {...message} />);
+      expect(wrapper.container.textContent).toBe('Added a to timeline');
     });
 
     test('Add success is called with "template" if timeline type is template', () => {
@@ -405,7 +413,11 @@ describe('add to timeline', () => {
 
       fireEvent.click(screen.getByRole('button'));
 
-      expect(mockAddSuccess).toBeCalledWith('Added a to template');
+      const message: SuccessMessageProps = {
+        children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, false),
+      };
+      const wrapper = render(<AddSuccessMessage {...message} />);
+      expect(wrapper.container.textContent).toBe('Added a to template');
     });
   });
 });
