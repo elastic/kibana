@@ -37,7 +37,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: { width?: number };
+  viewport: { width?: number; deviceScaleFactor?: number };
   openUrlTimeout: number;
 }
 
@@ -155,7 +155,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout, viewport }: CreatePageOptions,
     logger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
@@ -173,14 +173,15 @@ export class HeadlessChromiumDriverFactory {
       // We set the viewport width using the client-side layout info to reduce the chances of
       // browser reflow. Only the window height is expected to be adjusted dramatically
       // before taking a screenshot, to ensure the elements to capture are contained in the viewport.
-      const viewport = {
+      const newViewport = {
         ...DEFAULT_VIEWPORT,
-        width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+        width: viewport.width ?? DEFAULT_VIEWPORT.width,
+        deviceScaleFactor: viewport.deviceScaleFactor ?? DEFAULT_VIEWPORT.deviceScaleFactor,
       };
 
       log(
         `Launching with viewport:` +
-          ` width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
+          ` width=${newViewport.width} height=${newViewport.height} scaleFactor=${newViewport.deviceScaleFactor}`
       );
 
       (async () => {
@@ -193,7 +194,7 @@ export class HeadlessChromiumDriverFactory {
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
             args: chromiumArgs,
-            defaultViewport: viewport,
+            defaultViewport: newViewport,
             env: {
               TZ: browserTimezone,
             },

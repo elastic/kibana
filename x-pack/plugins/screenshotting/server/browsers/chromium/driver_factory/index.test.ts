@@ -71,7 +71,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     it('returns browser driver, error observable, and close callback', async () => {
       await expect(
         factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .createPage({ openUrlTimeout: 0, viewport: DEFAULT_VIEWPORT })
           .pipe(take(1))
           .toPromise()
       ).resolves.toEqual(
@@ -89,7 +89,7 @@ describe('HeadlessChromiumDriverFactory', () => {
       );
       expect(() =>
         factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .createPage({ openUrlTimeout: 0, viewport: DEFAULT_VIEWPORT })
           .pipe(take(1))
           .toPromise()
       ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -100,7 +100,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     describe('close behaviour', () => {
       it('does not allow close to be called on the browse more than once', async () => {
         await factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .createPage({ openUrlTimeout: 0, viewport: DEFAULT_VIEWPORT })
           .pipe(
             take(1),
             mergeMap(async ({ close }) => {

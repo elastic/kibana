@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import assert from 'assert';
 import { firstValueFrom, lastValueFrom, mergeMap, toArray } from 'rxjs';
 import { DiagnosticResponse } from '.';
@@ -41,11 +42,10 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
 
       // Hack the layout to make the base/login page work
-      const layout = {
+      const layout: LayoutParams<'preserve_layout'> = {
         dimensions: {
           width: 1440,
           height: 2024,
-          deviceScaleFactor: 2,
         },
         selectors: {
           screenshot: `.${APP_WRAPPER_CLASS}`,

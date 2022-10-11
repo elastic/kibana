@@ -134,7 +134,7 @@ export class Screenshots {
         {
           browserTimezone,
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          defaultViewport: { width: layout.width },
+          viewport: { width: layout.width },
         },
         this.logger
       )
