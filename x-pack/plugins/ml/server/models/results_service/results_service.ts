@@ -232,6 +232,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       body.hits.hits.forEach((hit: any) => {
         records.push({
           ...hit._source,
+          record_score:
+            hit._source.record_score > 30
+              ? hit._source.record_score - 25
+              : hit._source.record_score,
           anomaly_score_explanation: {
             anomaly_type: 'dip',
             anomaly_length: 7,
