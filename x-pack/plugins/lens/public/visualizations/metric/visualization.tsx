@@ -67,6 +67,7 @@ export interface MetricVisualizationState {
   trendlineLayerType?: LayerType;
   trendlineTimeAccessor?: string;
   trendlineMetricAccessor?: string;
+  trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
 }
 
@@ -251,6 +252,23 @@ const getTrendlineLayerConfiguration = (
             ]
           : [],
         supportsMoreColumns: !props.state.trendlineMetricAccessor,
+        filterOperations: () => false,
+        hideGrouping: true,
+        nestingOrder: 3,
+      },
+      {
+        groupId: GROUP_ID.TREND_SECONDARY_METRIC,
+        groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+        accessors: props.state.trendlineSecondaryMetricAccessor
+          ? [
+              {
+                columnId: props.state.trendlineSecondaryMetricAccessor,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.trendlineSecondaryMetricAccessor,
         filterOperations: () => false,
         hideGrouping: true,
         nestingOrder: 2,
@@ -472,6 +490,21 @@ export const getMetricVisualization = ({
         to: {
           columnId: state.trendlineMetricAccessor,
           groupId: GROUP_ID.TREND_METRIC,
+          layerId: state.trendlineLayerId,
+        },
+      });
+    }
+
+    if (state.secondaryMetricAccessor) {
+      links.push({
+        from: {
+          columnId: state.secondaryMetricAccessor,
+          groupId: GROUP_ID.SECONDARY_METRIC,
+          layerId: state.layerId,
+        },
+        to: {
+          columnId: state.trendlineSecondaryMetricAccessor,
+          groupId: GROUP_ID.TREND_SECONDARY_METRIC,
           layerId: state.trendlineLayerId,
         },
       });

@@ -43,6 +43,7 @@ describe('metric visualization', () => {
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-col-id',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   } as const;
@@ -53,6 +54,7 @@ describe('metric visualization', () => {
       | 'trendlineLayerId'
       | 'trendlineLayerType'
       | 'trendlineMetricAccessor'
+      | 'trendlineSecondaryMetricAccessor'
       | 'trendlineTimeAccessor'
       | 'trendlineBreakdownByAccessor'
     >
@@ -708,9 +710,13 @@ describe('metric visualization', () => {
     });
 
     it('links metrics when present on leader layer', () => {
-      expect(
-        visualization.getLinkedDimensions!({ ...fullStateWTrend, breakdownByAccessor: undefined })
-      ).toMatchInlineSnapshot(`
+      const localState: MetricVisualizationState = {
+        ...fullStateWTrend,
+        breakdownByAccessor: undefined,
+        secondaryMetricAccessor: undefined,
+      };
+
+      expect(visualization.getLinkedDimensions!(localState)).toMatchInlineSnapshot(`
         Array [
           Object {
             "from": Object {
@@ -728,16 +734,51 @@ describe('metric visualization', () => {
       `);
 
       const newColumnId = visualization.getLinkedDimensions!({
-        ...fullStateWTrend,
+        ...localState,
         trendlineMetricAccessor: undefined,
+      })[0].to.columnId;
+      expect(newColumnId).toBeUndefined();
+    });
+
+    it('links secondary metrics when present on leader layer', () => {
+      const localState: MetricVisualizationState = {
+        ...fullStateWTrend,
+        metricAccessor: undefined,
         breakdownByAccessor: undefined,
+      };
+
+      expect(visualization.getLinkedDimensions!(localState)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "from": Object {
+              "columnId": "secondary-metric-col-id",
+              "groupId": "secondaryMetric",
+              "layerId": "first",
+            },
+            "to": Object {
+              "columnId": "trendline-secondary-metric-col-id",
+              "groupId": "trendSecondaryMetric",
+              "layerId": "second",
+            },
+          },
+        ]
+      `);
+
+      const newColumnId = visualization.getLinkedDimensions!({
+        ...localState,
+        trendlineSecondaryMetricAccessor: undefined,
       })[0].to.columnId;
       expect(newColumnId).toBeUndefined();
     });
 
     it('links breakdowns when present', () => {
-      expect(visualization.getLinkedDimensions!({ ...fullStateWTrend, metricAccessor: undefined }))
-        .toMatchInlineSnapshot(`
+      const localState: MetricVisualizationState = {
+        ...fullStateWTrend,
+        metricAccessor: undefined,
+        secondaryMetricAccessor: undefined,
+      };
+
+      expect(visualization.getLinkedDimensions!(localState)).toMatchInlineSnapshot(`
         Array [
           Object {
             "from": Object {
@@ -755,8 +796,7 @@ describe('metric visualization', () => {
       `);
 
       const newColumnId = visualization.getLinkedDimensions!({
-        ...fullStateWTrend,
-        metricAccessor: undefined,
+        ...localState,
         trendlineBreakdownByAccessor: undefined,
       })[0].to.columnId;
       expect(newColumnId).toBeUndefined();

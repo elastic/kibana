@@ -144,6 +144,19 @@ Object {
       "groupId": "trendMetric",
       "groupLabel": "Primary metric",
       "hideGrouping": true,
+      "nestingOrder": 3,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-secondary-metric-col-id",
+        },
+      ],
+      "filterOperations": [Function],
+      "groupId": "trendSecondaryMetric",
+      "groupLabel": "Secondary metric",
+      "hideGrouping": true,
       "nestingOrder": 2,
       "supportsMoreColumns": false,
     },
