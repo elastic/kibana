@@ -6,38 +6,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
+import {
+  FAAS_COLDSTART,
+  METRICSET_NAME,
+} from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStartDuration', {
-    defaultMessage: 'Cold start duration',
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+    defaultMessage: 'Cold start',
   }),
-  key: 'cold_start_duration',
-  type: 'linemark',
-  yUnit: 'time',
+  key: 'cold_start_count',
+  type: 'bar',
+  yUnit: 'integer',
   series: {
     coldStart: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.serverless.coldStartDuration',
-        { defaultMessage: 'Cold start duration' }
-      ),
+      title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+        defaultMessage: 'Cold start',
+      }),
       color: theme.euiColorVis5,
     },
   },
-  description: i18n.translate(
-    'xpack.apm.agentMetrics.serverless.coldStartDuration.description',
-    {
-      defaultMessage:
-        'Cold start duration shows the execution duration of the serverless runtime for requests that experience cold starts.',
-    }
-  ),
 };
 
-export function getColdStartDuration({
+export function getColdStartCountChart({
   environment,
   kuery,
   setup,
@@ -60,8 +56,11 @@ export function getColdStartDuration({
     start,
     end,
     chartBase,
-    aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
-    additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
-    operationName: 'get_cold_start_duration',
+    aggs: { coldStart: { sum: { field: FAAS_COLDSTART } } },
+    additionalFilters: [
+      ...termQuery(FAAS_COLDSTART, true),
+      ...termQuery(METRICSET_NAME, 'transaction'),
+    ],
+    operationName: 'get_cold_start_count',
   });
 }

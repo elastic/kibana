@@ -10,7 +10,7 @@ import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
 import { isJavaAgentName, isServerlessAgent } from '../../../common/agent_name';
 import { GenericMetricsChart } from './fetch_and_transform_metrics';
-import { getServerlessAgentMetricCharts } from './by_agent/serverless';
+import { getServerlessAgentMetricsCharts } from './by_agent/serverless/get_serverless_agent_metrics_chart';
 
 export async function getMetricsChartDataByAgent({
   environment,
@@ -49,7 +49,7 @@ export async function getMetricsChartDataByAgent({
   }
 
   if (isServerlessAgent(serviceRuntimeName)) {
-    return getServerlessAgentMetricCharts(options);
+    return getServerlessAgentMetricsCharts(options);
   }
 
   return getDefaultMetricsCharts(options);

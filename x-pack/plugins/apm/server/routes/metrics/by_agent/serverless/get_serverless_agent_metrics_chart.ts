@@ -7,15 +7,15 @@
 
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { getServerlessFunctionLatency } from './serverless_function_latency';
-import { getColdStartDuration } from './cold_start_duration';
+import { getServerlessFunctionLatencyChart } from './get_serverless_function_latency_chart';
+import { getColdStartDurationChart } from './get_cold_start_duration_chart';
 import { getMemoryChartData } from '../shared/memory';
-import { getComputeUsage } from './compute_usage';
-import { getActiveInstances } from './active_instances';
-import { getColdStartCount } from './cold_start_count';
+import { getComputeUsageChart } from './get_compute_usage_chart';
+import { getActiveInstancesChart } from './get_active_instances_chart';
+import { getColdStartCountChart } from './get_cold_start_count_chart';
 import { getSearchAggregatedTransactions } from '../../../../lib/helpers/transactions';
 
-export function getServerlessAgentMetricCharts({
+export function getServerlessAgentMetricsCharts({
   environment,
   kuery,
   setup,
@@ -47,15 +47,15 @@ export function getServerlessAgentMetricCharts({
       end,
     };
     return await Promise.all([
-      getServerlessFunctionLatency({
+      getServerlessFunctionLatencyChart({
         ...options,
         searchAggregatedTransactions,
       }),
       getMemoryChartData(options),
-      getColdStartDuration(options),
-      getColdStartCount(options),
-      getComputeUsage(options),
-      getActiveInstances({ ...options, searchAggregatedTransactions }),
+      getColdStartDurationChart(options),
+      getColdStartCountChart(options),
+      getComputeUsageChart(options),
+      getActiveInstancesChart({ ...options, searchAggregatedTransactions }),
     ]);
   });
 }

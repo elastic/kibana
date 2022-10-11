@@ -6,8 +6,13 @@
  */
 
 import React from 'react';
-import { isJavaAgentName, isJRubyAgent } from '../../../../common/agent_name';
+import {
+  isJavaAgentName,
+  isJRubyAgent,
+  isServerlessAgent,
+} from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { ServerLessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { ServiceNodeOverview } from './service_node_overview';
 
@@ -16,6 +21,10 @@ export function Metrics() {
 
   if (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) {
     return <ServiceNodeOverview />;
+  }
+
+  if (isServerlessAgent(runtimeName)) {
+    return <ServerLessMetrics />;
   }
 
   return <ServiceMetrics />;

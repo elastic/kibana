@@ -47,7 +47,7 @@ function calculateComputeUsageGBSeconds({
   return totalMemoryGB * faasBilledDurationSec;
 }
 
-export async function getComputeUsage({
+export async function getComputeUsageChart({
   environment,
   kuery,
   setup,

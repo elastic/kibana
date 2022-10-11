@@ -21,7 +21,7 @@ import {
 } from '../../../../lib/helpers/transactions';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 
-export async function getActiveInstances({
+export async function getActiveInstancesChart({
   environment,
   kuery,
   setup,

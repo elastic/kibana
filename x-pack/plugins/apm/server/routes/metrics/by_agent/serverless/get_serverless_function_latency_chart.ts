@@ -84,7 +84,7 @@ async function getServerlessLantecySeries({
   ];
 }
 
-export async function getServerlessFunctionLatency({
+export async function getServerlessFunctionLatencyChart({
   environment,
   kuery,
   setup,
