@@ -33,7 +33,7 @@ const ruleReferences: Rule[] = [
     ],
     id: '1a2b3c',
     name: 'Simple Rule Query',
-    ruleId: 'rule-2',
+    rule_id: 'rule-2',
   },
 ];
 const mockGetFormattedComments = () =>
