@@ -80,11 +80,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
 
     const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
-    const alertUuid = getAlertUuid(alertId);
 
-    const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
+    const alertFactory: MetricThresholdAlertFactory = (alertInstanceId, reason) =>
       alertWithLifecycle({
-        id,
+        id: alertInstanceId,
         fields: {
           [ALERT_REASON]: reason,
         },
@@ -110,6 +109,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
+        const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
         alert.scheduleActions(actionGroupId, {
           alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
@@ -170,16 +170,17 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
-    for (const group of groups) {
+    // The key of `groups` is the alert instance ID.
+    for (const alertInstanceId of groups) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
-      const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
+      const shouldAlertFire = alertResults.every((result) => result[alertInstanceId]?.shouldFire);
+      const shouldAlertWarn = alertResults.every((result) => result[alertInstanceId]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group]?.isNoData);
+      const isNoData = alertResults.some((result) => result[alertInstanceId]?.isNoData);
 
-      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
-        nextMissingGroups.add(group);
+      if (isNoData && alertInstanceId !== UNGROUPED_FACTORY_KEY) {
+        nextMissingGroups.add(alertInstanceId);
       }
 
       const nextState = isNoData
@@ -195,8 +196,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
-              group,
+              ...formatAlertResult(result[alertInstanceId], nextState === AlertStates.WARNING),
+              group: alertInstanceId,
             })
           )
           .join('\n');
@@ -223,8 +224,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         // check to see if a No Data state has occurred
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
-            .filter((result) => result[group].isNoData)
-            .map((result) => buildNoDataAlertReason({ ...result[group], group }))
+            .filter((result) => result[alertInstanceId].isNoData)
+            .map((result) =>
+              buildNoDataAlertReason({ ...result[alertInstanceId], group: alertInstanceId })
+            )
             .join('\n');
         }
       }
@@ -239,23 +242,24 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alert = alertFactory(`${group}`, reason);
+        const alert = alertFactory(`${alertInstanceId}`, reason);
+        const alertUuid = getAlertUuid(alertInstanceId);
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
           alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[nextState],
-          group,
+          group: alertInstanceId,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           threshold: mapToConditionsLookup(
             alertResults,
-            (result) => formatAlertResult(result[group]).threshold
+            (result) => formatAlertResult(result[alertInstanceId]).threshold
           ),
           timestamp,
           value: mapToConditionsLookup(
             alertResults,
-            (result) => formatAlertResult(result[group]).currentValue
+            (result) => formatAlertResult(result[alertInstanceId]).currentValue
           ),
           viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
         });
@@ -264,13 +268,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
+
     for (const alert of recoveredAlerts) {
-      const recoveredAlertId = alert.getId();
+      const recoveredAlertInstanceId = alert.getId();
       const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
+      const alertUuid = getAlertUuid(recoveredAlertInstanceId);
+
       const context = {
         alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
         alertState: stateToAlertMessage[AlertStates.OK],
-        group: recoveredAlertId,
+        group: recoveredAlertInstanceId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
