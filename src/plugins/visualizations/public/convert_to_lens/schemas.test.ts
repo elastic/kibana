@@ -40,7 +40,7 @@ jest.mock('../../common/convert_to_lens/lib/buckets', () => ({
 }));
 
 jest.mock('../../common/convert_to_lens/lib/utils', () => ({
-  getCutomBucketsFromSiblingAggs: jest.fn(() => mockGetCutomBucketsFromSiblingAggs()),
+  getCustomBucketsFromSiblingAggs: jest.fn(() => mockGetCutomBucketsFromSiblingAggs()),
 }));
 
 jest.mock('../vis_schemas', () => ({

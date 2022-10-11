@@ -11,43 +11,27 @@ import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { LegendSize } from '../../constants';
-
-export const XYCurveTypes = {
-  LINEAR: 'LINEAR',
-  CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
-  CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
-} as const;
-
-export const YAxisModes = {
-  AUTO: 'auto',
-  LEFT: 'left',
-  RIGHT: 'right',
-  BOTTOM: 'bottom',
-} as const;
-
-export const SeriesTypes = {
-  BAR: 'bar',
-  LINE: 'line',
-  AREA: 'area',
-  BAR_STACKED: 'bar_stacked',
-  AREA_STACKED: 'area_stacked',
-  BAR_HORIZONTAL: 'bar_horizontal',
-  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
-  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
-  AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
-  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
-} as const;
-
-export const FillTypes = {
-  NONE: 'none',
-  ABOVE: 'above',
-  BELOW: 'below',
-} as const;
+import {
+  CategoryDisplayTypes,
+  PartitionChartTypes,
+  NumberDisplayTypes,
+  LegendDisplayTypes,
+  FillTypes,
+  SeriesTypes,
+  YAxisModes,
+  XYCurveTypes,
+  LayerTypes,
+} from '../constants';
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type XYCurveType = $Values<typeof XYCurveTypes>;
+export type PartitionChartType = $Values<typeof PartitionChartTypes>;
+export type CategoryDisplayType = $Values<typeof CategoryDisplayTypes>;
+export type NumberDisplayType = $Values<typeof NumberDisplayTypes>;
+export type LegendDisplayType = $Values<typeof LegendDisplayTypes>;
+export type LayerType = $Values<typeof LayerTypes>;
 
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
@@ -217,4 +201,34 @@ export interface MetricVisConfiguration {
   maxCols?: number;
 }
 
-export type Configuration = XYConfiguration | TableVisConfiguration | MetricVisConfiguration;
+export interface PartitionLayerState {
+  layerId: string;
+  layerType: LayerType;
+  primaryGroups: string[];
+  secondaryGroups?: string[];
+  metric?: string;
+  collapseFns?: Record<string, string>;
+  numberDisplay: NumberDisplayType;
+  categoryDisplay: CategoryDisplayType;
+  legendDisplay: LegendDisplayType;
+  legendPosition?: Position;
+  showValuesInLegend?: boolean;
+  nestedLegend?: boolean;
+  percentDecimals?: number;
+  emptySizeRatio?: number;
+  legendMaxLines?: number;
+  legendSize?: LegendSize;
+  truncateLegend?: boolean;
+}
+
+export interface PartitionVisConfiguration {
+  shape: PartitionChartType;
+  layers: PartitionLayerState[];
+  palette?: PaletteOutput;
+}
+
+export type Configuration =
+  | XYConfiguration
+  | TableVisConfiguration
+  | PartitionVisConfiguration
+  | MetricVisConfiguration;

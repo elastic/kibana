@@ -41,7 +41,6 @@ export function createMockDatasource(id: string): DatasourceMock {
     initialize: jest.fn((_state?) => {}),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    getCurrentIndexPatternId: jest.fn(),
     toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((_state, _layerId) => {}),
@@ -63,7 +62,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
-    getUsedDataView: jest.fn(),
+    getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
   };

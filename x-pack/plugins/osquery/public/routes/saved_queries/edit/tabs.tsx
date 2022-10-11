@@ -10,12 +10,9 @@ import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import { useKibana } from '../../../common/lib/kibana';
 import type { AddToTimelinePayload } from '../../../timelines/get_add_to_timeline';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
-
-const CASES_OWNER: string[] = [];
 
 interface ResultTabsProps {
   actionId: string;
@@ -38,10 +35,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   addToTimeline,
   addToCase,
 }) => {
-  const { cases } = useKibana().services;
-  const casePermissions = cases.helpers.canUseCases();
-  const CasesContext = cases.ui.getCasesContext();
-
   const tabs = useMemo(
     () => [
       {
@@ -85,16 +78,14 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   );
 
   return (
-    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
-      <EuiTabbedContent
-        // TODO: extend the EuiTabbedContent component to support EuiTabs props
-        // bottomBorder={false}
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
-    </CasesContext>
+    <EuiTabbedContent
+      // TODO: extend the EuiTabbedContent component to support EuiTabs props
+      // bottomBorder={false}
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
   );
 };
 

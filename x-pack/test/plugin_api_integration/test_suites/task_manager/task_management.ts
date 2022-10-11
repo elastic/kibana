@@ -696,9 +696,10 @@ export default function ({ getService }: FtrProviderContext) {
       // disable the task
       await bulkDisable([scheduledTask.id]);
 
+      let disabledTask: SerializedConcreteTaskInstance;
       await retry.try(async () => {
-        const task = await currentTask(scheduledTask.id);
-        expect(task.enabled).to.eql(false);
+        disabledTask = await currentTask(scheduledTask.id);
+        expect(disabledTask.enabled).to.eql(false);
       });
 
       // re-enable the task
@@ -708,7 +709,7 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
-        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(scheduledTask.scheduledAt));
+        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
       });
     });
 

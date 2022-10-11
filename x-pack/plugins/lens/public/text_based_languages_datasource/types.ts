@@ -6,6 +6,8 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeEditorContext } from '../types';
 
 export interface TextBasedLanguagesLayerColumn {
   columnId: string;
@@ -34,6 +36,7 @@ export interface TextBasedLanguagesPersistedState {
 export type TextBasedLanguagesPrivateState = TextBasedLanguagesPersistedState & {
   indexPatternRefs: IndexPatternRef[];
   fieldList: DatatableColumn[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 };
 
 export interface IndexPatternRef {

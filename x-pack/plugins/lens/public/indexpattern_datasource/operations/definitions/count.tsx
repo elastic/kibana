@@ -11,9 +11,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { TimeScaleUnit } from '../../../../common/expressions';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { TimeScaleUnit } from '../../../../common/expressions';
+import type { OperationDefinition, ParamEditorProps } from '.';
+import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField } from '../../../types';
 import {
   getInvalidFieldMessage,
@@ -50,7 +50,7 @@ function ofName(
   timeScale: string | undefined,
   reducedTimeRange: string | undefined
 ) {
-  if (field?.customLabel) {
+  if (field?.customLabel && field?.type !== 'document') {
     return field.customLabel;
   }
 
@@ -248,5 +248,10 @@ To calculate the number of documents that match a specific filter, use \`count(k
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
+    defaultMessage: `
+The total number of documents. When you provide a field, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
+      `,
+  }),
   shiftable: true,
 };

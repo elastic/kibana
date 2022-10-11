@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
+import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
 import * as i18n from '../translations';
 import { ExceptionItemCardHeader } from './header';
 import { fireEvent, render } from '@testing-library/react';
