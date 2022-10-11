@@ -89,7 +89,8 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125033
-  describe('Generating signals from ml anomalies', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/142993
+  describe.skip('Generating signals from ml anomalies', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
