@@ -43,16 +43,15 @@ Use tables to display the following quantitive and qualitative data:
 * Text, such as names, geographic locations, and URLs
 * Plain numbers, such as value amounts, percentages, and dates
 
-Add tables to your dashboard to answer the following questions:
-
-* How many visits did a webpage on my site receive compared to other webpages?
-* What log errors did I receive over the last week?
-* What was my revenue this week compared to last week?
-
 Best practices:
 
 * Priortize the data by ordering columns by level of relevance.
 * Leave adequate spacing between columns and rows to make the table easy to read and the information easy to consume. 
+* Add tables to your dashboard to answer the following questions:
+
+** How many visits did a webpage on my site receive compared to other webpages?
+** What log errors did I receive over the last week?
+** What was my revenue this week compared to last week?
 
 Alternative visualizations:
 
@@ -62,9 +61,13 @@ Alternative visualizations:
 
 [discrete]
 [[supported-visualizations-bar]]
-=== Bar (Giovanni)
+=== Bar
 
-Supported visualizations:
+Bar charts, or bar graphs, display data in rectangular bars, where the height and length from the common baseline are proportional to the values the bars represent. You can display bar charts vertically or horizontally, and if you have many fields, you can use stacked or grouped bar charts. Use bar charts to visually compare the differences between categorical data, such as logs, host names, or days of the week, and are the best option for when you want to be able to detect small changes in the values across categories.
+
+[image]
+
+Supported bar charts:
 
 * Bar horizontal
 * Bar horizontal percentage
@@ -72,6 +75,64 @@ Supported visualizations:
 * Bar vertical
 * Bar vertical percentage
 * Bar vertical stacked
+
+[image]
+
+[cols=2*]
+|===
+
+| *1*
+| *Axis tick label* [Description]
+
+| *2*
+| *Vertical axis* The quantitive axis that represents the scale of a measured value, which is represented by the height of the bars, and displays a set of incremental ticks to guide analysis. In a vertical bar chart, represents categorical data.
+
+| *3*
+| *Grid line* [Description]
+
+| *4*
+| *Bar* Increases from a common baseline where the height corresponds to the categorical data along the vertical axis. In a vertical bar chart, appears along the horizontal access.
+
+| *5*
+| *Baseline* [Description]
+
+| *5*
+| *Horizontal axis* The axis that represents the categorical data that appear as a set of incremental ticks to guide analysis. In a vertical bar chart, represents the scale of a measured value.
+
+| *5*
+| *Tick* A visually aligned, and labeled, category that appears along the corresponding axis.
+|===
+
+[discrete]
+[[supported-visualizations-bar-chart-best-practices]]
+==== Bar chart best practices
+
+Use horizontal bar charts to display long labels, such as IDs and host names. Use vertical bar charts to display a large number of categories. 
+
+[image]
+
+Depending on the amount of intervals and interval size, you can display the bars as discrete ordinal categories, or a continuous histogram. For example, when you want to represent the months of the year, or a six hour time range with one minute intervals. When you display the bars as a continuous histogram, the discrete categories decrease in importance, and are better displayed without boundaries to represent continuity. 
+
+To display hierarchy, apply different colors to the sub categories. For example, to compare the monthly memory usage between two services, apply different colors to the services.
+
+Add bar charts to your dashboard to answer the following types of questions:
+
+* Which are the most frequent response types across my hosts?
+* What are the top five hosts that produce the most error logs?
+* What is the top selling product category?
+* Are my network interface bandwidths used equally? Is the traffic more or less demanding on a specific interface?
+* What deployed services use the most memory?
+* How many hourly logs were ingested last week?
+
+[discrete]
+[[supported-visualizations-bar-chart-alternatives]]
+==== Alternative bar chart visualizations
+
+* *Histogram?*
+
+* *Line* Use line charts when your data contains discrete, but ordinal, categories or intervals. For example, time ranges or age groups. Line charts are a better way to help you understand the trends across the set of ordinal categories, instead of only comparing the trends.
+
+* *Pie chart* Use pie charts to display the data divided into categories, where the sum of the categories represents the whole. For example, the total number of logs divided by possible log types. Pie charts are a better way to help you understand how each category contributes to the whole.
 
 [discrete]
 [[supported-visualizations-goal-and-single-value]]
@@ -137,9 +198,9 @@ Text and values should be self-explanatory and shouldn't require any prior conte
 
 [image]
 
-When the displayed value is the result of applied filters and does not reflect the current timeframe selected on your dashboard, 
-remember to make this explicit. You can use subtitles or <other smaller text name> to clarify this and to inform the user of the choices 
-and calculations that have been made prior. 
+When the displayed value is the result of applied filters and does not reflect the selected dashboard time range, 
+remember to make this explicit. You can use subtitles or <other smaller text name> to inform users of the choices 
+and calculations. 
 
 *Don'ts*
 Don’t rely solely on <micro visualization functionality> or <background visualization functionality> to provide a precise and understandable analysis of data trends. 
