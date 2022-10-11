@@ -31,7 +31,7 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
 
-  const hash = stringify(
+  return stringify(
     url.encodeQuery({
       _g: rison.encode({
         filters: globalFilters || [],
@@ -43,8 +43,6 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
     }),
     { encode: false, sort: false }
   );
-
-  return hash;
 };
 
 /**
@@ -85,10 +83,6 @@ export const useNavigationProps = ({
     () => getCurrentBreadcrumb(history?.location?.search),
     [history?.location?.search]
   );
-  const contextSearchHash = useMemo(
-    () => getContextHash(columns, filterManager),
-    [columns, filterManager]
-  );
 
   const singleDocHref = addBasePath(
     `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
@@ -96,7 +90,7 @@ export const useNavigationProps = ({
   const surDocsHref = addBasePath(
     `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
       rowId
-    )}?${contextSearchHash}`
+    )}?${getContextHash(columns, filterManager)}`
   );
 
   /**
@@ -126,7 +120,7 @@ export const useNavigationProps = ({
 
       history.push({
         pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(String(rowId))}`,
-        search: `?${contextSearchHash}&breadcrumb=${currentBreadcrumb}`,
+        search: `?${getContextHash(columns, filterManager)}&breadcrumb=${currentBreadcrumb}`,
       });
     };
 
