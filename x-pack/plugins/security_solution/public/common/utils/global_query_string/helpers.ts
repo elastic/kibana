@@ -61,6 +61,7 @@ export const useGetInitialUrlParamValue = <State>(urlParamKey: string) => {
     );
 
     const decodedParam = decodeRisonUrlState<State>(param ?? undefined);
+
     return { param, decodedParam };
   }, [urlParamKey]);
 
