@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'remoteClusters', 'indexManagement', 'crossClusterReplication']);
+  const pageObjects = getPageObjects([
+    'common',
+    'remoteClusters',
+    'indexManagement',
+    'crossClusterReplication',
+  ]);
   const security = getService('security');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -45,8 +50,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await remoteEs.indices.create({
           index: 'my-index',
           body: {
-            settings: { number_of_shards: 1, soft_deletes: { enabled: true } }
-          }
+            settings: { number_of_shards: 1, soft_deletes: { enabled: true } },
+          },
         });
         await pageObjects.common.navigateToApp('crossClusterReplication');
         await retry.waitFor('indices table to be visible', async () => {
