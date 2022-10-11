@@ -925,6 +925,34 @@ By default, the Upgrade Assistant flaw is mitigated in all {kib} instances acces
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [float]
+[[deprecations-7.7.0]]
+=== Deprecations
+
+The following functionality is deprecated in 7.7.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.7.0.
+
+[discrete]
+[[deprecation-53010]]
+==== Deprecates authentication settings
+
+*Details* +
+
+Deprecates the `xpack.security.authc.saml.realm` and `xpack.security.authc.saml.maxRedirectURLSize` settings used for {kib} SAML authentication. 
+
+Deprecates the `xpack.security.authc.oidc.realm` settings used for {kib} OpenID Connect authentication. 
+
+For more information, refer to {kibana-pull}53010[#53010].
+
+*Impact* +
+
+* Instead of `xpack.security.authc.saml.realm`, use `xpack.security.authc.providers.saml.<provider-name>.realm`.
+
+* Instead of `xpack.security.authc.saml.maxRedirectURLSize`, use `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`.
+
+* Instead of `xpack.security.authc.oidc.realm`, use `xpack.security.authc.providers.oidc.<provider-name>.realm`.
+
+[float]
 [[known-issues-7.7.0]]
 === Known issues
 
@@ -2595,6 +2623,29 @@ Machine Learning::
 * Data Frame: Remove format from date_histogram configs. {kib-pull}39811[#39811]
 Maps::
 * [Fixes #34662] Hide feature when it has no corresponding term join {kib-pull}36617[#36617]
+
+
+[float]
+[[deprecations-7.3.0]]
+=== Deprecation
+
+The following functionality is deprecated in 7.3.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.3.0.
+
+[discrete]
+[[deprecation-xpack-security-authProviders]]
+==== Deprecates `xpack.security.authProviders` and `xpack.security.public`
+
+*Details:* Deprecates the `xpack.security.authProviders` and `xpack.security.public` settings used for {kib} SAML authentication. For more information, refer to {pull}37346[#37346].
+
+*Impact:* 
+
+When you use the SAML authentication provider, use the following settings:
+
+* Instead of `xpack.security.authProviders`, use `xpack.security.authc.providers`.
+
+* Instead of `xpack.security.public`, use `xpack.security.authc.saml.realm`.
 
 [float]
 [[enhancement-7.3.0]]

@@ -39,6 +39,21 @@ have multiple environments for development and production.
 Import and export also work well when you have a large number
 of objects to update and want to batch the process.
 
+[float]
+==== Compatibility across versions
+
+With each release, {kib} introduces changes to the way saved objects are stored. When importing a saved object, {kib} will run the necessary migrations to ensure that the imported saved objects are compatible with the current version.
+
+However, saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
+
+|=======
+| Exporting version | Importing version | Compatible?
+| 6.7.0 | 6.8.1 | Yes
+| 6.8.1 | 7.3.0 | Yes
+| 7.3.0 | 7.11.1 | Yes
+| 7.11.1 | 7.6.0 | No
+| 6.8.1 | 8.0.0 | No
+|=======
 
 [float]
 ==== Import
@@ -56,8 +71,8 @@ You have two options for exporting saved objects.
 * Select the checkboxes of objects that you want to export, and then click *Export*.
 * Click *Export x objects*, and export objects by type.
 
-This action creates an NDJSON with all your saved objects.  By default,
-the NDJSON includes related objects. Exported dashboards include their associated index patterns.
+This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
+objects. Exported dashboards include their associated index patterns.
 
 [float]
 [role="xpack"]
@@ -69,8 +84,8 @@ and select *Copy to space*. From here, you can select the spaces in which to cop
 You can also select whether to automatically overwrite any conflicts in the target spaces, or
 resolve them manually.
 
-WARNING: The copy operation automatically includes related objects. If you don't want this behavior,
-use the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
+WARNING: The copy operation automatically includes child objects that are related to the saved objects. If you don't want this behavior, use
+the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
 
 [float]

@@ -21,8 +21,6 @@ include::user/index.asciidoc[]
 
 include::accessibility.asciidoc[]
 
-include::limitations.asciidoc[]
-
 include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]

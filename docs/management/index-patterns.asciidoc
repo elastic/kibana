@@ -13,10 +13,19 @@ Once you create an index pattern, you're ready to:
 
 [float]
 [[index-patterns-read-only-access]]
+
 === [xpack]#Read-only access#
 If you have insufficient privileges to create or save index patterns, a read-only
 indicator appears in Kibana. The buttons to create new index patterns or save
 existing index patterns are not visible. For more information, see <<xpack-security-authorization>>.
+
+[float]
+=== Before you begin
+
+* To access the *Index Patterns* view, you must have the {kib} privilege
+`Index Pattern Management`.  To create an index pattern, you must have the {es} privilege
+`view_index_metadata`. To add the privileges, open the main menu, then click *Stack Management > Roles*.
+
 
 [role="screenshot"]
 image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]
@@ -86,6 +95,11 @@ as your index pattern.
 To query across all {es} clusters that have been configured for {ccs},
 use a standalone wildcard for your cluster name in your index
 pattern: `*:logstash-*`.
+
+You can use exclusions to exclude indices that might contain mapping errors.
+To match indices starting with `logstash-`, and exclude those starting with `logstash-old` from 
+all clusters having a name starting with `cluster_`, you can use `cluster_*:logstash-*,cluster*:logstash-old*`.
+To exclude a cluster, use `cluster_*:logstash-*,cluster_one:-*`.
 
 Once an index pattern is configured using the {ccs} syntax, all searches and
 aggregations using that index pattern in {kib} take advantage of {ccs}.

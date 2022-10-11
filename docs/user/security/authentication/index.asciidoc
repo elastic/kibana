@@ -120,6 +120,7 @@ You can also configure both PKI and basic authentication for the same {kib} inst
 
 [source,yaml]
 --------------------------------------------------------------------------------
+server.ssl.clientAuthentication: optional
 xpack.security.authc.providers:
   pki.pki1:
     order: 0
@@ -315,7 +316,11 @@ xpack.security.authc.providers:
     order: 1
 -----------------------------------------------
 
-Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.
+IMPORTANT: {kib} uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. 
+At the end of the Kerberos handshake, {kib} forwards the service ticket to {es}, then {es} unpacks the service ticket and responds with an access and refresh token, which are used for subsequent authentication.
+On every {es} node that {kib} connects to, the keytab file should always contain the HTTP service principal for the {kib} host. 
+The HTTP service principal name must have the `HTTP/kibana.domain.local@KIBANA.DOMAIN.LOCAL` format.
+
 
 [[http-authentication]]
 ==== HTTP authentication

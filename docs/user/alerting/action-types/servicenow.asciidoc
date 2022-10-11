@@ -2,7 +2,7 @@
 [[servicenow-action-type]]
 === ServiceNow action
 
-The ServiceNow action type uses the https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI[V2 Table API] to create ServiceNow incidents.
+The {sn} action type uses the https://docs.servicenow.com/bundle/sandiego-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create {sn} incidents. The connector can be used for rule actions and cases.  
 
 [float]
 [[servicenow-connector-configuration]]
