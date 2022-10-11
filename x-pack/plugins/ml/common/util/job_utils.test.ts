@@ -732,7 +732,7 @@ describe('getFiltersForDSLQuery', () => {
       expect(result).toBe(true);
     });
 
-    test('returns true for default lens created query1', () => {
+    test('returns true for default lens created query variation 1', () => {
       const result = isKnownEmptyQuery({
         bool: {
           must: [
@@ -746,7 +746,7 @@ describe('getFiltersForDSLQuery', () => {
       expect(result).toBe(true);
     });
 
-    test('returns true for default lens created query3', () => {
+    test('returns true for default lens created query variation 2', () => {
       const result = isKnownEmptyQuery({
         bool: {
           must: [
@@ -759,14 +759,14 @@ describe('getFiltersForDSLQuery', () => {
       expect(result).toBe(true);
     });
 
-    test('returns true for default lens created query4', () => {
+    test('returns true for QA framework created query4', () => {
       const result = isKnownEmptyQuery({
         match_all: {},
       });
       expect(result).toBe(true);
     });
 
-    test('returns true for default lens created query5', () => {
+    test('returns false for query with match_phrase', () => {
       const result = isKnownEmptyQuery({
         match_phrase: {
           region: 'us-east-1',
@@ -775,7 +775,7 @@ describe('getFiltersForDSLQuery', () => {
       expect(result).toBe(false);
     });
 
-    test('returns true for default lens created query6', () => {
+    test('returns false for query with match_phrase in should', () => {
       const result = isKnownEmptyQuery({
         bool: {
           should: [
