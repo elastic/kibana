@@ -19,7 +19,7 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { MONITOR_SUCCESS_LABEL, MY_FIRST_MONITOR, SimpleFormData } from './simple_monitor_form';
+import { MONITOR_SUCCESS_LABEL, SimpleFormData } from './simple_monitor_form';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
@@ -39,7 +39,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
   await page.goto('${urls}');
 });`,
         [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-        [ConfigKey.NAME]: MY_FIRST_MONITOR,
+        [ConfigKey.NAME]: urls,
         [ConfigKey.LOCATIONS]: locations,
         [ConfigKey.URLS]: urls,
       },

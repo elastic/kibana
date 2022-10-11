@@ -92,13 +92,6 @@ export const SimpleMonitorForm = () => {
   );
 };
 
-export const MY_FIRST_MONITOR = i18n.translate(
-  'xpack.synthetics.monitorManagement.myFirstMonitor',
-  {
-    defaultMessage: 'My first monitor',
-  }
-);
-
 export const WEBSITE_URL_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.websiteUrlLabel',
   {
