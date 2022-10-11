@@ -7,10 +7,11 @@
 
 import React, { useEffect, useState } from 'react';
 import type { FunctionComponent, ReactElement } from 'react';
+import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-type TourType = 'addIntegrationButton' | 'integrationsList';
+type TourType = 'addIntegrationButton' | 'integrationsList' | 'agentModalButton';
 const getTourConfig = (packageKey: string, tourType: TourType) => {
   if (packageKey.startsWith('endpoint') && tourType === 'addIntegrationButton') {
     return {
@@ -23,19 +24,52 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
       }),
     };
   }
+
+  if (packageKey.startsWith('kubernetes') && tourType === 'addIntegrationButton') {
+    return {
+      title: i18n.translate('xpack.fleet.guidedOnboardingTour.kubernetesButton.tourTitle', {
+        defaultMessage: 'Add Kubernetes',
+      }),
+      description: i18n.translate(
+        'xpack.fleet.guidedOnboardingTour.kubernetesButton.tourDescription',
+        {
+          defaultMessage:
+            'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+        }
+      ),
+    };
+  }
+
+  if (packageKey.startsWith('kubernetes') && tourType === 'agentModalButton') {
+    return {
+      title: i18n.translate('xpack.fleet.guidedOnboardingTour.agentModalButton.tourTitle', {
+        defaultMessage: 'Add Elastic Agent',
+      }),
+      description: i18n.translate(
+        'xpack.fleet.guidedOnboardingTour.agentModalButton.tourDescription',
+        {
+          defaultMessage:
+            'In order to proceed with your setup, add Elastic Agent to your hosts now.',
+        }
+      ),
+    };
+  }
+
   return null;
 };
 export const WithGuidedOnboardingTour: FunctionComponent<{
   packageKey: string;
-  isGuidedOnboardingActive: boolean;
+  isTourVisible: boolean;
   tourType: TourType;
+  tourPosition?: EuiTourStepProps['anchorPosition'];
   children: ReactElement;
-}> = ({ packageKey, isGuidedOnboardingActive, tourType, children }) => {
+  tourOffset?: EuiTourStepProps['offset'];
+}> = ({ packageKey, isTourVisible, tourType, children, tourPosition, tourOffset }) => {
   const [isGuidedOnboardingTourOpen, setIsGuidedOnboardingTourOpen] =
-    useState<boolean>(isGuidedOnboardingActive);
+    useState<boolean>(isTourVisible);
   useEffect(() => {
-    setIsGuidedOnboardingTourOpen(isGuidedOnboardingActive);
-  }, [isGuidedOnboardingActive]);
+    setIsGuidedOnboardingTourOpen(isTourVisible);
+  }, [isTourVisible]);
   const config = getTourConfig(packageKey, tourType);
 
   return config ? (
@@ -46,8 +80,9 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       onFinish={() => setIsGuidedOnboardingTourOpen(false)}
       step={1}
       stepsTotal={1}
+      offset={tourOffset}
       title={config.title}
-      anchorPosition="rightUp"
+      anchorPosition={tourPosition ? tourPosition : 'rightUp'}
       footerAction={
         <EuiButton onClick={() => setIsGuidedOnboardingTourOpen(false)} size="s" color="success">
           {i18n.translate('xpack.fleet.guidedOnboardingTour.nextButtonLabel', {
