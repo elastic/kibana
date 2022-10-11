@@ -29,6 +29,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/stack/email'));
     loadTestFile(require.resolve('./connector_types/stack/es_index'));
     loadTestFile(require.resolve('./connector_types/stack/es_index_preconfigured'));
+    loadTestFile(require.resolve('./connector_types/stack/opsgenie'));
     loadTestFile(require.resolve('./connector_types/stack/pagerduty'));
     loadTestFile(require.resolve('./connector_types/stack/server_log'));
     loadTestFile(require.resolve('./connector_types/stack/slack'));

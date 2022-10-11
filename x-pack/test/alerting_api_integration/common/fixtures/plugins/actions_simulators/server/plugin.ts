@@ -26,6 +26,7 @@ import { initPlugin as initXmatters } from './xmatters_simulation';
 export const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
+  OPSGENIE = 'opsgenie',
   PAGERDUTY = 'pagerduty',
   SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',

@@ -6,6 +6,7 @@
  */
 
 import http from 'http';
+import { getDataFromPostRequest } from './data_handler';
 
 /**
  * This server records the data from a create incident request. It only saves the most recent request. When building tests,
@@ -28,7 +29,7 @@ export class RecordingServiceNowSimulator {
   }
 
   private handler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-    const data = await getData(request);
+    const data = await getDataFromPostRequest(request);
     const pathName = request.url!;
 
     if (isCreateRequest(pathName)) {
@@ -62,7 +63,7 @@ const sendResponse = (response: http.ServerResponse, data: any) => {
 };
 
 const requestHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-  const data: Record<string, unknown> = await getData(request);
+  const data: Record<string, unknown> = await getDataFromPostRequest(request);
 
   return handleSendingResponse(request, response, data);
 };
@@ -229,20 +230,4 @@ const handleSendingResponse = async (
   response.statusCode = 400;
   response.setHeader('Content-Type', 'application/json');
   response.end('Not supported endpoint to request servicenow simulator');
-};
-
-const getData = async (request: http.IncomingMessage) => {
-  let data: Record<string, unknown> = {};
-
-  if (request.method === 'POST') {
-    const buffers = [];
-
-    for await (const chunk of request) {
-      buffers.push(chunk);
-    }
-
-    data = JSON.parse(Buffer.concat(buffers).toString());
-  }
-
-  return data;
 };
