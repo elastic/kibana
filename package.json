@@ -1243,7 +1243,7 @@
     "babel-plugin-require-context-hook": "^1.0.0",
     "babel-plugin-styled-components": "^2.0.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "backport": "^8.9.4",
+    "backport": "^8.9.7",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
     "chokidar": "^3.5.3",

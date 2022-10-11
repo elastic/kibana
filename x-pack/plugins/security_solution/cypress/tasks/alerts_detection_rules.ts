@@ -59,7 +59,11 @@ import {
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
+import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
+
+import { goToRuleEditSettings } from './rule_details';
+import { goToActionsStepTab } from './create_new_rule';
 
 export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -179,9 +183,7 @@ export const loadPrebuiltDetectionRules = () => {
  * load prebuilt rules by clicking button on page header
  */
 export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click().should('not.exist');
 };
 
 export const openIntegrationsPopover = () => {
@@ -386,4 +388,12 @@ export const cancelConfirmationModal = () => {
 
 export const clickErrorToastBtn = () => {
   cy.get(TOASTER_ERROR_BTN).click();
+};
+
+export const goToEditRuleActionsSettingsOf = (name: string) => {
+  goToTheRuleDetailsOf(name);
+  goToRuleEditSettings();
+  // wait until first step loads completely. Otherwise cypress stuck at the first edit page
+  cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
+  goToActionsStepTab();
 };
