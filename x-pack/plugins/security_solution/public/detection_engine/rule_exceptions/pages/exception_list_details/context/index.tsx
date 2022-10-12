@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, createContext, useContext, useMemo } from 'react';
+import React, { useState, createContext, useContext, useMemo, useCallback } from 'react';
 import type { Dispatch } from 'react';
 
 import type { ExceptionListItemSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -13,9 +13,12 @@ import type { Pagination } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core/public';
 import type { RuleReferences } from '@kbn/securitysolution-exception-list-components';
+import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useToasts, useKibana } from '../../../../../common/lib/kibana';
+import * as i18n from '../translations';
 
 interface ExceptionListDetailsContextProps {
+  viewerStatus: string;
   exceptionListReferences: RuleReferences;
   toasts?: IToasts;
   http: HttpSetup | undefined;
@@ -28,8 +31,11 @@ interface ExceptionListDetailsContextProps {
   setPagination: Dispatch<React.SetStateAction<Pagination>>;
   setIsReadOnly: Dispatch<React.SetStateAction<boolean>>;
   setExceptionListReferences: Dispatch<React.SetStateAction<RuleReferences | null>>;
+  setViewerStatus: Dispatch<React.SetStateAction<ViewerStatus | ''>>;
+  handleErrorStatus: (error: Error, title?: string, description?: string) => void;
 }
 const defaultState: ExceptionListDetailsContextProps = {
+  viewerStatus: ViewerStatus.LOADING,
   exceptionListReferences: {},
   exceptions: [],
   isLoading: false,
@@ -41,6 +47,8 @@ const defaultState: ExceptionListDetailsContextProps = {
   setPagination: () => null,
   setIsReadOnly: () => {},
   setExceptionListReferences: () => {},
+  setViewerStatus: () => {},
+  handleErrorStatus: (error, title, description) => {},
 };
 
 const ExceptionListDetailsContext = createContext<ExceptionListDetailsContextProps>(defaultState);
@@ -54,35 +62,61 @@ export const ExceptionListDetailsProvider = ({ children }: ExceptionListDetailsP
   const { services } = useKibana();
   const { http } = services;
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [exceptions, setExceptions] = useState([]);
-  const [exceptionListReferences, setExceptionListReferences] = useState([]);
-  const [pagination, setPagination] = useState({});
-  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(
+    defaultState.viewerStatus
+  );
 
+  const [isLoading, setIsLoading] = useState(defaultState.isLoading);
+  const [exceptions, setExceptions] = useState(defaultState.exceptions);
+  const [exceptionListReferences, setExceptionListReferences] = useState(
+    defaultState.exceptionListReferences
+  );
+  const [pagination, setPagination] = useState(defaultState.pagination);
+  const [isReadOnly, setIsReadOnly] = useState(defaultState.isReadOnly);
+
+  const handleErrorStatus = useCallback(
+    (error: Error, errorTitle?: string, errorDescription?: string) => {
+      toasts?.addError(error, {
+        title: errorTitle || i18n.EXCEPTION_ERROR_TITLE,
+        toastMessage: errorDescription || i18n.EXCEPTION_ERROR_DESCRIPTION,
+      });
+      setViewerStatus(ViewerStatus.ERROR);
+    },
+    [setViewerStatus, toasts]
+  );
   const providerValue = useMemo(
     () => ({
       http,
+      viewerStatus,
       isLoading,
       pagination,
       exceptions,
       isReadOnly,
       toasts,
       exceptionListReferences,
-
+      setViewerStatus,
       setExceptions,
       setPagination,
       setIsLoading,
       setIsReadOnly,
       setExceptionListReferences,
+      handleErrorStatus,
     }),
-    [exceptionListReferences, exceptions, http, isLoading, isReadOnly, pagination, toasts]
+    [
+      exceptionListReferences,
+      exceptions,
+      http,
+      isLoading,
+      isReadOnly,
+      pagination,
+      toasts,
+      viewerStatus,
+      handleErrorStatus,
+    ]
   );
 
   return (
-    <ExceptionListDetailsContext.Provider
-      value={providerValue as unknown as ExceptionListDetailsContextProps}
-    >
+    <ExceptionListDetailsContext.Provider value={providerValue as ExceptionListDetailsContextProps}>
       {children}
     </ExceptionListDetailsContext.Provider>
   );

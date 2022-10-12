@@ -12,7 +12,10 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
+import type {
+  GetExceptionItemProps,
+  RuleReferences,
+} from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import {
   prepareFetchExceptionItemsParams,
@@ -25,6 +28,7 @@ import { useExceptionListDetailsContext } from '../context';
 
 export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
   const {
+    viewerStatus,
     isReadOnly,
     toasts,
     http,
@@ -34,24 +38,15 @@ export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
     setExceptions,
     setPagination,
     setExceptionListReferences,
+    setViewerStatus,
+    handleErrorStatus,
   } = useExceptionListDetailsContext();
-  const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(ViewerStatus.LOADING);
 
   const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
 
-  const handleErrorStatus = useCallback(
-    (error) => {
-      toasts?.addError(error, {
-        title: i18n.EXCEPTION_ERROR_TITLE,
-        toastMessage: i18n.EXCEPTION_ERROR_DESCRIPTION,
-      });
-      setViewerStatus(ViewerStatus.ERROR);
-    },
-    [toasts]
-  );
   const getReferences = useCallback(async () => {
     try {
-      const result = await getExceptionItemsReferences(list);
+      const result: RuleReferences = await getExceptionItemsReferences(list);
       setExceptionListReferences(result);
     } catch (error) {
       handleErrorStatus(error);
@@ -69,7 +64,7 @@ export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
         else setViewerStatus(!dataLength ? ViewerStatus.EMPTY : '');
       }, 200);
     },
-    [setPagination]
+    [setPagination, setViewerStatus]
   );
 
   const fetchItems = useCallback(
@@ -115,7 +110,7 @@ export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
       setViewerStatus(ViewerStatus.SEARCHING);
       fetchItems(options, ViewerStatus.EMPTY_SEARCH);
     },
-    [fetchItems]
+    [fetchItems, setViewerStatus]
   );
 
   const onAddExceptionClick = () => {};
@@ -134,7 +129,7 @@ export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
         handleErrorStatus(error);
       }
     },
-    [http, toasts, fetchItems, handleErrorStatus]
+    [http, toasts, fetchItems, handleErrorStatus, setViewerStatus]
   );
   const onEditExceptionItem = (exception: ExceptionListItemSchema) => {};
   const onCreateExceptionListItem = useCallback(() => {}, []);

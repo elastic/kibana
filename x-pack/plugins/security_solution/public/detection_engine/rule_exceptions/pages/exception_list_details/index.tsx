@@ -10,10 +10,12 @@ import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types
 import { ExceptionListDetailsProvider } from './context';
 import { ExceptionListDetailsComponent } from './exception_list_details';
 
-export const ExceptionListDetails = memo(({ list }: { list: ExceptionListSchema }) => (
-  <ExceptionListDetailsProvider>
-    <ExceptionListDetailsComponent list={list} />
-  </ExceptionListDetailsProvider>
-));
+export const ExceptionListDetails = memo(
+  ({ list, isReadOnly = false }: { list: ExceptionListSchema; isReadOnly: boolean }) => (
+    <ExceptionListDetailsProvider>
+      <ExceptionListDetailsComponent list={list} isReadOnly={isReadOnly} />
+    </ExceptionListDetailsProvider>
+  )
+);
 
 ExceptionListDetails.displayName = 'ExceptionListDetails';

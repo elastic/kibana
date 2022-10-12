@@ -66,7 +66,7 @@ export interface Rule {
 export interface RuleReference {
   name: string;
   id: string;
-  rules: Rule[];
+  referenced_rules: Rule[];
   listId?: string;
 }
 

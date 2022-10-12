@@ -4,47 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Pagination } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
 
 import type {
   Pagination as ServerPagination,
   ExceptionListSchema,
   ListArray,
   NamespaceType,
-  UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  deleteExceptionListById,
   deleteExceptionListItemById,
+  exportExceptionList,
   fetchExceptionListsItemsByListIds,
   updateExceptionList,
 } from '@kbn/securitysolution-list-api';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 import type {
   GetExceptionItemProps,
-  RuleReference,
   RuleReferences,
 } from '@kbn/securitysolution-exception-list-components';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { findRuleExceptionReferences } from '../../../../../detections/containers/detection_engine/rules';
-
-interface FetchItemsProps {
-  http: HttpSetup | undefined;
-  listIds: string[];
-  namespaceTypes: NamespaceType[];
-  pagination: Pagination | undefined;
-  search?: string;
-  filter?: string;
-}
-interface DeleteExceptionItem {
-  id: string;
-  namespaceType: NamespaceType;
-  http: HttpSetup | undefined;
-}
-
-interface UpdateExceptionList {
-  http: HttpSetup | undefined;
-  list: UpdateExceptionListSchema;
-}
+import type {
+  DeleteExceptionItem,
+  DeleteExceptionList,
+  ExportExceptionList,
+  FetchItems,
+  UpdateExceptionList,
+} from './types';
 
 export const prepareFetchExceptionItemsParams = (
   exceptions: ListArray | null,
@@ -78,7 +65,7 @@ export const fetchListExceptionItems = async ({
   http,
   pagination,
   search,
-}: FetchItemsProps) => {
+}: FetchItems) => {
   try {
     const abortCtrl = new AbortController();
     const {
@@ -120,9 +107,7 @@ export const fetchListExceptionItems = async ({
   }
 };
 
-export const getExceptionItemsReferences = async (
-  list: ExceptionListSchema
-): Promise<RuleReferences> => {
+export const getExceptionItemsReferences = async (list: ExceptionListSchema) => {
   try {
     const abortCtrl = new AbortController();
 
@@ -134,18 +119,9 @@ export const getExceptionItemsReferences = async (
       })),
       signal: abortCtrl.signal,
     });
-    return references.reduce<RuleReferences>((acc, result) => {
-      const [[key, value]] = Object.entries(result);
 
-      const reference: RuleReference = {
-        name: value.name,
-        id: value.id,
-        rules: value.referenced_rules,
-        listId: value.list_id,
-      };
-      acc[key] = reference;
-
-      return acc;
+    return references.reduce<RuleReferences>((acc, reference) => {
+      return { ...acc, ...reference } as RuleReferences;
     }, {});
   } catch (error) {
     throw new Error(error);
@@ -166,19 +142,43 @@ export const deleteExceptionListItem = async ({ id, namespaceType, http }: Delet
   }
 };
 
-export const updateExceptionListDetails = async ({ list, http }: UpdateExceptionList) => {
+export const updateList = async ({ list, http }: UpdateExceptionList) => {
   try {
     const abortCtrl = new AbortController();
-
-    const data = await updateExceptionList({
+    await updateExceptionList({
       http: http as HttpSetup,
       list,
       signal: abortCtrl.signal,
     });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
-    return {
-      data,
-    };
+export const exportList = async ({ id, listId, http, namespaceType }: ExportExceptionList) => {
+  try {
+    const abortCtrl = new AbortController();
+    return await exportExceptionList({
+      id,
+      http: http as HttpSetup,
+      listId,
+      signal: abortCtrl.signal,
+      namespaceType,
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const deleteList = async ({ id, http, namespaceType }: DeleteExceptionList) => {
+  try {
+    const abortCtrl = new AbortController();
+    await deleteExceptionListById({
+      id,
+      http: http as HttpSetup,
+      signal: abortCtrl.signal,
+      namespaceType,
+    });
   } catch (error) {
     throw new Error(error);
   }

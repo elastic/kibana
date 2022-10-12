@@ -94,7 +94,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             color: 'primary',
             'aria-current': false,
             href: '#',
-            onClick: (e) => e.preventDefault(),
+            onClick: (e) => e.preventDefault(), // TODO get all list link
           },
         ]}
       />

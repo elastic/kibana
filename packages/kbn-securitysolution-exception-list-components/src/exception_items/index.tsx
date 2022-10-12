@@ -112,7 +112,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
                   listType={listType}
                   ruleReferences={
                     Object.keys(ruleReferences).length && ruleReferences[exception.list_id]
-                      ? ruleReferences[exception.list_id].rules
+                      ? ruleReferences[exception.list_id].referenced_rules
                       : []
                   }
                   editActionLabel={editActionLabel}

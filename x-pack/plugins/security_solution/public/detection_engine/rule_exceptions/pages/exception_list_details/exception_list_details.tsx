@@ -7,8 +7,13 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { ExceptionListHeader } from '@kbn/securitysolution-exception-list-components';
+import {
+  EmptyViewerState,
+  ExceptionListHeader,
+  ViewerStatus,
+} from '@kbn/securitysolution-exception-list-components';
 
+import { AutoDownload } from '../../../../common/components/auto_download/auto_download';
 import { ListWithSearch } from './list_with_search';
 import { useManageExceptionListDetails } from './hooks/use_manage_exception_list_details';
 import type { ExceptionListDetailsComponentProps } from './types';
@@ -17,8 +22,16 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   isReadOnly = false,
   list,
 }) => {
-  const { listName, listDescription, listId, onEditListDetails, onExportList, onDeleteList } =
-    useManageExceptionListDetails({ isReadOnly, list });
+  const {
+    exportedList,
+    viewerStatus,
+    listName,
+    listDescription,
+    listId,
+    onEditListDetails,
+    onExportList,
+    onDeleteList,
+  } = useManageExceptionListDetails({ isReadOnly, list });
   return (
     <>
       <ExceptionListHeader
@@ -30,7 +43,14 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         onExportList={onExportList}
         onDeleteList={onDeleteList}
       />
-      <ListWithSearch list={list} />
+      {viewerStatus === ViewerStatus.ERROR ? (
+        <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />
+      ) : (
+        <>
+          <AutoDownload blob={exportedList} name={listName} />
+          <ListWithSearch list={list} />
+        </>
+      )}
     </>
   );
 };
