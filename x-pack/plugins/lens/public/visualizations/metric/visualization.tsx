@@ -31,9 +31,9 @@ import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
-import { FormatSelectorOptions } from '../../indexpattern_datasource/dimension_panel/format_selector';
+import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
+import { FormBasedLayer } from '../../datasources/form_based/types';
 import { toExpression } from './to_expression';
-import { IndexPatternLayer } from '../../indexpattern_datasource/types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -73,7 +73,7 @@ export interface MetricVisualizationState {
 
 interface MetricDatasourceState {
   [prop: string]: unknown;
-  layers: IndexPatternLayer[];
+  layers: FormBasedLayer[];
 }
 
 export interface MetricSuggestion extends Suggestion {

@@ -34,6 +34,7 @@ import {
   XYVisStatePre850,
   VisState850,
   LensDocShape850,
+  LensDocShape860,
 } from './types';
 import { DOCUMENT_FIELD_NAME, LegacyMetricState } from '../../common';
 import { isPartitionShape } from '../../common/visualizations';
@@ -475,6 +476,22 @@ export const commonMigrateMetricIds = (
   newAttributes.visualizationType = typeMappings[attributes.visualizationType];
 
   return newAttributes;
+};
+
+export const commonMigrateIndexPatternDatasource = (
+  attributes: LensDocShape850<unknown>
+): LensDocShape860<unknown> => {
+  const newAttrs = {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        formBased: attributes.state.datasourceStates.indexpattern,
+      },
+    },
+  };
+
+  return newAttrs;
 };
 
 export const commonMigratePartitionChartGroups = (

@@ -51,6 +51,13 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   geo: 'Geo',
 };
 
+// featured integrations will be brought to the top of the search results for
+// a given category. Integrations are displayed in the order of the array.
+export const FEATURED_INTEGRATIONS_BY_CATEGORY = {
+  security: ['endpoint', 'cloud_security_posture', 'network_traffic'],
+  '': ['apm', 'endpoint', 'web_crawler'], // no category selected
+};
+
 /**
  * A category applicable to an Integration.
  */
