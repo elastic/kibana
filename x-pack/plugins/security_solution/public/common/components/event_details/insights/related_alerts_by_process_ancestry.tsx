@@ -98,6 +98,8 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
       );
     }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId]);
 
+    const betaBadge = useMemo(() => <EuiBetaBadge size="s" label={BETA} color="subdued" />, []);
+
     return (
       <InsightAccordion
         prefix="RelatedAlertsByProcessAncestry"
@@ -110,7 +112,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         }
         renderContent={renderContent}
         onToggle={onToggle}
-        extraAction={<EuiBetaBadge size="s" label={BETA} color="subdued" />}
+        extraAction={betaBadge}
       />
     );
   }
