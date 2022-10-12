@@ -125,8 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await button.click();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
@@ -153,7 +152,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(canEdit).to.be(false);
     });
 
-    it('should convert sibling pipeline aggregation with terms', async () => {
+    it('should convert parent pipeline aggregation with terms', async () => {
       await visualBuilder.createNewAgg();
 
       await visualBuilder.selectAggType('Cumulative Sum', 1);
@@ -167,8 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
@@ -178,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should convert parent pipeline aggregation with terms', async () => {
+    it('should convert sibling pipeline aggregation with terms', async () => {
       await visualBuilder.createNewAgg();
 
       await visualBuilder.selectAggType('Overall Average', 1);
@@ -192,8 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);

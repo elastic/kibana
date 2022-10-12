@@ -333,7 +333,8 @@ export const createOtherBucketPostFlightRequest = (
     searchSource,
     inspectorRequestAdapter,
     abortSignal,
-    searchSessionId
+    searchSessionId,
+    disableShardFailureWarning
   ) => {
     if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
@@ -347,6 +348,7 @@ export const createOtherBucketPostFlightRequest = (
         nestedSearchSource.fetch$({
           abortSignal,
           sessionId: searchSessionId,
+          disableShardFailureWarning,
           inspector: {
             adapter: inspectorRequestAdapter,
             title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
