@@ -6,12 +6,13 @@
  */
 
 import uuid from 'uuid';
+
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 
-import { SERVER_APP_ID } from '../../../../../../common/constants';
-import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { SERVER_APP_ID } from '../../../../common/constants';
+import type { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
 import { duplicateExceptions } from './duplicate_exceptions';
 
 const DUPLICATE_TITLE = i18n.translate(
