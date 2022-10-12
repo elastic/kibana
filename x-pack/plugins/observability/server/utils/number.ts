@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './indicators';
-export * from './error_budget';
+const SIX_DIGITS = 1000000;
+
+export function toHighPrecision(value: number): number {
+  return Math.round(value * SIX_DIGITS) / SIX_DIGITS;
+}
