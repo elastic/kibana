@@ -30,6 +30,7 @@ export const serviceApiKeyPrivileges = {
         'view_index_metadata',
         'create_doc',
         'auto_configure',
+        'read',
       ] as SecurityIndexPrivilege[],
     },
   ],
