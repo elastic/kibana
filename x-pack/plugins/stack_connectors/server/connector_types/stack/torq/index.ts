@@ -159,7 +159,6 @@ export async function executor(
   const token = secrets.token;
 
   const axiosInstance = axios.create();
-  console.log("token: %s", token);
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
