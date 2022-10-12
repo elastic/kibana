@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { act, waitFor, fireEvent } from '@testing-library/react';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
-import { PolicyList } from './policy_list';
-import { sendBulkGetAgentPolicyList } from '../../../services/policies/ingest';
-import type { GetPolicyListResponse } from '../types';
-import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
-import { APP_UI_ID } from '../../../../../common/constants';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
+import { PolicyList } from '../policy_list';
+import { sendBulkGetAgentPolicyList } from '../../../../services/policies/ingest';
+import type { GetPolicyListResponse } from '../../types';
+import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
+import { APP_UI_ID } from '../../../../../../common/constants';
 
 jest.mock('../../../services/policies/policies');
 jest.mock('../../../services/policies/ingest');
@@ -119,14 +119,12 @@ describe('When on the policy list page', () => {
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139778
-    it.skip('should show the correct endpoint count', async () => {
+    it('should show the correct endpoint count', async () => {
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink');
       expect(endpointCount[0].textContent).toBe('4');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/140153
-    it.skip('endpoint count link should navigate to the endpoint list filtered by policy', () => {
+    it('endpoint count link should navigate to the endpoint list filtered by policy', () => {
       const policyId = policies.items[0].id;
       const filterByPolicyQuery = `?admin_query=(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
       const backLink = {
@@ -153,8 +151,7 @@ describe('When on the policy list page', () => {
       render();
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/139207
-  describe.skip('pagination', () => {
+  describe('pagination', () => {
     beforeEach(async () => {
       getPackagePolicies.mockImplementation(({ page, perPage }) => {
         // # policies = 100 to trigger UI to show pagination
@@ -190,8 +187,7 @@ describe('When on the policy list page', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139196
-    it.skip('should pass the correct pageSize value to the api', async () => {
+    it('should pass the correct pageSize value to the api', async () => {
       await waitFor(() => {
         expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
       });
@@ -212,8 +208,7 @@ describe('When on the policy list page', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139207
-    it.skip('should call the api with the initial pagination values taken from the url', async () => {
+    it('should call the api with the initial pagination values taken from the url', async () => {
       act(() => {
         history.push('/administration/policies?page=3&pageSize=50');
       });
