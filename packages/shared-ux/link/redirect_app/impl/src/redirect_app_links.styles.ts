@@ -7,11 +7,10 @@
  */
 
 export const RedirectAppLinksStyles = () => {
-    return {
-        'align-items': 'flex-start',
-        display: 'flex',
-        flex: 1,
-        'flex-direction': 'column',
-    };
+  return {
+    'align-items': 'flex-start',
+    display: 'flex',
+    flex: 1,
+    'flex-direction': 'column',
   };
-  
+};
