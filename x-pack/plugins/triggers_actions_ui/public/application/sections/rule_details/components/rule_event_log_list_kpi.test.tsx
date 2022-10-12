@@ -71,7 +71,7 @@ describe('rule_event_log_list_kpi', () => {
     ).toEqual('--');
     expect(
       wrapper
-        .find('[data-test-subj="ruleEventLogKpi-unknownOutcome"] .euiStat__title')
+        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
         .first()
         .text()
     ).toEqual('--');
