@@ -702,6 +702,36 @@ describe('IndexPattern Data Panel', () => {
       ).toBe('1 available field. 2 empty fields. 0 meta fields.');
     });
 
+    it("should trigger showNoDataPopover if fields don't have data", async () => {
+      const props = testProps({
+        currentIndexPatternId: 'a',
+      });
+
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+        return {
+          existingFieldNames: [],
+        };
+      });
+
+      let inst: ReactWrapper;
+
+      await act(async () => {
+        inst = await mountWithIntl(<IndexPatternDataPanel {...props} />);
+        await inst.update();
+      });
+
+      await inst!.update();
+
+      expect(defaultProps.showNoDataPopover).toHaveBeenCalled();
+
+      expect(
+        inst!
+          .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
+          .first()
+          .text()
+      ).toBe('0 available fields. 5 empty fields. 0 meta fields.');
+    });
+
     it("should default to empty dsl if query can't be parsed", async () => {
       const props = testProps({
         currentIndexPatternId: 'a',
