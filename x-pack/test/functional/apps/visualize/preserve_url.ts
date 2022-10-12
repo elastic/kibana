@@ -9,21 +9,32 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'spaceSelector', 'visChart']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const kibanaServer = getService('kibanaServer');
+  const spacesService = getService('spaces');
 
   describe('preserve url', function () {
-    before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/multi_space');
+    const anotherSpace = 'another-space';
+
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space_default_space'
+      );
+      await spacesService.create({ id: anotherSpace, name: 'Another Space' });
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space_another_space',
+        { space: anotherSpace }
+      );
     });
 
-    after(function () {
-      return esArchiver.unload('x-pack/test/functional/es_archives/spaces/multi_space');
+    after(async () => {
+      await spacesService.delete(anotherSpace);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('goes back to last opened url', async function () {
+    it('goes back to last opened url', async () => {
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.openSavedVisualization('A Pie');
       await PageObjects.common.navigateToApp('home');

@@ -14,17 +14,19 @@ import type {
 } from '@kbn/core/server';
 
 import { PLUGIN_ID } from '../common/constants';
-
-import { BlobStorageService } from './blob_storage_service';
-import { FileServiceFactory } from './file_service';
-import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
 import {
   setFileKindsRegistry,
   getFileKindsRegistry,
   FileKindsRegistryImpl,
-} from './file_kinds_registry';
+} from '../common/file_kinds_registry';
+
+import { BlobStorageService } from './blob_storage_service';
+import { FileServiceFactory } from './file_service';
+import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
+
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
-import { registerRoutes } from './routes';
+import { registerRoutes, registerFileKindRoutes } from './routes';
+import { Counters, registerUsageCollector } from './usage';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
@@ -35,9 +37,13 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: FilesPluginSetupDependencies): FilesSetup {
-    FileServiceFactory.setup(core.savedObjects);
-    this.securitySetup = deps.security;
+  public setup(
+    core: CoreSetup,
+    { security, usageCollection }: FilesPluginSetupDependencies
+  ): FilesSetup {
+    const usageCounter = usageCollection?.createUsageCounter(PLUGIN_ID);
+    FileServiceFactory.setup(core.savedObjects, usageCounter);
+    this.securitySetup = security;
 
     core.http.registerRouteHandlerContext<FilesRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
@@ -47,6 +53,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
             asCurrentUser: () => this.fileServiceFactory!.asScoped(req),
             asInternalUser: () => this.fileServiceFactory!.asInternal(),
             logger: this.logger.get('files-routes'),
+            usageCounter: usageCounter
+              ? (counter: Counters) => usageCounter.incrementCounter({ counterName: counter })
+              : undefined,
           },
         };
       }
@@ -54,7 +63,15 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
 
     const router: FilesRouter = core.http.createRouter();
     registerRoutes(router);
-    setFileKindsRegistry(new FileKindsRegistryImpl(router));
+    setFileKindsRegistry(
+      new FileKindsRegistryImpl((fk) => {
+        registerFileKindRoutes(router, fk);
+      })
+    );
+    registerUsageCollector({
+      usageCollection,
+      getFileService: () => this.fileServiceFactory?.asInternal(),
+    });
 
     return {
       registerFileKind(fileKind) {

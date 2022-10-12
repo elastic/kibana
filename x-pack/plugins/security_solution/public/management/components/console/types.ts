@@ -12,7 +12,11 @@ import type { CommonProps } from '@elastic/eui';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
-import type { ParsedArgData, ParsedCommandInterface } from './service/parsed_command_input';
+import type {
+  ParsedArgData,
+  ParsedCommandInterface,
+  PossibleArgDataTypes,
+} from './service/parsed_command_input';
 
 export interface CommandArgs {
   [longName: string]: {
@@ -54,9 +58,13 @@ export interface CommandDefinition<TMeta = any> {
    */
   HelpComponent?: CommandExecutionComponent;
   /**
-   * If defined, the button to add to the text bar will be disabled.
+   * If defined, the button to add to the text bar will be disabled and the user will not be able to use this command if entered into the console.
    */
   helpDisabled?: boolean;
+  /**
+   * If defined, the command will be hidden from in the Help menu and help text. It will warn the user and not execute the command if manually typed in.
+   */
+  helpHidden?: boolean;
   /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component
@@ -92,15 +100,22 @@ export interface CommandDefinition<TMeta = any> {
 }
 
 /**
+ * The map of supported arguments by the command.
+ * Used mainly with `CommandExecutionComponentProps`.
+ */
+export interface SupportedArguments {
+  [argName: string]: PossibleArgDataTypes;
+}
+
+/**
  * A command to be executed (as entered by the user)
  */
 export interface Command<
   TDefinition extends CommandDefinition = CommandDefinition,
-  TArgs extends object = any
+  TArgs extends SupportedArguments = any
 > {
   /** The raw input entered by the user */
   input: string;
-  // FIXME:PT this should be a generic that allows for the arguments type to be used
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInterface<TArgs>;
   /** The command definition associated with this user command */
@@ -109,7 +124,7 @@ export interface Command<
 
 export interface CommandExecutionComponentProps<
   /** The arguments that could have been entered by the user */
-  TArgs extends object = any,
+  TArgs extends SupportedArguments = any,
   /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
   /** The metadata defined on the Command Definition */
@@ -155,9 +170,9 @@ export interface CommandExecutionComponentProps<
  */
 export type CommandExecutionComponent<
   /** The arguments that could have been entered by the user */
-  TArgs extends object = any,
+  TArgs extends SupportedArguments = any,
   /** Internal store for the Command execution */
-  TStore extends object = Record<string, unknown>,
+  TStore extends object = any,
   /** The metadata defined on the Command Definition */
   TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;

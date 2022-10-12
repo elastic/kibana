@@ -22,7 +22,7 @@ import {
   ElasticsearchLegacySource,
 } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 export function handleResponse(
@@ -118,7 +118,7 @@ export function getNodeSummary(
 
   const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     dataset,
@@ -133,7 +133,7 @@ export function getNodeSummary(
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: dataset,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         start,
         end,

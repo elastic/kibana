@@ -88,16 +88,18 @@ function buildEuiGridColumn({
     editField &&
     dataViewField &&
     buildEditFieldButton({ services, dataView, field: dataViewField, editField });
+  const columnDisplayName =
+    columnName === '_source'
+      ? i18n.translate('discover.grid.documentHeader', {
+          defaultMessage: 'Document',
+        })
+      : dataViewField?.displayName || columnName;
+
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
     isSortable: isSortEnabled && dataViewField?.sortable === true,
-    display:
-      columnName === '_source'
-        ? i18n.translate('discover.grid.documentHeader', {
-            defaultMessage: 'Document',
-          })
-        : dataViewField?.displayName,
+    displayAsText: columnDisplayName,
     actions: {
       showHide:
         defaultColumns || columnName === dataView.timeFieldName
@@ -113,9 +115,10 @@ function buildEuiGridColumn({
       additional: [
         ...(columnName === '__source'
           ? []
-          : [buildCopyColumnNameButton({ columnId: columnName, services })]),
+          : [buildCopyColumnNameButton({ columnDisplayName, services })]),
         buildCopyColumnValuesButton({
           columnId: columnName,
+          columnDisplayName,
           services,
           rowsCount,
           valueToStringConverter,

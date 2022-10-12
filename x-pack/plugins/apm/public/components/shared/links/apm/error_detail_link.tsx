@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { APMLink, APMLinkExtendProps } from './apm_link';
+import { LegacyAPMLink, APMLinkExtendProps } from './apm_link';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -15,7 +15,7 @@ interface Props extends APMLinkExtendProps {
 
 function ErrorDetailLink({ serviceName, errorGroupId, ...rest }: Props) {
   return (
-    <APMLink
+    <LegacyAPMLink
       path={`/services/${serviceName}/errors/${errorGroupId}`}
       {...rest}
     />

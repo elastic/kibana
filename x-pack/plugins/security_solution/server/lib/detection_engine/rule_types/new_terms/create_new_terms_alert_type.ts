@@ -15,8 +15,6 @@ import { newTermsRuleParams } from '../../schemas/rule_schemas';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
-import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
 import type {
   DocFetchAggResult,
@@ -29,36 +27,14 @@ import {
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
 import type { SignalSource } from '../../signals/types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
-
-interface BulkCreateResults {
-  bulkCreateTimes: string[];
-  createdSignalsCount: number;
-  createdSignals: unknown[];
-  success: boolean;
-  errors: string[];
-  alertsWereTruncated: boolean;
-}
-
-interface SearchAfterResults {
-  searchDurations: string[];
-  searchErrors: string[];
-}
-
-const addBulkCreateResults = (
-  results: BulkCreateResults,
-  newResults: GenericBulkCreateResponse<BaseFieldsLatest>
-): BulkCreateResults => {
-  return {
-    bulkCreateTimes: [...results.bulkCreateTimes, newResults.bulkCreateDuration],
-    createdSignalsCount: results.createdSignalsCount + newResults.createdItemsCount,
-    createdSignals: [...results.createdSignals, ...newResults.createdItems],
-    success: results.success && newResults.success,
-    errors: [...results.errors, ...newResults.errors],
-    alertsWereTruncated: results.alertsWereTruncated || newResults.alertsWereTruncated,
-  };
-};
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  getUnprocessedExceptionsWarnings,
+} from '../../signals/utils';
+import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -90,7 +66,6 @@ export const createNewTermsAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -116,7 +91,6 @@ export const createNewTermsAlertType = (
           ruleExecutionLogger,
           bulkCreate,
           completeRule,
-          exceptionItems,
           tuple,
           mergeStrategy,
           inputIndex,
@@ -124,10 +98,13 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           aggregatableTimestampField,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         params,
         spaceId,
+        state,
       } = execOptions;
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`
@@ -137,7 +114,7 @@ export const createNewTermsAlertType = (
         from: params.from,
       });
 
-      const filter = await getFilter({
+      const esFilter = await getFilter({
         filters: params.filters,
         index: inputIndex,
         language: params.language,
@@ -145,7 +122,7 @@ export const createNewTermsAlertType = (
         services,
         type: params.type,
         query: params.query,
-        lists: exceptionItems,
+        exceptionFilter,
       });
 
       const parsedHistoryWindowSize = parseDateString({
@@ -155,19 +132,13 @@ export const createNewTermsAlertType = (
       });
 
       let afterKey;
-      let bulkCreateResults: BulkCreateResults = {
-        bulkCreateTimes: [],
-        createdSignalsCount: 0,
-        createdSignals: [],
-        success: true,
-        errors: [],
-        alertsWereTruncated: false,
-      };
 
-      const searchAfterResults: SearchAfterResults = {
-        searchDurations: [],
-        searchErrors: [],
-      };
+      const result = createSearchAfterReturnType();
+
+      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+      if (exceptionsWarning) {
+        result.warningMessages.push(exceptionsWarning);
+      }
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -175,10 +146,7 @@ export const createNewTermsAlertType = (
       // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
-      while (
-        !bulkCreateResults.alertsWereTruncated &&
-        bulkCreateResults.createdSignalsCount < params.maxSignals
-      ) {
+      while (result.createdSignalsCount < params.maxSignals) {
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
@@ -194,7 +162,7 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
@@ -206,8 +174,8 @@ export const createNewTermsAlertType = (
         }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
-        searchAfterResults.searchDurations.push(searchDuration);
-        searchAfterResults.searchErrors.push(...searchErrors);
+        result.searchAfterTimes.push(searchDuration);
+        result.errors.push(...searchErrors);
 
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
 
@@ -244,13 +212,13 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
         });
-        searchAfterResults.searchDurations.push(pageSearchDuration);
-        searchAfterResults.searchErrors.push(...pageSearchErrors);
+        result.searchAfterTimes.push(pageSearchDuration);
+        result.errors.push(...pageSearchErrors);
 
         logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
@@ -286,13 +254,13 @@ export const createNewTermsAlertType = (
             to: tuple.to.toISOString(),
             services,
             ruleExecutionLogger,
-            filter,
+            filter: esFilter,
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
           });
-          searchAfterResults.searchDurations.push(docFetchSearchDuration);
-          searchAfterResults.searchErrors.push(...docFetchSearchErrors);
+          result.searchAfterTimes.push(docFetchSearchDuration);
+          result.errors.push(...docFetchSearchErrors);
 
           const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
 
@@ -318,27 +286,21 @@ export const createNewTermsAlertType = (
 
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
-            params.maxSignals - bulkCreateResults.createdSignalsCount
+            params.maxSignals - result.createdSignalsCount,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
           );
 
-          bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
+          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+
+          if (bulkCreateResult.alertsWereTruncated) {
+            break;
+          }
         }
       }
-
-      return {
-        // If an error occurs but doesn't cause us to throw then we still count the execution as a success.
-        // Should be refactored for better clarity, but that's how it is for now.
-        success: true,
-        warning: false,
-        searchAfterTimes: searchAfterResults.searchDurations,
-        bulkCreateTimes: bulkCreateResults.bulkCreateTimes,
-        lastLookBackDate: undefined,
-        createdSignalsCount: bulkCreateResults.createdSignalsCount,
-        createdSignals: bulkCreateResults.createdSignals,
-        errors: [...searchAfterResults.searchErrors, ...bulkCreateResults.errors],
-        warningMessages: [],
-        state: {},
-      };
+      return { ...result, state };
     },
   };
 };

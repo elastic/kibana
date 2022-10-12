@@ -23,7 +23,7 @@ export function MachineLearningJobWizardCategorizationProvider({ getService }: F
     async selectCategorizationDetectorType(identifier: string) {
       const id = `~mlJobWizardCategorizationDetector${identifier}Card`;
       await testSubjects.existOrFail(id);
-      await testSubjects.clickWhenNotDisabled(id);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(id);
       await testSubjects.existOrFail(`mlJobWizardCategorizationDetector${identifier}Card selected`);
     },
 

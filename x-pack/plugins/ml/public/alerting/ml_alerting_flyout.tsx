@@ -79,6 +79,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
       },
     });
     // deps on id to avoid re-rendering on auto-refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggersActionsUi, initialAlert?.id, jobIds]);
 
   return <>{AlertFlyout}</>;
@@ -114,6 +115,7 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
     return () => {
       unsetShowFunction();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isVisible && jobIds ? (

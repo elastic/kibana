@@ -14,7 +14,6 @@ import { DataTableRecord } from '../../../../../types';
 export function getDetails(
   field: DataViewField,
   hits: DataTableRecord[] | undefined,
-  columns: string[],
   dataView?: DataView
 ) {
   if (!dataView || !hits) {
@@ -27,7 +26,6 @@ export function getDetails(
       count: 5,
       grouped: false,
     }),
-    columns,
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {

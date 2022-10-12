@@ -36,13 +36,13 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
-import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
+import { connectorTokenClientMock } from './lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
-import { getOAuthJwtAccessToken } from './builtin_action_types/lib/get_oauth_jwt_access_token';
-import { getOAuthClientCredentialsAccessToken } from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
+import { getOAuthJwtAccessToken } from './lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from './lib/get_oauth_client_credentials_access_token';
 import { OAuthParams } from './routes/get_oauth_access_token';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
@@ -74,10 +74,10 @@ jest.mock('./authorization/get_authorization_mode_by_source', () => {
   };
 });
 
-jest.mock('./builtin_action_types/lib/get_oauth_jwt_access_token', () => ({
+jest.mock('./lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
 }));
-jest.mock('./builtin_action_types/lib/get_oauth_client_credentials_access_token', () => ({
+jest.mock('./lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
@@ -376,9 +376,11 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: schema.object({
-          param1: schema.string(),
-        }),
+        config: {
+          schema: schema.object({
+            param1: schema.string(),
+          }),
+        },
       },
       executor,
     });
@@ -1949,9 +1951,11 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: schema.object({
-          param1: schema.string(),
-        }),
+        config: {
+          schema: schema.object({
+            param1: schema.string(),
+          }),
+        },
       },
       executor,
     });

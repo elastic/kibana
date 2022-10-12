@@ -8,8 +8,8 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
-
 import { ErrorCode } from '../../../common/types/error_codes';
+import { isAlphaNumericOrUnderscore } from '../../../common/utils/is_alphanumeric_underscore';
 
 import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
@@ -22,6 +22,10 @@ const createAnalyticsCollection = async (
 
   if (analyticsCollection) {
     throw new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS);
+  }
+
+  if (!isAlphaNumericOrUnderscore(document.name)) {
+    throw new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID);
   }
 
   // index the document

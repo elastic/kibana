@@ -364,7 +364,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Average',
     }),
     fieldRequired: true,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'histogram'],
     value: AGGREGATION_TYPES.AVERAGE,
   },
   max: {
@@ -372,7 +372,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Max',
     }),
     fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
+    validNormalizedTypes: ['number', 'date', 'histogram'],
     value: AGGREGATION_TYPES.MAX,
   },
   min: {
@@ -380,7 +380,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Min',
     }),
     fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
+    validNormalizedTypes: ['number', 'date', 'histogram'],
     value: AGGREGATION_TYPES.MIN,
   },
   cardinality: {
@@ -413,7 +413,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.SUM,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'histogram'],
   },
   p95: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p95', {
@@ -421,7 +421,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.P95,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'histogram'],
   },
   p99: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p99', {
@@ -429,6 +429,6 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.P99,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'histogram'],
   },
 };

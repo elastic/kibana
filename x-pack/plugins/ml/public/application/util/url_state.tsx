@@ -151,6 +151,7 @@ export const UrlStateProvider: FC = ({ children }) => {
         console.error('Could not save url state', error);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchString]
   );
 
@@ -170,6 +171,7 @@ export const useUrlState = (
     if (typeof fullUrlState === 'object') {
       return fullUrlState[accessor];
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchString]);
 
   const setUrlState = useCallback(
@@ -277,6 +279,7 @@ export const usePageUrlState = <PageUrlState extends object>(
     prevPageState.current = result;
 
     return result;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageState]);
 
   const onStateUpdate = useCallback(

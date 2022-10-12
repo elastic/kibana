@@ -189,7 +189,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
-      if (Object.keys(parsedInput.args).length > 1 || parsedInput.args.help.length) {
+      if (
+        Object.keys(parsedInput.args).length > 1 ||
+        parsedInput.args.help.length > 1 ||
+        parsedInput.args.help[0] !== true
+      ) {
         return updateStateWithNewCommandHistoryItem(
           state,
           createCommandHistoryEntry(
@@ -445,7 +449,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   // if the Command definition has a `validate()` callback, then call it now
   if (commandDefinition.validate) {
     const validationResult = commandDefinition.validate(command);
-
     if (validationResult !== true) {
       return updateStateWithNewCommandHistoryItem(
         state,

@@ -18,19 +18,21 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiNotificationBadge,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   useResizeObserver,
   EuiButton,
 } from '@elastic/eui';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { FIELDS_LIMIT_SETTING } from '../../../../../common';
+import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
@@ -39,6 +41,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
+import { getUiActions } from '../../../../kibana_services';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -116,6 +119,7 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
+  state,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -144,8 +148,8 @@ export function DiscoverSidebarComponent({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: DataViewField) => getDetails(ipField, documents, columns, selectedDataView),
-    [documents, columns, selectedDataView]
+    (ipField: DataViewField) => getDetails(ipField, documents, selectedDataView),
+    [documents, selectedDataView]
   );
 
   const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
@@ -184,7 +188,8 @@ export function DiscoverSidebarComponent({
         // In this case the fieldsPerPage needs to be adapted
         const fieldsRenderedHeight = availableFieldsContainer.current.clientHeight;
         const avgHeightPerItem = Math.round(fieldsRenderedHeight / fieldsToRender);
-        const newFieldsPerPage = Math.round(clientHeight / avgHeightPerItem) + 10;
+        const newFieldsPerPage =
+          (avgHeightPerItem > 0 ? Math.round(clientHeight / avgHeightPerItem) : 0) + 10;
         if (newFieldsPerPage >= FIELDS_PER_PAGE && newFieldsPerPage !== fieldsPerPage) {
           setFieldsPerPage(newFieldsPerPage);
           setFieldsToRender(newFieldsPerPage);
@@ -278,7 +283,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                onFieldEdited();
+                await onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -307,6 +312,18 @@ export function DiscoverSidebarComponent({
   );
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
+
+  const visualizeAggregateQuery = useCallback(() => {
+    const aggregateQuery =
+      state.query && isOfAggregateQueryType(state.query) ? state.query : undefined;
+    triggerVisualizeActionsTextBasedLanguages(
+      getUiActions(),
+      columns,
+      PLUGIN_ID,
+      selectedDataView,
+      aggregateQuery
+    );
+  }, [columns, selectedDataView, state.query]);
 
   if (!selectedDataView) {
     return null;
@@ -412,6 +429,8 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                state={state}
+                                contextualFields={columns}
                               />
                             </li>
                           );
@@ -472,6 +491,8 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                state={state}
+                                contextualFields={columns}
                               />
                             </li>
                           );
@@ -501,6 +522,8 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
+                            state={state}
+                            contextualFields={columns}
                           />
                         </li>
                       );
@@ -521,6 +544,20 @@ export function DiscoverSidebarComponent({
             >
               {i18n.translate('discover.fieldChooser.addField.label', {
                 defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="lensApp"
+              data-test-subj="textBased-visualize"
+              onClick={visualizeAggregateQuery}
+              size="s"
+            >
+              {i18n.translate('discover.textBasedLanguages.visualize.label', {
+                defaultMessage: 'Visualize in Lens',
               })}
             </EuiButton>
           </EuiFlexItem>

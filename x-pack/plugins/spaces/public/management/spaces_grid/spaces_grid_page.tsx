@@ -11,7 +11,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
   EuiText,

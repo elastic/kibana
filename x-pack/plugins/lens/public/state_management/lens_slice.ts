@@ -12,7 +12,7 @@ import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { VisualizeEditorContext, Suggestion } from '../types';
+import type { VisualizeEditorContext, Suggestion, IndexPattern } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
@@ -57,10 +57,12 @@ export const getPreloadedState = ({
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
   if (initialDatasourceId) {
-    datasourceStates[initialDatasourceId] = {
-      state: null,
-      isLoading: true,
-    };
+    Object.keys(datasourceMap).forEach((datasourceId) => {
+      datasourceStates[datasourceId] = {
+        state: null,
+        isLoading: true,
+      };
+    });
   }
 
   const state = {
@@ -88,7 +90,10 @@ export const getPreloadedState = ({
 };
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
-export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
+export const onActiveDataChange = createAction<{
+  activeData: TableInspectorAdapter;
+  requestWarnings?: string[];
+}>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
@@ -127,6 +132,11 @@ export const submitSuggestion = createAction<void>('lens/submitSuggestion');
 export const switchDatasource = createAction<{
   newDatasourceId: string;
 }>('lens/switchDatasource');
+export const switchAndCleanDatasource = createAction<{
+  newDatasourceId: string;
+  visualizationId: string | null;
+  currentIndexPatternId?: string;
+}>('lens/switchAndCleanDatasource');
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
@@ -158,6 +168,14 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+
+export const cloneLayer = createAction(
+  'cloneLayer',
+  function prepare({ layerId }: { layerId: string }) {
+    return { payload: { newLayerId: generateId(), layerId } };
+  }
+);
+
 export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
@@ -171,6 +189,9 @@ export const setLayerDefaultDimension = createAction<{
 
 export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
   'lens/updateIndexPatterns'
+);
+export const replaceIndexpattern = createAction<{ newIndexPattern: IndexPattern; oldId: string }>(
+  'lens/replaceIndexPattern'
 );
 export const changeIndexPattern = createAction<{
   visualizationIds?: string[];
@@ -197,6 +218,7 @@ export const lensActions = {
   setToggleFullscreen,
   submitSuggestion,
   switchDatasource,
+  switchAndCleanDatasource,
   navigateAway,
   loadInitial,
   initEmpty,
@@ -204,8 +226,10 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
+  replaceIndexpattern,
   changeIndexPattern,
 };
 
@@ -218,10 +242,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...payload,
       };
     },
-    [onActiveDataChange.type]: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
+    [onActiveDataChange.type]: (
+      state,
+      {
+        payload: { activeData, requestWarnings },
+      }: PayloadAction<{ activeData: TableInspectorAdapter; requestWarnings?: string[] }>
+    ) => {
       return {
         ...state,
-        activeData: payload,
+        activeData,
+        requestWarnings,
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {
@@ -262,6 +292,53 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         stagedPreview: undefined,
       };
     },
+    [cloneLayer.type]: (
+      state,
+      {
+        payload: { layerId, newLayerId },
+      }: {
+        payload: {
+          layerId: string;
+          newLayerId: string;
+        };
+      }
+    ) => {
+      const clonedIDsMap = new Map<string, string>();
+
+      const getNewId = (prevId: string) => {
+        const inMapValue = clonedIDsMap.get(prevId);
+        if (!inMapValue) {
+          const newId = generateId();
+          clonedIDsMap.set(prevId, newId);
+          return newId;
+        }
+        return inMapValue;
+      };
+
+      if (!state.activeDatasourceId || !state.visualization.activeId) {
+        return state;
+      }
+
+      state.datasourceStates = mapValues(state.datasourceStates, (datasourceState, datasourceId) =>
+        datasourceId
+          ? {
+              ...datasourceState,
+              state: datasourceMap[datasourceId].cloneLayer(
+                datasourceState.state,
+                layerId,
+                newLayerId,
+                getNewId
+              ),
+            }
+          : datasourceState
+      );
+      state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
+        state.visualization.state,
+        layerId,
+        newLayerId,
+        clonedIDsMap
+      );
+    },
     [removeOrClearLayer.type]: (
       state,
       {
@@ -275,6 +352,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       const activeVisualization = visualizationMap[visualizationId];
+      const activeDataSource = datasourceMap[state.activeDatasourceId!];
       const isOnlyLayer =
         getRemoveOperation(
           activeVisualization,
@@ -289,16 +367,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const datasource = datasourceMap[datasourceId!];
           return {
             ...datasourceState,
-            state: isOnlyLayer
-              ? datasource.clearLayer(datasourceState.state, layerId)
-              : datasource.removeLayer(datasourceState.state, layerId),
+            ...(datasourceId === state.activeDatasourceId && {
+              state: isOnlyLayer
+                ? datasource.clearLayer(datasourceState.state, layerId)
+                : datasource.removeLayer(datasourceState.state, layerId),
+            }),
           };
         }
       );
       state.stagedPreview = undefined;
+      // reuse the activeDatasource current dataView id for the moment
+      const currentDataViewsId = activeDataSource.getUsedDataView(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
       state.visualization.state =
         isOnlyLayer || !activeVisualization.removeLayer
-          ? activeVisualization.clearLayer(state.visualization.state, layerId)
+          ? activeVisualization.clearLayer(state.visualization.state, layerId, currentDataViewsId)
           : activeVisualization.removeLayer(state.visualization.state, layerId);
     },
     [changeIndexPattern.type]: (
@@ -316,20 +400,38 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
-      const newState: Partial<LensAppState> = { dataViews: { ...state.dataViews, ...dataViews } };
+      const newIndexPatternRefs = [...state.dataViews.indexPatternRefs];
+      const availableRefs = new Set(newIndexPatternRefs.map((ref) => ref.id));
+      // check for missing refs
+      Object.values(dataViews.indexPatterns || {}).forEach((indexPattern) => {
+        if (!availableRefs.has(indexPattern.id)) {
+          newIndexPatternRefs.push({
+            id: indexPattern.id!,
+            name: indexPattern.name,
+            title: indexPattern.title,
+          });
+        }
+      });
+      const newState: Partial<LensAppState> = {
+        dataViews: {
+          ...state.dataViews,
+          indexPatterns: dataViews.indexPatterns,
+          indexPatternRefs: newIndexPatternRefs,
+        },
+      };
       if (visualizationIds?.length) {
         for (const visualizationId of visualizationIds) {
           const activeVisualization =
             visualizationId &&
-            state.visualization.activeId !== visualizationId &&
+            state.visualization.activeId === visualizationId &&
             visualizationMap[visualizationId];
           if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
             newState.visualization = {
               ...state.visualization,
               state: activeVisualization.onIndexPatternChange(
                 state.visualization.state,
-                layerId,
-                indexPatternId
+                indexPatternId,
+                layerId
               ),
             };
           }
@@ -401,6 +503,38 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         dataViews: { ...state.dataViews, ...payload },
       };
+    },
+    [replaceIndexpattern.type]: (
+      state,
+      { payload }: { payload: { newIndexPattern: IndexPattern; oldId: string } }
+    ) => {
+      state.dataViews.indexPatterns[payload.newIndexPattern.id] = payload.newIndexPattern;
+      delete state.dataViews.indexPatterns[payload.oldId];
+      state.dataViews.indexPatternRefs = state.dataViews.indexPatternRefs.filter(
+        (r) => r.id !== payload.oldId
+      );
+      state.dataViews.indexPatternRefs.push({
+        id: payload.newIndexPattern.id,
+        title: payload.newIndexPattern.title,
+        name: payload.newIndexPattern.name,
+      });
+      const visualization = visualizationMap[state.visualization.activeId!];
+      state.visualization.state =
+        visualization.onIndexPatternRename?.(
+          state.visualization.state,
+          payload.oldId,
+          payload.newIndexPattern.id
+        ) ?? state.visualization.state;
+
+      Object.entries(state.datasourceStates).forEach(([datasourceId, datasourceState]) => {
+        const datasource = datasourceMap[datasourceId];
+        state.datasourceStates[datasourceId].state =
+          datasource?.onIndexPatternRename?.(
+            datasourceState.state,
+            payload.oldId,
+            payload.newIndexPattern.id!
+          ) ?? datasourceState.state;
+      });
     },
     [updateDatasourceState.type]: (
       state,
@@ -537,6 +671,55 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           },
         },
         activeDatasourceId: payload.newDatasourceId,
+      };
+    },
+    [switchAndCleanDatasource.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newDatasourceId: string;
+          visualizationId?: string;
+          currentIndexPatternId?: string;
+        };
+      }
+    ) => {
+      const activeVisualization =
+        payload.visualizationId && visualizationMap[payload.visualizationId];
+      const visualization = state.visualization;
+      let newVizState = visualization.state;
+      const ids: string[] = [];
+      if (activeVisualization && activeVisualization.getLayerIds) {
+        const layerIds = activeVisualization.getLayerIds(visualization.state);
+        ids.push(...Object.values(layerIds));
+        newVizState = activeVisualization.initialize(() => ids[0]);
+      }
+      const currentVizId = ids[0];
+
+      const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
+        ? current(state).datasourceStates[payload.newDatasourceId]?.state
+        : datasourceMap[payload.newDatasourceId].createEmptyLayer(
+            payload.currentIndexPatternId ?? ''
+          );
+      const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
+        datasourceState,
+        currentVizId
+      );
+
+      return {
+        ...state,
+        datasourceStates: {
+          [payload.newDatasourceId]: {
+            state: updatedState,
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: payload.newDatasourceId,
+        visualization: {
+          ...visualization,
+          state: newVizState,
+        },
       };
     },
     [navigateAway.type]: (state) => state,
@@ -743,15 +926,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
 
       const activeVisualization = visualizationMap[state.visualization.activeId];
+      const activeDatasource = datasourceMap[state.activeDatasourceId];
+      // reuse the active datasource dataView id for the new layer
+      const currentDataViewsId = activeDatasource.getUsedDataView(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
       const visualizationState = activeVisualization.appendLayer!(
         state.visualization.state,
         layerId,
-        layerType
+        layerType,
+        currentDataViewsId
       );
 
       const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
 
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
       const { noDatasource } =
         activeVisualization
           .getSupportedLayers(visualizationState, framePublicAPI)

@@ -11,7 +11,7 @@ import type {
   AggregationsRateAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -32,7 +32,7 @@ interface PolicyLevelUsage {
 export async function getPolicyLevelUsage(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  packagePolicyService?: PackagePolicyServiceInterface
+  packagePolicyService?: PackagePolicyClient
 ): Promise<PolicyLevelUsage> {
   if (!packagePolicyService) {
     return {};

@@ -23,7 +23,8 @@ import {
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
-import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -34,9 +35,9 @@ import {
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
+import { FormBasedLayer } from '../..';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -45,6 +46,16 @@ const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
+}
+
+interface GaugeDatasourceState {
+  [prop: string]: unknown;
+  layers: FormBasedLayer[];
+}
+
+export interface GaugeSuggestion extends Suggestion {
+  datasourceState: GaugeDatasourceState;
+  visualizationState: GaugeVisualizationState;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>
@@ -215,7 +226,7 @@ export const getGaugeVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
         palette: mainPalette,
         ticksPosition: 'auto',
@@ -275,7 +286,7 @@ export const getGaugeVisualization = ({
             : [],
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: !metricAccessor,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',
           enableDimensionEditor: true,
         },
@@ -352,7 +363,7 @@ export const getGaugeVisualization = ({
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,
-          required: false,
+          requiredMinDimensionCount: 0,
           dataTestSubj: 'lnsGauge_goalDimensionPanel',
         },
       ],
@@ -432,7 +443,7 @@ export const getGaugeVisualization = ({
 
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.gauge.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -542,5 +553,26 @@ export const getGaugeVisualization = ({
     }
 
     return warnings;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as GaugeSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 });

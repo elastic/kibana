@@ -18,7 +18,7 @@ import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -225,6 +225,10 @@ export function WrappedHelper<ExtraCore>({
   history = createMemoryHistory(),
 }: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
   const testState: AppState = merge({}, mockState, state);
+
+  if (url) {
+    history = getHistoryFromUrl(url);
+  }
 
   return (
     <MountWithReduxProvider state={testState} useRealStore={useRealStore}>

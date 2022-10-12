@@ -44,6 +44,7 @@ export const EsQueryExpression: React.FC<
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    excludeHitsFromPreviousRun,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -57,6 +58,7 @@ export const EsQueryExpression: React.FC<
     size: size ?? DEFAULT_VALUES.SIZE,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
     searchType: SearchType.esQuery,
+    excludeHitsFromPreviousRun: excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
   });
 
   const setParam = useCallback(
@@ -190,6 +192,7 @@ export const EsQueryExpression: React.FC<
       <EuiSpacer size="s" />
       <EuiFormRow
         id="queryEditor"
+        data-test-subj="queryJsonEditor"
         fullWidth
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
@@ -206,7 +209,6 @@ export const EsQueryExpression: React.FC<
           languageId="xjson"
           width="100%"
           height="200px"
-          data-test-subj="queryJsonEditor"
           value={xJson}
           onChange={(xjson: string) => {
             setXJson(xjson);
@@ -251,6 +253,10 @@ export const EsQueryExpression: React.FC<
         errors={errors}
         hasValidationErrors={hasValidationErrors()}
         onTestFetch={onTestQuery}
+        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        onChangeExcludeHitsFromPreviousRun={(exclude) => {
+          setParam('excludeHitsFromPreviousRun', exclude);
+        }}
       />
 
       <EuiSpacer />

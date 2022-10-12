@@ -18,7 +18,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
   EuiText,
   useEuiTheme,

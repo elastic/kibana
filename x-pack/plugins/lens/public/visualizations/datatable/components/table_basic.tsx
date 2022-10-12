@@ -52,7 +52,8 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getOriginalId, getFinalSummaryConfiguration } from '../../../../common/expressions';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -452,6 +453,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           alignments,
           minMaxByColumnId,
           getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
+          handleFilterClick,
         }}
       >
         <EuiDataGrid
@@ -460,7 +462,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHeightsOptions={{
             defaultHeight: props.args.fitRowToContent
               ? 'auto'
-              : props.args.rowHeightLines
+              : props.args.rowHeightLines && props.args.rowHeightLines !== 1
               ? {
                   lineCount: props.args.rowHeightLines,
                 }

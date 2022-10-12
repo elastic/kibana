@@ -12,17 +12,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { useDoesEndpointSupportResponder } from '../../../common/hooks/endpoint/use_does_endpoint_support_responder';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
   {
-    defaultMessage:
-      'Add the Endpoint and Cloud Security integration via Elastic Agent to enable this feature',
+    defaultMessage: 'Add the Elastic Defend integration via Elastic Agent to enable this feature',
   }
 );
 export const HOST_ENDPOINT_UNENROLLED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.unenrolledTooltip',
-  { defaultMessage: 'Host is no longer enrolled with the Endpoint and Cloud Security integration' }
+  { defaultMessage: 'Host is no longer enrolled with the Elastic Defend integration' }
 );
 export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
@@ -47,6 +48,10 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       error,
     } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
+    const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(
+      endpointHostInfo?.metadata
+    );
+
     const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
       if (!endpointId) {
         return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
@@ -55,6 +60,10 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       // Still loading Endpoint host info
       if (isFetching) {
         return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
+      }
+
+      if (endpointHostInfo && !isResponderCapabilitiesEnabled) {
+        return [true, UPGRADE_ENDPOINT_FOR_RESPONDER];
       }
 
       // if we got an error and it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
@@ -73,7 +82,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       }
 
       return [false, undefined];
-    }, [endpointHostInfo, endpointId, error, isFetching]);
+    }, [endpointHostInfo, endpointId, error, isFetching, isResponderCapabilitiesEnabled]);
 
     const handleResponseActionsClick = useCallback(() => {
       if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);

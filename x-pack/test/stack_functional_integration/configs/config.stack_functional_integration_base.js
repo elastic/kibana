@@ -12,7 +12,6 @@ import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
-import { services } from '../services';
 
 const log = new ToolingLog({
   level: 'info',
@@ -28,13 +27,14 @@ export default async ({ readConfigFile }) => {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../functional/config.base.js')
   );
-  const externalConf = consumeState(resolve(__dirname, stateFilePath));
+  const externalConf = consumeState(resolve(__dirname, stateFilePath)) ?? {
+    TESTS_LIST: 'alerts',
+  };
   process.env.stack_functional_integration = true;
   logAll(log);
 
   const settings = {
     ...xpackFunctionalConfig.getAll(),
-    services,
     pageObjects: {
       triggersActionsUI: TriggersActionsPageProvider,
       ...xpackFunctionalConfig.get('pageObjects'),
@@ -52,6 +52,9 @@ export default async ({ readConfigFile }) => {
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
+    },
+    esArchiver: {
+      baseDirectory: INTEGRATION_TEST_ROOT,
     },
     testFiles: tests(externalConf.TESTS_LIST).map(prepend).map(logTest),
     // testFiles: ['alerts'].map(prepend).map(logTest),

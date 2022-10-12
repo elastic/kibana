@@ -87,6 +87,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   const tabs = [
     {
       id: SelectedPolicyTab.NEW,
+      'data-test-subj': 'newHostsTab',
       name: 'New hosts',
       content: (
         <AgentPolicyIntegrationForm
@@ -100,6 +101,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     },
     {
       id: SelectedPolicyTab.EXISTING,
+      'data-test-subj': 'existingHostsTab',
       name: 'Existing hosts',
       content: (
         <StepSelectAgentPolicy

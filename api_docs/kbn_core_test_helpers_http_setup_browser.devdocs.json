@@ -47,6 +47,7 @@
         ],
         "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
@@ -66,6 +67,7 @@
             ],
             "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -92,6 +94,7 @@
         ],
         "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -112,7 +115,8 @@
               "InternalInjectedMetadataSetup"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
@@ -130,7 +134,8 @@
               "FatalErrorsSetup"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -13,7 +13,7 @@ import { INTERNAL_SUGGEST_USER_PROFILES_URL, DEFAULT_USER_SIZE } from '../../../
 export interface SuggestUserProfilesArgs {
   http: HttpStart;
   name: string;
-  owner: string[];
+  owners: string[];
   signal: AbortSignal;
   size?: number;
 }
@@ -22,11 +22,11 @@ export const suggestUserProfiles = async ({
   http,
   name,
   size = DEFAULT_USER_SIZE,
-  owner,
+  owners,
   signal,
 }: SuggestUserProfilesArgs): Promise<UserProfile[]> => {
   const response = await http.post<UserProfile[]>(INTERNAL_SUGGEST_USER_PROFILES_URL, {
-    body: JSON.stringify({ name, size, owner }),
+    body: JSON.stringify({ name, size, owners }),
     signal,
   });
 
@@ -42,5 +42,19 @@ export const bulkGetUserProfiles = async ({
   security,
   uids,
 }: BulkGetUserProfilesArgs): Promise<UserProfile[]> => {
+  if (uids.length === 0) {
+    return [];
+  }
+
   return security.userProfiles.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
+};
+
+export interface GetCurrentUserProfileArgs {
+  security: SecurityPluginStart;
+}
+
+export const getCurrentUserProfile = async ({
+  security,
+}: GetCurrentUserProfileArgs): Promise<UserProfile> => {
+  return security.userProfiles.getCurrent({ dataPath: 'avatar' });
 };

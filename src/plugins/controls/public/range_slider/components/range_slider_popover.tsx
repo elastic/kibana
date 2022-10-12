@@ -20,9 +20,10 @@ import {
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { RangeValue } from '../../../common/range_slider/types';
 import { pluginServices } from '../../services';
 import { rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderReduxState, RangeValue } from '../types';
+import { RangeSliderReduxState } from '../types';
 import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderPopover: FC = () => {
@@ -30,8 +31,9 @@ export const RangeSliderPopover: FC = () => {
   const rangeRef = useRef<EuiDualRange | null>(null);
 
   // Controls Services Context
-  const { dataViews } = pluginServices.getHooks();
-  const { get: getDataViewById } = dataViews.useService();
+  const {
+    dataViews: { get: getDataViewById },
+  } = pluginServices.getServices();
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,

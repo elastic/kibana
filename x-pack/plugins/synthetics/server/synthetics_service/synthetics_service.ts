@@ -16,8 +16,6 @@ import {
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import { MonitorSyncEvent } from '../legacy_uptime/lib/telemetry/types';
-import { sendSyncTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
@@ -42,8 +40,6 @@ import {
   HeartbeatConfig,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
-import { hydrateSavedObjects } from './hydrate_saved_object';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 
 import { normalizeSecrets } from './utils/secrets';
 
@@ -259,8 +255,8 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: HeartbeatConfig) {
-    const monitors = this.formatConfigs([config]);
+  async addConfig(config: HeartbeatConfig | HeartbeatConfig[]) {
+    const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
 
     this.apiKey = await this.getApiKey();
 
@@ -284,8 +280,10 @@ export class SyntheticsService {
     }
   }
 
-  async editConfig(monitorConfig: HeartbeatConfig) {
-    const monitors = this.formatConfigs([monitorConfig]);
+  async editConfig(monitorConfig: HeartbeatConfig | HeartbeatConfig[]) {
+    const monitors = this.formatConfigs(
+      Array.isArray(monitorConfig) ? monitorConfig : [monitorConfig]
+    );
 
     this.apiKey = await this.getApiKey();
 
@@ -315,11 +313,6 @@ export class SyntheticsService {
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
       return null;
-    }
-
-    if (!configs && monitorConfigs.length > 0) {
-      const telemetry = this.getSyncTelemetry(monitorConfigs);
-      sendSyncTelemetryEvents(this.logger, this.server.telemetry, telemetry);
     }
 
     this.apiKey = await this.getApiKey();
@@ -434,17 +427,36 @@ export class SyntheticsService {
 
     const start = performance.now();
 
-    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = await Promise.all(
-      encryptedMonitors.map((monitor) =>
-        encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-          syntheticsMonitor.name,
-          monitor.id,
-          {
-            namespace: monitor.namespaces?.[0],
-          }
+    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = (
+      await Promise.all(
+        encryptedMonitors.map(
+          (monitor) =>
+            new Promise((resolve) => {
+              encryptedClient
+                .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+                  syntheticsMonitor.name,
+                  monitor.id,
+                  {
+                    namespace: monitor.namespaces?.[0],
+                  }
+                )
+                .then((decryptedMonitor) => resolve(decryptedMonitor))
+                .catch((e) => {
+                  this.logger.error(e);
+                  sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+                    reason: 'Failed to decrypt monitor',
+                    message: e?.message,
+                    type: 'runTaskError',
+                    code: e?.code,
+                    status: e.status,
+                    kibanaVersion: this.server.kibanaVersion,
+                  });
+                  resolve(null);
+                });
+            })
         )
       )
-    );
+    ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
 
     const end = performance.now();
     const duration = end - start;
@@ -455,14 +467,6 @@ export class SyntheticsService {
       },
       monitors: monitors.length,
     });
-
-    if (this.indexTemplateExists) {
-      // without mapping, querying won't make sense
-      hydrateSavedObjects({
-        monitors: monitors as unknown as DecryptedSyntheticsMonitorSavedObject[],
-        server: this.server,
-      });
-    }
 
     return (monitors ?? []).map((monitor) => {
       const attributes = monitor.attributes as unknown as MonitorFields;
@@ -478,70 +482,6 @@ export class SyntheticsService {
     return configs.map((config: SyntheticsMonitor) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config as Partial<MonitorFields>)
     );
-  }
-
-  getSyncTelemetry(monitors: SyntheticsMonitorWithId[]): MonitorSyncEvent {
-    let totalRuns = 0;
-    let browserTestRuns = 0;
-    let httpTestRuns = 0;
-    let icmpTestRuns = 0;
-    let tcpTestRuns = 0;
-
-    const locationRuns: Record<string, number> = {};
-    const locationMonitors: Record<string, number> = {};
-
-    const testRunsInDay = (schedule: string) => {
-      return (24 * 60) / Number(schedule);
-    };
-
-    const monitorsByType: Record<string, number> = {
-      browser: 0,
-      http: 0,
-      tcp: 0,
-      icmp: 0,
-    };
-
-    monitors.forEach((monitor) => {
-      if (monitor.schedule.number) {
-        totalRuns += testRunsInDay(monitor.schedule.number);
-      }
-      switch (monitor.type) {
-        case 'browser':
-          browserTestRuns += testRunsInDay(monitor.schedule.number);
-          break;
-        case 'http':
-          httpTestRuns += testRunsInDay(monitor.schedule.number);
-          break;
-        case 'icmp':
-          icmpTestRuns += testRunsInDay(monitor.schedule.number);
-          break;
-        case 'tcp':
-          tcpTestRuns += testRunsInDay(monitor.schedule.number);
-          break;
-        default:
-          break;
-      }
-
-      monitorsByType[monitor.type] = (monitorsByType[monitor.type] ?? 0) + 1;
-
-      monitor.locations.forEach(({ id }) => {
-        locationRuns[id + 'Tests'] =
-          (locationRuns[id + 'Tests'] ?? 0) + testRunsInDay(monitor.schedule.number);
-        locationMonitors[id + 'Monitors'] = (locationMonitors[id + 'Monitors'] ?? 0) + 1;
-      });
-    });
-
-    return {
-      total: monitors.length,
-      totalTests: totalRuns,
-      browserTests24h: browserTestRuns,
-      httpTests24h: httpTestRuns,
-      icmpTests24h: icmpTestRuns,
-      tcpTests24h: tcpTestRuns,
-      ...locationRuns,
-      ...locationMonitors,
-      ...monitorsByType,
-    };
   }
 }
 

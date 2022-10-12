@@ -870,6 +870,44 @@ describe('#delete', () => {
   });
 });
 
+describe('#bulkDelete', () => {
+  const obj1 = Object.freeze({ type: 'unknown-type', id: 'unknown-type-id-1' });
+  const obj2 = Object.freeze({ type: 'unknown-type', id: 'unknown-type-id-2' });
+  const namespace = 'some-ns';
+
+  it('redirects request to underlying base client if type is not registered', async () => {
+    await wrapper.bulkDelete([obj1, obj2], { namespace });
+    expect(mockBaseClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkDelete).toHaveBeenCalledWith([obj1, obj2], { namespace });
+  });
+
+  it('redirects request to underlying base client if type is registered', async () => {
+    const knownObj1 = Object.freeze({ type: 'known-type', id: 'known-type-id-1' });
+    const knownObj2 = Object.freeze({ type: 'known-type', id: 'known-type-id-2' });
+    const options = { namespace: 'some-ns' };
+
+    await wrapper.bulkDelete([knownObj1, knownObj2], options);
+
+    expect(mockBaseClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkDelete).toHaveBeenCalledWith([knownObj1, knownObj2], { namespace });
+  });
+
+  it('fails if base client fails', async () => {
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.bulkDelete.mockRejectedValue(failureReason);
+
+    await expect(wrapper.bulkDelete([{ type: 'known-type', id: 'some-id' }])).rejects.toThrowError(
+      failureReason
+    );
+
+    expect(mockBaseClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkDelete).toHaveBeenCalledWith(
+      [{ type: 'known-type', id: 'some-id' }],
+      undefined
+    );
+  });
+});
+
 describe('#find', () => {
   it('redirects request to underlying base client and does not alter response if type is not registered', async () => {
     const mockedResponse = {

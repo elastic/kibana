@@ -11,6 +11,15 @@ export const mockSingleIndexResponse = {
   },
 };
 
+export const mockSingleIndexWithAliasesResponse = {
+  'search-regular-index': {
+    aliases: {
+      'search-alias-1': {},
+      'search-alias-2': {},
+    },
+  },
+};
+
 export const mockSingleIndexStatsResponse = {
   indices: {
     'search-regular-index': {

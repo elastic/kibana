@@ -110,7 +110,7 @@ export class AnomalyExplorerChartsService {
     severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {
-    const bounds = this.timeFilter.getActiveBounds();
+    const bounds = this.getTimeBounds();
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
     const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
 

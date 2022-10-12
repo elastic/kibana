@@ -9,7 +9,7 @@ import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../../shared_components';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ShallowWrapper } from 'enzyme';
 
 function getRangeInputComponent(component: ShallowWrapper) {
@@ -29,7 +29,7 @@ describe('Axes Settings', () => {
       layers: [
         {
           seriesType: 'bar',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -114,6 +114,28 @@ describe('Axes Settings', () => {
       <AxisSettingsPopover {...props} endzonesVisible={true} setEndzoneVisibility={() => {}} />
     );
     expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
+  });
+
+  it('hides the current time marker visibility flag if no setter is passed in', () => {
+    const component = shallow(<AxisSettingsPopover {...props} />);
+    expect(component.find('[data-test-subj="lnsshowCurrentTimeMarker"]')).toHaveLength(0);
+  });
+
+  it('shows the current time marker switch if setter is present', () => {
+    const mockToggle = jest.fn();
+    const component = shallow(
+      <AxisSettingsPopover
+        {...props}
+        currentTimeMarkerVisible={false}
+        setCurrentTimeMarkerVisibility={mockToggle}
+      />
+    );
+    const switchElement = component.find('[data-test-subj="lnsshowCurrentTimeMarker"]');
+    expect(switchElement.prop('checked')).toBe(false);
+
+    switchElement.simulate('change');
+
+    expect(mockToggle).toHaveBeenCalledWith(true);
   });
 
   describe('axis extent', () => {

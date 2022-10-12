@@ -31,10 +31,12 @@ export const CategorizationField: FC = () => {
       jobCreator.categorizationFieldName = categorizationFieldName;
       jobCreatorUpdate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categorizationFieldName]);
 
   useEffect(() => {
     setCategorizationFieldName(jobCreator.categorizationFieldName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

@@ -22,8 +22,7 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataView, DataViewAttributes, DataViewField } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
+import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -51,7 +50,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available data views
    */
-  dataViewList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
@@ -63,7 +62,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
    * Callback function when changing an data view
    */
@@ -94,7 +93,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: () => void;
+  onFieldEdited: () => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -183,7 +182,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
   useEffect(
     () => {
@@ -220,7 +220,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
               fieldName,
               onSave: async () => {
-                onFieldEdited();
+                await onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -242,25 +242,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
-            if (closeFlyout) {
-              closeFlyout();
-            }
-          }
-        : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]
-  );
+  const createNewDataView = useCallback(() => {
+    const ref = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        onDataViewCreated(dataView);
+      },
+    });
+    if (setDataViewEditorRef) {
+      setDataViewEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
 
   if (!selectedDataView) {
     return null;

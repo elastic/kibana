@@ -12,7 +12,8 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
-import { RangeSliderReduxState, RangeValue } from './types';
+import { RangeSliderReduxState } from './types';
+import { RangeValue } from '../../common/range_slider/types';
 
 export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
   min: '',

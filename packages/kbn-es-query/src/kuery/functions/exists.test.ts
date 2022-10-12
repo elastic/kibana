@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 
 jest.mock('../grammar');

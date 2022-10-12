@@ -10,6 +10,7 @@ import { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 
 import { schema } from './schema';
+import { ConfigModule } from './config_loading';
 
 const $values = Symbol('values');
 
@@ -17,25 +18,27 @@ interface Options {
   settings?: Record<string, any>;
   primary?: boolean;
   path: string;
+  module: ConfigModule;
 }
 
 export class Config {
   public readonly path: string;
+  public readonly module: ConfigModule;
   private [$values]: Record<string, any>;
 
   constructor(options: Options) {
-    const { settings = {}, primary = false, path = null } = options || {};
-
-    if (!path) {
+    if (!options.path) {
       throw new TypeError('path is a required option');
     }
 
-    this.path = path;
-    const { error, value } = schema.validate(settings, {
+    this.path = options.path;
+    this.module = options.module;
+
+    const { error, value } = schema.validate(options.settings, {
       abortEarly: false,
       context: {
-        primary: !!primary,
-        path,
+        primary: !!options?.primary,
+        path: options.path,
       },
     });
 

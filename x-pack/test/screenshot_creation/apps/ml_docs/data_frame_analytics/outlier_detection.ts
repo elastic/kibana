@@ -79,7 +79,12 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.wizard.assertDefineStepActive();
 
       await ml.testExecution.logTestStep('take screenshot');
-      await commonScreenshots.takeScreenshot('logs-transform-preview', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'logs-transform-preview',
+        screenshotDirectories,
+        1600,
+        1400
+      );
     });
 
     it('wizard screenshots', async () => {

@@ -8,19 +8,25 @@
 import { Ast, AstFunction } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationServiceType,
+  isManualPointAnnotationConfig,
+  isRangeAnnotationConfig,
+} from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYCurveType } from '@kbn/expression-xy-plugin/common';
-import {
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type {
   State,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
   AxisConfig,
+  ValidXYDataLayerConfig,
 } from './types';
-import type { ValidXYDataLayerConfig } from './types';
-import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
+import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
@@ -32,7 +38,6 @@ import {
   getAnnotationsLayers,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
-import { layerTypes } from '../../../common';
 import { axisExtentConfigToExpression } from '../../shared_components';
 
 export const getSortedAccessors = (
@@ -85,8 +90,8 @@ export const toExpression = (
 };
 
 const simplifiedLayerExpression = {
-  [layerTypes.DATA]: (layer: XYDataLayerConfig) => ({ ...layer, simpleView: true }),
-  [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
+  [LayerTypes.DATA]: (layer: XYDataLayerConfig) => ({ ...layer, simpleView: true }),
+  [LayerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     simpleView: true,
     yConfig: layer.yConfig?.map(({ ...rest }) => ({
@@ -96,7 +101,7 @@ const simplifiedLayerExpression = {
       textVisibility: false,
     })),
   }),
-  [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
+  [LayerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     simpleView: true,
   }),
@@ -185,6 +190,10 @@ export const buildExpression = (
         annotations: layer.annotations.map((c) => ({
           ...c,
           label: uniqueLabels[c.id],
+          ...(c.type === 'query'
+            ? // Move the ignore flag at the event level
+              { ignoreGlobalFilters: layer.ignoreGlobalFilters }
+            : {}),
         })),
       };
     });
@@ -240,6 +249,11 @@ export const buildExpression = (
       ...yAxisConfigs[1],
     });
   }
+
+  const isValidAnnotation = (a: EventAnnotationConfig) =>
+    isManualPointAnnotationConfig(a) ||
+    isRangeAnnotationConfig(a) ||
+    (a.filter && a.filter?.query !== '');
 
   return {
     type: 'expression',
@@ -300,6 +314,7 @@ export const buildExpression = (
           fillOpacity: [state.fillOpacity || 0.3],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
+          addTimeMarker: [state?.showCurrentTimeMarker || false],
           valuesInLegend: [state?.valuesInLegend || false],
           yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
           xAxisConfig: [
@@ -342,10 +357,39 @@ export const buildExpression = (
                 datasourceExpressionsByLayers[layer.layerId]
               )
             ),
-            ...validAnnotationsLayers.map((layer) =>
-              annotationLayerToExpression(layer, eventAnnotationService)
-            ),
           ],
+          annotations:
+            validAnnotationsLayers.length &&
+            validAnnotationsLayers.flatMap((l) => l.annotations.filter(isValidAnnotation)).length
+              ? [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'event_annotations_result',
+                        arguments: {
+                          layers: validAnnotationsLayers.map((layer) =>
+                            annotationLayerToExpression(layer, eventAnnotationService)
+                          ),
+                          datatable: eventAnnotationService.toFetchExpression({
+                            interval:
+                              (validDataLayers[0]?.xAccessor &&
+                                metadata[validDataLayers[0]?.layerId]?.[
+                                  validDataLayers[0]?.xAccessor
+                                ]?.interval) ||
+                              'auto',
+                            groups: validAnnotationsLayers.map((layer) => ({
+                              indexPatternId: layer.indexPatternId,
+                              annotations: layer.annotations.filter(isValidAnnotation),
+                            })),
+                          }),
+                        },
+                      },
+                    ],
+                  },
+                ]
+              : [],
         },
       },
     ],
@@ -415,9 +459,7 @@ const annotationLayerToExpression = (
         arguments: {
           simpleView: [Boolean(layer.simpleView)],
           layerId: [layer.layerId],
-          annotations: layer.annotations
-            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
-            : [],
+          annotations: eventAnnotationService.toExpression(layer.annotations || []),
         },
       },
     ],

@@ -10,7 +10,7 @@ import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { Cluster, LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from './get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from './get_index_patterns';
 
 export interface FindSupportClusterRequestPayload {
   timeRange: TimeRange;
@@ -25,7 +25,7 @@ async function findSupportedBasicLicenseCluster(
 ) {
   const dataset = 'stats';
   const moduleType = 'kibana';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
@@ -53,7 +53,7 @@ async function findSupportedBasicLicenseCluster(
               bool: {
                 should: [
                   { term: { type: 'kibana_stats' } },
-                  { term: { 'data_stream.dataset': 'kibana.stats' } },
+                  { term: { 'data_stream.dataset': getKibanaDataset(dataset) } },
                 ],
               },
             },

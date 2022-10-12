@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./logout'));
     loadTestFile(require.resolve('./header'));
     loadTestFile(require.resolve('./session'));
+    loadTestFile(require.resolve('./audit'));
   });
 }

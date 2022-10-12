@@ -14,6 +14,7 @@ import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertSearchResponse } from '../alerts/types';
 import { useQueryAlerts } from '../alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../alerts/constants';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
 import * as i18n from './translations';
@@ -98,6 +99,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   const { loading: alertsLoading, data: alertsData } = useQueryAlerts<AlertHit, undefined>({
     query: buildLastAlertQuery(ruleId),
     skip: isExistingRule,
+    queryName: ALERTS_QUERY_NAMES.BY_RULE_ID,
   });
 
   useEffect(() => {

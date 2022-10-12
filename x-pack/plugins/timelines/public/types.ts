@@ -12,6 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { ApmBase } from '@elastic/apm-rum';
 import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
@@ -46,6 +47,7 @@ export interface TimelinesStartPlugins {
   data: DataPublicPluginStart;
   cases: CasesUiStart;
   triggersActionsUi: TriggersActionsStart;
+  apm?: ApmBase;
 }
 
 export type TimelinesStartServices = CoreStart & TimelinesStartPlugins;

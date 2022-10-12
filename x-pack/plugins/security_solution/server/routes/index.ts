@@ -68,12 +68,23 @@ import type {
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
-import { readPrebuiltDevToolContentRoute } from '../lib/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route';
-import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
-
+import { findRuleExceptionReferencesRoute } from '../lib/detection_engine/routes/rules/find_rule_exceptions_route';
+import { createRuleExceptionsRoute } from '../lib/detection_engine/routes/rules/create_rule_exceptions_route';
+import {
+  createEsIndexRoute,
+  createPrebuiltSavedObjectsRoute,
+  createStoredScriptRoute,
+  deleteEsIndicesRoute,
+  deletePrebuiltSavedObjectsRoute,
+  deleteStoredScriptRoute,
+  getRiskScoreIndexStatusRoute,
+  installRiskScoresRoute,
+  readPrebuiltDevToolContentRoute,
+  restartTransformRoute,
+} from '../lib/risk_score/routes';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -108,6 +119,7 @@ export const initRoutes = (
     previewRuleDataClient,
     getStartServices
   );
+  createRuleExceptionsRoute(router);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
@@ -129,6 +141,7 @@ export const initRoutes = (
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml);
   exportRulesRoute(router, config, logger);
+  findRuleExceptionReferencesRoute(router);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
@@ -162,14 +175,23 @@ export const initRoutes = (
   readAlertsIndexExistsRoute(router);
   deleteIndexRoute(router);
 
-  readPrebuiltDevToolContentRoute(router);
-  createPrebuiltSavedObjectsRoute(router, security);
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
 
+  // risky score module
+  createEsIndexRoute(router, logger);
+  deleteEsIndicesRoute(router);
+  createStoredScriptRoute(router, logger);
+  deleteStoredScriptRoute(router);
+  readPrebuiltDevToolContentRoute(router);
+  createPrebuiltSavedObjectsRoute(router, logger, security);
+  deletePrebuiltSavedObjectsRoute(router, security);
+  getRiskScoreIndexStatusRoute(router);
+  installRiskScoresRoute(router, logger, security);
+  restartTransformRoute(router, logger);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.

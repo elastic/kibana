@@ -210,7 +210,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
           } = await http.get<{
             meta: Meta;
             results: DomainConfigFromServer[];
-          }>(`/internal/enterprise_search/engines/${engineName}/crawler/domain_configs`, {
+          }>(`/internal/app_search/engines/${engineName}/crawler/domain_configs`, {
             query: { 'page[current]': nextPage, 'page[size]': pageSize },
           });
 

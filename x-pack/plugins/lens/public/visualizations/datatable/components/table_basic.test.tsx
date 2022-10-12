@@ -16,7 +16,7 @@ import { VisualizationContainer } from '../../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { DataContext, DatatableComponent } from './table_basic';
-import { DatatableProps } from '../../../../common/expressions';
+import type { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
@@ -136,6 +136,27 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          interactive
+          renderComplete={renderComplete}
+        />
+      )
+    ).toMatchSnapshot();
+  });
+
+  test('it renders custom row height if set to another value than 1', () => {
+    const { data, args } = sampleArgs();
+
+    expect(
+      shallow(
+        <DatatableComponent
+          data={data}
+          args={{ ...args, rowHeightLines: 5 }}
+          formatFactory={(x) => x as unknown as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
           interactive
           renderComplete={renderComplete}
         />

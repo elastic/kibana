@@ -6,8 +6,15 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { FilesClientFactory } from './types';
+import {
+  getFileKindsRegistry,
+  setFileKindsRegistry,
+  FileKindsRegistryImpl,
+} from '../common/file_kinds_registry';
+import type { FilesClient, FilesClientFactory } from './types';
 import { createFilesClient } from './files_client';
+import { FileKind } from '../common';
+import { ScopedFilesClient } from '.';
 
 /**
  * Public setup-phase contract
@@ -16,30 +23,52 @@ export interface FilesSetup {
   /**
    * A factory for creating an {@link FilesClient} instance. This requires a
    * registered {@link FileKind}.
+   *
+   * @track-adoption
    */
   filesClientFactory: FilesClientFactory;
+
+  /**
+   * Register a {@link FileKind} which allows for specifying details about the files
+   * that will be uploaded.
+   *
+   * @param {FileKind} fileKind - the file kind to register
+   */
+  registerFileKind(fileKind: FileKind): void;
 }
 
-export type FilesStart = FilesSetup;
+export type FilesStart = Pick<FilesSetup, 'filesClientFactory'>;
 
 /**
  * Bringing files to Kibana
  */
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
-  private api: undefined | FilesSetup;
+  private filesClientFactory: undefined | FilesClientFactory;
+
+  constructor() {
+    setFileKindsRegistry(new FileKindsRegistryImpl());
+  }
 
   setup(core: CoreSetup): FilesSetup {
-    this.api = {
-      filesClientFactory: {
-        asScoped(fileKind: string) {
-          return createFilesClient({ fileKind, http: core.http });
-        },
+    this.filesClientFactory = {
+      asScoped<M = unknown>(fileKind: string) {
+        return createFilesClient({ fileKind, http: core.http }) as ScopedFilesClient<M>;
+      },
+      asUnscoped<M>() {
+        return createFilesClient({ http: core.http }) as FilesClient<M>;
       },
     };
-    return this.api;
+    return {
+      filesClientFactory: this.filesClientFactory,
+      registerFileKind: (fileKind: FileKind) => {
+        getFileKindsRegistry().register(fileKind);
+      },
+    };
   }
 
   start(core: CoreStart): FilesStart {
-    return this.api!;
+    return {
+      filesClientFactory: this.filesClientFactory!,
+    };
   }
 }

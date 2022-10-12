@@ -11,7 +11,6 @@ import {
   postNodeSetupStatusRequestQueryRT,
   postNodeSetupStatusResponsePayloadRT,
 } from '../../../../../common/http_api/setup';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
@@ -39,22 +38,13 @@ export function nodeSetupStatusRoute(server: MonitoringCore) {
     handler: async (req) => {
       const nodeUuid = req.params.nodeUuid;
       const skipLiveData = req.query.skipLiveData;
-      const ccs = req.payload.ccs;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server.config, {}, ccs);
-        const status = await getCollectionStatus(
-          req,
-          indexPatterns,
-          undefined,
-          nodeUuid,
-          skipLiveData
-        );
-
+        const status = await getCollectionStatus(req, undefined, nodeUuid, skipLiveData);
         return postNodeSetupStatusResponsePayloadRT.encode(status);
       } catch (err) {
         throw handleError(err, req);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console,max-classes-per-file */
 import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
@@ -14,8 +14,10 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
+import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import { fetchStackVersion } from './common/stack_services';
 
 main();
 
@@ -249,6 +251,13 @@ async function main() {
       type: 'string',
       default: '',
     },
+    randomVersions: {
+      describe:
+        'By default, the data generated (that contains a stack version - ex: `agent.version`) will have a ' +
+        'version number set to be the same as the version of the running stack. Using this flag (`--randomVersions=true`) ' +
+        'will result in random version being generated',
+      default: false,
+    },
   }).argv;
   let ca: Buffer;
 
@@ -323,11 +332,14 @@ async function main() {
   }
 
   let seed = argv.seed;
+
   if (!seed) {
     seed = Math.random().toString();
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
+
   const startTime = new Date().getTime();
+
   if (argv.fleet && !argv.withNewUser) {
     // warn and exit when using fleet flag
     console.log(
@@ -336,6 +348,29 @@ async function main() {
     // eslint-disable-next-line no-process-exit
     process.exit(0);
   }
+
+  let DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator;
+
+  // If `--randomVersions` is NOT set, then use custom generator that ensures all data generated
+  // has a stack version number that matches that of the running stack
+  if (!argv.randomVersions) {
+    const stackVersion = await fetchStackVersion(kbnClient);
+
+    // Document Generator override that uses a custom Endpoint Metadata generator and sets the
+    // `agent.version` to the current version
+    DocGenerator = class extends EndpointDocGenerator {
+      constructor(...args: ConstructorParameters<typeof EndpointDocGenerator>) {
+        const MetadataGenerator = class extends EndpointMetadataGenerator {
+          protected randomVersion(): string {
+            return stackVersion;
+          }
+        };
+
+        super(args[0], MetadataGenerator);
+      }
+    };
+  }
+
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -360,10 +395,11 @@ async function main() {
       ancestryArraySize: argv.ancestryArraySize,
       eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
-    }
+    },
+    DocGenerator
   );
-  // delete endpoint_user after
 
+  // delete endpoint_user after
   if (user) {
     const deleted = await deleteUser(client, user.username);
     if (deleted.found) {

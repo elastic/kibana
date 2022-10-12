@@ -274,6 +274,7 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const shouldShowLinearProgress = isFetched && isRefetching;
     const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isActionInProgress;
+
     return (
       <>
         {shouldShowLinearProgress && (

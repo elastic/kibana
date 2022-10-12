@@ -17,8 +17,10 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { LibraryNotificationActionContext, UnlinkFromLibraryAction } from '.';
+
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { LibraryNotificationActionContext } from './library_notification_action';
 
 export interface LibraryNotificationProps {
   context: LibraryNotificationActionContext;

@@ -9,9 +9,11 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
-import { setMockValues } from '../../__mocks__/kea_logic';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { ProductAccess } from '../../../../common/types';
+
+import { enableBehavioralAnalyticsSection } from '../../../../common/ui_settings_keys';
 
 import { useEnterpriseSearchNav } from './nav';
 
@@ -26,6 +28,7 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
+    mockKibanaValues.uiSettings.get.mockReturnValue(true);
 
     expect(useEnterpriseSearchNav()).toEqual([
       {
@@ -41,8 +44,25 @@ describe('useEnterpriseSearchContentNav', () => {
             id: 'search_indices',
             name: 'Indices',
           },
+          {
+            href: '/app/enterprise_search/content/settings',
+            id: 'settings',
+            items: undefined,
+            name: 'Settings',
+          },
         ],
         name: 'Content',
+      },
+      {
+        id: 'enterpriseSearchAnalytics',
+        items: [
+          {
+            href: '/app/enterprise_search/analytics',
+            id: 'analytics_collections',
+            name: 'Collections',
+          },
+        ],
+        name: 'Analytics',
       },
       {
         id: 'search',
@@ -66,6 +86,10 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Search',
       },
     ]);
+    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(
+      enableBehavioralAnalyticsSection,
+      false
+    );
   });
 
   it('excludes legacy products when the user has no access to them', () => {
@@ -76,7 +100,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
     setMockValues({ productAccess: noProductAccess });
 
-    expect(useEnterpriseSearchNav()[2]).toEqual({
+    expect(useEnterpriseSearchNav()[3]).toEqual({
       id: 'search',
       items: [
         {
@@ -97,7 +121,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
     setMockValues({ productAccess: workplaceSearchProductAccess });
 
-    expect(useEnterpriseSearchNav()[2]).toEqual({
+    expect(useEnterpriseSearchNav()[3]).toEqual({
       id: 'search',
       items: [
         {
@@ -123,7 +147,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
     setMockValues({ productAccess: appSearchProductAccess });
 
-    expect(useEnterpriseSearchNav()[2]).toEqual({
+    expect(useEnterpriseSearchNav()[3]).toEqual({
       id: 'search',
       items: [
         {

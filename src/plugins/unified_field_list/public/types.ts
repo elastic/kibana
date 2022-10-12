@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginStart {}
+
+export type AddFieldFilterHandler = (
+  field: DataViewField | '_exists_',
+  value: unknown,
+  type: '+' | '-'
+) => void;

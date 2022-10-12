@@ -11,7 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import { Section, routeToConnectors, routeToRules, routeToInternalAlerts } from './constants';
+import {
+  Section,
+  routeToConnectors,
+  routeToRules,
+  routeToInternalAlerts,
+  routeToLogs,
+} from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
@@ -25,6 +31,7 @@ const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
+const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
@@ -70,6 +77,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       ),
     });
   }
+
+  tabs.push({
+    id: 'logs',
+    name: <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />,
+  });
 
   if (isInternalAlertsTableEnabled) {
     tabs.push({
@@ -138,6 +150,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
+            <Route
+              exact
+              path={routeToLogs}
+              component={suspendedComponentWithProps(LogsList, 'xl')}
+            />
             {canShowActions && (
               <Route
                 exact

@@ -89,5 +89,26 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         }
       });
     },
+
+    async setSearchTextInAssigneesPopover(text: string) {
+      await (
+        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
+      ).type(text);
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectFirstRowInAssigneesPopover() {
+      await (await find.byClassName('euiSelectableListItem__content')).click();
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectAllRowsInAssigneesPopover() {
+      const rows = await find.allByCssSelector('.euiSelectableListItem__content');
+      for (const row of rows) {
+        await row.click();
+      }
+
+      await header.waitUntilLoadingHasFinished();
+    },
   };
 }

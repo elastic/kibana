@@ -29,7 +29,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         elasticsearch: { skipStartupConnectionCheck: true },
       });
       await root.preboot();
-    }, 30000);
+    });
 
     afterEach(async () => {
       await root.shutdown();

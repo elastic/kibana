@@ -14,7 +14,6 @@ import pMap from 'p-map';
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import type { RuleAlertType } from '../../rules/types';
@@ -26,6 +25,7 @@ import type { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchema | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -92,7 +92,7 @@ export const getIdBulkError = ({
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
-): Array<Partial<RulesSchema>> => {
+): FullResponseSchema[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
 };
 
@@ -104,7 +104,7 @@ export const transformFindAlerts = (
   page: number;
   perPage: number;
   total: number;
-  data: Array<Partial<RulesSchema>>;
+  data: Array<Partial<FullResponseSchema>>;
 } | null => {
   return {
     page: ruleFindResults.page,
@@ -121,7 +121,7 @@ export const transform = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): Partial<RulesSchema> | null => {
+): FullResponseSchema | null => {
   if (isAlertType(rule)) {
     return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }

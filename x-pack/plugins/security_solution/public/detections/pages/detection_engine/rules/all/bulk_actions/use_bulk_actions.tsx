@@ -14,11 +14,11 @@ import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
@@ -359,6 +359,26 @@ export const useBulkActions = ({
               'data-test-subj': 'tagsBulkEditRule',
               disabled: isEditDisabled,
               panel: 1,
+            },
+            {
+              key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
+              name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
+              'data-test-subj': 'addRuleActionsBulk',
+              disabled: !hasActionsPrivileges || isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.add_rule_actions),
+              toolTipContent: !hasActionsPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
+            },
+            {
+              key: i18n.BULK_ACTION_SET_SCHEDULE,
+              name: i18n.BULK_ACTION_SET_SCHEDULE,
+              'data-test-subj': 'setScheduleBulk',
+              disabled: isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.set_schedule),
+              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
             },
             {
               key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,

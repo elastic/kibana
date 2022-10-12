@@ -27,6 +27,7 @@ import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
+import { useAutotuneTimerange } from './use_autotune_timerange';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -58,7 +59,7 @@ export const ResolverWithoutProviders = React.memo(
       shouldUpdate,
       filters,
     });
-
+    useAutotuneTimerange();
     /**
      * This will keep the selectedNode in the view in sync with the nodeID specified in the url
      */

@@ -19,8 +19,9 @@ import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { useDoesEndpointSupportResponder } from '../../../../../common/hooks/endpoint/use_does_endpoint_support_responder';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../../../common/translations';
 
 interface Options {
   isEndpointList: boolean;
@@ -34,7 +35,6 @@ export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined,
   options?: Options
 ): ContextMenuItemNavByRouterProps[] => {
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
@@ -42,7 +42,9 @@ export const useEndpointActionItems = (
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
-  const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
+  const { canAccessResponseConsole, canIsolateHost, canUnIsolateHost } =
+    useUserPrivileges().endpointPrivileges;
+  const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(endpointMetadata);
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -79,8 +81,8 @@ export const useEndpointActionItems = (
 
       const isolationActions = [];
 
-      if (isIsolated) {
-        // Un-isolate is always available to users regardless of license level
+      if (isIsolated && canUnIsolateHost) {
+        // Un-isolate is available to users regardless of license level if they have unisolate permissions
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
           icon: 'lockOpen',
@@ -97,7 +99,7 @@ export const useEndpointActionItems = (
             />
           ),
         });
-      } else if (isPlatinumPlus && isolationSupported) {
+      } else if (isolationSupported && canIsolateHost) {
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
@@ -125,6 +127,7 @@ export const useEndpointActionItems = (
                 'data-test-subj': 'console',
                 icon: 'console',
                 key: 'consoleLink',
+                disabled: !isResponderCapabilitiesEnabled,
                 onClick: (ev: React.MouseEvent) => {
                   ev.preventDefault();
                   showEndpointResponseActionsConsole(endpointMetadata);
@@ -135,6 +138,9 @@ export const useEndpointActionItems = (
                     defaultMessage="Respond"
                   />
                 ),
+                toolTipContent: !isResponderCapabilitiesEnabled
+                  ? UPGRADE_ENDPOINT_FOR_RESPONDER
+                  : '',
               },
             ]
           : []),
@@ -149,8 +155,8 @@ export const useEndpointActionItems = (
                 href: getAppUrl({ path: endpointActionsPath }),
                 children: (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.actions.actionsLog"
-                    defaultMessage="View actions log"
+                    id="xpack.securitySolution.endpoint.actions.responseActionsHistory"
+                    defaultMessage="View response actions history"
                   />
                 ),
               },
@@ -253,9 +259,11 @@ export const useEndpointActionItems = (
     endpointMetadata,
     fleetAgentPolicies,
     getAppUrl,
-    isPlatinumPlus,
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
     options?.isEndpointList,
+    isResponderCapabilitiesEnabled,
+    canIsolateHost,
+    canUnIsolateHost,
   ]);
 };

@@ -12,7 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
@@ -45,10 +45,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 }));
 
 jest.mock('../../../lib/rule_api', () => ({
-  updateAPIKey: jest.fn(),
+  bulkUpdateAPIKey: jest.fn(),
   deleteRules: jest.fn(),
 }));
-const { updateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
+const { bulkUpdateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -211,19 +211,17 @@ describe('rule_details', () => {
           },
         ];
 
+        const wrapper = mountWithIntl(
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        );
+
         expect(
-          mountWithIntl(
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          ).containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          wrapper.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
         ).toBeTruthy();
       });
 
@@ -275,19 +273,10 @@ describe('rule_details', () => {
         );
 
         expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          details.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
         ).toBeTruthy();
-
         expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          details.find('[data-test-subj="actionConnectorName-0-Send email"]').exists
         ).toBeTruthy();
       });
     });
@@ -579,16 +568,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
     });
@@ -627,16 +612,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
     });
@@ -703,8 +684,8 @@ describe('rule_details', () => {
 
       confirmButton.simulate('click');
 
-      expect(updateAPIKey).toHaveBeenCalledTimes(1);
-      expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: rule.id }));
+      expect(bulkUpdateAPIKey).toHaveBeenCalledTimes(1);
+      expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
     });
   });
 

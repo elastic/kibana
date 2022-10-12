@@ -336,7 +336,7 @@ export const PolicyTabs = React.memo(() => {
   // show loader for privileges validation
   if (
     isInHostIsolationExceptionsTab &&
-    (privileges.loading || allPolicyHostIsolationExceptionsListRequest.isLoading)
+    (privileges.loading || allPolicyHostIsolationExceptionsListRequest.isFetching)
   ) {
     return <ManagementPageLoader data-test-subj="policyHostIsolationExceptionsTabLoading" />;
   }

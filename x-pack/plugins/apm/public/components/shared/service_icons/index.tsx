@@ -129,7 +129,12 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.container', {
         defaultMessage: 'Container',
       }),
-      component: <ContainerDetails container={details?.container} />,
+      component: (
+        <ContainerDetails
+          container={details?.container}
+          kubernetes={details?.kubernetes}
+        />
+      ),
     },
     {
       key: 'serverless',

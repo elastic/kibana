@@ -21,7 +21,7 @@ export const sampleMetricFormulaAttribute = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [
@@ -174,5 +174,5 @@ export const sampleMetricFormulaAttribute = {
     },
   },
   title: 'Prefilled from exploratory view app',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
 };

@@ -11,19 +11,23 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import { enableBehavioralAnalyticsSection } from '../../../../common/ui_settings_keys';
+import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess } = useValues(KibanaLogic);
+  const { productAccess, uiSettings } = useValues(KibanaLogic);
+
+  const analyticsSectionEnabled = uiSettings?.get<boolean>(enableBehavioralAnalyticsSection, false);
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -50,11 +54,45 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
           }),
         },
+        {
+          id: 'settings',
+          name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
+            defaultMessage: 'Settings',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
+          }),
+        },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',
       }),
     },
+    ...(analyticsSectionEnabled
+      ? [
+          {
+            id: 'enterpriseSearchAnalytics',
+            items: [
+              {
+                id: 'analytics_collections',
+                name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
+                  defaultMessage: 'Collections',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ANALYTICS_PLUGIN.URL,
+                }),
+              },
+            ],
+            name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
+              defaultMessage: 'Analytics',
+            }),
+          },
+        ]
+      : []),
     {
       id: 'search',
       items: [

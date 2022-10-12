@@ -40,7 +40,10 @@ const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => 
     );
     return alertInstance;
   },
-  hasReachedAlertLimit: () => false,
+  alertLimit: {
+    getValue: () => 1000,
+    setLimitReached: () => {},
+  },
   done: () => ({ getRecoveredAlerts: () => [] }),
 });
 

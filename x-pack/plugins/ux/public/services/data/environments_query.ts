@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import {
   SERVICE_ENVIRONMENT,

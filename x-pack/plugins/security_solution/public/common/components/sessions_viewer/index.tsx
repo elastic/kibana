@@ -16,6 +16,8 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { useLicense } from '../../hooks/use_license';
+import { TimelineId } from '../../../../common/types/timeline';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -74,9 +76,13 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     ],
     [pageFilters, parsedFilterQuery]
   );
-
-  const ACTION_BUTTON_COUNT = 5;
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT =
+    isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions ? 5 : 4;
+  const leadingControlColumns = useMemo(
+    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
+    [ACTION_BUTTON_COUNT]
+  );
 
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;

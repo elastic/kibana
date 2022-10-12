@@ -36,7 +36,7 @@ import type {
   PackageVerificationResult,
 } from '../../../types';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+import { FleetError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
@@ -170,14 +170,14 @@ export async function handleInstallPackageFailure({
   spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  error: IngestManagerError | Boom.Boom | Error;
+  error: FleetError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
   spaceId: string;
 }) {
-  if (error instanceof IngestManagerError) {
+  if (error instanceof FleetError) {
     return;
   }
   const logger = appContextService.getLogger();
@@ -241,6 +241,7 @@ interface InstallUploadedArchiveParams {
   archiveBuffer: Buffer;
   contentType: string;
   spaceId: string;
+  version?: string;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -301,7 +302,7 @@ async function installPackageFromRegistry({
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
       }),
-      Registry.getRegistryPackage(pkgName, pkgVersion, {
+      Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,
       }),
     ]);
@@ -437,6 +438,7 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
   spaceId,
+  version,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
@@ -449,21 +451,26 @@ async function installPackageByUpload({
   try {
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
 
+    // Allow for overriding the version in the manifest for cases where we install
+    // stack-aligned bundled packages to support special cases around the
+    // `forceAlignStackVersion` flag in `fleet_packages.json`.
+    const pkgVersion = version || packageInfo.version;
+
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName: packageInfo.name,
     });
 
-    installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+    installType = getInstallType({ pkgVersion, installedPkg });
 
     span?.addLabels({
       packageName: packageInfo.name,
-      packageVersion: packageInfo.version,
+      packageVersion: pkgVersion,
       installType,
     });
 
     telemetryEvent.packageName = packageInfo.name;
-    telemetryEvent.newVersion = packageInfo.version;
+    telemetryEvent.newVersion = pkgVersion;
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
@@ -472,14 +479,14 @@ async function installPackageByUpload({
     deleteVerificationResult(packageInfo);
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
-      version: packageInfo.version,
+      version: pkgVersion,
       archiveBuffer,
       contentType,
     });
 
     setPackageInfo({
       name: packageInfo.name,
-      version: packageInfo.version,
+      version: pkgVersion,
       packageInfo,
     });
 
@@ -505,7 +512,7 @@ async function installPackageByUpload({
       logger,
       installedPkg,
       paths,
-      packageInfo,
+      packageInfo: { ...packageInfo, version: pkgVersion },
       installType,
       installSource,
       spaceId,
@@ -572,6 +579,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         archiveBuffer: matchingBundledPackage.buffer,
         contentType: 'application/zip',
         spaceId,
+        version: matchingBundledPackage.version,
       });
 
       return { ...response, installSource: 'bundled' };

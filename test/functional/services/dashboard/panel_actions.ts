@@ -79,7 +79,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.openContextMenu();
     const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
@@ -92,7 +92,7 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
-    await this.testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
   }
 
   async clickExpandPanelToggle() {
@@ -177,6 +177,14 @@ export class DashboardPanelActionsService extends FtrService {
     ).getAttribute('data-search-session-id');
     await this.inspector.close();
     return searchSessionId;
+  }
+
+  async getSearchResponseByTitle(title: string) {
+    await this.openInspectorByTitle(title);
+    await this.inspector.openInspectorRequestsView();
+    const response = await this.inspector.getResponse();
+    await this.inspector.close();
+    return response;
   }
 
   async openInspector(parent?: WebElementWrapper) {

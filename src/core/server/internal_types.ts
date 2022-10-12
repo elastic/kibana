@@ -46,16 +46,23 @@ import {
   InternalSavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server-internal';
 import {
+  InternalDeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+} from '@kbn/core-deprecations-server-internal';
+import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
-} from './ui_settings';
-import { InternalRenderingServiceSetup } from './rendering';
-import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
-import { InternalStatusServiceSetup } from './status';
-import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
-import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
+} from '@kbn/core-ui-settings-server-internal';
+import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
+import type {
+  InternalHttpResourcesPreboot,
+  InternalHttpResourcesSetup,
+} from '@kbn/core-http-resources-server-internal';
 
 /** @internal */
 export interface InternalCorePreboot {

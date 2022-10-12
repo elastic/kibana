@@ -6,7 +6,7 @@
  */
 
 export const elasticAgentStandaloneManifest = `---
-# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
+# For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -23,9 +23,11 @@ spec:
       labels:
         app: elastic-agent
     spec:
-      # Tolerations are needed to run Elastic Agent on Kubernetes master nodes.
-      # Agents running on master nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
+      # Tolerations are needed to run Elastic Agent on Kubernetes control-plane nodes.
+      # Agents running on control-plane nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
       tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
@@ -37,7 +39,6 @@ spec:
           args: [
             "-c", "/etc/agent.yml",
             "-e",
-            "-d", "'*'",
           ]
           env:
             # The basic authentication username used to connect to Elasticsearch
@@ -59,10 +60,10 @@ spec:
             runAsUser: 0
           resources:
             limits:
-              memory: 500Mi
+              memory: 700Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 400Mi
           volumeMounts:
             - name: datastreams
               mountPath: /etc/agent.yml
@@ -70,12 +71,6 @@ spec:
               subPath: agent.yml
             - name: proc
               mountPath: /hostfs/proc
-              readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
-              readOnly: true
-            - name: var-lib
-              mountPath: /hostfs/var/lib
               readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
@@ -85,6 +80,12 @@ spec:
               readOnly: true
             - name: varlog
               mountPath: /var/log
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+              readOnly: true
+            - name: var-lib
+              mountPath: /hostfs/var/lib
               readOnly: true
             - name: passwd
               mountPath: /hostfs/etc/passwd
@@ -103,6 +104,15 @@ spec:
         - name: proc
           hostPath:
             path: /proc
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: varlog
+          hostPath:
+            path: /var/log
         # Needed for cloudbeat
         - name: etc-kubernetes
           hostPath:
@@ -119,15 +129,6 @@ spec:
         - name: group
           hostPath:
             path: /etc/group
-        - name: cgroup
-          hostPath:
-            path: /sys/fs/cgroup
-        - name: varlibdockercontainers
-          hostPath:
-            path: /var/lib/docker/containers
-        - name: varlog
-          hostPath:
-            path: /var/log
         # Needed for cloudbeat
         - name: etcsysmd
           hostPath:
@@ -234,7 +235,7 @@ rules:
       - rolebindings
       - roles
     verbs: ["get", "list", "watch"]
-    # Needed for cloudbeat
+  # Needed for cloudbeat
   - apiGroups: ["policy"]
     resources:
       - podsecuritypolicies
@@ -298,9 +299,11 @@ spec:
       labels:
         app: elastic-agent
     spec:
-      # Tolerations are needed to run Elastic Agent on Kubernetes master nodes.
-      # Agents running on master nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
+      # Tolerations are needed to run Elastic Agent on Kubernetes control-plane nodes.
+      # Agents running on control-plane nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
       tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
@@ -355,12 +358,6 @@ spec:
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
-              readOnly: true
-            - name: var-lib
-              mountPath: /hostfs/var/lib
-              readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
               readOnly: true
@@ -369,6 +366,12 @@ spec:
               readOnly: true
             - name: varlog
               mountPath: /var/log
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+              readOnly: true
+            - name: var-lib
+              mountPath: /hostfs/var/lib
               readOnly: true
             - name: passwd
               mountPath: /hostfs/etc/passwd

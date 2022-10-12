@@ -13,7 +13,7 @@ import {
 import { waitForPageToBeLoaded } from './common';
 
 export const goToCreateNewCase = () => {
-  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN).click({ force: true });
+  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN, { timeout: 60000 }).click({ force: true });
 };
 
 export const goToCaseDetails = () => {

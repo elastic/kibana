@@ -34,6 +34,7 @@
         "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
+        "trackAdoption": false,
         "references": [],
         "children": [
           {
@@ -48,6 +49,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -61,6 +63,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -75,6 +78,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -97,6 +101,7 @@
         "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
+        "trackAdoption": false,
         "references": [],
         "children": [
           {
@@ -111,6 +116,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -124,6 +130,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -138,6 +145,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

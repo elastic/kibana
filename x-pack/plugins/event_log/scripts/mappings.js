@@ -50,6 +50,10 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          outcome: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
         },
       },
       alert: {
@@ -107,6 +111,30 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       execution_gap_duration_s: {
+                        type: 'long',
+                      },
+                      rule_type_run_duration_ms: {
+                        type: 'long',
+                      },
+                      process_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      trigger_actions_duration_ms: {
+                        type: 'long',
+                      },
+                      process_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      claim_to_start_duration_ms: {
+                        type: 'long',
+                      },
+                      prepare_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      total_enrichment_duration_ms: {
                         type: 'long',
                       },
                     },

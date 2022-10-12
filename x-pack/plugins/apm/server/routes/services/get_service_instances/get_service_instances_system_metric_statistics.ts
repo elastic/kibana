@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
@@ -145,6 +145,7 @@ export async function getServiceInstancesSystemMetricStatistics<
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

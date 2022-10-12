@@ -6,9 +6,10 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
   ]
 }

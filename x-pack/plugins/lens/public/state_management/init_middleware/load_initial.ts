@@ -97,7 +97,13 @@ export function loadInitial(
   },
   autoApplyDisabled: boolean
 ) {
-  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const {
+    lensServices,
+    datasourceMap,
+    embeddableEditorIncomingState,
+    initialContext,
+    visualizationMap,
+  } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
@@ -109,6 +115,11 @@ export function loadInitial(
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
+  let activeDatasourceId: string | undefined;
+  if (initialContext && 'query' in initialContext) {
+    activeDatasourceId = 'textBased';
+  }
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
@@ -117,22 +128,26 @@ export function loadInitial(
     return initializeSources(
       {
         datasourceMap,
+        visualizationMap,
+        visualizationState: lens.visualization,
         datasourceStates: lens.datasourceStates,
         initialContext,
+        adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
         ...loaderSharedArgs,
       },
       {
         isFullEditor: true,
       }
     )
-      .then(({ states, indexPatterns, indexPatternRefs }) => {
+      .then(({ datasourceStates, indexPatterns, indexPatternRefs }) => {
         store.dispatch(
           initEmpty({
             newState: {
               ...emptyState,
               dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
-              datasourceStates: Object.entries(states).reduce(
+              ...(activeDatasourceId && { activeDatasourceId }),
+              datasourceStates: Object.entries(datasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
                   [datasourceId]: {
@@ -186,19 +201,27 @@ export function loadInitial(
           const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
+
+          const docVisualizationState = {
+            activeId: doc.visualizationType,
+            state: doc.state.visualization,
+          };
           return initializeSources(
             {
               datasourceMap,
+              visualizationMap,
+              visualizationState: docVisualizationState,
               datasourceStates: docDatasourceStates,
-              references: doc.references,
+              references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
               dataViews: lensServices.dataViews,
               storage: lensServices.storage,
+              adHocDataViews: doc.state.adHocDataViews,
               defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
             },
             { isFullEditor: true }
           )
-            .then(({ states, indexPatterns, indexPatternRefs }) => {
+            .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
               const currentSessionId = data.search.session.getSessionId();
               store.dispatch(
                 setState({
@@ -217,10 +240,10 @@ export function loadInitial(
                   activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
-                    state: doc.state.visualization,
+                    state: visualizationState,
                   },
                   dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-                  datasourceStates: Object.entries(states).reduce(
+                  datasourceStates: Object.entries(datasourceStates).reduce(
                     (state, [datasourceId, datasourceState]) => ({
                       ...state,
                       [datasourceId]: {

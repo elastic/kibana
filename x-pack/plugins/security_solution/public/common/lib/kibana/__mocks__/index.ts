@@ -16,6 +16,7 @@ import {
   createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
+import { mockApm } from '../../apm/service.mock';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
@@ -24,6 +25,7 @@ export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => 
 export const useKibana = jest.fn().mockReturnValue({
   services: {
     ...mockStartServicesMock,
+    apm: mockApm(),
     uiSettings: {
       get: jest.fn(),
       set: jest.fn(),
@@ -50,6 +52,9 @@ export const useKibana = jest.fn().mockReturnValue({
           setAppFilters: jest.fn(),
         },
       },
+    },
+    osquery: {
+      OsqueryResults: jest.fn().mockReturnValue(null),
     },
     timelines: createTGridMocks(),
     savedObjectsTagging: {

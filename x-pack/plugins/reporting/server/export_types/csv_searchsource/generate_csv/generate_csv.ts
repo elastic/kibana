@@ -24,11 +24,11 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { ReportingConfig } from '../../..';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
+import { ReportingConfigType } from '../../../config';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
@@ -53,7 +53,7 @@ export class CsvGenerator {
 
   constructor(
     private job: Omit<JobParamsCSV, 'version'>,
-    private config: ReportingConfig,
+    private config: ReportingConfigType['csv'],
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
@@ -84,7 +84,13 @@ export class CsvGenerator {
     try {
       results = (
         await lastValueFrom(
-          this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY })
+          this.clients.data.search(searchParams, {
+            strategy: ES_SEARCH_STRATEGY,
+            transport: {
+              maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+              requestTimeout: this.config.scroll.duration,
+            },
+          })
         )
       ).rawResponse as estypes.SearchResponse<unknown>;
     } catch (err) {
@@ -187,12 +193,13 @@ export class CsvGenerator {
    * Use the list of columns to generate the header row
    */
   private generateHeader(
-    columns: string[],
+    columns: Set<string>,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
-    const header = columns.map(this.escapeValues(settings)).join(settings.separator) + '\n';
+    const header =
+      Array.from(columns).map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
@@ -207,7 +214,7 @@ export class CsvGenerator {
    * Format a Datatable into rows of CSV content
    */
   private async generateRows(
-    columns: string[],
+    columns: Set<string>,
     table: Datatable,
     builder: MaxSizeStringBuilder,
     formatters: Record<string, FieldFormat>,
@@ -309,6 +316,7 @@ export class CsvGenerator {
       this.logger.error(err);
     }
 
+    const columns = new Set<string>(this.job.columns ?? []);
     try {
       do {
         if (this.cancellationToken.isCancelled()) {
@@ -360,11 +368,8 @@ export class CsvGenerator {
           break;
         }
 
-        let columns: string[];
-        if (this.job.columns && this.job.columns.length > 0) {
-          columns = this.job.columns;
-        } else {
-          columns = this.getColumnsFromTabify(table);
+        if (!this.job.columns?.length) {
+          this.getColumnsFromTabify(table).forEach((column) => columns.add(column));
         }
 
         if (first) {

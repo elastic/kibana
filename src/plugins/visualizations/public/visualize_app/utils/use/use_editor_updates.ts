@@ -54,6 +54,7 @@ export const useEditorUpdates = (
             query: queryString.getQuery() as Query,
             linked: !!vis.data.savedSearchId,
             savedSearch,
+            unifiedSearch: services.unifiedSearch,
           });
         } else {
           embeddableHandler.updateInput({

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiToolTip,
   EuiBadge,

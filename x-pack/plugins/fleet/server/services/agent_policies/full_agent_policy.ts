@@ -18,11 +18,14 @@ import type {
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 import { dataTypes, outputType } from '../../../common/constants';
-import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
+import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
+
+import { getPackageInfo } from '../epm/packages';
+import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -80,6 +83,34 @@ export async function getFullAgentPolicy(
 
   const sourceUri = await getSourceUriForAgentPolicy(soClient, agentPolicy);
 
+  // Build up an in-memory object for looking up Package Info, so we don't have
+  // call `getPackageInfo` for every single policy, which incurs performance costs
+  const packageInfoCache = new Map<string, PackageInfo>();
+  for (const policy of agentPolicy.package_policies as PackagePolicy[]) {
+    if (!policy.package || packageInfoCache.has(pkgToPkgKey(policy.package))) {
+      continue;
+    }
+
+    // Prime the cache w/ just the package key - we'll fetch all the package
+    // info concurrently below
+    packageInfoCache.set(pkgToPkgKey(policy.package), {} as PackageInfo);
+  }
+
+  // Fetch all package info concurrently
+  await Promise.all(
+    Array.from(packageInfoCache.keys()).map(async (pkgKey) => {
+      const { pkgName, pkgVersion } = splitPkgKey(pkgKey);
+
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName,
+        pkgVersion,
+      });
+
+      packageInfoCache.set(pkgKey, packageInfo);
+    })
+  );
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -93,8 +124,8 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs: await storedPackagePoliciesToAgentInputs(
-      soClient,
       agentPolicy.package_policies as PackagePolicy[],
+      packageInfoCache,
       getOutputIdForAgentPolicy(dataOutput)
     ),
     revision: agentPolicy.revision,
@@ -116,7 +147,10 @@ export async function getFullAgentPolicy(
   };
 
   const dataPermissions =
-    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies)) || {};
+    (await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      agentPolicy.package_policies
+    )) || {};
 
   dataPermissions._elastic_agent_checks = {
     cluster: DEFAULT_CLUSTER_PERMISSIONS,

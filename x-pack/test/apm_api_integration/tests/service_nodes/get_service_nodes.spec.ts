@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
+      endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
       params: {
         path: { serviceName },
         query: {
@@ -50,7 +50,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Service nodes when data is loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
-      const instance = apm.service(serviceName, 'production', 'go').instance(instanceName);
+      const instance = apm
+        .service({ name: serviceName, environment: 'production', agentName: 'go' })
+        .instance(instanceName);
       await synthtraceEsClient.index(
         timerange(start, end)
           .interval('1m')

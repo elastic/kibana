@@ -7,25 +7,19 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import {
-  EuiPageTemplateProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
-import { RunTestManually } from './components/monitor_summary/run_test_manually';
-import { MonitorSummaryHeaderContent } from './components/monitor_summary/monitor_summary_header_content';
-import { MonitorSummaryTitle } from './components/monitor_summary/monitor_summary_title';
-import { MonitorSummaryPage } from './components/monitor_summary/monitor_summary';
+import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
+import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
 import { OverviewPage } from './components/monitors_page/overview/overview_page';
@@ -44,20 +38,20 @@ import {
   GETTING_STARTED_ROUTE,
   MONITOR_ROUTE,
 } from '../../../common/constants';
+import { PLUGIN } from '../../../common/constants/plugin';
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
+import { RunTestManually } from './components/monitor_details/run_test_manually';
+import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
+import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
+import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
 
-type RouteProps = {
+type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  pageHeader?: {
-    pageTitle: string | JSX.Element;
-    children?: JSX.Element;
-    rightSideItems?: JSX.Element[];
-  };
-} & EuiPageTemplateProps;
+};
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
@@ -72,7 +66,8 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
-  history: ReturnType<typeof useHistory>
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string
 ): RouteProps[] => {
   return [
     {
@@ -83,30 +78,43 @@ const getRoutes = (
       path: GETTING_STARTED_ROUTE,
       component: () => <GettingStartedPage />,
       dataTestSubj: 'syntheticsGettingStartedPage',
-      template: 'centeredBody',
-      pageContentProps: {
+      pageSectionProps: {
+        alignment: 'center',
         paddingSize: 'none',
-        hasShadow: false,
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
-        defaultMessage: 'Synthetics Getting Started | {baseTitle}',
+      title: i18n.translate('xpack.synthetics.monitorDetails.title', {
+        defaultMessage: 'Synthetics Monitor Details | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      component: () => <MonitorSummaryPage />,
-      template: 'centeredBody',
-      dataTestSubj: 'syntheticsGettingStartedPage',
-      pageContentProps: {
-        paddingSize: 'none',
-        hasShadow: false,
-      },
+      component: () => <MonitorDetailsPage />,
+      dataTestSubj: 'syntheticsMonitorDetailsPage',
       pageHeader: {
-        paddingSize: 'none',
-        children: <MonitorSummaryHeaderContent />,
-        pageTitle: <MonitorSummaryTitle />,
-        rightSideItems: [<RunTestManually />],
+        pageTitle: <MonitorDetailsPageTitle />,
+        breadcrumbs: [
+          {
+            text: (
+              <>
+                <EuiIcon size="s" type="arrowLeft" />{' '}
+                <FormattedMessage
+                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+                  defaultMessage="Monitors"
+                />
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
+          },
+        ],
+        rightSideItems: [
+          <RunTestManually />,
+          <MonitorDetailsLastRun />,
+          <MonitorDetailsStatus />,
+          <MonitorDetailsLocation />,
+        ],
       },
     },
     {
@@ -272,10 +280,15 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
+  const { services } = useKibana();
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const routes = getRoutes(euiTheme, history);
+  const routes = getRoutes(
+    euiTheme,
+    history,
+    services.application!.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+  );
 
   apiService.addInspectorRequest = addInspectorRequest;
 

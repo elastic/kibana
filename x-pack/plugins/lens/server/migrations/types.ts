@@ -270,5 +270,57 @@ export interface XYVisualizationState830 extends VisState820 {
 export type VisStatePre830 = XYVisualizationStatePre830;
 export type VisState830 = XYVisualizationState830;
 
+export interface XYVisStatePre850 {
+  layers: Array<
+    | {
+        layerId: string;
+        layerType: Exclude<LayerType, 'annotations'>;
+      }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string }>;
+      }
+  >;
+}
+
+export interface XYVisState850 {
+  layers: Array<
+    | {
+        layerId: string;
+        layerType: Exclude<LayerType, 'annotations'>;
+      }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string; type: 'manual' | 'query' }>;
+        ignoreGlobalFilters: boolean;
+      }
+  >;
+}
+export type VisState850 = XYVisState850;
 export type VisState840 = VisState830;
 export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
+
+export type LensDocShape850<VisualizationState = unknown> = LensDocShape840<VisualizationState>;
+
+export type LensDocShape860<VisualizationState = unknown> = Omit<
+  LensDocShape850<VisualizationState>,
+  'state'
+> & {
+  state: Omit<LensDocShape850<VisualizationState>['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      // This is hardcoded as our only datasource
+      formBased: {
+        currentIndexPatternId: string;
+        layers: Record<
+          string,
+          {
+            columnOrder: string[];
+            columns: Record<string, Record<string, unknown>>;
+          }
+        >;
+      };
+    };
+  };
+};

@@ -27,7 +27,7 @@
       "matchPackageNames": ["@elastic/charts"],
       "reviewers": ["team:datavis", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "auto-backport", "Team:DataVis"],
+      "labels": ["release_note:skip", "backport:skip", "Team:DataVis"],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,
@@ -125,7 +125,7 @@
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Security", "release_note:skip", "auto-backport"],
+      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
       "enabled": true
     },
     {
@@ -207,6 +207,24 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "Profiling",
+      "matchPackageNames": ["peggy", "@types/dagre"],
+      "reviewers": ["team:profiling-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "TTY Output",
+      "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
+      "reviewers": ["team:awp-viz"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }

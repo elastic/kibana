@@ -21,6 +21,7 @@
         "description": [],
         "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
@@ -33,7 +34,22 @@
               "InternalHttpServiceSetup"
             ],
             "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-internal",
+            "id": "def-server.MetricsServiceSetupDeps.elasticsearchService",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearchService",
+            "description": [],
+            "signature": [
+              "InternalElasticsearchServiceSetup"
+            ],
+            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -51,6 +67,7 @@
         "description": [],
         "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
@@ -63,7 +80,8 @@
               "\"ops\""
             ],
             "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
@@ -85,7 +103,8 @@
               "<string | undefined>; }>; }>"
             ],
             "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
