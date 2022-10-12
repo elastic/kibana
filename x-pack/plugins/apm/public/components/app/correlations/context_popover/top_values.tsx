@@ -27,7 +27,7 @@ import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useFetchParams } from '../use_fetch_params';
-
+// @TODO: Delete this file
 export type OnAddFilter = ({
   fieldName,
   fieldValue,

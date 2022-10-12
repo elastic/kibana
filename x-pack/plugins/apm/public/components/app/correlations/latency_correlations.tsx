@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
@@ -45,7 +46,6 @@ import { getOverallHistogram } from './utils/get_overall_histogram';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
@@ -201,10 +201,9 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           render: (_, { fieldName, fieldValue }) => (
             <>
               {fieldName}
-              <CorrelationsContextPopover
+              <FieldStatsPopover
                 fieldName={fieldName}
                 fieldValue={fieldValue}
-                topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
                 onAddFilter={onAddFilter}
               />
             </>

@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import {
   asPercent,
   asPreciseDecimal,
@@ -50,7 +51,6 @@ import { DurationDistributionChart } from '../../shared/charts/duration_distribu
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
@@ -295,10 +295,9 @@ export function FailedTransactionsCorrelations({
         render: (_, { fieldName, fieldValue }) => (
           <>
             {fieldName}
-            <CorrelationsContextPopover
+            <FieldStatsPopover
               fieldName={fieldName}
               fieldValue={fieldValue}
-              topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
               onAddFilter={onAddFilter}
             />
           </>

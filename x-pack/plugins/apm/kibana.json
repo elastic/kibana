@@ -20,14 +20,17 @@
     "share",
     "unifiedSearch",
     "dataViews",
-    "advancedSettings"
+    "advancedSettings",
+    "unifiedFieldList"
   ],
   "optionalPlugins": [
     "actions",
     "alerting",
     "cases",
+    "charts",
     "cloud",
     "fleet",
+    "fieldFormats",
     "home",
     "ml",
     "security",

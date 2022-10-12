@@ -17,10 +17,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type {
-  DataPublicPluginStart,
-  DataPublicPluginSetup,
-} from '@kbn/data-plugin/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -51,6 +48,8 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import {
   getApmEnrollmentFlyoutData,
@@ -82,7 +81,7 @@ export interface ApmPluginSetupDeps {
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
-  data: DataPublicPluginStart;
+  charts?: ChartsPluginStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -92,6 +91,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
+  fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   infra?: InfraClientStartExports;
