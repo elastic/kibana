@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { act, screen, render, fireEvent, waitFor } from '@testing-library/react';
+import { act, screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import OpsgenieParamFields from './params_useform';
+import OpsgenieParamFields from './params';
 import { OpsgenieSubActions } from '../../../../common';
 import { OpsgenieActionParams } from '../../../../server/connector_types/stack';
 
@@ -67,7 +67,7 @@ describe('OpsgenieParamFields', () => {
 
     expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
-    expect(screen.getByTestId('opsgenie-eventActionSelect'));
+    expect(screen.getByTestId('opsgenie-subActionSelect'));
 
     expect(screen.getByText('hello')).toBeInTheDocument();
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('OpsgenieParamFields', () => {
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
-    expect(screen.getByTestId('opsgenie-eventActionSelect'));
+    expect(screen.getByTestId('opsgenie-subActionSelect'));
 
     expect(screen.queryByText('hello')).not.toBeInTheDocument();
     expect(screen.queryByText('123')).not.toBeInTheDocument();
@@ -120,7 +120,14 @@ describe('OpsgenieParamFields', () => {
     `);
   });
 
-  it('preserves the previous message value when switching between the create and close alert event actions', async () => {
+  it('does not render the create or close alert components if the subAction is undefined', async () => {
+    render(<OpsgenieParamFields {...{ ...defaultCreateAlertProps, actionParams: {} }} />);
+
+    expect(screen.queryByTestId('opsgenie-alias-row')).not.toBeInTheDocument();
+    expect(screen.queryByText('Message')).not.toBeInTheDocument();
+  });
+
+  it('preserves the previous alias value when switching between the create and close alert event actions', async () => {
     const { rerender } = render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
     expect(screen.getByText('hello')).toBeInTheDocument();
@@ -129,37 +136,72 @@ describe('OpsgenieParamFields', () => {
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
     expect(editAction).toBeCalledTimes(1);
 
-    rerender(<OpsgenieParamFields {...defaultCloseAlertProps} />);
-
-    expect(screen.queryByText('hello')).not.toBeInTheDocument();
-    expect(screen.getByDisplayValue('456')).toBeInTheDocument();
-
-    expect(editAction).toBeCalledTimes(1);
-
-    // The action params should get overridden with the stored state action params
-    // alias: 'a new alias' and message: 'hello'
     rerender(
       <OpsgenieParamFields
         {...{
-          ...defaultCreateAlertProps,
+          ...defaultCloseAlertProps,
           actionParams: {
-            subAction: OpsgenieSubActions.CreateAlert,
-            subActionParams: { alias: '123', message: 'message' },
+            ...defaultCloseAlertProps.actionParams,
+            subActionParams: {
+              alias: 'a new alias',
+            },
           },
         }}
       />
     );
 
+    expect(screen.queryByText('hello')).not.toBeInTheDocument();
+
+    expect(editAction).toBeCalledTimes(2);
+
     expect(editAction.mock.calls[1]).toMatchInlineSnapshot(`
-      Array [
-        "subActionParams",
-        Object {
-          "alias": "a new alias",
-          "message": "hello",
-        },
-        0,
-      ]
-    `);
+    Array [
+      "subActionParams",
+      Object {
+        "alias": "a new alias",
+      },
+      0,
+    ]
+  `);
+  });
+
+  it('only preserves the previous alias value when switching between the create and close alert event actions', async () => {
+    const { rerender } = render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
+
+    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('123')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
+    expect(editAction).toBeCalledTimes(1);
+
+    rerender(
+      <OpsgenieParamFields
+        {...{
+          ...defaultCloseAlertProps,
+          actionParams: {
+            ...defaultCloseAlertProps.actionParams,
+            subActionParams: {
+              message: 'hello',
+              alias: 'a new alias',
+            },
+          },
+        }}
+      />
+    );
+
+    expect(screen.queryByText('hello')).not.toBeInTheDocument();
+
+    expect(editAction).toBeCalledTimes(2);
+
+    expect(editAction.mock.calls[1]).toMatchInlineSnapshot(`
+    Array [
+      "subActionParams",
+      Object {
+        "alias": "a new alias",
+      },
+      0,
+    ]
+  `);
   });
 
   it('calls editAction when changing the subAction', async () => {
@@ -167,7 +209,7 @@ describe('OpsgenieParamFields', () => {
 
     act(() =>
       userEvent.selectOptions(
-        screen.getByTestId('opsgenie-eventActionSelect'),
+        screen.getByTestId('opsgenie-subActionSelect'),
         screen.getByText('Close Alert')
       )
     );

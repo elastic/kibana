@@ -13,6 +13,7 @@ import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [
+  '.opsgenie',
   '.email',
   '.index',
   '.pagerduty',

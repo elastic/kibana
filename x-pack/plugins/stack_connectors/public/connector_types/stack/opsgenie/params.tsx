@@ -12,7 +12,6 @@ import {
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect, RecursivePartial } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionParams,
@@ -30,11 +29,11 @@ type SubActionProps<SubActionParams> = Omit<
 };
 
 const CreateAlertComponent: React.FC<SubActionProps<OpsgenieCreateAlertParams>> = ({
-  subActionParams,
   editSubAction,
   errors,
   index,
   messageVariables,
+  subActionParams,
 }) => {
   return (
     <>
@@ -63,11 +62,11 @@ const CreateAlertComponent: React.FC<SubActionProps<OpsgenieCreateAlertParams>> 
 CreateAlertComponent.displayName = 'CreateAlertComponent';
 
 const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertParams>> = ({
-  subActionParams,
   editSubAction,
   errors,
   index,
   messageVariables,
+  subActionParams,
 }) => {
   const isAliasInvalid =
     errors['subActionParams.alias'] !== undefined &&
@@ -98,11 +97,6 @@ const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertParams>> = 
 
 CloseAlertComponent.displayName = 'CloseAlertComponent';
 
-interface SubActionState {
-  [OpsgenieSubActions.CreateAlert]: RecursivePartial<OpsgenieCreateAlertParams> | undefined;
-  [OpsgenieSubActions.CloseAlert]: RecursivePartial<OpsgenieCloseAlertParams> | undefined;
-}
-
 const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
   actionParams,
   editAction,
@@ -112,13 +106,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
 }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const currentSubAction = useRef<OpsgenieSubActions | undefined>(subAction);
-  const stateParams = useRef<SubActionState>({ createAlert: undefined, closeAlert: undefined });
-
-  // const [subActionParamsState, setSubActionParamsState] = useState<SubActionState>({
-  //   createAlert: {},
-  //   closeAlert: {},
-  // });
+  const currentSubAction = useRef<string>(subAction ?? OpsgenieSubActions.CreateAlert);
 
   const actionOptions = [
     {
@@ -140,54 +128,33 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
 
   const editSubAction = useCallback(
     (key, value) => {
-      if (subAction) {
-        const updatedState = { ...stateParams.current[subAction], [key]: value };
-        stateParams.current[subAction] = updatedState;
-        editAction('subActionParams', updatedState, index);
-      }
+      editAction('subActionParams', { ...subActionParams, [key]: value }, index);
     },
-    [editAction, index, subAction]
+    [editAction, index, subActionParams]
   );
-
-  useEffect(() => {
-    console.log('subAction', subAction);
-    console.log('current sub action', currentSubAction.current);
-    console.log('sub action params', JSON.stringify(subActionParams, null, 2));
-    console.log('state', JSON.stringify(stateParams.current, null, 2));
-    if (
-      subAction &&
-      subActionParams &&
-      stateParams.current[subAction] == null &&
-      currentSubAction.current != null &&
-      // check to see if the params match the old sub action, if so then they haven't been refreshed yet so ignore them
-      !isEqual(subActionParams, stateParams.current[currentSubAction.current]) &&
-      !isEqual(subActionParams, stateParams.current[subAction])
-    ) {
-      console.log('update the state');
-      stateParams.current[subAction] = subActionParams;
-      editAction('subActionParams', stateParams.current[subAction], index);
-    }
-
-    if (currentSubAction.current !== subAction) {
-      console.log('got in here');
-      currentSubAction.current = subAction;
-    }
-  }, [subAction, subActionParams]);
 
   useEffect(() => {
     if (!subAction) {
       editAction('subAction', OpsgenieSubActions.CreateAlert, index);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, subAction]);
 
-  useEffect(() => {}, [subAction, index]);
+  useEffect(() => {
+    if (subAction != null && currentSubAction.current !== subAction) {
+      currentSubAction.current = subAction;
+      const params = subActionParams?.alias ? { alias: subActionParams.alias } : undefined;
+      editAction('subActionParams', params, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subAction, currentSubAction]);
 
   return (
     <>
       <EuiFormRow fullWidth label={i18n.ACTION_LABEL}>
         <EuiSelect
           fullWidth
-          data-test-subj="opsgenie-eventActionSelect"
+          data-test-subj="opsgenie-subActionSelect"
           options={actionOptions}
           hasNoInitialSelection={subAction == null}
           value={subAction}
@@ -195,23 +162,25 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
         />
       </EuiFormRow>
 
-      {subAction === OpsgenieSubActions.CreateAlert ? (
+      {subAction != null && subAction === OpsgenieSubActions.CreateAlert && (
         <CreateAlertComponent
-          subActionParams={stateParams.current[subAction]}
+          subActionParams={subActionParams}
           editSubAction={editSubAction}
           errors={errors}
           index={index}
           messageVariables={messageVariables}
         />
-      ) : subAction === OpsgenieSubActions.CloseAlert ? (
+      )}
+
+      {subAction != null && subAction === OpsgenieSubActions.CloseAlert && (
         <CloseAlertComponent
-          subActionParams={stateParams.current[subAction]}
+          subActionParams={subActionParams}
           editSubAction={editSubAction}
           errors={errors}
           index={index}
           messageVariables={messageVariables}
         />
-      ) : null}
+      )}
     </>
   );
 };
