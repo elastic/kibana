@@ -41,6 +41,7 @@ import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { SizeLabel } from './size_label';
+import { IndexStatsPerService } from './index_stats_per_service';
 
 interface Props {
   serviceName: string;
@@ -155,7 +156,7 @@ export function StorageDetailsPerService({
 
   return (
     <>
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -264,6 +265,12 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IndexStatsPerService
+            indicesStats={data.indicesStats}
+            status={status}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

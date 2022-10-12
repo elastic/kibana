@@ -12,8 +12,12 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar';
@@ -27,6 +31,8 @@ import { TipsAndResources } from './resources/tips_and_resources';
 const INITIAL_DATA = { hasPrivileges: false };
 
 export function StorageExplorer() {
+  const router = useApmRouter();
+
   const { data: { hasPrivileges } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer/privileges');
@@ -67,6 +73,35 @@ export function StorageExplorer() {
           <IndexLifecyclePhaseSelect />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.storageExplorer.settingsCalloutTitle',
+          {
+            defaultMessage: 'Long loading time?',
+          }
+        )}
+        iconType="timeRefresh"
+      >
+        <FormattedMessage
+          id="xpack.apm.storageExplorer.settingsCalloutText"
+          defaultMessage="Enable progressive loading of data in {apmGeneralSettingsLink}."
+          values={{
+            apmGeneralSettingsLink: (
+              <EuiLink href={router.link('/settings/general-settings')}>
+                {i18n.translate(
+                  'xpack.apm.storageExplorer.settingsCalloutLink',
+                  {
+                    defaultMessage: 'APM general settings',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
+
       <EuiSpacer />
       <SummaryStats />
       <EuiSpacer />

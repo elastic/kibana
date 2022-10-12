@@ -21,7 +21,10 @@ import {
   rangeRt,
 } from '../default_api_types';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
+import {
+  getStorageDetailsPerIndex,
+  getStorageDetailsPerProcessorEvent,
+} from './get_storage_details_per_processor_event';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSizeTimeseries } from './get_size_timeseries';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
@@ -127,6 +130,15 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       docs: number;
       size: number;
     }>;
+    indicesStats: Array<{
+      indexName: string;
+      primary: number | string;
+      replica: number | string;
+      numberOfDocs: number;
+      size: number;
+      dataStream?: string;
+      lifecyclePhase: string;
+    }>;
   }> => {
     const {
       params,
@@ -152,19 +164,32 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const processorEventStats = await getStorageDetailsPerProcessorEvent({
-      setup,
-      context,
-      indexLifecyclePhase,
-      randomSampler,
-      environment,
-      kuery,
-      start,
-      end,
-      serviceName,
-    });
+    const [processorEventStats, indicesStats] = await Promise.all([
+      getStorageDetailsPerProcessorEvent({
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        environment,
+        kuery,
+        start,
+        end,
+        serviceName,
+      }),
+      getStorageDetailsPerIndex({
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        environment,
+        kuery,
+        start,
+        end,
+        serviceName,
+      }),
+    ]);
 
-    return { processorEventStats };
+    return { processorEventStats, indicesStats };
   },
 });
 

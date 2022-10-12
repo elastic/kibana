@@ -28,6 +28,8 @@ import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
+  getIndicesLifecycleStatus,
+  getIndicesInfo,
 } from './indices_stats_helpers';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
@@ -152,4 +154,117 @@ export async function getStorageDetailsPerProcessorEvent({
           : 0,
     };
   });
+}
+
+export async function getStorageDetailsPerIndex({
+  setup,
+  context,
+  indexLifecyclePhase,
+  randomSampler,
+  start,
+  end,
+  environment,
+  kuery,
+  serviceName,
+}: {
+  setup: Setup;
+  context: ApmPluginRequestHandlerContext;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  randomSampler: RandomSampler;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
+  serviceName: string;
+}) {
+  const { apmEventClient } = setup;
+
+  const [
+    { indices: allIndicesStats },
+    indicesLifecycleStatus,
+    indicesInfo,
+    response,
+  ] = await Promise.all([
+    getTotalIndicesStats({ setup, context }),
+    getIndicesLifecycleStatus({ setup, context }),
+    getIndicesInfo({ setup, context }),
+    apmEventClient.search('get_storage_details_per_index', {
+      apm: {
+        events: [
+          ProcessorEvent.span,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
+      },
+      body: {
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(
+                    TIER,
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  )
+                : []),
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          sample: {
+            random_sampler: randomSampler,
+            aggs: {
+              indices: {
+                terms: {
+                  field: INDEX,
+                  size: 500,
+                },
+                aggs: {
+                  number_of_metric_docs_for_index: {
+                    value_count: {
+                      field: INDEX,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  return (
+    response.aggregations?.sample.indices.buckets.map((bucket) => {
+      const indexName = bucket.key as string;
+      const numberOfDocs = bucket.number_of_metric_docs_for_index.value;
+      const indexInfo = indicesInfo[indexName];
+      const indexLifecycle = indicesLifecycleStatus[indexName];
+
+      const size =
+        (allIndicesStats &&
+          getEstimatedSizeForDocumentsInIndex({
+            allIndicesStats,
+            indexName,
+            numberOfDocs,
+          })) ??
+        0;
+
+      return {
+        indexName,
+        primary: indexInfo.settings?.index?.number_of_shards ?? 0,
+        replica: indexInfo.settings?.number_of_replicas ?? 0,
+        numberOfDocs,
+        size,
+        dataStream: indexInfo.data_stream,
+        lifecyclePhase: 'phase' in indexLifecycle ? indexLifecycle.phase : '',
+      };
+    }) ?? []
+  );
 }
