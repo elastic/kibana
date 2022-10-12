@@ -31,12 +31,14 @@ import {
   MonitorDetailsLinkPortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  GETTING_STARTED_ROUTE,
+  MONITORS_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITORS_ROUTE,
-  OVERVIEW_ROUTE,
-  GETTING_STARTED_ROUTE,
+  MONITOR_ERRORS_ROUTE,
+  MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
+  OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
 import { MonitorPage } from './components/monitors_page/monitor_page';
@@ -91,6 +93,74 @@ const getRoutes = (
       path: MONITOR_ROUTE,
       component: () => <MonitorDetailsPage />,
       dataTestSubj: 'syntheticsMonitorDetailsPage',
+      pageHeader: {
+        pageTitle: <MonitorDetailsPageTitle />,
+        breadcrumbs: [
+          {
+            text: (
+              <>
+                <EuiIcon size="s" type="arrowLeft" />{' '}
+                <FormattedMessage
+                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+                  defaultMessage="Monitors"
+                />
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
+          },
+        ],
+        rightSideItems: [
+          <RunTestManually />,
+          <MonitorDetailsLastRun />,
+          <MonitorDetailsStatus />,
+          <MonitorDetailsLocation />,
+        ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.monitorHistory.title', {
+        defaultMessage: 'Synthetics Monitor History | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_HISTORY_ROUTE,
+      component: () => <div>History</div>,
+      dataTestSubj: 'syntheticsMonitorHistoryPage',
+      pageHeader: {
+        pageTitle: <MonitorDetailsPageTitle />,
+        breadcrumbs: [
+          {
+            text: (
+              <>
+                <EuiIcon size="s" type="arrowLeft" />{' '}
+                <FormattedMessage
+                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+                  defaultMessage="Monitors"
+                />
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
+          },
+        ],
+        rightSideItems: [
+          <RunTestManually />,
+          <MonitorDetailsLastRun />,
+          <MonitorDetailsStatus />,
+          <MonitorDetailsLocation />,
+        ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.monitorErrors.title', {
+        defaultMessage: 'Synthetics Monitor Errors | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_ERRORS_ROUTE,
+      component: () => <div>Errors</div>,
+      dataTestSubj: 'syntheticsMonitorHistoryPage',
       pageHeader: {
         pageTitle: <MonitorDetailsPageTitle />,
         breadcrumbs: [
