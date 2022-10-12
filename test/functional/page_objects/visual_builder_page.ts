@@ -406,6 +406,17 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
+  public async createNewAggSeries(nth = 0) {
+    const prevAggs = await this.testSubjects.findAll('draggable');
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new agg series is added', async () => {
+      const currentAggs = await this.testSubjects.findAll('draggable');
+      return currentAggs.length > prevAggs.length;
+    });
+  }
+
   public async selectAggType(value: string, nth = 0) {
     const elements = await this.testSubjects.findAll('aggSelector');
     await this.comboBox.setElement(elements[nth], value);
@@ -617,6 +628,11 @@ export class VisualBuilderPageObject extends FtrService {
   public async setLabel(labelName: string, nth: number = 0): Promise<void> {
     const input = (await this.find.allByCssSelector('[placeholder="Label"]'))[nth];
     await input.type(labelName);
+  }
+
+  public async setStaticValue(value: number, nth: number = 0): Promise<void> {
+    const input = (await this.testSubjects.findAll('staticValue'))[nth];
+    await input.type(value.toString());
   }
 
   /**
