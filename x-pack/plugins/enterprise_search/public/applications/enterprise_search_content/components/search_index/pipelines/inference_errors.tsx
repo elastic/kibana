@@ -81,6 +81,10 @@ export const InferenceErrors: React.FC = () => {
             columns={errorsColumns}
             items={inferenceErrors}
             rowHeader="message"
+            noItemsMessage={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.emptyMessage',
+              { defaultMessage: 'This index has no inference errors' }
+            )}
           />
         )}
       </DataPanel>
