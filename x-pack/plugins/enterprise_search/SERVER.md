@@ -71,7 +71,7 @@ client.asCurrentUser.update({
   doc: { property_to_update: 'new value' },
   id: 'doc_id',
   index: 'indexName',
-  })
+})
 ```
  This will replace the specified properties with the values you provide, while leaving unspecified properties untouched.
 
