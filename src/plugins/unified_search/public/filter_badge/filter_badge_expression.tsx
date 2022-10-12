@@ -21,9 +21,14 @@ export interface FilterBadgeExpressionProps {
   filter: Filter;
   dataViews: DataView[];
   conditionType?: ConditionTypes;
+  isRootLevel?: boolean;
 }
 
-export function FilterExpressionBadge({ filter, dataViews }: FilterBadgeExpressionProps) {
+export function FilterExpressionBadge({
+  filter,
+  dataViews,
+  isRootLevel,
+}: FilterBadgeExpressionProps) {
   const conditionalOperationType = getConditionalOperationType(filter);
 
   const paddingLeft = useEuiPaddingCSS('left').xs;
@@ -47,20 +52,24 @@ export function FilterExpressionBadge({ filter, dataViews }: FilterBadgeExpressi
   if (!conditionalOperationType) {
     label = getValueLabel(filter, dataViews);
   }
-
+  
   return conditionalOperationType ? (
     <>
-      <span css={paddingLeft}>
-        <EuiTextColor className={bracketСolor}>(</EuiTextColor>
-      </span>
+      {!isRootLevel ? (
+        <span css={paddingLeft}>
+          <EuiTextColor className={bracketСolor}>(</EuiTextColor>
+        </span>
+      ) : null}
       <FilterBadgeGroup
         filters={Array.isArray(filter) ? filter : filter.meta?.params}
         dataViews={dataViews}
         conditionType={conditionalOperationType}
       />
-      <span css={paddingRight}>
-        <EuiTextColor className={bracketСolor}>)</EuiTextColor>
-      </span>
+      {!isRootLevel ? (
+        <span css={paddingRight}>
+          <EuiTextColor className={bracketСolor}>)</EuiTextColor>
+        </span>
+      ) : null}
     </>
   ) : (
     <span css={[paddingLeft, paddingRight]}>

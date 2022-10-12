@@ -44,8 +44,8 @@ export function isOrFilter(filter: Filter): filter is OrFilter {
  * @param filters An array of OrFilterItem
  * @public
  */
-export function buildOrFilter(filters: FilterItem[]): OrFilter {
-  const filter = buildEmptyFilter(false);
+export function buildOrFilter(filters: FilterItem[], dataViewId?: string): OrFilter {
+  const filter = buildEmptyFilter(false, dataViewId);
   return {
     ...filter,
     meta: {

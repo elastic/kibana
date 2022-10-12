@@ -7,13 +7,23 @@
  */
 
 import { compact, flatten } from 'lodash';
-import { Filter, migrateFilter } from '@kbn/es-query';
+import { buildOrFilter, Filter, isOrFilter, migrateFilter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
 
 export const mapAndFlattenFilters = (filters: Filter[]) => {
   return compact(flatten(filters))
     .map((filter) => {
-      return migrateFilter(filter);
+      if (isOrFilter(filter) && Array.isArray(filter.meta.params)) {
+        return buildOrFilter([mapAndFlattenFilters(filter.meta.params)], filter.meta.index);
+      } else {
+        return migrateFilter(filter, filter.meta.index);
+      }
     })
-    .map((item: Filter) => mapFilter(item));
+    .map((item: Filter) => {
+      if (isOrFilter(item) && Array.isArray(item.meta.params)) {
+        return buildOrFilter([mapAndFlattenFilters(item.meta.params)], item.meta.index);
+      } else {
+        return mapFilter(item);
+      }
+    });
 };

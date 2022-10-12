@@ -18,6 +18,7 @@ export interface FilterBadgeGroupProps {
   filters: Filter[];
   dataViews: DataView[];
   conditionType?: ConditionTypes;
+  isRootLevel?: boolean;
 }
 
 const ConditionalTypeDelimiter = ({ conditional }: { conditional: ConditionTypes }) => {
@@ -32,12 +33,17 @@ const ConditionalTypeDelimiter = ({ conditional }: { conditional: ConditionTypes
   return <EuiTextColor className={bracketСolor}>{conditional}</EuiTextColor>;
 };
 
-export function FilterBadgeGroup({ filters, dataViews, conditionType }: FilterBadgeGroupProps) {
+export function FilterBadgeGroup({
+  filters,
+  dataViews,
+  conditionType,
+  isRootLevel,
+}: FilterBadgeGroupProps) {
   return (
     <>
       {filters.map((filter, index, acc) => (
         <>
-          <FilterExpressionBadge filter={filter} dataViews={dataViews} />
+          <FilterExpressionBadge filter={filter} dataViews={dataViews} isRootLevel={isRootLevel} />
           {conditionType && index + 1 < acc.length ? (
             <ConditionalTypeDelimiter conditional={conditionType} />
           ) : null}

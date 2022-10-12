@@ -49,7 +49,7 @@ describe('#handleOrFilter', function () {
       buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
       buildExistsFilter(getField('machine.os'), indexPattern),
     ];
-    const filter = buildOrFilter(filters);
+    const filter = buildOrFilter(filters, indexPattern.id);
     const result = handleOrFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {

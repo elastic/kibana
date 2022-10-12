@@ -9,7 +9,7 @@
 import { EuiBadge, EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC, MouseEvent } from 'react';
-import { Filter, isFilterPinned } from '@kbn/es-query';
+import { Filter, isFilterPinned, isOrFilter } from '@kbn/es-query';
 import { FilterLabel } from '..';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
@@ -100,7 +100,7 @@ export const FilterView: FC<Props> = ({
   const FilterPill = () => (
     <>
       <FilterBadge
-        filters={[filter]}
+        filters={isOrFilter(filter) ? filter.meta.params : [filter]}
         dataViews={dataViews}
         {...badgeProps}
         {...rest}

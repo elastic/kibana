@@ -151,12 +151,12 @@ export function FilterItem({
         type: 'addFilter',
         payload: {
           path,
-          filter: buildEmptyFilter(false, dataView.id),
+          filter: buildEmptyFilter(false, dataView?.id),
           conditionalType,
         },
       });
     },
-    [dispatch, dataView.id, path]
+    [dispatch, dataView?.id, path]
   );
 
   const onAddButtonClick = useCallback(() => onAddFilter(ConditionTypes.AND), [onAddFilter]);

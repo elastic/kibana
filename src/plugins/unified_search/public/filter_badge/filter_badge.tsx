@@ -37,8 +37,6 @@ function FilterBadge({ filters, dataViews, iconOnClick, onClick }: FilterBadgePr
     return null;
   }
 
-  console.log('filters', filters)
-
   return (
     <EuiBadge
       className={badgePading}
@@ -56,6 +54,7 @@ function FilterBadge({ filters, dataViews, iconOnClick, onClick }: FilterBadgePr
           filters={filters}
           dataViews={dataViews}
           conditionType={rootLevelConditionType}
+          isRootLevel={true}
         />
       </EuiFlexGroup>
     </EuiBadge>

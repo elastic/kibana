@@ -30,6 +30,7 @@ import {
   cleanFilter,
   getFilterParams,
   buildOrFilter,
+  isOrFilter,
 } from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -100,7 +101,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      filters: [props.filter],
+      filters: isOrFilter(props.filter) ? props.filter.meta.params[0] : [props.filter],
     };
   }
 
@@ -450,7 +451,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
-    return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
+    return !!type && !['phrase', 'phrases', 'range', 'exists', 'OR'].includes(type);
   }
 
   private getIndexPatternFromFilter() {
@@ -485,16 +486,17 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       }
     }
 
-    return this.state.filters
-      .map((filter) =>
-        isFilterValid(
-          indexPattern,
-          getFieldFromFilter(filter as FieldFilter, indexPattern!),
-          getOperatorFromFilter(filter),
-          getFilterParams(filter)
-        )
-      )
-      .every((filterValid) => Boolean(filterValid));
+    return true;
+    // this.state.filters
+    //   .map((filter) =>
+    //     isFilterValid(
+    //       indexPattern,
+    //       getFieldFromFilter(isOrFilter(filter), indexPattern!),
+    //       getOperatorFromFilter(filter),
+    //       getFilterParams(filter)
+    //     )
+    //   )
+    //   .every((filterValid) => Boolean(filterValid));
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
@@ -565,51 +567,23 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
-      // this.props.onSubmit(filter);
+      this.props.onSubmit(filter);
     } else if (indexPattern) {
-      // const filter = buildFilter(
-      //   indexPattern,
-      //   field,
-      //   operator.type,
-      //   operator.negate,
-      //   this.props.filter.meta.disabled ?? false,
-      //   params ?? '',
-      //   alias,
-      //   $state.store
-      // );
-
-      console.log(
-        'build or filter',
-        buildOrFilter(
-          this.state.filters.map((filter) =>
-            buildFilter(
-              indexPattern,
-              getFieldFromFilter(filter as FieldFilter, indexPattern)!,
-              getOperatorFromFilter(filter)?.type!,
-              getOperatorFromFilter(filter)?.negate!,
-              filter.meta.disabled ?? false,
-              getFilterParams(filter) ?? '',
-              alias,
-              filter?.$state?.store
-            )
-          )
+      const filters = this.state.filters.map((filter: Filter) =>
+        buildFilter(
+          indexPattern,
+          getFieldFromFilter(filter, indexPattern)!,
+          getOperatorFromFilter(filter)?.type!,
+          getOperatorFromFilter(filter)?.negate!,
+          filter.meta.disabled ?? false,
+          getFilterParams(filter) ?? '',
+          alias,
+          filter?.$state?.store
         )
       );
+
       this.props.onSubmit(
-        // buildOrFilter([
-          this.state.filters.map((filter) =>
-            buildFilter(
-              indexPattern,
-              getFieldFromFilter(filter as FieldFilter, indexPattern)!,
-              getOperatorFromFilter(filter)?.type!,
-              getOperatorFromFilter(filter)?.negate!,
-              filter.meta.disabled ?? false,
-              getFilterParams(filter) ?? '',
-              alias,
-              filter?.$state?.store
-            )
-          ),
-        // ])
+        filters.length === 1 ? filters[0] : buildOrFilter([filters], indexPattern?.id)
       );
     }
   };

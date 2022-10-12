@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { FilterStateStore } from '@kbn/es-query';
+import { buildOrFilter, FilterStateStore } from '@kbn/es-query';
 
 import {
   isFilterPinned,
@@ -85,14 +85,13 @@ export class FilterManager implements PersistableStateService<Filter[]> {
 
   private handleStateUpdate(newFilters: Filter[]) {
     newFilters.sort(sortFilters);
-
     const filtersUpdated = !compareFilters(this.filters, newFilters, COMPARE_ALL_OPTIONS);
     const updatedOnlyDisabledFilters = onlyDisabledFiltersChanged(newFilters, this.filters);
 
     this.filters = newFilters;
     if (filtersUpdated) {
       this.updated$.next();
-      if (!updatedOnlyDisabledFilters) {
+      if (updatedOnlyDisabledFilters) {
         this.fetch$.next();
       }
     }
