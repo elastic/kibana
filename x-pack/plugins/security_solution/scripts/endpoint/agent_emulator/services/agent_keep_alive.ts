@@ -39,7 +39,6 @@ export class AgentKeepAliveService extends BaseRunningService {
           for (const endpoint of endpoints.data) {
             await Promise.all([
               checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id, {
-                agentStatus: 'random',
                 log,
               }).catch((err) => {
                 log.verbose(err);
