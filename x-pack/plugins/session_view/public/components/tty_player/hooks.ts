@@ -30,7 +30,10 @@ import {
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
   TTY_LINES_PRE_SEEK,
+  ENDPOINTS_PAGE_PATH,
+  SESSION_VIEW_PLUGIN_ID,
 } from '../../../common/constants';
+import { PROCESS_DATA_LIMIT_EXCEEDED, PROCESS_DATA_LIMIT_EXCEEDED_2 } from './translations';
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -173,13 +176,17 @@ export const useXtermPlayer = ({
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
+  const { getUrlForApp } = useKibana<CoreStart>().services.application;
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
   const tty = lines?.[currentLine]?.event.process?.tty;
-
+  const processName = lines?.[currentLine]?.event.process?.name;
+  const settingsUrl = getUrlForApp(SESSION_VIEW_PLUGIN_ID, { path: ENDPOINTS_PAGE_PATH });
   const [terminal, searchAddon] = useMemo(() => {
     const term = new Terminal({
       theme: {
-        selection: colors.warning,
+        selectionBackground: colors.warning,
+        selectionForeground: colors.ink,
+        yellow: colors.warning,
       },
       fontFamily: font.familyCode,
       fontSize: DEFAULT_TTY_FONT_SIZE,
@@ -215,6 +222,20 @@ export const useXtermPlayer = ({
     };
   }, [terminal, ref]);
 
+  const renderTruncatedMsg = useCallback(() => {
+    if (tty?.columns) {
+      const lineBreak = '-'.repeat(tty.columns);
+      return `
+
+\x1b[33m${lineBreak}
+${PROCESS_DATA_LIMIT_EXCEEDED} ${processName}\x1b[1mlinux.advanced.tty_io.max_kilobytes_per_process\x1b[22m${PROCESS_DATA_LIMIT_EXCEEDED_2}
+\x1b]8;;${settingsUrl}\x1b\\[ GO TO SETTINGS ]\x1b]8;;\e\\\n
+${lineBreak}\x1b[0m
+
+`;
+    }
+  }, [processName, settingsUrl, tty.columns]);
+
   const render = useCallback(
     (lineNumber: number, clear: boolean) => {
       if (lines.length === 0) {
@@ -237,21 +258,26 @@ export const useXtermPlayer = ({
         linesToPrint = lines.slice(lineNumber, lineNumber + 1);
       }
 
-      linesToPrint.forEach((line, index) => {
+      linesToPrint.forEach((line) => {
         if (line?.value !== undefined) {
           terminal.write(line.value);
         }
       });
+
+      const msg = renderTruncatedMsg();
+      if (msg && clear) {
+        terminal.write(msg);
+      }
     },
-    [lines, terminal]
+    [lines, renderTruncatedMsg, terminal]
   );
 
   useEffect(() => {
-    const fontChanged = terminal.getOption('fontSize') !== fontSize;
+    const fontChanged = terminal.options.fontSize !== fontSize;
     const ttyChanged = tty && (terminal.rows !== tty?.rows || terminal.cols !== tty?.columns);
 
     if (fontChanged) {
-      terminal.setOption('fontSize', fontSize);
+      terminal.options.fontSize = fontSize;
     }
 
     if (tty?.rows && tty?.columns && ttyChanged) {
