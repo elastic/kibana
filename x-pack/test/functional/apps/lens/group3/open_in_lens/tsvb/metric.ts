@@ -102,5 +102,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const canEdit = await testSubjects.exists('visualizeEditInLensButton');
       expect(canEdit).to.be(false);
     });
+
+    it('should convert color ranges', async () => {
+      await visualBuilder.clickPanelOptions('metric');
+      await visualBuilder.setColorRuleOperator('>= greater than or equal');
+      await visualBuilder.setColorRuleValue(10);
+      await visualBuilder.setColorPickerValue('#54B399');
+
+      await header.waitUntilLoadingHasFinished();
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+
+      await lens.waitForVisualization('mtrVis');
+      await retry.try(async () => {
+        const closePalettePanels = await testSubjects.findAll(
+          'lns-indexPattern-PalettePanelContainerBack'
+        );
+        if (closePalettePanels.length) {
+          await lens.closePalettePanel();
+          await lens.closeDimensionEditor();
+        }
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(1);
+
+        dimensions[0].click();
+
+        await lens.openPalettePanel('lnsMetric');
+        const colorStops = await lens.getPaletteColorStops();
+
+        expect(colorStops).to.eql([
+          { stop: '10', color: 'rgba(84, 179, 153, 1)' },
+          { stop: '', color: undefined },
+        ]);
+      });
+    });
   });
 }
