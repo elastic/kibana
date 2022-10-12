@@ -16,6 +16,8 @@ import { isImage } from '../../util';
 import { useFilesContext } from '../../context';
 import { useFilePickerContext } from '../context';
 
+import './file_card.scss';
+
 interface Props {
   file: FileJSON;
 }
@@ -61,7 +63,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       }
       description={
         <>
-          <EuiText size="xs">
+          <EuiText size="s">
             <strong>
               {file.name}.{file.extension}
             </strong>

@@ -28,8 +28,6 @@ import { UploadFilesPrompt } from './components/upload_files';
 import { FileGrid } from './components/file_grid';
 import { i18nTexts } from './i18n_texts';
 
-import './file_picker.scss';
-
 export interface Props<Kind extends string = string> {
   /**
    * The file kind that was passed to the registry.
