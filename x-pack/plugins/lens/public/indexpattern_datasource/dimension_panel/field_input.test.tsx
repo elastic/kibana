@@ -141,7 +141,7 @@ const mockedReader = {
   },
 };
 
-jest.mock('@kbn/unified-field-list-plugin/public', () => ({
+jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => mockedReader),
 }));
 
