@@ -1155,9 +1155,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 columnId={props.columnId}
                 setColumns={(columnOrder) => updateLayer({ columnOrder })}
                 getFieldByName={currentIndexPattern.getFieldByName}
-                visualizationGroup={dimensionGroups.find(
-                  ({ groupId }) => groupId === props.groupId
-                )}
               />
             )}
 
