@@ -417,6 +417,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     threatIndexField.setValue(threatIndicesConfig);
   }, [getFields, threatIndicesConfig]);
 
+  const enrichThrestIndices = useMemo(() => {
+    const threatIndexField = getFields().threatIndex;
+
+    return threatIndexField;
+  }, [getFields]);
+  console.log(formThreatIndex);
+
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -454,9 +461,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         threatIndexPatternsLoading={threatIndexPatternsLoading}
         threatMapping={threatMapping}
         onValidityChange={setIsThreatQueryBarValid}
+        formThreatIndex={formThreatIndex}
       />
     ),
     [
+      formThreatIndex,
       handleResetThreatIndices,
       indexPattern,
       threatBrowserFields,

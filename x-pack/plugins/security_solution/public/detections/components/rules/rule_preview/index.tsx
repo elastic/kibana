@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import {
+  EuiTitle,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +36,7 @@ import type {
   TimeframePreviewOptions,
 } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
+import { ProfileTree } from './profile/profile_tree';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -208,7 +210,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       timeframeStart,
     ]
   );
-  console.log(profileResponse);
+  // console.log(profileResponse);
   return (
     <>
       <EuiSpacer size="s" />
@@ -255,6 +257,27 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="l" />
+      {profileResponse && profileResponse.profileResponse && (
+        <>
+          <EuiTitle size="xs">
+            <h4>Source indices profile</h4>
+          </EuiTitle>
+          <ProfileTree
+            target={'searches'}
+            data={profileResponse?.profileResponse[0].profile.shards}
+          />
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
+            <h4>Indicator indices profile</h4>
+          </EuiTitle>
+          <ProfileTree
+            target={'searches'}
+            data={profileResponse?.profileResponse[1].profile.shards}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram

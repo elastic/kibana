@@ -25,7 +25,17 @@ import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
 
 const CommonUseField = getUseField({ component: Field });
-
+const optionsStatic = [
+  {
+    label: 'Titan',
+    'data-test-subj': 'titanOption',
+    color: 'success',
+  },
+  {
+    label: 'Enceladus',
+    color: 'warning',
+  },
+];
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
   threatBrowserFields: Readonly<Record<string, Partial<BrowserField>>>;
@@ -46,6 +56,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   threatIndexPatternsLoading,
   threatBrowserFields,
   onValidityChange,
+  formThreatIndex,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
 
@@ -88,6 +99,14 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
                 fullWidth: true,
                 isDisabled: false,
                 placeholder: '',
+                ...(formThreatIndex
+                  ? {
+                      selectedOptions: formThreatIndex?.map((i) => ({
+                        label: i,
+                        color: 'success',
+                      })),
+                    }
+                  : {}),
               },
             }}
           />

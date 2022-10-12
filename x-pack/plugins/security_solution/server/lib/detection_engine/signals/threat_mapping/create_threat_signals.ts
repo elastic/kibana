@@ -22,7 +22,6 @@ import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
-import { getFilter } from '../get_filter';
 
 export const createThreatSignals = async ({
   alertId,

@@ -6,8 +6,8 @@
  */
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSwitch } from '@elastic/eui';
 import {
+  EuiSwitch,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -484,22 +484,12 @@ const EditRulePageComponent: FC = () => {
               title={i18n.PAGE_TITLE}
             >
               {defineStep.data && aboutStep.data && scheduleStep.data && (
-                <>
-                  <span style={{ paddingRight: '6px' }}>
-                    <EuiSwitch
-                      label="Indices profile"
-                      checked={checked}
-                      onChange={(e) => onChange(e)}
-                    />
-                  </span>
-
-                  <EuiButton
-                    iconType="visBarVerticalStacked"
-                    onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
-                  >
-                    {ruleI18n.RULE_PREVIEW_TITLE}
-                  </EuiButton>
-                </>
+                <EuiButton
+                  iconType="visBarVerticalStacked"
+                  onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+                >
+                  {ruleI18n.RULE_PREVIEW_TITLE}
+                </EuiButton>
               )}
             </HeaderPage>
             {invalidSteps.length > 0 && (
