@@ -18,10 +18,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const remoteEs = getService('remoteEs');
+  const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
+  const log = getService('log');
 
-  describe('CCS Remote Clusters > Index Management', function () {
+  describe.only('CCS Remote Clusters > Index Management', function () {
+    const leaderName = 'my-index';
+    const followerName = 'my-follower';
+    const remoteCluster = 'ftr-remote';
     before(async () => {
       await security.testUser.setRoles(['global_ccr_role', 'follower_index_user', 'superuser']);
     });
@@ -60,8 +64,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       it('Create Follower Index', async () => {
         await pageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
-        await pageObjects.crossClusterReplication.createFollowerIndex('my-index', 'my-follower');
-      })
+        await pageObjects.crossClusterReplication.createFollowerIndex(
+          leaderName,
+          followerName,
+          true,
+          '1s'
+        );
+      });
     });
     describe('Index Management', function () {
       before(async () => {
@@ -70,22 +79,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('indicesList');
         });
         await remoteEs.index({
-          target: 'my-index',
-          field: {"a": "b"}
+          index: 'my-index',
+          body: { a: 'b' },
         });
         await pageObjects.common.navigateToApp('indexManagement');
+        await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
+          return await testSubjects.isDisplayed('indicesList');
+        });
       });
       it('Made it this far', async () => {
-        //
+        await pageObjects.indexManagement.clickIndiceAt(0);
+        await pageObjects.indexManagement.performIndexActionInDetailPanel('flush');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await pageObjects.common.navigateToApp('indexManagement');
+        await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
+          return await testSubjects.isDisplayed('indicesList');
+        });
+
+        const indicesList = await pageObjects.indexManagement.getIndexList();
+        const followerIndex = indicesList[0];
+        expect(followerIndex.indexDocuments).to.not.eql('0');
+        expect(followerIndex.indexDocuments).to.eql('1');
       });
     });
 
     after(async () => {
-      // await localEs.ccr.forgetFollower()
+      const ccrInfo = await localEs.ccr.followInfo({
+        index: followerName,
+      });
+      await log.debug(JSON.stringify(ccrInfo));
+      // await localEs.ccr.forgetFollower({
+      //   index: leaderName,
+      //   body: {
+      //     leader_remote_cluster: remoteCluster,
+      //     follower_index: followerName,
+      //   },
+      // });
       // await remoteEs.indices.delete({
-      //   index: 'my-index'
+      //   index: leaderName,
       // });
       await security.testUser.restoreDefaults();
     });
   });
-}
+};
