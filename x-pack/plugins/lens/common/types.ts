@@ -11,14 +11,9 @@ import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
-import {
-  CategoryDisplay,
-  layerTypes,
-  LegendDisplay,
-  NumberDisplay,
-  PieChartTypes,
-} from './constants';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 
@@ -39,11 +34,7 @@ export interface PersistableFilter extends Filter {
 
 export type SortingHint = 'version';
 
-export type CustomPaletteParamsConfig = CustomPaletteParams & {
-  maxSteps?: number;
-};
-
-export type LayerType = typeof layerTypes[keyof typeof layerTypes];
+export type LayerType = typeof LayerTypes[keyof typeof LayerTypes];
 
 export type ValueLabelConfig = 'hide' | 'show';
 

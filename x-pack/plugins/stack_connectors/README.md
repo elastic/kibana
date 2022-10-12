@@ -332,6 +332,32 @@ The following table describes the properties of the `incident` object.
 | severity    | The severity of the incident.    | string _(optional)_ |
 ---
 
+## Ospgenie
+
+Refer to the [Run connector API documentation](https://www.elastic.co/guide/en/kibana/master/execute-connector-api.html#execute-connector-api-request-body)
+for the full list of properties.
+
+### `params`
+
+| Property        | Description                                                        | Type   |
+| --------------- | ------------------------------------------------------------------ | ------ |
+| subAction       | The subaction to perform. It can be `createAlert` or `closeAlert`. | string |
+| subActionParams | The parameters of the subaction.                                   | object |
+
+`subActionParams (createAlert)`
+
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| message  | The alert message.                                                                                            | string                |
+
+The optional parameters `alias`, `description`, `responders`, `visibleTo`, `actions`, `tags`, `details`, `entity`, `source`, `priority`, `user`, and `note` are supported. See the [Opsgenie API documentation](https://docs.opsgenie.com/docs/alert-api#create-alert) for more information on their types.
+
+`subActionParams (closeAlert)`
+
+No parameters are required. For the definition of the optional parameters see the [Opsgenie API documentation](https://docs.opsgenie.com/docs/alert-api#close-alert).
+
+---
+
 # Developing New Connector Types
 
 When creating a new connector type, your plugin will eventually call `server.plugins.actions.setup.registerType()` to register the type with the `actions` plugin, but there are some additional things to think about about and implement.

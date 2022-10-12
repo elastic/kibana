@@ -9,7 +9,7 @@ import { isNestedField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 
 type ErrorHandler = (err: Error) => void;
 type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;

@@ -8,7 +8,7 @@
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { ensureIndexPattern, loadIndexPatternRefs, loadIndexPatterns } from './loader';
 import { sampleIndexPatterns, mockDataViewsService } from './mocks';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {
