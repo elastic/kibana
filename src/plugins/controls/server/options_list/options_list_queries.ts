@@ -60,7 +60,6 @@ export const getSuggestionAggregationBuilder = ({
   textFieldName,
   searchString,
 }: OptionsListRequestBody) => {
-  // console.log(fieldSpec);
   if (textFieldName && fieldSpec?.aggregatable && searchString) {
     return suggestionAggSubtypes.keywordAndText;
   }
@@ -162,7 +161,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    */
   ip: {
     buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
-      let rangeQuery: IpRangeQuery = [
+      let rangeQuery: IpRangeQuery['rangeQuery'] = [
         {
           key: 'ipv6',
           from: '::',
@@ -170,16 +169,14 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         },
       ];
       if (searchString) {
-        rangeQuery = getIpRangeQuery(searchString);
+        const { rangeQuery: testRangeQuery, validSearch } = getIpRangeQuery(searchString);
+        if (!validSearch) {
+          // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
+          // simply don't return an aggregation query for the ES search request
+          return;
+        }
+        rangeQuery = testRangeQuery;
       }
-
-      // if (rangeQuery.length === 0)
-      //   // CLEAN THIS UP??? JUST PREVENTS ERROR WHEN RUNNING INVALID SEARCH
-      //   return {
-      //     terms: {
-      //       field: fieldName,
-      //     },
-      //   };
 
       return {
         ip_range: {
@@ -199,6 +196,12 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
       };
     },
     parse: (rawEsResult) => {
+      if (!get(rawEsResult, 'aggregation.suggestions')) {
+        // if this is happens, that means there is an invalid search that snuck through to the server side code
+        // so might as well early return with no suggestions
+        return [];
+      }
+
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');

@@ -8,9 +8,10 @@
 
 import ipaddr from 'ipaddr.js';
 
-export type IpRangeQuery = Array<
-  { key: string; from: string; to: string } | { key: string; mask: string }
->;
+export interface IpRangeQuery {
+  validSearch: boolean;
+  rangeQuery?: Array<{ key: string; from: string; to: string } | { key: string; mask: string }>;
+}
 interface IpSegments {
   segments: string[];
   type: 'ipv4' | 'ipv6' | 'unknown';
@@ -27,7 +28,7 @@ const getIpSegments = (searchString: string): IpSegments => {
   return { segments: [searchString], type: 'unknown' };
 };
 
-const fullIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery => {
+const fullIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery['rangeQuery'] => {
   const isIpv4 = type === 'ipv4';
   const searchIp = segments.join(isIpv4 ? '.' : ':');
   if (ipaddr.isValid(searchIp)) {
@@ -38,10 +39,9 @@ const fullIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery =
       },
     ];
   }
-  return [];
 };
 
-const partialIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery => {
+const partialIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery['rangeQuery'] => {
   const isIpv4 = type === 'ipv4';
   const minIp = isIpv4
     ? segments.concat(Array(4 - segments.length).fill('0')).join('.')
@@ -58,22 +58,38 @@ const partialIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuer
       },
     ];
   }
-
-  return [];
 };
 
 export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
   if (searchString.match(/^[A-Fa-f0-9.:]*$/) === null) {
-    return [];
+    return { validSearch: false };
   }
 
   const { type: ipType, segments: ipSegments } = getIpSegments(searchString);
-  if (ipType === 'ipv6' && ipSegments.length === 8) {
-    return fullIpSearch('ipv6', ipSegments);
-  }
+  let ipv4RangeQuery;
+  let ipv6RangeQuery;
   if (ipType === 'ipv4' && ipSegments.length === 4) {
-    return fullIpSearch('ipv4', ipSegments);
+    ipv4RangeQuery = fullIpSearch('ipv4', ipSegments);
+    if (!Boolean(ipv4RangeQuery)) {
+      return { validSearch: false };
+    }
+    return { validSearch: true, rangeQuery: ipv4RangeQuery };
+  }
+  if (ipType === 'ipv6' && ipSegments.length === 8) {
+    ipv6RangeQuery = fullIpSearch('ipv6', ipSegments);
+    if (!Boolean(ipv6RangeQuery)) {
+      return { validSearch: false };
+    }
+    return { validSearch: true, rangeQuery: ipv6RangeQuery };
   }
 
-  return partialIpSearch('ipv4', ipSegments).concat(partialIpSearch('ipv6', ipSegments));
+  ipv4RangeQuery = partialIpSearch('ipv4', ipSegments);
+  ipv6RangeQuery = partialIpSearch('ipv6', ipSegments);
+  if (!Boolean(ipv4RangeQuery) && !Boolean(Boolean(ipv6RangeQuery))) {
+    return { validSearch: false };
+  }
+  return {
+    validSearch: true,
+    rangeQuery: (ipv4RangeQuery ?? []).concat(ipv6RangeQuery ?? []),
+  };
 };
