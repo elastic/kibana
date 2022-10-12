@@ -211,7 +211,7 @@ function setKibanaVersion(url: URL) {
     return;
   }
 
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaVersion = '8.5.0'; //appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
 
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
