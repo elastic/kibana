@@ -19,7 +19,7 @@ export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
 
 export const syntheticsServiceApiKey: SavedObjectsType = {
   name: syntheticsApiKeyObjectType,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
@@ -40,7 +40,7 @@ export const syntheticsServiceApiKey: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
     icon: 'uptimeApp',
     getTitle: () =>
       i18n.translate('xpack.synthetics.synthetics.service.apiKey', {
