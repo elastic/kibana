@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 
-import { Duration } from '../../../types/schema';
+import { Duration, DurationUnit } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -48,7 +48,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'created_at' | 'updated_at'> = {
   name: 'irrelevant',
   description: 'irrelevant',
   time_window: {
-    duration: new Duration(7, 'd'),
+    duration: new Duration(7, DurationUnit.d),
     is_rolling: true,
   },
   budgeting_method: 'occurrences',
@@ -78,9 +78,8 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
     time_window: {
-      duration: new Duration(7, 'd'),
-      is_rolling: false,
-      calendar: { startTime: new Date('2022-10-01 00:00'), timeZone: 'America/Chicago' },
+      duration: new Duration(7, DurationUnit.d),
+      calendar: { start_time: '2022-10-01T00:00', time_zone: 'America/Chicago' },
     },
     ...params,
   });
