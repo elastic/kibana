@@ -43,7 +43,7 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
       leader: string,
       follower: string,
       advancedSettings: boolean = false,
-      readPollTimeout: string
+      readPollTimeout?: string
     ) {
       await testSubjects.setValue('leaderIndexInput', leader);
       await testSubjects.setValue('followerIndexInput', follower);
