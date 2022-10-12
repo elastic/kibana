@@ -55,6 +55,18 @@ export const createRequest = (
   const metricAggregations = createMetricAggregations(timerange, nodeType, metric, customMetric);
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
+  const additionalContextAgg = {
+    additionalContext: {
+      top_hits: {
+        size: 1,
+        _source: {
+          includes: ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*', 'container.*'],
+          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+        },
+      },
+    },
+  };
+
   const request: ESSearchRequest = {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -65,7 +77,7 @@ export const createRequest = (
       aggs: {
         nodes: {
           composite,
-          aggs: { ...metricAggregations, ...bucketSelector },
+          aggs: { ...metricAggregations, ...bucketSelector, ...additionalContextAgg },
         },
       },
     },

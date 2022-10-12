@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import {
@@ -20,13 +22,28 @@ import { createRequest } from './create_request';
 interface BucketKey {
   node: string;
 }
-type Response = Record<string, { value: number | null; warn: boolean; trigger: boolean }>;
+
+interface AdditionalContext {
+  [x: string]: any;
+}
+
+type Response = Record<
+  string,
+  {
+    value: number | null;
+    warn: boolean;
+    trigger: boolean;
+  } & AdditionalContext
+>;
+
 type Metric = Record<string, { value: number | null }>;
+
 interface Bucket {
   key: BucketKey;
   doc_count: number;
   shouldWarn: { value: number };
   shouldTrigger: { value: number };
+  additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 type NodeBucket = Bucket & Metric;
 interface ResponseAggregations {
@@ -56,10 +73,15 @@ export const getData = async (
     const nextAfterKey = nodes.after_key;
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
+      const bucketHits = bucket.additionalContext?.hits?.hits;
+      const additionalContextSource =
+        bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
         warn: bucket?.shouldWarn.value > 0 ?? false,
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
+        ...additionalContextSource,
       };
     }
     if (nextAfterKey) {

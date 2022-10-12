@@ -214,3 +214,45 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
       'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
   }
 );
+
+export const cloudActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.cloudActionVariableDescription',
+  {
+    defaultMessage: 'The cloud object defined by ECS if available in the source.',
+  }
+);
+
+export const hostActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.hostActionVariableDescription',
+  {
+    defaultMessage: 'The host object defined by ECS if available in the source.',
+  }
+);
+
+export const containerActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.containerActionVariableDescription',
+  {
+    defaultMessage: 'The container object defined by ECS if available in the source.',
+  }
+);
+
+export const orchestratorActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.orchestratorActionVariableDescription',
+  {
+    defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
+  }
+);
+
+export const labelsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.labelsActionVariableDescription',
+  {
+    defaultMessage: 'List of labels associated with the entity where this alert triggered.',
+  }
+);
+
+export const tagsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.tagsActionVariableDescription',
+  {
+    defaultMessage: 'List of tags associated with the entity where this alert triggered.',
+  }
+);
