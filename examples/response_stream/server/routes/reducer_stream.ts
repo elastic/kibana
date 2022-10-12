@@ -28,33 +28,32 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
       },
     },
     async (context, request, response) => {
-      // const maxTimeoutMs = request.body.timeout ?? 250;
+      const maxTimeoutMs = request.body.timeout ?? 250;
       const simulateError = request.body.simulateErrors ?? false;
 
       let logMessageCounter = 1;
 
-      function logInfoMessage(msg: string) {
-        logger.info(`Response Stream Example #${logMessageCounter}: ${msg}`);
+      function logDebugMessage(msg: string) {
+        logger.debug(`Response Stream Example #${logMessageCounter}: ${msg}`);
         logMessageCounter++;
       }
 
-      logInfoMessage('Starting stream.');
+      logDebugMessage('Starting stream.');
 
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
-        logInfoMessage('aborted$ subscription trigger.');
+        logDebugMessage('aborted$ subscription trigger.');
         shouldStop = true;
       });
       request.events.completed$.subscribe(() => {
-        logInfoMessage('completed$ subscription trigger.');
+        logDebugMessage('completed$ subscription trigger.');
         shouldStop = true;
       });
 
       const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
         request.headers,
         logger,
-        request.body.compressResponse,
-        true
+        request.body.compressResponse
       );
 
       const entities = [
@@ -75,18 +74,12 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         actions.push('emit-error');
       }
 
-      // let progress = 0;
-
-      const start = Date.now();
+      let progress = 0;
 
       async function pushStreamUpdate() {
         setTimeout(() => {
           try {
-            const now = Date.now();
-            const delta = now - start;
-            const runningTime = 60 * 60 * 1000;
-
-            const progress = Math.round((delta / runningTime) * 100);
+            progress++;
 
             if (progress > 100 || shouldStop) {
               end();
@@ -117,7 +110,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
           } catch (e) {
             logger.error(e);
           }
-        }, Math.floor(Math.random() * 10)); // maxTimeoutMs));
+        }, Math.floor(Math.random() * maxTimeoutMs));
       }
 
       // do not call this using `await` so it will run asynchronously while we return the stream already.

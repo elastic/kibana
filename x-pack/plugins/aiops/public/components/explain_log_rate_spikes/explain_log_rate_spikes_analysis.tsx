@@ -96,7 +96,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       index: dataView.title,
       grouping: true,
       ...windowParameters,
-      // compressResponse: false,
     },
     { reducer: streamReducer, initialState }
   );
