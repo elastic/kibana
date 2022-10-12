@@ -7,7 +7,14 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPageHeaderProps,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -93,31 +100,7 @@ const getRoutes = (
       path: MONITOR_ROUTE,
       component: () => <MonitorDetailsPage />,
       dataTestSubj: 'syntheticsMonitorDetailsPage',
-      pageHeader: {
-        pageTitle: <MonitorDetailsPageTitle />,
-        breadcrumbs: [
-          {
-            text: (
-              <>
-                <EuiIcon size="s" type="arrowLeft" />{' '}
-                <FormattedMessage
-                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
-                  defaultMessage="Monitors"
-                />
-              </>
-            ),
-            color: 'primary',
-            'aria-current': false,
-            href: `${syntheticsPath}${MONITORS_ROUTE}`,
-          },
-        ],
-        rightSideItems: [
-          <RunTestManually />,
-          <MonitorDetailsLastRun />,
-          <MonitorDetailsStatus />,
-          <MonitorDetailsLocation />,
-        ],
-      },
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath),
     },
     {
       title: i18n.translate('xpack.synthetics.monitorHistory.title', {
@@ -127,31 +110,7 @@ const getRoutes = (
       path: MONITOR_HISTORY_ROUTE,
       component: () => <div>History</div>,
       dataTestSubj: 'syntheticsMonitorHistoryPage',
-      pageHeader: {
-        pageTitle: <MonitorDetailsPageTitle />,
-        breadcrumbs: [
-          {
-            text: (
-              <>
-                <EuiIcon size="s" type="arrowLeft" />{' '}
-                <FormattedMessage
-                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
-                  defaultMessage="Monitors"
-                />
-              </>
-            ),
-            color: 'primary',
-            'aria-current': false,
-            href: `${syntheticsPath}${MONITORS_ROUTE}`,
-          },
-        ],
-        rightSideItems: [
-          <RunTestManually />,
-          <MonitorDetailsLastRun />,
-          <MonitorDetailsStatus />,
-          <MonitorDetailsLocation />,
-        ],
-      },
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath),
     },
     {
       title: i18n.translate('xpack.synthetics.monitorErrors.title', {
@@ -161,31 +120,7 @@ const getRoutes = (
       path: MONITOR_ERRORS_ROUTE,
       component: () => <div>Errors</div>,
       dataTestSubj: 'syntheticsMonitorHistoryPage',
-      pageHeader: {
-        pageTitle: <MonitorDetailsPageTitle />,
-        breadcrumbs: [
-          {
-            text: (
-              <>
-                <EuiIcon size="s" type="arrowLeft" />{' '}
-                <FormattedMessage
-                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
-                  defaultMessage="Monitors"
-                />
-              </>
-            ),
-            color: 'primary',
-            'aria-current': false,
-            href: `${syntheticsPath}${MONITORS_ROUTE}`,
-          },
-        ],
-        rightSideItems: [
-          <RunTestManually />,
-          <MonitorDetailsLastRun />,
-          <MonitorDetailsStatus />,
-          <MonitorDetailsLocation />,
-        ],
-      },
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath),
     },
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
@@ -340,6 +275,37 @@ const getRoutes = (
       },
     },
   ];
+};
+
+const getMonitorSummaryHeader = (
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string
+): EuiPageHeaderProps => {
+  return {
+    pageTitle: <MonitorDetailsPageTitle />,
+    breadcrumbs: [
+      {
+        text: (
+          <>
+            <EuiIcon size="s" type="arrowLeft" />{' '}
+            <FormattedMessage
+              id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+              defaultMessage="Monitors"
+            />
+          </>
+        ),
+        color: 'primary',
+        'aria-current': false,
+        href: `${syntheticsPath}${MONITORS_ROUTE}`,
+      },
+    ],
+    rightSideItems: [
+      <RunTestManually />,
+      <MonitorDetailsLastRun />,
+      <MonitorDetailsStatus />,
+      <MonitorDetailsLocation />,
+    ],
+  };
 };
 
 const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
