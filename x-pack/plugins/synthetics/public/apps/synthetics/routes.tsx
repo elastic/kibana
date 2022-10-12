@@ -15,7 +15,7 @@ import {
   EuiPageHeaderProps,
   useEuiTheme,
 } from '@elastic/eui';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -282,6 +282,16 @@ const getMonitorSummaryHeader = (
   syntheticsPath: string,
   selectedTab: 'summary' | 'history' | 'errors'
 ): EuiPageHeaderProps => {
+  // Not a component, but it doesn't matter. Hooks are just functions
+  const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+
+  if (!match) {
+    return {};
+  }
+
+  const search = history.location.search;
+  const monitorId = match.params.monitorId;
+
   return {
     pageTitle: <MonitorDetailsPageTitle />,
     breadcrumbs: [
@@ -312,14 +322,25 @@ const getMonitorSummaryHeader = (
           defaultMessage: 'Summary',
         }),
         isSelected: selectedTab === 'summary',
-        onClick: selectedTab === 'summary' ? undefined : () => window.alert('Unimplemented'),
+        onClick:
+          selectedTab === 'summary'
+            ? undefined
+            : () =>
+                history.push({ pathname: MONITOR_ROUTE.replace(':monitorId?', monitorId), search }),
       },
       {
         label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
           defaultMessage: 'History',
         }),
         isSelected: selectedTab === 'history',
-        onClick: selectedTab === 'history' ? undefined : () => window.alert('Unimplemented'),
+        onClick:
+          selectedTab === 'history'
+            ? undefined
+            : () =>
+                history.push({
+                  pathname: MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId),
+                  search,
+                }),
       },
       {
         label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
@@ -327,7 +348,14 @@ const getMonitorSummaryHeader = (
         }),
         prepend: <EuiIcon type="alert" color="danger" />,
         isSelected: selectedTab === 'errors',
-        onClick: selectedTab === 'errors' ? undefined : () => window.alert('Unimplemented'),
+        onClick:
+          selectedTab === 'errors'
+            ? undefined
+            : () =>
+                history.push({
+                  pathname: MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId),
+                  search,
+                }),
       },
     ],
   };
