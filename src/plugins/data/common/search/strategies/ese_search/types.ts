@@ -12,7 +12,9 @@ export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
 
 export interface IAsyncSearchOptions extends ISearchOptions {
   /**
-   * The number of milliseconds to wait between receiving a response and sending another request
+   * number or `backoff` string literal
+   * A number means a fixed timeout to wait between receiving a response and sending another request,
+   * `backoff` (default) means to use a dynamic strategy with backing off from 1 to 5 seconds timeouts as request gets longer
    */
-  pollInterval?: number;
+  pollInterval?: number | 'backoff';
 }
