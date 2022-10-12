@@ -7,5 +7,4 @@
 
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from './constants';
 import { EventAction } from './types/process_tree';
-
 export { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction };
