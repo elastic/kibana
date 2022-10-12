@@ -298,6 +298,20 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getSelectedFields', () => {
+    it('should return the fields used per layer', async () => {
+      expect(FormBasedDatasource?.getSelectedFields?.(baseState)).toEqual(['op']);
+    });
+
+    it('should return empty array for empty layers', async () => {
+      const state = {
+        ...baseState,
+        layers: {},
+      };
+      expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
+    });
+  });
+
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
