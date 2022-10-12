@@ -122,8 +122,9 @@ export const getDiscoverAppStateContainer = (
   const enhancedAppContainer = {
     ...appStateContainer,
     reset: (nextSavedSearch: SavedSearch) => {
-      addLog('🔗 [appState] reset', nextSavedSearch);
+      addLog('🔗 [appState] reset to saved search', nextSavedSearch);
       const resetState = getInitialState(stateStorage, nextSavedSearch, services);
+      addLog('🔗 [appState] reset to saved search new app state', resetState);
       appStateContainer.set(resetState);
     },
     set: (value: AppState | null) => {

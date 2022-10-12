@@ -5,83 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { updateSavedSearch } from './update_saved_search';
 import { addLog } from '../../../utils/addLog';
 import { AppState } from '../services/discover_app_state_container';
-import { updateSearchSource } from './update_search_source';
 import { DiscoverServices } from '../../../build_services';
 
-export function updateSavedSearch(
-  {
-    savedSearch,
-    dataView,
-    state,
-    services,
-  }: {
-    savedSearch: SavedSearch;
-    dataView: DataView;
-    state: AppState;
-    services: DiscoverServices;
-  },
-  initial: boolean = false
-) {
-  addLog('💾 [savedSearch] updateSavedSearch', savedSearch, state);
-  if (!initial) {
-    updateSearchSource(savedSearch.searchSource, {
-      dataView,
-      services,
-    });
-  } else {
-    savedSearch.searchSource
-      .setField('index', dataView)
-      .setField('query', state.query)
-      .setField('filter', state.filters);
-  }
-  savedSearch.columns = state.columns || [];
-  savedSearch.sort = (state.sort as SortOrder[]) || [];
-  if (state.grid) {
-    savedSearch.grid = state.grid;
-  }
-  if (typeof state.hideChart !== 'undefined') {
-    savedSearch.hideChart = state.hideChart;
-  }
-  if (typeof state.rowHeight !== 'undefined') {
-    savedSearch.rowHeight = state.rowHeight;
-  }
-
-  if (state.viewMode) {
-    savedSearch.viewMode = state.viewMode;
-  }
-
-  if (state.hideAggregatedPreview) {
-    savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
-  }
-
-  // add a flag here to identify text based language queries
-  // these should be filtered out from the visualize editor
-  const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
-  if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
-    savedSearch.isTextBasedQuery = isTextBasedQuery;
-  }
-
-  const { from, to } = services.timefilter.getTime();
-  const refreshInterval = services.timefilter.getRefreshInterval();
-  savedSearch.timeRange =
-    savedSearch.timeRestore || savedSearch.timeRange
-      ? {
-          from,
-          to,
-        }
-      : undefined;
-  savedSearch.refreshInterval =
-    savedSearch.timeRestore || savedSearch.refreshInterval
-      ? { value: refreshInterval.value, pause: refreshInterval.pause }
-      : undefined;
-  return savedSearch;
-}
 /**
  * Helper function to update and persist the given savedSearch
  */

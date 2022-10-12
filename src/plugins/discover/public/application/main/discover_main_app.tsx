@@ -52,7 +52,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useUrl({ history: usedHistory, stateContainer });
 
   /**
-   * SavedSearch dependend initializing
+   * SavedSearch dependent initializing
    */
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';

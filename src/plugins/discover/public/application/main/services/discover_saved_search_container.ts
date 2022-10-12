@@ -11,12 +11,13 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { differenceWith, isEqual, toPairs } from 'lodash';
+import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/addLog';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { AppState, AppStateContainer } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { persistSavedSearch, updateSavedSearch } from '../utils/persist_saved_search';
+import { persistSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
 export interface PersistParams {
@@ -121,8 +122,17 @@ export function getSavedSearchContainer({
       }),
       services.uiSettings
     );
-    update(undefined, newAppState, true);
-    return nextSavedSearch;
+    const nextSavedSearchToSet = updateSavedSearch(
+      {
+        savedSearch: { ...nextSavedSearch },
+        dataView: dataView ? dataView : get().searchSource.getField('index')!,
+        state: newAppState,
+        services,
+      },
+      true
+    );
+    set(nextSavedSearchToSet);
+    return nextSavedSearchToSet;
   };
 
   const persist = async (
@@ -156,12 +166,12 @@ export function getSavedSearchContainer({
   ) => {
     addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetPersisted });
 
-    const previousDataView = get();
+    const previousSavedSearch = get();
     const prevSearchSource = savedSearchPersisted$.getValue().searchSource.getFields();
     const nextSavedSearch = updateSavedSearch(
       {
-        savedSearch: { ...previousDataView },
-        dataView: nextDataView ? nextDataView : previousDataView.searchSource.getField('index')!,
+        savedSearch: { ...previousSavedSearch },
+        dataView: nextDataView ? nextDataView : previousSavedSearch.searchSource.getField('index')!,
         state: nextState,
         services,
       },

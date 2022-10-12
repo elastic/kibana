@@ -9,8 +9,8 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { updateSavedSearch } from './update_saved_search';
 import { AppState } from '../services/discover_app_state_container';
-import { updateSavedSearch } from './persist_saved_search';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
 import {

@@ -273,7 +273,9 @@ export function getDiscoverStateContainer({
       ) => {
         addLog('🧭 [discoverState] loadNewSavedSearch');
         const nextSavedSearch = await savedSearchContainer.new();
+        addLog('🧭 [discoverState] loadNewSavedSearch', nextSavedSearch);
         if (!appStateContainer.isEmptyURL()) {
+          addLog('🧭 [discoverState] update by given state since URL is not empty');
           await savedSearchContainer.update(
             nextSavedSearch.searchSource.getField('index'),
             appStateContainer.getState()
@@ -294,6 +296,7 @@ export function getDiscoverStateContainer({
         }
         appStateContainer.reset(nextSavedSearch);
         await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
+        addLog('🧭 [discoverState] loadNewSavedSearch result', nextSavedSearch);
         return nextSavedSearch;
       },
       initSyncSubscribe: () => {
