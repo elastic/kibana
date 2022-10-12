@@ -418,7 +418,7 @@ export const ExceptionListsTable = React.memo(() => {
           titleText={i18n.REFERENCE_MODAL_TITLE}
         />
       </div>
-      {showDetails && <ExceptionListDetails list={tableItems[1]} />}
+      {showDetails && <ExceptionListDetails list={tableItems[0]} isReadOnly={false} />}
     </>
   );
 });
