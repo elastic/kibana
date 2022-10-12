@@ -278,8 +278,9 @@ export const getManagementFilteredLinks = async (
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,
         ]);
+      } else if (!canReadActionsLogManagement) {
+        return excludeLinks([SecurityPageName.responseActionsHistory]);
       }
-      return excludeLinks([SecurityPageName.responseActionsHistory]);
     }
   } catch {
     return excludeLinks([SecurityPageName.hostIsolationExceptions]);
