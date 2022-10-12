@@ -22,6 +22,7 @@ import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
+import { initPlugin as initTorq } from './torq_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -35,6 +36,7 @@ export enum ExternalServiceSimulator {
   WEBHOOK = 'webhook',
   MS_EXCHANGE = 'exchange',
   XMATTERS = 'xmatters',
+  TORQ = 'torq',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -127,6 +129,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     const router: IRouter = core.http.createRouter();
 
+    initTorq(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.TORQ));
     initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));

@@ -45,6 +45,7 @@ const enabledActionTypes = [
   '.slack',
   '.webhook',
   '.xmatters',
+  '.torq',
   '.test-sub-action-connector',
   '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
