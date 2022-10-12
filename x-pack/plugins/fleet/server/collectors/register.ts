@@ -26,6 +26,17 @@ interface Usage {
   fleet_server: FleetServerUsage;
 }
 
+export const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(config, soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+    packages: await getPackageUsage(soClient),
+  };
+  return usage;
+};
+
 export function registerFleetUsageCollector(
   core: CoreSetup,
   config: FleetConfigType,
@@ -41,15 +52,7 @@ export function registerFleetUsageCollector(
   const fleetCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'fleet',
     isReady: () => true,
-    fetch: async () => {
-      const [soClient, esClient] = await getInternalClients(core);
-      return {
-        agents_enabled: getIsAgentsEnabled(config),
-        agents: await getAgentUsage(config, soClient, esClient),
-        fleet_server: await getFleetServerUsage(soClient, esClient),
-        packages: await getPackageUsage(soClient),
-      };
-    },
+    fetch: async () => fetchUsage(core, config),
     schema: {
       agents_enabled: { type: 'boolean' },
       agents: {
