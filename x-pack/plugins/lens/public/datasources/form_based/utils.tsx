@@ -182,27 +182,6 @@ export function getShardFailuresWarningMessages(
   if (state) {
     if (warning.type === 'shard_failure') {
       switch (warning.reason.type) {
-        case 'generic_shard_warning':
-          return [
-            <>
-              <EuiTextColor color="accent">{warning.message}</EuiTextColor>
-              <EuiText size="s">{warning.text}</EuiText>
-              <EuiSpacer size="s" />
-              {warning.text ? (
-                <ShardFailureOpenModalButton
-                  theme={theme}
-                  title={warning.message}
-                  size="m"
-                  getRequestMeta={
-                    getRequestMeta as () => {
-                      request: ShardFailureRequest;
-                      response: estypes.SearchResponse;
-                    }
-                  }
-                />
-              ) : null}
-            </>,
-          ];
         case 'unsupported_aggregation_on_downsampled_index':
           return Object.values(state.layers).flatMap((layer) =>
             uniq(
@@ -228,6 +207,27 @@ export function getShardFailuresWarningMessages(
               })
             )
           );
+        default:
+          return [
+            <>
+              <EuiTextColor color="accent">{warning.message}</EuiTextColor>
+              <EuiText size="s">{warning.text}</EuiText>
+              <EuiSpacer size="s" />
+              {warning.text ? (
+                <ShardFailureOpenModalButton
+                  theme={theme}
+                  title={warning.message}
+                  size="m"
+                  getRequestMeta={
+                    getRequestMeta as () => {
+                      request: ShardFailureRequest;
+                      response: estypes.SearchResponse;
+                    }
+                  }
+                />
+              ) : null}
+            </>,
+          ];
       }
     }
   }
