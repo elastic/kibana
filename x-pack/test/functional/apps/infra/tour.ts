@@ -26,30 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      // Activate the Observability guide, step 3, in order to trigger the EuiTour
-      await supertest
-        .put(`/api/guided_onboarding/state`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          status: 'in_progress',
-          guidedId: 'observability',
-          isActive: true,
-          steps: [
-            {
-              id: 'add_data',
-              status: 'complete',
-            },
-            {
-              id: 'view_dashboard',
-              status: 'complete',
-            },
-            {
-              id: 'tour_observability',
-              status: 'in_progress',
-            },
-          ],
-        })
-        .expect(200);
       await pageObjects.common.navigateToApp('observability');
       // Need to increase the browser height so the tour steps fit to screen
       await browser.setWindowSize(1600, 1400);
@@ -61,6 +37,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Tour enabled', () => {
+      beforeEach(async () => {
+        // Activate the Observability guide, step 3, in order to trigger the EuiTour
+        await supertest
+          .put(`/api/guided_onboarding/state`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            status: 'in_progress',
+            guideId: 'observability',
+            isActive: true,
+            steps: [
+              {
+                id: 'add_data',
+                status: 'complete',
+              },
+              {
+                id: 'view_dashboard',
+                status: 'complete',
+              },
+              {
+                id: 'tour_observability',
+                status: 'in_progress',
+              },
+            ],
+          })
+          .expect(200);
+      });
+
       it('can complete tour', async () => {
         await setInitialTourState();
 
