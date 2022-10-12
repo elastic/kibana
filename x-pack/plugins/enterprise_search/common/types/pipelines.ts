@@ -34,3 +34,9 @@ export interface MlInferenceHistoryItem {
 export interface MlInferenceHistoryResponse {
   history: MlInferenceHistoryItem[];
 }
+
+export interface MlInferenceError {
+  message: string;
+  doc_count: number;
+  timestamp: string | undefined; // Date string
+}

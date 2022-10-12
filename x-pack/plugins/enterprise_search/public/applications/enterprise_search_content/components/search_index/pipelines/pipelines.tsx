@@ -25,6 +25,7 @@ import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { isApiIndex } from '../../../utils/indices';
 
+import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { IngestPipelinesCard } from './ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
@@ -172,6 +173,7 @@ export const SearchIndexPipelines: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <InferenceErrors />
       {showAddMlInferencePipelineModal && (
         <AddMLInferencePipelineModal onClose={closeAddMlInferencePipelineModal} />
       )}
