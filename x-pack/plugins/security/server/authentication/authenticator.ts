@@ -422,6 +422,7 @@ export class Authenticator {
         });
 
         if (requestIsRedirectable) {
+          // TODO: Will existingSessionValueRaw no always be a string here?!?
           if (
             // TODO: Should this just be `instanceof SessionError`?
             existingSessionValueRaw instanceof SessionExpiredError &&
