@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { filter, head, noop, orderBy, pipe, has } from 'lodash/fp';
+import { useState, useEffect, useMemo } from 'react';
+import { filter, head, orderBy, pipe, has } from 'lodash/fp';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
@@ -48,7 +48,7 @@ export const useNotableAnomaliesSearch = ({
   refetch: inputsModel.Refetch;
 } => {
   const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], []));
-  const refetch = useRef<inputsModel.Refetch>(noop);
+
   const {
     loading: jobsLoading,
     isMlAdmin: isMlUser,
@@ -114,14 +114,14 @@ export const useNotableAnomaliesSearch = ({
     }
 
     fetchAnomaliesSearch();
-    refetch.current = refetchJobs;
+
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
   }, [skip, isMlUser, addError, query, notableAnomaliesJobs, refetchJobs]);
 
-  return { isLoading: loading || jobsLoading, data, refetch: refetch.current };
+  return { isLoading: loading || jobsLoading, data, refetch: refetchJobs };
 };
 
 function formatResultData(

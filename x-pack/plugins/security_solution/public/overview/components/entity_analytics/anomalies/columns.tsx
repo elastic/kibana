@@ -23,7 +23,7 @@ import { UsersType } from '../../../../users/store/model';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { Refetch } from '../../../../common/store/inputs/model';
-import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { isJobFailed, isJobStarted } from '../../../../../common/machine_learning/helpers';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 
@@ -72,14 +72,12 @@ export const useAnomaliesColumns = (loading: boolean, refreshJobs: Refetch): Ano
 
           if (count > 0 || isJobStarted(job.jobState, job.datafeedState)) {
             return <AnomaliesTabLink count={count} jobId={job.id} entity={entity} />;
+          } else if (isJobFailed(job.jobState, job.datafeedState)) {
+            return i18n.JOB_STATUS_FAILED;
+          } else if (job.isCompatible) {
+            return <EnableJob job={job} isJobLoading={loading} refreshJobs={refreshJobs} />;
           } else {
-            return job.isCompatible ? (
-              <EnableJob job={job} isJobLoading={loading} refreshJobs={refreshJobs} />
-            ) : (
-              <>
-                <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />
-              </>
-            );
+            return <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />;
           }
         },
       },
@@ -109,7 +107,9 @@ const EnableJob = ({
   return isLoading || isJobLoading ? (
     <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
   ) : (
-    <LinkAnchor onClick={handleJobStateChange}>{i18n.RUN_JOB}</LinkAnchor>
+    <LinkAnchor onClick={handleJobStateChange} data-test-subj="enable-job">
+      {i18n.RUN_JOB}
+    </LinkAnchor>
   );
 };
 

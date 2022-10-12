@@ -20,6 +20,15 @@ const mockUseNotableAnomaliesSearch = jest.fn().mockReturnValue({
   refetch: jest.fn(),
 });
 
+jest.mock(
+  '@kbn/ml-plugin/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader',
+  () => {
+    return {
+      MLJobsAwaitingNodeWarning: () => <></>,
+    };
+  }
+);
+
 jest.mock('../../../../common/components/ml/anomaly/use_anomalies_search', () => {
   const original = jest.requireActual(
     '../../../../common/components/ml/anomaly/use_anomalies_search'
@@ -115,7 +124,7 @@ describe('EntityAnalyticsAnomalies', () => {
 
     expect(getByTestId('anomalies-table-column-name')).toHaveTextContent(jobCount.name);
     expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('Run job');
-    expect(getByTestId('jobs-table-link')).toBeInTheDocument();
+    expect(getByTestId('enable-job')).toBeInTheDocument();
   });
 
   it('renders uninstalled jobs', () => {
@@ -140,7 +149,8 @@ describe('EntityAnalyticsAnomalies', () => {
     );
 
     expect(getByTestId('anomalies-table-column-name')).toHaveTextContent(jobCount.name);
-    expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('uninstalled');
+    expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('Run job');
+    expect(getByTestId('enable-job')).toBeInTheDocument();
   });
 
   it('renders failed jobs', () => {
@@ -162,14 +172,13 @@ describe('EntityAnalyticsAnomalies', () => {
       refetch: jest.fn(),
     });
 
-    const { getByTestId, debug } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <EntityAnalyticsAnomalies />
       </TestProviders>
     );
 
     expect(getByTestId('anomalies-table-column-name')).toHaveTextContent(jobCount.name);
-    debug();
     expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('failed');
   });
 
