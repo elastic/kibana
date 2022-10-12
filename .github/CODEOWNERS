@@ -142,6 +142,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /src/core/types/elasticsearch @elastic/apm-ui
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
 /packages/kbn-utility-types/src/dot_test.ts @dgieselaar
+/packages/kbn-adhoc-profiler @dgieselaar
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
