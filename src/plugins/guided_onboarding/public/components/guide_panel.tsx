@@ -107,8 +107,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     application.navigateToApp('home', { path: '#getting_started' });
   };
 
-  const completeGuide = async () => {
+  const completeGuide = async (
+    completedGuideRedirectLocation: GuideConfig['completedGuideRedirectLocation']
+  ) => {
     await api.completeGuide(guideState!.guideId);
+
+    if (completedGuideRedirectLocation) {
+      const { appID, path } = completedGuideRedirectLocation;
+      application.navigateToApp(appID, { path });
+    }
   };
 
   const openQuitGuideModal = () => {
@@ -294,7 +301,11 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
               {isGuideReadyToComplete && (
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={completeGuide} fill data-test-subj="useElasticButton">
+                    <EuiButton
+                      onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
+                      fill
+                      data-test-subj="useElasticButton"
+                    >
                       {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                         defaultMessage: 'Continue using Elastic',
                       })}
