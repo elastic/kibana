@@ -282,7 +282,7 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => T;
 
-  getUsedFields?: (state: T) => string[];
+  getSelectedFields?: (state: T) => string[];
 
   renderDataPanel: (
     domElement: Element,

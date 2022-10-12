@@ -327,7 +327,7 @@ export function getTextBasedDatasource({
     toExpression: (state, layerId, indexPatterns) => {
       return toExpression(state, layerId);
     },
-    getUsedFields(state) {
+    getSelectedFields(state) {
       const fields: string[] = [];
       Object.values(state?.layers)?.forEach((l) => {
         const { columns } = l;
@@ -341,7 +341,7 @@ export function getTextBasedDatasource({
     },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getUsedFields?.(props.state);
+      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
       render(
         <I18nProvider>
           <TextBasedDataPanel

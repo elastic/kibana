@@ -65,6 +65,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
         id={id}
         buttonContent={renderButton}
         extraAction={extraAction}
+        data-test-subj={id}
       >
         <ul
           className="lnsInnerIndexPatternDataPanel__fieldItems"

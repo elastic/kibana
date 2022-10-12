@@ -263,7 +263,7 @@ export function getFormBasedDatasource({
       });
     },
 
-    getUsedFields(state) {
+    getSelectedFields(state) {
       const fields: string[] = [];
       Object.values(state?.layers)?.forEach((l) => {
         const { columns } = l;
@@ -281,7 +281,7 @@ export function getFormBasedDatasource({
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
-      const layerFields = formBasedDatasource?.getUsedFields?.(props.state);
+      const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
