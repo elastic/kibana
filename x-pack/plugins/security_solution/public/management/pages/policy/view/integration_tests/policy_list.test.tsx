@@ -17,8 +17,8 @@ import type { GetPolicyListResponse } from '../../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../common/constants';
 
-jest.mock('../../../services/policies/policies');
-jest.mock('../../../services/policies/ingest');
+jest.mock('../../../../services/policies/policies');
+jest.mock('../../../../services/policies/ingest');
 
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
