@@ -188,7 +188,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       state: {
         visualization,
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: this.layers,
           },
         },
