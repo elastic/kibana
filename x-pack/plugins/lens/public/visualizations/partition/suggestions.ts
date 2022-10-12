@@ -284,6 +284,7 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
+                secondaryGroups: [],
                 metric: metricColumnId,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: LayerTypes.DATA,
