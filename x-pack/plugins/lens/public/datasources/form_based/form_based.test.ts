@@ -2728,26 +2728,22 @@ describe('IndexPattern Data Source', () => {
       };
 
       expect(
-        indexPatternDatasource
-          .getPublicAPI({
-            state: baseState,
-            layerId: 'first',
-            indexPatterns: {
-              1: indexPatternWithDefaultTimeField,
-            },
-          })
-          .hasDefaultTimeField()
+        FormBasedDatasource.getPublicAPI({
+          state: baseState,
+          layerId: 'first',
+          indexPatterns: {
+            1: indexPatternWithDefaultTimeField,
+          },
+        }).hasDefaultTimeField()
       ).toBe(true);
       expect(
-        indexPatternDatasource
-          .getPublicAPI({
-            state: baseState,
-            layerId: 'first',
-            indexPatterns: {
-              1: indexPatternWithoutDefaultTimeField,
-            },
-          })
-          .hasDefaultTimeField()
+        FormBasedDatasource.getPublicAPI({
+          state: baseState,
+          layerId: 'first',
+          indexPatterns: {
+            1: indexPatternWithoutDefaultTimeField,
+          },
+        }).hasDefaultTimeField()
       ).toBe(false);
     });
   });
@@ -3321,9 +3317,9 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      } as IndexPatternPrivateState;
+      } as FormBasedPrivateState;
       expect(
-        indexPatternDatasource.initializeDimension!(state, 'first', indexPatterns, {
+        FormBasedDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newTime',
           groupId: 'a',
           autoTimeField: true,

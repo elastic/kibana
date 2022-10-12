@@ -91,7 +91,7 @@ import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
-import { IndexPatternLayer } from '..';
+import { FormBasedLayer } from '../..';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -821,7 +821,7 @@ export function getFormBasedDatasource({
   return formBasedDatasource;
 }
 
-function blankLayer(indexPatternId: string, linkToLayers?: string[]): IndexPatternLayer {
+function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedLayer {
   return {
     indexPatternId,
     linkToLayers,
