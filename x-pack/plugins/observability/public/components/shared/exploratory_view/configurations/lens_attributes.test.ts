@@ -118,7 +118,7 @@ describe('Lens Attribute', () => {
       ReportTypes.KPI
     );
 
-    expect(lnsAttrKpi.getJSON().state.datasourceStates.indexpattern.layers.layer0.columns).toEqual({
+    expect(lnsAttrKpi.getJSON().state.datasourceStates.formBased.layers.layer0.columns).toEqual({
       'x-axis-column-layer0': {
         dataType: 'date',
         isBucketed: true,
@@ -352,7 +352,7 @@ describe('Lens Attribute', () => {
   });
 
   it('should return first layer', function () {
-    expect(lnsAttr.getLayers()).toEqual(sampleAttribute.state.datasourceStates.indexpattern.layers);
+    expect(lnsAttr.getLayers()).toEqual(sampleAttribute.state.datasourceStates.formBased.layers);
   });
 
   it('should return expected XYState', function () {
