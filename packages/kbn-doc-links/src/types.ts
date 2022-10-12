@@ -276,6 +276,9 @@ export interface DocLinks {
     };
     readonly threatIntelInt: string;
     readonly responseActions: string;
+    readonly exceptions: {
+      value_lists: string;
+    };
   };
   readonly query: {
     readonly eql: string;
