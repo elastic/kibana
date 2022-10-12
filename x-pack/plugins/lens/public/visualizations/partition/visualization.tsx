@@ -201,7 +201,7 @@ export const getPieVisualization = ({
             supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
-            hideGrouping: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
+            hideGrouping: true,
           };
         case 'mosaic':
           return {
@@ -230,7 +230,7 @@ export const getPieVisualization = ({
             dimensionsTooMany:
               totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            hideGrouping: true,
+            hideGrouping: state.shape === 'treemap',
           };
       }
     };
