@@ -1250,56 +1250,54 @@ function syncLinkedDimensions(
   const linkedDimensions = activeVisualization.getLinkedDimensions?.(visualizationState);
   const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
 
-  linkedDimensions?.forEach(({ from, to }) => {
-    const columnId = to.columnId ?? generateId();
+  const getDimensionGroups = (layerId: string) =>
+    activeVisualization.getConfiguration({
+      state: visualizationState,
+      layerId,
+      frame,
+    }).groups;
 
-    const dropSource = {
-      ...from,
-      id: from.columnId,
-      // don't need to worry about accessibility here
-      humanData: { label: '' },
-    };
+  if (linkedDimensions) {
+    const idAssuredLinks = linkedDimensions.map((link) => ({
+      ...link,
+      to: { ...link.to, columnId: link.to.columnId ?? generateId() },
+    }));
 
-    const dropTarget = {
-      ...to,
-      columnId,
-      filterOperations: () => true,
-    };
-
-    const dropType = 'duplicate_compatible';
-
-    // TODO - always call onDrop with the TARGET's dimension groups throughout Lens
-    const getDimensionGroups = () =>
-      activeVisualization.getConfiguration({
-        state: visualizationState,
-        layerId: to.layerId,
-        frame,
-      }).groups;
-
-    visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
-      {
-        prevState: visualizationState,
-        frame,
-        target: dropTarget,
-        source: dropSource,
-        dropType,
-        group: getDimensionGroups().find(({ groupId }) => groupId === dropTarget.groupId),
-      },
-      activeVisualization
-    );
-
-    datasourceMap[datasourceId].onDrop({
-      source: dropSource,
-      target: dropTarget,
+    datasourceState = datasourceMap[datasourceId].syncColumns({
       state: datasourceState,
-      setState: (s) => {
-        datasourceState = s;
-      },
-      targetLayerDimensionGroups: getDimensionGroups(),
-      dropType,
+      links: idAssuredLinks,
+      getDimensionGroups,
       indexPatterns,
     });
-  });
+
+    idAssuredLinks.forEach(({ from, to }) => {
+      const dropSource = {
+        ...from,
+        id: from.columnId,
+        // don't need to worry about accessibility here
+        humanData: { label: '' },
+      };
+
+      const dropTarget = {
+        ...to,
+        filterOperations: () => true,
+      };
+
+      visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+        {
+          prevState: visualizationState,
+          frame,
+          target: dropTarget,
+          source: dropSource,
+          dropType: 'duplicate_compatible',
+          group: getDimensionGroups(to.layerId).find(
+            ({ groupId }) => groupId === dropTarget.groupId
+          ),
+        },
+        activeVisualization
+      );
+    });
+  }
 
   return { datasourceState, visualizationState };
 }

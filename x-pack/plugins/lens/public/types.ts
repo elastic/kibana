@@ -233,6 +233,15 @@ export interface GetDropPropsArgs<T = unknown> {
   indexPatterns: IndexPatternMap;
 }
 
+interface DimensionLink {
+  from: { columnId: string; groupId: string; layerId: string };
+  to: {
+    columnId?: string;
+    groupId: string;
+    layerId: string;
+  };
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -283,6 +292,13 @@ export interface Datasource<T = unknown, P = unknown> {
       autoTimeField?: boolean;
     }
   ) => T;
+
+  syncColumns: (args: {
+    state: T;
+    links: Array<DimensionLink & { to: { columnId: string } }>;
+    getDimensionGroups: (layerId: string) => VisualizationDimensionGroupConfig[];
+    indexPatterns: IndexPatternMap;
+  }) => T;
 
   renderDataPanel: (
     domElement: Element,
@@ -1005,14 +1021,7 @@ export interface Visualization<T = unknown, P = unknown> {
   /**
    * Returns a set of dimensions that should be kept in sync
    */
-  getLinkedDimensions?: (state: T) => Array<{
-    from: { columnId: string; groupId: string; layerId: string };
-    to: {
-      columnId?: string;
-      groupId: string;
-      layerId: string;
-    };
-  }>;
+  getLinkedDimensions?: (state: T) => DimensionLink[];
 
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';

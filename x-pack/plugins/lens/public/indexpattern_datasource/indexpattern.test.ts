@@ -3421,6 +3421,221 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#syncColumns', () => {
+    it('copies linked columns', () => {
+      const links: Parameters<Datasource['syncColumns']>[0]['links'] = [
+        {
+          from: {
+            columnId: 'col1',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'col1',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+        {
+          from: {
+            columnId: 'col2',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'new-col',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+      ];
+
+      const newState = indexPatternDatasource.syncColumns({
+        state: {
+          currentIndexPatternId: 'foo',
+          layers: {
+            first: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  operationType: 'sum',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'field1',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as SumIndexPatternColumn,
+                col2: {
+                  sourceField: 'field2',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'h',
+                } as CountIndexPatternColumn,
+              },
+            },
+            second: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  sourceField: 'field1',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as CountIndexPatternColumn,
+              },
+            },
+          },
+        },
+        links,
+        indexPatterns,
+        getDimensionGroups: () => [],
+      });
+
+      expect(newState).toMatchInlineSnapshot(`
+        Object {
+          "currentIndexPatternId": "foo",
+          "layers": Object {
+            "first": Object {
+              "columnOrder": Array [],
+              "columns": Object {
+                "col1": Object {
+                  "customLabel": false,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "",
+                  "operationType": "sum",
+                  "sourceField": "field1",
+                  "timeScale": "d",
+                },
+                "col2": Object {
+                  "customLabel": false,
+                  "operationType": "count",
+                  "sourceField": "field2",
+                  "timeScale": "h",
+                },
+              },
+              "indexPatternId": "foo",
+            },
+            "second": Object {
+              "columnOrder": Array [
+                "col1",
+                "new-col",
+              ],
+              "columns": Object {
+                "col1": Object {
+                  "customLabel": false,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "",
+                  "operationType": "sum",
+                  "sourceField": "field1",
+                  "timeScale": "d",
+                },
+                "new-col": Object {
+                  "customLabel": false,
+                  "operationType": "count",
+                  "sourceField": "field2",
+                  "timeScale": "h",
+                },
+              },
+              "indexPatternId": "foo",
+            },
+          },
+        }
+      `);
+    });
+
+    it('updates terms order by references', () => {
+      const links: Parameters<Datasource['syncColumns']>[0]['links'] = [
+        {
+          from: {
+            columnId: 'col1FirstLayer',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'col1SecondLayer',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+        {
+          from: {
+            columnId: 'col2',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'new-col',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+      ];
+
+      const newState = indexPatternDatasource.syncColumns({
+        state: {
+          currentIndexPatternId: 'foo',
+          layers: {
+            first: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1FirstLayer: {
+                  operationType: 'sum',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'field1',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as SumIndexPatternColumn,
+                col2: {
+                  operationType: 'terms',
+                  sourceField: 'field2',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  params: {
+                    orderBy: {
+                      columnId: 'col1FirstLayer',
+                      type: 'column',
+                    },
+                  },
+                } as TermsIndexPatternColumn,
+              },
+            },
+            second: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1SecondLayer: {
+                  sourceField: 'field1',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as CountIndexPatternColumn,
+              },
+            },
+          },
+        },
+        links,
+        indexPatterns,
+        getDimensionGroups: () => [],
+      });
+
+      expect(
+        (newState.layers.second.columns['new-col'] as TermsIndexPatternColumn).params.orderBy
+      ).toEqual({
+        type: 'column',
+        columnId: 'col1SecondLayer',
+      });
+    });
+  });
+
   describe('#isEqual', () => {
     const layerId = '8bd66b66-aba3-49fb-9ff2-4bf83f2be08e';
 

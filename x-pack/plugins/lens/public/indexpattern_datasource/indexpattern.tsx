@@ -80,9 +80,18 @@ import {
   operationDefinitionMap,
   TermsIndexPatternColumn,
 } from './operations';
-import { getReferenceRoot } from './operations/layer_helpers';
-import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
-import { mergeLayer } from './state_helpers';
+import {
+  copyColumn,
+  getColumnOrder,
+  getReferenceRoot,
+  reorderByGroups,
+} from './operations/layer_helpers';
+import {
+  IndexPatternPrivateState,
+  IndexPatternPersistedState,
+  DataViewDragDropOperation,
+} from './types';
+import { mergeLayer, mergeLayers } from './state_helpers';
 import { Datasource, VisualizeEditorContext } from '../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
@@ -285,6 +294,80 @@ export function getIndexPatternDatasource({
       }
 
       return ret;
+    },
+
+    syncColumns({ state, links, indexPatterns, getDimensionGroups }) {
+      let modifiedLayers: Record<string, IndexPatternLayer> = state.layers;
+
+      links.forEach((link) => {
+        const source: DataViewDragDropOperation = {
+          ...link.from,
+          dataView: indexPatterns[modifiedLayers[link.from.layerId]?.indexPatternId],
+          filterOperations: () => true,
+        };
+
+        const target: DataViewDragDropOperation = {
+          ...link.to,
+          dataView: indexPatterns[modifiedLayers[link.to.layerId]?.indexPatternId],
+          filterOperations: () => true,
+        };
+
+        modifiedLayers = copyColumn({
+          layers: modifiedLayers,
+          target,
+          source,
+        });
+
+        const updatedColumnOrder = reorderByGroups(
+          getDimensionGroups(target.layerId),
+          getColumnOrder(modifiedLayers[target.layerId]),
+          target.groupId,
+          target.columnId
+        );
+
+        modifiedLayers = {
+          ...modifiedLayers,
+          [target.layerId]: {
+            ...modifiedLayers[target.layerId],
+            columnOrder: updatedColumnOrder,
+            columns: modifiedLayers[target.layerId].columns,
+          },
+        };
+      });
+
+      const newState = mergeLayers({
+        state,
+        newLayers: modifiedLayers,
+      });
+
+      links
+        .filter((link) =>
+          isColumnOfType<TermsIndexPatternColumn>(
+            'terms',
+            newState.layers[link.from.layerId].columns[link.from.columnId]
+          )
+        )
+        .forEach(({ from, to }) => {
+          const fromColumn = newState.layers[from.layerId].columns[
+            from.columnId
+          ] as TermsIndexPatternColumn;
+          if (fromColumn.params.orderBy.type === 'column') {
+            const fromOrderByColumnId = fromColumn.params.orderBy.columnId;
+            const orderByColumnLink = links.find(
+              ({ from: { columnId } }) => columnId === fromOrderByColumnId
+            );
+
+            if (orderByColumnLink) {
+              // order the synced column by the dimension which is linked to the column that the original column was ordered by
+              const toColumn = newState.layers[to.layerId].columns[
+                to.columnId
+              ] as TermsIndexPatternColumn;
+              toColumn.params.orderBy = { type: 'column', columnId: orderByColumnLink.to.columnId };
+            }
+          }
+        });
+
+      return newState;
     },
 
     toExpression: (state, layerId, indexPatterns) =>

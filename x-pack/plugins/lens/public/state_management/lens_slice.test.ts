@@ -391,11 +391,8 @@ describe('lensSlice', () => {
           groups: [{ groupId: 'to-group' } as VisualizationDimensionGroupConfig],
         }));
         activeVisualization.onDrop = jest.fn(({ prevState }) => prevState);
-        (datasourceMap.testDatasource as unknown as Datasource).onDrop = jest.fn(
-          ({ state, setState: setDatasourceState }) => {
-            setDatasourceState(state);
-            return true;
-          }
+        (datasourceMap.testDatasource as unknown as Datasource).syncColumns = jest.fn(
+          ({ state }) => state
         );
 
         customStore.dispatch(
@@ -404,6 +401,38 @@ describe('lensSlice', () => {
             layerType: layerTypes.DATA,
           })
         );
+
+        expect(
+          (
+            (datasourceMap.testDatasource as unknown as Datasource).syncColumns as jest.Mock<
+              Datasource['syncColumns']
+            >
+          ).mock.calls[0][0]
+        ).toMatchInlineSnapshot(`
+          Object {
+            "getDimensionGroups": [Function],
+            "indexPatterns": Object {},
+            "links": Array [
+              Object {
+                "from": Object {
+                  "columnId": "from-column",
+                  "groupId": "from-group",
+                  "layerId": "from-layer",
+                },
+                "to": Object {
+                  "columnId": "from-column",
+                  "groupId": "from-group",
+                  "layerId": "from-layer",
+                },
+              },
+            ],
+            "state": Array [
+              "layer1",
+              "foo",
+              "linked-layer-id",
+            ],
+          }
+        `);
 
         expect(activeVisualization.onDrop).toHaveBeenCalledTimes(1);
         expect({

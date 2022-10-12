@@ -211,6 +211,11 @@ export function getTextBasedLanguagesDatasource({
         initialContext: context,
       };
     },
+
+    syncColumns() {
+      throw new Error('Not yet implemented!');
+    },
+
     onRefreshIndexPattern() {},
 
     getUsedDataViews: (state) => {

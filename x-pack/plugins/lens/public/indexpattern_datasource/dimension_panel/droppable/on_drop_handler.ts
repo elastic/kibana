@@ -87,16 +87,24 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return onReorder(operationProps);
   }
 
-  if (['move_compatible', 'replace_compatible'].includes(dropType)) {
+  if (
+    [
+      'duplicate_compatible',
+      'replace_duplicate_compatible',
+      'move_compatible',
+      'replace_compatible',
+    ].includes(dropType)
+  ) {
     return onMoveCompatible(operationProps);
   }
-  if (['duplicate_compatible', 'replace_duplicate_compatible'].includes(dropType)) {
-    return onMoveCompatible(operationProps);
-  }
-  if (['move_incompatible', 'replace_incompatible'].includes(dropType)) {
-    return onMoveIncompatible(operationProps);
-  }
-  if (['duplicate_incompatible', 'replace_duplicate_incompatible'].includes(dropType)) {
+  if (
+    [
+      'duplicate_incompatible',
+      'replace_duplicate_incompatible',
+      'move_incompatible',
+      'replace_incompatible',
+    ].includes(dropType)
+  ) {
     return onMoveIncompatible(operationProps);
   }
   if (dropType === 'swap_compatible') {
