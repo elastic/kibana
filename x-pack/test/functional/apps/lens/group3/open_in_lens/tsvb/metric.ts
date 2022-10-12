@@ -66,5 +66,41 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[0].getVisibleText()).to.be('10');
       });
     });
+
+    it('should convert metric with params', async () => {
+      await visualBuilder.selectAggType('Value Count');
+      await visualBuilder.setFieldForAggregation('bytes');
+
+      await header.waitUntilLoadingHasFinished();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('mtrVis');
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(1);
+        expect(await dimensions[0].getVisibleText()).to.be('Count of bytes');
+      });
+    });
+
+    it('should not allow converting of unsupported metric', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+
+      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
+      expect(canEdit).to.be(false);
+    });
+
+    it('should not allow converting of not valid panel', async () => {
+      await visualBuilder.selectAggType('Value Count');
+      await header.waitUntilLoadingHasFinished();
+      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
+      expect(canEdit).to.be(false);
+    });
   });
 }
