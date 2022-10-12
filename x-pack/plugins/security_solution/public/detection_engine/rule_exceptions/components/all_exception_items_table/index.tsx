@@ -75,12 +75,15 @@ export interface GetExceptionItemProps {
 interface ExceptionsViewerProps {
   rule: Rule | null;
   listType: ExceptionListTypeEnum;
+  /* Used for when displaying exceptions for a rule that has since been deleted, forcing read only view */
+  isViewReadOnly: boolean;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
   listType,
+  isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -159,8 +162,17 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [isLoadingReferences, isFetchReferencesError, allReferences] =
-    useFindExceptionListReferences(exceptionListsToQuery);
+  const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
+    useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null && exceptionListsToQuery.length) {
+      const listsToQuery = exceptionListsToQuery.map(
+        ({ id, list_id: listId, namespace_type: namespaceType }) => ({ id, listId, namespaceType })
+      );
+      fetchReferences(listsToQuery);
+    }
+  }, [exceptionListsToQuery, fetchReferences]);
 
   useEffect(() => {
     if (isFetchReferencesError) {
@@ -337,8 +349,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(!canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {

@@ -10,11 +10,13 @@ import moment from 'moment';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
+  isQueryAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
@@ -109,7 +111,7 @@ export const getAnnotationsSupportedLayer = (
       : undefined;
 
   return {
-    type: layerTypes.ANNOTATIONS,
+    type: LayerTypes.ANNOTATIONS,
     label: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabel', {
       defaultMessage: 'Annotations',
     }),
@@ -125,7 +127,7 @@ export const getAnnotationsSupportedLayer = (
   };
 };
 
-const getDefaultAnnotationConfig = (id: string, timestamp: string): EventAnnotationConfig => ({
+const getDefaultManualAnnotation = (id: string, timestamp: string): EventAnnotationConfig => ({
   label: defaultAnnotationLabel,
   type: 'manual',
   key: {
@@ -136,13 +138,32 @@ const getDefaultAnnotationConfig = (id: string, timestamp: string): EventAnnotat
   id,
 });
 
+const getDefaultQueryAnnotation = (
+  id: string,
+  fieldName: string,
+  timeField: string
+): EventAnnotationConfig => ({
+  filter: {
+    type: 'kibana_query',
+    query: `${fieldName}: *`,
+    language: 'kuery',
+  },
+  timeField,
+  type: 'query',
+  key: {
+    type: 'point_in_time',
+  },
+  id,
+  label: `${fieldName}: *`,
+});
+
 const createCopiedAnnotation = (
   newId: string,
   timestamp: string,
   source?: EventAnnotationConfig
 ): EventAnnotationConfig => {
   if (!source) {
-    return getDefaultAnnotationConfig(newId, timestamp);
+    return getDefaultManualAnnotation(newId, timestamp);
   }
   return {
     ...source,
@@ -158,17 +179,78 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
   dropType,
 }) => {
   const targetLayer = prevState.layers.find((l) => l.layerId === target.layerId);
-  const sourceLayer = prevState.layers.find((l) => l.layerId === source.layerId);
-  if (
-    !targetLayer ||
-    !isAnnotationsLayer(targetLayer) ||
-    !sourceLayer ||
-    !isAnnotationsLayer(sourceLayer)
-  ) {
+  if (!targetLayer || !isAnnotationsLayer(targetLayer)) {
     return prevState;
   }
   const targetAnnotation = targetLayer.annotations.find(({ id }) => id === target.columnId);
+  const targetDataView = frame.dataViews.indexPatterns[targetLayer.indexPatternId];
+
+  if (isDraggedDataViewField(source)) {
+    const timeField = targetDataView.timeFieldName;
+    switch (dropType) {
+      case 'field_add':
+        if (targetAnnotation || !timeField) {
+          return prevState;
+        }
+        return {
+          ...prevState,
+          layers: prevState.layers.map(
+            (l): XYLayerConfig =>
+              l.layerId === target.layerId
+                ? {
+                    ...targetLayer,
+                    annotations: [
+                      ...targetLayer.annotations,
+                      getDefaultQueryAnnotation(target.columnId, source.field.name, timeField),
+                    ],
+                  }
+                : l
+          ),
+        };
+      case 'field_replace':
+        if (!targetAnnotation || !timeField) {
+          return prevState;
+        }
+
+        return {
+          ...prevState,
+          layers: prevState.layers.map(
+            (l): XYLayerConfig =>
+              l.layerId === target.layerId
+                ? {
+                    ...targetLayer,
+                    annotations: [
+                      ...targetLayer.annotations.map((a) =>
+                        a === targetAnnotation
+                          ? {
+                              ...targetAnnotation,
+                              ...getDefaultQueryAnnotation(
+                                target.columnId,
+                                source.field.name,
+                                timeField
+                              ),
+                            }
+                          : a
+                      ),
+                    ],
+                  }
+                : l
+          ),
+        };
+    }
+
+    return prevState;
+  }
+
+  const sourceLayer = prevState.layers.find((l) => l.layerId === source.layerId);
+  if (!sourceLayer || !isAnnotationsLayer(sourceLayer)) {
+    return prevState;
+  }
   const sourceAnnotation = sourceLayer.annotations.find(({ id }) => id === source.columnId);
+  const sourceDataView = frame.dataViews.indexPatterns[sourceLayer.indexPatternId];
+  if (sourceDataView !== targetDataView && isQueryAnnotationConfig(sourceAnnotation)) {
+    return prevState;
+  }
   switch (dropType) {
     case 'reorder':
       if (!targetAnnotation || !sourceAnnotation || source.layerId !== target.layerId) {

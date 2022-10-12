@@ -24,6 +24,7 @@ import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
 import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 import { OverviewLoader } from './overview_loader';
+import { OverviewStatus } from './overview_status';
 
 export const OverviewGrid = () => {
   const {
@@ -71,6 +72,12 @@ export const OverviewGrid = () => {
 
   return (
     <>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <OverviewStatus />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <OverviewPaginationInfo page={page} loading={!loaded} />

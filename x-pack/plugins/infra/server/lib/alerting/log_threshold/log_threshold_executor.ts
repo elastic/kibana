@@ -19,6 +19,7 @@ import {
   Alert,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
+  RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 
@@ -60,18 +61,23 @@ export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-type LogThresholdAlert = Alert<
+export type LogThresholdAlert = Alert<
   LogThresholdAlertState,
   LogThresholdAlertContext,
   LogThresholdActionGroups
 >;
-type LogThresholdAlertFactory = (
+export type LogThresholdAlertFactory = (
   id: string,
   reason: string,
   value: number,
   threshold: number,
   actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>
 ) => LogThresholdAlert;
+export type LogThresholdAlertLimit = RuleExecutorServices<
+  LogThresholdAlertState,
+  LogThresholdAlertContext,
+  LogThresholdActionGroups
+>['alertFactory']['alertLimit'];
 
 const COMPOSITE_GROUP_SIZE = 2000;
 
@@ -96,8 +102,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     LogThresholdAlertContext,
     LogThresholdActionGroups
   >(async ({ services, params, startedAt }) => {
-    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
-      services;
+    const {
+      alertFactory: { alertLimit },
+      alertWithLifecycle,
+      savedObjectsClient,
+      scopedClusterClient,
+      getAlertStartedDate,
+    } = services;
     const { basePath } = libs;
 
     const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions) => {
@@ -150,6 +161,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertFactory,
+          alertLimit,
           startedAt.valueOf()
         );
       } else {
@@ -160,6 +172,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertFactory,
+          alertLimit,
           startedAt.valueOf()
         );
       }
@@ -185,6 +198,7 @@ export async function executeAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit,
   executionTimestamp: number
 ) {
   const query = getESQuery(
@@ -200,9 +214,19 @@ export async function executeAlert(
   }
 
   if (hasGroupBy(ruleParams)) {
-    processGroupByResults(await getGroupedResults(query, esClient), ruleParams, alertFactory);
+    processGroupByResults(
+      await getGroupedResults(query, esClient),
+      ruleParams,
+      alertFactory,
+      alertLimit
+    );
   } else {
-    processUngroupedResults(await getUngroupedResults(query, esClient), ruleParams, alertFactory);
+    processUngroupedResults(
+      await getUngroupedResults(query, esClient),
+      ruleParams,
+      alertFactory,
+      alertLimit
+    );
   }
 }
 
@@ -213,6 +237,7 @@ export async function executeRatioAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit,
   executionTimestamp: number
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
@@ -254,7 +279,8 @@ export async function executeRatioAlert(
       numeratorGroupedResults,
       denominatorGroupedResults,
       ruleParams,
-      alertFactory
+      alertFactory,
+      alertLimit
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
@@ -265,7 +291,8 @@ export async function executeRatioAlert(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
       ruleParams,
-      alertFactory
+      alertFactory,
+      alertLimit
     );
   }
 }
@@ -297,7 +324,8 @@ const getESQuery = (
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountRuleParams,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
@@ -323,6 +351,9 @@ export const processUngroupedResults = (
       },
     ];
     alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions);
+    alertLimit.setLimitReached(alertLimit.getValue() <= 1);
+  } else {
+    alertLimit.setLimitReached(false);
   }
 };
 
@@ -330,7 +361,8 @@ export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -360,6 +392,9 @@ export const processUngroupedRatioResults = (
       },
     ];
     alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions);
+    alertLimit.setLimitReached(alertLimit.getValue() <= 1);
+  } else {
+    alertLimit.setLimitReached(false);
   }
 };
 
@@ -405,16 +440,24 @@ const getReducedGroupByResults = (
 export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountRuleParams,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
-  groupResults.forEach((group) => {
+  let remainingAlertCount = alertLimit.getValue();
+
+  for (const group of groupResults) {
+    if (remainingAlertCount <= 0) {
+      break;
+    }
+
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
+      remainingAlertCount -= 1;
       const reasonMessage = getReasonMessageForGroupedCountAlert(
         documentCount,
         count.value,
@@ -437,21 +480,30 @@ export const processGroupByResults = (
       ];
       alertFactory(group.name, reasonMessage, documentCount, count.value, actions);
     }
-  });
+  }
+
+  alertLimit.setLimitReached(remainingAlertCount <= 0);
 };
 
 export const processGroupByRatioResults = (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioRuleParams,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
 
-  numeratorGroupResults.forEach((numeratorGroup) => {
+  let remainingAlertCount = alertLimit.getValue();
+
+  for (const numeratorGroup of numeratorGroupResults) {
+    if (remainingAlertCount <= 0) {
+      break;
+    }
+
     const numeratorDocumentCount = numeratorGroup.documentCount;
     const denominatorGroup = denominatorGroupResults.find(
       (_group) => _group.name === numeratorGroup.name
@@ -464,6 +516,7 @@ export const processGroupByRatioResults = (
       ratio !== undefined &&
       checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
+      remainingAlertCount -= 1;
       const reasonMessage = getReasonMessageForGroupedRatioAlert(
         ratio,
         count.value,
@@ -487,7 +540,9 @@ export const processGroupByRatioResults = (
       ];
       alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value, actions);
     }
-  });
+  }
+
+  alertLimit.setLimitReached(remainingAlertCount <= 0);
 };
 
 export const buildFiltersFromCriteria = (
