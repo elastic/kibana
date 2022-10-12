@@ -25,6 +25,7 @@ import {
   getOperationParams,
   groupArgsByType,
   mergeWithGlobalFilters,
+  nonNullable,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
@@ -89,9 +90,9 @@ function extractColumns(
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
       // it's a regular math node
-      const consumedArgs = node.args
-        .map(parseNode)
-        .filter((n) => typeof n !== 'undefined' && n !== null) as Array<number | TinymathVariable>;
+      const consumedArgs = node.args.map(parseNode).filter(nonNullable) as Array<
+        number | TinymathVariable
+      >;
       return {
         ...node,
         args: consumedArgs,

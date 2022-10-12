@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-/**
- * Returns the mathematical constant PI
- * @return {(number)} The mathematical constant PI
- *
- * @example
- * pi() // 3.141592653589793
- */
+const { eq } = require('./eq');
+const { lt } = require('./lt');
+const { gt } = require('./gt');
+const { lte } = require('./lte');
+const { gte } = require('./gte');
+const { ifelse } = require('./ifelse');
 
-function pi() {
-  return Math.PI;
-}
-module.exports = { pi };
+module.exports = { eq, lt, gt, lte, gte, ifelse };

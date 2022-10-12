@@ -114,12 +114,16 @@ function getTypeI18n(type: string) {
   if (type === 'string') {
     return i18n.translate('xpack.lens.formula.string', { defaultMessage: 'string' });
   }
+  if (type === 'boolean') {
+    return i18n.translate('xpack.lens.formula.boolean', { defaultMessage: 'boolean' });
+  }
   return '';
 }
 
 export const tinymathFunctions: Record<
   string,
   {
+    section: 'math' | 'comparison';
     positionalArguments: Array<{
       name: string;
       optional?: boolean;
@@ -129,9 +133,13 @@ export const tinymathFunctions: Record<
     }>;
     // Help is in Markdown format
     help: string;
+    // When omitted defaults to "number".
+    // Used for comparison functions return type
+    outputType?: string;
   }
 > = {
   add: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -158,6 +166,7 @@ Example: Offset count by a static value
     }),
   },
   subtract: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -179,6 +188,7 @@ Example: Calculate the range of a field
     }),
   },
   multiply: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -203,6 +213,7 @@ Example: Calculate price after constant tax rate
     }),
   },
   divide: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -226,6 +237,7 @@ Example: \`divide(sum(bytes), 2)\`
     }),
   },
   abs: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -241,6 +253,7 @@ Example: Calculate average distance to sea level \`abs(average(altitude))\`
     }),
   },
   cbrt: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -257,6 +270,7 @@ Example: Calculate side length from volume
     }),
   },
   ceil: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -273,6 +287,7 @@ Example: Round up price to the next dollar
     }),
   },
   clamp: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -305,6 +320,7 @@ clamp(
     }),
   },
   cube: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -321,6 +337,7 @@ Example: Calculate volume from side length
     }),
   },
   exp: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -338,6 +355,7 @@ Example: Calculate the natural exponential function
     }),
   },
   fix: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -354,6 +372,7 @@ Example: Rounding towards zero
     }),
   },
   floor: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -370,6 +389,7 @@ Example: Round down a price
     }),
   },
   log: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -395,6 +415,7 @@ log(sum(bytes), 2)
     }),
   },
   mod: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -415,6 +436,7 @@ Example: Calculate last three digits of a value
     }),
   },
   pow: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -435,6 +457,7 @@ Example: Calculate volume based on side length
     }),
   },
   round: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -460,6 +483,7 @@ round(sum(bytes), 2)
     }),
   },
   sqrt: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -476,6 +500,7 @@ Example: Calculate side length based on area
     }),
   },
   square: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -492,6 +517,7 @@ Example: Calculate area based on side length
     }),
   },
   pick_max: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -512,6 +538,7 @@ Example: Find the maximum between two fields averages
     }),
   },
   pick_min: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
@@ -532,6 +559,7 @@ Example: Find the minimum between two fields averages
     }),
   },
   defaults: {
+    section: 'math',
     positionalArguments: [
       {
         name: i18n.translate('xpack.lens.formula.value', { defaultMessage: 'value' }),
@@ -548,10 +576,169 @@ Returns a default numeric value when value is null.
 
 Example: Return -1 when a field has no data
 \`defaults(average(bytes), -1)\`
+`,
+    }),
+  },
+  lt: {
+    section: 'comparison',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.ltFunction.markdown', {
+      defaultMessage: `
+Performs a lower than comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`<\` symbol.
+
+Example: Returns true if the average of bytes is lower than the average amount of memory
+\`average(bytes) <= average(memory)\`
+
+Example: \`lt(average(bytes), 1000)\`
+    `,
+    }),
+  },
+  gt: {
+    section: 'comparison',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.gtFunction.markdown', {
+      defaultMessage: `
+Performs a greater than comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`>\` symbol.
+
+Example: Returns true if the average of bytes is greater than the average amount of memory
+\`average(bytes) > average(memory)\`
+
+Example: \`gt(average(bytes), 1000)\`
+    `,
+    }),
+  },
+  eq: {
+    section: 'comparison',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.eqFunction.markdown', {
+      defaultMessage: `
+Performs an equality comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`==\` symbol.
+
+Example: Returns true if the average of bytes is exactly the same amount of average memory
+\`average(bytes) == average(memory)\`
+
+Example: \`eq(sum(bytes), 1000000)\`
+    `,
+    }),
+  },
+  lte: {
+    section: 'comparison',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.lteFunction.markdown', {
+      defaultMessage: `
+Performs a lower than or equal comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`<=\` symbol.
+
+Example: Returns true if the average of bytes is lower than or equal to the average amount of memory
+\`average(bytes) <= average(memory)\`
+
+Example: \`lte(average(bytes), 1000)\`
+    `,
+    }),
+  },
+  gte: {
+    section: 'comparison',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    outputType: getTypeI18n('boolean'),
+    help: i18n.translate('xpack.lens.formula.gteFunction.markdown', {
+      defaultMessage: `
+Performs a greater than comparison between two values.
+To be used as condition for \`ifelse\` comparison function.
+Also works with \`>=\` symbol.
+
+Example: Returns true if the average of bytes is greater than or equal to the average amount of memory
+\`average(bytes) >= average(memory)\`
+
+Example: \`gte(average(bytes), 1000)\`
+    `,
+    }),
+  },
+  ifelse: {
+    section: 'comparison',
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.condition', { defaultMessage: 'condition' }),
+        type: getTypeI18n('boolean'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.ifElseFunction.markdown', {
+      defaultMessage: `
+Returns a value depending on whether the element of condition is true or false.
+
+Example: Average revenue per customer but in some cases customer id is not provided which counts as additional customer
+\`sum(total)/(unique_count(customer_id) + ifelse( count() > count(kql='customer_id:*'), 1, 0))\`
     `,
     }),
   },
 };
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 export function isMathNode(node: TinymathAST | string) {
   return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];
@@ -562,7 +749,7 @@ export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
     if (!isObject(node) || node.type !== 'function' || !isMathNode(node)) {
       return [];
     }
-    return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
+    return [node, ...node.args.flatMap(flattenMathNodes)].filter(nonNullable);
   }
 
   return flattenMathNodes(root);

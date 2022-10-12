@@ -11,6 +11,32 @@
       max: location.end.offset
     }
   }
+
+  const symbolsToFn = {
+    '+': 'add', '-': 'subtract',
+    '*': 'multiply', '/': 'divide',
+    '<': 'lt', '>': 'gt', '==': 'eq',
+    '<=': 'lte', '>=': 'gte',
+  }
+
+  // Shared function for AST operations
+  function parseSymbol(left, rest){
+    const topLevel = rest.reduce((acc, [name, right]) => ({
+      type: 'function',
+      name: symbolsToFn[name],
+      args: [acc, right],
+    }), left);
+    if (typeof topLevel === 'object') {
+      topLevel.location = simpleLocation(location());
+      topLevel.text = text();
+    }
+    return topLevel;
+  }
+  
+  // op is always defined, while eq can be null for gt and lt cases
+  function getComparisonSymbol([op, eq]){
+    return symbolsToFn[op+(eq || '')];
+  }
 }
 
 start
@@ -70,45 +96,55 @@ Variable
 
 // expressions
 
+// An Expression can be of 3 different types:
+// * a Comparison operation, which can contain recursive MathOperations inside
+// * a MathOperation, which can contain other MathOperations, but not Comparison types
+// * an ExpressionGroup, which is a generic Grouping that contains also Comparison operations (i.e. ( 5 > 1))
 Expression
+  = Comparison 
+  / MathOperation
+  / ExpressionGroup
+
+Comparison
+  = _ left:MathOperation op:(('>' / '<')('=')? / '=''=') right:MathOperation _ {
+    return {
+      type: 'function',
+      name: getComparisonSymbol(op),
+      args: [left, right],
+      location: simpleLocation(location()),
+      text: text()
+    };
+  }
+
+MathOperation 
   = AddSubtract
+  / MultiplyDivide
+  / Factor
 
 AddSubtract
   = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)+ _ {
-    const topLevel = rest.reduce((acc, curr) => ({
-      type: 'function',
-      name: curr[0] === '+' ? 'add' : 'subtract',
-      args: [acc, curr[1]],
-    }), left);
-    if (typeof topLevel === 'object') {
-      topLevel.location = simpleLocation(location());
-      topLevel.text = text();
-    }
-    return topLevel;
+    return parseSymbol(left, rest, {'+': 'add', '-': 'subtract'});
   }
-  / MultiplyDivide
 
 MultiplyDivide
   = _ left:Factor rest:(('*' / '/') Factor)* _ {
-    const topLevel = rest.reduce((acc, curr) => ({
-      type: 'function',
-      name: curr[0] === '*' ? 'multiply' : 'divide',
-      args: [acc, curr[1]],
-    }), left);
-    if (typeof topLevel === 'object') {
-      topLevel.location = simpleLocation(location());
-      topLevel.text = text();
-    }
-    return topLevel;
+    return parseSymbol(left, rest, {'*': 'multiply', '/': 'divide'});
   }
-  / Factor
 
 Factor
   = Group
   / Function
   / Literal
 
+// Because of the new Comparison syntax it is required a new Group type
+// the previous Group has been renamed into ExpressionGroup while
+// a new Group type has been defined to exclude the Comparison type from it
 Group
+  = _ '(' _ expr:MathOperation _ ')' _ {
+    return expr
+  }
+  
+ExpressionGroup
   = _ '(' _ expr:Expression _ ')' _ {
     return expr
   }
