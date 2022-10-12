@@ -9,7 +9,10 @@
 /**
  * Definition of the gainSight API.
  */
-export type GainSightApi = (functionId: keyof Mapping, ...options: any) => void;
+export interface GainSightApi {
+  init?: boolean;
+  (functionId: keyof Mapping, ...options: any): void;
+}
 
 interface Mapping {
   identify: (id: string, userVars?: Record<string, unknown>) => void;

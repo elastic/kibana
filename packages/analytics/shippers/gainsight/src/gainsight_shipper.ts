@@ -23,7 +23,7 @@ import { loadSnippet } from './load_snippet';
 export class GainSightShipper implements IShipper {
   /** Shipper's unique name */
   public static shipperName = 'Gainsight';
-
+  private lastUserId: string | undefined;
   private readonly gainSightApi: GainSightApi;
 
   /**
@@ -49,8 +49,7 @@ export class GainSightShipper implements IShipper {
     // gainSight requires different APIs for different type of contexts.
     const { userId, cluster_name: clusterName } = newContext;
 
-    // Call it only when the userId changes
-    if (userId && clusterName) {
+    if (userId && userId !== this.lastUserId && clusterName) {
       this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
       this.gainSightApi('identify', {
@@ -60,6 +59,9 @@ export class GainSightShipper implements IShipper {
       this.gainSightApi('set', 'globalContext', {
         kibanaUserId: userId,
       });
+      if (this.gainSightApi.init) {
+        this.lastUserId = userId;
+      }
     } else {
       this.initContext.logger.debug(
         `Identify has already been called with ${userId} and ${clusterName}`
