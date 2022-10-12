@@ -34,7 +34,7 @@ export interface EmbeddableOutput {
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
-  N = unknown
+  N = any
 > {
   /**
    * Is this embeddable an instance of a Container class, can it contain

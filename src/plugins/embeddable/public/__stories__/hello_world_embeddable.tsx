@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { EmbeddableInput, EmbeddableOutput, Embeddable } from '..';
+import { Embeddable } from '..';
 import { createStore, State } from '../store';
 
-export class HelloWorldEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput, ReactNode> {
+export class HelloWorldEmbeddable extends Embeddable {
   // eslint-disable-next-line @kbn/eslint/no_this_in_property_initializers
   readonly store = createStore(this);
 

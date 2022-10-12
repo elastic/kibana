@@ -24,7 +24,7 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
-  TNode = unknown
+  TNode = any
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;
@@ -211,14 +211,13 @@ export abstract class Embeddable<
     }
   }
 
-  public render(el: HTMLElement): void {
+  public render(el: HTMLElement): TNode | void {
     this.renderComplete.setEl(el);
     this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
-    return;
   }
 
   /**
