@@ -23,18 +23,18 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
-} from '../../../../common/service_nodes';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { truncate, unit } from '../../../utils/style';
-import { MetricsChart } from '../../shared/charts/metrics_chart';
+} from '../../../../../common/service_nodes';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useServiceMetricChartsFetcher } from '../../../../hooks/use_service_metric_charts_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { truncate, unit } from '../../../../utils/style';
+import { MetricsChart } from '../../../shared/charts/metrics_chart';
 
 const INITIAL_DATA = {
   host: '',
@@ -52,9 +52,9 @@ export function ServiceNodeMetrics() {
   const apmRouter = useApmRouter();
 
   const {
-    path: { serviceNodeName },
+    path: { id: serviceNodeName },
     query,
-  } = useApmParams('/services/{serviceName}/nodes/{serviceNodeName}/metrics');
+  } = useApmParams('/services/{serviceName}/metrics/{id}');
 
   const { environment, kuery, rangeFrom, rangeTo } = query;
 
@@ -63,16 +63,13 @@ export function ServiceNodeMetrics() {
   useBreadcrumb(
     () => ({
       title: getServiceNodeName(serviceNodeName),
-      href: apmRouter.link(
-        '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
-        {
-          path: {
-            serviceName,
-            serviceNodeName,
-          },
-          query,
-        }
-      ),
+      href: apmRouter.link('/services/{serviceName}/metrics/{id}', {
+        path: {
+          serviceName,
+          id: serviceNodeName,
+        },
+        query,
+      }),
     }),
     [apmRouter, query, serviceName, serviceNodeName]
   );
