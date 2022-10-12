@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { assertNever } from '@kbn/std';
 import moment from 'moment-timezone';
 
 import type { TimeWindow } from '../../types/models/time_window';
@@ -19,10 +20,10 @@ export interface DateRange {
   to: Date;
 }
 
-export const toDateRange = (timeWindow: TimeWindow, currentDate: Date): DateRange => {
+export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
-    const now = moment(currentDate).tz(timeWindow.calendar.time_zone);
+    const now = moment(currentDate).tz(timeWindow.calendar.time_zone).startOf('minute');
     const startTime = moment.tz(timeWindow.calendar.start_time, timeWindow.calendar.time_zone);
 
     const differenceInUnit = now.diff(startTime, unit);
@@ -38,7 +39,7 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date): DateRang
 
   if (rollingTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
-    const now = moment.utc(currentDate);
+    const now = moment.utc(currentDate).startOf('minute');
 
     return {
       from: now.clone().subtract(timeWindow.duration.value, unit).toDate(),
@@ -46,26 +47,26 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date): DateRang
     };
   }
 
-  throw new Error('Invalid time window');
+  assertNever(timeWindow);
 };
 
 const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
   switch (unit) {
-    case 'm':
+    case DurationUnit.m:
       return 'minutes';
-    case 'h':
+    case DurationUnit.h:
       return 'hours';
-    case 'd':
+    case DurationUnit.d:
       return 'days';
-    case 'w':
+    case DurationUnit.w:
       return 'weeks';
-    case 'M':
+    case DurationUnit.M:
       return 'months';
-    case 'Q':
+    case DurationUnit.Q:
       return 'quarters';
-    case 'Y':
+    case DurationUnit.Y:
       return 'years';
+    default:
+      assertNever(unit);
   }
-
-  throw new Error('Invalid unit');
 };
