@@ -50,21 +50,27 @@ exports[`getting started should render getting started component 1`] = `
         size="xxl"
       />
       <EuiFlexGrid
-        columns={3}
-        gutterSize="xl"
+        columns={4}
+        gutterSize="l"
       >
         <EuiFlexItem>
-          <UseCaseCard
+          <GuideCard
+            guides={Array []}
             useCase="search"
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <UseCaseCard
+          <GuideCard
+            guides={Array []}
             useCase="observability"
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <UseCaseCard
+          <LinkCard />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <GuideCard
+            guides={Array []}
             useCase="security"
           />
         </EuiFlexItem>

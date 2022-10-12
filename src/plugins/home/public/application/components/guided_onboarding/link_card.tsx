@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getServices } from '../../kibana_services';
 import { UseCaseCard } from './use_case_card';
 
@@ -49,23 +49,27 @@ export const LinkCard = () => {
     });
   };
   const button = (
-    <EuiButton
-      // Used for FS tracking
-      data-test-subj={`onboarding--linkCard--observability`}
-      fill
-      onClick={navigateToIntegrations}
-    >
-      {i18n.translate('home.guidedOnboarding.gettingStarted.linkCard.buttonLabel', {
-        defaultMessage: 'View integrations',
-      })}
-    </EuiButton>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          // Used for FS tracking
+          data-test-subj={`onboarding--linkCard--observability`}
+          fill
+          onClick={navigateToIntegrations}
+        >
+          {i18n.translate('home.guidedOnboarding.gettingStarted.linkCard.buttonLabel', {
+            defaultMessage: 'View integrations',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   return (
     <UseCaseCard
       useCase={'observability'}
       title={constants.observability.i18nTexts.title}
       description={constants.observability.i18nTexts.description}
-      button={button}
+      footer={button}
     />
   );
 };

@@ -16,11 +16,12 @@ export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepId
 
 /**
  * Allowed states for a guide:
- *  in_progress: Guide has been started
+ *  not_started: Guide has not been started
+ *  in_progress: At least one step in the guide has been started
  *  ready_to_complete: All steps have been completed, but the "Continue using Elastic" button has not been clicked
  *  complete: All steps and the guide have been completed
  */
-export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
+export type GuideStatus = 'not_started' | 'in_progress' | 'ready_to_complete' | 'complete';
 
 /**
  * Allowed states for each step in a guide:

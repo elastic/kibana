@@ -7,7 +7,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
 import { GuideId, GuideState, GuideStepIds, StepStatus } from '../common/types';
 
@@ -16,10 +15,6 @@ export interface GuidedOnboardingPluginSetup {}
 
 export interface GuidedOnboardingPluginStart {
   guidedOnboardingApi?: GuidedOnboardingApi;
-}
-
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
 }
 
 export interface ClientConfigType {

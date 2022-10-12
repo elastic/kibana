@@ -12,30 +12,32 @@ import { shallow } from 'enzyme';
 import { UseCaseCard } from './use_case_card';
 
 jest.mock('../../kibana_services', () => {
-  const { applicationServiceMock, uiSettingsServiceMock, httpServiceMock } =
-    jest.requireActual('@kbn/core/public/mocks');
+  const { uiSettingsServiceMock, httpServiceMock } = jest.requireActual('@kbn/core/public/mocks');
   return {
     getServices: () => ({
-      application: applicationServiceMock.createStartContract(),
-      trackUiMetric: jest.fn(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       http: httpServiceMock.createStartContract(),
     }),
   };
 });
 describe('use case card', () => {
+  const testProps = {
+    title: 'testTitle',
+    description: 'testDescription',
+    footer: <span>testFooter</span>,
+  };
   test('should render use case card component for search', async () => {
-    const component = await shallow(<UseCaseCard useCase="search" />);
+    const component = await shallow(<UseCaseCard useCase="search" {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });
   test('should render use case card component for observability', async () => {
-    const component = await shallow(<UseCaseCard useCase="observability" />);
+    const component = await shallow(<UseCaseCard useCase="observability" {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });
   test('should render use case card component for security', async () => {
-    const component = await shallow(<UseCaseCard useCase="security" />);
+    const component = await shallow(<UseCaseCard useCase="security" {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });

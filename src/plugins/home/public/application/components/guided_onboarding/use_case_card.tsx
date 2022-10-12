@@ -54,10 +54,10 @@ export interface UseCaseProps {
   useCase: UseCase;
   title: string;
   description: string;
-  button: ReactNode;
+  footer: ReactNode;
 }
 
-export const UseCaseCard = ({ useCase, title, description, button }: UseCaseProps) => {
+export const UseCaseCard = ({ useCase, title, description, footer }: UseCaseProps) => {
   const { uiSettings, http } = getServices();
 
   const isDarkTheme = uiSettings.get('theme:darkMode');
@@ -89,7 +89,7 @@ export const UseCaseCard = ({ useCase, title, description, button }: UseCaseProp
       image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logAltText} />}
       title={titleElement}
       description={descriptionElement}
-      footer={button}
+      footer={footer}
       betaBadgeProps={{
         label: constants[useCase].betaBadgeLabel,
       }}

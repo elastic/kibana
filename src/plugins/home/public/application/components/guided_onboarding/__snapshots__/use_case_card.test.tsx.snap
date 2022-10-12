@@ -2,25 +2,33 @@
 
 exports[`use case card should render use case card component for observability 1`] = `
 <EuiCard
-  data-test-subj="onboarding--observabilityUseCaseCard"
+  betaBadgeProps={
+    Object {
+      "label": "observe",
+    }
+  }
   description={
     <EuiText
       color="subdued"
       size="xs"
     >
       <p>
-        Get end-to-end observability into your environments by consolidating your logs, metrics, and traces.
+        testDescription
       </p>
     </EuiText>
   }
   display="subdued"
+  footer={
+    <span>
+      testFooter
+    </span>
+  }
   image={
     <EuiImage
       alt="Observability logo"
       src="/plugins/home/assets/solution_logos/observability.png"
     />
   }
-  onClick={[Function]}
   textAlign="left"
   title={
     <EuiTitle
@@ -28,7 +36,7 @@ exports[`use case card should render use case card component for observability 1
     >
       <h4>
         <strong>
-          Monitor my environments
+          testTitle
         </strong>
       </h4>
     </EuiTitle>
@@ -38,25 +46,33 @@ exports[`use case card should render use case card component for observability 1
 
 exports[`use case card should render use case card component for search 1`] = `
 <EuiCard
-  data-test-subj="onboarding--searchUseCaseCard"
+  betaBadgeProps={
+    Object {
+      "label": "search",
+    }
+  }
   description={
     <EuiText
       color="subdued"
       size="xs"
     >
       <p>
-        Create a finely-tuned search experience for your websites, applications, workplace content, and more.
+        testDescription
       </p>
     </EuiText>
   }
   display="subdued"
+  footer={
+    <span>
+      testFooter
+    </span>
+  }
   image={
     <EuiImage
       alt="Enterprise Search logo"
       src="/plugins/home/assets/solution_logos/search.png"
     />
   }
-  onClick={[Function]}
   textAlign="left"
   title={
     <EuiTitle
@@ -64,7 +80,7 @@ exports[`use case card should render use case card component for search 1`] = `
     >
       <h4>
         <strong>
-          Search my data
+          testTitle
         </strong>
       </h4>
     </EuiTitle>
@@ -74,25 +90,33 @@ exports[`use case card should render use case card component for search 1`] = `
 
 exports[`use case card should render use case card component for security 1`] = `
 <EuiCard
-  data-test-subj="onboarding--securityUseCaseCard"
+  betaBadgeProps={
+    Object {
+      "label": "security",
+    }
+  }
   description={
     <EuiText
       color="subdued"
       size="xs"
     >
       <p>
-        Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place.
+        testDescription
       </p>
     </EuiText>
   }
   display="subdued"
+  footer={
+    <span>
+      testFooter
+    </span>
+  }
   image={
     <EuiImage
       alt="Security logo"
       src="/plugins/home/assets/solution_logos/security.png"
     />
   }
-  onClick={[Function]}
   textAlign="left"
   title={
     <EuiTitle
@@ -100,7 +124,7 @@ exports[`use case card should render use case card component for security 1`] = 
     >
       <h4>
         <strong>
-          Protect my environment
+          testTitle
         </strong>
       </h4>
     </EuiTitle>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+import { GuideState } from '@kbn/guided-onboarding-plugin/common/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 import { GuideCard } from './guide_card';
@@ -46,7 +47,8 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome } = getServices();
+  const { application, trackUiMetric, chrome, guideOnboardingService } = getServices();
+  const [guidesState, setGuidesState] = useState<GuideState[]>([]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -63,6 +65,16 @@ export const GettingStarted = () => {
       },
     ]);
   }, [chrome, trackUiMetric]);
+
+  const fetchGuidesState = useCallback(async () => {
+    const allGuides = await guideOnboardingService?.fetchAllGuidesState();
+    if (allGuides) {
+      setGuidesState(allGuides.state);
+    }
+  }, [guideOnboardingService]);
+  useEffect(() => {
+    fetchGuidesState();
+  }, [fetchGuidesState]);
 
   const onSkip = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
@@ -87,18 +99,18 @@ export const GettingStarted = () => {
           </EuiText>
           <EuiSpacer size="s" />
           <EuiSpacer size="xxl" />
-          <EuiFlexGrid columns={3} gutterSize="xl">
+          <EuiFlexGrid columns={4} gutterSize="l">
             <EuiFlexItem>
-              <GuideCard useCase="search" />
+              <GuideCard useCase="search" guides={guidesState} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <GuideCard useCase="observability" />
+              <GuideCard useCase="observability" guides={guidesState} />
             </EuiFlexItem>
             <EuiFlexItem>
               <LinkCard />
             </EuiFlexItem>
             <EuiFlexItem>
-              <GuideCard useCase="security" />
+              <GuideCard useCase="security" guides={guidesState} />
             </EuiFlexItem>
           </EuiFlexGrid>
           <EuiSpacer />

@@ -117,6 +117,12 @@ export class ApiService implements GuidedOnboardingApi {
     guideId: GuideId,
     guide?: GuideState
   ): Promise<{ state: GuideState } | undefined> {
+    // deactivate the current active guide if any
+    const activeGuide = await firstValueFrom(this.fetchActiveGuideState$());
+    if (activeGuide && activeGuide.guideId !== guideId) {
+      await this.deactivateGuide(activeGuide);
+    }
+
     // If we already have the guide state (i.e., user has already started the guide at some point),
     // simply pass it through so they can continue where they left off, and update the guide to active
     if (guide) {
@@ -144,7 +150,7 @@ export class ApiService implements GuidedOnboardingApi {
 
       const updatedGuide: GuideState = {
         isActive: true,
-        status: 'in_progress',
+        status: 'not_started',
         steps: updatedSteps,
         guideId,
       };
