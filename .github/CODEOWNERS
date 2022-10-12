@@ -893,12 +893,9 @@ packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-expect @elastic/kibana-operations
-packages/kbn-failed-test-reporter-cli @elastic/kibana-operations
 packages/kbn-field-types @elastic/kibana-app-services
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-flot-charts @elastic/kibana-operations
-packages/kbn-ftr-common-functional-services @elastic/kibana-operations
-packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-handlebars @elastic/kibana-security
@@ -909,7 +906,6 @@ packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-interpreter @elastic/kibana-app-services
 packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
-packages/kbn-journeys @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core

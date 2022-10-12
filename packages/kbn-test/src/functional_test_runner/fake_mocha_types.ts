@@ -15,7 +15,6 @@
 import { EventEmitter } from 'events';
 
 export interface Suite {
-  currentTest?: Test;
   suites: Suite[];
   tests: Test[];
   title: string;

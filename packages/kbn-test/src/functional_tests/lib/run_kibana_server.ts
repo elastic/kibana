@@ -34,19 +34,25 @@ function extendNodeOptions(installDir?: string) {
   };
 }
 
-export async function runKibanaServer(options: {
+export async function runKibanaServer({
+  procs,
+  config,
+  options,
+  onEarlyExit,
+}: {
   procs: ProcRunner;
   config: Config;
-  installDir?: string;
-  extraKbnOpts?: string[];
-  logsDir?: string;
+  options: {
+    installDir?: string;
+    extraKbnOpts?: string[];
+    logsDir?: string;
+  };
   onEarlyExit?: (msg: string) => void;
 }) {
-  const { config, procs } = options;
-  const runOptions = options.config.get('kbnTestServer.runOptions');
+  const runOptions = config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
-  const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
+  const useTaskRunner = config.get('kbnTestServer.useDedicatedTaskRunner');
 
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
@@ -58,11 +64,11 @@ export async function runKibanaServer(options: {
     env: {
       FORCE_COLOR: 1,
       ...process.env,
-      ...options.config.get('kbnTestServer.env'),
+      ...config.get('kbnTestServer.env'),
       ...extendNodeOptions(installDir),
     },
     wait: runOptions.wait,
-    onEarlyExit: options.onEarlyExit,
+    onEarlyExit,
   };
 
   const prefixArgs = devMode

@@ -60,7 +60,6 @@ describe('dev/mocha/junit report generation', () => {
         name: 'test',
         skipped: '1',
         tests: '4',
-        'metadata-json': '{}',
         time: testsuite.$.time,
         timestamp: testsuite.$.timestamp,
       },

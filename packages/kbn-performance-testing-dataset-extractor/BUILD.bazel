@@ -66,8 +66,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-dev-cli-errors:npm_module_types",
   "//packages/kbn-dev-cli-runner:npm_module_types",
+  "//packages/kbn-test:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
-  "//packages/kbn-journeys:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@types/node",
   "@npm//@types/jest",

@@ -6,13 +6,23 @@
  * Side Public License, v 1.
  */
 
+// @internal
+import {
+  runTestsCli,
+  processRunTestsCliOptions,
+  startServersCli,
+  processStartServersCliOptions,
+  // @ts-ignore not typed yet
+} from './src/functional_tests/cli';
+
 export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_error';
 
 // @internal
-export { startServersCli, startServers } from './src/functional_tests/start_servers';
+export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
+// @ts-ignore not typed yet
 // @internal
-export { runTestsCli, runTests } from './src/functional_tests/run_tests';
+export { runTests, startServers } from './src/functional_tests/tasks';
 
 export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
 
@@ -38,8 +48,14 @@ export {
   systemIndicesSuperuser,
 } from './src/kbn';
 
+export { readConfigFile } from './src/functional_test_runner/lib/config/read_config_file';
+
+export { runFtrCli } from './src/functional_test_runner/cli';
+
 // @internal
 export { setupJUnitReportGeneration, escapeCdata } from './src/mocha';
+
+export { runFailedTestsReporterCli } from './src/failed_tests_reporter';
 
 export { CI_PARALLEL_PROCESS_PREFIX } from './src/ci_parallel_process_prefix';
 

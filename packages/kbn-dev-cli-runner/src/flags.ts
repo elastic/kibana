@@ -53,10 +53,6 @@ export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = 
   };
 }
 
-export const DEFAULT_FLAG_ALIASES = {
-  v: 'verbose',
-};
-
 export function getFlags(
   argv: string[],
   flagOptions: RunOptions['flags'] = {},
@@ -71,7 +67,7 @@ export function getFlags(
     boolean: [...(flagOptions.boolean || []), ...logLevelFlags, 'help'],
     alias: {
       ...flagOptions.alias,
-      ...DEFAULT_FLAG_ALIASES,
+      v: 'verbose',
     },
     default: flagOptions.default,
     unknown: (name: string) => {

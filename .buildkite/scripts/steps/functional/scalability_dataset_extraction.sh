@@ -15,16 +15,19 @@ OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-for journey in x-pack/performance/journeys/*; do
-  echo "Looking for journey=${journey} and BUILD_ID=${BUILD_ID} in APM traces"
+scalabilityJourneys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
 
-  node scripts/extract_performance_testing_dataset \
-    --config "${journey}" \
-    --buildId "${BUILD_ID}" \
-    --es-url "${ES_SERVER_URL}" \
-    --es-username "${USER_FROM_VAULT}" \
-    --es-password "${PASS_FROM_VAULT}" \
-    --without-static-resources
+for i in "${scalabilityJourneys[@]}"; do
+    JOURNEY_NAME="${i}"
+    echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
+
+    node scripts/extract_performance_testing_dataset \
+        --config "x-pack/test/performance/journeys/${i}/config.ts" \
+        --buildId "${BUILD_ID}" \
+        --es-url "${ES_SERVER_URL}" \
+        --es-username "${USER_FROM_VAULT}" \
+        --es-password "${PASS_FROM_VAULT}" \
+        --without-static-resources
 done
 
 echo "--- Creating scalability dataset in ${OUTPUT_REL}"

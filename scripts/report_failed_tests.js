@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/failed-test-reporter-cli');
+require('@kbn/test').runFailedTestsReporterCli();
