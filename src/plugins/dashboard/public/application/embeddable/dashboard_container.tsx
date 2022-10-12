@@ -153,16 +153,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       isProjectEnabledInLabs('labs:dashboard:dashboardControls')
     ) {
       this.controlGroup = controlGroup;
-      this.controlGroup.untilInitialized().then(() => {
-        if (!this.controlGroup || isErrorEmbeddable(this.controlGroup)) return;
-        syncDashboardControlGroup({
-          dashboardContainer: this,
-          controlGroup: this.controlGroup,
-        }).then((result) => {
-          if (!result) return;
-          const { onDestroyControlGroup } = result;
-          this.onDestroyControlGroup = onDestroyControlGroup;
-        });
+      syncDashboardControlGroup({
+        dashboardContainer: this,
+        controlGroup: this.controlGroup,
+      }).then((result) => {
+        if (!result) return;
+        const { onDestroyControlGroup } = result;
+        this.onDestroyControlGroup = onDestroyControlGroup;
       });
     }
 
