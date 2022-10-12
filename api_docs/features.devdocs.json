@@ -2336,6 +2336,10 @@
                 "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
               },
