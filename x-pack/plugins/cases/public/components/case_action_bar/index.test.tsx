@@ -212,7 +212,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(screen.queryByTitle('Change status')).toBeDisabled();
+    expect(screen.queryByTitle('Change status')).not.toBeInTheDocument();
   });
 
   it('should not show the sync alerts toggle when the user does not have update privileges', () => {
