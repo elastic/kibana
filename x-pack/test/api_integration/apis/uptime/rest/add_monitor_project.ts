@@ -194,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             urls: '',
             id: '',
+            hash: 'ekrjelkjrelkjre',
           });
         }
       } finally {
@@ -308,6 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
             urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
             'url.port': null,
             id: '',
+            hash: 'ekrjelkjrelkjre',
           });
         }
       } finally {
@@ -409,6 +411,7 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             urls: '',
             id: '',
+            hash: 'ekrjelkjrelkjre',
           });
         }
       } finally {
@@ -511,6 +514,7 @@ export default function ({ getService }: FtrProviderContext) {
                 ? monitor.wait?.slice(0, -1)
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
             id: '',
+            hash: 'ekrjelkjrelkjre',
           });
         }
       } finally {
@@ -929,6 +933,7 @@ export default function ({ getService }: FtrProviderContext) {
                 upload: 3,
               },
               type: 'browser',
+              hash: 'ekrjelkjrelkjre',
             },
             reason: 'Failed to save or update monitor. Configuration is not valid',
           },
@@ -1220,6 +1225,7 @@ export default function ({ getService }: FtrProviderContext) {
                   latency: 20,
                   upload: 3,
                 },
+                hash: 'ekrjelkjrelkjre',
               },
               reason: 'Failed to create or update monitor',
             },
