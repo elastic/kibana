@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NoDataCard props button 1`] = `
-<div>
+<div
+  css="[object Object]"
+>
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
@@ -75,7 +77,9 @@ exports[`NoDataCard props button 1`] = `
 `;
 
 exports[`NoDataCard props extends EuiCardProps 1`] = `
-<div>
+<div
+  css="[object Object]"
+>
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
@@ -149,7 +153,9 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 `;
 
 exports[`NoDataCard props href 1`] = `
-<div>
+<div
+  css="[object Object]"
+>
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
@@ -223,7 +229,9 @@ exports[`NoDataCard props href 1`] = `
 `;
 
 exports[`NoDataCard props no access to Fleet 1`] = `
-<div>
+<div
+  css="[object Object]"
+>
   <div
     class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard-isDisabled emotion-euiPanel-grow-m-l-subdued-EuiCard"
   >
@@ -282,7 +290,9 @@ exports[`NoDataCard props no access to Fleet 1`] = `
 `;
 
 exports[`NoDataCard renders 1`] = `
-<div>
+<div
+  css="[object Object]"
+>
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
