@@ -66,7 +66,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.fleet.packages.0.version=8.5.0`,
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
         '--xpack.cloudSecurityPosture.enabled=true',
