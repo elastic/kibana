@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esClient = getService('es');
   const unzipPromisify = promisify(unzip);
 
-  describe('For each artifact list under management', function () {
+  describe.skip('For each artifact list under management', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     const checkFleetArtifacts = async (
