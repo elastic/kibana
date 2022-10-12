@@ -94,10 +94,10 @@ export const EXCEPTION_LIST_HEADER_LIST_ID = i18n.translate(
   }
 );
 
-export const EXCEPTION_LIST_HEADER_TITLE = i18n.translate(
-  'exceptionList-components.exception_list_header_title',
+export const EXCEPTION_LIST_HEADER_NAME = i18n.translate(
+  'exceptionList-components.exception_list_header_name',
   {
-    defaultMessage: 'Add a title',
+    defaultMessage: 'Add a name',
   }
 );
 
@@ -108,10 +108,10 @@ export const EXCEPTION_LIST_HEADER_DESCRIPTION = i18n.translate(
   }
 );
 
-export const EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE = (listTitle: string) =>
-  i18n.translate('exceptionList-components.exception_list_header_edit_modal_title', {
-    defaultMessage: 'Edit {listTitle}',
-    values: { listTitle },
+export const EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE = (listName: string) =>
+  i18n.translate('exceptionList-components.exception_list_header_edit_modal_name', {
+    defaultMessage: 'Edit {listName}',
+    values: { listName },
   });
 
 export const EXCEPTION_LIST_HEADER_EDIT_MODAL_SAVE_BUTTON = i18n.translate(
@@ -127,10 +127,10 @@ export const EXCEPTION_LIST_HEADER_EDIT_MODAL_CANCEL_BUTTON = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
-export const EXCEPTION_LIST_HEADER_TITLE_TEXTBOX = i18n.translate(
-  'exceptionList-components.exception_list_header_title_textbox',
+export const EXCEPTION_LIST_HEADER_NAME_TEXTBOX = i18n.translate(
+  'exceptionList-components.exception_list_header_Name_textbox',
   {
-    defaultMessage: 'Title',
+    defaultMessage: 'Name',
   }
 );
 

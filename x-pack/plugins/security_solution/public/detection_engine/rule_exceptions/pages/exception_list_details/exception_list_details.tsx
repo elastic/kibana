@@ -4,42 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { FC } from 'react';
 
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListHeader } from '@kbn/securitysolution-exception-list-components';
 
 import { ListWithSearch } from './list_with_search';
-import { useExceptionListDetailsContext } from './context';
-
-interface ExceptionListDetailsComponentProps {
-  isReadOnly?: boolean;
-  list: ExceptionListSchema;
-}
+import { useManageExceptionListDetails } from './hooks/use_manage_exception_list_details';
+import type { ExceptionListDetailsComponentProps } from './types';
 
 export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProps> = ({
   isReadOnly = false,
   list,
 }) => {
-  const { name: listName, description: listDescription, list_id: listId } = list;
-
-  const { setIsReadOnly } = useExceptionListDetailsContext();
-  useEffect(() => {
-    setIsReadOnly(isReadOnly);
-  }, []);
+  const { listName, listDescription, listId, onEditListDetails, onExportList, onDeleteList } =
+    useManageExceptionListDetails({ isReadOnly, list });
   return (
     <>
       <ExceptionListHeader
-        title={listName}
+        name={listName}
         description={listDescription}
         listId={listId}
         isReadonly={false}
-        onEditTitle={() => {}}
-        onEditDescription={() => {}}
-        onExportList={() => {}}
-        onDeleteList={() => {}}
+        onEditListDetails={onEditListDetails}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
       />
       <ListWithSearch list={list} />
     </>

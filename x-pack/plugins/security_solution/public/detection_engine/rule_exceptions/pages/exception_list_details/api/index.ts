@@ -12,10 +12,12 @@ import type {
   ExceptionListSchema,
   ListArray,
   NamespaceType,
+  UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   deleteExceptionListItemById,
   fetchExceptionListsItemsByListIds,
+  updateExceptionList,
 } from '@kbn/securitysolution-list-api';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 import type {
@@ -33,10 +35,15 @@ interface FetchItemsProps {
   search?: string;
   filter?: string;
 }
-interface DeleteItem {
+interface DeleteExceptionItem {
   id: string;
   namespaceType: NamespaceType;
   http: HttpSetup | undefined;
+}
+
+interface UpdateExceptionList {
+  http: HttpSetup | undefined;
+  list: UpdateExceptionListSchema;
 }
 
 export const prepareFetchExceptionItemsParams = (
@@ -145,7 +152,7 @@ export const getExceptionItemsReferences = async (
   }
 };
 
-export const deleteExceptionListItem = async ({ id, namespaceType, http }: DeleteItem) => {
+export const deleteExceptionListItem = async ({ id, namespaceType, http }: DeleteExceptionItem) => {
   try {
     const abortCtrl = new AbortController();
     await deleteExceptionListItemById({
@@ -154,6 +161,24 @@ export const deleteExceptionListItem = async ({ id, namespaceType, http }: Delet
       namespaceType,
       signal: abortCtrl.signal,
     });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const updateExceptionListDetails = async ({ list, http }: UpdateExceptionList) => {
+  try {
+    const abortCtrl = new AbortController();
+
+    const data = await updateExceptionList({
+      http: http as HttpSetup,
+      list,
+      signal: abortCtrl.signal,
+    });
+
+    return {
+      data,
+    };
   } catch (error) {
     throw new Error(error);
   }

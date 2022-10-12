@@ -20,11 +20,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
+import { ListDetails } from '../../types';
 
-export interface ListDetails {
-  title: string;
-  description?: string;
-}
 interface EditModalProps {
   listDetails: ListDetails;
   onSave: (newListDetails: ListDetails) => void;
@@ -46,14 +43,14 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
     <EuiModal onClose={onSubmit} initialFocus="[name=popswitch]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.title)}</h1>
+          <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}</h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm id={modalFormId} component="form" onSubmit={onSubmit}>
-          <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_TITLE_TEXTBOX}>
-            <EuiFieldText name="title" value={newListDetails.title} onChange={onChange} />
+          <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_NAME_TEXTBOX}>
+            <EuiFieldText name="name" value={newListDetails.name} onChange={onChange} />
           </EuiFormRow>
 
           <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX}>
