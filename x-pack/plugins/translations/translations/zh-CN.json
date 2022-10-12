@@ -7504,7 +7504,6 @@
     "xpack.apm.serviceDetails.metrics.errorsList.title": "错误",
     "xpack.apm.serviceDetails.metrics.memoryUsageChartTitle": "系统内存使用",
     "xpack.apm.serviceDetails.metricsTabLabel": "指标",
-    "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.overviewTabLabel": "概览",
     "xpack.apm.serviceDetails.transactionsTabLabel": "事务",
     "xpack.apm.serviceGroup.allServices.title": "所有服务",
