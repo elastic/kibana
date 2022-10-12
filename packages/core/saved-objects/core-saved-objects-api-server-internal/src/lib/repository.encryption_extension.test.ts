@@ -44,7 +44,7 @@ import {
   TypeIdTuple,
   updateSuccess,
 } from './repository.common.test';
-import { extensionsMock } from './extensions.test.mock';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -117,7 +117,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     serializer = createSpySerializer(registry);
 
     // create a mock saved objects encryption extension
-    mockEncryptionExt = extensionsMock.createEncryptionExtension();
+    mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();

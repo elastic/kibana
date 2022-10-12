@@ -32,7 +32,6 @@ import {
   ISavedObjectsSecurityExtension,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   authMap,
   enforceError,
@@ -44,6 +43,7 @@ import {
   setupEnforceSuccess,
   setupRedactPassthrough,
 } from './repository.common.test';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';
@@ -398,7 +398,7 @@ describe('internalBulkResolve', () => {
         { type: OBJ_TYPE, id: '11' }, // non encryptable type
         { type: ENCRYPTED_TYPE, id: '12' }, // encryptable type
       ];
-      const mockEncryptionExt = extensionsMock.createEncryptionExtension();
+      const mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
       const params = setup(objects, { namespace }, { encryptionExt: mockEncryptionExt });
       mockBulkResults(
         // No alias matches
@@ -448,7 +448,7 @@ describe('internalBulkResolve', () => {
         } as SavedObject;
       });
 
-      mockSecurityExt = extensionsMock.createSecurityExtension();
+      mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
       params = setup(objects, { namespace }, { securityExt: mockSecurityExt });
 
       mockBulkResults(

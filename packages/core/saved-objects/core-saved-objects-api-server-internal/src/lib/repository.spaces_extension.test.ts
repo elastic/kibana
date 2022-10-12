@@ -33,7 +33,6 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { kibanaMigratorMock } from '../mocks';
-import { extensionsMock } from './extensions.test.mock';
 import {
   createRegistry,
   createDocumentMigrator,
@@ -56,6 +55,7 @@ import {
   setupCheckUnauthorized,
   generateIndexPatternSearchResults,
 } from './repository.common.test';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -121,7 +121,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         serializer = createSpySerializer(registry);
 
         // create a mock saved objects spaces extension
-        mockSpacesExt = extensionsMock.createSpacesExtension();
+        mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
 
         mockGetCurrentTime.mockReturnValue(mockTimestamp);
         mockGetSearchDsl.mockClear();
@@ -812,8 +812,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
       serializer = createSpySerializer(registry);
       // create a mock extensions
-      mockSpacesExt = extensionsMock.createSpacesExtension();
-      mockSecurityExt = extensionsMock.createSecurityExtension();
+      mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
+      mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
       mockGetCurrentTime.mockReturnValue(mockTimestamp);
       mockGetSearchDsl.mockClear();
       repository = instantiateRepository();

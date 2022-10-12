@@ -27,7 +27,7 @@ import {
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import { AuditAction, ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import { extensionsMock } from './extensions.test.mock';
+
 import {
   authMap,
   enforceError,
@@ -39,6 +39,7 @@ import {
   setupEnforceSuccess,
   setupRedactPassthrough,
 } from './repository.common.test';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
@@ -465,7 +466,7 @@ describe('collectMultiNamespaceReferences', () => {
   });
 
   describe('with security enabled', () => {
-    const mockSecurityExt = extensionsMock.createSecurityExtension();
+    const mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
     const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
     const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-2' };
     const obj3 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-3' };

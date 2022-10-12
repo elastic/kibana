@@ -19,8 +19,8 @@ import {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
-import { extensionsMock } from './extensions.test.mock';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 /**
  * @internal only used for unit tests
@@ -110,19 +110,19 @@ describe(`allows extensions to be excluded`, () => {
   const typeRegistry = typeRegistryMock.create();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
 
-  const mockEncryptionExt = extensionsMock.createEncryptionExtension();
+  const mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
   const encryptionExtFactory: SavedObjectsEncryptionExtensionFactory = (params: {
     typeRegistry: ISavedObjectTypeRegistry;
     request: KibanaRequest;
   }) => mockEncryptionExt;
 
-  const mockSpacesExt = extensionsMock.createSpacesExtension();
+  const mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
   const spacesExtFactory: SavedObjectsSpacesExtensionFactory = (params: {
     typeRegistry: ISavedObjectTypeRegistry;
     request: KibanaRequest;
   }) => mockSpacesExt;
 
-  const mockSecurityExt = extensionsMock.createSecurityExtension();
+  const mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
   const securityExtFactory: SavedObjectsSecurityExtensionFactory = (params: {
     typeRegistry: ISavedObjectTypeRegistry;
     request: KibanaRequest;

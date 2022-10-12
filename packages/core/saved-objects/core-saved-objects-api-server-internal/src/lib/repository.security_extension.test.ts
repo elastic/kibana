@@ -27,7 +27,6 @@ import {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';
-import { extensionsMock } from './extensions.test.mock';
 import {
   createRegistry,
   createDocumentMigrator,
@@ -64,6 +63,7 @@ import {
   bulkUpdateSuccess,
   expectUpdateResult,
 } from './repository.common.test';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -116,7 +116,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     serializer = createSpySerializer(registry);
 
     // create a mock saved objects encryption extension
-    mockSecurityExt = extensionsMock.createSecurityExtension();
+    mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();

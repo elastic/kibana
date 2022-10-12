@@ -26,7 +26,6 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
 import { AuditAction, ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import { extensionsMock } from './extensions.test.mock';
 import {
   authMap,
   checkAuthError,
@@ -39,6 +38,7 @@ import {
   setupEnforceSuccess,
   setupRedactPassthrough,
 } from './repository.common.test';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>
@@ -659,7 +659,7 @@ describe('#updateObjectsSpaces', () => {
         const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' };
         const objects = [obj1];
         const spacesToAdd = ['foo-space'];
-        mockSecurityExt = extensionsMock.createSecurityExtension();
+        mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
         params = setup({ objects, spacesToAdd }, mockSecurityExt);
         mockMgetResults({ found: true, namespaces: [EXISTING_SPACE] }); // result for obj1
         mockBulkResults({ error: false }); // result for obj1
@@ -752,7 +752,7 @@ describe('#updateObjectsSpaces', () => {
       const spacesToRemove = [EXISTING_SPACE];
 
       beforeEach(() => {
-        mockSecurityExt = extensionsMock.createSecurityExtension();
+        mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
         params = setup({ objects, spacesToAdd, spacesToRemove }, mockSecurityExt);
         mockMgetResults(
           { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
@@ -835,7 +835,7 @@ describe('#updateObjectsSpaces', () => {
       const objects = [obj1, obj2, obj3, obj4];
 
       const setupForAllSpaces = (spacesToAdd: string[], spacesToRemove: string[]) => {
-        mockSecurityExt = extensionsMock.createSecurityExtension();
+        mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
         params = setup({ objects, spacesToAdd, spacesToRemove }, mockSecurityExt);
         mockMgetResults(
           { found: true, namespaces: [ALL_NAMESPACES_STRING, otherSpace] }, // result for obj1 -- will not be changed
