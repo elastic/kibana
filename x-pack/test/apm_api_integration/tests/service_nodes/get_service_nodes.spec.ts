@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
+      endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
       params: {
         path: { serviceName },
         query: {
