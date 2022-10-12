@@ -13,6 +13,7 @@ import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
+import { duplicateExceptions } from './duplicate_exceptions';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -21,7 +22,10 @@ const DUPLICATE_TITLE = i18n.translate(
   }
 );
 
-export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCreate => {
+export const duplicateRule = async (
+  rule: SanitizedRule<RuleParams>,
+  shouldDuplicateExceptions: boolean
+): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
   const ruleId = uuid.v4();
 
@@ -31,6 +35,10 @@ export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCrea
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
+  const exceptions = await duplicateExceptions(
+    rule.params.exceptionsList,
+    shouldDuplicateExceptions
+  );
 
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
@@ -44,6 +52,7 @@ export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCrea
       relatedIntegrations,
       requiredFields,
       setup,
+      exceptionsList: exceptions,
     },
     schedule: rule.schedule,
     enabled: false,

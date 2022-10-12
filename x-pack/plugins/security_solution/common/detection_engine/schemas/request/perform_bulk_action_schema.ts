@@ -162,10 +162,15 @@ export const performBulkActionSchema = t.intersection([
         action: t.union([
           t.literal(BulkAction.delete),
           t.literal(BulkAction.disable),
-          t.literal(BulkAction.duplicate),
           t.literal(BulkAction.enable),
           t.literal(BulkAction.export),
         ]),
+      })
+    ),
+    t.exact(
+      t.type({
+        action: t.literal(BulkAction.duplicate),
+        [BulkAction.duplicate]: bulkActionDuplicatePayload,
       })
     ),
     t.exact(

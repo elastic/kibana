@@ -503,8 +503,13 @@ export const performBulkActionRoute = (
                   rule,
                 });
 
+                const duplicateRuleToCreate = await duplicateRule(
+                  migratedRule,
+                  body.duplicate.include_exceptions
+                );
+
                 const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule),
+                  data: duplicateRuleToCreate,
                 });
 
                 return createdRule;
