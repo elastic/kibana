@@ -218,6 +218,15 @@ const mockGetTrainedModelStats = {
         allocation_status: {
           allocation_count: 1,
         },
+        state: 'started',
+      },
+      model_id: 'trained-model-id-3-in-other-space',
+    },
+    {
+      deployment_stats: {
+        allocation_status: {
+          allocation_count: 1,
+        },
         state: 'starting',
       },
       model_id: 'trained-model-id-4',
@@ -235,16 +244,19 @@ const mockTrainedModelsInCurrentSpace = {
 
 const trainedModelDataObject: Record<string, InferencePipeline> = {
   'trained-model-id-1': {
+    modelId: 'trained-model-id-1',
     modelState: TrainedModelState.NotDeployed,
     pipelineName: 'ml-inference-pipeline-1',
     types: ['lang_ident', 'ner'],
   },
   'trained-model-id-2': {
+    modelId: 'trained-model-id-2',
     modelState: TrainedModelState.Started,
     pipelineName: 'ml-inference-pipeline-2',
     types: ['pytorch', 'ner'],
   },
   'ml-inference-pipeline-3': {
+    modelId: 'trained-model-id-1',
     modelState: TrainedModelState.NotDeployed,
     pipelineName: 'ml-inference-pipeline-3',
     types: ['lang_ident', 'ner'],
@@ -307,12 +319,14 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
 
     const expected: InferencePipelineData[] = [
       {
+        modelId: 'trained-model-id-1',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
         types: [],
       },
       {
+        modelId: 'trained-model-id-2',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
@@ -360,12 +374,14 @@ describe('getMlModelConfigsForModelIds lib function', () => {
   it('should fetch the models that we ask for', async () => {
     const input: Record<string, InferencePipelineData> = {
       'trained-model-id-1': {
+        modelId: 'trained-model-id-1',
         modelState: TrainedModelState.Started,
         pipelineName: '',
         trainedModelName: 'trained-model-id-1',
         types: ['pytorch', 'ner'],
       },
       'trained-model-id-2': {
+        modelId: 'trained-model-id-2',
         modelState: TrainedModelState.Started,
         pipelineName: '',
         trainedModelName: 'trained-model-id-2',
@@ -391,24 +407,34 @@ describe('getMlModelConfigsForModelIds lib function', () => {
     expect(response).toEqual(expected);
   });
 
-  it('should filter models not in the current space', async () => {
+  it('should redact model IDs not in the current space', async () => {
     const input: Record<string, InferencePipelineData> = {
       'trained-model-id-1': {
+        modelId: 'trained-model-id-1',
         modelState: TrainedModelState.Started,
         pipelineName: '',
         trainedModelName: 'trained-model-id-1',
         types: ['pytorch', 'ner'],
       },
       'trained-model-id-2': {
+        modelId: 'trained-model-id-2',
         modelState: TrainedModelState.Started,
         pipelineName: '',
         trainedModelName: 'trained-model-id-2',
+        types: ['pytorch', 'ner'],
+      },
+      'trained-model-id-3-in-other-space': {
+        modelId: undefined, // Redacted
+        modelState: TrainedModelState.Started,
+        pipelineName: '',
+        trainedModelName: 'trained-model-id-3-in-other-space',
         types: ['pytorch', 'ner'],
       },
     };
 
     const expected = {
       'trained-model-id-2': input['trained-model-id-2'],
+      'trained-model-id-3-in-other-space': input['trained-model-id-3-in-other-space'],
     };
     const response = await getMlModelConfigsForModelIds(
       mockClient as unknown as ElasticsearchClient,
@@ -454,24 +480,28 @@ describe('fetchAndAddTrainedModelData lib function', () => {
 
     const pipelines: InferencePipelineData[] = [
       {
+        modelId: 'trained-model-id-1',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
         types: [],
       },
       {
+        modelId: 'trained-model-id-2',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
         types: [],
       },
       {
+        modelId: 'trained-model-id-3',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-3',
         trainedModelName: 'trained-model-id-3',
         types: [],
       },
       {
+        modelId: 'trained-model-id-4',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-4',
         trainedModelName: 'trained-model-id-4',
@@ -481,18 +511,21 @@ describe('fetchAndAddTrainedModelData lib function', () => {
 
     const expected: InferencePipelineData[] = [
       {
+        modelId: 'trained-model-id-1',
         modelState: TrainedModelState.NotDeployed,
         pipelineName: 'ml-inference-pipeline-1',
         trainedModelName: 'trained-model-id-1',
         types: ['lang_ident', 'ner'],
       },
       {
+        modelId: 'trained-model-id-2',
         modelState: TrainedModelState.Started,
         pipelineName: 'ml-inference-pipeline-2',
         trainedModelName: 'trained-model-id-2',
         types: ['pytorch', 'ner'],
       },
       {
+        modelId: 'trained-model-id-3',
         modelState: TrainedModelState.Failed,
         modelStateReason: 'something is wrong, boom',
         pipelineName: 'ml-inference-pipeline-3',
@@ -500,6 +533,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         types: ['pytorch', 'text_classification'],
       },
       {
+        modelId: 'trained-model-id-4',
         modelState: TrainedModelState.Starting,
         pipelineName: 'ml-inference-pipeline-4',
         trainedModelName: 'trained-model-id-4',

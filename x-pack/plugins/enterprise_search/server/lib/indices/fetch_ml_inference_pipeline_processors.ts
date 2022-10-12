@@ -58,6 +58,7 @@ export const fetchPipelineProcessorInferenceData = async (
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
         pipelineProcessorData.push({
+          modelId: trainedModelName,
           modelState: TrainedModelState.NotDeployed,
           pipelineName: pipelineProcessorName,
           trainedModelName,
@@ -89,8 +90,9 @@ export const getMlModelConfigsForModelIds = async (
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
     const trainedModelName = trainedModelData.model_id;
 
-    if (trainedModelNames.includes(trainedModelName) && modelNamesInCurrentSpace.includes(trainedModelName)) {
+    if (trainedModelNames.includes(trainedModelName)) {
       modelConfigs[trainedModelName] = {
+        modelId: modelNamesInCurrentSpace.includes(trainedModelName) ? trainedModelName : undefined,
         modelState: TrainedModelState.NotDeployed,
         pipelineName: '',
         trainedModelName,
@@ -144,9 +146,10 @@ export const fetchAndAddTrainedModelData = async (
     if (!model) {
       return data;
     }
-    const { types, modelState, modelStateReason } = model;
+    const { modelId, types, modelState, modelStateReason } = model;
     return {
       ...data,
+      modelId,
       types,
       modelState,
       modelStateReason,
