@@ -201,7 +201,6 @@ export const getDiscoverAppStateContainer = (
     }
 
     const { start, stop } = initSyncState();
-
     replaceUrlState({}).then(() => start());
 
     return () => {

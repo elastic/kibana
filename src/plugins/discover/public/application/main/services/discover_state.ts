@@ -118,6 +118,7 @@ export interface DiscoverStateContainer {
       onError: (e: Error) => void
     ) => void;
     initSyncSubscribe: () => () => void;
+    newSavedSearch: () => void;
   };
 }
 
@@ -298,6 +299,11 @@ export function getDiscoverStateContainer({
         await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
         addLog('🧭 [discoverState] loadNewSavedSearch result', nextSavedSearch);
         return nextSavedSearch;
+      },
+      newSavedSearch: async () => {
+        addLog('🧭 [discoverState] newSavedSearch result');
+        const nextSavedSearch = await savedSearchContainer.new();
+        appStateContainer.reset(nextSavedSearch);
       },
       initSyncSubscribe: () => {
         const unsubscribeData = dataStateContainer.subscribe();
