@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 export const RunTestManually = () => {
   return (
-    <EuiButton fill={true} iconType="play" isDisabled={true}>
+    <EuiButton fill={true} iconType="beaker" isDisabled={true}>
       {RUN_TEST_LABEL}
     </EuiButton>
   );

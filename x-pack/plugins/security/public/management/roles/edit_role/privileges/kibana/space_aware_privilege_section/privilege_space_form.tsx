@@ -547,6 +547,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         }
       });
     }
+
     this.setState({
       role,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
