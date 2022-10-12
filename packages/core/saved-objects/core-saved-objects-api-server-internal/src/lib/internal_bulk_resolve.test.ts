@@ -32,7 +32,7 @@ import {
   ISavedObjectsSecurityExtension,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { extensionsMock } from './extensions.test.mock';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   authMap,
   enforceError,

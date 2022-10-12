@@ -37,7 +37,7 @@ const create = (): jest.Mocked<SavedObjectsExtensions> => ({
   spacesExtension: createSpacesExtension(),
 });
 
-export const extensionsMock = {
+export const savedObjectsExtensionsMock = {
   create,
   createEncryptionExtension,
   createSecurityExtension,
