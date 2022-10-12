@@ -147,7 +147,9 @@ export function tabifyAggResponse(
 
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
   const topLevelBucket: AggResponseBucket = {
-    ...esResponse.aggregations,
+    ...(aggConfigs.samplerConfig.probability !== 1
+      ? esResponse.aggregations.sampling
+      : esResponse.aggregations),
     doc_count: esResponse.aggregations?.doc_count || esResponse.hits?.total,
   };
 

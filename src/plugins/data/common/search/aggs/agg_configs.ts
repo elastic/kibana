@@ -109,6 +109,10 @@ export class AggConfigs {
     return this.opts.partialRows ?? false;
   }
 
+  public get samplerConfig() {
+    return { probability: this.opts.probability, seed: this.opts.samplerSeed };
+  }
+
   setTimeFields(timeFields: string[] | undefined) {
     this.timeFields = timeFields;
   }
@@ -227,9 +231,19 @@ export class AggConfigs {
   }
 
   toDsl(): Record<string, any> {
-    const dslTopLvl = {};
+    const dslTopLvl: Record<string, any> = {};
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
+
+    if (this.opts.probability !== 1) {
+      dslTopLvl.sampling = {
+        random_sampler: {
+          probability: this.opts.probability,
+          seed: this.opts.samplerSeed,
+        },
+        aggs: {},
+      };
+    }
 
     const timeShifts = this.getTimeShifts();
     const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
@@ -250,10 +264,6 @@ export class AggConfigs {
           };
         });
     }
-    if (this.opts.probability !== 1) {
-      // inject the random sampler here as agg root
-      // console.log('Has random sampling in here');
-    }
     const requestAggs = this.getRequestAggs();
     const aggsWithDsl = requestAggs.filter((agg) => !agg.type.hasNoDsl).length;
     const timeSplitIndex = this.getAll().findIndex(
@@ -264,6 +274,10 @@ export class AggConfigs {
       if (!dslLvlCursor) {
         // start at the top level
         dslLvlCursor = dslTopLvl;
+        // when sampling jump directly to the aggs
+        if (this.opts.probability !== 1) {
+          dslLvlCursor = dslLvlCursor.sampling.aggs;
+        }
       } else {
         const prevConfig: AggConfig = list[i - 1];
         const prevDsl = dslLvlCursor[prevConfig.id];
@@ -537,6 +551,8 @@ export class AggConfigs {
         metricsAtAllLevels: this.hierarchical,
         partialRows: this.partialRows,
         aggs: this.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
+        probability: this.opts.probability,
+        samplerSeed: this.opts.samplerSeed,
       }),
     ]).toAst();
   }

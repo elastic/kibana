@@ -133,6 +133,7 @@ export const handleRequest = ({
             const tabifyParams = {
               metricsAtAllLevels: aggs.hierarchical,
               partialRows: aggs.partialRows,
+              samplerConfig: aggs.samplerConfig,
               timeRange: parsedTimeRange
                 ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
                 : undefined,

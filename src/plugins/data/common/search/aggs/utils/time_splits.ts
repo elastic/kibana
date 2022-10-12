@@ -427,11 +427,11 @@ export function insertTimeShiftSplit(
   const timeRange = aggConfigs.timeRange;
   const filters: Record<string, unknown> = {};
   const timeField = aggConfigs.timeFields[0];
+  const timeFilter = getTime(aggConfigs.indexPattern, timeRange, {
+    fieldName: timeField,
+    forceNow: aggConfigs.forceNow,
+  }) as RangeFilter;
   Object.entries(timeShifts).forEach(([key, shift]) => {
-    const timeFilter = getTime(aggConfigs.indexPattern, timeRange, {
-      fieldName: timeField,
-      forceNow: aggConfigs.forceNow,
-    }) as RangeFilter;
     if (timeFilter) {
       filters[key] = {
         range: {

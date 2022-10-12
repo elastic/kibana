@@ -392,6 +392,8 @@ function getExpressionForLayer(
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
+          probability: layer.sampling || 1,
+          // TODO: add samplerSeed here from search session
         }).toAst(),
         {
           type: 'function',
