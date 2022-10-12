@@ -221,7 +221,9 @@ describe('discover sidebar', function () {
   it('should render the Visualize in Lens button in text based languages mode', () => {
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverSidebar {...props} onAddFilter={undefined} />
+        <DiscoverAppStateProvider value={getAppStateContainer()}>
+          <DiscoverSidebar {...props} onAddFilter={undefined} />
+        </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );
     const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
