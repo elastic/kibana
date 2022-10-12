@@ -19,8 +19,6 @@ API endpoints are organized according to loosely applied RESTful principles. GET
 
 Endpoints should return and accept data in a JSON format using `snake_case` for property names. Any translation to and from `snake_case` should occur in the frontend. A notable allowed exception here is any endpoint calling the Enterprise Search Ruby app, as that app tends to accept `snake_case` but return `camelCase`.
 
-A good practice is to minimize
-
 ### Routes
 
 Each route path has its own file exporting a registerRoutes function, that's called by the plugin. For example, all `enterprise_search/indices` routes can be found in the [server/routes/enterprise_search/indices.ts](server/routes/enterprise_search/indices.ts) file.
@@ -30,9 +28,9 @@ Each of the route functions is wrapped in a generic handler. If the route is jus
 Ideally, these route files do only two things: call a single library function to do the actual work we expect out of this endpoint, and handle any specific errors that don't fit into the generic error handler we use above. This minimalistic approach allows us to easily test whether the routes are calling the correct functions, and offload the actual logic to different places.
 
 ### Library functions
-Each route that does more than just pass requests to Enterprise Search should have a single library function it can call that does the actual processing work. These library functions are located in [server/lib/] and should mirror the path of the routes. Which each function living in a file that matches its path, prefixed with the HTTP verb used to call it. So a GET request to `enterprise_search/indices/{indexName}` should end up in a `getIndex` function, located in [server/lib/indices/get_index.ts](server/lib/indices/get_index.ts).
+Each route that does more than just pass requests to Enterprise Search should have a single library function it can call that does the actual processing work. These library functions are located in [server/lib/] and should mirror the path of the routes, prefixing the filename with the HTTP verb. So a GET request to `enterprise_search/indices/{indexName}` should end up in a `getIndex` function, located in [server/lib/indices/get_index.ts](server/lib/indices/get_index.ts).
 
-Where necessary to make these functions readable and/or avoid duplicate code, these functions should call utility functions located in a `shared` folder in the nearest common parent directory. Eg a library function called by routes in just the `indices` directory should be located in [server/lib/indices/shared](server/lib/indices/shared), while a library function called by routes in both the `connectors` and `indices` directories should be located in [server/lib/shared](server/lib/shared).
+Where necessary for readability and/or to avoid duplicate code, these functions should call utility functions located in a `shared` folder in the nearest common parent directory. For example, a library function called by routes in just the `indices` directory should be located in [server/lib/indices/shared](server/lib/indices/shared), while a library function called by routes in both the `connectors` and `indices` directories should be located in [server/lib/shared](server/lib/shared).
 
 Be careful when sharing functions across multiple routes: if you're adding many inputs to a single function, it's probably better to split them up and dedicate each to a single route, even if that means more duplicate code in the system. The added complexity caused by maintaining multiple code paths in a single function is generally not worth it.
 
