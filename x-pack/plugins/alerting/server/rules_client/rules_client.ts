@@ -715,9 +715,11 @@ export class RulesClient {
   public async resolve<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId,
+    includeSnoozeData = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
+    includeSnoozeData?: boolean;
   }): Promise<ResolvedSanitizedRule<Params>> {
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawRule>('alert', id);
@@ -750,7 +752,9 @@ export class RulesClient {
       result.attributes.alertTypeId,
       result.attributes,
       result.references,
-      includeLegacyId
+      includeLegacyId,
+      false,
+      includeSnoozeData
     );
 
     return {
