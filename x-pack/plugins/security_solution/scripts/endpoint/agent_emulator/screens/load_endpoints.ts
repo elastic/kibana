@@ -9,6 +9,7 @@
 
 import { blue, green } from 'chalk';
 import type { DistinctQuestion } from 'inquirer';
+import type { LoadEndpointsConfig } from '../types';
 import { loadEndpoints } from '../services/endpoint_loader';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { ProgressFormatter } from '../../common/screen/progress_formatter';
@@ -21,10 +22,6 @@ interface LoadOptions {
   progress: ProgressFormatter;
   isRunning: boolean;
   isDone: boolean;
-}
-
-interface LoadEndpointsConfig {
-  count: number;
 }
 
 const promptQuestion = <TAnswers extends object = object>(
@@ -67,6 +64,22 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
     super();
   }
 
+  private async loadSettings(): Promise<void> {
+    const allSettings = await this.emulatorContext.getSettingsService().get();
+
+    this.config = allSettings.endpointLoader;
+  }
+
+  private async saveSettings(): Promise<void> {
+    const settingsService = this.emulatorContext.getSettingsService();
+
+    const allSettings = await settingsService.get();
+    await settingsService.save({
+      ...allSettings,
+      endpointLoader: this.config,
+    });
+  }
+
   protected header() {
     return super.header(TOOL_TITLE, 'Endpoint loader');
   }
@@ -104,7 +117,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
         return;
 
       case '2':
-        this.setConfig();
+        this.configView();
         return;
 
       default:
@@ -120,7 +133,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
     }
   }
 
-  private async setConfig() {
+  private async configView() {
     this.config = await this.prompt<LoadEndpointsConfig>({
       questions: [
         promptQuestion({
@@ -145,6 +158,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
       title: blue('Endpoint Loader Settings'),
     });
 
+    await this.saveSettings();
     this.reRender();
   }
 
@@ -201,5 +215,10 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   Done. Endpoint(s) have been loaded into Elastic/Kibana.
   Press Enter to continue
 `;
+  }
+
+  async show(options: Partial<{ prompt: string; resume: boolean }> = {}): Promise<void> {
+    await this.loadSettings();
+    return super.show(options);
   }
 }

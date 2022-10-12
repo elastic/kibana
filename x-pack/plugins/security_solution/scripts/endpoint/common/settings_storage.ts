@@ -56,7 +56,7 @@ export class SettingsStorage<TSettingsDef extends object = object> {
   public async get(): Promise<TSettingsDef> {
     await this.ensureExists();
     const fileContent = await readFile(this.settingsFileFullPath);
-    return fileContent.toJSON() as TSettingsDef;
+    return JSON.parse(fileContent.toString()) as TSettingsDef;
   }
 
   /** Save a new version of the settings to disk */

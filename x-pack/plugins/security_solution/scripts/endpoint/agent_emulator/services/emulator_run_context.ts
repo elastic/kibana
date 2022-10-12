@@ -60,7 +60,13 @@ export class EmulatorRunContext {
       return;
     }
 
-    this.settings = new SettingsStorage<AgentEmulatorSettings>('endpoint_agent_emulator.json');
+    this.settings = new SettingsStorage<AgentEmulatorSettings>('endpoint_agent_emulator.json', {
+      defaultSettings: {
+        endpointLoader: {
+          count: 2,
+        },
+      },
+    });
 
     const { esClient, kbnClient, log } = await createRuntimeServices({
       kibanaUrl: this.kibanaUrl,

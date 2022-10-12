@@ -6,7 +6,9 @@
  */
 
 export interface AgentEmulatorSettings {
-  endpointLoader: {
-    count: number;
-  };
+  endpointLoader: LoadEndpointsConfig;
+}
+
+export interface LoadEndpointsConfig {
+  count: number;
 }
