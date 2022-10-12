@@ -178,7 +178,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should convert parent pipeline aggregation with terms', async () => {
+    it('should convert sibling pipeline aggregation with terms', async () => {
       await visualBuilder.createNewAgg();
 
       await visualBuilder.selectAggType('Overall Average', 1);
