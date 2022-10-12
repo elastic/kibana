@@ -337,25 +337,14 @@ const getMonitorSummaryHeader = (
           defaultMessage: 'Summary',
         }),
         isSelected: selectedTab === 'summary',
-        onClick:
-          selectedTab === 'summary'
-            ? undefined
-            : () =>
-                history.push({ pathname: MONITOR_ROUTE.replace(':monitorId?', monitorId), search }),
+        href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
       },
       {
         label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
           defaultMessage: 'History',
         }),
         isSelected: selectedTab === 'history',
-        onClick:
-          selectedTab === 'history'
-            ? undefined
-            : () =>
-                history.push({
-                  pathname: MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId),
-                  search,
-                }),
+        href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
       },
       {
         label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
@@ -363,14 +352,7 @@ const getMonitorSummaryHeader = (
         }),
         prepend: <EuiIcon type="alert" color="danger" />,
         isSelected: selectedTab === 'errors',
-        onClick:
-          selectedTab === 'errors'
-            ? undefined
-            : () =>
-                history.push({
-                  pathname: MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId),
-                  search,
-                }),
+        href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
       },
     ],
   };
