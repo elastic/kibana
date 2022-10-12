@@ -33,7 +33,7 @@ describe('gainSightShipper', () => {
         const userId = 'test-user-id';
         const clusterUuid = '123654';
         gainSightShipper.extendContext({ userId, cluster_uuid: clusterUuid });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', {
+        expect(gainSightApiMock).toHaveBeenCalledWith('identify', {
           id: clusterUuid,
           userType: 'deployment',
         });
@@ -43,17 +43,17 @@ describe('gainSightShipper', () => {
         const userId = 'test-user-id';
         const clusterUuid = '123654';
         gainSightShipper.extendContext({ userId, cluster_uuid: clusterUuid });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('identify', {
+        expect(gainSightApiMock).toHaveBeenCalledTimes(2);
+        expect(gainSightApiMock).toHaveBeenCalledWith('identify', {
           id: clusterUuid,
           userType: 'deployment',
         });
 
         gainSightShipper.extendContext({ userId, cluster_uuid: clusterUuid });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
+        expect(gainSightApiMock).toHaveBeenCalledTimes(2);
 
         gainSightShipper.extendContext({ userId: `${userId}-1`, cluster_uuid: clusterUuid });
-        expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(4); // called again because the user changed
+        expect(gainSightApiMock).toHaveBeenCalledTimes(4); // called again because the user changed
       });
     });
   });
@@ -61,12 +61,12 @@ describe('gainSightShipper', () => {
   describe('optIn', () => {
     test('should call consent true and restart when isOptIn: true', () => {
       gainSightShipper.optIn(true);
-      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('config', 'enableTag', true);
+      expect(gainSightApiMock).toHaveBeenCalledWith('config', 'enableTag', true);
     });
 
     test('should call consent false and shutdown when isOptIn: false', () => {
       gainSightShipper.optIn(false);
-      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('config', 'enableTag', false);
+      expect(gainSightApiMock).toHaveBeenCalledWith('config', 'enableTag', false);
     });
   });
 
@@ -87,11 +87,11 @@ describe('gainSightShipper', () => {
         },
       ]);
 
-      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledTimes(2);
-      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('track', 'test-event-1', {
+      expect(gainSightApiMock).toHaveBeenCalledTimes(2);
+      expect(gainSightApiMock).toHaveBeenCalledWith('track', 'test-event-1', {
         test_str: 'test-1',
       });
-      expect(gainSightApiMock.aptrinsic).toHaveBeenCalledWith('track', 'test-event-2', {
+      expect(gainSightApiMock).toHaveBeenCalledWith('track', 'test-event-2', {
         other_property_str: 'test-2',
       });
     });

@@ -25,7 +25,6 @@ export class GainSightShipper implements IShipper {
   public static shipperName = 'Gainsight';
 
   private readonly gainSightApi: GainSightApi;
-  private lastUserId: string | undefined;
 
   /**
    * Creates a new instance of the gainSightShipper.
@@ -51,19 +50,17 @@ export class GainSightShipper implements IShipper {
     const { userId, cluster_uuid: clusterUuid } = newContext;
 
     // Call it only when the userId changes
-    if (userId && clusterUuid && userId !== this.lastUserId) {
+    if (userId && clusterUuid) {
       this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
-      this.gainSightApi.aptrinsic('identify', {
+      this.gainSightApi('identify', {
         id: clusterUuid,
         userType: 'deployment',
       });
-      this.gainSightApi.aptrinsic('set', 'globalContext', {
+      this.gainSightApi('set', 'globalContext', {
         kibanaUserId: userId,
       });
-      this.lastUserId = userId;
     } else {
-      console.log(`Identify has already been called with ${userId} and ${clusterUuid}`);
       this.initContext.logger.debug(
         `Identify has already been called with ${userId} and ${clusterUuid}`
       );
@@ -78,9 +75,9 @@ export class GainSightShipper implements IShipper {
     this.initContext.logger.debug(`Setting gainsight to optIn ${isOptedIn}`);
 
     if (isOptedIn) {
-      this.gainSightApi.aptrinsic('config', 'enableTag', true);
+      this.gainSightApi('config', 'enableTag', true);
     } else {
-      this.gainSightApi.aptrinsic('config', 'enableTag', false);
+      this.gainSightApi('config', 'enableTag', false);
     }
   }
 
@@ -92,7 +89,7 @@ export class GainSightShipper implements IShipper {
     this.initContext.logger.debug(`Reporting ${events.length} events to gainsight`);
     events.forEach((event) => {
       // We only read event.properties and discard the rest because the context is already sent in the other APIs.
-      this.gainSightApi.aptrinsic('track', event.event_type, formatPayload(event.properties));
+      this.gainSightApi('track', event.event_type, formatPayload(event.properties));
     });
   }
 

@@ -35,7 +35,6 @@ export function loadSnippet({
     // @ts-expect-error
     (n[i] =
       // @ts-expect-error
-
       n[i] ||
       function () {
         // @ts-expect-error
@@ -46,7 +45,7 @@ export function loadSnippet({
     // @ts-expect-error
     n[i].c = co;
     var r = t.createElement('script');
-    (r.async = !0), (r.src = a + '?a=' + e);
+    (r.async = !1), (r.src = a + '?a=' + e);
     var c = t.getElementsByTagName('script')[0];
     // @ts-expect-error
     c.parentNode.insertBefore(r, c);
