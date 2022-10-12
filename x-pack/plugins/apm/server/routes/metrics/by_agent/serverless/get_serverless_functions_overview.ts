@@ -15,6 +15,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { Setup } from '../../../../lib/helpers/setup_request';
+import { getMemoryInfo, percentMemoryUsedScript } from '../shared/memory';
 
 export async function getServerlessFunctionsOverview({
   end,
@@ -57,23 +58,19 @@ export async function getServerlessFunctionsOverview({
             faasDurationAvg: { avg: { field: FAAS_DURATION } },
             faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
             coldStartCount: { sum: { field: FAAS_COLDSTART } },
-            // cgroupMemoryUsedMax: {
-            //   max: { script: percentCgroupMemoryUsedScript },
-            // },
-            // cgroupMemoryUsedAvg: {
-            //   avg: { script: percentCgroupMemoryUsedScript },
-            // },
-            // systemMemoryUsedMax: {
-            //   max: { script: percentSystemMemoryUsedScript },
-            // },
-            // systemMemoryUsedAvg: {
-            //   avg: { script: percentSystemMemoryUsedScript },
-            // },
+            systemMemoryUsedMax: {
+              max: { script: percentMemoryUsedScript },
+            },
+            systemMemoryUsedAvg: {
+              avg: { script: percentMemoryUsedScript },
+            },
           },
         },
       },
     },
   };
+
+  getMemoryInfo({ end, environment, kuery, serviceName, setup, start });
 
   const response = await apmEventClient.search(
     'ger_serverless_functions_overview',
@@ -83,14 +80,12 @@ export async function getServerlessFunctionsOverview({
   const serverlessFunctionsOverview =
     response.aggregations?.serverlessFunctions.buckets.map((bucket) => {
       return {
-        functionName: bucket.key,
+        serverlessFunctionName: bucket.key,
         serverlessDurationAvg: bucket.faasDurationAvg.value,
         billedDurationAvg: bucket.faasBilledDurationAvg.value,
         coldStartCount: bucket.coldStartCount.value,
-        // memoryMax:
-        //   bucket.cgroupMemoryUsedMax.value || bucket.systemMemoryUsedMax.value,
-        // memorySize:
-        //   bucket.cgroupMemoryUsedAvg.value || bucket.systemMemoryUsedAvg.value,
+        memoryMax: bucket.systemMemoryUsedMax.value,
+        memorySize: bucket.systemMemoryUsedAvg.value,
       };
     });
 

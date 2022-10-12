@@ -117,9 +117,9 @@ export async function getServerlessSummary({
 
   return {
     memoryUsageAvg: memoryUsage,
-    serverlessFunctionsTotal: response.aggregations?.totalFunctions,
-    ServerlessDurationAvg: response.aggregations?.faasDurationAvg,
-    billedDurationAvg: response.aggregations?.faasBilledDurationAvg,
+    serverlessFunctionsTotal: response.aggregations?.totalFunctions.value,
+    serverlessDurationAvg: response.aggregations?.faasDurationAvg.value,
+    billedDurationAvg: response.aggregations?.faasBilledDurationAvg.value,
     // TODO: caue fix it
     estimatedCostsAvg: 0,
   };

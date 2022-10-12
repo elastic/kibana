@@ -17,21 +17,23 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { Coordinate } from '../../../../../typings/timeseries';
 import { getBucketSize } from '../../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../../lib/helpers/setup_request';
+import { percentMemoryUsedScript } from '../shared/memory';
 
 interface ActiveInstanceTimeseries {
-  faasDuration: Coordinate[];
-  faasBilledDuration: Coordinate[];
-  // memoryMax: Coordinate[];
-  // memorySize: Coordinate[];
+  serverlessDuration: Coordinate[];
+  billedDuration: Coordinate[];
+  memoryMax: Coordinate[];
+  memorySize: Coordinate[];
 }
 
 interface ActiveInstanceOverview {
+  activeInstanceName: string;
   serverlessFunctionName: string;
   timeseries: ActiveInstanceTimeseries;
-  faasDuration: number | null;
-  faasBilledDuration: number | null;
-  // memoryMax: number | null;
-  // memorySize: number | null;
+  serverlessDurationAvg: number | null;
+  billedDurationAvg: number | null;
+  memoryMax: number | null;
+  memorySize: number | null;
 }
 
 export async function getServerlessActiveInstancesOverview({
@@ -60,18 +62,12 @@ export async function getServerlessActiveInstancesOverview({
   const aggs = {
     faasDurationAvg: { avg: { field: FAAS_DURATION } },
     faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
-    // cgroupMemoryUsedMax: {
-    //   max: { script: percentCgroupMemoryUsedScript },
-    // },
-    // cgroupMemoryUsedAvg: {
-    //   avg: { script: percentCgroupMemoryUsedScript },
-    // },
-    // systemMemoryUsedMax: {
-    //   max: { script: percentSystemMemoryUsedScript },
-    // },
-    // systemMemoryUsedAvg: {
-    //   avg: { script: percentSystemMemoryUsedScript },
-    // },
+    systemMemoryUsedMax: {
+      max: { script: percentMemoryUsedScript },
+    },
+    systemMemoryUsedAvg: {
+      avg: { script: percentMemoryUsedScript },
+    },
   };
 
   const params = {
@@ -125,83 +121,70 @@ export async function getServerlessActiveInstancesOverview({
   );
 
   return (
-    response.aggregations?.activeInstances.buckets.map((bucket) => {
-      const activeInstanceName = bucket.key_as_string;
+    response.aggregations?.activeInstances.buckets.flatMap((bucket) => {
+      const activeInstanceName = bucket.key as string;
       const serverlessFunctionsDetails =
         bucket.serverlessFunctions.buckets.reduce<ActiveInstanceOverview[]>(
           (acc, curr) => {
-            const serverlessFunctionName = curr.key_as_string;
-            if (!serverlessFunctionName) {
-              return acc;
-            }
+            const serverlessFunctionName = curr.key as string;
 
             const timeseries =
               curr.timeseries.buckets.reduce<ActiveInstanceTimeseries>(
                 (timeseriesAcc, timeseriesCurr) => {
                   return {
-                    faasDuration: [
-                      ...timeseriesAcc.faasDuration,
+                    serverlessDuration: [
+                      ...timeseriesAcc.serverlessDuration,
                       {
                         x: timeseriesCurr.key,
                         y: timeseriesCurr.faasDurationAvg.value,
                       },
                     ],
-                    faasBilledDuration: [
-                      ...timeseriesAcc.faasBilledDuration,
+                    billedDuration: [
+                      ...timeseriesAcc.billedDuration,
                       {
                         x: timeseriesCurr.key,
                         y: timeseriesCurr.faasBilledDurationAvg.value,
                       },
                     ],
-                    // memoryMax: [
-                    //   ...timeseriesAcc.memoryMax,
-                    //   {
-                    //     x: timeseriesCurr.key,
-                    //     y:
-                    //       timeseriesCurr.cgroupMemoryUsedMax.value ||
-                    //       timeseriesCurr.systemMemoryUsedMax.value,
-                    //   },
-                    // ],
-                    // memorySize: [
-                    //   ...timeseriesAcc.memorySize,
-                    //   {
-                    //     x: timeseriesCurr.key,
-                    //     y:
-                    //       timeseriesCurr.cgroupMemoryUsedAvg.value ||
-                    //       timeseriesCurr.systemMemoryUsedAvg.value,
-                    //   },
-                    // ],
+                    memoryMax: [
+                      ...timeseriesAcc.memoryMax,
+                      {
+                        x: timeseriesCurr.key,
+                        y: timeseriesCurr.systemMemoryUsedMax.value,
+                      },
+                    ],
+                    memorySize: [
+                      ...timeseriesAcc.memorySize,
+                      {
+                        x: timeseriesCurr.key,
+                        y: timeseriesCurr.systemMemoryUsedAvg.value,
+                      },
+                    ],
                   };
                 },
                 {
-                  faasDuration: [],
-                  faasBilledDuration: [],
-                  // memoryMax: [],
-                  // memorySize: [],
+                  serverlessDuration: [],
+                  billedDuration: [],
+                  memoryMax: [],
+                  memorySize: [],
                 }
               );
             return [
               ...acc,
               {
+                activeInstanceName,
                 serverlessFunctionName,
                 timeseries,
-                faasDuration: curr.faasDurationAvg.value,
-                faasBilledDuration: curr.faasBilledDurationAvg.value,
-                // memoryMax:
-                //   curr.cgroupMemoryUsedMax.value ||
-                //   curr.systemMemoryUsedMax.value,
-                // memorySize:
-                //   curr.cgroupMemoryUsedAvg.value ||
-                //   curr.systemMemoryUsedAvg.value,
+                serverlessDurationAvg: curr.faasDurationAvg.value,
+                billedDurationAvg: curr.faasBilledDurationAvg.value,
+                memoryMax: curr.systemMemoryUsedMax.value,
+                memorySize: curr.systemMemoryUsedAvg.value,
               },
             ];
           },
           []
         );
-      return {
-        activeInstanceName,
-        ...serverlessFunctionsDetails,
-      };
+      return serverlessFunctionsDetails;
     }) || []
   );
 }
