@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiTextAlign } from '@elastic/eui';
+import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getOverlays } from '../services';
 import { ShardFailureModal } from './shard_failure_modal';
-import { ShardFailureRequest } from './shard_failure_types';
+import type { ShardFailureRequest } from './shard_failure_types';
 
 // @internal
 export interface ShardFailureOpenModalButtonProps {
@@ -22,6 +22,7 @@ export interface ShardFailureOpenModalButtonProps {
   response: estypes.SearchResponse<any>;
   theme: ThemeServiceStart;
   title: string;
+  size?: EuiButtonProps['size'];
 }
 
 // Needed for React.lazy
@@ -31,8 +32,9 @@ export default function ShardFailureOpenModalButton({
   response,
   theme,
   title,
+  size = 's',
 }: ShardFailureOpenModalButtonProps) {
-  function onClick() {
+  const onClick = useCallback(() => {
     const modal = getOverlays().openModal(
       toMountPoint(
         <ShardFailureModal
@@ -47,21 +49,20 @@ export default function ShardFailureOpenModalButton({
         className: 'shardFailureModal',
       }
     );
-  }
+  }, [request, response, theme.theme$, title]);
+
   return (
-    <EuiTextAlign textAlign="right">
-      <EuiButton
-        color="warning"
-        size="s"
-        onClick={onClick}
-        data-test-subj="openShardFailureModalBtn"
-      >
-        <FormattedMessage
-          id="data.search.searchSource.fetch.shardsFailedModal.showDetails"
-          defaultMessage="Show details"
-          description="Open the modal to show details"
-        />
-      </EuiButton>
-    </EuiTextAlign>
+    <EuiButton
+      color="warning"
+      size={size}
+      onClick={onClick}
+      data-test-subj="openShardFailureModalBtn"
+    >
+      <FormattedMessage
+        id="data.search.searchSource.fetch.shardsFailedModal.showDetails"
+        defaultMessage="Show details"
+        description="Open the modal to show details"
+      />
+    </EuiButton>
   );
 }

@@ -183,16 +183,16 @@ export function getShardFailuresWarningMessages(
         case 'generic_shard_warning':
           return [
             <>
-              <p>
-                <EuiTextColor color="accent">{warning.message}</EuiTextColor>
-                <EuiText size="s">{warning.text}</EuiText>
-              </p>
+              <EuiTextColor color="accent">{warning.message}</EuiTextColor>
+              <EuiText size="s">{warning.text}</EuiText>
+              <EuiSpacer size="s" />
               {warning.text ? (
                 <ShardFailureOpenModalButton
                   request={request as ShardFailureRequest}
                   response={response}
                   theme={theme}
                   title={warning.message}
+                  size="m"
                 />
               ) : null}
             </>,

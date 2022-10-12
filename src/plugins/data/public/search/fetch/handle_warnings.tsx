@@ -7,7 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
@@ -65,12 +65,14 @@ export function handleWarnings(
       <>
         {warning.text}
         <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton
-          request={request as ShardFailureRequest}
-          response={response}
-          theme={theme}
-          title={title}
-        />
+        <EuiTextAlign textAlign="right">
+          <ShardFailureOpenModalButton
+            request={request as ShardFailureRequest}
+            response={response}
+            theme={theme}
+            title={title}
+          />
+        </EuiTextAlign>
       </>,
       { theme$: theme.theme$ }
     );
