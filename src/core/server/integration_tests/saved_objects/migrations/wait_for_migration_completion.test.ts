@@ -54,7 +54,7 @@ describe('migration with waitForCompletion=true', () => {
 
     esServer = await startES();
     await root.preboot();
-    const coreSetup = await root.setup();
+    await root.setup();
 
     root.start();
     const esClient = esServer.es.getClient();
