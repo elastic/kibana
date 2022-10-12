@@ -203,7 +203,8 @@ describe('When using ConsoleManager', () => {
     });
   });
 
-  describe('and when the console page overlay is rendered into the page', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/142683
+  describe.skip('and when the console page overlay is rendered into the page', () => {
     type ConsoleManagerQueriesAndActions = ReturnType<
       typeof getConsoleManagerMockRenderResultQueriesAndActions
     >;
