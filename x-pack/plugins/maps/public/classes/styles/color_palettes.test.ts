@@ -35,7 +35,7 @@ describe('getColorRampCenterColor', () => {
 
 describe('getOrdinalMbColorRampStops', () => {
   it('Should create color stops for custom range', () => {
-    expect(getOrdinalMbColorRampStops('Blues', 0, 1000)).toEqual([
+    expect(getOrdinalMbColorRampStops('Blues', 0, 1000, false)).toEqual([
       0,
       '#ecf1f7',
       125,
@@ -56,7 +56,7 @@ describe('getOrdinalMbColorRampStops', () => {
   });
 
   it('Should snap to end of color stops for identical range', () => {
-    expect(getOrdinalMbColorRampStops('Blues', 23, 23)).toEqual([23, '#6092c0']);
+    expect(getOrdinalMbColorRampStops('Blues', 23, 23, false)).toEqual([23, '#6092c0']);
   });
 });
 
@@ -69,7 +69,7 @@ describe('getPercentilesMbColorRampStops', () => {
       { percentile: '95.0', value: 11145.5 },
       { percentile: '99.0', value: 16958.18 },
     ];
-    expect(getPercentilesMbColorRampStops('Blues', percentiles)).toEqual([
+    expect(getPercentilesMbColorRampStops('Blues', percentiles, false)).toEqual([
       5567.83,
       '#e0e8f2',
       8069,
