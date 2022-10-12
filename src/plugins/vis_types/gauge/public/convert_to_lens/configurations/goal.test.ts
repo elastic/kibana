@@ -78,6 +78,7 @@ describe('getConfiguration', () => {
       layerType: 'data',
       maxAccessor,
       metricAccessor,
+      showBar: true,
       palette,
     });
   });
