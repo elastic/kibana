@@ -526,16 +526,22 @@ export class Embeddable
     if (!activeDatasourceId || !adapters?.requests) return;
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warnings: React.ReactNode[] = [];
-    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
-      const warningMessage = activeDatasource.getSearchWarningMessages?.(
+    const warnings: Array<string | React.ReactNode> = [];
+    this.deps.data.search.showWarnings(adapters.requests, (warning, request, response) => {
+      const warningMessages = activeDatasource.getSearchWarningMessages?.(
         docDatasourceState,
-        warning
+        warning,
+        request,
+        response
       );
 
-      warnings.push(...(warningMessage || []));
-      if (warningMessage && warningMessage.length) return true;
+      if (warningMessages?.length) {
+        warnings.push(warningMessages);
+        return true;
+      }
+      return false;
     });
+
     if (warnings && this.warningDomNode) {
       render(<Warnings warnings={warnings} />, this.warningDomNode);
     }

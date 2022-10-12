@@ -231,31 +231,42 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
 
-        const requestWarnings: string[] = [];
-        const datasource = Object.values(renderDeps.current?.datasourceMap)[0];
-        const datasourceState = Object.values(renderDeps.current?.datasourceStates)[0].state;
-        if (adapters?.requests) {
-          plugins.data.search.showWarnings(adapters.requests, (warning) => {
-            const warningMessage = datasource.getSearchWarningMessages?.(datasourceState, warning);
+        const warnings: Array<string | React.ReactNode> = [];
+        const datasource = Object.values(renderDeps.current.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
-            requestWarnings.push(...(warningMessage || []));
-            if (warningMessage && warningMessage.length) return true;
+        if (adapters?.requests) {
+          plugins.data.search.showWarnings(adapters.requests, (warning, request, response) => {
+            const warningMessages = datasource.getSearchWarningMessages?.(
+              datasourceState,
+              warning,
+              request,
+              response
+            );
+
+            if (warningMessages?.length) {
+              warnings.push(warningMessages);
+              return true;
+            }
+            return false;
           });
         }
-        if (adapters && adapters.tables) {
-          dispatchLens(
-            onActiveDataChange({
-              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
-                {}
-              ),
-              requestWarnings,
-            })
-          );
-        }
+
+        dispatchLens(
+          onActiveDataChange({
+            activeData:
+              adapters && adapters.tables
+                ? Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                    (acc, [key, value], index, tables) => ({
+                      ...acc,
+                      [tables.length === 1 ? defaultLayerId : key]: value,
+                    }),
+                    {}
+                  )
+                : undefined,
+            requestWarnings: warnings,
+          })
+        );
       }
     },
     [dispatchLens, plugins.data.search]

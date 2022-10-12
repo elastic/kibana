@@ -37,7 +37,7 @@ export function handleWarnings(
     return;
   }
 
-  const internal = cb ? filterWarnings(warnings, cb) : warnings;
+  const internal = cb ? filterWarnings(warnings, cb, request, response) : warnings;
   if (internal.length === 0) {
     return;
   }
@@ -86,12 +86,17 @@ export function handleWarnings(
 /**
  * @internal
  */
-export function filterWarnings(warnings: SearchResponseWarning[], cb: WarningHandlerCallback) {
+export function filterWarnings(
+  warnings: SearchResponseWarning[],
+  cb: WarningHandlerCallback,
+  request: SearchRequest,
+  response: estypes.SearchResponse
+) {
   const unfiltered: SearchResponseWarning[] = [];
 
   // use the consumer's callback as a filter to receive warnings to handle on our side
   warnings.forEach((warning) => {
-    const consumerHandled = cb?.(warning);
+    const consumerHandled = cb?.(warning, request, response);
     if (!consumerHandled) {
       unfiltered.push(warning);
     }
