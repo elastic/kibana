@@ -11,16 +11,18 @@ import * as zlib from 'zlib';
 
 import type { Logger } from '@kbn/logging';
 import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { acceptCompression } from './accept_compression';
 
+// type guard to identify compressed stream
+function isCompressedSream(arg: unknown): arg is zlib.Gzip {
+  return isPopulatedObject(arg, ['flush']);
+}
+
 const FLUSH_PAYLOAD_SIZE = 4 * 1024;
 
-// We need this otherwise Kibana server will crash with a 'ERR_METHOD_NOT_IMPLEMENTED' error.
-class ResponseStream extends Stream.PassThrough {
-  flush() {}
-  _read() {}
-}
+class UncompressedResponseStream extends Stream.PassThrough {}
 
 const DELIMITER = '\n';
 
@@ -31,7 +33,7 @@ interface StreamFactoryReturnType<T = unknown> {
   end: () => void;
   push: (d: T, drain?: boolean) => void;
   responseWithHeaders: {
-    body: zlib.Gzip | ResponseStream;
+    body: zlib.Gzip | UncompressedResponseStream;
     headers?: ResponseHeaders;
   };
 }
@@ -73,7 +75,7 @@ export function streamFactory<T = unknown>(
   let streamType: StreamType;
   const isCompressed = compressOverride && acceptCompression(headers);
 
-  const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
+  const stream = isCompressed ? zlib.createGzip() : new UncompressedResponseStream();
 
   // If waiting for draining of the stream, items will be added to this buffer.
   const backPressureBuffer: T[] = [];
@@ -89,11 +91,15 @@ export function streamFactory<T = unknown>(
   // not want to end the stream right away. Once the backpressure buffer is cleared, we'll end the stream eventually.
   let tryToEnd = false;
 
+  function logMessage(msg: string) {
+    logger.info(`HTTP Response Stream: ${msg}`);
+  }
+
   function end() {
     tryToEnd = true;
 
-    logger.debug(`backPressureBuffer size on end(): ${backPressureBuffer.length}`);
-    logger.debug(`waitForCallbacks size on end(): ${waitForCallbacks.length}`);
+    logMessage(`backPressureBuffer size on end(): ${backPressureBuffer.length}`);
+    logMessage(`waitForCallbacks size on end(): ${waitForCallbacks.length}`);
 
     // Before ending the stream, we need to empty the backPressureBuffer
     if (backPressureBuffer.length > 0) {
@@ -105,13 +111,13 @@ export function streamFactory<T = unknown>(
     }
 
     if (waitForCallbacks.length === 0) {
-      logger.debug('All backPressureBuffer and waitForCallbacks cleared, ending the stream.');
+      logMessage('All backPressureBuffer and waitForCallbacks cleared, ending the stream.');
       stream.end();
     }
   }
 
   function push(d: T, drain = false) {
-    logger.debug(
+    logMessage(
       `Push to stream. Current backPressure buffer size: ${backPressureBuffer.length}, drain flag: ${drain}`
     );
 
@@ -132,8 +138,8 @@ export function streamFactory<T = unknown>(
       return;
     }
 
-    if ((!drain && waitForDrain) || backPressureBuffer.length > 0) {
-      logger.debug('Adding item to backpressure buffer.');
+    if ((!drain && waitForDrain) || (!drain && backPressureBuffer.length > 0)) {
+      logMessage('Adding item to backpressure buffer.');
       backPressureBuffer.push(d);
       return;
     }
@@ -155,7 +161,7 @@ export function streamFactory<T = unknown>(
         waitForCallbacks.pop();
         // Calling .flush() on a compression stream will
         // make zlib return as much output as currently possible.
-        if (typeof stream.flush === 'function') {
+        if (isCompressedSream(stream)) {
           stream.flush();
         }
 
@@ -164,14 +170,14 @@ export function streamFactory<T = unknown>(
         }
       });
 
-      logger.debug(`Is it ok to continue writing to the stream? ${writeOk}`);
+      logMessage(`Ok to write to the stream again? ${writeOk}`);
 
       if (!writeOk) {
-        logger.debug(`Should we add the "drain" listener?: ${!waitForDrain}`);
+        logMessage(`Should we add the "drain" listener?: ${!waitForDrain}`);
         if (!waitForDrain) {
           waitForDrain = true;
           stream.once('drain', () => {
-            logger.debug('The "drain" listener triggered, we can continue pushing to the stream.');
+            logMessage('The "drain" listener triggered, we can continue pushing to the stream.');
 
             waitForDrain = false;
             if (backPressureBuffer.length > 0) {
@@ -183,7 +189,7 @@ export function streamFactory<T = unknown>(
           });
         }
       } else if (writeOk && drain && backPressureBuffer.length > 0) {
-        logger.debug('Continue clearing the backpressure buffer.');
+        logMessage('Continue clearing the backpressure buffer.');
         const el = backPressureBuffer.shift();
         if (el !== undefined) {
           push(el, true);

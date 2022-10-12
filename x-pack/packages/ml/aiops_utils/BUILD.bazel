@@ -48,7 +48,8 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
-  "//packages/kbn-logging"
+  "//packages/kbn-logging",
+  "//x-pack/packages/ml/is_populated_object"
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -65,7 +66,8 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/react",
   "//packages/core/elasticsearch/core-elasticsearch-server:npm_module_types",
-  "//packages/kbn-logging:npm_module_types"
+  "//packages/kbn-logging:npm_module_types",
+  "//x-pack/packages/ml/is_populated_object:npm_module_types"
 ]
 
 jsts_transpiler(
