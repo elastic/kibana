@@ -20,6 +20,7 @@ import * as Rx from 'rxjs';
 import {
   catchError,
   concatMap,
+  filter,
   ignoreElements,
   map,
   mergeMap,
@@ -455,20 +456,23 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
+    const browserProcessLogger = this.logger.get('chromium-stderr');
     const error$ = Rx.fromEvent(browserProcess, 'error').pipe(
       map((err) => {
-        this.logger.error(`Browser process threw an error on startup`);
-        this.logger.error(err as string | Error);
+        browserProcessLogger.error(`Browser process threw an error on startup`);
+        browserProcessLogger.error(err as string | Error);
         return `Browser process threw an error on startup`;
       })
     );
 
-    const browserProcessLogger = this.logger.get('chromium-stderr');
     const log$ = Rx.fromEvent(rl, 'line').pipe(
-      map((message) => (typeof message === 'string' ? message : (message as object).toString())),
-      tap((message) => {
-        browserProcessLogger.info(message);
-      })
+      tap((message: unknown) => {
+        if (typeof message === 'string') {
+          browserProcessLogger.info(message);
+        }
+      }),
+      filter((message) => message !== ''),
+      map((message) => (message as object).toString())
     );
 
     // Collect all events (exit, error and on log-lines), but let chromium keep spitting out
