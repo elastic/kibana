@@ -26,7 +26,7 @@ describe('GetSLO', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSLIClient.fetchDataForSLOTimeWindow.mockResolvedValueOnce({ good: 9999, total: 10000 });
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({ good: 9999, total: 10000 });
 
       const result = await getSLO.execute(slo.id);
 

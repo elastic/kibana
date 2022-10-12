@@ -14,13 +14,13 @@ import { IndicatorData, SLO } from '../../types/models';
 import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
 
 export interface SLIClient {
-  fetchDataForSLOTimeWindow(slo: SLO): Promise<IndicatorData>;
+  fetchCurrentSLIData(slo: SLO): Promise<IndicatorData>;
 }
 
 export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchDataForSLOTimeWindow(slo: SLO): Promise<IndicatorData> {
+  async fetchCurrentSLIData(slo: SLO): Promise<IndicatorData> {
     if (slo.budgeting_method !== 'occurrences') {
       throw new NotSupportedError(`Budgeting method: ${slo.budgeting_method}`);
     }

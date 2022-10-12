@@ -16,7 +16,7 @@ export class GetSLO {
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
-    const sliData = await this.sliClient.fetchDataForSLOTimeWindow(slo);
+    const sliData = await this.sliClient.fetchCurrentSLIData(slo);
     const sliValue = computeSLI(sliData);
     const errorBudget = computeErrorBudget(slo, sliData);
     return this.toResponse(slo, sliValue, errorBudget);
