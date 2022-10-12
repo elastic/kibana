@@ -30,10 +30,11 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { tableDefaults } from '../../../../../common/store/data_table/defaults';
+import { dataTableActions, dataTableSelectors } from '../../../../../common/store/data_table';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { SecuritySolutionTabNavigation } from '../../../../../common/components/navigation';
+import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -693,7 +694,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                             !hasUserCRUDPermission(canUserCRUD) ||
-                            (!hasMlPermissions && !rule?.enabled)
+                            (isMlRule(rule?.type) && !hasMlPermissions && !rule?.enabled)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
