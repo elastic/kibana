@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useMemo, useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
@@ -20,8 +21,8 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 export const ErrorsList = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('state.started_at');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState('@timestamp');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const { errorStates, loading } = useMonitorErrors();
 
@@ -43,21 +44,20 @@ export const ErrorsList = () => {
 
   const columns = [
     {
-      field: 'state.started_at',
-      name: '@timestamp',
+      field: '@timestamp',
+      name: TIMESTAMP_LABEL,
       sortable: true,
-      truncateText: true,
       render: (value: string, item: Ping) => {
         return (
           <EuiLink href={`${basePath}/app/synthetics/error-details/${item.state?.id}`}>
-            {formatTestRunAt(value)}
+            {formatTestRunAt(item.state!.started_at)}
           </EuiLink>
         );
       },
     },
     {
       field: 'monitor.check_group',
-      name: !isBrowserType ? 'Error message' : 'Failed step',
+      name: !isBrowserType ? ERROR_MESSAGE_LABEL : FAILED_STEP_LABEL,
       truncateText: true,
       render: (value: string, item: Ping) => {
         if (!isBrowserType) {
@@ -76,9 +76,9 @@ export const ErrorsList = () => {
     },
     {
       field: 'state.duration_ms',
-      name: 'Error duration',
+      name: ERROR_DURATION_LABEL,
       align: 'right' as const,
-      render: (value: number) => <EuiText>{formatTestDuration(value)}</EuiText>,
+      render: (value: number) => <EuiText>{formatTestDuration(value, true)}</EuiText>,
     },
   ];
 
@@ -106,7 +106,7 @@ export const ErrorsList = () => {
     <div>
       <EuiSpacer />
       <EuiBasicTable
-        tableCaption="Demo for EuiBasicTable with sorting"
+        tableCaption={ERRORS_LIST_LABEL}
         loading={loading}
         items={items}
         columns={columns}
@@ -132,3 +132,23 @@ export const ErrorsList = () => {
     </div>
   );
 };
+
+const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
+  defaultMessage: 'Errors list',
+});
+
+const ERROR_DURATION_LABEL = i18n.translate('xpack.synthetics.errorDuration.label', {
+  defaultMessage: 'Error duration',
+});
+
+const ERROR_MESSAGE_LABEL = i18n.translate('xpack.synthetics.errorMessage.label', {
+  defaultMessage: 'Error message',
+});
+
+const FAILED_STEP_LABEL = i18n.translate('xpack.synthetics.failedStep.label', {
+  defaultMessage: 'Failed step',
+});
+
+const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.timestamp.label', {
+  defaultMessage: '@timestamp',
+});

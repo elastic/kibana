@@ -22,7 +22,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { rangeFrom, rangeTo } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { data, loading } = useEsSearch(
     {
@@ -37,8 +37,8 @@ export function useMonitorErrors(monitorIdArg?: string) {
               {
                 range: {
                   '@timestamp': {
-                    gte: rangeFrom,
-                    lte: rangeTo,
+                    gte: dateRangeStart,
+                    lte: dateRangeEnd,
                   },
                 },
               },
@@ -75,7 +75,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, rangeFrom, rangeTo],
+    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd],
     { name: 'getMonitorErrors' }
   );
 
