@@ -376,7 +376,7 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
       docLinks: docLinkStart,
-      node: this.node.start(),
+      node: await this.node.start(),
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
