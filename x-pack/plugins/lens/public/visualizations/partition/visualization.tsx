@@ -15,6 +15,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
   Visualization,
   OperationMetadata,
@@ -24,17 +25,23 @@ import type {
   VisualizeEditorContext,
 } from '../../types';
 import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
-import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../../common';
+import {
+  CategoryDisplay,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieLayerState,
+  PieVisualizationState,
+} from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
-import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../common';
-import { IndexPatternLayer } from '../..';
+import type { FormBasedLayer } from '../..';
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
-  layers: IndexPatternLayer[];
+  layers: FormBasedLayer[];
 }
 
 export interface PartitionSuggestion extends Suggestion {
@@ -52,7 +59,7 @@ function newLayerState(layerId: string): PieLayerState {
     categoryDisplay: CategoryDisplay.DEFAULT,
     legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
   };
 }
 
@@ -362,7 +369,7 @@ export const getPieVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.pie.addLayer', {
           defaultMessage: 'Visualization',
         }),

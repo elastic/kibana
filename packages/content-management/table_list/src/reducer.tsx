@@ -30,7 +30,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
           if (hasUpdatedAtMetadata) {
             tableSort = {
-              field: 'updatedAt' as keyof T,
+              field: 'updatedAt' as const,
               direction: 'desc' as const,
             };
           }
@@ -67,7 +67,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onTableChange': {
-        const tableSort = action.data.sort ?? state.tableSort;
+        const tableSort = (action.data.sort as State['tableSort']) ?? state.tableSort;
         return {
           ...state,
           pagination: {
@@ -76,6 +76,12 @@ export function getReducer<T extends UserContentCommonSchema>() {
             pageSize: action.data.page.size,
           },
           tableSort,
+        };
+      }
+      case 'onTableSortChange': {
+        return {
+          ...state,
+          tableSort: action.data,
         };
       }
       case 'showConfirmDeleteItemsModal': {

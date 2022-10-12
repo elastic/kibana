@@ -8,6 +8,8 @@
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import { filterCustomIntegrations } from '@kbn/custom-integrations-plugin/public';
 
+import { useMemo } from 'react';
+
 import type { PackageListItem } from '../../../../common/types/models';
 import { FLEET_APM_PACKAGE } from '../../../../common/constants';
 
@@ -27,44 +29,46 @@ export function useMergeEprPackagesWithReplacements(
   rawEprPackages: PackageListItem[],
   replacements: CustomIntegration[]
 ): Array<PackageListItem | CustomIntegration> {
-  const merged: Array<PackageListItem | CustomIntegration> = [];
-  const filteredReplacements = replacements;
+  return useMemo(() => {
+    const merged: Array<PackageListItem | CustomIntegration> = [];
+    const filteredReplacements = replacements;
 
-  // APM EPR-packages should _never_ show. They have special handling.
-  const eprPackages = rawEprPackages.filter((p) => {
-    return p.name !== FLEET_APM_PACKAGE;
-  });
-
-  // Either select replacement or select beat
-  eprPackages.forEach((eprPackage: PackageListItem) => {
-    const hits = findReplacementsForEprPackage(
-      filteredReplacements,
-      eprPackage.name,
-      eprPackage.release
-    );
-    if (hits.length) {
-      hits.forEach((hit) => {
-        const match = merged.find(({ id }) => {
-          return id === hit.id;
-        });
-        if (!match) {
-          merged.push(hit);
-        }
-      });
-    } else {
-      merged.push(eprPackage);
-    }
-  });
-
-  // Add unused replacements
-  // This is an edge-case. E.g. the Oracle-beat did not have an Epr-equivalent at the time of writing
-  const unusedReplacements = filteredReplacements.filter((integration) => {
-    return !eprPackages.find((eprPackage) => {
-      return eprPackage.name === integration.eprOverlap;
+    // APM EPR-packages should _never_ show. They have special handling.
+    const eprPackages = rawEprPackages.filter((p) => {
+      return p.name !== FLEET_APM_PACKAGE;
     });
-  });
 
-  merged.push(...unusedReplacements);
+    // Either select replacement or select beat
+    eprPackages.forEach((eprPackage: PackageListItem) => {
+      const hits = findReplacementsForEprPackage(
+        filteredReplacements,
+        eprPackage.name,
+        eprPackage.release
+      );
+      if (hits.length) {
+        hits.forEach((hit) => {
+          const match = merged.find(({ id }) => {
+            return id === hit.id;
+          });
+          if (!match) {
+            merged.push(hit);
+          }
+        });
+      } else {
+        merged.push(eprPackage);
+      }
+    });
 
-  return merged;
+    // Add unused replacements
+    // This is an edge-case. E.g. the Oracle-beat did not have an Epr-equivalent at the time of writing
+    const unusedReplacements = filteredReplacements.filter((integration) => {
+      return !eprPackages.find((eprPackage) => {
+        return eprPackage.name === integration.eprOverlap;
+      });
+    });
+
+    merged.push(...unusedReplacements);
+
+    return merged;
+  }, [rawEprPackages, replacements]);
 }
