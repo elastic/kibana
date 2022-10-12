@@ -242,7 +242,7 @@ export const getManagementFilteredLinks = async (
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = fleetAuthz
+    const { canAccessEndpointManagement, canReadActionsLogManagement, canIsolateHost } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
@@ -253,27 +253,26 @@ export const getManagementFilteredLinks = async (
       : getEndpointAuthzInitialState();
 
     // exclude links based on privileges
-    if (!privileges.canAccessEndpointManagement || !privileges.canReadActionsLogManagement) {
-      if (!privileges.canAccessEndpointManagement) {
-        return excludeLinks([SecurityPageName.hostIsolationExceptions]);
-      } else if (!privileges.canReadActionsLogManagement) {
-        return excludeLinks([SecurityPageName.responseActionsHistory]);
-      } else if (
-        !privileges.canAccessEndpointManagement &&
-        !privileges.canReadActionsLogManagement
-      ) {
+    if (!canAccessEndpointManagement || !canReadActionsLogManagement) {
+      if (!canAccessEndpointManagement && !canReadActionsLogManagement) {
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,
         ]);
+      } else if (!canAccessEndpointManagement) {
+        return excludeLinks([SecurityPageName.hostIsolationExceptions]);
+      } else if (!canReadActionsLogManagement) {
+        return excludeLinks([SecurityPageName.responseActionsHistory]);
       }
     }
 
-    if (!privileges.canIsolateHost || !privileges.canReadActionsLogManagement) {
+    // exclude links based on privileges and HIE entries
+    if (!canIsolateHost || !canReadActionsLogManagement) {
       const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
         core.http
       );
       const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+
       if (!summaryResponse.total) {
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
