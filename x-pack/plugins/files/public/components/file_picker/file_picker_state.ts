@@ -4,15 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BehaviorSubject, distinctUntilChanged, map, Subscription, combineLatest } from 'rxjs';
-import { debounce } from 'lodash';
+import {
+  map,
+  debounceTime,
+  Subscription,
+  combineLatest,
+  BehaviorSubject,
+  distinctUntilChanged,
+} from 'rxjs';
 import { FileJSON } from '../../../common';
 
 const filterFiles = (files: FileJSON[], filter?: string) => {
   if (!filter) return files;
-
+  const lowerFilter = filter.toLowerCase();
   return files.filter((file) => {
-    return file.name.toLowerCase().includes(filter);
+    return file.name.toLowerCase().includes(lowerFilter);
   });
 };
 
@@ -50,7 +56,7 @@ export class FilePickerState {
         )
         .subscribe(this.hasFiles$),
 
-      combineLatest([this.unfilteredFiles$, this.query$])
+      combineLatest([this.unfilteredFiles$, this.query$.pipe(debounceTime(100))])
         .pipe(map(([files, query]) => filterFiles(files, query)))
         .subscribe(this.files$),
     ];
@@ -89,10 +95,10 @@ export class FilePickerState {
     this.unfilteredFiles$.next(files);
   };
 
-  public setQuery = debounce((query: string): void => {
+  public setQuery = (query: string): void => {
     if (query) this.query$.next(query);
     else this.query$.next(undefined);
-  }, 100);
+  };
 
   public dispose = (): void => {
     for (const sub of this.subscriptions) sub.unsubscribe();
