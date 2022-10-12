@@ -37,7 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spaces = getService('spaces');
   const elasticChart = getService('elasticChart');
 
-  describe('Dashboard to dashboard drilldown', function () {
+  // Skipping in 8.5 until https://github.com/elastic/kibana/pull/143220 is merged and backported...
+  describe.skip('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
