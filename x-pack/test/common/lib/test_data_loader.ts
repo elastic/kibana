@@ -63,7 +63,8 @@ export function getTestDataLoader({ getService }) {
 
   return {
     createFtrSpaces: async () => {
-      await Promise.all([await spacesService.create(SPACE_1), await spacesService.create(SPACE_2)]);
+      await spacesService.create(SPACE_1);
+      await spacesService.create(SPACE_2);
     },
 
     deleteFtrSpaces: async () => {
@@ -75,17 +76,15 @@ export function getTestDataLoader({ getService }) {
     ) => {
       log.debug('Loading test data for the following spaces: default, space_1 and space_2');
 
-      await Promise.all(
-        spaceData.map((spaceDataObj) => {
-          if (spaceDataObj.spaceName) {
-            return kbnServer.importExport.load(spaceDataObj.dataUrl, {
-              space: spaceDataObj.spaceName,
-            });
-          } else {
-            return kbnServer.importExport.load(spaceDataObj.dataUrl);
-          }
-        })
-      );
+      spaceData.map(async (spaceDataObj) => {
+        if (spaceDataObj.spaceName) {
+          return await kbnServer.importExport.load(spaceDataObj.dataUrl, {
+            space: spaceDataObj.spaceName,
+          });
+        } else {
+          return await kbnServer.importExport.load(spaceDataObj.dataUrl);
+        }
+      });
 
       // Adjust spaces for the imported saved objects.
       for (const { objects, spacesToAdd = [], spacesToRemove = [] } of OBJECTS_TO_SHARE) {
@@ -96,6 +95,7 @@ export function getTestDataLoader({ getService }) {
             .map(({ type, id }) => `${type}:${id}`)
             .join(', ')}`
         );
+
         await supertest
           .post('/api/spaces/_update_objects_spaces')
           .send({ objects, spacesToAdd, spacesToRemove })
@@ -104,17 +104,18 @@ export function getTestDataLoader({ getService }) {
     },
 
     deleteFtrSavedObjectsData: async () => {
-      const allSpacesIds = [
-        ...(await spacesService.getAll()).map((space: { id: string }) => space.id),
-        'non_existent_space',
+      let allSpacesIds = ['non_existent_space'];
+
+      allSpacesIds = [
+        ...allSpacesIds,
+        ...(await spacesService.getAll().map((space: { id: string }) => space.id)),
       ];
+
       log.debug(`Removing data from the following spaces: ${allSpacesIds.join(', ')}`);
       await Promise.all(
         allSpacesIds.flatMap((spaceId) => [
-          kbnServer.savedObjects.cleanStandardList({ space: spaceId, force: true }).catch(() => {}),
-          kbnServer.savedObjects
-            .clean({ space: spaceId, types: ['sharedtype'], force: true })
-            .catch(() => {}),
+          kbnServer.savedObjects.cleanStandardList({ space: spaceId, force: true }),
+          kbnServer.savedObjects.clean({ space: spaceId, types: ['sharedtype'], force: true }),
         ])
       );
     },

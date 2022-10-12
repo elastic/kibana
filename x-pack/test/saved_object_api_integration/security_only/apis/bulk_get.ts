@@ -58,8 +58,10 @@ const createTestCases = () => {
 };
 
 export default function (context: FtrProviderContext) {
-  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    bulkGetTestSuiteFactory(context);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = bulkGetTestSuiteFactory(
+    context,
+    true
+  );
   const createTests = () => {
     const { normalTypes, hiddenType, allTypes } = createTestCases();
     // use singleRequest to reduce execution time and/or test combined cases

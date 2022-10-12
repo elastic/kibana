@@ -34,8 +34,9 @@ const createRequest = ({ type, id, namespaces }: BulkGetTestCase) => ({
   ...(namespaces && { namespaces }), // individual "object namespaces" string array
 });
 
-export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
+export function bulkGetTestSuiteFactory(context: FtrProviderContext, useEsArchiver?: boolean) {
   const testDataLoader = getTestDataLoader(context);
+  const esArchiver = context.getService('esArchiver');
   const supertest = context.getService('supertestWithoutAuth');
 
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
@@ -96,29 +97,41 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
 
       describeFn(description, () => {
         before(async () => {
-          await testDataLoader.createFtrSpaces();
-          await testDataLoader.createFtrSavedObjectsData([
-            {
-              spaceName: null,
-              dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
-            },
-            {
-              spaceName: SPACE_1.id,
-              dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
-            },
-            {
-              spaceName: SPACE_2.id,
-              dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
-            },
-          ]);
+          if (useEsArchiver) {
+            await esArchiver.load(
+              'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            );
+          } else {
+            await testDataLoader.createFtrSpaces();
+            await testDataLoader.createFtrSavedObjectsData([
+              {
+                spaceName: null,
+                dataUrl:
+                  'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+              },
+              {
+                spaceName: SPACE_1.id,
+                dataUrl:
+                  'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+              },
+              {
+                spaceName: SPACE_2.id,
+                dataUrl:
+                  'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+              },
+            ]);
+          }
         });
 
         after(async () => {
-          await testDataLoader.deleteFtrSpaces();
-          await testDataLoader.deleteFtrSavedObjectsData();
+          if (useEsArchiver) {
+            await esArchiver.unload(
+              'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            );
+          } else {
+            await testDataLoader.deleteFtrSpaces();
+            await testDataLoader.deleteFtrSavedObjectsData();
+          }
         });
 
         for (const test of tests) {

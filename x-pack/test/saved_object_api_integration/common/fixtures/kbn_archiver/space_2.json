@@ -16,9 +16,6 @@
 {
   "attributes": {
     "description": "",
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"index\":\"space2-index-pattern-id\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-    },
     "title": "Count of requests",
     "version": 1
   },
