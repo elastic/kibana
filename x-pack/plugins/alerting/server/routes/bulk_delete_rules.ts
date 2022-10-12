@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteOptions } from '.';
-import { BASE_ALERTING_API_PATH } from '../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from './lib';
 
 export const bulkDeleteRulesRoute = ({ router, licenseState }: RouteOptions) => {
   router.patch(
     {
-      path: `${BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
       validate: {
         body: schema.object({
           filter: schema.maybe(schema.any()),

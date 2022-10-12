@@ -1836,7 +1836,7 @@ export class RulesClient {
     const errors: BulkDeleteError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
-    const ruleIdToRuleNameMapping: Record<string, string> = {};
+    const ruleNameToRuleIdMapping: Record<string, string> = {};
 
     for await (const response of rulesFinder.find()) {
       pMap(
@@ -1846,7 +1846,7 @@ export class RulesClient {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
           if (rule.attributes.name) {
-            ruleIdToRuleNameMapping[rule.id] = rule.attributes.name; // chnage name for consistecy
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
           }
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
@@ -1873,7 +1873,7 @@ export class RulesClient {
           status: status.error.statusCode,
           rule: {
             id: status.id,
-            name: ruleIdToRuleNameMapping[status.id] ?? 'n/a',
+            name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
           },
         });
       }
