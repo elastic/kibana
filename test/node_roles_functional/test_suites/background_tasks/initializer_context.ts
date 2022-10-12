@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('passes node roles to server PluginInitializerContext', async () => {
       await supertest.get('/core_plugin_initializer_context/node/roles').expect(200, {
         backgroundTasks: true,
-        ui: false,
+        ui: true,
       });
     });
   });
