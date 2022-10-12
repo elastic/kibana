@@ -47,14 +47,14 @@ export class GainSightShipper implements IShipper {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
     // gainSight requires different APIs for different type of contexts.
-    const { userId, cluster_uuid: clusterUuid } = newContext;
+    const { userId, cluster_name: clusterName } = newContext;
 
     // Call it only when the userId changes
-    if (userId && clusterUuid) {
+    if (userId && clusterName) {
       this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
       this.gainSightApi('identify', {
-        id: clusterUuid,
+        id: clusterName,
         userType: 'deployment',
       });
       this.gainSightApi('set', 'globalContext', {
@@ -62,7 +62,7 @@ export class GainSightShipper implements IShipper {
       });
     } else {
       this.initContext.logger.debug(
-        `Identify has already been called with ${userId} and ${clusterUuid}`
+        `Identify has already been called with ${userId} and ${clusterName}`
       );
     }
   }
