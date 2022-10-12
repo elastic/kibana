@@ -239,10 +239,12 @@ export const createLifecycleExecutor =
         const isRecovered = !currentAlerts[alertInstanceId];
         const isActive = !isRecovered;
 
-        const { alertUuid, started } = state.trackedAlerts[alertInstanceId] ?? {
-          alertUuid: newAlertUuids[alertInstanceId],
-          started: commonRuleFields[TIMESTAMP],
-        };
+        const { alertUuid, started } = !isNew
+          ? state.trackedAlerts[alertInstanceId]
+          : {
+              alertUuid: newAlertUuids[alertInstanceId] || v4(),
+              started: commonRuleFields[TIMESTAMP],
+            };
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
@@ -262,8 +264,8 @@ export const createLifecycleExecutor =
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
-          [VERSION]: ruleDataClient.kibanaVersion,
           [TAGS]: options.tags,
+          [VERSION]: ruleDataClient.kibanaVersion,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 
