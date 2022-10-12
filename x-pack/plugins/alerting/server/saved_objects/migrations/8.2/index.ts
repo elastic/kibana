@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { getMappedParams } from "../../../rules_client/lib/mapped_params_utils";
-import { RawRule } from "../../../types";
-import { createEsoMigration, pipeMigrations } from "../utils";
+import { getMappedParams } from '../../../rules_client/lib/mapped_params_utils';
+import { RawRule } from '../../../types';
+import { createEsoMigration, pipeMigrations } from '../utils';
 
 function addMappedParams(
   doc: SavedObjectUnsanitizedDoc<RawRule>
@@ -34,9 +33,9 @@ function addMappedParams(
   return doc;
 }
 
-export const getMigrations_8_2_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-  pipeMigrations(addMappedParams)
-);
-
+export const getMigrations_8_2_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addMappedParams)
+  );

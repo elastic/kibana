@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from "@kbn/core-saved-objects-common";
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule, RawRuleAction } from "../../../types";
-import { createEsoMigration, pipeMigrations } from "../utils";
+import { RawRule, RawRuleAction } from '../../../types';
+import { createEsoMigration, pipeMigrations } from '../utils';
 
 const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
 export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
@@ -121,13 +121,13 @@ function restructureConnectorsThatSupportIncident(
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
-            title: string;
-            description: string;
-            incidentTypes?: number[];
-            severityCode?: number;
-            comments?: unknown[];
-            name?: string;
-          };
+          title: string;
+          description: string;
+          incidentTypes?: number[];
+          severityCode?: number;
+          comments?: unknown[];
+          name?: string;
+        };
         return [
           ...acc,
           {
@@ -161,14 +161,16 @@ function restructureConnectorsThatSupportIncident(
   };
 }
 
-export const getMigrations_7_11_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
-  pipeMigrations(restructureConnectorsThatSupportIncident)
-);
+export const getMigrations_7_11_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
+    pipeMigrations(restructureConnectorsThatSupportIncident)
+  );
 
-export const getMigrations_7_11_2 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
-  pipeMigrations(restructureConnectorsThatSupportIncident)
-);
+export const getMigrations_7_11_2 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
+    pipeMigrations(restructureConnectorsThatSupportIncident)
+  );

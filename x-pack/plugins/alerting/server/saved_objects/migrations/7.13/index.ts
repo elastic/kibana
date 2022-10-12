@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute } from "@kbn/core-saved-objects-common";
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectAttribute } from '@kbn/core-saved-objects-common';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule } from "../../../types";
-import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from "../utils";
+import { RawRule } from '../../../types';
+import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from '../utils';
 
 function convertNullToUndefined(attribute: SavedObjectAttribute) {
   return attribute != null ? attribute : undefined;
@@ -45,42 +45,43 @@ function removeNullsFromSecurityRules(
         threat: params.threat != null ? params.threat : [],
         threshold:
           params.threshold != null &&
-            typeof params.threshold === 'object' &&
-            !Array.isArray(params.threshold)
+          typeof params.threshold === 'object' &&
+          !Array.isArray(params.threshold)
             ? {
-              field: Array.isArray(params.threshold.field)
-                ? params.threshold.field
-                : params.threshold.field === '' || params.threshold.field == null
+                field: Array.isArray(params.threshold.field)
+                  ? params.threshold.field
+                  : params.threshold.field === '' || params.threshold.field == null
                   ? []
                   : [params.threshold.field],
-              value: params.threshold.value,
-              cardinality:
-                params.threshold.cardinality != null ? params.threshold.cardinality : [],
-            }
+                value: params.threshold.value,
+                cardinality:
+                  params.threshold.cardinality != null ? params.threshold.cardinality : [],
+              }
             : undefined,
         timestampOverride: convertNullToUndefined(params.timestampOverride),
         exceptionsList:
           params.exceptionsList != null
             ? params.exceptionsList
             : params.exceptions_list != null
-              ? params.exceptions_list
-              : params.lists != null
-                ? params.lists
-                : [],
+            ? params.exceptions_list
+            : params.lists != null
+            ? params.lists
+            : [],
         threatFilters: convertNullToUndefined(params.threatFilters),
         machineLearningJobId:
           params.machineLearningJobId == null
             ? undefined
             : Array.isArray(params.machineLearningJobId)
-              ? params.machineLearningJobId
-              : [params.machineLearningJobId],
+            ? params.machineLearningJobId
+            : [params.machineLearningJobId],
       },
     },
   };
 }
 
-export const getMigrations_7_13_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
-  pipeMigrations(removeNullsFromSecurityRules)
-);
+export const getMigrations_7_13_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
+    pipeMigrations(removeNullsFromSecurityRules)
+  );
