@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { SearchRequest } from '..';
+import type { SearchRequest } from '..';
 import { getNotifications } from '../../services';
 import { ShardFailureOpenModalButton, ShardFailureRequest } from '../../shard_failure_modal';
-import {
+import type {
   SearchResponseShardFailureWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
@@ -67,10 +67,12 @@ export function handleWarnings(
         <EuiSpacer size="s" />
         <EuiTextAlign textAlign="right">
           <ShardFailureOpenModalButton
-            request={request as ShardFailureRequest}
-            response={response}
             theme={theme}
             title={title}
+            getRequestMeta={() => ({
+              request: request as ShardFailureRequest,
+              response,
+            })}
           />
         </EuiTextAlign>
       </>,
@@ -98,7 +100,10 @@ export function filterWarnings(
 
   // use the consumer's callback as a filter to receive warnings to handle on our side
   warnings.forEach((warning) => {
-    const consumerHandled = cb?.(warning, request, response);
+    const consumerHandled = cb?.(warning, () => ({
+      request,
+      response,
+    }));
     if (!consumerHandled) {
       unfiltered.push(warning);
     }

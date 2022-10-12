@@ -18,23 +18,25 @@ import type { ShardFailureRequest } from './shard_failure_types';
 
 // @internal
 export interface ShardFailureOpenModalButtonProps {
-  request: ShardFailureRequest;
-  response: estypes.SearchResponse<any>;
   theme: ThemeServiceStart;
   title: string;
   size?: EuiButtonProps['size'];
+  getRequestMeta: () => {
+    request: ShardFailureRequest;
+    response: estypes.SearchResponse<any>;
+  };
 }
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function ShardFailureOpenModalButton({
-  request,
-  response,
+  getRequestMeta,
   theme,
   title,
   size = 's',
 }: ShardFailureOpenModalButtonProps) {
   const onClick = useCallback(() => {
+    const { request, response } = getRequestMeta();
     const modal = getOverlays().openModal(
       toMountPoint(
         <ShardFailureModal
@@ -49,7 +51,7 @@ export default function ShardFailureOpenModalButton({
         className: 'shardFailureModal',
       }
     );
-  }, [request, response, theme.theme$, title]);
+  }, [getRequestMeta, theme.theme$, title]);
 
   return (
     <EuiButton

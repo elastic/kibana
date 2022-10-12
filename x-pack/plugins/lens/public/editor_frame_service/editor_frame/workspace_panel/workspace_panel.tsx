@@ -236,12 +236,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
         if (adapters?.requests) {
-          plugins.data.search.showWarnings(adapters.requests, (warning, request, response) => {
+          plugins.data.search.showWarnings(adapters.requests, (warning, getRequestMeta) => {
             const warningMessages = datasource.getSearchWarningMessages?.(
               datasourceState,
               warning,
-              request,
-              response
+              getRequestMeta
             );
 
             if (warningMessages?.length) {

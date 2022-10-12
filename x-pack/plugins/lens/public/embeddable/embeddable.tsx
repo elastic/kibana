@@ -527,12 +527,11 @@ export class Embeddable
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
     const warnings: Array<string | React.ReactNode> = [];
-    this.deps.data.search.showWarnings(adapters.requests, (warning, request, response) => {
+    this.deps.data.search.showWarnings(adapters.requests, (warning, getRequestMeta) => {
       const warningMessages = activeDatasource.getSearchWarningMessages?.(
         docDatasourceState,
         warning,
-        request,
-        response
+        getRequestMeta
       );
 
       if (warningMessages?.length) {
