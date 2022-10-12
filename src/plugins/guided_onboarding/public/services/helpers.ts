@@ -91,7 +91,7 @@ export const isStepReadyToComplete = (
     return false;
   }
 
-  // false if the step is not 'in_progress'
+  // false if the step is not 'ready_to_complete'
   const selectedStep = guideState!.steps.find((step) => step.id === stepId);
   return selectedStep ? selectedStep.status === 'ready_to_complete' : false;
 };
