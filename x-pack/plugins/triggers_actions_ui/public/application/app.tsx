@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Route, Redirect, Router, useLocation } from 'react-router-dom';
+import { Switch, Route, Redirect, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -102,8 +102,8 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
     actions: { validateEmailAddresses },
+    application: { navigateToApp },
   } = useKibana().services;
-  const location = useLocation();
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
@@ -125,11 +125,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           exact
           path={routeToConnectors}
           render={() => {
-            const newPath = window.location.pathname.replace(
-              `triggersActions${location.pathname}`,
-              CONNECTORS_PLUGIN_ID
-            );
-            window.location.pathname = newPath;
+            navigateToApp(`management/insightsAndAlerting/${CONNECTORS_PLUGIN_ID}`);
             return null;
           }}
         />
