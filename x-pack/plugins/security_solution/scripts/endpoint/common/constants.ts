@@ -6,3 +6,7 @@
  */
 
 export const HORIZONTAL_LINE = '-'.repeat(80);
+
+export const ENDPOINT_EVENTS_INDEX = 'logs-endpoint.events.process-default';
+
+export const ENDPOINT_ALERTS_INDEX = 'logs-endpoint.alerts-default';
