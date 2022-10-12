@@ -45,9 +45,10 @@ const warnings: SearchResponseWarning[] = [
   },
 ];
 
+const sessionId = 'abcd';
+
 describe('Filtering and showing warnings', () => {
   const notifications = notificationServiceMock.createStartContract();
-  // jest.useFakeTimers();
   jest.useFakeTimers('modern');
 
   describe('handleWarnings', () => {
@@ -63,12 +64,16 @@ describe('Filtering and showing warnings', () => {
     test('should notify if timed out', () => {
       (extract.extractWarnings as jest.Mock).mockImplementation(() => [warnings[0]]);
       const response = { rawResponse: { timed_out: true } } as unknown as estypes.SearchResponse;
-      handleWarnings(request, response, theme);
+      handleWarnings({ request, response, theme });
       // test debounce, addWarning should only be called once
-      handleWarnings(request, response, theme);
+      handleWarnings({ request, response, theme });
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
       expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'Something timed out!' });
+
+      // test debounce, call addWarning again due to sessionId
+      handleWarnings({ request, response, theme, sessionId });
+      expect(notifications.toasts.addWarning).toBeCalledTimes(2);
     });
 
     test('should notify if shards failed for unknown type/reason', () => {
@@ -76,12 +81,16 @@ describe('Filtering and showing warnings', () => {
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-      handleWarnings(request, response, theme);
+      handleWarnings({ request, response, theme });
       // test debounce, addWarning should only be called once
-      handleWarnings(request, response, theme);
+      handleWarnings({ request, response, theme });
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
       expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'Some shards failed!' });
+
+      // test debounce, call addWarning again due to sessionId
+      handleWarnings({ request, response, theme, sessionId });
+      expect(notifications.toasts.addWarning).toBeCalledTimes(2);
     });
 
     test('should add mount point for shard modal failure button if warning.text is provided', () => {
@@ -89,13 +98,19 @@ describe('Filtering and showing warnings', () => {
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-      handleWarnings(request, response, theme);
+      handleWarnings({ request, response, theme });
+      // test debounce, addWarning should only be called once
+      handleWarnings({ request, response, theme });
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
       expect(notifications.toasts.addWarning).toBeCalledWith({
         title: 'Some shards failed!',
         text: expect.any(Function),
       });
+
+      // test debounce, call addWarning again due to sessionId
+      handleWarnings({ request, response, theme, sessionId });
+      expect(notifications.toasts.addWarning).toBeCalledTimes(2);
     });
 
     test('should notify once if the response contains multiple failures', () => {
@@ -103,7 +118,7 @@ describe('Filtering and showing warnings', () => {
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-      handleWarnings(request, response, theme);
+      handleWarnings({ request, response, theme });
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
       expect(notifications.toasts.addWarning).toBeCalledWith({
@@ -118,7 +133,7 @@ describe('Filtering and showing warnings', () => {
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-      handleWarnings(request, response, theme, callback);
+      handleWarnings({ request, response, theme, callback });
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
       expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'Some shards failed!' });
@@ -129,7 +144,7 @@ describe('Filtering and showing warnings', () => {
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-      handleWarnings(request, response, theme, callback);
+      handleWarnings({ request, response, theme, callback });
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(0);
     });
