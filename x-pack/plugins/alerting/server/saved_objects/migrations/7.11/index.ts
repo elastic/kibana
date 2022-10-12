@@ -26,6 +26,32 @@ function isEmptyObject(obj: {}) {
   return true;
 }
 
+function setAlertUpdatedAtDate(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const updatedAt = doc.updated_at || doc.attributes.createdAt;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      updatedAt,
+    },
+  };
+}
+
+function setNotifyWhen(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const notifyWhen = doc.attributes.throttle ? 'onThrottleInterval' : 'onActiveAlert';
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      notifyWhen,
+    },
+  };
+}
+
 function restructureConnectorsThatSupportIncident(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
@@ -164,8 +190,8 @@ function restructureConnectorsThatSupportIncident(
 export const getMigrationsM7m11p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
-    pipeMigrations(restructureConnectorsThatSupportIncident)
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
 export const getMigrationsM7m11p2 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
