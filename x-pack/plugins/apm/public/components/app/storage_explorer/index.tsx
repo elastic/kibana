@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiCallOut,
   EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,20 +28,34 @@ import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TipsAndResources } from './resources/tips_and_resources';
-
-const INITIAL_DATA = { hasPrivileges: false };
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 export function StorageExplorer() {
   const router = useApmRouter();
+  const [
+    crossClusterSearchCalloutDismissed,
+    setCrossClusterSearchCalloutDismissed,
+  ] = useLocalStorage('apm.storageExplorer.ccsCalloutDismissed', false);
 
-  const { data: { hasPrivileges } = INITIAL_DATA, status } = useFetcher(
+  const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer/privileges');
     },
     []
   );
 
-  const loading = status === FETCH_STATUS.LOADING;
+  const { data: isCrossClusterSearchData } = useFetcher(
+    (callApmApi) => {
+      if (!crossClusterSearchCalloutDismissed) {
+        return callApmApi(
+          'GET /internal/apm/storage_explorer/is_cross_cluster_search'
+        );
+      }
+    },
+    [crossClusterSearchCalloutDismissed]
+  );
+
+  const loading = hasPrivilegesStatus === FETCH_STATUS.LOADING;
 
   if (loading) {
     return (
@@ -58,7 +73,7 @@ export function StorageExplorer() {
     );
   }
 
-  if (!hasPrivileges) {
+  if (!hasPrivilegesData?.hasPrivileges) {
     return <PermissionDenied />;
   }
 
@@ -77,7 +92,7 @@ export function StorageExplorer() {
 
       <EuiCallOut
         title={i18n.translate(
-          'xpack.apm.storageExplorer.settingsCalloutTitle',
+          'xpack.apm.storageExplorer.longLoadingTimeCalloutTitle',
           {
             defaultMessage: 'Long loading time?',
           }
@@ -85,13 +100,13 @@ export function StorageExplorer() {
         iconType="timeRefresh"
       >
         <FormattedMessage
-          id="xpack.apm.storageExplorer.settingsCalloutText"
+          id="xpack.apm.storageExplorer.longLoadingTimeCalloutText"
           defaultMessage="Enable progressive loading of data in {apmGeneralSettingsLink}."
           values={{
             apmGeneralSettingsLink: (
               <EuiLink href={router.link('/settings/general-settings')}>
                 {i18n.translate(
-                  'xpack.apm.storageExplorer.settingsCalloutLink',
+                  'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
                   {
                     defaultMessage: 'APM general settings',
                   }
@@ -101,6 +116,42 @@ export function StorageExplorer() {
           }}
         />
       </EuiCallOut>
+
+      {!crossClusterSearchCalloutDismissed &&
+        isCrossClusterSearchData?.isCrossClusterSearch && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.storageExplorer.crossClusterSearchCalloutTitle',
+                {
+                  defaultMessage: 'Searching across clusters?',
+                }
+              )}
+              iconType="search"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.apm.storageExplorer.crossClusterSearchCalloutText',
+                  {
+                    defaultMessage:
+                      'While getting document count works with cross-cluster search, index statistics such as size are only displayed for data that are stored in this cluster.',
+                  }
+                )}
+              </p>
+              <EuiButton
+                onClick={() => setCrossClusterSearchCalloutDismissed(true)}
+              >
+                {i18n.translate(
+                  'xpack.apm.storageExplorer.crossClusterSearchCalloutText.dimissButton',
+                  {
+                    defaultMessage: 'Dismiss',
+                  }
+                )}
+              </EuiButton>
+            </EuiCallOut>
+          </>
+        )}
 
       <EuiSpacer />
       <SummaryStats />

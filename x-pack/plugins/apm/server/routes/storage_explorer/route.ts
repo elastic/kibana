@@ -32,6 +32,7 @@ import {
   getMainSummaryStats,
   getTracesPerMinute,
 } from './get_summary_statistics';
+import { IsCrossClusterSearch } from './is_cross_cluster_search';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -362,12 +363,23 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer/is_cross_cluster_search',
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<{ isCrossClusterSearch: boolean }> => {
+    const setup = await setupRequest(resources);
+    const isCrossClusterSearch = IsCrossClusterSearch(setup);
+    return { isCrossClusterSearch };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
   ...storageChartRoute,
   ...storageExplorerPrivilegesRoute,
   ...storageExplorerSummaryStatsRoute,
+  ...storageExplorerIsCrossClusterSearchRoute,
 };
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
