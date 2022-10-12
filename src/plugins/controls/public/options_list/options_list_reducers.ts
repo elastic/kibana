@@ -12,6 +12,11 @@ import { Filter } from '@kbn/es-query';
 
 import { OptionsListReduxState, OptionsListComponentState } from './types';
 import { OptionsListField } from '../../common/options_list/types';
+import { getIpRangeQuery } from '../../common/options_list/ip_search';
+
+export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
+  searchString: { value: '', valid: true },
+});
 
 export const optionsListReducers = {
   deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
@@ -38,7 +43,16 @@ export const optionsListReducers = {
     }
   },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    state.componentState.searchString = action.payload;
+    state.componentState.searchString.value = action.payload;
+    if (
+      action.payload !== '' &&
+      state.componentState.field?.type === 'ip' &&
+      getIpRangeQuery(action.payload).length === 0
+    ) {
+      state.componentState.searchString.valid = false;
+    } else {
+      state.componentState.searchString.valid = true;
+    }
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];

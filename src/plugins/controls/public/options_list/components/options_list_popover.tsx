@@ -25,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { getIpRangeQuery } from '../../../common/options_list/ip_search';
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -81,16 +80,12 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
             >
               <EuiFlexItem>
                 <EuiFieldSearch
-                  isInvalid={
-                    field?.type === 'ip' &&
-                    Boolean(searchString) &&
-                    getIpRangeQuery(searchString).length === 0
-                  }
+                  isInvalid={!searchString.valid}
                   compressed
                   disabled={showOnlySelected}
                   fullWidth
                   onChange={(event) => updateSearchString(event.target.value)}
-                  value={searchString}
+                  value={searchString.value}
                   data-test-subj="optionsList-control-search-input"
                   placeholder={
                     totalCardinality

@@ -63,7 +63,9 @@ const partialIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuer
 };
 
 export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
-  if (searchString.match('^[A-Fa-f0-9.:]') === null) return [];
+  if (searchString.match(/^[A-Fa-f0-9.:]*$/) === null) {
+    return [];
+  }
 
   const { type: ipType, segments: ipSegments } = getIpSegments(searchString);
   if (ipType === 'ipv6' && ipSegments.length === 8) {
@@ -73,8 +75,5 @@ export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
     return fullIpSearch('ipv4', ipSegments);
   }
 
-  const ranges: IpRangeQuery = partialIpSearch('ipv4', ipSegments).concat(
-    partialIpSearch('ipv6', ipSegments)
-  );
-  return ranges;
+  return partialIpSearch('ipv4', ipSegments).concat(partialIpSearch('ipv6', ipSegments));
 };

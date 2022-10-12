@@ -79,7 +79,7 @@ export const getSuggestionAggregationBuilder = ({
 const getEscapedQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
-const combineIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
+const getIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
   const results = get(
     rawEsResult,
     `aggregations.suggestions.buckets.${type}.filteredSuggestions.buckets`
@@ -173,13 +173,13 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         rangeQuery = getIpRangeQuery(searchString);
       }
 
-      if (rangeQuery.length === 0)
-        // CLEAN THIS UP??? JUST PREVENTS ERROR WHEN RUNNING INVALID SEARCH
-        return {
-          terms: {
-            field: fieldName,
-          },
-        };
+      // if (rangeQuery.length === 0)
+      //   // CLEAN THIS UP??? JUST PREVENTS ERROR WHEN RUNNING INVALID SEARCH
+      //   return {
+      //     terms: {
+      //       field: fieldName,
+      //     },
+      //   };
 
       return {
         ip_range: {
@@ -193,7 +193,6 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
-              size: searchString ? 5 : 10,
             },
           },
         },
@@ -201,10 +200,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
     },
     parse: (rawEsResult) => {
       const buckets: EsBucket[] = [];
-      combineIpBuckets(rawEsResult, buckets, 'ipv4');
-      combineIpBuckets(rawEsResult, buckets, 'ipv6');
+      getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
+      getIpBuckets(rawEsResult, buckets, 'ipv6');
       return buckets
         .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
+        .slice(0, 10) // only return top 10 results
         .map((bucket: EsBucket) => bucket.key);
     },
   },
