@@ -25,6 +25,7 @@ import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../components/landing_links_images';
 import * as i18n from './translations';
+import { DashboardEmbedded } from '../../common/components/dashboards/dashboard_embedded';
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
@@ -73,6 +74,18 @@ export const DashboardsLandingPage = () => {
       <EuiHorizontalRule margin="s" />
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="xxl" />
+
+      {canReadDashboard && (
+        <>
+          <EuiTitle size="xxxs">
+            <h2>{'EMBEDDED'}</h2>
+          </EuiTitle>
+          <EuiHorizontalRule margin="s" />
+          <EuiSpacer size="m" />
+          <DashboardEmbedded />
+          <EuiSpacer size="xxl" />
+        </>
+      )}
 
       {canReadDashboard && (
         <>

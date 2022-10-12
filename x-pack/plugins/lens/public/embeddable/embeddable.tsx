@@ -80,6 +80,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  isLensCellValueEvent,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -788,6 +789,12 @@ export class Embeddable
       if (this.input.onFilter) {
         this.input.onFilter(event.data);
       }
+    }
+    if (isLensCellValueEvent(event)) {
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        data: event.data,
+        embeddable: this,
+      });
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {

@@ -39,6 +39,9 @@ export const createGridColumns = (
         negate?: boolean
       ) => void)
     | undefined,
+  handleCellValueAction:
+    | ((param: { field: string; value: unknown; type: string }) => void)
+    | undefined,
   isReadOnly: boolean,
   columnConfig: ColumnConfig,
   visibleColumns: string[],
@@ -67,9 +70,10 @@ export const createGridColumns = (
     const rowValue = table.rows[rowIndex]?.[columnId];
     const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
+    const { params, field, type } = column.meta ?? {};
 
-    const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
-    return { rowValue, contentsIsDefined, cellContent };
+    const cellContent = formatFactory(params).convert(rowValue);
+    return { rowValue, contentsIsDefined, cellContent, field, type };
   };
 
   return visibleColumns.map((field) => {
@@ -78,87 +82,139 @@ export const createGridColumns = (
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
-    const cellActions =
-      filterable && handleFilterClick && !columnArgs?.oneClickFilter
-        ? [
-            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-              const { rowValue, contentsIsDefined, cellContent } = getContentData({
-                rowIndex,
-                columnId,
-              });
+    const cellActions = [];
+    if (filterable && !columnArgs?.oneClickFilter) {
+      if (handleFilterClick) {
+        cellActions.push(
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            const { rowValue, contentsIsDefined, cellContent } = getContentData({
+              rowIndex,
+              columnId,
+            });
 
-              const filterForText = i18n.translate(
-                'xpack.lens.table.tableCellFilter.filterForValueText',
-                {
-                  defaultMessage: 'Filter for value',
-                }
-              );
-              const filterForAriaLabel = i18n.translate(
-                'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
-                {
-                  defaultMessage: 'Filter for value: {cellContent}',
-                  values: {
-                    cellContent,
-                  },
-                }
-              );
+            const filterForText = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterForValueText',
+              {
+                defaultMessage: 'Filter for value',
+              }
+            );
+            const filterForAriaLabel = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
+              {
+                defaultMessage: 'Filter for value: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
 
-              return (
-                contentsIsDefined && (
-                  <Component
-                    aria-label={filterForAriaLabel}
-                    data-test-subj="lensDatatableFilterFor"
-                    onClick={() => {
-                      handleFilterClick(field, rowValue, colIndex, rowIndex);
-                      closeCellPopover?.();
-                    }}
-                    iconType="plusInCircle"
-                  >
-                    {filterForText}
-                  </Component>
-                )
-              );
-            },
-            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-              const { rowValue, contentsIsDefined, cellContent } = getContentData({
-                rowIndex,
-                columnId,
-              });
+            return (
+              contentsIsDefined && (
+                <Component
+                  aria-label={filterForAriaLabel}
+                  data-test-subj="lensDatatableFilterFor"
+                  onClick={() => {
+                    handleFilterClick(field, rowValue, colIndex, rowIndex);
+                    closeCellPopover?.();
+                  }}
+                  iconType="plusInCircle"
+                >
+                  {filterForText}
+                </Component>
+              )
+            );
+          },
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            const { rowValue, contentsIsDefined, cellContent } = getContentData({
+              rowIndex,
+              columnId,
+            });
 
-              const filterOutText = i18n.translate(
-                'xpack.lens.table.tableCellFilter.filterOutValueText',
-                {
-                  defaultMessage: 'Filter out value',
-                }
-              );
-              const filterOutAriaLabel = i18n.translate(
-                'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
-                {
-                  defaultMessage: 'Filter out value: {cellContent}',
-                  values: {
-                    cellContent,
-                  },
-                }
-              );
+            const filterOutText = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterOutValueText',
+              {
+                defaultMessage: 'Filter out value',
+              }
+            );
+            const filterOutAriaLabel = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
+              {
+                defaultMessage: 'Filter out value: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
 
-              return (
-                contentsIsDefined && (
-                  <Component
-                    data-test-subj="lensDatatableFilterOut"
-                    aria-label={filterOutAriaLabel}
-                    onClick={() => {
-                      handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                      closeCellPopover?.();
-                    }}
-                    iconType="minusInCircle"
-                  >
-                    {filterOutText}
-                  </Component>
-                )
-              );
-            },
-          ]
-        : undefined;
+            return (
+              contentsIsDefined && (
+                <Component
+                  data-test-subj="lensDatatableFilterOut"
+                  aria-label={filterOutAriaLabel}
+                  onClick={() => {
+                    handleFilterClick(field, rowValue, colIndex, rowIndex, true);
+                    closeCellPopover?.();
+                  }}
+                  iconType="minusInCircle"
+                >
+                  {filterOutText}
+                </Component>
+              )
+            );
+          }
+        );
+      }
+      if (handleCellValueAction) {
+        cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+          const {
+            rowValue,
+            contentsIsDefined,
+            cellContent,
+            field: columnField,
+            type,
+          } = getContentData({
+            rowIndex,
+            columnId,
+          });
+
+          const addToTimelineText = i18n.translate(
+            'xpack.lens.table.tableCellValueAction.addToTimelineText',
+            {
+              defaultMessage: 'Add to Timeline',
+            }
+          );
+          const addToTimelineAriaLabel = i18n.translate(
+            'xpack.lens.table.tableCellValueAction.addToTimelineAriaLabel',
+            {
+              defaultMessage: 'Add {cellContent} to Timeline',
+              values: {
+                cellContent,
+              },
+            }
+          );
+
+          return (
+            contentsIsDefined && (
+              <Component
+                aria-label={addToTimelineAriaLabel}
+                data-test-subj="lensDatatableAddToTimeline"
+                onClick={() => {
+                  handleCellValueAction({
+                    field: columnField!,
+                    value: rowValue,
+                    type: type!,
+                  });
+                  closeCellPopover?.();
+                }}
+                iconType="timeline"
+              >
+                {addToTimelineText}
+              </Component>
+            )
+          );
+        });
+      }
+    }
 
     const isTransposed = Boolean(columnArgs?.originalColumnId);
     const initialWidth = columnArgs?.width;
@@ -236,6 +292,7 @@ export const createGridColumns = (
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
+      visibleCellActions: 5,
       display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
       actions: {

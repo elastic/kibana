@@ -59,6 +59,7 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
 
       try {
         const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
+        console.log(context.embeddable, { vis });
         return isCompatibleVisualizationType(vis);
       } catch (error) {
         // eslint-disable-next-line no-console

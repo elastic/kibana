@@ -27,7 +27,7 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { CellValueTriggerEvent, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
@@ -46,6 +46,7 @@ import type {
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
+  createGridCellValueHandler,
   createGridFilterHandler,
   createGridHideHandler,
   createGridResizeHandler,
@@ -159,6 +160,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     },
     [dispatchEvent]
   );
+  const onCellValueAction = useCallback(
+    (data: CellValueTriggerEvent['data']) => {
+      dispatchEvent({ name: 'cellValue', data });
+    },
+    [dispatchEvent]
+  );
 
   const onEditAction = useCallback(
     (
@@ -200,6 +207,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const handleFilterClick = useMemo(
     () => (isInteractive ? createGridFilterHandler(firstTableRef, onClickValue) : undefined),
     [firstTableRef, onClickValue, isInteractive]
+  );
+
+  const handleCellValueAction = useMemo(
+    () => (isInteractive ? createGridCellValueHandler(onCellValueAction) : undefined),
+    [onCellValueAction, isInteractive]
   );
 
   const handleTransposedColumnClick = useMemo(
@@ -301,6 +313,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         firstLocalTable,
         handleFilterClick,
         handleTransposedColumnClick,
+        handleCellValueAction,
         isReadOnlySorted,
         columnConfig,
         visibleColumns,
@@ -317,6 +330,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       firstLocalTable,
       handleFilterClick,
       handleTransposedColumnClick,
+      handleCellValueAction,
       isReadOnlySorted,
       columnConfig,
       visibleColumns,

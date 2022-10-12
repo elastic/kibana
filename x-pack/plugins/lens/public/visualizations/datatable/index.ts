@@ -9,11 +9,13 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EditorFrameSetup } from '../../types';
 import type { FormatFactory } from '../../../common';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -31,6 +33,7 @@ export class DatatableVisualization {
       const { getDatatableRenderer, getDatatableVisualization } = await import(
         '../../async_services'
       );
+      const [, { uiActions }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerRenderer(() =>
         getDatatableRenderer({
@@ -41,6 +44,7 @@ export class DatatableVisualization {
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
           paletteService: palettes,
           uiSettings: core.uiSettings,
+          uiActions,
         })
       );
 

@@ -70,6 +70,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { initDataView } from './common/store/sourcerer/model';
 import type { SecurityDataView } from './common/containers/sourcerer/api';
+import { registerActions } from './actions';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -96,6 +97,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * See `store` method.
    */
   private _store?: SecurityAppStore;
+  private _actionsRegistered?: boolean = false;
 
   public setup(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
@@ -168,11 +170,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const store = await this.store(coreStart, startPlugins, subPlugins);
+        this.registerActions(startPlugins, store);
+
         const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
           ...params,
           services: await startServices(params),
-          store: await this.store(coreStart, startPlugins, subPlugins),
+          store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
@@ -486,6 +491,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  registerActions({ uiActions }: StartPlugins, store: SecurityAppStore) {
+    if (this._actionsRegistered) {
+      return;
+    }
+    registerActions(uiActions, store);
+    this._actionsRegistered = true;
   }
 
   /**

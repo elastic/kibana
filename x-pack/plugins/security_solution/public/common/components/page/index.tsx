@@ -121,13 +121,13 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
       }
     }
 
-    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
-    .euiPopoverFooter:nth-child(2) {
+    /* Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons */
+    /* .euiPopoverFooter:nth-child(2) {
       .euiFlexItem:first-child,
       .euiFlexItem:nth-child(2) {
           display: none;
       }
-    }
+    } */
   }
 
   /* overrides default styling in angular code that was not theme-friendly */

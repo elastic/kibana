@@ -53,6 +53,32 @@ export const useSecurityDashboardsTableItems = () => {
   return { items, isLoading, error };
 };
 
+export const useSecurityDashboardSavedObjects = () => {
+  const {
+    savedObjects: { client: savedObjectsClient },
+  } = useKibana().services;
+
+  const { fetch, data, isLoading, error } = useFetch(
+    REQUEST_NAMES.SECURITY_DASHBOARDS,
+    getSecurityDashboards
+  );
+
+  useEffect(() => {
+    if (savedObjectsClient) {
+      fetch(savedObjectsClient);
+    }
+  }, [fetch, savedObjectsClient]);
+
+  const items = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    return data;
+  }, [data]);
+
+  return { items, isLoading, error };
+};
+
 export const useSecurityDashboardsTableColumns = (): Array<
   EuiBasicTableColumn<DashboardTableItem>
 > => {

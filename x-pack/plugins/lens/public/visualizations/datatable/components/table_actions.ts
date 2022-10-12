@@ -6,8 +6,12 @@
  */
 
 import type { EuiDataGridSorting } from '@elastic/eui';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
+import { CellValueTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type { ColumnConfig, LensGridDirection } from '../../../../common/expressions';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
@@ -87,6 +91,12 @@ export const createGridFilterHandler =
     };
 
     onClickValue(data);
+  };
+
+export const createGridCellValueHandler =
+  (onCellValueAction: (data: CellValueTriggerEvent['data']) => void) =>
+  ({ field, value, type }: { field: string; value: unknown; type: string }) => {
+    onCellValueAction({ field, value, type: type as DatatableColumnType });
   };
 
 export const createTransposeColumnFilterHandler =

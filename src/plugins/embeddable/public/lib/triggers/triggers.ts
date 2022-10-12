@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 
@@ -26,6 +26,15 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
     }>;
     timeFieldName?: string;
     negate?: boolean;
+  };
+}
+
+export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
+  data: {
+    field: string;
+    type: DatatableColumnType;
+    value: any;
   };
 }
 
@@ -98,6 +107,21 @@ export const valueClickTrigger: Trigger = {
     defaultMessage: 'A data point click on the visualization',
   }),
 };
+
+export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
+export const cellValueTrigger: Trigger = {
+  id: CELL_VALUE_TRIGGER,
+  title: i18n.translate('embeddableApi.cellValueTrigger.title', {
+    defaultMessage: 'Cell value',
+  }),
+  description: i18n.translate('embeddableApi.cellValueTrigger.description', {
+    defaultMessage: 'Actions appear in the cell value options on the visualization',
+  }),
+};
+
+export const isCellValueTriggerContext = (
+  context: ChartActionContext
+): context is ValueClickContext => context.data && 'value' in context.data;
 
 export const isValueClickTriggerContext = (
   context: ChartActionContext

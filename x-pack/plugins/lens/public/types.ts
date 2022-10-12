@@ -25,7 +25,11 @@ import type {
   RowClickContext,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type {
+  ClickTriggerEvent,
+  BrushTriggerEvent,
+  CellValueTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
@@ -1191,6 +1195,12 @@ export function isLensFilterEvent(event: ExpressionRendererEvent): event is Clic
   return event.name === 'filter';
 }
 
+export function isLensCellValueEvent(
+  event: ExpressionRendererEvent
+): event is CellValueTriggerEvent {
+  return event.name === 'cellValue';
+}
+
 export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
@@ -1216,6 +1226,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
   event: (
     event:
       | ClickTriggerEvent
+      | CellValueTriggerEvent
       | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent

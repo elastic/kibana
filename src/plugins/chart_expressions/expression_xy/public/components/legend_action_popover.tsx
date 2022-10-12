@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
-import type { FilterEvent } from '../types';
 
 export interface LegendActionPopoverProps {
   /**
@@ -20,17 +19,17 @@ export interface LegendActionPopoverProps {
   /**
    * Callback on filter value
    */
-  onFilter: (data: FilterEvent['data']) => void;
+  onFilter: (param?: { negate?: boolean }) => void;
   /**
-   * Determines the filter event data
+   * Callback on cell value action
    */
-  context: FilterEvent['data'];
+  onCellValueAction: () => void;
 }
 
 export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
   label,
   onFilter,
-  context,
+  onCellValueAction,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
@@ -45,9 +44,10 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           }),
           'data-test-subj': `legend-${label}-filterIn`,
           icon: <EuiIcon type="plusInCircle" size="m" />,
+
           onClick: () => {
             setPopoverOpen(false);
-            onFilter(context);
+            onFilter();
           },
         },
         {
@@ -58,7 +58,18 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           icon: <EuiIcon type="minusInCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
-            onFilter({ ...context, negate: true });
+            onFilter({ negate: true });
+          },
+        },
+        {
+          name: i18n.translate('expressionXY.legend.addToTimelineButtonAriaLabel', {
+            defaultMessage: 'Add to Timeline',
+          }),
+          'data-test-subj': `legend-${label}-addToTimeline`,
+          icon: <EuiIcon type="timeline" size="m" />,
+          onClick: () => {
+            setPopoverOpen(false);
+            onCellValueAction();
           },
         },
       ],

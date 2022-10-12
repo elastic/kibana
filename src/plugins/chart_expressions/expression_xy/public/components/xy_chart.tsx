@@ -47,7 +47,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
+import type { FilterEvent, BrushEvent, FormatFactory, CellValueEvent } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
@@ -121,6 +121,7 @@ export type XYChartRenderProps = XYChartProps & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  onCellValueAction: (data: CellValueEvent['data']) => void;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
@@ -195,6 +196,7 @@ export function XYChart({
   paletteService,
   minInterval,
   onClickValue,
+  onCellValueAction,
   onSelectRange,
   interactive = true,
   syncColors,
@@ -829,6 +831,7 @@ export function XYChart({
                 ? getLegendAction(
                     dataLayers,
                     onClickValue,
+                    onCellValueAction,
                     fieldFormats,
                     formattedDatatables,
                     titles,

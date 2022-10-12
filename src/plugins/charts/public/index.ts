@@ -9,7 +9,11 @@
 // TODO: https://github.com/elastic/kibana/issues/110891
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import {
+  RangeSelectContext,
+  ValueClickContext,
+  CellValueContext,
+} from '@kbn/embeddable-plugin/public';
 import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
@@ -23,6 +27,11 @@ export { useActiveCursor } from './services/active_cursor';
 export interface ClickTriggerEvent {
   name: 'filter';
   data: ValueClickContext['data'];
+}
+
+export interface CellValueTriggerEvent {
+  name: 'cellValue';
+  data: CellValueContext['data'];
 }
 
 export interface BrushTriggerEvent {

@@ -9,7 +9,8 @@
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { FilterEvent } from '../types';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { CellValueEvent, FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import { LegendActionPopover } from './legend_action_popover';
 import {
@@ -23,6 +24,7 @@ import {
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
   onFilter: (data: FilterEvent['data']) => void,
+  onCellValueAction: (data: CellValueEvent['data']) => void,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   titles: LayersAccessorsTitles,
@@ -50,28 +52,40 @@ export const getLegendAction = (
 
     const { table } = layer;
 
-    const data: FilterEvent['data']['data'] = [];
+    const filterActionData: FilterEvent['data']['data'] = [];
+    let cellValueActionData: CellValueEvent['data'];
 
     series.splitAccessors.forEach((value, accessor) => {
       const rowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
         return row[accessor] === value;
       });
       if (rowIndex !== -1) {
-        data.push({
+        filterActionData.push({
           row: rowIndex,
           column: table.columns.findIndex((column) => column.id === accessor),
           value: table.rows[rowIndex][accessor],
           table,
         });
+
+        const columnData = table.columns.find((column) => column.id === accessor);
+        cellValueActionData = {
+          value: table.rows[rowIndex][accessor],
+          field: columnData?.meta.field!,
+          type: columnData?.meta.type as DatatableColumnType,
+        };
       }
     });
 
-    if (data.length === 0) {
+    if (filterActionData.length === 0) {
       return null;
     }
 
-    const context: FilterEvent['data'] = {
-      data,
+    const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
+      onFilter({ data: filterActionData, negate });
+    };
+
+    const cellValueActionHandler = () => {
+      onCellValueAction(cellValueActionData);
     };
 
     return (
@@ -91,8 +105,8 @@ export const getLegendAction = (
             titles
           )?.toString() || ''
         }
-        context={context}
-        onFilter={onFilter}
+        onFilter={filterHandler}
+        onCellValueAction={cellValueActionHandler}
       />
     );
   });
