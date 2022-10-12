@@ -136,6 +136,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    it('should convert static value to the separate layer with y dimension', async () => {
+      await visualBuilder.createNewAggSeries();
+      await visualBuilder.selectAggType('Static Value', 1);
+      await visualBuilder.setStaticValue(10);
+
+      await header.waitUntilLoadingHasFinished();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        const layerCount = await lens.getLayerCount();
+        expect(layerCount).to.be(2);
+        const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
+        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
+        expect(yDimensionText1).to.be('Count of records');
+        expect(yDimensionText2).to.be('10');
+      });
+    });
+
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
       const button = await testSubjects.find('visualizeEditInLensButton');
       await button.click();
