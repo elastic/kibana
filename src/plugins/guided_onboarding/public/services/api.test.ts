@@ -336,7 +336,7 @@ describe('GuidedOnboarding ApiService', () => {
 
       // Once on update, once on complete
       expect(httpClient.put).toHaveBeenCalledTimes(1);
-      // Verify the completed step now has a "complete" status, and the subsequent step is "active"
+      // Verify the completed step now has a "ready_to_complete" status, and the subsequent step is "inactive"
       expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           ...securityRulesInProgressState,
