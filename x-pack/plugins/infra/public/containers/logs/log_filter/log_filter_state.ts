@@ -20,16 +20,7 @@ interface ILogFilterState {
     serializedQuery: string;
     originalQuery: Query;
   } | null;
-  filterQueryDraft: Query;
 }
-
-const initialLogFilterState: ILogFilterState = {
-  filterQuery: null,
-  filterQueryDraft: {
-    language: 'kuery',
-    query: '',
-  },
-};
 
 export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase }) => {
   const {
@@ -37,7 +28,6 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
       query: { queryString },
     },
   } = useKibanaContextForPlugin().services;
-  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(initialLogFilterState);
   const kibanaQuerySettings = useKibanaQuerySettings();
 
   const parseQuery = useCallback(
@@ -45,23 +35,41 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     [indexPattern, kibanaQuerySettings]
   );
 
-  const applyLogFilterQuery = useCallback(
+  const getLogFilterQuery = useCallback(
     (filterQuery: Query) => {
       try {
         const parsedQuery = parseQuery(filterQuery);
-        setLogFilterState((previousLogFilterState) => ({
-          ...previousLogFilterState,
-          filterQuery: {
-            parsedQuery,
-            serializedQuery: JSON.stringify(parsedQuery),
-            originalQuery: filterQuery,
-          },
-        }));
+        return {
+          parsedQuery,
+          serializedQuery: JSON.stringify(parsedQuery),
+          originalQuery: filterQuery,
+        };
       } catch (error) {
-        // This shouldn't really happen as the Unified Search Bar handles passing through the query.
+        // If for some reason parsing the query fails we should revert back to a safe default. This would most likely happen due to a bad URL parameter.
+        queryString.setQuery({
+          language: 'kuery',
+          query: '',
+        });
       }
     },
-    [parseQuery]
+    [parseQuery, queryString]
+  );
+
+  const [logFilterState, setLogFilterState] = useState<ILogFilterState>({
+    filterQuery: getLogFilterQuery(queryString.getQuery()) || null,
+  });
+
+  const applyLogFilterQuery = useCallback(
+    (filterQuery: Query) => {
+      const logFilterQuery = getLogFilterQuery(filterQuery);
+      if (logFilterQuery) {
+        setLogFilterState((previousLogFilterState) => ({
+          ...previousLogFilterState,
+          filterQuery: logFilterQuery,
+        }));
+      }
+    },
+    [getLogFilterQuery]
   );
 
   useSubscription(
