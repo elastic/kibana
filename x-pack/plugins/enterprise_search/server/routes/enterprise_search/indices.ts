@@ -50,6 +50,7 @@ export function registerIndexRoutes({
   router,
   enterpriseSearchRequestHandler,
   log,
+  ml
 }: RouteDependencies) {
   router.get(
     { path: '/internal/enterprise_search/search_indices', validate: false },
@@ -323,10 +324,15 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
-      const { client } = (await context.core).elasticsearch;
+      const {
+        elasticsearch: { client },
+        savedObjects: { client: savedObjectsClient }
+      } = await context.core;
+      const trainedModelsProvider = await ml.trainedModelsProvider(request, savedObjectsClient);
 
       const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
         client.asCurrentUser,
+        trainedModelsProvider,
         indexName
       );
 
