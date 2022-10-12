@@ -31,6 +31,7 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import {
+  ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
@@ -147,17 +148,25 @@ export function registerTransactionDurationAlertType({
             },
           },
           aggs: {
-            latency:
-              ruleParams.aggregationType === 'avg'
-                ? { avg: { field } }
-                : {
-                    percentiles: {
-                      field,
-                      percents: [
-                        ruleParams.aggregationType === '95th' ? 95 : 99,
-                      ],
-                    },
-                  },
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                missing: ENVIRONMENT_NOT_DEFINED.value,
+              },
+              aggs: {
+                latency:
+                  ruleParams.aggregationType === 'avg'
+                    ? { avg: { field } }
+                    : {
+                        percentiles: {
+                          field,
+                          percents: [
+                            ruleParams.aggregationType === '95th' ? 95 : 99,
+                          ],
+                        },
+                      },
+              },
+            },
           },
         },
       };
@@ -171,15 +180,28 @@ export function registerTransactionDurationAlertType({
         return {};
       }
 
-      const { latency } = response.aggregations;
-
-      const transactionDuration =
-        'values' in latency ? Object.values(latency.values)[0] : latency?.value;
-
       // Converts threshold to microseconds because this is the unit used on transactionDuration
       const thresholdMicroseconds = ruleParams.threshold * 1000;
 
-      if (transactionDuration && transactionDuration > thresholdMicroseconds) {
+      const triggeredEnvironmentDurations =
+        response.aggregations.environments.buckets
+          .map(({ key: environment, latency }) => {
+            const transactionDuration =
+              'values' in latency
+                ? Object.values(latency.values)[0]
+                : latency?.value;
+            return { transactionDuration, environment };
+          })
+          .filter(
+            ({ transactionDuration }) =>
+              transactionDuration !== null &&
+              transactionDuration > thresholdMicroseconds
+          ) as Array<{ transactionDuration: number; environment: string }>;
+
+      for (const {
+        environment,
+        transactionDuration,
+      } of triggeredEnvironmentDurations) {
         const durationFormatter = getDurationFormatter(transactionDuration);
         const transactionDurationFormatted =
           durationFormatter(transactionDuration).formatted;
@@ -195,7 +217,7 @@ export function registerTransactionDurationAlertType({
 
         const relativeViewInAppUrl = getAlertUrlTransaction(
           ruleParams.serviceName,
-          getEnvironmentEsField(ruleParams.environment)?.[SERVICE_ENVIRONMENT],
+          getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
           ruleParams.transactionType
         );
 
@@ -208,11 +230,11 @@ export function registerTransactionDurationAlertType({
         services
           .alertWithLifecycle({
             id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
-              ruleParams.environment
+              environment
             )}`,
             fields: {
               [SERVICE_NAME]: ruleParams.serviceName,
-              ...getEnvironmentEsField(ruleParams.environment),
+              ...getEnvironmentEsField(environment),
               [TRANSACTION_TYPE]: ruleParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
@@ -223,7 +245,7 @@ export function registerTransactionDurationAlertType({
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {
             transactionType: ruleParams.transactionType,
             serviceName: ruleParams.serviceName,
-            environment: getEnvironmentLabel(ruleParams.environment),
+            environment: getEnvironmentLabel(environment),
             threshold: thresholdMicroseconds,
             triggerValue: transactionDurationFormatted,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
