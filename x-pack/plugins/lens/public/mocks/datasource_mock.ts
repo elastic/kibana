@@ -54,6 +54,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
     createEmptyLayer: jest.fn(),
+    syncColumns: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
