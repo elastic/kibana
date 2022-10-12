@@ -17,7 +17,7 @@ Object {
   ],
   "state": Object {
     "datasourceStates": Object {
-      "indexpattern": Object {
+      "formBased": Object {
         "layers": Object {
           "1f48a633-8eee-45ae-9471-861227e9ca03": Object {
             "columnOrder": Array [

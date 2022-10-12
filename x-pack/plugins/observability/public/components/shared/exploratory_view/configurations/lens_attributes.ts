@@ -1100,7 +1100,7 @@ export class LensAttributes {
       references: this.getReferences(),
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: this.layers,
           },
         },

@@ -93,7 +93,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of getFilters returning errors', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'indexpattern',
+      datasourceId: 'formBased',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
@@ -166,7 +166,7 @@ describe('getLayerMetaInfo', () => {
   it('should basically work collecting fields and filters in the visualization', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'indexpattern',
+      datasourceId: 'formBased',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),

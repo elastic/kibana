@@ -74,7 +74,7 @@ describe('SingleMetricAttributes', () => {
       ],
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer0: {
                 columnOrder: ['layer-0-column-1'],
@@ -136,7 +136,7 @@ describe('SingleMetricAttributes', () => {
       ],
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer0: {
                 columnOrder: ['layer-0-column-1'],

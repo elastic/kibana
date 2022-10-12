@@ -22,7 +22,7 @@ export const sampleAttributeCoreWebVital = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [

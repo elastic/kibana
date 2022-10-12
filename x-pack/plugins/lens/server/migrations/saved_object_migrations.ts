@@ -38,6 +38,7 @@ import {
   LensDocShape850,
   LensDocShape840,
   VisState850,
+  LensDocShape860,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -59,6 +60,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigrateIndexPatternDatasource,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -533,6 +535,13 @@ const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850>
   attributes: commonMigrateMetricIds(doc.attributes),
 });
 
+const migrateIndexPatternDatasource: SavedObjectMigrationFn<LensDocShape850, LensDocShape860> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigrateIndexPatternDatasource(doc.attributes),
+});
+
 const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensDocShape840> = (
   doc
 ) => ({
@@ -566,6 +575,7 @@ const lensMigrations: SavedObjectMigrationMap = {
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
   '8.5.0': flow(migrateMetricIds, enrichAnnotationLayers, migratePartitionChartGroups),
+  '8.6.0': flow(migrateIndexPatternDatasource),
 };
 
 export const getAllMigrations = (

@@ -22,7 +22,7 @@ export const sampleAttributeKpi = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],

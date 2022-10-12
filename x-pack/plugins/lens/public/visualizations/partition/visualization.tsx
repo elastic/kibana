@@ -37,11 +37,11 @@ import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
-import type { IndexPatternLayer } from '../..';
+import type { FormBasedLayer } from '../..';
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
-  layers: IndexPatternLayer[];
+  layers: FormBasedLayer[];
 }
 
 export interface PartitionSuggestion extends Suggestion {

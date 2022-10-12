@@ -37,7 +37,7 @@ import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
-import { IndexPatternLayer } from '../..';
+import { FormBasedLayer } from '../..';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -50,7 +50,7 @@ interface GaugeVisualizationDeps {
 
 interface GaugeDatasourceState {
   [prop: string]: unknown;
-  layers: IndexPatternLayer[];
+  layers: FormBasedLayer[];
 }
 
 export interface GaugeSuggestion extends Suggestion {

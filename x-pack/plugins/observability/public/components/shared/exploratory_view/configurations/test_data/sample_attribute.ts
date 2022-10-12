@@ -27,7 +27,7 @@ export const sampleAttribute = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [
