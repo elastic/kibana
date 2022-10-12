@@ -2355,4 +2355,126 @@ describe('formatExecutionKPIAggBuckets', () => {
       triggeredActions: 10,
     });
   });
+
+  test('should format results correctly when outcome is warning and alerting outcome is not set', () => {
+    const results = {
+      aggregations: {
+        excludeExecuteStart: {
+          meta: {},
+          doc_count: 875,
+          executionUuid: {
+            meta: {},
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 3,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
+                  },
+                  ruleExecutionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: ['warning', 'success'],
+                        key_as_string: 'warning|success',
+                        doc_count: 3,
+                      },
+                    ],
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 5,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'success',
+                        doc_count: 5,
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 2,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
+                  },
+                  ruleExecutionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: ['', 'success'],
+                        key_as_string: '|success',
+                        doc_count: 2,
+                      },
+                    ],
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 3,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'failure',
+                        doc_count: 3,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    expect(formatExecutionKPIResult(results)).toEqual({
+      success: 2,
+      unknown: 0,
+      failure: 0,
+      warning: 3,
+      activeAlerts: 10,
+      newAlerts: 10,
+      recoveredAlerts: 0,
+      erroredActions: 3,
+      triggeredActions: 10,
+    });
+  });
 });
