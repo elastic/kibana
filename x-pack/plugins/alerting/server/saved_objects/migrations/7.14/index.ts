@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule } from "../../../types";
-import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from "../utils";
-
+import { RawRule } from '../../../types';
+import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from '../utils';
 
 /**
  * The author field was introduced later and was not part of the original rules. We overlooked
@@ -39,8 +38,9 @@ function removeNullAuthorFromSecurityRules(
   };
 }
 
-export const getMigrations_7_14_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
-  pipeMigrations(removeNullAuthorFromSecurityRules)
-);
+export const getMigrationsM7m14p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
+    pipeMigrations(removeNullAuthorFromSecurityRules)
+  );

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from "@kbn/core-saved-objects-common";
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
-import { RawRule, RawRuleAction } from "../../../types";
-import { extractRefsFromGeoContainmentAlert } from "../../geo_containment/migrations";
-import { createEsoMigration, isSecuritySolutionLegacyNotification, pipeMigrations } from "../utils";
+import { RawRule, RawRuleAction } from '../../../types';
+import { extractRefsFromGeoContainmentAlert } from '../../geo_containment/migrations';
+import { createEsoMigration, isSecuritySolutionLegacyNotification, pipeMigrations } from '../utils';
 
 function setLegacyId(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsanitizedDoc<RawRule> {
   const { id } = doc;
@@ -143,13 +143,17 @@ function addRuleIdsToLegacyNotificationReferences(
   }
 }
 
-export const getMigrations_7_16_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup, isPreconfigured: (connectorId: string) => boolean) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-  pipeMigrations(
-    setLegacyId,
-    getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
-    addRuleIdsToLegacyNotificationReferences,
-    extractRefsFromGeoContainmentAlert
-  )
-);
+export const getMigrationsM7m16p0 = (
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isPreconfigured: (connectorId: string) => boolean
+) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(
+      setLegacyId,
+      getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
+      addRuleIdsToLegacyNotificationReferences,
+      extractRefsFromGeoContainmentAlert
+    )
+  );

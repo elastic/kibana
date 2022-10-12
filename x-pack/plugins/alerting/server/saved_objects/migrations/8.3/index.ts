@@ -5,28 +5,32 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { omit } from "lodash";
+import { omit } from 'lodash';
 import moment from 'moment-timezone';
-import { RawRule } from "../../../types";
-import { createEsoMigration, isDetectionEngineAADRuleType, isEsQueryRuleType, pipeMigrations } from "../utils";
-
+import { RawRule } from '../../../types';
+import {
+  createEsoMigration,
+  isDetectionEngineAADRuleType,
+  isEsQueryRuleType,
+  pipeMigrations,
+} from '../utils';
 
 function addSearchType(doc: SavedObjectUnsanitizedDoc<RawRule>) {
   const searchType = doc.attributes.params.searchType;
 
   return isEsQueryRuleType(doc) && !searchType
     ? {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        params: {
-          ...doc.attributes.params,
-          searchType: 'esQuery',
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: {
+            ...doc.attributes.params,
+            searchType: 'esQuery',
+          },
         },
-      },
-    }
+      }
     : doc;
 }
 
@@ -70,22 +74,23 @@ function convertSnoozes(
       ...(omit(doc.attributes, ['snoozeEndTime']) as RawRule),
       snoozeSchedule: snoozeEndTime
         ? [
-          {
-            duration: Date.parse(snoozeEndTime as string) - Date.now(),
-            rRule: {
-              dtstart: new Date().toISOString(),
-              tzid: moment.tz.guess(),
-              count: 1,
+            {
+              duration: Date.parse(snoozeEndTime as string) - Date.now(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: moment.tz.guess(),
+                count: 1,
+              },
             },
-          },
-        ]
+          ]
         : [],
     },
   };
 }
 
-export const getMigrations_8_3_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-  pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
-);
+export const getMigrationsM8m3p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
+  );

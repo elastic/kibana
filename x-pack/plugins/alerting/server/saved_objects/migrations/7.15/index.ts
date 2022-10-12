@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectAttributes, SavedObjectReference } from "@kbn/core-saved-objects-common";
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-common';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
-import { RawRule } from "../../../types";
-import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from "../utils";
+import { RawRule } from '../../../types';
+import { createEsoMigration, isSiemSignalsRuleType, pipeMigrations } from '../utils';
 
 /**
  * This will do a flatMap reduce where we only return exceptionsLists and their items if:
@@ -103,8 +107,9 @@ function addExceptionListsToReferences(
   }
 }
 
-export const getMigrations_7_15_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
-  pipeMigrations(addExceptionListsToReferences)
-);
+export const getMigrationsM7m15p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
+    pipeMigrations(addExceptionListsToReferences)
+  );
