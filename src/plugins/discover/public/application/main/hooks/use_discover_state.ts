@@ -7,19 +7,14 @@
  */
 import { useEffect } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { DiscoverStateContainer } from '../services/discover_state';
+import { DiscoverStateContainer, useSavedSearch } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { useSearchSession } from './use_search_session';
 import { DataTableRecord } from '../../../types';
 import { FetchStatus } from '../../types';
 import { useAdHocDataViews } from './use_adhoc_data_views';
-import {
-  InternalState,
-  useInternalStateSelector,
-} from '../services/discover_internal_state_container';
+import { useInternalStateSelector } from '../services/discover_internal_state_container';
 
 export function useDiscoverState({
   services,
@@ -31,13 +26,10 @@ export function useDiscoverState({
   stateContainer: DiscoverStateContainer;
 }) {
   const { dataViews } = services;
-  const dataViewList = useInternalStateSelector((state: InternalState) => state.dataViews);
-  const dataView = useInternalStateSelector((state: InternalState) => state.dataView!);
+  const dataViewList = useInternalStateSelector((state) => state.dataViews);
+  const dataView = useInternalStateSelector((state) => state.dataView!);
 
-  const savedSearch = useObservable<SavedSearch>(
-    stateContainer.savedSearchContainer.savedSearchPersisted$,
-    stateContainer.savedSearchContainer.savedSearchPersisted$.getValue()
-  );
+  const savedSearch = useSavedSearch();
   /**
    * Search session logic
    */
@@ -57,15 +49,10 @@ export function useDiscoverState({
   });
 
   /**
-   * Data fetching logic
-   */
-  const { data$, inspectorAdapters } = stateContainer.dataStateContainer;
-
-  /**
    * State changes (data view, columns), when a text base query result is returned
    */
   useTextBasedQueryLanguage({
-    documents$: data$.documents$,
+    documents$: stateContainer.dataStateContainer.data$.documents$,
     dataViews,
     stateContainer,
     dataViewList,
@@ -102,9 +89,7 @@ export function useDiscoverState({
   }, [dataView, stateContainer]);
 
   return {
-    data$,
     dataView,
-    inspectorAdapters,
     stateContainer,
     adHocDataViewList,
     persistDataView,

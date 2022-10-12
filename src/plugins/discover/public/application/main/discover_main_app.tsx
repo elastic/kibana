@@ -7,13 +7,11 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './hooks/use_discover_state';
-import { DiscoverStateContainer } from './services/discover_state';
+import { DiscoverStateContainer, useSavedSearch } from './services/discover_state';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
@@ -27,10 +25,7 @@ export interface DiscoverMainProps {
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
-  const savedSearch = useObservable<SavedSearch>(
-    stateContainer.savedSearchContainer.savedSearchPersisted$,
-    stateContainer.savedSearchContainer.savedSearchPersisted$.getValue()
-  );
+  const savedSearch = useSavedSearch();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -45,14 +40,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * State related logic
    */
-  const {
-    data$,
-    dataView,
-    inspectorAdapters,
-    persistDataView,
-    updateAdHocDataViewId,
-    adHocDataViewList,
-  } = useDiscoverState({
+  const { dataView, persistDataView, updateAdHocDataViewId, adHocDataViewList } = useDiscoverState({
     services,
     setExpandedDoc,
     stateContainer,
@@ -87,11 +75,9 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   return (
     <DiscoverLayoutMemoized
       dataView={dataView}
-      inspectorAdapters={inspectorAdapters}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       navigateTo={navigateTo}
-      savedSearchData$={data$}
       stateContainer={stateContainer}
       persistDataView={persistDataView}
       updateAdHocDataViewId={updateAdHocDataViewId}

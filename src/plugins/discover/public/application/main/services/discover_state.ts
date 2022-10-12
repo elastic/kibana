@@ -254,11 +254,12 @@ export function getDiscoverStateContainer({
         });
         if (currentSavedSearch) {
           await savedSearchContainer.set(currentSavedSearch);
-          await savedSearchContainer.update(
-            currentSavedSearch.searchSource.getField('index'),
-            appStateContainer.getState(),
-            appStateContainer.isEmptyURL()
-          );
+          if (!appStateContainer.isEmptyURL()) {
+            await savedSearchContainer.update(
+              currentSavedSearch.searchSource.getField('index'),
+              appStateContainer.getState()
+            );
+          }
           await appStateContainer.reset(currentSavedSearch);
           internalStateContainer.transitions.setDataView(
             currentSavedSearch.searchSource.getField('index')!
@@ -272,11 +273,13 @@ export function getDiscoverStateContainer({
       ) => {
         addLog('🧭 [discoverState] loadNewSavedSearch');
         const nextSavedSearch = await savedSearchContainer.new();
-        await savedSearchContainer.update(
-          nextSavedSearch.searchSource.getField('index'),
-          appStateContainer.getState(),
-          appStateContainer.isEmptyURL()
-        );
+        if (!appStateContainer.isEmptyURL()) {
+          await savedSearchContainer.update(
+            nextSavedSearch.searchSource.getField('index'),
+            appStateContainer.getState()
+          );
+        }
+
         const nextDataView = await loadDataViewBySavedSearch(
           nextSavedSearch,
           appStateContainer,

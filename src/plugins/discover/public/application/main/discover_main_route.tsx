@@ -110,7 +110,6 @@ export function DiscoverMainRoute(props: Props) {
           setError
         );
       }
-
       setLoading(false);
     } catch (e) {
       if (e instanceof DataViewSavedObjectConflictError) {

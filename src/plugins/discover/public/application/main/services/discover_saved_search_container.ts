@@ -121,8 +121,7 @@ export function getSavedSearchContainer({
       }),
       services.uiSettings
     );
-    await appStateContainer.replace(newAppState, !appStateContainer.isEmptyURL());
-    set(nextSavedSearch);
+    update(undefined, newAppState, true);
     return nextSavedSearch;
   };
 

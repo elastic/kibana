@@ -20,11 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { isOfQueryType } from '@kbn/es-query';
-import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { useSavedSearch } from '../../services/discover_state';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -58,11 +57,9 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
   dataView,
-  inspectorAdapters,
   expandedDoc,
   navigateTo,
   setExpandedDoc,
-  savedSearchData$,
   stateContainer,
   persistDataView,
   updateAdHocDataViewId,
@@ -89,11 +86,8 @@ export function DiscoverLayout({
     state.sort,
   ]);
 
-  const savedSearch = useObservable<SavedSearch>(
-    stateContainer.savedSearchContainer.savedSearchPersisted$,
-    stateContainer.savedSearchContainer.savedSearchPersisted$.getValue()
-  );
-  const dataState: DataMainMsg = useDataState(savedSearchData$.main$);
+  const savedSearch = useSavedSearch();
+  const dataState: DataMainMsg = useDataState(stateContainer.dataStateContainer.data$.main$);
 
   const currentViewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
@@ -129,7 +123,7 @@ export function DiscoverLayout({
   const onOpenInspector = useInspector({
     setExpandedDoc,
     inspector,
-    inspectorAdapters,
+    inspectorAdapters: stateContainer.dataStateContainer.inspectorAdapters,
     savedSearch,
   });
 
@@ -244,7 +238,7 @@ export function DiscoverLayout({
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={currentColumns}
-              documents$={savedSearchData$.documents$}
+              documents$={stateContainer.dataStateContainer.data$.documents$}
               onAddField={onAddColumn}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
@@ -255,7 +249,7 @@ export function DiscoverLayout({
               onFieldEdited={onFieldEdited}
               viewMode={currentViewMode}
               onDataViewCreated={onDataViewCreated}
-              availableFields$={savedSearchData$.availableFields$}
+              availableFields$={stateContainer.dataStateContainer.data$.availableFields$}
               stateContainer={stateContainer}
             />
           </EuiFlexItem>
@@ -314,7 +308,7 @@ export function DiscoverLayout({
                   expandedDoc={expandedDoc}
                   setExpandedDoc={setExpandedDoc}
                   savedSearch={savedSearch}
-                  savedSearchData$={savedSearchData$}
+                  savedSearchData$={stateContainer.dataStateContainer.data$}
                   stateContainer={stateContainer}
                   isTimeBased={isTimeBased}
                   viewMode={currentViewMode}
