@@ -39,7 +39,7 @@ import { createIndexPatternServiceMock } from '../mocks/data_views_service_mock'
 import { createMockFramePublicAPI } from '../mocks';
 import { DataViewsState } from '../state_management';
 import { IndexPattern } from '../types';
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ReactWrapper } from 'enzyme';
 
@@ -182,6 +182,7 @@ function getExistingFieldsMock(indexPatterns: Record<string, IndexPattern>) {
     (): ExistingFieldsReader => ({
       hasFieldData: (dataViewId, fieldName) => Boolean(fieldsByDataViewMap[dataViewId][fieldName]),
       getFieldsExistenceStatus: (dataViewId) => ExistenceFetchStatus.succeeded,
+      isFieldsExistenceInfoUnavailable: () => false,
     })
   );
 }
@@ -194,19 +195,23 @@ function getCustomExistingFieldsMock(fieldsByDataViewMap: MockExistingFieldsByDa
         dataViewId in fieldsByDataViewMap
           ? ExistenceFetchStatus.succeeded
           : ExistenceFetchStatus.unknown,
+      isFieldsExistenceInfoUnavailable: (dataViewId) => !(dataViewId in fieldsByDataViewMap),
     })
   );
 }
 
 const originalUseExistingFieldsFetcher = UseExistingFieldsApi.useExistingFieldsFetcher;
+const originalUseExistingFieldsReader = UseExistingFieldsApi.useExistingFieldsReader;
 
 jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsReader').mockImplementation(() => ({
   hasFieldData: () => false,
   getFieldsExistenceStatus: () => ExistenceFetchStatus.unknown,
+  isFieldsExistenceInfoUnavailable: () => true,
 }));
 
 jest.spyOn(UseExistingFieldsApi, 'useExistingFieldsFetcher').mockImplementation(() => ({
   refetchFieldsExistenceInfo: jest.fn(),
+  isProcessing: false,
 }));
 
 jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
@@ -706,79 +711,105 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('shows a loading indicator when loading', async () => {
-      const updateIndexPatterns = jest.fn();
-      const load = async () => {};
-      const inst = mountWithIntl(<IndexPatternDataPanel {...testProps(updateIndexPatterns)} />);
-      expect(inst.find(EuiProgress).length).toEqual(1);
-      await act(load);
-      inst.update();
-      expect(inst.find(EuiProgress).length).toEqual(0);
-    });
-
-    it('does not perform multiple queries at once', async () => {
-      const updateIndexPatterns = jest.fn();
-      let queryCount = 0;
-      let overlapCount = 0;
-      const props = testProps(updateIndexPatterns);
-
-      dataViews.getFieldsForIndexPattern.mockImplementation((dataView) => {
-        if (queryCount) {
-          ++overlapCount;
-        }
-        ++queryCount;
-        const result = Promise.resolve([
-          { name: `${dataView.title}_field_1` },
-          { name: `${dataView.title}_field_2` },
-        ]) as Promise<FieldSpec[]>;
-
-        result.then(() => --queryCount);
-
-        return result;
+      const props = testProps({
+        currentIndexPatternId: 'a',
       });
 
-      const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
-
-      inst.update();
-
-      act(() => {
-        (inst.setProps as unknown as (props: unknown) => {})({
-          ...props,
-          dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
+      (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(
+        originalUseExistingFieldsFetcher
+      );
+      (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockImplementation(
+        originalUseExistingFieldsReader
+      );
+      let resolveFunction: (arg: unknown) => void;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveFunction = resolve;
         });
-        inst.update();
       });
+      let inst: ReactWrapper;
 
       await act(async () => {
-        (inst.setProps as unknown as (props: unknown) => {})({
-          ...props,
-          dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
-        });
-        inst.update();
+        inst = await mountWithIntl(<IndexPatternDataPanel {...props} />);
+        await inst.update();
       });
 
-      expect(dataViews.getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
-      expect(overlapCount).toEqual(0);
+      await inst!.update();
+      expect(inst!.find(EuiProgress).length).toEqual(1);
+      expect(
+        inst!
+          .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
+          .first()
+          .text()
+      ).toBe('5 available fields. 0 empty fields. 0 meta fields.');
+
+      await act(() => {
+        resolveFunction!({
+          existingFieldNames: [indexPatterns.a.fields[0].name, indexPatterns.a.fields[1].name],
+        });
+      });
+
+      await inst!.update();
+      expect(inst!.find(EuiProgress).length).toEqual(0);
+      expect(
+        inst!
+          .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
+          .first()
+          .text()
+      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
-      const updateIndexPatterns = jest.fn();
-      const props = {
-        ...testProps(updateIndexPatterns),
-        query: {
-          language: 'kuery',
-          query: '@timestamp : NOT *',
-        },
-      };
-      await testExistenceLoading(props, undefined, undefined);
-
-      const firstCall = dataViews.getFieldsForIndexPattern.mock.calls[0];
-      expect(firstCall[1]?.filter?.bool?.filter).toContainEqual({
-        bool: {
-          must_not: {
-            match_all: {},
+      const props = testProps({
+        currentIndexPatternId: 'a',
+        otherProps: {
+          query: {
+            language: 'kuery',
+            query: '@timestamp : NOT *',
           },
         },
       });
+
+      (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockImplementation(
+        originalUseExistingFieldsFetcher
+      );
+      (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockImplementation(
+        originalUseExistingFieldsReader
+      );
+      let resolveFunction: (arg: unknown) => void;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveFunction = resolve;
+        });
+      });
+      let inst: ReactWrapper;
+
+      await act(async () => {
+        inst = await mountWithIntl(<IndexPatternDataPanel {...props} />);
+        await inst.update();
+      });
+
+      await inst!.update();
+
+      await act(() => {
+        resolveFunction!({
+          existingFieldNames: [indexPatterns.a.fields[0].name, indexPatterns.a.fields[1].name],
+        });
+      });
+
+      await inst!.update();
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dslQuery: {
+            bool: {
+              must_not: {
+                match_all: {},
+              },
+            },
+          },
+        })
+      );
     });
   });
 

@@ -18,6 +18,7 @@ import {
   EuiFormControlLayout,
   EuiIcon,
   EuiPopover,
+  EuiProgress,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -267,7 +268,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
-  const { refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+  const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
     dataViews: activeIndexPatterns as unknown as DataView[],
     query,
     filters,
@@ -282,11 +283,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       if (dataViewId === currentIndexPatternId) {
         showNoDataPopover();
       }
-    }, // TODO: show only for the current data view
+    },
   });
-  const { getFieldsExistenceStatus, hasFieldData } = useExistingFieldsReader();
-  // TODO: add a loading indicator while info is loading
+  const { getFieldsExistenceStatus, hasFieldData, isFieldsExistenceInfoUnavailable } =
+    useExistingFieldsReader();
   const fieldsExistenceStatus = getFieldsExistenceStatus(currentIndexPatternId);
+  const fieldsExistenceInfoUnavailable = isFieldsExistenceInfoUnavailable(currentIndexPatternId);
+
+  // console.log(isProcessing, fieldsExistenceStatus);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -311,8 +315,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
-    const fieldInfoUnavailable = fieldsExistenceStatus !== ExistenceFetchStatus.succeeded;
-
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern?.getFieldByName(field.name);
       return overallField && hasFieldData(currentIndexPatternId, overallField.name);
@@ -353,7 +355,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         fieldCount: groupedFields.availableFields.length,
         isInitiallyOpen: true,
         showInAccordion: true,
-        title: fieldInfoUnavailable
+        title: fieldsExistenceInfoUnavailable
           ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
               defaultMessage: 'All fields',
             })
@@ -372,8 +374,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         // Show details on timeout but not failure
-        // hideDetails: fieldInfoUnavailable && !existenceFetchTimeout, // TODO: is this check still necessary?
-        hideDetails: fieldInfoUnavailable,
+        // hideDetails: fieldsExistenceInfoUnavailable && !existenceFetchTimeout, // TODO: is this check still necessary?
+        hideDetails: fieldsExistenceInfoUnavailable,
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
           defaultMessage: `There are no available fields that contain data.`,
         }),
@@ -415,7 +417,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     };
 
     // do not show empty field accordion if there is no existence information
-    if (fieldInfoUnavailable) {
+    if (fieldsExistenceInfoUnavailable) {
       delete fieldGroupDefinitions.EmptyFields;
     }
 
@@ -423,8 +425,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, [
     allFields,
     core.uiSettings,
-    fieldsExistenceStatus,
     hasFieldData,
+    fieldsExistenceInfoUnavailable,
     filters.length,
     currentIndexPatternId,
     currentIndexPattern,
@@ -615,6 +617,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         direction="column"
         responsive={false}
       >
+        {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
         <EuiFlexItem grow={false}>
           <EuiFormControlLayout
             icon="search"

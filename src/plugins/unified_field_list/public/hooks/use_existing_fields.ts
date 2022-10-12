@@ -9,20 +9,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
-import { buildEsQuery, Query, Filter, AggregateQuery, EsQueryConfig } from '@kbn/es-query';
+import { AggregateQuery, buildEsQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   DataPublicPluginStart,
   DataViewsContract,
   getEsQueryConfig,
 } from '@kbn/data-plugin/public';
 import { type DataView } from '@kbn/data-plugin/common';
-import { loadFieldExisting } from '../services/field_existing/load_field_existing';
+import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
   existingFieldsByFieldNameMap: Record<string, boolean>;
   numberOfFetches: number;
+  hasDataViewRestrictions?: boolean;
 }
 
 export interface FetchExistenceInfoParams {
@@ -44,6 +45,7 @@ type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
 export interface ExistingFieldsReader {
   hasFieldData: (dataViewId: string, fieldName: string) => boolean;
   getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
+  isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean;
 }
 
 const initialData: ExistingFieldsByDataViewMap = {};
@@ -60,8 +62,11 @@ export const useExistingFieldsFetcher = (
   params: FetchExistenceInfoParams
 ): {
   refetchFieldsExistenceInfo: (dataViewId?: string) => Promise<void>;
+  isProcessing: boolean;
 } => {
   const mountedRef = useRef<boolean>(true);
+  const [activeRequests, setActiveRequests] = useState<number>(0);
+  const isProcessing = activeRequests > 0;
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -86,11 +91,13 @@ export const useExistingFieldsFetcher = (
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
       const dataView = await dataViews.get(dataViewId);
 
-      // console.log('fetching', dataViewId, dataView);
+      // console.log('fetching', dataViewId);
 
       if (!dataView?.title) {
         return;
       }
+
+      setActiveRequests((value) => value + 1);
 
       const hasRestrictions = Boolean(dataView?.typeMeta?.aggs);
       const info: ExistingFieldsInfo = {
@@ -100,9 +107,10 @@ export const useExistingFieldsFetcher = (
 
       try {
         if (hasRestrictions) {
-          info.fetchStatus = ExistenceFetchStatus.dataViewHasRestrictions;
+          info.fetchStatus = ExistenceFetchStatus.succeeded;
+          info.hasDataViewRestrictions = true;
         } else {
-          // TODO: support aborting a request
+          // console.log('requesting data');
           const result = await loadFieldExisting({
             dslQuery: buildSafeEsQuery(dataView, query, filters, getEsQueryConfig(core.uiSettings)),
             fromDate,
@@ -114,6 +122,7 @@ export const useExistingFieldsFetcher = (
             dataView,
           });
 
+          // console.log({ result });
           const existingFieldNames = result?.existingFieldNames || [];
 
           if (
@@ -135,13 +144,16 @@ export const useExistingFieldsFetcher = (
 
       // skip redundant results
       if (mountedRef.current && Date.now() >= lastFetchRequestedAtTimestamp) {
+        // console.log('finished', info);
         globalMap$.next({
           ...globalMap$.getValue(),
           [dataViewId]: info,
         });
       }
+
+      setActiveRequests((value) => value - 1);
     },
-    [mountedRef]
+    [mountedRef, setActiveRequests]
   );
 
   const dataViewsHash = getDataViewsHash(params.dataViews);
@@ -192,38 +204,44 @@ export const useExistingFieldsFetcher = (
   return useMemo(
     () => ({
       refetchFieldsExistenceInfo,
+      isProcessing,
     }),
-    [refetchFieldsExistenceInfo]
+    [refetchFieldsExistenceInfo, isProcessing]
   );
 };
 
 export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
+  const mountedRef = useRef<boolean>(true);
   const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
     useState<ExistingFieldsByDataViewMap>(globalMap$.getValue());
 
   useEffect(() => {
     const subscription = globalMap$.subscribe((data) => {
       // console.log('received', data);
-      setExistingFieldsByDataViewMap((savedData) => ({
-        ...savedData,
-        ...data,
-      }));
+      if (mountedRef.current) {
+        setExistingFieldsByDataViewMap((savedData) => ({
+          ...savedData,
+          ...data,
+        }));
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setExistingFieldsByDataViewMap]);
+  }, [setExistingFieldsByDataViewMap, mountedRef]);
 
   const hasFieldData = useCallback(
     (dataViewId: string, fieldName: string) => {
       const info = existingFieldsByDataViewMap[dataViewId];
 
       if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
-        return Boolean(info?.existingFieldsByFieldNameMap[fieldName]);
+        return info?.hasDataViewRestrictions
+          ? true
+          : Boolean(info?.existingFieldsByFieldNameMap[fieldName]);
       }
 
-      return true; // TODO: double check this including for `dataViewHasRestrictions` case
+      return true; // TODO: double check `true` returns
     },
     [existingFieldsByDataViewMap]
   );
@@ -236,18 +254,35 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   );
 
   const getFieldsExistenceStatus = useCallback(
-    (dataViewId: string) => {
+    (dataViewId: string): ExistenceFetchStatus => {
       return getFieldsExistenceInfo(dataViewId)?.fetchStatus || ExistenceFetchStatus.unknown;
     },
     [getFieldsExistenceInfo]
   );
 
+  const isFieldsExistenceInfoUnavailable = useCallback(
+    (dataViewId: string): boolean => {
+      const info = getFieldsExistenceInfo(dataViewId);
+      return Boolean(
+        info?.fetchStatus !== ExistenceFetchStatus.succeeded || info?.hasDataViewRestrictions
+      );
+    },
+    [getFieldsExistenceInfo]
+  );
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [mountedRef]);
+
   return useMemo(
     () => ({
       hasFieldData,
       getFieldsExistenceStatus,
+      isFieldsExistenceInfoUnavailable,
     }),
-    [hasFieldData, getFieldsExistenceStatus]
+    [hasFieldData, getFieldsExistenceStatus, isFieldsExistenceInfoUnavailable]
   );
 };
 
