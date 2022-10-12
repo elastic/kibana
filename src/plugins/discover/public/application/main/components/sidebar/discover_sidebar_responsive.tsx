@@ -93,7 +93,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: () => void;
+  onFieldEdited: () => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -220,7 +220,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
               fieldName,
               onSave: async () => {
-                onFieldEdited();
+                await onFieldEdited();
               },
             });
             if (setFieldEditorRef) {

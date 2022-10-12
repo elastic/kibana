@@ -52,7 +52,7 @@ export interface DiscoverMainContentProps {
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
-  onFieldEdited: () => void;
+  onFieldEdited: () => Promise<void>;
   columns: string[];
   resizeRef: RefObject<HTMLDivElement>;
 }

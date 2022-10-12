@@ -44,7 +44,7 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, data, filterManager, dataViews } = services;
+  const { uiSettings, data, filterManager, dataViews, toastNotifications } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
@@ -126,10 +126,12 @@ export function useDiscoverState({
    */
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
     dataView,
-    dataViews,
     stateContainer,
     savedSearch,
-    onChangeDataView,
+    setUrlTracking,
+    dataViews,
+    toastNotifications,
+    filterManager,
   });
 
   /**
