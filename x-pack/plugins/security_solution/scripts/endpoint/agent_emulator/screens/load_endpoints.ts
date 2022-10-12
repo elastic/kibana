@@ -7,6 +7,8 @@
 
 /* eslint-disable require-atomic-updates */
 
+import { blue } from 'chalk';
+import type { DistinctQuestion } from 'inquirer';
 import { loadEndpoints } from '../services/endpoint_loader';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { ProgressFormatter } from '../../common/screen/progress_formatter';
@@ -21,6 +23,32 @@ interface LoadOptions {
   isDone: boolean;
 }
 
+interface LoadEndpointsConfig {
+  count: number;
+}
+
+const promptQuestion = <TAnswers extends object = object>(
+  options: DistinctQuestion<TAnswers>
+): DistinctQuestion<TAnswers> => {
+  const question: DistinctQuestion<TAnswers> = {
+    type: 'input',
+    name: 'Unknown?',
+    message: 'Unknown?',
+    // @ts-expect-error unclear why this is not defined in the defintion file
+    askAnswered: true,
+    prefix: '    ==> ',
+    ...options,
+  };
+
+  if (question.default === undefined) {
+    question.default = (answers: TAnswers) => {
+      return answers[(question.name ?? '-') as keyof TAnswers] ?? '';
+    };
+  }
+
+  return question;
+};
+
 export class LoadEndpointsScreen extends ScreenBaseClass {
   private runInfo: LoadOptions | undefined = undefined;
   private choices: ChoiceMenuFormatter = new ChoiceMenuFormatter([
@@ -33,6 +61,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
       key: '2',
     },
   ]);
+  private config: LoadEndpointsConfig = { count: 2 };
 
   constructor(private readonly emulatorContext: EmulatorRunContext) {
     super();
@@ -64,7 +93,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
 
       case '1':
         this.runInfo = {
-          count: 2,
+          count: this.config.count,
           progress: new ProgressFormatter(),
           isRunning: false,
           isDone: false,
@@ -75,7 +104,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
         return;
 
       case '2':
-        // show config
+        this.setConfig();
         return;
 
       default:
@@ -85,17 +114,38 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
             this.reRender();
             return;
           }
-
-          this.throwUnknownChoiceError(choice);
         }
+
+        this.throwUnknownChoiceError(choice);
     }
+  }
 
-    //
-    // const count: number = Number(choiceValue);
+  private async setConfig() {
+    this.config = await this.prompt<LoadEndpointsConfig>({
+      questions: [
+        promptQuestion({
+          type: 'number',
+          name: 'count',
+          message: 'How many endpoints to load?',
+          validate(input: number, answers): boolean | string {
+            if (!Number.isFinite(input)) {
+              return 'Enter valid number';
+            }
+            return true;
+          },
+          filter(input: number): number | string {
+            if (Number.isNaN(input)) {
+              return '';
+            }
+            return input;
+          },
+        }),
+      ],
+      answers: this.config,
+      title: blue('Endpoint Loader Settings'),
+    });
 
-    // if (!Number.isFinite(count)) {
-    //   throw new Error(`Invalid number: ${choice}`);
-    // }
+    this.reRender();
   }
 
   private async loadEndpoints() {
@@ -126,7 +176,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   Generate and load endpoints into elasticsearch along with associated
   fleet agents. Current settings:
 
-      Count: ${this.runInfo?.count ?? 2}
+      Count: ${this.config.count}
 
   Options:
 

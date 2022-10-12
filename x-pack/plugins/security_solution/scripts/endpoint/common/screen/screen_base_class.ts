@@ -11,6 +11,8 @@ import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdin, stdout } from 'node:process';
 import * as readline from 'node:readline';
 import { blue, green, red } from 'chalk';
+import type { QuestionCollection } from 'inquirer';
+import inquirer from 'inquirer';
 import { QuitChoice } from './common_choices';
 import type { Choice } from './types';
 import { ChoiceMenuFormatter } from './choice_menu_formatter';
@@ -296,6 +298,31 @@ ${displayChoices}${HORIZONTAL_LINE}`;
   public pause() {
     this.isPaused = true;
     this.closeReadline();
+  }
+
+  public async prompt<TAnswers extends object = object>({
+    questions,
+    answers = {},
+    title = blue('Settings:'),
+  }: {
+    questions: QuestionCollection<TAnswers>;
+    answers?: Partial<TAnswers>;
+    title?: string;
+  }): Promise<TAnswers> {
+    if (this.isPaused || this.isHidden) {
+      return answers as TAnswers;
+    }
+
+    const screenRenderInfo = new RenderedScreen(this.getOutputContent(this.header()));
+
+    this.screenRenderInfo = screenRenderInfo;
+    this.clearScreen();
+    this.ttyOut.write(`${screenRenderInfo.output}${title ? `${this.leftPad(title)}\n` : ''}`);
+
+    const ask = inquirer.createPromptModule();
+    const newAnswers = await ask(questions, answers);
+
+    return newAnswers;
   }
 }
 
