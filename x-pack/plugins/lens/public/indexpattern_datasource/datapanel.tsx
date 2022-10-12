@@ -6,7 +6,7 @@
  */
 
 import './datapanel.scss';
-import { groupBy, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiCallOut,
@@ -25,18 +25,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataView, type DataViewField } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   ExistenceFetchStatus,
+  FieldsGroupNames,
   FieldList,
-  type FieldListGroups,
   type FieldListProps,
-  useExistingFieldsReader,
   useExistingFieldsFetcher,
+  useGroupedFields,
+  useExistingFieldsReader,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
@@ -68,10 +69,6 @@ export type Props = Omit<
   indexPatternService: IndexPatternServiceAPI;
   onIndexPatternRefresh: () => void;
 };
-
-function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
-  return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
-}
 
 const supportedFieldTypes = new Set([
   'string',
@@ -107,6 +104,10 @@ const fieldTypeNames: Record<DataType, string> = {
   }),
   murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
 };
+
+function onSupportedFieldFilter(field: DataViewField): boolean {
+  return supportedFieldTypes.has(field.type);
+}
 
 export function IndexPatternDataPanel({
   state,
@@ -206,18 +207,6 @@ interface DataPanelState {
   isMetaAccordionOpen: boolean;
 }
 
-const defaultFieldGroups: {
-  specialFields: IndexPatternField[];
-  availableFields: IndexPatternField[];
-  emptyFields: IndexPatternField[];
-  metaFields: IndexPatternField[];
-} = {
-  specialFields: [],
-  availableFields: [],
-  emptyFields: [],
-  metaFields: [],
-};
-
 const htmlId = htmlIdGenerator('datapanel');
 const fieldSearchDescriptionId = htmlId();
 
@@ -285,12 +274,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       }
     },
   });
-  const { getFieldsExistenceStatus, hasFieldData, isFieldsExistenceInfoUnavailable } =
-    useExistingFieldsReader();
-  const fieldsExistenceStatus = getFieldsExistenceStatus(currentIndexPatternId);
-  const fieldsExistenceInfoUnavailable = isFieldsExistenceInfoUnavailable(currentIndexPatternId);
-
-  // console.log(isProcessing, fieldsExistenceStatus);
+  const fieldsExistenceReader = useExistingFieldsReader();
+  const fieldsExistenceStatus =
+    fieldsExistenceReader.getFieldsExistenceStatus(currentIndexPatternId);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -302,8 +288,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         );
   }, [currentIndexPattern, visualizeGeoFieldTrigger]);
 
-  // console.log(currentIndexPatternId, fieldsExistenceStatus, allFields);
-
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const availableFieldTypes = uniq([
     ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
@@ -314,148 +298,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const editPermission =
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
-  const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
-    const containsData = (field: IndexPatternField) => {
-      const overallField = currentIndexPattern?.getFieldByName(field.name);
-      return overallField && hasFieldData(currentIndexPatternId, overallField.name);
-    };
-
-    const allSupportedTypesFields = allFields.filter((field) =>
-      supportedFieldTypes.has(field.type)
-    );
-    const sorted = allSupportedTypesFields.sort(sortFields);
-    const groupedFields = {
-      ...defaultFieldGroups,
-      ...groupBy(sorted, (field) => {
-        if (field.type === 'document') {
-          return 'specialFields';
-        } else if (field.meta) {
-          return 'metaFields';
-        } else if (containsData(field)) {
-          return 'availableFields';
-        } else return 'emptyFields';
-      }),
-    };
-
-    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
-
-    const fieldGroupDefinitions: FieldListGroups = {
-      SpecialFields: {
-        fields: groupedFields.specialFields,
-        fieldCount: 1,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: false,
-        showInAccordion: false,
-        title: '',
-        hideDetails: true,
-      },
-      AvailableFields: {
-        fields: groupedFields.availableFields,
-        fieldCount: groupedFields.availableFields.length,
-        isInitiallyOpen: true,
-        showInAccordion: true,
-        title: fieldsExistenceInfoUnavailable
-          ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
-              defaultMessage: 'All fields',
-            })
-          : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
-              defaultMessage: 'Available fields',
-            }),
-        helpText: isUsingSampling
-          ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
-              defaultMessage:
-                'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
-            })
-          : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
-              defaultMessage:
-                'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
-            }),
-        isAffectedByGlobalFilter: !!filters.length,
-        isAffectedByTimeFilter: true,
-        // Show details on timeout but not failure
-        // hideDetails: fieldsExistenceInfoUnavailable && !existenceFetchTimeout, // TODO: is this check still necessary?
-        hideDetails: fieldsExistenceInfoUnavailable,
-        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
-          defaultMessage: `There are no available fields that contain data.`,
-        }),
-      },
-      EmptyFields: {
-        fields: groupedFields.emptyFields,
-        fieldCount: groupedFields.emptyFields.length,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: false,
-        showInAccordion: true,
-        hideDetails: false,
-        title: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
-          defaultMessage: 'Empty fields',
-        }),
-        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noEmptyDataLabel', {
-          defaultMessage: `There are no empty fields.`,
-        }),
-        helpText: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabelHelp', {
-          defaultMessage:
-            'Empty fields did not contain any values in the first 500 documents based on your filters.',
-        }),
-      },
-      MetaFields: {
-        fields: groupedFields.metaFields,
-        fieldCount: groupedFields.metaFields.length,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: false,
-        showInAccordion: true,
-        hideDetails: false,
-        title: i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
-          defaultMessage: 'Meta fields',
-        }),
-        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noMetaDataLabel', {
-          defaultMessage: `There are no meta fields.`,
-        }),
-      },
-    };
-
-    // do not show empty field accordion if there is no existence information
-    if (fieldsExistenceInfoUnavailable) {
-      delete fieldGroupDefinitions.EmptyFields;
-    }
-
-    return fieldGroupDefinitions;
-  }, [
-    allFields,
-    core.uiSettings,
-    hasFieldData,
-    fieldsExistenceInfoUnavailable,
-    filters.length,
-    currentIndexPatternId,
-    currentIndexPattern,
-  ]);
-
-  // TODO: fix DataViewField vs IndexPatternField types
-  const fieldGroups: FieldListGroups = useMemo(() => {
-    const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
-      fieldGroup.filter((field) => {
-        if (
-          localState.nameFilter.length &&
-          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
-          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
-        ) {
-          return false;
-        }
-        if (localState.typeFilter.length > 0) {
-          return localState.typeFilter.includes(getFieldType(field) as DataType);
-        }
-        return true;
-      });
-    return Object.fromEntries(
-      Object.entries(unfilteredFieldGroups).map(([name, group]) => [
-        name,
-        { ...group, fields: filterFieldGroup(group.fields) },
-      ])
-    );
-  }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
-
   const { nameFilter, typeFilter } = localState;
 
   const filter = useMemo(
@@ -465,6 +307,49 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     }),
     [nameFilter, typeFilter]
   );
+
+  const onFilterField = (field: IndexPatternField | DataViewField) => {
+    if (
+      localState.nameFilter.length &&
+      !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+      !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
+    ) {
+      return false;
+    }
+    if (localState.typeFilter.length > 0) {
+      return localState.typeFilter.includes(getFieldType(field) as DataType);
+    }
+    return true;
+  };
+
+  const { fieldGroups } = useGroupedFields({
+    dataViewId: currentIndexPatternId,
+    allFields: allFields as unknown as DataViewField[],
+    services: {
+      dataViews,
+    },
+    fieldsExistenceReader,
+    onFilterField,
+    onSupportedFieldFilter,
+    onOverrideFieldGroupDetails: (groupName) => {
+      if (groupName === FieldsGroupNames.AvailableFields) {
+        const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+
+        return {
+          helpText: isUsingSampling
+            ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
+                defaultMessage:
+                  'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
+              })
+            : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+                defaultMessage:
+                  'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+              }),
+          isAffectedByGlobalFilter: !!filters.length,
+        };
+      }
+    },
+  });
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -570,7 +455,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ({ field, itemIndex, groupIndex, hideDetails }) => (
       <FieldItem
         field={field}
-        exists={fieldContainsData(field.name, currentIndexPattern, hasFieldData)}
+        exists={fieldContainsData(
+          field.name,
+          currentIndexPattern,
+          fieldsExistenceReader.hasFieldData
+        )}
         hideDetails={hideDetails}
         itemIndex={itemIndex}
         groupIndex={groupIndex}
@@ -598,7 +487,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       filters,
       localState.nameFilter,
       charts.theme,
-      hasFieldData,
+      fieldsExistenceReader.hasFieldData,
       dropOntoWorkspace,
       hasSuggestionForField,
       editField,

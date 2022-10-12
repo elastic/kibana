@@ -10,28 +10,12 @@ import { partition, throttle } from 'lodash';
 import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
+import { FieldListGroups } from '../../types';
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
-
-export type FieldListGroups = Record<
-  string,
-  {
-    fields: DataViewField[];
-    fieldCount: number;
-    showInAccordion: boolean;
-    isInitiallyOpen: boolean;
-    title: string;
-    helpText?: string;
-    isAffectedByGlobalFilter: boolean;
-    isAffectedByTimeFilter: boolean;
-    hideDetails?: boolean;
-    defaultNoFieldsMessage?: string;
-  }
->;
 
 function getDisplayedFieldsLength(
   fieldGroups: FieldListGroups,
@@ -145,10 +129,10 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
                   defaultMessage:
                     '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
                   values: {
-                    availableFields: fieldGroups.AvailableFields.fields.length,
+                    availableFields: fieldGroups.AvailableFields?.fields.length || 0,
                     // empty fields can be undefined if there is no existence information to be fetched
                     emptyFields: fieldGroups.EmptyFields?.fields.length || 0,
-                    metaFields: fieldGroups.MetaFields.fields.length,
+                    metaFields: fieldGroups.MetaFields?.fields.length || 0,
                   },
                 })}
               </div>

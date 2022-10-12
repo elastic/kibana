@@ -25,3 +25,30 @@ export enum ExistenceFetchStatus {
   succeeded = 'succeeded',
   unknown = 'unknown',
 }
+
+export enum FieldsGroupNames {
+  SpecialFields = 'SpecialFields',
+  AvailableFields = 'AvailableFields',
+  EmptyFields = 'EmptyFields',
+  MetaFields = 'MetaFields',
+}
+
+export interface FieldsGroupDetails {
+  showInAccordion: boolean;
+  isInitiallyOpen: boolean;
+  title: string;
+  helpText?: string;
+  isAffectedByGlobalFilter: boolean;
+  isAffectedByTimeFilter: boolean;
+  hideDetails?: boolean;
+  defaultNoFieldsMessage?: string;
+}
+
+export interface FieldsGroup extends FieldsGroupDetails {
+  fields: DataViewField[];
+  fieldCount: number;
+}
+
+export type FieldListGroups = {
+  [key in FieldsGroupNames]?: FieldsGroup;
+};

@@ -14,7 +14,7 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export { FieldList, type FieldListProps, type FieldListGroups } from './components/field_list';
+export { FieldList, type FieldListProps } from './components/field_list';
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
 export {
@@ -45,8 +45,10 @@ export type {
   UnifiedFieldListPluginSetup,
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
+  FieldListGroups,
+  FieldsGroupDetails,
 } from './types';
-export { ExistenceFetchStatus } from './types';
+export { ExistenceFetchStatus, FieldsGroupNames } from './types';
 
 export {
   useExistingFieldsFetcher,
@@ -56,3 +58,5 @@ export {
   type FetchExistenceInfoParams,
   type ExistingFieldsReader,
 } from './hooks/use_existing_fields';
+
+export { useGroupedFields } from './hooks/use_grouped_fields';
