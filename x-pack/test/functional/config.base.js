@@ -508,7 +508,7 @@ export default async function ({ readConfigFile }) {
                 names: ['*'],
                 privileges: ['all'],
               },
-            ]
+            ],
           },
         },
 
