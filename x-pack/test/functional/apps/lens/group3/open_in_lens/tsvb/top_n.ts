@@ -80,12 +80,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to horizontal bar', async () => {
+      await visualBuilder.selectAggType('Max');
+      await visualBuilder.setFieldForAggregation('memory', 0);
       const button = await testSubjects.find('visualizeEditInLensButton');
       await button.click();
       await lens.waitForVisualization('xyVisChart');
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Bar horizontal');
+      await retry.try(async () => {
+        const layerCount = await lens.getLayerCount();
+        expect(layerCount).to.be(1);
+
+        const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
+        expect(yDimensionText).to.be('Maximum of memory');
+      });
     });
 
     it('should convert group by to vertical axis', async () => {
