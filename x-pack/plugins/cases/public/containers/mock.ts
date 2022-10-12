@@ -401,7 +401,14 @@ const basicAction = {
 
 export const cases: Case[] = [
   basicCase,
-  { ...pushedCase, id: '1', totalComment: 0, comments: [], status: CaseStatuses['in-progress'] },
+  {
+    ...pushedCase,
+    id: '1',
+    totalComment: 0,
+    comments: [],
+    status: CaseStatuses['in-progress'],
+    severity: CaseSeverity.MEDIUM,
+  },
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
@@ -565,6 +572,7 @@ export const casesSnake: CasesResponse = [
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],
+    severity: CaseSeverity.MEDIUM,
   },
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },

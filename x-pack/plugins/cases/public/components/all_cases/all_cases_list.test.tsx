@@ -24,7 +24,7 @@ import {
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
@@ -159,10 +159,6 @@ describe('AllCasesListGeneric', () => {
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
-      ).toBe(useGetCasesMockState.data.cases[0].severity);
-
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
@@ -273,6 +269,12 @@ describe('AllCasesListGeneric', () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
     expect(res.getByTestId('tableHeaderCell_Status_6')).toBeInTheDocument();
+  });
+
+  it('renders the severity column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_Severity_7')).toBeInTheDocument();
   });
 
   it('should render the case stats', () => {
@@ -763,6 +765,48 @@ describe('AllCasesListGeneric', () => {
         }
       );
 
+      it.each([
+        [CaseSeverity.LOW],
+        [CaseSeverity.MEDIUM],
+        [CaseSeverity.HIGH],
+        [CaseSeverity.CRITICAL],
+      ])('Bulk update severity: %s', async (severity) => {
+        const result = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        act(() => {
+          userEvent.click(result.getByText('Bulk actions'));
+        });
+
+        await waitForEuiPopoverOpen();
+
+        act(() => {
+          userEvent.click(result.getByTestId('case-bulk-action-severity'));
+        });
+
+        await waitFor(() => {
+          expect(result.getByTestId(`cases-bulk-action-severity-${severity}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(result.getByTestId(`cases-bulk-action-severity-${severity}`));
+        });
+
+        await waitForComponentToUpdate();
+
+        expect(updateCasesSpy).toBeCalledWith(
+          useGetCasesMockState.data.cases.map(({ id, version }) => ({
+            id,
+            version,
+            severity,
+          })),
+          expect.anything()
+        );
+      });
+
       it('Bulk delete', async () => {
         const result = appMockRenderer.render(<AllCasesList />);
 
@@ -828,6 +872,13 @@ describe('AllCasesListGeneric', () => {
         [CaseStatuses.closed],
       ];
 
+      const severityTests = [
+        [CaseSeverity.LOW],
+        [CaseSeverity.MEDIUM],
+        [CaseSeverity.HIGH],
+        [CaseSeverity.CRITICAL],
+      ];
+
       it('should render row actions', async () => {
         const res = appMockRenderer.render(<AllCasesList />);
 
@@ -873,6 +924,46 @@ describe('AllCasesListGeneric', () => {
         await waitFor(() => {
           expect(updateCasesSpy).toHaveBeenCalledWith(
             [{ id: theCase.id, status, version: theCase.version }],
+            expect.anything()
+          );
+        });
+      });
+
+      it.each(severityTests)('update the status of a case: %s', async (severity) => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const lowCase = useGetCasesMockState.data.cases[0];
+        const mediumCase = useGetCasesMockState.data.cases[1];
+        const theCase = severity === CaseSeverity.LOW ? mediumCase : lowCase;
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-popover-button-${theCase.id}`));
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-severity-panel-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-severity-panel-${theCase.id}`), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`cases-bulk-action-severity-${severity}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`cases-bulk-action-severity-${severity}`));
+        });
+
+        await waitFor(() => {
+          expect(updateCasesSpy).toHaveBeenCalledWith(
+            [{ id: theCase.id, severity, version: theCase.version }],
             expect.anything()
           );
         });
