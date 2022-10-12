@@ -206,7 +206,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
             </EuiButtonEmpty>
 
             <EuiTitle size="m">
-              <h2>
+              <h2 data-test-subj="guideTitle">
                 {isGuideReadyToComplete
                   ? i18n.translate('guidedOnboarding.dropdownPanel.completeGuideFlyoutTitle', {
                       defaultMessage: 'Well done!',
@@ -222,7 +222,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
             <div>
               <EuiText size="m">
-                <p>
+                <p data-test-subj="guideDescription">
                   {isGuideReadyToComplete
                     ? i18n.translate(
                         'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',

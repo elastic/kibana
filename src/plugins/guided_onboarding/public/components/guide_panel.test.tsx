@@ -158,8 +158,8 @@ describe('Guided setup', () => {
       expect(exists('guideProgress')).toBe(true);
     });
 
-    test('should show the "Continue using Elastic" button when all steps has been completed', async () => {
-      const { component, exists } = testBed;
+    test('should show the completed state when all steps has been completed', async () => {
+      const { component, exists, find } = testBed;
 
       const readyToCompleteGuideState: GuideState = {
         guideId: 'search',
@@ -187,6 +187,10 @@ describe('Guided setup', () => {
 
       component.update();
 
+      expect(find('guideTitle').text()).toContain('Well done');
+      expect(find('guideDescription').text()).toContain(
+        `You've completed the Elastic Enterprise Search guide`
+      );
       expect(exists('useElasticButton')).toBe(true);
     });
 
