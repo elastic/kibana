@@ -30,17 +30,3 @@ export function withCpuProfile(callback: () => any, onProfileDone: (profile: Pro
   }
   return result;
 }
-
-// export function withCpuProfile(callback: () => any) {
-//   const stop = pprof.time.start();
-
-//   const result = callback();
-
-//   if (isPromise(result)) {
-//     result.then(( ) => {
-//       return
-//     }, ( ) => {
-
-//     })
-//   }
-// }
