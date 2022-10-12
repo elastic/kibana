@@ -278,6 +278,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: max grouped on float', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
       await createRule({
         name: 'never fire',
         aggType: 'max',
