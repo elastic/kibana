@@ -78,6 +78,7 @@ export type ColorDynamicOptions = {
   customColorRamp?: OrdinalColorStop[];
   useCustomColorRamp?: boolean;
   dataMappingFunction?: DATA_MAPPING_FUNCTION;
+  invert?: boolean;
 
   // category color properties
   colorCategory?: string; // TODO move color category palettes to constants and make ENUM type
