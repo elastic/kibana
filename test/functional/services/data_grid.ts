@@ -296,10 +296,6 @@ export class DataGridService extends FtrService {
     await this.openColMenuByField(field);
     await this.find.clickByButtonText('Copy name');
   }
-  public async clickEditField(field: string) {
-    await this.openColMenuByField(field);
-    await this.testSubjects.click('gridEditFieldButton');
-  }
 
   public async clickEditField(field: string) {
     await this.openColMenuByField(field);
