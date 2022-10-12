@@ -200,7 +200,8 @@ export class ControlGroupContainer extends Container<
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
-      this.initialized$.next(true);
+      // set initialized state on next frame to ensure initial filters have been published into output.
+      setTimeout(() => this.initialized$.next(true));
     });
   }
 
