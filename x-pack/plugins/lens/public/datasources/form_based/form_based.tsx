@@ -67,7 +67,7 @@ import {
   getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
-  cloneLayer
+  cloneLayer,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { normalizeOperationDataType } from './pure_utils';
