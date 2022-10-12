@@ -278,6 +278,9 @@ export interface DocLinks {
     readonly threatIntelInt: string;
     readonly responseActions: string;
     readonly configureEndpointIntegrationPolicy: string;
+    readonly exceptions: {
+      value_lists: string;
+    };
   };
   readonly query: {
     readonly eql: string;
