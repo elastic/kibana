@@ -505,4 +505,46 @@ export class ConsolePageObject extends FtrService {
     const body = await this.getRequestBody();
     return body.split('\n').length;
   }
+
+  public async copyRequestsToClipboard() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+  }
+
+  public async pasteClipboardValue() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'v']);
+  }
+
+  public async clickHistory() {
+    const historyButton = await this.testSubjects.find('consoleHistoryButton');
+    await historyButton.click();
+  }
+
+  public async getHistoryEntries() {
+    const history = await this.find.allByCssSelector('.list-group-item');
+    return await Promise.all(history.map(async (item) => await item.getVisibleText()));
+  }
+
+  public async loadRequestFromHistory(index: number) {
+    const historyItem = await this.find.byCssSelector(`#historyReq${index}`);
+    await historyItem.click();
+    await this.testSubjects.click('consoleHistoryApplyButton');
+  }
+
+  public async clickClearHistory() {
+    const clearHistoryButton = await this.testSubjects.find('consoleClearHistoryButton');
+    await clearHistoryButton.click();
+
+    await this.retry.waitFor('history to be cleared', async () => {
+      const history = await this.getHistoryEntries();
+      return history.length === 0;
+    });
+  }
+
+  public async closeHistory() {
+    const closeButton = await this.testSubjects.find('consoleHistoryCloseButton');
+    await closeButton.click();
+  }
 }

@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  EndpointCapabilities,
+  ConsoleResponseActionCommands,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -16,10 +20,6 @@ import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 import type { ImmutableArray } from '../../../../common/endpoint/types';
 import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
-import type {
-  ResponderCapabilities,
-  ResponderCommands,
-} from '../../../../common/endpoint/constants';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -45,7 +45,7 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilities>([
+const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
   ['kill-process', 'kill_process'],
@@ -54,9 +54,9 @@ const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilitie
 ]);
 
 const capabilitiesValidator = (command: Command): true | string => {
-  const endpointCapabilities: ResponderCapabilities[] = command.commandDefinition.meta.capabilities;
+  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
   const responderCapability = commandToCapabilitiesMap.get(
-    command.commandDefinition.name as ResponderCommands
+    command.commandDefinition.name as ConsoleResponseActionCommands
   );
   if (responderCapability) {
     if (endpointCapabilities.includes(responderCapability)) {
@@ -97,7 +97,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId: string;
   endpointCapabilities: ImmutableArray<string>;
 }): CommandDefinition[] => {
-  const doesEndpointSupportCommand = (commandName: ResponderCommands) => {
+  const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
