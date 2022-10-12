@@ -21,6 +21,7 @@ import {
   ContainerOutput,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
+  isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
@@ -73,15 +74,13 @@ export class DashboardContainerFactoryDefinition
     };
   }
 
-  public create = async (
-    initialInput: DashboardContainerInput,
-    parent?: Container
-  ): Promise<DashboardContainer | ErrorEmbeddable> => {
+  private buildControlGroup = async (
+    initialInput: DashboardContainerInput
+  ): Promise<ControlGroupContainer | ErrorEmbeddable | undefined> => {
     const { pluginServices } = await import('../../services/plugin_services');
     const {
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
-
     const controlsGroupFactory = getEmbeddableFactory<
       ControlGroupInput,
       ControlGroupOutput,
@@ -97,10 +96,23 @@ export class DashboardContainerFactoryDefinition
       filters,
       query,
     });
+    if (controlGroup && !isErrorEmbeddable(controlGroup)) {
+      await controlGroup.untilInitialized();
+    }
+    return controlGroup;
+  };
 
-    const { DashboardContainer: DashboardContainerEmbeddable } = await import(
-      './dashboard_container'
-    );
+  public create = async (
+    initialInput: DashboardContainerInput,
+    parent?: Container
+  ): Promise<DashboardContainer | ErrorEmbeddable> => {
+    const controlGroupPromise = this.buildControlGroup(initialInput);
+    const dashboardContainerPromise = import('./dashboard_container');
+
+    const [controlGroup, { DashboardContainer: DashboardContainerEmbeddable }] = await Promise.all([
+      controlGroupPromise,
+      dashboardContainerPromise,
+    ]);
 
     return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, controlGroup));
   };
