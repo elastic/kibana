@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -127,6 +128,7 @@ export function DiscoverSidebarComponent({
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
   const isPlainRecord = !onAddFilter;
+  const query = useAppStateSelector((state) => state.query);
 
   useEffect(() => {
     if (documents) {
@@ -313,8 +315,7 @@ export function DiscoverSidebarComponent({
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
   const visualizeAggregateQuery = useCallback(() => {
-    const aggregateQuery =
-      state.query && isOfAggregateQueryType(state.query) ? state.query : undefined;
+    const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
     triggerVisualizeActionsTextBasedLanguages(
       getUiActions(),
       columns,
@@ -322,7 +323,7 @@ export function DiscoverSidebarComponent({
       selectedDataView,
       aggregateQuery
     );
-  }, [columns, selectedDataView, state.query]);
+  }, [columns, selectedDataView, query]);
 
   if (!selectedDataView) {
     return null;
