@@ -138,10 +138,16 @@ export class DataViewEditorService {
   getIndicesCached = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
     const key = JSON.stringify(props);
 
-    this.getIndicesMemory[key] =
-      this.getIndicesMemory[key] ||
-      this.dataViews.getIndices({ ...props, isRollupIndex: await this.getIsRollupIndex() });
-    return await this.getIndicesMemory[key];
+    const getIndicesPromise = this.getIsRollupIndex().then((isRollupIndex) =>
+      this.dataViews.getIndices({ ...props, isRollupIndex })
+    );
+    this.getIndicesMemory[key] = this.getIndicesMemory[key] || getIndicesPromise;
+
+    getIndicesPromise.catch(() => {
+      delete this.getIndicesMemory[key];
+    });
+
+    return await getIndicesPromise;
   };
 
   private timeStampOptionsMemory: Record<string, Promise<TimestampOption[]>> = {};
@@ -158,10 +164,19 @@ export class DataViewEditorService {
     requireTimestampField: boolean
   ) => {
     const key = JSON.stringify(getFieldsOptions) + requireTimestampField;
+
+    const getTimestampOptionsPromise = this.getTimestampOptionsForWildcard(
+      getFieldsOptions,
+      requireTimestampField
+    );
     this.timeStampOptionsMemory[key] =
-      this.timeStampOptionsMemory[key] ||
-      this.getTimestampOptionsForWildcard(getFieldsOptions, requireTimestampField);
-    return await this.timeStampOptionsMemory[key];
+      this.timeStampOptionsMemory[key] || getTimestampOptionsPromise;
+
+    getTimestampOptionsPromise.catch(() => {
+      delete this.timeStampOptionsMemory[key];
+    });
+
+    return await getTimestampOptionsPromise;
   };
 
   loadTimestampFields = async (
