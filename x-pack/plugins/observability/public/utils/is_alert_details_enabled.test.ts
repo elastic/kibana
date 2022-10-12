@@ -251,5 +251,42 @@ describe('isAlertDetailsEnabled', () => {
       } as ConfigSchema;
       expect(isAlertDetailsEnabledPerApp(undefined, updatedConfig)).toBeFalsy();
     });
+    it('returns FALSE when a none-listed rule type is checked', () => {
+      const updatedConfig = {
+        unsafe: {
+          alertDetails: {
+            apm: { enabled: true },
+            logs: { enabled: true },
+            metrics: { enabled: true },
+            uptime: { enabled: true },
+          },
+        },
+      } as ConfigSchema;
+      const noneListedRuleType = {
+        reason: 'reason message',
+        fields: {
+          [ALERT_STATUS]: 'active',
+          [TIMESTAMP]: '2022-09-02T13:08:51.750Z',
+          [ALERT_DURATION]: 882076000,
+          [ALERT_WORKFLOW_STATUS]: 'open',
+          [ALERT_RULE_UUID]: 'db2ab7c0-0bec-11ec-9ae2-5b10ca924404',
+          [ALERT_START]: '2021-09-02T12:54:09.674Z',
+          [ALERT_RULE_TYPE_ID]: 'new.rule.type.not.listed',
+          [EVENT_ACTION]: 'active',
+          [ALERT_EVALUATION_VALUE]: 1957,
+          [ALERT_INSTANCE_ID]: '*',
+          [ALERT_RULE_NAME]: 'mockedRule',
+          [ALERT_UUID]: '432ab7c0-0bec-11ec-9ae2-4b10ca857438',
+          [SPACE_IDS]: ['default'],
+          [VERSION]: '8.0.0',
+          [EVENT_KIND]: 'signal',
+          [ALERT_RULE_TAGS]: [],
+        },
+        active: true,
+        start: 1630587249674,
+        lastUpdated: 1630588131750,
+      } as unknown as TopAlert;
+      expect(isAlertDetailsEnabledPerApp(noneListedRuleType, updatedConfig)).toBeFalsy();
+    });
   });
 });
