@@ -180,7 +180,7 @@ describe('execute Torq action', () => {
       services,
       config,
       secrets: { token: '1234' },
-      params: { payload: 'some data' },
+      params: { body: 'some data' },
       configurationUtilities: configurationUtilities,
     });
 
@@ -237,12 +237,12 @@ describe('execute Torq action', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let paramsObject: any;
     try {
-      paramsObject = JSON.parse(`${params.payload}`);
+      paramsObject = JSON.parse(`${params.body}`);
     } catch (err) {
       expect(err).toBe(null);
     }
 
     expect(paramsObject.x).toBe(rogue);
-    expect(params.payload).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
+    expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 });

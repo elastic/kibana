@@ -62,7 +62,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            payload: `{"msg": "test"}`,
+            body: `{"msg": "test"}`,
           },
         })
         .expect(200);
@@ -148,7 +148,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            payload: `{"msg": "test"}`,
+            body: `{"msg": "test"}`,
           },
         })
         .expect(200);
@@ -167,7 +167,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            payload: `{"msg": "respond-with-400"}`
+            body: `{"msg": "respond-with-400"}`
           },
         })
         .expect(200);
@@ -181,7 +181,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            payload: `{"msg": "respond-with-429"}`
+            body: `{"msg": "respond-with-429"}`
           },
         })
         .expect(200);
@@ -198,7 +198,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            payload: `{"msg": "respond-with-502"}`,
+            body: `{"msg": "respond-with-502"}`,
           },
         })
         .expect(200);
@@ -216,7 +216,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            payload: `{"msg": "respond-with-405"}`,
+            body: `{"msg": "respond-with-405"}`,
           },
         })
         .expect(200);

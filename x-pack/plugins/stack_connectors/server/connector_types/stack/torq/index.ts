@@ -58,7 +58,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  payload: schema.maybe(schema.string()),
+  body: schema.maybe(schema.string()),
 });
 
 export const ActionTypeId = '.torq';
@@ -100,9 +100,9 @@ function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
-  if (!params.payload) return params;
+  if (!params.body) return params;
   return {
-    payload: renderMustacheString(params.payload, variables, 'json'),
+    body: renderMustacheString(params.body, variables, 'json'),
   };
 }
 
@@ -152,7 +152,7 @@ export async function executor(
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const { webhookIntegrationUrl } = execOptions.config;
-  const { payload: data } = execOptions.params;
+  const { body: data } = execOptions.params;
   const configurationUtilities = execOptions.configurationUtilities;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
