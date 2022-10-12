@@ -205,11 +205,11 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
-  const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
-  if (disableVersionCheck) {
-    return;
-  }
+  // const disableVersionCheck =
+  //   appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+  // if (disableVersionCheck) {
+  //   return;
+  // }
 
   const kibanaVersion = '8.5.0'; //appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
 
