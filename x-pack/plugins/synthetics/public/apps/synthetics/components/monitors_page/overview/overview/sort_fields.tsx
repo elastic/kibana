@@ -107,7 +107,7 @@ export const SortFields = ({ onSortChange }: { onSortChange?: () => void }) => {
               <span>{SORT_TITLE}</span>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="syntheticsOverviewSortButton">
             <SortMenu sortOptions={sortByOptions} orderOptions={orderByOptions} sortField={label} />
           </EuiFlexItem>
         </EuiFlexGroup>

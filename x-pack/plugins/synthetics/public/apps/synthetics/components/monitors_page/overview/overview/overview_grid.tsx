@@ -88,7 +88,7 @@ export const OverviewGrid = () => {
       </EuiFlexGroup>
       <EuiSpacer />
       {loaded && currentMonitors.length ? (
-        <EuiFlexGrid columns={4}>
+        <EuiFlexGrid columns={4} data-test-subj="syntheticsOverviewGridItemContainer">
           {currentMonitors.map((monitor) => (
             <EuiFlexItem
               key={`${monitor.id}-${monitor.location?.id}`}
