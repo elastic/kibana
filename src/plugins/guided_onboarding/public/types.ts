@@ -68,6 +68,7 @@ export interface StepConfig {
   manualCompletion?: {
     title: string;
     description: string;
+    readyToCompleteOnNavigation?: boolean;
   };
 }
 export interface GuideConfig {

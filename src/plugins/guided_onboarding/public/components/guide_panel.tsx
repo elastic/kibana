@@ -83,7 +83,12 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
       }
       if (status === 'active' || status === 'in_progress') {
         if (stepConfig.location) {
-          application.navigateToApp(stepConfig.location.appID, { path: stepConfig.location.path });
+          await application.navigateToApp(stepConfig.location.appID, {
+            path: stepConfig.location.path,
+          });
+          if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
+            await api.completeGuideStep(guideState.guideId, id);
+          }
         }
       }
     }

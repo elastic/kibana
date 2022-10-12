@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
 
@@ -22,20 +22,25 @@ export const GuideButtonPopover = ({
   title,
   description,
 }: GuideButtonPopoverProps) => {
-  const isPopoverShown = useRef(true);
+  const isFirstRender = useRef(true);
   useEffect(() => {
-    // the guide panel is closed by default and if the user opens it, we don't want to keep showing the popover
-    if (isPopoverShown.current && isGuidePanelOpen) {
-      isPopoverShown.current = false;
+    isFirstRender.current = false;
+  }, []);
+
+  const [isPopoverShown, setIsPopoverShown] = useState(true);
+  useEffect(() => {
+    // close the popover after it was rendered once and the panel is opened
+    if (isGuidePanelOpen && !isFirstRender.current) {
+      setIsPopoverShown(false);
     }
   }, [isGuidePanelOpen]);
   return (
     <EuiPopover
       data-test-subj="manualCompletionPopover"
       button={button}
-      isOpen={isPopoverShown.current && !isGuidePanelOpen}
+      isOpen={isPopoverShown}
       closePopover={() => {
-        /* do nothing, the popover is closed once when the panel is opened */
+        /* do nothing, the popover is closed once the panel is opened */
       }}
     >
       {title && <EuiPopoverTitle>{title}</EuiPopoverTitle>}

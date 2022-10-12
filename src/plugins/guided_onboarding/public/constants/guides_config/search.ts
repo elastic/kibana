@@ -45,6 +45,7 @@ export const searchConfig: GuideConfig = {
         title: 'Manual completion step title',
         description:
           'Mark the step complete by opening the panel and clicking the button "Mark done"',
+        readyToCompleteOnNavigation: true,
       },
     },
     {
