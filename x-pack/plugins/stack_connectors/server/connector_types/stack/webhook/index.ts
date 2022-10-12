@@ -96,6 +96,7 @@ export function getConnectorType({ logger }: { logger: Logger }): WebhookConnect
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
+    maxAttempts: 3,
     validate: {
       config: {
         schema: ConfigSchema,

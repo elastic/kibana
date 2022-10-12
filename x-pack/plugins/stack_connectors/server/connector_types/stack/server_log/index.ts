@@ -57,6 +57,7 @@ export function getConnectorType({ logger }: { logger: Logger }): ServerLogConne
       defaultMessage: 'Server log',
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
+    maxAttempts: 3,
     validate: {
       params: {
         schema: ParamsSchema,

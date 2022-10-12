@@ -71,6 +71,7 @@ export function getServiceNowITOMConnectorType(
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    maxAttempts: 3,
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationBaseSchema,

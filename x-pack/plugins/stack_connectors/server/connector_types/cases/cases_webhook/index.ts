@@ -49,6 +49,7 @@ export function getConnectorType({
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
+    maxAttempts: 3,
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationSchema,
