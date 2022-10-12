@@ -201,17 +201,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(prevDataViewId).not.to.equal(newDataViewId);
     });
 
-    it('should update id after data view field removal', async () => {
-      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      await PageObjects.discover.clickFieldListItemRemove('_bytes-runtimefield-edited');
-      await PageObjects.discover.removeField('_bytes-runtimefield-edited');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
-      expect(prevDataViewId).not.to.equal(newDataViewId);
-    });
-
     it('should notify about invalid filter reffs', async () => {
       await PageObjects.discover.createAdHocDataView('logstas', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
