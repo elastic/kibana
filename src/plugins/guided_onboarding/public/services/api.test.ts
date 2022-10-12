@@ -334,7 +334,6 @@ describe('GuidedOnboarding ApiService', () => {
 
       await apiService.completeGuideStep('security', 'rules');
 
-      // Once on update, once on complete
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // Verify the completed step now has a "ready_to_complete" status, and the subsequent step is "inactive"
       expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
@@ -367,7 +366,6 @@ describe('GuidedOnboarding ApiService', () => {
       apiService.setup(httpClient);
 
       await apiService.completeGuideStep(searchGuide, firstStep);
-      // Expect only 1 call from updateGuideState()
       expect(httpClient.put).toHaveBeenCalledTimes(0);
     });
   });

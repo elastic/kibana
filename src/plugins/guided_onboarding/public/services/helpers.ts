@@ -11,9 +11,9 @@ import { guidesConfig } from '../constants/guides_config';
 import { GuideConfig, StepConfig } from '../types';
 import { GuideStep } from '../../common/types';
 
-export const getGuideConfig = (guideId?: string): GuideConfig | undefined => {
+export const getGuideConfig = (guideId?: GuideId): GuideConfig | undefined => {
   if (guideId && Object.keys(guidesConfig).includes(guideId)) {
-    return guidesConfig[guideId as GuideId];
+    return guidesConfig[guideId];
   }
 };
 
@@ -22,17 +22,17 @@ export const getStepConfig = (guideId: GuideId, stepId: GuideStepIds): StepConfi
   return guideConfig?.steps.find((step) => step.id === stepId);
 };
 
-const getStepIndex = (guideID: string, stepID: string): number => {
-  const guide = getGuideConfig(guideID);
+const getStepIndex = (guideId: GuideId, stepId: GuideStepIds): number => {
+  const guide = getGuideConfig(guideId);
   if (guide) {
-    return guide.steps.findIndex((step: StepConfig) => step.id === stepID);
+    return guide.steps.findIndex((step: StepConfig) => step.id === stepId);
   }
   return -1;
 };
 
-export const isLastStep = (guideID: string, stepID: string): boolean => {
-  const guide = getGuideConfig(guideID);
-  const activeStepIndex = getStepIndex(guideID, stepID);
+export const isLastStep = (guideId: GuideId, stepId: GuideStepIds): boolean => {
+  const guide = getGuideConfig(guideId);
+  const activeStepIndex = getStepIndex(guideId, stepId);
   const stepsNumber = guide?.steps.length || 0;
   if (stepsNumber > 0) {
     return activeStepIndex === stepsNumber - 1;

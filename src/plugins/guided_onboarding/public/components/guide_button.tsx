@@ -19,10 +19,10 @@ interface GuideButtonProps {
   isGuidePanelOpen: boolean;
 }
 
-const getStepNumber = (state?: GuideState): number | undefined => {
+const getStepNumber = (state: GuideState): number | undefined => {
   let stepNumber: number | undefined;
 
-  state?.steps.forEach((step, stepIndex) => {
+  state.steps.forEach((step, stepIndex) => {
     // If the step is in_progress or ready_to_complete, show that step number
     if (step.status === 'in_progress' || step.status === 'ready_to_complete') {
       stepNumber = stepIndex + 1;
@@ -66,14 +66,17 @@ export const GuideButton = ({
   );
   if (stepReadyToComplete) {
     const stepConfig = getStepConfig(guideState.guideId, stepReadyToComplete.id);
-    return (
-      <GuideButtonPopover
-        button={button}
-        isGuidePanelOpen={isGuidePanelOpen}
-        title={stepConfig?.manualCompletion?.title}
-        description={stepConfig?.manualCompletion?.description}
-      />
-    );
+    // check if the stepConfig has manualCompletion info
+    if (stepConfig && stepConfig.manualCompletion) {
+      return (
+        <GuideButtonPopover
+          button={button}
+          isGuidePanelOpen={isGuidePanelOpen}
+          title={stepConfig.manualCompletion.title}
+          description={stepConfig.manualCompletion.description}
+        />
+      );
+    }
   }
   return button;
 };

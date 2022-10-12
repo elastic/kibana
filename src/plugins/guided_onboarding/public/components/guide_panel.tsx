@@ -31,10 +31,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ApplicationStart } from '@kbn/core/public';
 
-import { guidesConfig } from '../constants/guides_config';
-import type { GuideState, GuideStepIds, GuideStep as GuideStepStatus } from '../../common/types';
-import type { GuideConfig, StepConfig } from '../types';
-
+import type { GuideState, GuideStep as GuideStepStatus } from '../../common/types';
+import type { StepConfig } from '../types';
 
 import type { ApiService } from '../services/api';
 import { getGuideConfig } from '../services/helpers';
