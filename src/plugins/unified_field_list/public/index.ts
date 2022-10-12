@@ -51,6 +51,7 @@ export { ExistenceFetchStatus } from './types';
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
+  resetFieldsExistenceCache,
   type ExistingFieldsInfo,
   type FetchExistenceInfoParams,
   type ExistingFieldsReader,

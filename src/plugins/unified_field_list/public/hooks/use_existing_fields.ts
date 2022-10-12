@@ -286,6 +286,10 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   );
 };
 
+export const resetFieldsExistenceCache = () => {
+  globalMap$.next(initialData);
+};
+
 function getDataViewsHash(dataViews: DataView[]): string {
   return dataViews
     .map((dataView) => `${dataView.id}:${dataView.title}:${dataView.timeFieldName}`)
