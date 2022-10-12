@@ -7,11 +7,11 @@
 
 import moment from 'moment-timezone';
 
+import type { TimeWindow } from '../../types/models/time_window';
 import {
   calendarAlignedTimeWindowSchema,
   DurationUnit,
   rollingTimeWindowSchema,
-  TimeWindow,
 } from '../../types/schema';
 
 export interface DateRange {

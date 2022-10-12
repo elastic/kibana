@@ -7,8 +7,14 @@
 
 import * as t from 'io-ts';
 
-import { dateType, errorBudgetSchema, indicatorSchema } from '../schema';
-import { budgetingMethodSchema, objectiveSchema, timeWindowSchema } from '../schema/slo';
+import {
+  budgetingMethodSchema,
+  dateType,
+  errorBudgetSchema,
+  indicatorSchema,
+  objectiveSchema,
+  timeWindowSchema,
+} from '../schema';
 
 const createSLOParamsSchema = t.type({
   body: t.type({

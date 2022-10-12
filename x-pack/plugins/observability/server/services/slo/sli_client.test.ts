@@ -20,7 +20,7 @@ describe('SLIClient', () => {
 
   describe('fetchDataForSLOTimeWindow', () => {
     it('throws when aggregations failed', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       esClientMock.search.mockResolvedValueOnce({
         took: 100,
         timed_out: false,
@@ -43,7 +43,7 @@ describe('SLIClient', () => {
     });
 
     it('returns the aggregated good and total values for the SLO time window date range', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       esClientMock.search.mockResolvedValueOnce({
         took: 100,
         timed_out: false,

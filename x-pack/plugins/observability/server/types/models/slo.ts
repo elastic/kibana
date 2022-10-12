@@ -30,7 +30,6 @@ const sloSchema = t.type({
 export { sloSchema };
 
 type SLO = t.TypeOf<typeof sloSchema>;
-
 type StoredSLO = t.OutputOf<typeof sloSchema>;
 
 export type { SLO, StoredSLO };
