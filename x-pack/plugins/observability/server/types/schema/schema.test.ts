@@ -10,6 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { dateTimeType } from './common';
+import { Duration, DurationUnit } from './duration';
 
 describe('Schema', () => {
   describe('DateTime', () => {
@@ -48,6 +49,20 @@ describe('Schema', () => {
           }, t.identity)
         )
       ).toThrow(new Error('decode'));
+    });
+  });
+
+  describe('Duration', () => {
+    it('throws when value is negative', () => {
+      expect(() => new Duration(-1, DurationUnit.d)).toThrow('invalid duration value');
+    });
+
+    it('throws when value is zero', () => {
+      expect(() => new Duration(0, DurationUnit.d)).toThrow('invalid duration value');
+    });
+
+    it('throws when unit is not valid', () => {
+      expect(() => new Duration(1, 'z' as DurationUnit)).toThrow('invalid duration unit');
     });
   });
 });

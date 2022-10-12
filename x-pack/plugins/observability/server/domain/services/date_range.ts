@@ -52,10 +52,6 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date
 
 const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
   switch (unit) {
-    case DurationUnit.m:
-      return 'minutes';
-    case DurationUnit.h:
-      return 'hours';
     case DurationUnit.d:
       return 'days';
     case DurationUnit.w:
