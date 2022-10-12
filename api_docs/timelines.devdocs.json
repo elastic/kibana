@@ -3192,7 +3192,7 @@
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
           "Filter",
-          "[] | undefined; dataViewId: string | null; sort: ",
+          "[] | undefined; dataViewId: string | null; savedObjectId: string | null; sort: ",
           "SortColumnTimeline",
           "[]; version: string | null; filterManager?: ",
           {
@@ -3218,7 +3218,7 @@
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; isLoading: boolean; dataProviders: ",
+          " | undefined; type?: string | undefined; })[]; isLoading: boolean; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",

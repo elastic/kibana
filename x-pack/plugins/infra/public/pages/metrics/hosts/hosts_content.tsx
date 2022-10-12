@@ -27,6 +27,7 @@ export const HostsContent: React.FunctionComponent = () => {
     useMetricsDataViewContext();
   // needed to refresh the lens table when filters havent changed
   const [searchSessionId, setSearchSessionId] = useState(data.search.session.start());
+  const [isLensLoading, setIsLensLoading] = useState(false);
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -34,10 +35,25 @@ export const HostsContent: React.FunctionComponent = () => {
       if (payload.query) {
         setQuery(payload.query);
       }
+      setIsLensLoading(true);
       setSearchSessionId(data.search.session.start());
     },
     [setDateRange, setQuery, data.search.session]
   );
+
+  const onLoading = useCallback(
+    (isLoading: boolean) => {
+      if (isLensLoading) {
+        setIsLensLoading(isLoading);
+      }
+    },
+    [setIsLensLoading, isLensLoading]
+  );
+
+  const onRefetch = useCallback(() => {
+    setIsLensLoading(true);
+    setSearchSessionId(data.search.session.start());
+  }, [data.search.session]);
 
   return (
     <div>
@@ -61,6 +77,9 @@ export const HostsContent: React.FunctionComponent = () => {
             timeRange={dateRange}
             query={query}
             searchSessionId={searchSessionId}
+            onRefetch={onRefetch}
+            onLoading={onLoading}
+            isLensLoading={isLensLoading}
           />
         </>
       ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (

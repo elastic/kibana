@@ -7,11 +7,9 @@
 
 import * as t from 'io-ts';
 
-import { indicatorSchema } from './indicators';
-
 const rollingTimeWindowSchema = t.type({
   duration: t.string,
-  is_rolling: t.literal(true),
+  is_rolling: t.literal<boolean>(true),
 });
 
 const budgetingMethodSchema = t.literal('occurrences');
@@ -20,13 +18,4 @@ const objectiveSchema = t.type({
   target: t.number,
 });
 
-const commonSLOSchema = t.type({
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  time_window: rollingTimeWindowSchema,
-  budgeting_method: budgetingMethodSchema,
-  objective: objectiveSchema,
-});
-
-export { commonSLOSchema, rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };
+export { rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };

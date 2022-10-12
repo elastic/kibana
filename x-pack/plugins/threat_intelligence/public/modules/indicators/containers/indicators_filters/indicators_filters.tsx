@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import React, { ReactNode, VFC } from 'react';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '../../context';
-
-export interface IndicatorsFiltersProps {
-  /**
-   * Get {@link FilterManager} from the useFilters hook and save it in context to use within the indicators table.
-   */
-  filterManager: FilterManager;
-  /**
-   * Component(s) to be displayed inside
-   */
-  children: ReactNode;
-}
+import React, { FC, useMemo } from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useSecurityContext } from '../../../../hooks/use_security_context';
+import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from './context';
 
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
  */
-export const IndicatorsFilters: VFC<IndicatorsFiltersProps> = ({ filterManager, children }) => {
-  const contextValue: IndicatorsFiltersContextValue = { filterManager };
+export const IndicatorsFilters: FC = ({ children }) => {
+  const securityContext = useSecurityContext();
+
+  const {
+    services: {
+      data: {
+        query: { filterManager },
+      },
+    },
+  } = useKibana();
+
+  const globalFilters = securityContext.useFilters();
+  const globalQuery = securityContext.useQuery();
+  const globalTimeRange = securityContext.useGlobalTime();
+
+  const contextValue: IndicatorsFiltersContextValue = useMemo(
+    () => ({
+      timeRange: globalTimeRange,
+      filters: globalFilters,
+      filterQuery: globalQuery,
+      filterManager,
+    }),
+    [globalFilters, globalQuery, globalTimeRange, filterManager]
+  );
 
   return (
     <IndicatorsFiltersContext.Provider value={contextValue}>

@@ -117,14 +117,14 @@ describe('Action List Route', () => {
   });
 
   describe('User auth level', () => {
-    it('allows user with canAccessEndpointManagement access to allow requests to API', async () => {
+    it('allows user with canReadSecuritySolution access to allow requests to API', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {});
       expect(mockResponse.ok).toBeCalled();
     });
 
-    it('does not allow user with canAccessEndpointManagement access to allow requests to API', async () => {
+    it('does not allow user without canReadSecuritySolution access to allow requests to API', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
-        authz: { canAccessEndpointManagement: false },
+        authz: { canReadSecuritySolution: false },
       });
       expect(mockResponse.forbidden).toBeCalled();
     });

@@ -26,7 +26,10 @@ export interface UseInvestigateInTimelineParam {
 }
 
 export interface UseInvestigateInTimelineValue {
-  onClick: (() => Promise<void>) | undefined;
+  /**
+   * Investigate in Timeline function to run on click event.
+   */
+  investigateInTimelineFn: (() => Promise<void>) | undefined;
 }
 
 /**
@@ -51,13 +54,13 @@ export const useInvestigateInTimeline = ({
   const to = unwrapValue(indicator, RawIndicatorFieldId.TimeStamp) as string;
   const from = moment(to).subtract(10, 'm').toISOString();
 
-  const investigateInTimelineClick = securitySolutionContext?.getUseInvestigateInTimeline({
+  const investigateInTimelineFn = securitySolutionContext?.getUseInvestigateInTimeline({
     dataProviders,
     from,
     to,
   });
 
   return {
-    onClick: investigateInTimelineClick,
+    investigateInTimelineFn,
   };
 };

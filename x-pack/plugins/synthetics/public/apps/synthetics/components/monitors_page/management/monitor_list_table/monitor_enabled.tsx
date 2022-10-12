@@ -51,7 +51,7 @@ export const MonitorEnabled = ({
 
   const handleEnabledChange = (event: EuiSwitchEvent) => {
     const checked = event.target.checked;
-    updateMonitorEnabledState(monitor, checked);
+    updateMonitorEnabledState(checked);
   };
 
   return (

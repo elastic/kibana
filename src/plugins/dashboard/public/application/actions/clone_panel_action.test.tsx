@@ -12,7 +12,7 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
-import { ClonePanelAction } from '.';
+import { ClonePanelAction } from './clone_panel_action';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddable,

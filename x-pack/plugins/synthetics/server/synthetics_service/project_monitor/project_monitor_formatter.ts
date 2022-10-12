@@ -19,7 +19,6 @@ import { deleteMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/delete_
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
-  BrowserFields,
   ConfigKey,
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
@@ -124,16 +123,16 @@ export class ProjectMonitorFormatter {
     const existingMonitors = await this.getProjectMonitorsForProject();
     this.staleMonitorsMap = await this.getStaleMonitorsMap(existingMonitors);
 
-    const normalizedNewMonitors: BrowserFields[] = [];
+    const normalizedNewMonitors: SyntheticsMonitor[] = [];
     const normalizedUpdateMonitors: Array<{
       previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
-      monitor: BrowserFields;
+      monitor: SyntheticsMonitor;
     }> = [];
 
     for (const monitor of this.monitors) {
       const previousMonitor = existingMonitors.find(
         (monitorObj) =>
-          (monitorObj.attributes as BrowserFields)[ConfigKey.JOURNEY_ID] === monitor.id
+          (monitorObj.attributes as SyntheticsMonitor)[ConfigKey.JOURNEY_ID] === monitor.id
       );
 
       const normM = await this.validateProjectMonitor({
@@ -154,7 +153,7 @@ export class ProjectMonitorFormatter {
 
     await this.createMonitorsBulk(normalizedNewMonitors);
 
-    const { updatedCount } = await this.updateMonitors(normalizedUpdateMonitors);
+    const { updatedCount } = await this.updateMonitorsBulk(normalizedUpdateMonitors);
 
     if (normalizedUpdateMonitors.length > 0) {
       let updateMessage = '';
@@ -197,22 +196,17 @@ export class ProjectMonitorFormatter {
     try {
       await this.validatePermissions({ monitor });
 
-      const { normalizedFields: normalizedMonitor, unsupportedKeys } = normalizeProjectMonitor({
+      const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
         monitor,
         locations: this.locations,
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
+        version: this.server.kibanaVersion,
       });
 
-      if (unsupportedKeys.length) {
-        this.failedMonitors.push({
-          id: monitor.id,
-          reason: 'Unsupported Heartbeat option',
-          details: `The following Heartbeat options are not supported for ${
-            monitor.type
-          } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
-        });
+      if (errors.length) {
+        this.failedMonitors.push(...errors);
         this.handleStreamingMessage({
           message: `${monitor.id}: failed to create or update monitor`,
         });
@@ -233,16 +227,16 @@ export class ProjectMonitorFormatter {
       }
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
-      const { valid: isNormalizedMonitorValid } = this.validateMonitor({
+      const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
         validationResult: validateMonitor(normalizedMonitor as MonitorFields),
         monitorId: monitor.id,
       });
 
-      if (!isNormalizedMonitorValid) {
+      if (!isNormalizedMonitorValid || !decodedMonitor) {
         return null;
       }
 
-      return normalizedMonitor;
+      return decodedMonitor;
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({
@@ -264,7 +258,7 @@ export class ProjectMonitorFormatter {
     const staleMonitors: StaleMonitorMap = {};
 
     existingMonitors.forEach((savedObject) => {
-      const journeyId = (savedObject.attributes as BrowserFields)[ConfigKey.JOURNEY_ID];
+      const journeyId = (savedObject.attributes as SyntheticsMonitor)[ConfigKey.JOURNEY_ID];
       if (journeyId) {
         staleMonitors[journeyId] = {
           stale: true,
@@ -296,7 +290,7 @@ export class ProjectMonitorFormatter {
     return hits;
   };
 
-  private createMonitorsBulk = async (monitors: BrowserFields[]) => {
+  private createMonitorsBulk = async (monitors: SyntheticsMonitor[]) => {
     try {
       if (monitors.length > 0) {
         const { newMonitors } = await syncNewMonitorBulk({
@@ -357,9 +351,9 @@ export class ProjectMonitorFormatter {
     );
   };
 
-  private updateMonitors = async (
+  private updateMonitorsBulk = async (
     monitors: Array<{
-      monitor: BrowserFields;
+      monitor: SyntheticsMonitor;
       previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
     }>
   ): Promise<{

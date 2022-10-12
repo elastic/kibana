@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { StepStatus, StepConfig } from '../types';
+import type { StepStatus, GuideStepIds } from '../../common/types';
+import type { StepConfig } from '../types';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
 interface GuideStepProps {
@@ -28,7 +29,7 @@ interface GuideStepProps {
   stepStatus: StepStatus;
   stepConfig: StepConfig;
   stepNumber: number;
-  navigateToStep: (step: StepConfig) => void;
+  navigateToStep: (stepId: GuideStepIds, stepLocation: StepConfig['location']) => void;
 }
 
 export const GuideStep = ({
@@ -39,10 +40,10 @@ export const GuideStep = ({
   navigateToStep,
 }: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
-  const styles = getGuidePanelStepStyles(euiTheme);
+  const styles = getGuidePanelStepStyles(euiTheme, stepStatus);
 
-  const buttonContent = (
-    <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">
+  const stepTitleContent = (
+    <EuiFlexGroup gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         {stepStatus === 'complete' ? (
           <EuiIcon type="checkInCircleFilled" size="l" color={euiTheme.colors.success} />
@@ -60,38 +61,49 @@ export const GuideStep = ({
 
   return (
     <div data-test-subj="guidePanelStep">
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={buttonContent}
-        arrowDisplay="right"
-        forceState={stepStatus === 'in_progress' ? 'open' : 'closed'}
-      >
-        <>
-          <EuiSpacer size="s" />
+      {stepStatus === 'complete' ? (
+        <>{stepTitleContent}</>
+      ) : (
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={stepTitleContent}
+          arrowDisplay="right"
+          initialIsOpen={stepStatus === 'in_progress' || stepStatus === 'active'}
+        >
+          <>
+            <EuiSpacer size="s" />
 
-          <EuiText size="s">
-            <ul>
-              {stepConfig.descriptionList.map((description, index) => {
-                return <li key={`description-${index}`}>{description}</li>;
-              })}
-            </ul>
-          </EuiText>
+            <EuiText size="s">
+              <ul>
+                {stepConfig.descriptionList.map((description, index) => {
+                  return <li key={`description-${index}`}>{description}</li>;
+                })}
+              </ul>
+            </EuiText>
 
-          <EuiSpacer />
-          {stepStatus === 'in_progress' && (
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => navigateToStep(stepConfig)} fill>
-                  {/* TODO: Support for conditional "Continue" button label if user revists a step - https://github.com/elastic/kibana/issues/139752 */}
-                  {i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-                    defaultMessage: 'Start',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </>
-      </EuiAccordion>
+            <EuiSpacer />
+            {(stepStatus === 'in_progress' || stepStatus === 'active') && (
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => navigateToStep(stepConfig.id, stepConfig.location)}
+                    fill
+                    data-test-subj="activeStepButtonLabel"
+                  >
+                    {stepStatus === 'active'
+                      ? i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+                          defaultMessage: 'Start',
+                        })
+                      : i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
+                          defaultMessage: 'Continue',
+                        })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </>
+        </EuiAccordion>
+      )}
 
       <EuiHorizontalRule margin="l" />
     </div>

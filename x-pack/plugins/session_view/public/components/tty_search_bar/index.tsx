@@ -19,15 +19,24 @@ export interface TTYSearchBarDeps {
   lines: IOLine[];
   seekToLine(index: number): void;
   xTermSearchFn(query: string, index: number): void;
+  setIsPlaying(value: boolean): void;
 }
 
-export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarDeps) => {
+const STRIP_NEWLINES_REGEX = /^(\r\n|\r|\n|\n\r)/;
+
+export const TTYSearchBar = ({
+  lines,
+  seekToLine,
+  xTermSearchFn,
+  setIsPlaying,
+}: TTYSearchBarDeps) => {
   const [currentMatch, setCurrentMatch] = useState<SearchResult | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const jumpToMatch = useCallback(
     (match) => {
       if (match) {
+        setIsPlaying(false);
         const goToLine = lines.indexOf(match.line);
         seekToLine(goToLine);
       }
@@ -40,7 +49,7 @@ export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarD
         clearTimeout(timeout);
       };
     },
-    [lines, seekToLine, xTermSearchFn, searchQuery]
+    [setIsPlaying, lines, seekToLine, xTermSearchFn, searchQuery]
   );
 
   const searchResults = useMemo(() => {
@@ -53,7 +62,7 @@ export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarD
           const cursorMovement = current.value.match(/^\x1b\[\d+;(\d+)(H|d)/);
           const regex = new RegExp(searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'ig');
           const lineMatches = stripAnsi(current.value)
-            .replace(/^\r|\r?\n/, '')
+            .replace(STRIP_NEWLINES_REGEX, '')
             .matchAll(regex);
 
           if (lineMatches) {
@@ -90,10 +99,14 @@ export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarD
     return matches;
   }, [searchQuery, lines, jumpToMatch, xTermSearchFn]);
 
-  const onSearch = useCallback((query) => {
-    setSearchQuery(query);
-    setCurrentMatch(null);
-  }, []);
+  const onSearch = useCallback(
+    (query) => {
+      setIsPlaying(false);
+      setSearchQuery(query);
+      setCurrentMatch(null);
+    },
+    [setIsPlaying]
+  );
 
   const onSetCurrentMatch = useCallback(
     (index) => {
