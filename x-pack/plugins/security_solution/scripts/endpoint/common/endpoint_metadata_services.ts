@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { KbnClient } from '@kbn/test';
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import type { GetMetadataListRequestQuery } from '../../../common/endpoint/schema/metadata';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import {
@@ -17,7 +17,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
   METADATA_DATASTREAM,
 } from '../../../common/endpoint/constants';
-import { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
+import type { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 
 const endpointGenerator = new EndpointDocGenerator();
@@ -59,7 +59,9 @@ export const sendEndpointMetadataUpdate = async (
   const lastStreamedDoc = await fetchLastStreamedEndpointUpdate(esClient, agentId);
 
   if (!lastStreamedDoc) {
-    throw new Error(`An endpoint with agent.id of [${agentId}] not found!`);
+    throw new Error(
+      `An endpoint with agent.id of [${agentId}] not found! [sendEndpointMetadataUpdate()]`
+    );
   }
 
   const generatedHostMetadataDoc = clone(endpointGenerator.generateHostMetadata());

@@ -18,6 +18,7 @@ export class AgentKeepAliveService extends BaseRunningService {
 
     let hasMore = true;
     let page = 0;
+    let errorFound = 0;
 
     try {
       do {
@@ -40,8 +41,16 @@ export class AgentKeepAliveService extends BaseRunningService {
               checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id, {
                 agentStatus: 'random',
                 log,
+              }).catch((err) => {
+                log.verbose(err);
+                errorFound++;
+                return Promise.resolve();
               }),
-              sendEndpointMetadataUpdate(esClient, endpoint.metadata.agent.id),
+              sendEndpointMetadataUpdate(esClient, endpoint.metadata.agent.id).catch((err) => {
+                log.verbose(err);
+                errorFound++;
+                return Promise.resolve();
+              }),
             ]);
           }
         }
@@ -52,6 +61,12 @@ export class AgentKeepAliveService extends BaseRunningService {
       );
 
       log.verbose(err);
+    }
+
+    if (errorFound > 0) {
+      log.error(
+        `${this.logPrefix}.run() Error: Encountered ${errorFound} error(s). Use the '--verbose' option to see more.`
+      );
     }
   }
 }

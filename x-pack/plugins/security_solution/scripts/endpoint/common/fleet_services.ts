@@ -44,9 +44,7 @@ export const checkInFleetAgent = async (
   // WORKAROUND: Endpoint API will exclude metadata for any fleet agent whose status is `inactive`,
   // which means once we update the Fleet agent with that status, the metadata api will no longer
   // return the endpoint host info.'s. So - we avoid that here.
-  if (!update.active) {
-    update.active = true;
-  }
+  update.active = true;
 
   // Ensure any `undefined` value is set to `null` for the update
   Object.entries(update).forEach(([key, value]) => {
