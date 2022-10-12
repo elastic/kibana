@@ -180,6 +180,7 @@ export const TimeSeries = ({
         onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
+        pointerUpdateDebounce={0}
         theme={[
           {
             crosshair: {
