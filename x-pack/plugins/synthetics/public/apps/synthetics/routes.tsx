@@ -100,7 +100,7 @@ const getRoutes = (
       path: MONITOR_ROUTE,
       component: () => <MonitorDetailsPage />,
       dataTestSubj: 'syntheticsMonitorDetailsPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath),
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'summary'),
     },
     {
       title: i18n.translate('xpack.synthetics.monitorHistory.title', {
@@ -110,7 +110,7 @@ const getRoutes = (
       path: MONITOR_HISTORY_ROUTE,
       component: () => <div>History</div>,
       dataTestSubj: 'syntheticsMonitorHistoryPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath),
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'history'),
     },
     {
       title: i18n.translate('xpack.synthetics.monitorErrors.title', {
@@ -120,7 +120,7 @@ const getRoutes = (
       path: MONITOR_ERRORS_ROUTE,
       component: () => <div>Errors</div>,
       dataTestSubj: 'syntheticsMonitorHistoryPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath),
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
     },
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
@@ -279,7 +279,8 @@ const getRoutes = (
 
 const getMonitorSummaryHeader = (
   history: ReturnType<typeof useHistory>,
-  syntheticsPath: string
+  syntheticsPath: string,
+  selectedTab: 'summary' | 'history' | 'errors'
 ): EuiPageHeaderProps => {
   return {
     pageTitle: <MonitorDetailsPageTitle />,
@@ -304,6 +305,30 @@ const getMonitorSummaryHeader = (
       <MonitorDetailsLastRun />,
       <MonitorDetailsStatus />,
       <MonitorDetailsLocation />,
+    ],
+    tabs: [
+      {
+        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
+          defaultMessage: 'Summary',
+        }),
+        isSelected: selectedTab === 'summary',
+        onClick: selectedTab === 'summary' ? undefined : () => window.alert('Unimplemented'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
+          defaultMessage: 'History',
+        }),
+        isSelected: selectedTab === 'history',
+        onClick: selectedTab === 'history' ? undefined : () => window.alert('Unimplemented'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
+          defaultMessage: 'Errors',
+        }),
+        prepend: <EuiIcon type="alert" color="danger" />,
+        isSelected: selectedTab === 'errors',
+        onClick: selectedTab === 'errors' ? undefined : () => window.alert('Unimplemented'),
+      },
     ],
   };
 };
