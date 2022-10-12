@@ -120,8 +120,12 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async closeAssigneesPopover() {
-      await testSubjects.click('case-refresh');
-      await header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        // Click somewhere outside the popover
+        await testSubjects.click('header-page-title');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('euiSelectableList');
+      });
     },
   };
 }
