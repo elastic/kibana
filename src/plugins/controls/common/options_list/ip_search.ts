@@ -37,7 +37,7 @@ const buildFullIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['rangeQ
     return [
       {
         key: ipType,
-        mask: isIpv4 ? searchIp + '/32' : searchIp + '/64',
+        mask: isIpv4 ? searchIp + '/32' : searchIp + '/128',
       },
     ];
   }
