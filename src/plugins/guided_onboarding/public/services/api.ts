@@ -98,7 +98,8 @@ export class ApiService implements GuidedOnboardingApi {
       const response = await this.client.put<{ state: GuideState }>(`${API_BASE_PATH}/state`, {
         body: JSON.stringify(newState),
       });
-      this.onboardingGuideState$.next(newState);
+      // If the guide has been deactivated, we return undefined
+      this.onboardingGuideState$.next(newState.isActive ? newState : undefined);
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
@@ -153,6 +154,22 @@ export class ApiService implements GuidedOnboardingApi {
 
       return await this.updateGuideState(updatedGuide, true);
     }
+  }
+
+  /**
+   * Marks a guide as inactive
+   * This is useful for the dropdown panel, when a user quits a guide
+   * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
+   * @return {Promise} a promise with the updated guide state
+   */
+  public async deactivateGuide(guide: GuideState): Promise<{ state: GuideState } | undefined> {
+    return await this.updateGuideState(
+      {
+        ...guide,
+        isActive: false,
+      },
+      false
+    );
   }
 
   /**
