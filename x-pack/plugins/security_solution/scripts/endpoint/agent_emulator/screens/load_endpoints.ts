@@ -168,16 +168,16 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
     if (runInfo && !runInfo.isDone && !runInfo.isRunning) {
       runInfo.isRunning = true;
 
-      await loadEndpoints(
-        runInfo.count,
-        this.emulatorContext.getEsClient(),
-        this.emulatorContext.getKbnClient(),
-        this.emulatorContext.getLogger(),
-        (progress) => {
+      await loadEndpoints({
+        count: runInfo.count,
+        esClient: this.emulatorContext.getEsClient(),
+        kbnClient: this.emulatorContext.getKbnClient(),
+        log: this.emulatorContext.getLogger(),
+        onProgress: (progress) => {
           runInfo.progress.setProgress(progress.percent);
           this.reRender();
-        }
-      );
+        },
+      });
 
       runInfo.isDone = true;
       runInfo.isRunning = false;
