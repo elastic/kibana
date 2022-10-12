@@ -6,8 +6,12 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
+import {
+  byTestId,
+  TIMEOUT_60_SEC,
+  waitForLoadingToFinish,
+} from '@kbn/observability-plugin/e2e/utils';
 import { callKibana } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/helpers/call_kibana';
-import { byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 import { loginPageProvider } from '../page_objects/login';
 
 journey('DataViewPermissions', async ({ page, params }) => {
@@ -44,7 +48,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
   step('Click explore data button', async () => {
     await page.click(byTestId('uptimeExploreDataButton'));
     await waitForLoadingToFinish({ page });
-    await page.waitForSelector(`text=${permissionError}`);
+    await page.waitForSelector(`text=${permissionError}`, TIMEOUT_60_SEC);
     expect(await page.$(`text=${permissionError}`)).toBeTruthy();
   });
 });
