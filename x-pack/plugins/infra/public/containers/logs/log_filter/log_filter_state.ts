@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { buildEsQuery, DataViewBase, Query } from '@kbn/es-query';
+import { buildEsQuery, DataViewBase, Query, AggregateQuery } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
@@ -35,9 +35,17 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     [indexPattern, kibanaQuerySettings]
   );
 
+  function isQuery(value: Query | AggregateQuery): value is Query {
+    return value.hasOwnProperty('query');
+  }
+
   const getLogFilterQuery = useCallback(
-    (filterQuery: Query) => {
+    (filterQuery: Query | AggregateQuery) => {
       try {
+        // NOTE: We sync with the QueryString manager - and therefore other solutions - but we don't support SQL syntax.
+        if (!isQuery(filterQuery)) {
+          throw new Error('Only Query types are supported');
+        }
         const parsedQuery = parseQuery(filterQuery);
         return {
           parsedQuery,
@@ -45,7 +53,7 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
           originalQuery: filterQuery,
         };
       } catch (error) {
-        // If for some reason parsing the query fails we should revert back to a safe default. This would most likely happen due to a bad URL parameter.
+        // NOTE: If parsing fails or an AggregateQuery is in use
         queryString.setQuery({
           language: 'kuery',
           query: '',
@@ -60,7 +68,7 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
   });
 
   const applyLogFilterQuery = useCallback(
-    (filterQuery: Query) => {
+    (filterQuery: Query | AggregateQuery) => {
       const logFilterQuery = getLogFilterQuery(filterQuery);
       if (logFilterQuery) {
         setLogFilterState((previousLogFilterState) => ({
@@ -77,7 +85,7 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     {
       next: useCallback(() => {
         const esQuery = queryString.getQuery();
-        applyLogFilterQuery(esQuery as Query);
+        applyLogFilterQuery(esQuery);
       }, [applyLogFilterQuery, queryString]),
     }
   );
