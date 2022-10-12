@@ -439,6 +439,13 @@ export interface Datasource<T = unknown, P = unknown> {
    * Get all the used DataViews from state
    */
   getUsedDataViews: (state: T) => string[];
+
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>,
+    openLayerSettings: () => void
+  ) => LayerAction[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -984,7 +991,8 @@ export interface Visualization<T = unknown, P = unknown> {
   getSupportedActionsForLayer?: (
     layerId: string,
     state: T,
-    setState: StateSetter<T>
+    setState: StateSetter<T>,
+    openLayerSettings: () => void
   ) => LayerAction[];
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;

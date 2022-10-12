@@ -69,6 +69,7 @@ describe('Aggs service', () => {
           "geotile_grid",
           "sampler",
           "diversified_sampler",
+          "random_sampler",
           "foo",
         ]
       `);
@@ -123,6 +124,7 @@ describe('Aggs service', () => {
           "geotile_grid",
           "sampler",
           "diversified_sampler",
+          "random_sampler",
         ]
       `);
       expect(bStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`

@@ -443,6 +443,18 @@ export function getIndexPatternDatasource({
 
     getDropProps,
     onDrop,
+    getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
+      return [
+        {
+          displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
+            defaultMessage: 'Layer settings',
+          }),
+          execute: openLayerSettings,
+          icon: 'gear',
+          isCompatible: true,
+        },
+      ];
+    },
 
     getCustomWorkspaceRenderer: (
       state: IndexPatternPrivateState,
@@ -794,5 +806,6 @@ function blankLayer(indexPatternId: string) {
     indexPatternId,
     columns: {},
     columnOrder: [],
+    sampling: 4,
   };
 }

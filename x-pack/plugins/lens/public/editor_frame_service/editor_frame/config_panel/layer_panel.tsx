@@ -16,6 +16,9 @@ import {
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiRange,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerActions } from './layer_actions';
@@ -44,10 +47,13 @@ import {
 } from '../../../state_management';
 import { onDropForVisualization } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
+import { FlyoutContainer } from './flyout_container';
 
 const initialActiveDimensionState = {
   isNew: false,
 };
+
+const samplingValue = [0.0001, 0.001, 0.01, 0.1, 1];
 
 export function LayerPanel(
   props: Exclude<LayerPanelProps, 'state' | 'setState'> & {
@@ -80,6 +86,8 @@ export function LayerPanel(
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
     initialActiveDimensionState
   );
+  const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
+
   const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
@@ -110,6 +118,7 @@ export function LayerPanel(
   }, [activeVisualization.id]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const settingsPanelRef = useRef<HTMLDivElement | null>(null);
   const registerLayerRef = useCallback(
     (el) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
@@ -317,7 +326,14 @@ export function LayerPanel(
         ...(activeVisualization.getSupportedActionsForLayer?.(
           layerId,
           visualizationState,
-          updateVisualization
+          updateVisualization,
+          () => setPanelSettingsOpen(true)
+        ) || []),
+        ...(layerDatasource?.getSupportedActionsForLayer?.(
+          layerId,
+          layerDatasourceState,
+          (newState) => updateDatasource(datasourceId, newState),
+          () => setPanelSettingsOpen(true)
         ) || []),
         ...getSharedActions({
           activeVisualization,
@@ -333,15 +349,23 @@ export function LayerPanel(
     [
       activeVisualization,
       core,
+      datasourceId,
       isOnlyLayer,
       isTextBasedLanguage,
+      layerDatasource,
+      layerDatasourceState,
       layerId,
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
+      updateDatasource,
       updateVisualization,
       visualizationState,
     ]
+  );
+
+  const samplingIndex = samplingValue.findIndex(
+    (v) => v === layerDatasourceState.layers[layerId].sampling
   );
 
   return (
@@ -650,6 +674,73 @@ export function LayerPanel(
           })}
         </EuiPanel>
       </section>
+      <FlyoutContainer
+        panelRef={(el) => (settingsPanelRef.current = el)}
+        isOpen={isPanelSettingsOpen}
+        isFullscreen={false}
+        groupLabel={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
+          defaultMessage: 'Layer settings',
+        })}
+        handleClose={() => {
+          // update the current layer settings
+          setPanelSettingsOpen(false);
+          return true;
+        }}
+      >
+        <div id={layerId}>
+          <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+            <EuiFormRow
+              display="columnCompressed"
+              fullWidth
+              label={
+                <EuiToolTip
+                  content={i18n.translate('xpack.lens.xyChart.randomSampling.help', {
+                    defaultMessage:
+                      'Change the sampling probability to see how your chart is affected',
+                  })}
+                  delay="long"
+                  position="top"
+                >
+                  <span>
+                    {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
+                      defaultMessage: 'Random Sampling',
+                    })}
+                    <EuiIcon
+                      type="questionInCircle"
+                      color="subdued"
+                      size="s"
+                      className="eui-alignTop"
+                    />
+                  </span>
+                </EuiToolTip>
+              }
+            >
+              <EuiRange
+                value={samplingIndex > -1 ? samplingIndex : samplingValue.length - 1}
+                onChange={(e) => {
+                  updateDatasource(datasourceId, {
+                    ...layerDatasourceState,
+                    layers: {
+                      ...layerDatasourceState.layers,
+                      [layerId]: {
+                        ...layerDatasourceState.layers[layerId],
+                        sampling: samplingValue[Number(e.target.value)],
+                      },
+                    },
+                  });
+                }}
+                showInput={false}
+                showRange={false}
+                showTicks
+                step={1}
+                min={0}
+                max={samplingValue.length - 1}
+                ticks={samplingValue.map((v, i) => ({ label: `${v}`, value: i }))}
+              />
+            </EuiFormRow>
+          </div>
+        </div>
+      </FlyoutContainer>
 
       <DimensionContainer
         panelRef={(el) => (panelRef.current = el)}

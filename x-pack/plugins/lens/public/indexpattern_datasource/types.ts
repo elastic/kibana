@@ -54,6 +54,7 @@ export interface IndexPatternLayer {
   indexPatternId: string;
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
+  sampling?: number;
 }
 
 export interface IndexPatternPersistedState {

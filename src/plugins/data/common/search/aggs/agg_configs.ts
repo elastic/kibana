@@ -55,6 +55,8 @@ export interface AggConfigsOptions {
   hierarchical?: boolean;
   aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
   partialRows?: boolean;
+  probability: number;
+  samplerSeed?: number;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -247,6 +249,10 @@ export class AggConfigs {
             dsl: agg.toDsl(this),
           };
         });
+    }
+    if (this.opts.probability !== 1) {
+      // inject the random sampler here as agg root
+      // console.log('Has random sampling in here');
     }
     const requestAggs = this.getRequestAggs();
     const aggsWithDsl = requestAggs.filter((agg) => !agg.type.hasNoDsl).length;
