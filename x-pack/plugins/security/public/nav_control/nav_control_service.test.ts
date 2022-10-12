@@ -75,7 +75,9 @@ describe('SecurityNavControlService', () => {
 
     expect(target).toMatchInlineSnapshot(`
       <div>
-        <div>
+        <div
+          css="[object Object]"
+        >
           <div
             class="euiPopover emotion-euiPopover"
             id="headerUserMenu"
