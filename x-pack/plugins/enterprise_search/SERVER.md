@@ -83,6 +83,7 @@ client.asCurrentUser.update({
 For consistency in pagination, we have a [Paginate<T>](common/types/pagination.ts) type that produces a paginated type, to be used in paginated results. This type works with Elastic EUI's paginated tables and provides a consistent interface for result types.
 
 For pagination inputs, take a look at [fetch_sync_jobs.ts](server/lib/connectors/fetch_sync_jobs.ts). Generally speaking you'll want to specify at minimum a `size` and a `page` index.
- ### Testing
 
- We should aim for 100% unit test coverage in the server, although you're allowed to deviate from that if the effort to get there doesn't make add much security. We have a longer-term roadmap item to add Kibana FTR configs for end-to-end tests so that we can run these against an actual Elasticsearch backend, but we don't have these yet.
+### Testing
+
+We should aim for 100% unit test coverage in the server, although you're allowed to deviate from that if the effort to get there doesn't make add much security. We have a longer-term roadmap item to add Kibana FTR configs for end-to-end tests so that we can run these against an actual Elasticsearch backend, but we don't have these yet.
