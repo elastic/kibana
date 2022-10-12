@@ -294,6 +294,18 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
 
+export interface BulkDeleteOptionsFilter {
+  filter: string | KueryNode;
+  ids?: never;
+}
+
+export interface BulkDeleteOptionsIds {
+  ids: string[];
+  filter?: never;
+}
+
+export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
+
 export interface BulkEditError {
   message: string;
   rule: {
@@ -1715,13 +1727,7 @@ export class RulesClient {
     }
   };
 
-  public bulkDeleteRules = async ({
-    filter,
-    ids,
-  }: {
-    filter?: string | KueryNode;
-    ids?: string[];
-  }) => {
+  public bulkDeleteRules = async ({ filter, ids }: BulkDeleteOptions) => {
     if (ids && filter) {
       throw Boom.badRequest(
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
@@ -1733,7 +1739,7 @@ export class RulesClient {
 
     const kueryNodeFilterWithAuth =
       authorizationFilter && kueryNodeFilter
-        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode]) // think how to get rid
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
         : kueryNodeFilter;
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
@@ -1799,9 +1805,8 @@ export class RulesClient {
       kueryNodeFilterWithAuth
     );
 
-    // TODO: add audit logs
-
     if (taskIdsToDelete) {
+      // can be taskIdsToDelete false?
       this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
     }
 
@@ -1811,7 +1816,7 @@ export class RulesClient {
       this.unsecuredSavedObjectsClient
     );
 
-    return { errors, total }; // should total be number of succeed deletions?
+    return { errors, total };
   };
 
   private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
@@ -1831,6 +1836,7 @@ export class RulesClient {
     const errors: BulkDeleteError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
+    const ruleIdToRuleNameMapping: Record<string, string> = {};
 
     for await (const response of rulesFinder.find()) {
       pMap(
@@ -1839,30 +1845,37 @@ export class RulesClient {
           if (rule.attributes.apiKey) {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
-          rules.push(rule);
-          if (rule.error) {
-            errors.push({
-              message: rule.error.message ?? 'n/a',
-              status: rule.error.statusCode,
-              rule: {
-                id: rule.id,
-                name: rule.attributes?.name ?? 'n/a',
-              },
-            });
+          if (rule.attributes.name) {
+            ruleIdToRuleNameMapping[rule.id] = rule.attributes.name; // chnage name for consistecy
           }
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
           }
+          rules.push(rule);
         },
         { concurrency: API_KEY_GENERATE_CONCURRENCY }
       );
     }
-    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules, {}); // do we need force/refresh options here?
+
+    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules); // do we need force/refresh options here?
 
     result.statuses.forEach((status) => {
-      if (Boolean(status.error)) {
-        apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
-        taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+      if (status.error === undefined) {
+        if (apiKeyToRuleIdMapping[status.id]) {
+          apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+        }
+        if (taskIdToRuleIdMapping[status.id]) {
+          taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+        }
+      } else {
+        errors.push({
+          message: status.error.message ?? 'n/a',
+          status: status.error.statusCode,
+          rule: {
+            id: status.id,
+            name: ruleIdToRuleNameMapping[status.id] ?? 'n/a',
+          },
+        });
       }
     });
     return { apiKeysToInvalidate, result, errors, taskIdsToDelete };

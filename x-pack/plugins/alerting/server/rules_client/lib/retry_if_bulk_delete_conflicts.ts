@@ -110,7 +110,8 @@ export const retryIfBulkDeleteConflicts = async (
             convertRuleIdsToKueryNode(queryIds),
             retries - 1,
             apiKeysToInvalidate,
-            errors
+            errors,
+            taskIdsToDelete
           ),
         {
           concurrency: 1,
