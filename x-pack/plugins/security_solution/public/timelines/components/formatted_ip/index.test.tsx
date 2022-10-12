@@ -128,13 +128,13 @@ describe('FormattedIp', () => {
 
     userEvent.click(screen.getByTestId('network-details'));
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      id: context.timelineID,
       panelView: 'networkDetail',
       params: {
         flowTarget: 'source',
         ip: props.value,
       },
       tabType: context.tabType,
-      timelineId: context.timelineID,
     });
   });
 
@@ -180,13 +180,13 @@ describe('FormattedIp', () => {
 
     userEvent.click(screen.getByTestId('network-details'));
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      id: context.timelineID,
       panelView: 'networkDetail',
       params: {
         flowTarget: 'source',
         ip: props.value,
       },
       tabType: context.tabType,
-      timelineId: context.timelineID,
     });
     expect(toggleExpandedDetail).not.toHaveBeenCalled();
   });

@@ -345,6 +345,7 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(2);
       expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -352,7 +353,6 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'query',
-          timelineId: 'timeline-test',
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
@@ -370,6 +370,7 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(2);
       expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -377,7 +378,6 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'pinned',
-          timelineId: 'timeline-test',
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
@@ -395,6 +395,7 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(2);
       expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -402,7 +403,6 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'notes',
-          timelineId: 'timeline-test',
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
