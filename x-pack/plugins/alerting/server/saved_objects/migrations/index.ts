@@ -32,7 +32,6 @@ import { AlertLogMeta, AlertMigration } from './types';
 import { MINIMUM_SS_MIGRATION_VERSION } from './constants';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from './utils';
 
-
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   searchSourceMigrations: MigrateFunctionsObject,
@@ -40,19 +39,58 @@ export function getMigrations(
 ): SavedObjectMigrationMap {
   return mergeSavedObjectMigrationMaps(
     {
-      '7.10.0': executeMigrationWithErrorHandling(getMigrations_7_10_0(encryptedSavedObjects), '7.10.0'),
-      '7.11.0': executeMigrationWithErrorHandling(getMigrations_7_11_0(encryptedSavedObjects), '7.11.0'),
-      '7.11.2': executeMigrationWithErrorHandling(getMigrations_7_11_2(encryptedSavedObjects), '7.11.2'),
-      '7.13.0': executeMigrationWithErrorHandling(getMigrations_7_13_0(encryptedSavedObjects), '7.13.0'),
-      '7.14.1': executeMigrationWithErrorHandling(getMigrations_7_14_0(encryptedSavedObjects), '7.14.1'),
-      '7.15.0': executeMigrationWithErrorHandling(getMigrations_7_15_0(encryptedSavedObjects), '7.15.0'),
-      '7.16.0': executeMigrationWithErrorHandling(getMigrations_7_16_0(encryptedSavedObjects, isPreconfigured), '7.16.0'),
-      '8.0.0': executeMigrationWithErrorHandling(getMigrations_8_0_0(encryptedSavedObjects), '8.0.0'),
-      '8.0.1': executeMigrationWithErrorHandling(getMigrations_8_0_1(encryptedSavedObjects), '8.0.1'),
-      '8.2.0': executeMigrationWithErrorHandling(getMigrations_8_2_0(encryptedSavedObjects), '8.2.0'),
-      '8.3.0': executeMigrationWithErrorHandling(getMigrations_8_3_0(encryptedSavedObjects), '8.3.0'),
-      '8.4.1': executeMigrationWithErrorHandling(getMigrations_8_4_1(encryptedSavedObjects), '8.4.1'),
-      '8.5.0': executeMigrationWithErrorHandling(getMigrations_8_5_0(encryptedSavedObjects), '8.5.0'),
+      '7.10.0': executeMigrationWithErrorHandling(
+        getMigrations_7_10_0(encryptedSavedObjects),
+        '7.10.0'
+      ),
+      '7.11.0': executeMigrationWithErrorHandling(
+        getMigrations_7_11_0(encryptedSavedObjects),
+        '7.11.0'
+      ),
+      '7.11.2': executeMigrationWithErrorHandling(
+        getMigrations_7_11_2(encryptedSavedObjects),
+        '7.11.2'
+      ),
+      '7.13.0': executeMigrationWithErrorHandling(
+        getMigrations_7_13_0(encryptedSavedObjects),
+        '7.13.0'
+      ),
+      '7.14.1': executeMigrationWithErrorHandling(
+        getMigrations_7_14_0(encryptedSavedObjects),
+        '7.14.1'
+      ),
+      '7.15.0': executeMigrationWithErrorHandling(
+        getMigrations_7_15_0(encryptedSavedObjects),
+        '7.15.0'
+      ),
+      '7.16.0': executeMigrationWithErrorHandling(
+        getMigrations_7_16_0(encryptedSavedObjects, isPreconfigured),
+        '7.16.0'
+      ),
+      '8.0.0': executeMigrationWithErrorHandling(
+        getMigrations_8_0_0(encryptedSavedObjects),
+        '8.0.0'
+      ),
+      '8.0.1': executeMigrationWithErrorHandling(
+        getMigrations_8_0_1(encryptedSavedObjects),
+        '8.0.1'
+      ),
+      '8.2.0': executeMigrationWithErrorHandling(
+        getMigrations_8_2_0(encryptedSavedObjects),
+        '8.2.0'
+      ),
+      '8.3.0': executeMigrationWithErrorHandling(
+        getMigrations_8_3_0(encryptedSavedObjects),
+        '8.3.0'
+      ),
+      '8.4.1': executeMigrationWithErrorHandling(
+        getMigrations_8_4_1(encryptedSavedObjects),
+        '8.4.1'
+      ),
+      '8.5.0': executeMigrationWithErrorHandling(
+        getMigrations_8_5_0(encryptedSavedObjects),
+        '8.5.0'
+      ),
     },
     getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );
@@ -131,4 +169,3 @@ function getSearchSourceMigrations(
   }
   return filteredMigrations;
 }
-
