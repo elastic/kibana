@@ -54,6 +54,9 @@ import { RunTestManually } from './components/monitor_details/run_test_manually'
 import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
 import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
 import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
+import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
+import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
+import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -98,7 +101,11 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      component: () => <MonitorDetailsPage />,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorSummary />
+        </MonitorDetailsPage>
+      ),
       dataTestSubj: 'syntheticsMonitorDetailsPage',
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'summary'),
     },
@@ -108,7 +115,11 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_HISTORY_ROUTE,
-      component: () => <div>History</div>,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorHistory />
+        </MonitorDetailsPage>
+      ),
       dataTestSubj: 'syntheticsMonitorHistoryPage',
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'history'),
     },
@@ -118,7 +129,11 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ERRORS_ROUTE,
-      component: () => <div>Errors</div>,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorErrors />
+        </MonitorDetailsPage>
+      ),
       dataTestSubj: 'syntheticsMonitorHistoryPage',
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
     },
