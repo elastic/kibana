@@ -292,7 +292,7 @@ export async function getPackageFromSource(options: {
     }
   } else {
     res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion}`);
+    logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {
     throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
