@@ -277,27 +277,38 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('logs in with default user', () => {
-        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+        beforeEach(async () => {
+          await createAndNavigateToCase(getPageObject, getService);
+        });
 
         afterEach(async () => {
-          await cases.singleCase.closeAssigneesPopover();
+          await cases.api.deleteAllCases();
         });
 
         it('shows the assign users popover when clicked', async () => {
           await testSubjects.missingOrFail('euiSelectableList');
-
           await cases.singleCase.openAssigneesPopover();
+          await cases.singleCase.closeAssigneesPopover();
         });
 
         it('assigns a user from the popover', async () => {
           await cases.singleCase.openAssigneesPopover();
           await cases.common.setSearchTextInAssigneesPopover('case');
           await cases.common.selectFirstRowInAssigneesPopover();
-
-          // navigate out of the modal
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+        });
+
+        it('assigns multiple users', async () => {
+          await cases.singleCase.openAssigneesPopover();
+          await cases.common.setSearchTextInAssigneesPopover('case');
+          await cases.common.selectAllRowsInAssigneesPopover();
+
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
         });
       });
 

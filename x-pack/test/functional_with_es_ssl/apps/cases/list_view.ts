@@ -94,6 +94,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('case-status-badge-open');
         });
       });
+
+      describe('severity', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(2);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('change the severity of cases to medium correctly', async () => {
+          await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await testSubjects.missingOrFail('case-table-column-severity-low');
+        });
+      });
     });
 
     describe('filtering', () => {
@@ -209,14 +228,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      it('filters cases by the first cases all user assignee', async () => {
-        await cases.casesTable.filterByAssignee('all');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
-      });
+      describe('assignees filtering', () => {
+        it('filters cases by the first cases all user assignee', async () => {
+          await cases.casesTable.filterByAssignee('all');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user');
+        });
 
-      it('filters cases by the casesAllUser2 assignee', async () => {
-        await cases.casesTable.filterByAssignee('2');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
+        it('filters cases by the casesAllUser2 assignee', async () => {
+          await cases.casesTable.filterByAssignee('2');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+        });
       });
     });
 
@@ -314,6 +337,39 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('to open', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.open, 0);
           await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.open}`);
+        });
+      });
+
+      describe('Severity', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('to medium', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        });
+
+        it('to high', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
+        });
+
+        it('to critical', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.CRITICAL, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.CRITICAL}`);
+        });
+
+        it('to low', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.LOW, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.LOW}`);
         });
       });
 

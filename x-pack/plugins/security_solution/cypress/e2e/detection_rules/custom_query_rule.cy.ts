@@ -39,16 +39,10 @@ import {
   RULE_NAME_INPUT,
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
   TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
-  EMAIL_ACTION_BTN,
-  CREATE_ACTION_CONNECTOR_BTN,
-  SAVE_ACTION_CONNECTOR_BTN,
-  FROM_VALIDATION_ERROR,
-  EMAIL_ACTION_TO_INPUT,
-  EMAIL_ACTION_SUBJECT_INPUT,
-  SCHEDULE_CONTINUE_BUTTON,
 } from '../../screens/create_new_rule';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -86,12 +80,12 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
 import {
   createAndEnableRule,
   fillAboutRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
-  fillEmailConnectorForm,
   fillScheduleRuleAndContinue,
   goToAboutStepTab,
   goToActionsStepTab,
@@ -377,15 +371,8 @@ describe('Custom query rules', () => {
         cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
 
         cy.get(ACTIONS_THROTTLE_INPUT).select('Weekly');
-        cy.get(EMAIL_ACTION_BTN).click();
-        cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
-        fillEmailConnectorForm();
-        cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
 
-        cy.get(EMAIL_ACTION_TO_INPUT).type('test@example.com');
-        cy.get(EMAIL_ACTION_SUBJECT_INPUT).type('Subject');
-
-        cy.get(FROM_VALIDATION_ERROR).should('not.exist');
+        addEmailConnectorAndRuleAction('test@example.com', 'Subject');
 
         goToAboutStepTab();
         cy.get(TAGS_CLEAR_BUTTON).click({ force: true });

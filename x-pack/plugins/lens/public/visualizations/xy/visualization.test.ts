@@ -28,7 +28,7 @@ import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
-import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
@@ -2458,7 +2458,7 @@ describe('xy_visualization', () => {
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
           longMessage:
-            'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });
@@ -2513,7 +2513,8 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
+          longMessage:
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });

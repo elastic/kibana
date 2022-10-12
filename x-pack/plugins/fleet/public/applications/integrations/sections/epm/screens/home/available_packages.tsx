@@ -407,7 +407,7 @@ export const AvailablePackages: React.FC<{
   return (
     <PackageListGrid
       featuredList={featuredList}
-      isLoading={isLoadingAllPackages}
+      isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}

@@ -16,12 +16,13 @@ import { getEndpointResponseActionsConsoleCommands } from '../endpoint_response_
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import type { ResponderCapabilities } from '../../../../../common/endpoint/constants';
-import { RESPONDER_CAPABILITIES } from '../../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
+import type { EndpointCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using processes action from response actions console', () => {
   let render: (
-    capabilities?: ResponderCapabilities[]
+    capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -34,7 +35,7 @@ describe('When using processes action from response actions console', () => {
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
+    render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
@@ -44,6 +45,13 @@ describe('When using processes action from response actions console', () => {
                 commands: getEndpointResponseActionsConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
+                  endpointPrivileges: {
+                    ...getEndpointAuthzInitialState(),
+                    loading: false,
+                    canKillProcess: true,
+                    canSuspendProcess: true,
+                    canGetRunningProcesses: true,
+                  },
                 }),
               },
             };
