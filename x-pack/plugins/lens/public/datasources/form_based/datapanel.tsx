@@ -62,6 +62,7 @@ export type Props = Omit<
   frame: FramePublicAPI;
   indexPatternService: IndexPatternServiceAPI;
   onIndexPatternRefresh: () => void;
+  layerFields?: string[];
 };
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
@@ -144,6 +145,7 @@ export function FormBasedDataPanel({
   frame,
   onIndexPatternRefresh,
   usedIndexPatterns,
+  layerFields,
 }: Props) {
   const { indexPatterns, indexPatternRefs, existingFields, isFirstExistenceFetch } =
     frame.dataViews;
@@ -234,6 +236,7 @@ export function FormBasedDataPanel({
           indexPatternService={indexPatternService}
           onIndexPatternRefresh={onIndexPatternRefresh}
           frame={frame}
+          layerFields={layerFields}
         />
       )}
     </>
@@ -282,6 +285,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
+  layerFields,
 }: Omit<
   DatasourceDataPanelProps,
   'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
@@ -296,6 +300,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   onIndexPatternRefresh: () => void;
+  layerFields?: string[];
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -345,6 +350,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     const allSupportedTypesFields = allFields.filter((field) =>
       supportedFieldTypes.has(field.type)
     );
+    const usedByLayersFields = allFields.filter((field) => layerFields?.includes(field.name));
     const sorted = allSupportedTypesFields.sort(sortFields);
     const groupedFields = {
       ...defaultFieldGroups,
@@ -371,6 +377,19 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         showInAccordion: false,
         title: '',
         hideDetails: true,
+      },
+      SelectedFields: {
+        fields: usedByLayersFields,
+        fieldCount: usedByLayersFields.length,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        title: i18n.translate('xpack.lens.indexPattern.selectedFieldsLabel', {
+          defaultMessage: 'Selected fields',
+        }),
+        isAffectedByGlobalFilter: !!filters.length,
+        isAffectedByTimeFilter: true,
+        hideDetails: false,
+        hideIfEmpty: true,
       },
       AvailableFields: {
         fields: groupedFields.availableFields,
@@ -451,6 +470,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     existenceFetchTimeout,
     currentIndexPattern,
     existingFieldsForIndexPattern,
+    layerFields,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {

@@ -690,6 +690,31 @@ describe('FormBased Data Panel', () => {
         }),
       };
     });
+
+    it('should list all selected fields if exist', async () => {
+      const newProps = {
+        ...props,
+        layerFields: ['bytes'],
+      };
+      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...newProps} />);
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternSelectedFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['bytes']);
+    });
+
+    it('should not list the selected fields accordion if no fields given', async () => {
+      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternSelectedFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual([]);
+    });
+
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
       expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');

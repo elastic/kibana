@@ -216,6 +216,20 @@ describe('TextBased Query Languages Data Panel', () => {
     ).toEqual(['timestamp', 'bytes', 'memory']);
   });
 
+  it('should not display the selected fields accordion if there are no fields displayed', async () => {
+    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+    expect(wrapper.find('[data-test-subj="lnsSelectedFieldsTextBased"]').length).toEqual(0);
+  });
+
+  it('should display the selected fields accordion if there are fields displayed', async () => {
+    const props = {
+      ...defaultProps,
+      layerFields: ['memory'],
+    };
+    const wrapper = mountWithIntl(<TextBasedDataPanel {...props} />);
+    expect(wrapper.find('[data-test-subj="lnsSelectedFieldsTextBased"]').length).not.toEqual(0);
+  });
+
   it('should list all supported fields in the pattern that match the search input', async () => {
     const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
     const searchBox = wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]');

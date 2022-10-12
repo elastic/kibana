@@ -282,6 +282,8 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => T;
 
+  getSelectedFields?: (state: T) => string[];
+
   renderDataPanel: (
     domElement: Element,
     props: DatasourceDataPanelProps<T>
