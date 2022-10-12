@@ -242,7 +242,7 @@ export const updateTimelineShowTimeline = ({
   };
 };
 
-export const updateGraphEventId = ({
+export const updateTimelineGraphEventId = ({
   id,
   graphEventId,
   timelineById,
@@ -265,7 +265,7 @@ export const updateGraphEventId = ({
   };
 };
 
-export const updateSessionViewConfig = ({
+export const updateTimelineSessionViewConfig = ({
   id,
   sessionViewConfig,
   timelineById,
@@ -1233,7 +1233,7 @@ export const updateExcludedRowRenderersIds = ({
 };
 
 export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
-  const { tabType, timelineId, ...expandedDetails } = action;
+  const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
   const expandedTabType = tabType ?? 'query';

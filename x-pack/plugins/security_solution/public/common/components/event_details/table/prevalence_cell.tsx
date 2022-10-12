@@ -28,7 +28,7 @@ const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
 }) => {
   const { loading, count } = useAlertPrevalence({
     field: data.field,
-    isInTimeline: scopeId === TimelineId.active,
+    isActiveTimelines: scopeId === TimelineId.active,
     value: values,
     signalIndexName: null,
   });

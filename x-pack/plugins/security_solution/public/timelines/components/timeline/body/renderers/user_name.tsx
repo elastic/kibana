@@ -10,11 +10,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import { dataTableActions } from '../../../../../common/store/data_table';
-import {
-  isInTableScope,
-  isTimelineScope,
-} from '../../../../../common/components/event_details/helpers';
+import { getScopedActions } from '../../../../../helpers';
 import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -22,7 +18,6 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { timelineActions } from '../../../../store/timeline';
 
 interface Props {
   contextId: string;
@@ -71,19 +66,12 @@ const UserNameComponent: React.FC<Props> = ({
             userName,
           },
         };
-        if (isTimelineScope(timelineID)) {
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
           dispatch(
-            timelineActions.toggleDetailPanel({
+            scopedActions.toggleDetailPanel({
               ...updatedExpandedDetail,
-              timelineId: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        } else if (isInTableScope(timelineID)) {
-          dispatch(
-            dataTableActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              tableId: timelineID,
+              id: timelineID,
               tabType: tabType as TimelineTabs,
             })
           );

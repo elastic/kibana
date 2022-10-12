@@ -202,7 +202,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     });
 
   const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
+    onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
   }, [timelineId, onEventClosed]);
 
   const leadingControlColumns = useMemo(

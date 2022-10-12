@@ -168,7 +168,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     return shouldShowOverlay ? (
       <GraphOverlay
         scopeId={tableId}
-        isInTimeline={false}
+        isActiveTimelines={false}
         SessionView={SessionView}
         Navigation={Navigation}
       />

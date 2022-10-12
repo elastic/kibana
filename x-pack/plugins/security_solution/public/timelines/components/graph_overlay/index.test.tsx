@@ -85,12 +85,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div />}
-            scopeId={TableId.test}
-            isInTimeline={false}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -110,12 +105,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div />}
-            isInTimeline={false}
-            scopeId={TableId.test}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -145,12 +135,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay
-            isInTimeline={false}
-            SessionView={<div />}
-            Navigation={<div />}
-            scopeId={TableId.test}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -169,12 +154,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div />}
-            isInTimeline={true}
-            scopeId={timelineId}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -194,12 +174,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div />}
-            isInTimeline={true}
-            scopeId={timelineId}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -239,12 +214,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div />}
-            isInTimeline={true}
-            scopeId={timelineId}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -287,7 +257,6 @@ describe('GraphOverlay', () => {
           <GraphOverlay
             SessionView={<div />}
             Navigation={<div>{'Close Session'}</div>}
-            isInTimeline={true}
             scopeId={timelineId}
           />
         </TestProviders>
@@ -327,12 +296,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div />}
-            isInTimeline={true}
-            scopeId={timelineId}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
       wrapper.unmount();

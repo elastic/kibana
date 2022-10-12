@@ -46,7 +46,6 @@ describe('RelatedAlertsBySourceEvent', () => {
           data={testData}
           eventId={testEventId}
           scopeId=""
-          isInTimeline={false}
         />
       </TestProviders>
     );
@@ -67,7 +66,6 @@ describe('RelatedAlertsBySourceEvent', () => {
           data={testData}
           eventId={testEventId}
           scopeId=""
-          isInTimeline={false}
         />
       </TestProviders>
     );
@@ -88,7 +86,6 @@ describe('RelatedAlertsBySourceEvent', () => {
           data={testData}
           eventId={testEventId}
           scopeId=""
-          isInTimeline={false}
         />
       </TestProviders>
     );
@@ -113,7 +110,6 @@ describe('RelatedAlertsBySourceEvent', () => {
           data={testData}
           eventId={testEventId}
           scopeId=""
-          isInTimeline={false}
         />
       </TestProviders>
     );

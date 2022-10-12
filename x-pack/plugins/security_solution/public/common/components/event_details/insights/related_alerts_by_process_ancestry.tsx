@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
+import { isActiveTimeline } from '../../../../helpers';
 import type { DataProvider } from '../../../../../common/types';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { getDataProvider } from '../table/use_action_cell_data_provider';
@@ -29,7 +30,6 @@ interface Props {
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
   scopeId?: string;
-  isInTimeline: boolean;
 }
 
 interface Cache {
@@ -65,7 +65,7 @@ interface Cache {
  * state inside the component rather than to add it to Redux.
  */
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(
-  ({ data, originalDocumentId, index, eventId, scopeId, isInTimeline }) => {
+  ({ data, originalDocumentId, index, eventId, scopeId }) => {
     const [showContent, setShowContent] = useState(false);
     const [cache, setCache] = useState<Partial<Cache>>({});
 
@@ -91,20 +91,11 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           index={index}
           originalDocumentId={originalDocumentId}
           eventId={eventId}
-          isInTimeline={isInTimeline}
+          isActiveTimelines={isActiveTimeline(scopeId ?? '')}
           onCacheLoad={setCache}
         />
       );
-    }, [
-      showContent,
-      cache.alertIds,
-      data,
-      index,
-      originalDocumentId,
-      eventId,
-      isInTimeline,
-      scopeId,
-    ]);
+    }, [showContent, cache.alertIds, data, index, originalDocumentId, eventId, scopeId]);
 
     return (
       <InsightAccordion
@@ -133,9 +124,9 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
-  isInTimeline: boolean;
+  isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, originalDocumentId, index, isInTimeline, onCacheLoad, eventId }) => {
+}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
   const { values: wrappedProcessEntityId } = data;
   const { values: indices } = index;
   const { values: wrappedDocumentId } = originalDocumentId;
@@ -143,7 +134,7 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   const processEntityId = Array.isArray(wrappedProcessEntityId) ? wrappedProcessEntityId[0] : '';
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     processEntityId,
-    isInTimeline,
+    isActiveTimeline: isActiveTimelines,
     documentId,
     indices: indices ?? [],
   });

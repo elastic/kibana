@@ -179,7 +179,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   );
 
   const handleOnPanelClosed = useCallback(() => {
-    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, timelineId }));
+    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, id: timelineId }));
   }, [dispatch, timelineId]);
 
   const DetailsPanelContent = useMemo(

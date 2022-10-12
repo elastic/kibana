@@ -37,9 +37,9 @@ import {
   updateProviders,
   updateRange,
   updateTimeline,
-  updateTimelineGraphEventId,
+  updateGraphEventId,
   updateTitleAndDescription,
-  updateTimelineSessionViewConfig,
+  updateSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
   setTimelineUpdatedAt,
@@ -83,9 +83,9 @@ import {
   updateTimelineShowTimeline,
   updateTimelineTitleAndDescription,
   updateSavedQuery,
-  updateGraphEventId,
+  updateTimelineGraphEventId,
   updateFilters,
-  updateSessionViewConfig,
+  updateTimelineSessionViewConfig,
   updateTimelineDetailsPanel,
   setLoadingTableEvents,
   removeTableColumn,
@@ -160,13 +160,17 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
-  .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
+  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
-    timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
+    timelineById: updateTimelineGraphEventId({
+      id,
+      graphEventId,
+      timelineById: state.timelineById,
+    }),
   }))
-  .case(updateTimelineSessionViewConfig, (state, { id, sessionViewConfig }) => ({
+  .case(updateSessionViewConfig, (state, { id, sessionViewConfig }) => ({
     ...state,
-    timelineById: updateSessionViewConfig({
+    timelineById: updateTimelineSessionViewConfig({
       id,
       sessionViewConfig,
       timelineById: state.timelineById,
@@ -391,10 +395,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: {
       ...state.timelineById,
-      [action.timelineId]: {
-        ...state.timelineById[action.timelineId],
+      [action.id]: {
+        ...state.timelineById[action.id],
         expandedDetail: {
-          ...state.timelineById[action.timelineId].expandedDetail,
+          ...state.timelineById[action.id].expandedDetail,
           ...updateTimelineDetailsPanel(action),
         },
       },

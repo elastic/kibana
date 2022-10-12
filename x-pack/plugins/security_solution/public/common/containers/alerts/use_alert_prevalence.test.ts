@@ -32,7 +32,7 @@ describe('useAlertPrevalence', () => {
         useAlertPrevalence({
           field: 'host.name',
           value: ['Host-byc3w6qlpo'],
-          isInTimeline: false,
+          isActiveTimelines: false,
           signalIndexName: null,
           includeAlertIds: false,
         }),

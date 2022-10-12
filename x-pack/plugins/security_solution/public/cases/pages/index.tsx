@@ -58,7 +58,7 @@ const CaseContainerComponent: React.FC = () => {
       dispatch(
         timelineActions.toggleDetailPanel({
           panelView: 'eventDetail',
-          timelineId: TimelineId.casePage,
+          id: TimelineId.casePage,
           params: {
             eventId: alertId,
             indexName: index,

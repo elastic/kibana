@@ -10,6 +10,7 @@ import type { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { EuiPopover, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import { isActiveTimeline } from '../../../../helpers';
 import { StatefulTopN } from '../../top_n';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
 import { useSourcererDataView } from '../../../containers/sourcerer';
@@ -47,7 +48,6 @@ interface Props {
   scopeId?: string | null;
   title?: string;
   value?: string[] | string | null;
-  isInTimeline: boolean;
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
@@ -71,9 +71,8 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     title,
     value,
     globalFilters,
-    isInTimeline,
   }) => {
-    const activeScope: SourcererScopeName = isInTimeline
+    const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
       ? SourcererScopeName.timeline
       : scopeId != null && isDetectionsAlertsTable(scopeId)
       ? SourcererScopeName.detections
@@ -149,7 +148,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           toggleTopN={onClick}
           value={value}
           globalFilters={globalFilters}
-          isInTimeline={isInTimeline}
         />
       ),
       [
@@ -163,7 +161,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         onClick,
         value,
         globalFilters,
-        isInTimeline,
       ]
     );
 

@@ -444,7 +444,7 @@ export const setSelectedTableEvents = ({
 };
 
 export const updateTableDetailsPanel = (action: TableToggleDetailPanel): DataExpandedDetail => {
-  const { tabType, tableId, ...expandedDetails } = action;
+  const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
   const expandedTabType = tabType ?? 'query';
@@ -459,7 +459,7 @@ export const updateTableDetailsPanel = (action: TableToggleDetailPanel): DataExp
   };
 };
 
-export const updateGraphEventId = ({
+export const updateTableGraphEventId = ({
   id,
   graphEventId,
   tableById,
@@ -479,7 +479,7 @@ export const updateGraphEventId = ({
   };
 };
 
-export const updateSessionViewConfig = ({
+export const updateTableSessionViewConfig = ({
   id,
   sessionViewConfig,
   tableById,

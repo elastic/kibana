@@ -27,8 +27,8 @@ import {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-  updateTableGraphEventId,
-  updateTableSessionViewConfig,
+  updateGraphEventId,
+  updateSessionViewConfig,
   setTableUpdatedAt,
 } from './actions';
 
@@ -48,8 +48,8 @@ import {
   updateTableSort,
   upsertTableColumn,
   updateTableDetailsPanel,
-  updateGraphEventId,
-  updateSessionViewConfig,
+  updateTableGraphEventId,
+  updateTableSessionViewConfig,
 } from './helpers';
 
 import { TableState, EMPTY_TABLE_BY_ID } from './types';
@@ -77,10 +77,10 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
     ...state,
     tableById: {
       ...state.tableById,
-      [action.tableId]: {
-        ...state.tableById[action.tableId],
+      [action.id]: {
+        ...state.tableById[action.id],
         expandedDetail: {
-          ...state.tableById[action.tableId].expandedDetail,
+          ...state.tableById[action.id].expandedDetail,
           ...updateTableDetailsPanel(action),
         },
       },
@@ -235,13 +235,13 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       },
     },
   }))
-  .case(updateTableGraphEventId, (state, { id, graphEventId }) => ({
+  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
-    tableById: updateGraphEventId({ id, graphEventId, tableById: state.tableById }),
+    tableById: updateTableGraphEventId({ id, graphEventId, tableById: state.tableById }),
   }))
-  .case(updateTableSessionViewConfig, (state, { id, sessionViewConfig }) => ({
+  .case(updateSessionViewConfig, (state, { id, sessionViewConfig }) => ({
     ...state,
-    tableById: updateSessionViewConfig({
+    tableById: updateTableSessionViewConfig({
       id,
       sessionViewConfig,
       tableById: state.tableById,

@@ -20,7 +20,7 @@ const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
 interface UseAlertPrevalenceOptions {
   field: string;
   value: string | string[] | undefined | null;
-  isInTimeline: boolean;
+  isActiveTimelines: boolean;
   signalIndexName: string | null;
   includeAlertIds?: boolean;
   ignoreTimerange?: boolean;
@@ -36,7 +36,7 @@ interface UserAlertPrevalenceResult {
 export const useAlertPrevalence = ({
   field,
   value,
-  isInTimeline,
+  isActiveTimelines,
   signalIndexName,
   includeAlertIds = false,
   ignoreTimerange = false,
@@ -48,7 +48,7 @@ export const useAlertPrevalence = ({
   let to: string | undefined;
   let from: string | undefined;
   if (ignoreTimerange === false) {
-    ({ to, from } = isInTimeline ? timelineTime : globalTime);
+    ({ to, from } = isActiveTimelines ? timelineTime : globalTime);
   }
   const [initialQuery] = useState(() =>
     generateAlertPrevalenceQuery(field, value, from, to, includeAlertIds)

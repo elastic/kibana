@@ -12,11 +12,7 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { dataTableActions } from '../../../../../common/store/data_table';
-import {
-  isInTableScope,
-  isTimelineScope,
-} from '../../../../../common/components/event_details/helpers';
+import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -125,18 +121,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
+  const scopedActions = getScopedActions(timelineId);
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
 
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-    if (isInTableScope(timelineId)) {
-      dispatch(
-        dataTableActions.updateTableGraphEventId({ id: timelineId, graphEventId: ecsData._id })
-      );
-    } else if (isTimelineScope(timelineId)) {
-      dispatch(
-        timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id })
-      );
+    if (scopedActions) {
+      dispatch(scopedActions.updateGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
     }
     if (timelineId === TimelineId.active) {
       if (dataGridIsFullScreen) {
@@ -150,8 +141,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [
     startTransaction,
-    dispatch,
+    scopedActions,
     timelineId,
+    dispatch,
     ecsData._id,
     setTimelineFullScreen,
     setGlobalFullScreen,
@@ -195,14 +187,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }
     }
     if (sessionViewConfig !== null) {
-      if (isInTableScope(timelineId)) {
-        dispatch(
-          dataTableActions.updateTableSessionViewConfig({ id: timelineId, sessionViewConfig })
-        );
-      } else if (isTimelineScope(timelineId)) {
-        dispatch(
-          timelineActions.updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig })
-        );
+      if (scopedActions) {
+        dispatch(scopedActions.updateSessionViewConfig({ id: timelineId, sessionViewConfig }));
       }
     }
   }, [
@@ -212,6 +198,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     setTimelineFullScreen,
     dispatch,
     setGlobalFullScreen,
+    scopedActions,
   ]);
 
   return (
@@ -281,7 +268,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           columnValues={columnValues}
           key="alert-context-menu"
           ecsRowData={ecsData}
-          timelineId={timelineId}
+          scopeId={timelineId}
           disabled={isContextMenuDisabled}
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}

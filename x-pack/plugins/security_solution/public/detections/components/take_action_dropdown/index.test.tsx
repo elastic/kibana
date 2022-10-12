@@ -110,7 +110,6 @@ describe('take action dropdown', () => {
       refetchFlyoutData: jest.fn(),
       scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
-      isInTimeline: true,
     };
 
     mockStartServicesMock = createStartServicesMock();

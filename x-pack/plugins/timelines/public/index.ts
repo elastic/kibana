@@ -36,8 +36,8 @@ export {
   clearEventsDeleted,
   initializeTGridSettings,
   setTGridSelectAll,
-  updateTableGraphEventId,
-  updateTableSessionViewConfig,
+  updateGraphEventId,
+  updateSessionViewConfig,
   createTGrid,
 } from './store/t_grid/actions';
 

@@ -221,7 +221,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     });
 
   const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.eql, timelineId });
+    onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });
 
     if (
       expandedDetail[TimelineTabs.eql]?.panelView &&

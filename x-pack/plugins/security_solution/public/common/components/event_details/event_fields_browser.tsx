@@ -19,23 +19,18 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 
+import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { tableDefaults } from '../../store/data_table/defaults';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import { dataTableSelectors } from '../../store/data_table';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
-import {
-  EVENT_FIELDS_TABLE_CLASS_NAME,
-  isTimelineScope,
-  onEventDetailsTabKeyPressed,
-  search,
-  isInTableScope,
-} from './helpers';
+import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
 
@@ -214,46 +209,30 @@ export const EventFieldsBrowser = React.memo<Props>(
       },
       [data, columnHeaders]
     );
-
+    const scopedActions = getScopedActions(scopeId);
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
+        if (!scopedActions) {
+          return;
+        }
         if (columnHeaders.some((c) => c.id === column.id)) {
-          if (isTimelineScope(scopeId)) {
-            dispatch(
-              timelineActions.removeColumn({
-                columnId: column.id,
-                id: scopeId,
-              })
-            );
-          } else if (isInTableScope(scopeId)) {
-            dispatch(
-              dataTableActions.removeColumn({
-                columnId: column.id,
-                id: scopeId,
-              })
-            );
-          }
+          dispatch(
+            scopedActions.removeColumn({
+              columnId: column.id,
+              id: scopeId,
+            })
+          );
         } else {
-          if (isTimelineScope(scopeId)) {
-            dispatch(
-              timelineActions.upsertColumn({
-                column,
-                id: scopeId,
-                index: 1,
-              })
-            );
-          } else if (isInTableScope(scopeId)) {
-            dispatch(
-              dataTableActions.upsertColumn({
-                column,
-                id: scopeId,
-                index: 1,
-              })
-            );
-          }
+          dispatch(
+            scopedActions.upsertColumn({
+              column,
+              id: scopeId,
+              index: 1,
+            })
+          );
         }
       },
-      [columnHeaders, dispatch, scopeId]
+      [columnHeaders, dispatch, scopeId, scopedActions]
     );
 
     const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
@@ -267,13 +246,11 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const onUpdateColumns = useCallback(
       (columns) => {
-        if (isTimelineScope(scopeId)) {
-          dispatch(timelineActions.updateColumns({ id: scopeId, columns }));
-        } else if (isInTableScope(scopeId)) {
-          dispatch(dataTableActions.updateColumns({ id: scopeId, columns }));
+        if (scopedActions) {
+          dispatch(scopedActions.updateColumns({ id: scopeId, columns }));
         }
       },
-      [dispatch, scopeId]
+      [dispatch, scopeId, scopedActions]
     );
 
     const columns = useMemo(

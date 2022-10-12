@@ -17,11 +17,11 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../common/store';
 
-export function useTimelineDataFilters(isInTimeline: boolean) {
+export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
-  const isActive = useMemo(() => isInTimeline === true, [isInTimeline]);
+  const isActive = useMemo(() => isActiveTimelines === true, [isActiveTimelines]);
 
   const shouldUpdate = useDeepEqualSelector((state) => {
     if (isActive) {
@@ -53,8 +53,8 @@ export function useTimelineDataFilters(isInTimeline: boolean) {
   const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   const selectedPatterns = useMemo(
-    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
-    [defaultDataView.patternList, isInTimeline, timelinePatterns]
+    () => (isActiveTimelines ? timelinePatterns : defaultDataView.patternList),
+    [defaultDataView.patternList, isActiveTimelines, timelinePatterns]
   );
 
   return {

@@ -62,11 +62,11 @@ export const removeProvider = actionCreator<{
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
 
-export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
+export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
 );
 
-export const updateTimelineSessionViewConfig = actionCreator<{
+export const updateSessionViewConfig = actionCreator<{
   id: string;
   sessionViewConfig: SessionViewConfig | null;
 }>('UPDATE_TIMELINE_SESSION_VIEW_CONFIG');

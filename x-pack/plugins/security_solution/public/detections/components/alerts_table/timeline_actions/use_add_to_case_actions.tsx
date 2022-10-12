@@ -20,7 +20,7 @@ export interface UseAddToCaseActions {
   ecsData?: Ecs;
   nonEcsData?: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
-  isInTimeline: boolean;
+  isActiveTimelines: boolean;
   isInDetections: boolean;
 }
 
@@ -30,7 +30,7 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
-  isInTimeline,
+  isActiveTimelines,
   isInDetections,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -77,7 +77,7 @@ export const useAddToCaseActions = ({
 
   const addToCaseActionItems = useMemo(() => {
     if (
-      (isInTimeline || isInDetections) &&
+      (isActiveTimelines || isInDetections) &&
       userCasesPermissions.create &&
       userCasesPermissions.read &&
       isAlert
@@ -111,7 +111,7 @@ export const useAddToCaseActions = ({
     userCasesPermissions.create,
     userCasesPermissions.read,
     isInDetections,
-    isInTimeline,
+    isActiveTimelines,
     isAlert,
   ]);
 

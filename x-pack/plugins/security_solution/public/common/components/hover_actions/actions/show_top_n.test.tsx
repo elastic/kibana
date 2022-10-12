@@ -10,6 +10,7 @@ import React from 'react';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
+import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
@@ -39,9 +40,8 @@ describe('show topN button', () => {
     onClick: jest.fn(),
     ownFocus: false,
     showTopN: false,
-    scopeId: 'timeline-1',
+    scopeId: TimelineId.active,
     value: ['rule_name'],
-    isInTimeline: true,
   };
 
   describe('button', () => {

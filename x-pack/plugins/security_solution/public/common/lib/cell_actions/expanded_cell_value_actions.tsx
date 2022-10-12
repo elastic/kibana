@@ -15,7 +15,6 @@ import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
 import { useKibana } from '../kibana';
 import { SHOW_TOP_VALUES, HIDE_TOP_VALUES } from './translations';
-import { isTimelineScope } from '../../components/event_details/helpers';
 
 interface Props {
   field: ColumnHeaderOptions;
@@ -86,7 +85,6 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             scopeId={scopeId}
             title={showTopN ? HIDE_TOP_VALUES : SHOW_TOP_VALUES}
             value={value}
-            isInTimeline={isTimelineScope(scopeId)}
           />
         ) : null}
       </StyledContent>

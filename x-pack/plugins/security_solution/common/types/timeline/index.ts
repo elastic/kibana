@@ -530,7 +530,7 @@ export type TimelineExpandedDetail = {
 
 export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
-  timelineId: string;
+  id: string;
 };
 
 export const pageInfoTimeline = runtimeTypes.type({

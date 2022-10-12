@@ -166,7 +166,6 @@ let testProps = {
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),
   value,
-  isInTimeline: false,
 };
 
 describe('StatefulTopN', () => {
@@ -306,7 +305,6 @@ describe('StatefulTopN', () => {
             {...{
               ...testProps,
               scopeId: TimelineId.active,
-              isInTimeline: true,
             }}
           />
         </TestProviders>

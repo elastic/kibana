@@ -12,7 +12,7 @@ import deepEqual from 'fast-deep-equal';
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import { isInTableScope, isTimelineScope } from '../../../common/components/event_details/helpers';
+import { getScopedActions } from '../../../helpers';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
@@ -28,9 +28,7 @@ import { Provider } from '../timeline/data_providers/provider';
 import type { TimelineExpandedDetailType } from '../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
-import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { dataTableActions } from '../../../common/store/data_table';
 
 const getUniqueId = ({
   contextId,
@@ -203,20 +201,12 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
               : FlowTargetSourceDest.source,
           },
         };
-
-        if (isTimelineScope(timelineID)) {
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
           dispatch(
-            timelineActions.toggleDetailPanel({
+            scopedActions.toggleDetailPanel({
               ...updatedExpandedDetail,
-              timelineId: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        } else if (isInTableScope(timelineID)) {
-          dispatch(
-            dataTableActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              tableId: timelineID,
+              id: timelineID,
               tabType: tabType as TimelineTabs,
             })
           );

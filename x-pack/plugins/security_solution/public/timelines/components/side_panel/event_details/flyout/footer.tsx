@@ -10,6 +10,7 @@ import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
+import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import { useExceptionFlyout } from '../../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
@@ -22,8 +23,6 @@ import type { Ecs } from '../../../../../../common/ecs';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
-import { TimelineId } from '../../../../../../common/types';
-
 interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   detailsEcsData: Ecs | null;
@@ -64,7 +63,6 @@ export const FlyoutFooterComponent = React.memo(
     refetchFlyoutData,
   }: FlyoutFooterProps & PropsFromRedux) => {
     const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
-    const isInTimeline = scopeId === TimelineId.active;
     const ruleIndex = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
@@ -95,12 +93,12 @@ export const FlyoutFooterComponent = React.memo(
     };
 
     const refetchAll = useCallback(() => {
-      if (isInTimeline) {
+      if (isActiveTimeline(scopeId)) {
         refetchQuery([timelineQuery]);
       } else {
         refetchQuery(globalQuery);
       }
-    }, [isInTimeline, timelineQuery, globalQuery]);
+    }, [scopeId, timelineQuery, globalQuery]);
 
     const {
       exceptionFlyoutType,
@@ -111,7 +109,7 @@ export const FlyoutFooterComponent = React.memo(
     } = useExceptionFlyout({
       ruleIndex,
       refetch: refetchAll,
-      isInTimeline,
+      isActiveTimelines: isActiveTimeline(scopeId),
     });
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
@@ -148,7 +146,6 @@ export const FlyoutFooterComponent = React.memo(
                   indexName={expandedEvent.indexName}
                   scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
-                  isInTimeline={isInTimeline}
                 />
               )}
             </EuiFlexItem>

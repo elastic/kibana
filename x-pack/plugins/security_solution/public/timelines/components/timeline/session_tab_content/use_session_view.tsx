@@ -11,13 +11,15 @@ import styled from 'styled-components';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { useDispatch } from 'react-redux';
 import {
+  getScopedActions,
+  isActiveTimeline,
   isInTableScope,
   isTimelineScope,
-} from '../../../../common/components/event_details/helpers';
+} from '../../../../helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import type { TableId } from '../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { isFullScreen } from '../body/column_headers';
@@ -35,7 +37,7 @@ import { detectionsTimelineIds } from '../../../containers/helpers';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
+import { dataTableSelectors } from '../../../../common/store/data_table';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
 
 export interface SessionViewConfig {
@@ -53,7 +55,7 @@ interface NavigationProps {
   fullScreen: boolean;
   globalFullScreen: boolean;
   onCloseOverlay: () => void;
-  isInTimeline: boolean;
+  isActiveTimelines: boolean;
   timelineFullScreen: boolean;
   toggleFullScreen: () => void;
   graphEventId?: string;
@@ -64,14 +66,14 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   fullScreen,
   globalFullScreen,
   onCloseOverlay,
-  isInTimeline,
+  isActiveTimelines,
   timelineFullScreen,
   toggleFullScreen,
   graphEventId,
   activeTab,
 }) => {
   const title = () => {
-    if (isInTimeline) {
+    if (isActiveTimelines) {
       return activeTab === TimelineTabs.graph ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
     } else {
       return graphEventId ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
@@ -84,14 +86,14 @@ const NavigationComponent: React.FC<NavigationProps> = ({
           {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      {isInTimeline === false && (
+      {isActiveTimelines === false && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
             <FullScreenButtonIcon
               aria-label={
                 isFullScreen({
                   globalFullScreen,
-                  isInTimeline,
+                  isActiveTimelines,
                   timelineFullScreen,
                 })
                   ? EXIT_FULL_SCREEN
@@ -134,55 +136,40 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
     })
   );
 
-  const isInTimeline = scopeId === TimelineId.active;
+  const scopedActions = getScopedActions(scopeId);
   const onCloseOverlay = useCallback(() => {
     const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
     // Since EUI changes these values directly as a side effect, need to add them back on close.
     if (isDataGridFullScreen) {
-      if (isInTimeline) {
+      if (isActiveTimeline(scopeId)) {
         document.body.classList.add('euiDataGrid__restrictBody');
       } else {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
       }
     } else {
-      if (isInTimeline) {
+      if (isActiveTimeline(scopeId)) {
         setTimelineFullScreen(false);
       } else {
         setGlobalFullScreen(false);
       }
     }
-    if (isInTimeline === false) {
-      if (isTimelineScope(scopeId)) {
-        dispatch(timelineActions.updateTimelineGraphEventId({ id: scopeId, graphEventId: '' }));
-        dispatch(
-          timelineActions.updateTimelineSessionViewConfig({ id: scopeId, sessionViewConfig: null })
-        );
-      } else if (isInTableScope(scopeId)) {
-        dispatch(dataTableActions.updateTableGraphEventId({ id: scopeId, graphEventId: '' }));
-        dispatch(
-          dataTableActions.updateTableSessionViewConfig({ id: scopeId, sessionViewConfig: null })
-        );
+    if (isActiveTimeline(scopeId) === false) {
+      if (scopedActions) {
+        dispatch(scopedActions.updateGraphEventId({ id: scopeId, graphEventId: '' }));
+        dispatch(scopedActions.updateSessionViewConfig({ id: scopeId, sessionViewConfig: null }));
       }
     } else {
       if (activeTab === TimelineTabs.graph) {
-        if (isTimelineScope(scopeId)) {
-          dispatch(timelineActions.updateTimelineGraphEventId({ id: scopeId, graphEventId: '' }));
-          if (prevActiveTab === TimelineTabs.session && !sessionViewConfig) {
-            dispatch(
-              timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
-            );
-          }
-        } else if (isInTableScope(scopeId)) {
-          dispatch(dataTableActions.updateTableGraphEventId({ id: scopeId, graphEventId: '' }));
+        if (scopedActions) {
+          dispatch(scopedActions.updateGraphEventId({ id: scopeId, graphEventId: '' }));
+        }
+        if (prevActiveTab === TimelineTabs.session && !sessionViewConfig) {
+          dispatch(
+            timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
+          );
         }
       } else if (activeTab === TimelineTabs.session) {
         if (isTimelineScope(scopeId)) {
-          dispatch(
-            timelineActions.updateTimelineSessionViewConfig({
-              id: scopeId,
-              sessionViewConfig: null,
-            })
-          );
           if (prevActiveTab === TimelineTabs.graph && !graphEventId) {
             dispatch(
               timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
@@ -192,9 +179,10 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
               timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: prevActiveTab })
             );
           }
-        } else if (isInTableScope(scopeId)) {
+        }
+        if (scopedActions) {
           dispatch(
-            dataTableActions.updateTableSessionViewConfig({
+            scopedActions.updateSessionViewConfig({
               id: scopeId,
               sessionViewConfig: null,
             })
@@ -203,9 +191,9 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
       }
     }
   }, [
-    isInTimeline,
     setTimelineFullScreen,
     setGlobalFullScreen,
+    scopedActions,
     dispatch,
     scopeId,
     activeTab,
@@ -217,24 +205,18 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
     () =>
       isFullScreen({
         globalFullScreen,
-        isInTimeline,
+        isActiveTimelines: isActiveTimeline(scopeId),
         timelineFullScreen,
       }),
-    [globalFullScreen, isInTimeline, timelineFullScreen]
+    [globalFullScreen, scopeId, timelineFullScreen]
   );
   const toggleFullScreen = useCallback(() => {
-    if (isInTimeline) {
+    if (isActiveTimeline(scopeId)) {
       setTimelineFullScreen(!timelineFullScreen);
     } else {
       setGlobalFullScreen(!globalFullScreen);
     }
-  }, [
-    isInTimeline,
-    setTimelineFullScreen,
-    timelineFullScreen,
-    setGlobalFullScreen,
-    globalFullScreen,
-  ]);
+  }, [scopeId, setTimelineFullScreen, timelineFullScreen, setGlobalFullScreen, globalFullScreen]);
   const navigation = useMemo(() => {
     return (
       <Navigation
@@ -242,7 +224,7 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
         globalFullScreen={globalFullScreen}
         activeTab={activeTab}
         onCloseOverlay={onCloseOverlay}
-        isInTimeline={isInTimeline}
+        isActiveTimelines={isActiveTimeline(scopeId)}
         timelineFullScreen={timelineFullScreen}
         toggleFullScreen={toggleFullScreen}
         graphEventId={graphEventId}
@@ -252,11 +234,11 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
     fullScreen,
     globalFullScreen,
     activeTab,
-    graphEventId,
     onCloseOverlay,
+    scopeId,
     timelineFullScreen,
-    isInTimeline,
     toggleFullScreen,
+    graphEventId,
   ]);
 
   return {
@@ -292,33 +274,31 @@ export const useSessionView = ({
     ...((getScope && getScope(state, scopeId)) ?? defaults),
   }));
 
-  const isInTimeline = scopeId === TimelineId.active;
-
   const fullScreen = useMemo(
     () =>
       isFullScreen({
         globalFullScreen,
-        isInTimeline,
+        isActiveTimelines: isActiveTimeline(scopeId),
         timelineFullScreen,
       }),
-    [globalFullScreen, isInTimeline, timelineFullScreen]
+    [globalFullScreen, scopeId, timelineFullScreen]
   );
 
   const sourcererScope = useMemo(() => {
-    if (isInTimeline) {
+    if (isActiveTimeline(scopeId)) {
       return SourcererScopeName.timeline;
     } else if (detectionsTimelineIds.includes(scopeId as TableId)) {
       return SourcererScopeName.detections;
     } else {
       return SourcererScopeName.default;
     }
-  }, [scopeId, isInTimeline]);
+  }, [scopeId]);
   const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: !isInTimeline,
+    isFlyoutView: !isActiveTimeline(scopeId),
     entityType,
     sourcererScope,
     scopeId,
-    tabType: isInTimeline ? activeTab : TimelineTabs.query,
+    tabType: isActiveTimeline(scopeId) ? activeTab : TimelineTabs.query,
   });
 
   const sessionViewComponent = useMemo(() => {

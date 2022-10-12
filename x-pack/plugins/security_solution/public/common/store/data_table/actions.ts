@@ -25,7 +25,7 @@ export {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-  updateTableGraphEventId,
-  updateTableSessionViewConfig,
+  updateGraphEventId,
+  updateSessionViewConfig,
   createTGrid,
 } from '@kbn/timelines-plugin/public';

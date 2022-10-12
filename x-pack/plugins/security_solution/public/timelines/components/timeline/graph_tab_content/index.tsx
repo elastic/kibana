@@ -49,12 +49,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
 
   return (
     <>
-      <GraphOverlay
-        scopeId={timelineId}
-        isInTimeline={false}
-        Navigation={Navigation}
-        SessionView={SessionView}
-      />
+      <GraphOverlay scopeId={timelineId} Navigation={Navigation} SessionView={SessionView} />
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />

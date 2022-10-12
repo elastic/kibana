@@ -306,7 +306,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     });
 
   const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.query, timelineId });
+    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
 
     if (
       expandedDetail[TimelineTabs.query]?.panelView &&

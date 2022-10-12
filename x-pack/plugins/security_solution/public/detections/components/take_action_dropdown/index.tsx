@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
@@ -48,7 +49,6 @@ export interface TakeActionDropdownProps {
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
   refetchFlyoutData: () => Promise<void>;
-  isInTimeline: boolean;
   onOsqueryClick: (id: string) => void;
   scopeId: string;
 }
@@ -66,7 +66,6 @@ export const TakeActionDropdown = React.memo(
     onAddIsolationStatusClick,
     refetch,
     refetchFlyoutData,
-    isInTimeline,
     onOsqueryClick,
     scopeId,
   }: TakeActionDropdownProps) => {
@@ -228,7 +227,7 @@ export const TakeActionDropdown = React.memo(
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
       onSuccess: refetchFlyoutData,
-      isInTimeline,
+      isActiveTimelines: isActiveTimeline(scopeId),
       isInDetections,
     });
 

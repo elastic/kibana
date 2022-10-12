@@ -9,9 +9,7 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useBulkActionItems } from '@kbn/timelines-plugin/public';
-import { timelineActions } from '../../../../timelines/store/timeline';
-import { TableId, TimelineId } from '../../../../../common/types';
-import { dataTableActions } from '../../../../common/store/data_table';
+import { getScopedActions } from '../../../../helpers';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
@@ -23,11 +21,6 @@ interface Props {
   indexName: string;
   refetch?: () => void;
 }
-
-const isTimelineScope = (scopeId: string) =>
-  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
-const isInTableScope = (scopeId: string) =>
-  Object.values(TableId).includes(scopeId as unknown as TableId);
 
 export const useAlertsActions = ({
   alertStatus,
@@ -47,26 +40,23 @@ export const useAlertsActions = ({
     }
   }, [closePopover, refetch]);
 
+  const scopedActions = getScopedActions(scopeId);
   const setEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      if (isTimelineScope(scopeId)) {
-        dispatch(timelineActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
-      } else if (isInTableScope(scopeId)) {
-        dispatch(dataTableActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
+      if (scopedActions) {
+        dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
       }
     },
-    [dispatch, scopeId]
+    [dispatch, scopeId, scopedActions]
   );
 
   const setEventsDeleted = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      if (isTimelineScope(scopeId)) {
-        dispatch(timelineActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
-      } else if (isInTableScope(scopeId)) {
-        dispatch(dataTableActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
+      if (scopedActions) {
+        dispatch(scopedActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
       }
     },
-    [dispatch, scopeId]
+    [dispatch, scopeId, scopedActions]
   );
 
   const actionItems = useBulkActionItems({

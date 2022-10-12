@@ -14,7 +14,7 @@ import type { inputsModel } from '../../../../common/store';
 interface UseExceptionFlyoutProps {
   ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
-  isInTimeline: boolean;
+  isActiveTimelines: boolean;
 }
 interface UseExceptionFlyout {
   exceptionFlyoutType: ExceptionListType | null;
@@ -27,7 +27,7 @@ interface UseExceptionFlyout {
 export const useExceptionFlyout = ({
   ruleIndex,
   refetch,
-  isInTimeline,
+  isActiveTimelines,
 }: UseExceptionFlyoutProps): UseExceptionFlyout => {
   const [exceptionFlyoutType, setOpenAddExceptionFlyout] = useState<ExceptionListType | null>(null);
 
@@ -49,12 +49,12 @@ export const useExceptionFlyout = ({
 
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
-      if (refetch && (isInTimeline === false || didBulkCloseAlert)) {
+      if (refetch && (isActiveTimelines === false || didBulkCloseAlert)) {
         refetch();
       }
       setOpenAddExceptionFlyout(null);
     },
-    [refetch, isInTimeline]
+    [refetch, isActiveTimelines]
   );
 
   return {

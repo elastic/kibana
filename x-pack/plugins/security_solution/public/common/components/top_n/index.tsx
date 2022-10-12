@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
 import type { BrowserFields } from '../../containers/source';
@@ -84,7 +85,6 @@ export interface OwnProps {
   showLegend?: boolean;
   value?: string[] | string | null;
   globalFilters?: Filter[];
-  isInTimeline: boolean;
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
@@ -107,17 +107,16 @@ const StatefulTopNComponent: React.FC<Props> = ({
   showLegend,
   scopeId,
   toggleTopN,
-  isInTimeline,
   value,
 }) => {
   const { uiSettings } = useKibana().services;
   const { from, deleteQuery, setQuery, to } = useGlobalTime(false);
 
-  const options = getOptions(isInTimeline ? activeTimelineEventType : undefined);
+  const options = getOptions(isActiveTimeline(scopeId ?? '') ? activeTimelineEventType : undefined);
 
   const combinedQueries = useMemo(
     () =>
-      isInTimeline
+      isActiveTimeline(scopeId ?? '')
         ? combineQueries({
             browserFields,
             config: getEsQueryConfig(uiSettings),
@@ -132,14 +131,14 @@ const StatefulTopNComponent: React.FC<Props> = ({
           })?.filterQuery
         : undefined,
     [
-      activeTimelineFilters,
-      activeTimelineKqlQueryExpression,
+      scopeId,
       browserFields,
+      uiSettings,
       dataProviders,
+      activeTimelineFilters,
       indexPattern,
       kqlMode,
-      isInTimeline,
-      uiSettings,
+      activeTimelineKqlQueryExpression,
     ]
   );
 
@@ -153,21 +152,21 @@ const StatefulTopNComponent: React.FC<Props> = ({
       combinedQueries={combinedQueries}
       data-test-subj="top-n"
       defaultView={defaultView}
-      deleteQuery={isInTimeline ? undefined : deleteQuery}
+      deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}
       field={field as AlertsStackByField}
-      filters={isInTimeline ? EMPTY_FILTERS : globalFilters}
-      from={isInTimeline ? activeTimelineFrom : from}
+      filters={isActiveTimeline(scopeId ?? '') ? EMPTY_FILTERS : globalFilters}
+      from={isActiveTimeline(scopeId ?? '') ? activeTimelineFrom : from}
       indexPattern={indexPattern}
       options={options}
       paddingSize={paddingSize}
-      query={isInTimeline ? EMPTY_QUERY : globalQuery}
+      query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}
       showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={
-        isInTimeline ? InputsModelId.timeline : InputsModelId.global
+        isActiveTimeline(scopeId ?? '') ? InputsModelId.timeline : InputsModelId.global
       }
       setQuery={setQuery}
       scopeId={scopeId}
-      to={isInTimeline ? activeTimelineTo : to}
+      to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}
       onFilterAdded={onFilterAdded}
       value={value}

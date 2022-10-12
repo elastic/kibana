@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { find } from 'lodash/fp';
 
-import { TimelineId } from '../../../../../common/types';
 import * as i18n from './translations';
 
 import type { BrowserFields } from '../../../containers/source';
@@ -92,7 +91,6 @@ export const Insights = React.memo<Props>(
     if (isReadOnly || !canShowAtLeastOneInsight) {
       return null;
     }
-    const isInTimeline = scopeId === TimelineId.active;
 
     return (
       <div>
@@ -116,7 +114,6 @@ export const Insights = React.memo<Props>(
                 data={sourceEventField}
                 eventId={eventId}
                 scopeId={scopeId}
-                isInTimeline={isInTimeline}
               />
             </EuiFlexItem>
           )}
@@ -128,7 +125,6 @@ export const Insights = React.memo<Props>(
                 data={processSessionField}
                 eventId={eventId}
                 scopeId={scopeId}
-                isInTimeline={isInTimeline}
               />
             </EuiFlexItem>
           )}
@@ -142,7 +138,6 @@ export const Insights = React.memo<Props>(
                   index={originalDocumentIndex}
                   eventId={eventId}
                   scopeId={scopeId}
-                  isInTimeline={isInTimeline}
                 />
               </EuiFlexItem>
             ) : (

@@ -44,7 +44,7 @@ export const updateColumnWidth = actionCreator<{
 
 export type TableToggleDetailPanel = DataExpandedDetailType & {
   tabType?: string;
-  tableId: string;
+  id: string;
 };
 
 export const toggleDetailPanel = actionCreator<TableToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
@@ -112,11 +112,11 @@ export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean 
   'SET_TGRID_SELECT_ALL'
 );
 
-export const updateTableGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
+export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
   'UPDATE_TGRID_GRAPH_EVENT_ID'
 );
 
-export const updateTableSessionViewConfig = actionCreator<{
+export const updateSessionViewConfig = actionCreator<{
   id: string;
   sessionViewConfig: SessionViewConfig | null;
 }>('UPDATE_TGRID_SESSION_VIEW_CONFIG');

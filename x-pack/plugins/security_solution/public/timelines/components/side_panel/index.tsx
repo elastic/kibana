@@ -12,16 +12,17 @@ import { EuiFlyout } from '@elastic/eui';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
+import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
+import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
-import { TimelineId, TimelineTabs, TableId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
-import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
+import { dataTableSelectors } from '../../../common/store/data_table';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -33,11 +34,6 @@ interface DetailsPanelProps {
   scopeId: string;
   isReadOnly?: boolean;
 }
-
-const isTimelineScope = (scopeId: string) =>
-  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
-const isInTableScope = (scopeId: string) =>
-  Object.values(TableId).includes(scopeId as unknown as TableId);
 
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
@@ -70,10 +66,9 @@ export const DetailsPanel = React.memo(
 
     // To be used primarily in the flyout scenario where we don't want to maintain the tabType
     const defaultOnPanelClose = useCallback(() => {
-      if (isTimelineScope(scopeId)) {
-        dispatch(timelineActions.toggleDetailPanel({ timelineId: scopeId }));
-      } else if (isInTableScope(scopeId)) {
-        dispatch(dataTableActions.toggleDetailPanel({ tableId: scopeId }));
+      const scopedActions = getScopedActions(scopeId);
+      if (scopedActions) {
+        dispatch(scopedActions.toggleDetailPanel({ id: scopeId }));
       }
     }, [dispatch, scopeId]);
 

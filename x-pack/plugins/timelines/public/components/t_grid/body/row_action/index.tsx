@@ -101,7 +101,7 @@ const RowActionComponent = ({
       tGridActions.toggleDetailPanel({
         ...updatedExpandedDetail,
         tabType,
-        tableId,
+        id: tableId,
       })
     );
   }, [dispatch, eventId, indexName, tabType, tableId]);

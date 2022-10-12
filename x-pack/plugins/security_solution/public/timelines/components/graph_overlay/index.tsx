@@ -16,7 +16,12 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
-import { isInTableScope, isTimelineScope } from '../../../common/components/event_details/helpers';
+import {
+  getScopedActions,
+  isActiveTimeline,
+  isInTableScope,
+  isTimelineScope,
+} from '../../../helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -27,9 +32,9 @@ import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
+import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
+import { dataTableSelectors } from '../../../common/store/data_table';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
@@ -73,7 +78,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 
 interface GraphOverlayProps {
   scopeId: string;
-  isInTimeline: boolean;
   SessionView: JSX.Element | null;
   Navigation: JSX.Element | null;
 }
@@ -82,7 +86,6 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   SessionView,
   Navigation,
   scopeId,
-  isInTimeline,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -103,26 +106,32 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   );
 
   const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, isInTimeline, timelineFullScreen }),
-    [globalFullScreen, isInTimeline, timelineFullScreen]
+    () =>
+      isFullScreen({
+        globalFullScreen,
+        isActiveTimelines: isActiveTimeline(scopeId),
+        timelineFullScreen,
+      }),
+    [globalFullScreen, scopeId, timelineFullScreen]
   );
 
   useEffect(() => {
     return () => {
-      if (isInTableScope(scopeId)) {
-        dispatch(dataTableActions.updateTableGraphEventId({ id: scopeId, graphEventId: '' }));
-      } else if (isTimelineScope(scopeId)) {
-        dispatch(timelineActions.updateTimelineGraphEventId({ id: scopeId, graphEventId: '' }));
+      const scopedActions = getScopedActions(scopeId);
+      if (scopedActions) {
+        dispatch(scopedActions.updateGraphEventId({ id: scopeId, graphEventId: '' }));
       }
-      if (isInTimeline) {
+      if (isActiveTimeline(scopeId)) {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
-  }, [dispatch, isInTimeline, scopeId]);
+  }, [dispatch, scopeId]);
 
-  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(isInTimeline);
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
+    isActiveTimeline(scopeId)
+  );
 
   const sessionContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,7 +143,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     }
   }, [fullScreen]);
 
-  if (!isInTimeline && sessionViewConfig !== null) {
+  if (!isActiveTimeline(scopeId) && sessionViewConfig !== null) {
     return (
       <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
         <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
@@ -148,7 +157,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
         </EuiFlexGroup>
       </OverlayContainer>
     );
-  } else if (fullScreen && !isInTimeline) {
+  } else if (fullScreen && !isActiveTimeline(scopeId)) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />

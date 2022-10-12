@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
@@ -26,7 +27,7 @@ import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { TableId, TimelineId } from '../../../../../common/types';
+import { TableId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -50,7 +51,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
-  timelineId: string;
+  scopeId: string;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
@@ -61,7 +62,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   ecsRowData,
   refetch,
   onRuleChange,
-  timelineId,
+  scopeId,
   globalQuery,
   timelineQuery,
 }) => {
@@ -77,13 +78,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const isInDetections = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage].includes(
-    timelineId as TableId
+    scopeId as TableId
   );
-  const isInTimeline = timelineId === TimelineId.active;
+
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
     onMenuItemClick,
-    isInTimeline,
+    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     isInDetections,
   });
@@ -102,8 +103,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
   const timelineIdAllowsAddEndpointEventFilter = useMemo(
-    () => timelineId === TableId.hostsPageEvents || timelineId === TableId.usersPageEvents,
-    [timelineId]
+    () => scopeId === TableId.hostsPageEvents || scopeId === TableId.usersPageEvents,
+    [scopeId]
   );
 
   const onButtonClick = useCallback(() => {
@@ -134,7 +135,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   };
 
   const refetchAll = useCallback(() => {
-    if (timelineId === TimelineId.active) {
+    if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
       if (routeProps.pageName === 'alerts') {
         refetchQuery(globalQuery);
@@ -142,7 +143,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     } else {
       refetchQuery(globalQuery);
     }
-  }, [timelineId, globalQuery, timelineQuery, routeProps]);
+  }, [scopeId, globalQuery, timelineQuery, routeProps]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -156,7 +157,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   } = useExceptionFlyout({
     ruleIndex,
     refetch: refetchAll,
-    isInTimeline,
+    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
   });
 
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
@@ -166,7 +167,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     alertStatus,
     eventId: ecsRowData?._id,
     indexName: ecsRowData?._index ?? '',
-    scopeId: timelineId,
+    scopeId,
     refetch: refetchAll,
     closePopover,
   });
@@ -283,10 +284,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 const makeMapStateToProps = () => {
   const getGlobalQueries = inputsSelectors.globalQuery();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: AlertContextMenuProps) => {
+  const mapStateToProps = (state: State, { scopeId }: AlertContextMenuProps) => {
     return {
       globalQuery: getGlobalQueries(state),
-      timelineQuery: getTimelineQuery(state, timelineId),
+      timelineQuery: getTimelineQuery(state, scopeId),
     };
   };
   return mapStateToProps;

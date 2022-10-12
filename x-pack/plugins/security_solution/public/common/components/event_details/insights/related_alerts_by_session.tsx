@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { isActiveTimeline } from '../../../../helpers';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
@@ -25,7 +26,6 @@ interface Props {
   data: TimelineEventsDetailsItem;
   eventId: string;
   scopeId: string;
-  isInTimeline: boolean;
 }
 
 /**
@@ -36,12 +36,12 @@ interface Props {
  * the related alerts in a timeline investigation.
  */
 export const RelatedAlertsBySession = React.memo<Props>(
-  ({ browserFields, data, eventId, scopeId, isInTimeline }) => {
+  ({ browserFields, data, eventId, scopeId }) => {
     const { field, values } = data;
     const { error, count, alertIds } = useAlertPrevalence({
       field,
       value: values,
-      isInTimeline,
+      isActiveTimelines: isActiveTimeline(scopeId),
       signalIndexName: null,
       includeAlertIds: true,
       ignoreTimerange: true,

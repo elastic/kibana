@@ -14,7 +14,6 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { TableId, TimelineId } from '../../../../common/types';
 import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
@@ -186,8 +185,3 @@ export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
 export function hasHoverOrRowActions(field: string): boolean {
   return !FIELDS_WITHOUT_ACTIONS[field];
 }
-
-export const isTimelineScope = (scopeId: string) =>
-  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
-export const isInTableScope = (scopeId: string) =>
-  Object.values(TableId).includes(scopeId as unknown as TableId);

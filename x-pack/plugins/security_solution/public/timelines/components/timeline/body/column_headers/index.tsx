@@ -78,13 +78,14 @@ DraggableContainer.displayName = 'DraggableContainer';
 
 export const isFullScreen = ({
   globalFullScreen,
-  isInTimeline,
+  isActiveTimelines,
   timelineFullScreen,
 }: {
   globalFullScreen: boolean;
-  isInTimeline: boolean;
+  isActiveTimelines: boolean;
   timelineFullScreen: boolean;
-}) => (isInTimeline && timelineFullScreen) || (isInTimeline === false && globalFullScreen);
+}) =>
+  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);
 
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
