@@ -177,5 +177,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
       });
     });
+
+    it('should convert parent pipeline aggregation with terms', async () => {
+      await visualBuilder.createNewAgg();
+
+      await visualBuilder.selectAggType('Overall Average', 1);
+      await visualBuilder.setFieldForAggregation('Count', 1);
+
+      await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+      await header.waitUntilLoadingHasFinished();
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(3);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql('overall_average(count())');
+        expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
+      });
+    });
   });
 }
