@@ -25,4 +25,10 @@ export const i18nTexts = {
       defaultMessage: 'Select {nrOfFiles} files',
       values: { nrOfFiles },
     }),
+  searchFieldPlaceholder: i18n.translate('xpack.fileUpload.filePicker.searchFieldPlaceholder', {
+    defaultMessage: 'Filter by name',
+  }),
+  emptyFileGridPrompt: i18n.translate('xpack.fileUpload.filePicker.emptyGridPrompt', {
+    defaultMessage: 'No files matched your search',
+  }),
 };

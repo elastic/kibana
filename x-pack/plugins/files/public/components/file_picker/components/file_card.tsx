@@ -17,6 +17,7 @@ import { useFilesContext } from '../../context';
 import { useFilePickerContext } from '../context';
 
 import './file_card.scss';
+import { useBehaviorSubject } from '../../use_behavior_subject';
 
 interface Props {
   file: FileJSON;
@@ -27,7 +28,9 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const { kind, state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
-  const isSelected = state.hasFileId(file.id);
+
+  useBehaviorSubject(state.selectedFileIds$);
+  const isSelected = state.isFileIdSelected(file.id);
   const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
   return (
     <EuiCard
@@ -38,7 +41,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       paddingSize="s"
       selectable={{
         isSelected,
-        onClick: () => (isSelected ? state.removeFile(file.id) : state.addFile(file.id)),
+        onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file.id)),
       }}
       image={
         <div

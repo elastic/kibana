@@ -4,39 +4,98 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, Subscription, combineLatest } from 'rxjs';
+import { debounce } from 'lodash';
+import { FileJSON } from '../../../common';
+
+const filterFiles = (files: FileJSON[], filter?: string) => {
+  if (!filter) return files;
+
+  return files.filter((file) => {
+    return file.name.toLowerCase().includes(filter);
+  });
+};
 
 export class FilePickerState {
+  /**
+   * Files the user has selected
+   */
+  public readonly selectedFileIds$ = new BehaviorSubject<string[]>([]);
+
+  /**
+   * File objects we have loaded on the front end, stored here so that it can
+   * easily be passed to all relevant UI.
+   *
+   * @note This is not explicitly kept in sync with the selected files!
+   */
+  public readonly files$ = new BehaviorSubject<FileJSON[]>([]);
+  public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
+
+  /**
+   * This is how we keep a deduplicated list of file ids representing files a user
+   * has selected
+   */
   private readonly fileSet = new Set<string>();
 
-  private sendNext() {
-    this.fileIds$.next(this.getFileIds());
-  }
-  public fileIds$ = new BehaviorSubject<string[]>([]);
+  private readonly unfilteredFiles$ = new BehaviorSubject<FileJSON[]>([]);
+  private readonly query$ = new BehaviorSubject<undefined | string>(undefined);
+  private readonly subscriptions: Subscription[] = [];
 
-  public isEmpty() {
-    return this.fileSet.size === 0;
+  constructor() {
+    this.subscriptions = [
+      this.unfilteredFiles$
+        .pipe(
+          map((files) => files.length > 0),
+          distinctUntilChanged()
+        )
+        .subscribe(this.hasFiles$),
+
+      combineLatest([this.unfilteredFiles$, this.query$])
+        .pipe(map(([files, query]) => filterFiles(files, query)))
+        .subscribe(this.files$),
+    ];
+  }
+
+  private sendNextSelectedFiles() {
+    this.selectedFileIds$.next(this.getSelectedFileIds());
   }
 
   public hasFilesSelected = (): boolean => {
     return this.fileSet.size > 0;
   };
 
-  public addFile = (fileId: string | string[]): void => {
+  public selectFile = (fileId: string | string[]): void => {
     (Array.isArray(fileId) ? fileId : [fileId]).forEach((id) => this.fileSet.add(id));
-    this.sendNext();
+    this.sendNextSelectedFiles();
   };
 
-  public removeFile = (fileId: string): void => {
-    if (this.fileSet.delete(fileId)) this.sendNext();
+  public unselectFile = (fileId: string): void => {
+    if (this.fileSet.delete(fileId)) this.sendNextSelectedFiles();
   };
 
-  public hasFileId = (fileId: string): boolean => {
+  public isFileIdSelected = (fileId: string): boolean => {
     return this.fileSet.has(fileId);
   };
 
-  public getFileIds = (): string[] => {
+  public getSelectedFileIds = (): string[] => {
     return Array.from(this.fileSet);
+  };
+
+  public hasFiles = (): boolean => {
+    return Boolean(this.files$.getValue().length);
+  };
+
+  public setFiles = (files: FileJSON[]): void => {
+    this.unfilteredFiles$.next(files);
+  };
+
+  public setQuery = debounce((query: string): void => {
+    if (query) this.query$.next(query);
+    else this.query$.next(undefined);
+  }, 100);
+
+  public dispose = (): void => {
+    for (const sub of this.subscriptions) sub.unsubscribe();
   };
 }
 

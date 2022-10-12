@@ -7,17 +7,21 @@
 
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FileJSON } from '../../../../common';
+
+import { useBehaviorSubject } from '../../use_behavior_subject';
+import { i18nTexts } from '../i18n_texts';
+import { useFilePickerContext } from '../context';
 import { FileCard } from './file_card';
 
-interface Props {
-  files: FileJSON[];
-}
-
-export const FileGrid: FunctionComponent<Props> = ({ files }) => {
+export const FileGrid: FunctionComponent = () => {
+  const { state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
+  const files = useBehaviorSubject(state.files$);
+  if (!files.length) {
+    return <EuiEmptyPrompt title={<h3>{i18nTexts.emptyFileGridPrompt}</h3>} titleSize="s" />;
+  }
   return (
     <div
       css={css`

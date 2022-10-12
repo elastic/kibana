@@ -55,7 +55,7 @@ export const Empty = Template.bind({});
 
 const d = new Date();
 let id = 0;
-function createFileJSON(): FileJSON {
+function createFileJSON(file?: Partial<FileJSON>): FileJSON {
   return {
     alt: '',
     created: d.toISOString(),
@@ -71,6 +71,7 @@ function createFileJSON(): FileJSON {
     name: 'my file',
     size: 1,
     status: 'READY',
+    ...file,
   };
 }
 export const BasicOne = Template.bind({});
@@ -100,11 +101,11 @@ BasicMany.decorators = [
           getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
           list: async (): Promise<FilesClientResponses['list']> => ({
             files: [
-              createFileJSON(),
-              createFileJSON(),
-              createFileJSON(),
-              createFileJSON(),
-              createFileJSON(),
+              createFileJSON({ name: 'abc' }),
+              createFileJSON({ name: 'def' }),
+              createFileJSON({ name: 'efg' }),
+              createFileJSON({ name: 'foo' }),
+              createFileJSON({ name: 'bar' }),
               createFileJSON(),
               createFileJSON(),
             ],
