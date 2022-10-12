@@ -64,8 +64,8 @@
     "title": "A shared saved-object in all spaces"
   },
   "id": "all_spaces",
-  "type": "sharedtype",
   "references": [],
+  "type": "sharedtype",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5NywxXQ=="
 }
