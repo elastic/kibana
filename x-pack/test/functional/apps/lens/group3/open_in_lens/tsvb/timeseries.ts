@@ -125,8 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await button.click();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
@@ -167,8 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
@@ -192,8 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
