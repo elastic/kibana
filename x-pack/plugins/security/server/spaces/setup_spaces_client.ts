@@ -10,6 +10,7 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
+import { SavedObjectsSecurityExtension } from '../saved_objects';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Deps {
@@ -31,14 +32,22 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
     return savedObjectsStart.createScopedRepository(request, ['space']);
   });
 
-  spacesClient.registerClientWrapper(
-    (request, baseClient) =>
-      new SecureSpacesClientWrapper(
-        baseClient,
-        request,
-        authz,
-        audit.asScoped(request),
-        SavedObjectsClient.errors
-      )
-  );
+  spacesClient.registerClientWrapper((request, baseClient) => {
+    const securityExtension = authz.mode.useRbacForRequest(request)
+      ? new SavedObjectsSecurityExtension({
+          actions: authz.actions,
+          auditLogger: audit.asScoped(request),
+          checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
+          errors: SavedObjectsClient.errors,
+        })
+      : undefined;
+    return new SecureSpacesClientWrapper(
+      baseClient,
+      request,
+      authz,
+      audit.asScoped(request),
+      SavedObjectsClient.errors,
+      securityExtension
+    );
+  });
 };
