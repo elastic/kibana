@@ -43,9 +43,8 @@ export class FleetUsageSender {
               appContextService.getLogger().info('Running Fleet Usage telemetry send task');
 
               const usageData = await fetchUsage();
+              appContextService.getLogger().debug(JSON.stringify(usageData));
               core.analytics.reportEvent('Fleet Usage', usageData);
-
-              appContextService.getLogger().info('Completed Fleet Usage telemetry send task');
             },
 
             async cancel() {},
@@ -56,7 +55,7 @@ export class FleetUsageSender {
     this.registerTelemetryEventType(core);
 
     core.analytics.registerShipper(FleetShipper, {
-      channelName: 'fleet-usage',
+      channelName: 'fleet-usages',
       version: kibanaVersion,
       sendTo: isProductionMode ? 'production' : 'staging',
     });
