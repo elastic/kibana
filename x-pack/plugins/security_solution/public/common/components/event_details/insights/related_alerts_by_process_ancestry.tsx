@@ -182,14 +182,14 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
         return null;
       } else {
         return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-        const id = `${scopeId}-${eventId}-event.id-${index}-${alertId}`;
+          const id = `${scopeId}-${eventId}-event.id-${index}-${alertId}`;
           result.push(getDataProvider('_id', id, alertId));
           return result;
         }, []);
       }
     }
     return null;
-  }, [alertIds, eventId, timelineId, shouldUseFilters]);
+  }, [alertIds, shouldUseFilters, scopeId, eventId]);
 
   const filters: Filter[] | null = useMemo(() => {
     if (shouldUseFilters) {
