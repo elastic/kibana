@@ -92,3 +92,15 @@
   align-items: stretch;
   clip-path: polygon(-50% 0, 100% 0, 100% 100%, -50% 100%);
 }
+
+@keyframes euiFlyoutAnimation {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  75% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
