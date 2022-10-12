@@ -86,7 +86,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       this.props.controlGroup.render(this.controlsRoot.current);
     }
     if (this.props.controlGroup) {
-      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
+      this.props.controlGroup
+        ?.untilInitialized()
+        .then(() => this.setState({ controlGroupReady: true }));
     }
   }
 
