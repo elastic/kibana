@@ -58,6 +58,8 @@ export type ApmFields = Fields &
     'error.grouping_key': string;
     'host.name': string;
     'host.hostname': string;
+    'http.request.method': string;
+    'http.response.status_code': number;
     'kubernetes.pod.uid': string;
     'kubernetes.pod.name': string;
     'metricset.name': string;
@@ -84,14 +86,13 @@ export type ApmFields = Fields &
     'service.framework.name': string;
     'service.target.name': string;
     'service.target.type': string;
+    'span.action': string;
     'span.id': string;
     'span.name': string;
     'span.type': string;
     'span.subtype': string;
     'span.duration.us': number;
-    'span.destination.service.name': string;
     'span.destination.service.resource': string;
-    'span.destination.service.type': string;
     'span.destination.service.response_time.sum.us': number;
     'span.destination.service.response_time.count': number;
     'span.self_time.count': number;

@@ -10,6 +10,7 @@ import url from 'url';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
+import { SpanParams } from './instance';
 
 export class Span extends BaseSpan {
   constructor(fields: ApmFields) {
@@ -25,29 +26,26 @@ export class Span extends BaseSpan {
     return this;
   }
 
-  destination(resource: string, type?: string, name?: string) {
-    if (!type) {
-      type = this.fields['span.type'];
-    }
-
-    if (!name) {
-      name = resource;
-    }
+  destination(resource: string) {
     this.fields['span.destination.service.resource'] = resource;
-    this.fields['span.destination.service.name'] = name;
-    this.fields['span.destination.service.type'] = type;
 
     return this;
   }
 }
 
+export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT';
+
 export function httpExitSpan({
   spanName,
   destinationUrl,
+  method = 'GET',
+  statusCode = 200,
 }: {
   spanName: string;
   destinationUrl: string;
-}) {
+  method?: HttpMethod;
+  statusCode?: number;
+}): SpanParams {
   // origin: 'http://opbeans-go:3000',
   // host: 'opbeans-go:3000',
   // hostname: 'opbeans-go',
@@ -55,31 +53,98 @@ export function httpExitSpan({
   const destination = new url.URL(destinationUrl);
 
   const spanType = 'external';
-  const spanSubType = 'http';
+  const spanSubtype = 'http';
 
   return {
     spanName,
     spanType,
-    spanSubType,
+    spanSubtype,
+
+    // http
+    'span.action': method,
+    'http.request.method': method,
+    'http.response.status_code': statusCode,
+
+    // destination
     'destination.address': destination.hostname,
     'destination.port': parseInt(destination.port, 10),
     'service.target.name': destination.host,
-    'span.destination.service.name': destination.origin,
     'span.destination.service.resource': destination.host,
-    'span.destination.service.type': 'external',
   };
 }
 
-export function dbExitSpan({ spanName, spanSubType }: { spanName: string; spanSubType?: string }) {
+export function dbExitSpan({ spanName, spanSubtype }: { spanName: string; spanSubtype?: string }) {
   const spanType = 'db';
 
   return {
     spanName,
     spanType,
-    spanSubType,
-    'service.target.type': spanSubType,
-    'span.destination.service.name': spanSubType,
-    'span.destination.service.resource': spanSubType,
-    'span.destination.service.type': spanType,
+    spanSubtype,
+    'service.target.type': spanSubtype,
+    'span.destination.service.resource': spanSubtype,
+  };
+}
+
+export function elasticsearchSpan(spanName: string, statement?: string): SpanParams {
+  const spanType = 'db';
+  const spanSubtype = 'elasticsearch';
+
+  return {
+    spanName,
+    spanType,
+    spanSubtype,
+
+    ...(statement
+      ? {
+          'span.db.statement': statement,
+          'span.db.type': 'elasticsearch',
+        }
+      : {}),
+
+    'service.target.type': spanSubtype,
+    'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
+    'destination.port': 443,
+    'span.destination.service.resource': spanSubtype,
+  };
+}
+
+export function sqliteSpan(spanName: string, statement?: string): SpanParams {
+  const spanType = 'db';
+  const spanSubtype = 'sqlite';
+
+  return {
+    spanName,
+    spanType,
+    spanSubtype,
+
+    ...(statement
+      ? {
+          'span.db.statement': statement,
+          'span.db.type': 'sql',
+        }
+      : {}),
+
+    // destination
+    'service.target.type': spanSubtype,
+    'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
+    'destination.port': 443,
+    'span.destination.service.resource': spanSubtype,
+  };
+}
+
+export function redisSpan(spanName: string): SpanParams {
+  const spanType = 'db';
+  const spanSubtype = 'redis';
+
+  return {
+    spanName,
+    spanType,
+    spanSubtype,
+
+    // destination
+    'service.target.type': spanSubtype,
+    'destination.address': 'qwerty.us-west2.gcp.elastic-cloud.com',
+    'destination.port': 443,
+    'span.destination.service.resource': spanSubtype,
   };
 }
