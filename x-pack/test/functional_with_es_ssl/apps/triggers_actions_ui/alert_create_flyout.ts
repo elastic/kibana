@@ -286,13 +286,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":""}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
+      await testSubjects.setValue('queryJsonEditor', '');
+      await discardNewRuleCreation();
+    });
+
     it('should successfully test valid es_query alert', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      // Valid query
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
       const queryJsonEditor = await testSubjects.find('queryJsonEditor');
       await queryJsonEditor.clearValue();
+      // Valid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
         clearWithKeyboard: true,
       });
@@ -300,24 +323,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await discardNewRuleCreation();
-    });
-
-    // Failing: See https://github.com/elastic/kibana/issues/126873
-    it.skip('should show error when es_query is invalid', async () => {
-      const alertName = generateUniqueKey();
-      await defineEsQueryAlert(alertName);
-
-      // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
-        clearWithKeyboard: true,
-      });
-      await testSubjects.click('testQuery');
-      await testSubjects.missingOrFail('testQuerySuccess');
-      await testSubjects.existOrFail('testQueryError');
-      await testSubjects.setValue('queryJsonEditor', '', {
-        clearWithKeyboard: true,
-      });
       await discardNewRuleCreation();
     });
 
