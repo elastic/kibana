@@ -15,6 +15,7 @@ import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
+const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
 const RULE_NAME_FIELD = 'rule.name';
@@ -148,13 +149,14 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
           // Bucket by execution UUID
           terms: {
             field: EXECUTION_UUID_FIELD,
-            size: DEFAULT_MAX_BUCKETS_LIMIT,
+            size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
+            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
           },
           aggs: {
             executionUuidSorted: {
               bucket_sort: {
                 from: 0,
-                size: 1000,
+                size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
@@ -181,6 +183,11 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                 },
               },
               aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
                 numTriggeredActions: {
                   sum: {
                     field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
