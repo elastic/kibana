@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(canEdit).to.be(false);
     });
 
-    it('should convert sibling pipeline aggregation with terms', async () => {
+    it('should convert parent pipeline aggregation with terms', async () => {
       await visualBuilder.createNewAgg();
 
       await visualBuilder.selectAggType('Cumulative Sum', 1);
