@@ -10,6 +10,8 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { AgentEmulatorSettings } from '../types';
+import { SettingsStorage } from '../../common/settings_storage';
 import { AgentKeepAliveService } from './agent_keep_alive';
 import { ActionResponderService } from './action_responder';
 import { createRuntimeServices } from '../../common/stack_services';
@@ -40,6 +42,7 @@ export class EmulatorRunContext {
   private readonly checkinInterval: number;
   private readonly asSuperuser: boolean = false;
   private log: ToolingLog | undefined = undefined;
+  private settings: SettingsStorage<AgentEmulatorSettings> | undefined = undefined;
 
   constructor(options: EmulatorRunContextConstructorOptions) {
     this.username = options.username;
@@ -56,6 +59,8 @@ export class EmulatorRunContext {
     if (this.wasStarted) {
       return;
     }
+
+    this.settings = new SettingsStorage<AgentEmulatorSettings>('endpoint_agent_emulator.json');
 
     const { esClient, kbnClient, log } = await createRuntimeServices({
       kibanaUrl: this.kibanaUrl,
@@ -109,6 +114,11 @@ export class EmulatorRunContext {
       this.getActionResponderService().whileRunning,
       this.getAgentKeepAliveService().whileRunning,
     ]).then(() => {});
+  }
+
+  getSettingsService(): SettingsStorage<AgentEmulatorSettings> {
+    this.ensureStarted();
+    return this.settings!;
   }
 
   getActionResponderService(): ActionResponderService {
