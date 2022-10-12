@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, FC, useMemo, useState, useCallback } from 'react';
+import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -25,7 +25,7 @@ import {
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import { LegendToggle, EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
@@ -138,14 +138,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     timeZone,
     formatFactory,
     chartsThemeService,
+    chartsActiveCursorService,
     datatableUtilities,
     onClickValue,
     onSelectRange,
     paletteService,
     uiState,
     interactive,
+    syncTooltips,
     renderComplete,
   }) => {
+    const chartRef = useRef<Chart>(null);
     const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
     // legacy heatmap legend is handled by the uiState
@@ -436,6 +439,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
       return `${metricFormatter.convert(value) ?? ''}`;
     };
+    const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+      datatables: [formattedTable.table],
+    });
 
     const { colors, ranges } = computeColorRanges(
       paletteService,
@@ -564,12 +570,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition: args.legend.position,
           }}
         >
-          <Chart>
+          <Chart ref={chartRef}>
             <Settings
               onRenderChange={onRenderChange}
               noResults={
                 <EmptyPlaceholder icon={IconChartHeatmap} renderComplete={onRenderChange} />
               }
+              onPointerUpdate={handleCursorUpdate}
+              externalPointerEvents={{
+                tooltip: { visible: syncTooltips },
+              }}
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
