@@ -9,7 +9,6 @@ import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
-  CREATE_NEW_RULE_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
@@ -162,10 +161,6 @@ export const exportFirstRule = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
-};
-
-export const goToCreateNewRule = () => {
-  cy.get(CREATE_NEW_RULE_BTN).click({ force: true });
 };
 
 export const goToRuleDetails = () => {
@@ -348,13 +343,13 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const selectOverwriteRulesImport = () => {
+const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
     .should('be.checked');
 };
 
-export const selectOverwriteExceptionsRulesImport = () => {
+const selectOverwriteExceptionsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
     .should('be.checked');
