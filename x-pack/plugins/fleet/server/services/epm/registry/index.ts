@@ -265,7 +265,7 @@ async function getPackageInfoFromArchiveOrCache(
       archiveBuffer,
       ensureContentType(archivePath)
     );
-    setPackageInfo({ packageInfo, name, version });
+    setPackageInfo({ packageInfo: { ...packageInfo, download: archivePath }, name, version });
     return packageInfo;
   } else {
     return cachedInfo;
