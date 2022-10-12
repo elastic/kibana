@@ -132,7 +132,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const uuid = await import('uuid/v4');
 
-  const layers = dataLayers.reduce<Layer[]>((accLayers, l) => {
+  const layers = dataLayers.map<Layer>((l) => {
     const layerId = uuid.default();
     const series = visibleSeries.find((s) =>
       l.columns.some((c) => !c.isBucketed && c.meta.aggId.split('.')[0] === s.data.id)
@@ -142,7 +142,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
           l.bucketCollapseFn[key].includes(l.buckets.customBuckets[l.metrics[0]])
         )
       : undefined;
-    accLayers.push({
+    return {
       indexPatternId,
       layerId,
       columns: l.columns.map(excludeMetaFromColumn),
@@ -150,9 +150,8 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       seriesId: series?.data.id!,
       collapseFn,
       isReferenceLineLayer: false,
-    });
-    return accLayers;
-  }, []);
+    };
+  });
 
   if (vis.params.thresholdLine.show) {
     layers.push({

@@ -173,8 +173,7 @@ export const getColumnsFromVis = <T>(
   const layers = [];
 
   if (series && series.length) {
-    for (let i = 0; i < series.length; i++) {
-      const metricAggIds = series[i].metrics;
+    for (const { metrics: metricAggIds } of series) {
       const metrics = aggs.filter(
         (agg) => agg.aggId && metricAggIds.includes(agg.aggId.split('.')[0])
       );

@@ -54,11 +54,11 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
-  const result = layers[0];
+  const [layerConfig] = layers;
 
   // doesn't support more than three split slice levels
   // doesn't support pie without at least one split slice
-  if (result.buckets.all.length > 3 || !result.buckets.all.length) {
+  if (layerConfig.buckets.all.length > 3 || !layerConfig.buckets.all.length) {
     return null;
   }
 
@@ -71,11 +71,11 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(layerId, vis, result),
+    configuration: getConfiguration(layerId, vis, layerConfig),
     indexPatternIds: [indexPatternId],
   };
 };

@@ -67,15 +67,15 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
     return null;
   }
 
-  const result = layers[0];
+  const [layerConfig] = layers;
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.all.length > 1) {
+  if (layerConfig.metrics.length > 1 || layerConfig.buckets.all.length > 1) {
     return null;
   }
 
-  if (result.metrics[0]) {
-    const metric = result.columns.find(({ columnId }) => columnId === result.metrics[0]);
+  if (layerConfig.metrics[0]) {
+    const metric = layerConfig.columns.find(({ columnId }) => columnId === layerConfig.metrics[0]);
     if (metric?.dataType !== 'number') {
       return null;
     }
@@ -83,7 +83,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
   const { isPercentageMode, max } = percentageModeConfig as PercentageModeConfigWithMinMax;
   const maxColumn = createStaticValueColumn(isPercentageMode ? 1 : max);
 
-  const columns = [...result.columns, maxColumn];
+  const columns = [...layerConfig.columns, maxColumn];
   const layerId = uuid();
   const indexPatternId = dataView.id!;
 
@@ -102,7 +102,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
       vis.params,
       getPalette(vis.params.gauge, percentageModeConfig, true),
       {
-        ...result,
+        ...layerConfig,
         maxAccessor: maxColumn.columnId,
       }
     ),

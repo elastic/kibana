@@ -61,7 +61,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const result = layers[0];
+  const [layerConfig] = layers;
 
   if (vis.params.percentageCol) {
     const visSchemas = getVisSchemas(vis, {
@@ -80,12 +80,12 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     if (!percentageColumn) {
       return null;
     }
-    result.columns.splice(
-      result.columnsWithoutReferenced.findIndex((c) => c.meta.aggId === metricAgg.aggId) + 1,
+    layerConfig.columns.splice(
+      layerConfig.columnsWithoutReferenced.findIndex((c) => c.meta.aggId === metricAgg.aggId) + 1,
       0,
       percentageColumn
     );
-    result.columnsWithoutReferenced.push(percentageColumn);
+    layerConfig.columnsWithoutReferenced.push(percentageColumn);
   }
 
   const layerId = uuid();
@@ -96,11 +96,11 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(layerId, vis.params, result),
+    configuration: getConfiguration(layerId, vis.params, layerConfig),
     indexPatternIds: [indexPatternId],
   };
 };
