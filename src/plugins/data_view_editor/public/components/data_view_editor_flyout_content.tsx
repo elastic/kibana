@@ -7,10 +7,22 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  DataViewField,
+  DataViewsPublicPluginStart,
+  INDEX_PATTERN_TYPE,
+  MatchedItem,
+} from '@kbn/data-views-plugin/public';
 
 import {
   DataView,
@@ -23,16 +35,14 @@ import {
   UseField,
 } from '../shared_imports';
 
-import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
+import { ensureMinimumTime, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
 
 import {
-  MatchedItem,
   DataViewEditorContext,
   RollupIndicesCapsResponse,
-  INDEX_PATTERN_TYPE,
   IndexPatternConfig,
   MatchedIndicesSet,
   FormInternal,
@@ -64,6 +74,7 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
+  showManagementLink?: boolean;
   allowAdHoc: boolean;
 }
 
@@ -82,10 +93,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   requireTimestampField = false,
   editData,
   allowAdHoc,
+  showManagementLink,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, overlays },
+    services: { application, http, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
+
+  const canSave = dataViews.getCanSaveSync();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -94,7 +108,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isAdHoc: false,
       ...(editData
         ? {
-            title: editData.title,
+            title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
             ...(editData.timeFieldName
@@ -128,7 +142,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.title !== formData.title) {
+      if (editData && editData.getIndexPattern() !== formData.title) {
         editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
@@ -176,18 +190,19 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
-    getIndices({
-      http,
-      isRollupIndex: () => false,
-      pattern: '*',
-      showAllIndices: allowHidden,
-    }).then((dataSources) => {
-      setAllSources(dataSources);
-      const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
-      setMatchedIndices(matchedSet);
-      setIsLoadingSources(false);
-    });
-  }, [http, allowHidden]);
+    dataViews
+      .getIndices({
+        isRollupIndex: () => false,
+        pattern: '*',
+        showAllIndices: allowHidden,
+      })
+      .then((dataSources) => {
+        setAllSources(dataSources);
+        const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
+        setMatchedIndices(matchedSet);
+        setIsLoadingSources(false);
+      });
+  }, [allowHidden, dataViews]);
 
   // loading list of index patterns
   useEffect(() => {
@@ -271,7 +286,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         const { matchedIndicesResult, exactMatched } = !isLoadingSources
           ? await loadMatchedIndices(query, allowHidden, allSources, {
               isRollupIndex,
-              http,
+              dataViews,
             })
           : {
               matchedIndicesResult: {
@@ -302,14 +317,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
+    [dataViews, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
   );
 
   // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
   useEffect(() => {
     if (editData) {
       loadSources();
-      reloadMatchedIndices(removeSpaces(editData.title));
+      reloadMatchedIndices(removeSpaces(editData.getIndexPattern()));
     }
     // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -372,6 +387,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
+        {showManagementLink && editData && editData.id && (
+          <EuiLink
+            href={application.getUrlForApp('management', {
+              path: `/kibana/dataViews/dataView/${editData.id}`,
+            })}
+          >
+            {i18n.translate('indexPatternEditor.goToManagementPage', {
+              defaultMessage: 'View on data view management page',
+            })}
+          </EuiLink>
+        )}
         <Form form={form} className="indexPatternEditor__form">
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
@@ -421,7 +447,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
           }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          isPersisted={Boolean(editData && editData.isPersisted())}
           allowAdHoc={allowAdHoc}
+          canSave={canSave}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>
@@ -453,10 +481,10 @@ const loadMatchedIndices = memoizeOne(
     allSources: MatchedItem[],
     {
       isRollupIndex,
-      http,
+      dataViews,
     }: {
       isRollupIndex: (index: string) => boolean;
-      http: DataViewEditorContext['http'];
+      dataViews: DataViewsPublicPluginStart;
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
@@ -466,8 +494,7 @@ const loadMatchedIndices = memoizeOne(
     const indexRequests = [];
 
     if (query?.endsWith('*')) {
-      const exactMatchedQuery = getIndices({
-        http,
+      const exactMatchedQuery = dataViews.getIndices({
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
@@ -476,14 +503,12 @@ const loadMatchedIndices = memoizeOne(
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
-      const exactMatchQuery = getIndices({
-        http,
+      const exactMatchQuery = dataViews.getIndices({
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
       });
-      const partialMatchQuery = getIndices({
-        http,
+      const partialMatchQuery = dataViews.getIndices({
         isRollupIndex,
         pattern: `${query}*`,
         showAllIndices: allowHidden,

@@ -11,7 +11,7 @@ export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   ci_composite: '.ci/.storybook',
-  cloud: 'x-pack/plugins/cloud/.storybook',
+  cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management: 'packages/content-management/.storybook',
@@ -43,6 +43,7 @@ export const storybookAliases = {
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   shared_ux: 'packages/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
+  triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
 };

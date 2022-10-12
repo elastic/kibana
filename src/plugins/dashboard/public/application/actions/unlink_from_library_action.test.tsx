@@ -23,10 +23,10 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
-import { UnlinkFromLibraryAction } from '.';
 import { getSampleDashboardInput } from '../test_helpers';
-import { DashboardContainer } from '../embeddable/dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;

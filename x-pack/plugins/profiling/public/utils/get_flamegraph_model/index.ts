@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ColumnarViewModel } from '@elastic/charts';
 import d3 from 'd3';
 import { sum, uniqueId } from 'lodash';
-import { ElasticFlameGraph, FlameGraphComparisonMode, rgbToRGBA } from '../../../common/flamegraph';
+import { createColumnarViewModel, rgbToRGBA } from '../../../common/columnar_view_model';
+import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { getInterpolationValue } from './get_interpolation_value';
 
 const nullColumnarViewModel = {
@@ -35,23 +35,18 @@ export function getFlamegraphModel({
   colorNeutral: string;
   comparisonMode: FlameGraphComparisonMode;
 }) {
-  const comparisonNodesById: Record<
-    string,
-    { Value: number; CountInclusive: number; CountExclusive: number }
-  > = {};
+  const comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }> =
+    {};
 
   if (!primaryFlamegraph || !primaryFlamegraph.Label || primaryFlamegraph.Label.length === 0) {
     return { key: uniqueId(), viewModel: nullColumnarViewModel, comparisonNodesById };
   }
 
-  let colors: number[] | undefined = primaryFlamegraph.Color;
+  const viewModel = createColumnarViewModel(primaryFlamegraph, comparisonFlamegraph === undefined);
 
   if (comparisonFlamegraph) {
-    colors = [];
-
     comparisonFlamegraph.ID.forEach((nodeID, index) => {
       comparisonNodesById[nodeID] = {
-        Value: comparisonFlamegraph.Value[index],
         CountInclusive: comparisonFlamegraph.CountInclusive[index],
         CountExclusive: comparisonFlamegraph.CountExclusive[index],
       };
@@ -86,8 +81,8 @@ export function getFlamegraphModel({
         : primaryFlamegraph.TotalSeconds / comparisonFlamegraph.TotalSeconds;
 
     primaryFlamegraph.ID.forEach((nodeID, index) => {
-      const samples = primaryFlamegraph.Value[index];
-      const comparisonSamples = comparisonNodesById[nodeID]?.Value as number | undefined;
+      const samples = primaryFlamegraph.CountInclusive[index];
+      const comparisonSamples = comparisonNodesById[nodeID]?.CountInclusive as number | undefined;
 
       const foreground =
         comparisonMode === FlameGraphComparisonMode.Absolute ? samples : samples / totalSamples;
@@ -110,26 +105,14 @@ export function getFlamegraphModel({
           ? positiveChangeInterpolator(interpolationValue)
           : negativeChangeInterpolator(Math.abs(interpolationValue));
 
-      colors!.push(...rgbToRGBA(Number(nodeColor.replace('#', '0x'))));
+      const rgba = rgbToRGBA(Number(nodeColor.replace('#', '0x')));
+      viewModel.color.set(rgba, 4 * index);
     });
   }
 
-  const value = new Float64Array(primaryFlamegraph.Value);
-  const position = new Float32Array(primaryFlamegraph.Position);
-  const size = new Float32Array(primaryFlamegraph.Size);
-  const color = new Float32Array(colors);
-
   return {
     key: uniqueId(),
-    viewModel: {
-      label: primaryFlamegraph.Label,
-      value,
-      color,
-      position0: position,
-      position1: position,
-      size0: size,
-      size1: size,
-    } as ColumnarViewModel,
+    viewModel,
     comparisonNodesById,
   };
 }

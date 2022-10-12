@@ -68,7 +68,7 @@ export async function getExecutablesAndStackTraces({
       stackTraceEvents.set(id, Math.floor(count / (eventsIndex.sampleRate * p)));
     }
 
-    const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
+    const { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
       logger,
       client,
       events: stackTraceEvents,
@@ -86,6 +86,7 @@ export async function getExecutablesAndStackTraces({
         stackFrames,
         stackTraceEvents,
         totalCount,
+        totalFrames,
         eventsIndex,
       };
     });

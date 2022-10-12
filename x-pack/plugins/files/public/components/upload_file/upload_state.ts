@@ -25,9 +25,11 @@ import {
   type Observable,
   combineLatest,
   distinctUntilChanged,
+  Subscription,
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
+import { ImageMetadataFactory, getImageMetadata, isImage } from '../util';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
@@ -62,38 +64,42 @@ export class UploadState {
   public readonly uploading$ = new BehaviorSubject(false);
   public readonly done$ = new Subject<undefined | DoneNotification[]>();
 
+  private subscriptions: Subscription[];
+
   constructor(
     private readonly fileKind: FileKind,
     private readonly client: FilesClient,
-    private readonly opts: UploadOptions = { allowRepeatedUploads: false }
+    private readonly opts: UploadOptions = { allowRepeatedUploads: false },
+    private readonly loadImageMetadata: ImageMetadataFactory = getImageMetadata
   ) {
     const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
+    this.subscriptions = [
+      latestFiles$
+        .pipe(
+          map((files) => files.some((file) => file.status === 'uploading')),
+          distinctUntilChanged()
+        )
+        .subscribe(this.uploading$),
 
-    latestFiles$
-      .pipe(
-        map((files) => files.some((file) => file.status === 'uploading')),
-        distinctUntilChanged()
-      )
-      .subscribe(this.uploading$);
+      latestFiles$
+        .pipe(
+          map((files) => {
+            const errorFile = files.find((file) => Boolean(file.error));
+            return errorFile ? errorFile.error : undefined;
+          }),
+          filter(Boolean)
+        )
+        .subscribe(this.error$),
 
-    latestFiles$
-      .pipe(
-        map((files) => {
-          const errorFile = files.find((file) => Boolean(file.error));
-          return errorFile ? errorFile.error : undefined;
-        }),
-        filter(Boolean)
-      )
-      .subscribe(this.error$);
-
-    latestFiles$
-      .pipe(
-        filter(
-          (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
-        ),
-        map((files) => files.map((file) => ({ id: file.id!, kind: this.fileKind.id })))
-      )
-      .subscribe(this.done$);
+      latestFiles$
+        .pipe(
+          filter(
+            (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
+          ),
+          map((files) => files.map((file) => ({ id: file.id!, kind: this.fileKind.id })))
+        )
+        .subscribe(this.done$),
+    ];
   }
 
   public isUploading(): boolean {
@@ -165,16 +171,19 @@ export class UploadState {
 
     file$.setState({ status: 'uploading', error: undefined });
 
-    const { name, mime } = parseFileName(file.name);
+    const { name } = parseFileName(file.name);
+    const mime = file.type || undefined;
+    const _meta = meta as Record<string, unknown>;
 
-    return from(
-      this.client.create({
-        kind: this.fileKind.id,
-        name,
-        mimeType: mime,
-        meta: meta as Record<string, unknown>,
-      })
-    ).pipe(
+    return from(isImage(file) ? this.loadImageMetadata(file) : of(undefined)).pipe(
+      mergeMap((imageMetadata) =>
+        this.client.create({
+          kind: this.fileKind.id,
+          name,
+          mimeType: mime,
+          meta: imageMetadata ? { ...imageMetadata, ..._meta } : _meta,
+        })
+      ),
       mergeMap((result) => {
         uploadTarget = result.file;
         return race(
@@ -226,15 +235,21 @@ export class UploadState {
 
     return upload$;
   };
+
+  public dispose = (): void => {
+    for (const sub of this.subscriptions) sub.unsubscribe();
+  };
 }
 
 export const createUploadState = ({
   fileKind,
   client,
+  imageMetadataFactory,
   ...options
 }: {
   fileKind: FileKind;
   client: FilesClient;
+  imageMetadataFactory?: ImageMetadataFactory;
 } & UploadOptions) => {
-  return new UploadState(fileKind, client, options);
+  return new UploadState(fileKind, client, options, imageMetadataFactory);
 };

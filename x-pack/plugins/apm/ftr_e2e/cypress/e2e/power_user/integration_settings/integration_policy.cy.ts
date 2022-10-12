@@ -60,21 +60,19 @@ describe('when navigating to integration page', () => {
     cy.visitKibana(integrationsPath);
 
     // open integration policy form
-    cy.get('[data-test-subj="integration-card:epr:apm:featured').click();
+    cy.getByTestSubj('integration-card:ui_link:apm').click();
     cy.contains('Elastic APM in Fleet').click();
     cy.contains('a', 'APM integration').click();
-    cy.get('[data-test-subj="addIntegrationPolicyButton"]').click();
+    cy.getByTestSubj('addIntegrationPolicyButton').click();
   });
 
   it('checks validators for required fields', () => {
     const requiredFields = policyFormFields.filter((field) => field.required);
 
     requiredFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`).clear();
-      cy.get('[data-test-subj="createPackagePolicySaveButton"').should(
-        'be.disabled'
-      );
-      cy.get(`[data-test-subj="${field.selector}"`).type(field.value);
+      cy.getByTestSubj(field.selector).clear();
+      cy.getByTestSubj('createPackagePolicySaveButton').should('be.disabled');
+      cy.getByTestSubj(field.selector).type(field.value);
     });
   });
 

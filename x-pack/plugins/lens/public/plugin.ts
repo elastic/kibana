@@ -32,8 +32,8 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/pu
 import type { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import {
@@ -48,7 +48,7 @@ import {
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
@@ -56,6 +56,8 @@ import type {
   IndexPatternDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './indexpattern_datasource';
+import type { TextBasedLanguagesDatasource as TextBasedLanguagesDatasourceType } from './text_based_languages_datasource';
+
 import type {
   XyVisualization as XyVisualizationType,
   XyVisualizationPluginSetupPlugins,
@@ -230,6 +232,7 @@ export class LensPlugin {
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
+  private textBasedLanguagesDatasource: TextBasedLanguagesDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -331,7 +334,8 @@ export class LensPlugin {
       async () => {
         const { getTimeZone } = await import('./utils');
         return getTimeZone(core.uiSettings);
-      }
+      },
+      () => startServices().plugins.data.nowProvider.get()
     );
 
     const getPresentationUtilContext = () =>
@@ -426,10 +430,12 @@ export class LensPlugin {
       PieVisualization,
       HeatmapVisualization,
       GaugeVisualization,
+      TextBasedLanguagesDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
+    this.textBasedLanguagesDatasource = new TextBasedLanguagesDatasource();
     this.xyVisualization = new XyVisualization();
     this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
@@ -453,6 +459,7 @@ export class LensPlugin {
       eventAnnotation,
     };
     this.indexpatternDatasource.setup(core, dependencies);
+    this.textBasedLanguagesDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.legacyMetricVisualization.setup(core, dependencies);

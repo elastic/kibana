@@ -49,9 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // See https://github.com/elastic/kibana/pull/125396 for details
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'threatIntelligenceEnabled',
-        ])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
         `--home.disableWelcomeScreen=true`,
       ],
     },

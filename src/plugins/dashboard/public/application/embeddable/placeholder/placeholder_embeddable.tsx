@@ -13,9 +13,9 @@ import classNames from 'classnames';
 import { EuiLoadingChart } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, type EmbeddableInput, type IContainer } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from '../../../services/plugin_services';
 
-export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
+import { PLACEHOLDER_EMBEDDABLE } from '.';
+import { pluginServices } from '../../../services/plugin_services';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;

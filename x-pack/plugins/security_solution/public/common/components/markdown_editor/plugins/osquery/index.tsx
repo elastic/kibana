@@ -29,7 +29,7 @@ import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
-import { convertECSMappingToObject } from './utils';
+import { OsqueryNotAvailablePrompt } from './not_available_prompt';
 
 const StyledEuiButton = styled(EuiButton)`
   > span > img {
@@ -49,7 +49,12 @@ const OsqueryEditorComponent = ({
   };
 }>) => {
   const isEditMode = node != null;
-  const { osquery } = useKibana().services;
+  const {
+    osquery,
+    application: {
+      capabilities: { osquery: osqueryPermissions },
+    },
+  } = useKibana().services;
   const formMethods = useForm<{
     label: string;
     query: string;
@@ -70,7 +75,7 @@ const OsqueryEditorComponent = ({
             {
               query: data.query,
               label: data.label,
-              ecs_mapping: convertECSMappingToObject(data.ecs_mapping),
+              ecs_mapping: data.ecs_mapping,
             },
             (value) => !isEmpty(value)
           )
@@ -81,6 +86,17 @@ const OsqueryEditorComponent = ({
       );
     },
     [onSave]
+  );
+
+  const noOsqueryPermissions = useMemo(
+    () =>
+      (!osqueryPermissions.runSavedQueries || !osqueryPermissions.readSavedQueries) &&
+      !osqueryPermissions.writeLiveQueries,
+    [
+      osqueryPermissions.readSavedQueries,
+      osqueryPermissions.runSavedQueries,
+      osqueryPermissions.writeLiveQueries,
+    ]
   );
 
   const OsqueryActionForm = useMemo(() => {
@@ -97,6 +113,10 @@ const OsqueryEditorComponent = ({
     }
     return null;
   }, [formMethods, osquery]);
+
+  if (noOsqueryPermissions) {
+    return <OsqueryNotAvailablePrompt />;
+  }
 
   return (
     <>
@@ -241,7 +261,7 @@ const RunOsqueryButtonRenderer = ({
   };
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { agentId } = useContext(BasicAlertDataContext);
+  const { agentId, alertId } = useContext(BasicAlertDataContext);
 
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 
@@ -258,6 +278,7 @@ const RunOsqueryButtonRenderer = ({
       {showFlyout && (
         <OsqueryFlyout
           defaultValues={{
+            ...(alertId ? { alertIds: [alertId] } : {}),
             query: configuration.query,
             ecs_mapping: configuration.ecs_mapping,
             queryField: false,

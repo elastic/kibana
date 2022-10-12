@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -23,6 +23,7 @@ import {
   PROCESS_ANCESTRY_EMPTY,
   PROCESS_ANCESTRY_ERROR,
 } from './translations';
+import { BETA } from '../../../translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
@@ -70,15 +71,12 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
     const [cache, setCache] = useState<Partial<Cache>>({});
 
     const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
-    const isEmpty = !!cache.alertIds && cache.alertIds.length === 0;
 
     // Makes sure the component is not fetching data before the accordion
     // has been openend.
     const renderContent = useCallback(() => {
       if (!showContent) {
         return null;
-      } else if (isEmpty) {
-        return PROCESS_ANCESTRY_EMPTY;
       } else if (cache.alertIds) {
         return (
           <ActualRelatedAlertsByProcessAncestry
@@ -98,7 +96,9 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           onCacheLoad={setCache}
         />
       );
-    }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId, isEmpty]);
+    }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId]);
+
+    const betaBadge = useMemo(() => <EuiBetaBadge size="s" label={BETA} color="subdued" />, []);
 
     return (
       <InsightAccordion
@@ -112,6 +112,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         }
         renderContent={renderContent}
         onToggle={onToggle}
+        extraAction={betaBadge}
       />
     );
   }
@@ -143,7 +144,7 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   });
 
   useEffect(() => {
-    if (alertIds) {
+    if (alertIds && alertIds.length !== 0) {
       onCacheLoad({ alertIds });
     }
   }, [alertIds, onCacheLoad]);
@@ -152,6 +153,8 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
     return <EuiLoadingSpinner />;
   } else if (error) {
     return <>{PROCESS_ANCESTRY_ERROR}</>;
+  } else if (!alertIds || alertIds.length === 0) {
+    return <>{PROCESS_ANCESTRY_EMPTY}</>;
   }
 
   return null;

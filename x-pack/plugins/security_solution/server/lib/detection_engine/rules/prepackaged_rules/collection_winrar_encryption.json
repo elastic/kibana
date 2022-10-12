@@ -53,7 +53,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Collection"
+    "Collection",
+    "has_guide"
   ],
   "threat": [
     {

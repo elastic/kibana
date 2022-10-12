@@ -32,6 +32,7 @@ import {
   DETAILS_DESCRIPTION,
   EXCEPTION_ITEM_ACTIONS_BUTTON,
   EDIT_EXCEPTION_BTN,
+  EDIT_RULE_SETTINGS_LINK,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -85,7 +86,7 @@ export const searchForExceptionItem = (query: string) => {
   });
 };
 
-export const addExceptionFlyoutFromViewerHeader = () => {
+const addExceptionFlyoutFromViewerHeader = () => {
   cy.root()
     .pipe(($el) => {
       $el.find(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).trigger('click');
@@ -158,8 +159,15 @@ export const goBackToAllRulesTable = () => {
 export const getDetails = (title: string | RegExp) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
 
+export const assertDetailsNotExist = (title: string | RegExp) =>
+  cy.get(DETAILS_TITLE).contains(title).should('not.exist');
+
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
+};
+
+export const goToRuleEditSettings = () => {
+  cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };

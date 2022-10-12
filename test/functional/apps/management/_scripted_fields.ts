@@ -211,10 +211,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            '@timestamp',
-            'Median of ram_Pain1'
-          );
+          await retry.waitFor('lens visualization', async () => {
+            const elements = await testSubjects.getVisibleTextAll('lns-dimensionTrigger');
+            return elements[0] === '@timestamp' && elements[1] === 'Median of ram_Pain1';
+          });
         });
       });
 
@@ -314,9 +314,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
-        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-          'Top 5 values of painString'
-        );
+        await retry.waitFor('lens visualization', async () => {
+          const elements = await testSubjects.getVisibleTextAll('lns-dimensionTrigger');
+          return elements[0] === 'Top 5 values of painString';
+        });
       });
 
       after(async () => {
@@ -408,9 +409,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
-        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-          'Top 5 values of painBool'
-        );
+        await retry.waitFor('lens visualization', async () => {
+          const elements = await testSubjects.getVisibleTextAll('lns-dimensionTrigger');
+          return elements[0] === 'Top 5 values of painBool';
+        });
       });
 
       after(async () => {
@@ -503,7 +505,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
-        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain('painDate');
+        await retry.waitFor('lens visualization', async () => {
+          const elements = await testSubjects.getVisibleTextAll('lns-dimensionTrigger');
+          return elements[0] === 'painDate';
+        });
       });
     });
 

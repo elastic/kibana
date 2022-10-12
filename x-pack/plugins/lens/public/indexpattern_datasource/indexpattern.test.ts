@@ -1220,138 +1220,261 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
     });
 
-    it('should call optimizeEsAggs once per operation for which it is available', () => {
-      const queryBaseState: IndexPatternPrivateState = {
-        currentIndexPatternId: '1',
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columns: {
-              col1: {
-                label: 'timestamp',
-                dataType: 'date',
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                isBucketed: true,
-                scale: 'interval',
-                params: {
-                  interval: 'auto',
-                  includeEmptyRows: true,
-                  dropPartials: false,
-                },
-              } as DateHistogramIndexPatternColumn,
-              col2: {
-                label: '95th percentile of bytes',
-                dataType: 'number',
-                operationType: 'percentile',
-                sourceField: 'bytes',
-                isBucketed: false,
-                scale: 'ratio',
-                params: {
-                  percentile: 95,
-                },
-              } as PercentileIndexPatternColumn,
-              col3: {
-                label: '95th percentile of bytes',
-                dataType: 'number',
-                operationType: 'percentile',
-                sourceField: 'bytes',
-                isBucketed: false,
-                scale: 'ratio',
-                params: {
-                  percentile: 95,
-                },
-              } as PercentileIndexPatternColumn,
-            },
-            columnOrder: ['col1', 'col2', 'col3'],
-            incompleteColumns: {},
-          },
-        },
-      };
-
-      const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
-
-      indexPatternDatasource.toExpression(queryBaseState, 'first', indexPatterns);
-
-      expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
-
-      optimizeMock.mockRestore();
-    });
-
-    it('should update anticipated esAggs column IDs based on the order of the optimized agg expression builders', () => {
-      const queryBaseState: IndexPatternPrivateState = {
-        currentIndexPatternId: '1',
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columns: {
-              col1: {
-                label: 'timestamp',
-                dataType: 'date',
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                isBucketed: true,
-                scale: 'interval',
-                params: {
-                  interval: 'auto',
-                  includeEmptyRows: true,
-                  dropPartials: false,
-                },
-              } as DateHistogramIndexPatternColumn,
-              col2: {
-                label: '95th percentile of bytes',
-                dataType: 'number',
-                operationType: 'percentile',
-                sourceField: 'bytes',
-                isBucketed: false,
-                scale: 'ratio',
-                params: {
-                  percentile: 95,
-                },
-              } as PercentileIndexPatternColumn,
-              col3: {
-                label: 'Count of records',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: '___records___',
-                operationType: 'count',
-                timeScale: 'h',
+    describe('optimizations', () => {
+      it('should call optimizeEsAggs once per operation for which it is available', () => {
+        const queryBaseState: IndexPatternPrivateState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columns: {
+                col1: {
+                  label: 'timestamp',
+                  dataType: 'date',
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  isBucketed: true,
+                  scale: 'interval',
+                  params: {
+                    interval: 'auto',
+                    includeEmptyRows: true,
+                    dropPartials: false,
+                  },
+                } as DateHistogramIndexPatternColumn,
+                col2: {
+                  label: '95th percentile of bytes',
+                  dataType: 'number',
+                  operationType: 'percentile',
+                  sourceField: 'bytes',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    percentile: 95,
+                  },
+                } as PercentileIndexPatternColumn,
+                col3: {
+                  label: '95th percentile of bytes',
+                  dataType: 'number',
+                  operationType: 'percentile',
+                  sourceField: 'bytes',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    percentile: 95,
+                  },
+                } as PercentileIndexPatternColumn,
               },
-              col4: {
-                label: 'Count of records2',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: '___records___',
-                operationType: 'count',
-                timeScale: 'h',
-              },
+              columnOrder: ['col1', 'col2', 'col3'],
+              incompleteColumns: {},
             },
-            columnOrder: ['col1', 'col2', 'col3', 'col4'],
-            incompleteColumns: {},
           },
-        },
-      };
+        };
 
-      const optimizeMock = jest
-        .spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs')
-        .mockImplementation((aggs, esAggsIdMap) => {
-          // change the order of the aggregations
-          return { aggs: aggs.reverse(), esAggsIdMap };
-        });
+        const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
-      const ast = indexPatternDatasource.toExpression(
-        queryBaseState,
-        'first',
-        indexPatterns
-      ) as Ast;
+        indexPatternDatasource.toExpression(queryBaseState, 'first', indexPatterns);
 
-      expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
+        expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
-      const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
+        optimizeMock.mockRestore();
+      });
 
-      expect(Object.keys(idMap)).toEqual(['col-0-3', 'col-1-2', 'col-2-1', 'col-3-0']);
+      it('should update anticipated esAggs column IDs based on the order of the optimized agg expression builders', () => {
+        const queryBaseState: IndexPatternPrivateState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columns: {
+                col1: {
+                  label: 'timestamp',
+                  dataType: 'date',
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  isBucketed: true,
+                  scale: 'interval',
+                  params: {
+                    interval: 'auto',
+                    includeEmptyRows: true,
+                    dropPartials: false,
+                  },
+                } as DateHistogramIndexPatternColumn,
+                col2: {
+                  label: '95th percentile of bytes',
+                  dataType: 'number',
+                  operationType: 'percentile',
+                  sourceField: 'bytes',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    percentile: 95,
+                  },
+                } as PercentileIndexPatternColumn,
+                col3: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: '___records___',
+                  operationType: 'count',
+                  timeScale: 'h',
+                },
+                col4: {
+                  label: 'Count of records2',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'bytes',
+                  operationType: 'count',
+                  timeScale: 'h',
+                },
+              },
+              columnOrder: ['col1', 'col2', 'col3', 'col4'],
+              incompleteColumns: {},
+            },
+          },
+        };
 
-      optimizeMock.mockRestore();
+        const optimizeMock = jest
+          .spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs')
+          .mockImplementation((aggs, esAggsIdMap) => {
+            // change the order of the aggregations
+            return { aggs: aggs.reverse(), esAggsIdMap };
+          });
+
+        const ast = indexPatternDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns
+        ) as Ast;
+
+        expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
+
+        const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
+
+        expect(Object.keys(idMap)).toEqual(['col-0-3', 'col-1-2', 'col-2-1', 'col-3-0']);
+
+        optimizeMock.mockRestore();
+      });
+
+      it('should deduplicate aggs for supported operations', () => {
+        const queryBaseState: IndexPatternPrivateState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columns: {
+                col1: {
+                  label: 'My Op',
+                  dataType: 'string',
+                  isBucketed: true,
+                  operationType: 'terms',
+                  sourceField: 'op',
+                  params: {
+                    size: 5,
+                    orderBy: {
+                      type: 'column',
+                      columnId: 'col4', // col4 will disappear
+                    },
+                    orderDirection: 'asc',
+                  },
+                } as TermsIndexPatternColumn,
+                col2: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: '___records___',
+                  operationType: 'count',
+                  timeScale: 'h',
+                },
+                col3: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: '___records___',
+                  operationType: 'count',
+                  timeScale: 'h',
+                },
+                col4: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: '___records___',
+                  operationType: 'count',
+                  timeScale: 'h',
+                },
+              },
+              columnOrder: ['col1', 'col2', 'col3', 'col4'],
+              incompleteColumns: {},
+            },
+          },
+        };
+
+        const ast = indexPatternDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns
+        ) as Ast;
+
+        const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
+
+        const aggs = ast.chain[1].arguments.aggs;
+
+        expect(aggs).toHaveLength(2);
+
+        // orderby reference updated
+        expect((aggs[0] as Ast).chain[0].arguments.orderBy[0]).toBe('1');
+
+        expect(idMap).toMatchInlineSnapshot(`
+          Object {
+            "col-0-0": Array [
+              Object {
+                "dataType": "string",
+                "id": "col1",
+                "isBucketed": true,
+                "label": "My Op",
+                "operationType": "terms",
+                "params": Object {
+                  "orderBy": Object {
+                    "columnId": "col4",
+                    "type": "column",
+                  },
+                  "orderDirection": "asc",
+                  "size": 5,
+                },
+                "sourceField": "op",
+              },
+            ],
+            "col-1-1": Array [
+              Object {
+                "dataType": "number",
+                "id": "col2",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "sourceField": "___records___",
+                "timeScale": "h",
+              },
+              Object {
+                "dataType": "number",
+                "id": "col3",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "sourceField": "___records___",
+                "timeScale": "h",
+              },
+              Object {
+                "dataType": "number",
+                "id": "col4",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "sourceField": "___records___",
+                "timeScale": "h",
+              },
+            ],
+          }
+        `);
+      });
     });
 
     describe('references', () => {
@@ -1591,6 +1714,15 @@ describe('IndexPattern Data Source', () => {
             columns: {},
           },
         },
+      });
+    });
+  });
+
+  describe('#createEmptyLayer', () => {
+    it('creates state with empty layers', () => {
+      expect(indexPatternDatasource.createEmptyLayer('index-pattern-id')).toEqual({
+        currentIndexPatternId: 'index-pattern-id',
+        layers: {},
       });
     });
   });

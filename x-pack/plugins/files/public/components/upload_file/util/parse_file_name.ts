@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import mime from 'mime-types';
-
 interface Result {
   name: string;
-  mime?: string;
 }
 
 export function parseFileName(fileName: string): Result {
@@ -19,6 +16,5 @@ export function parseFileName(fileName: string): Result {
       .trim()
       .slice(0, 256)
       .replace(/[^a-z0-9\s]/gi, '_'), // replace invalid chars
-    mime: mime.lookup(fileName) || undefined,
   };
 }

@@ -376,6 +376,7 @@ describe('editor_frame', () => {
         getSourceId: jest.fn(),
         getFilters: jest.fn(),
         getMaxPossibleNumValues: jest.fn(),
+        isTextBasedLanguage: jest.fn(() => false),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -496,41 +497,6 @@ describe('editor_frame', () => {
 
     afterEach(() => {
       instance.unmount();
-    });
-
-    it('should initialize other datasource on switch', async () => {
-      await act(async () => {
-        instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
-      });
-      await act(async () => {
-        (
-          document.querySelector(
-            '[data-test-subj="datasource-switch-testDatasource2"]'
-          ) as HTMLButtonElement
-        ).click();
-      });
-      instance.update();
-      expect(mockDatasource2.initialize).toHaveBeenCalled();
-    });
-
-    it('should call datasource render with new state on switch', async () => {
-      const initialState = {};
-      mockDatasource2.initialize.mockReturnValue(initialState);
-
-      instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
-
-      await act(async () => {
-        (
-          document.querySelector(
-            '[data-test-subj="datasource-switch-testDatasource2"]'
-          ) as HTMLButtonElement
-        ).click();
-      });
-
-      expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({ state: initialState })
-      );
     });
 
     it('should initialize other visualization on switch', async () => {

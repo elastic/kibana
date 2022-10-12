@@ -71,6 +71,7 @@ import {
   setScheduleIntervalTimeUnit,
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
+  assertDefaultValuesAreAppliedToScheduleFields,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -93,13 +94,13 @@ import {
   getNewThreatIndicatorRule,
   getNewRule,
   getNewThresholdRule,
-  totalNumberOfPrebuiltRules,
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../objects/rule';
 import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
+import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -188,7 +189,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+      });
 
       // user can proceed with custom rule editing
       cy.get(MODAL_CONFIRMATION_BTN)
@@ -209,7 +212,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+      });
 
       // user cancels action and modal disappears
       cancelConfirmationModal();
@@ -493,6 +498,18 @@ describe('Detection rules, bulk edit', () => {
   });
 
   describe('Schedule', () => {
+    it('Default values are applied to bulk edit schedule fields', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
+
+      assertDefaultValuesAreAppliedToScheduleFields({
+        interval: 5,
+        lookback: 1,
+      });
+    });
+
     it('Updates schedule for custom rules', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
       clickUpdateScheduleMenuItem();

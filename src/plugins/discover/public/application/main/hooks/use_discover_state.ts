@@ -16,7 +16,7 @@ import { useUrlTracking } from './use_url_tracking';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { loadDataView } from '../utils/resolve_data_view';
+import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
@@ -67,7 +67,7 @@ export function useDiscoverState({
     [history, savedSearch, services]
   );
 
-  const { appStateContainer } = stateContainer;
+  const { appStateContainer, replaceUrlAppState } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
 
@@ -190,13 +190,25 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(
+        const nextDataViewData = await loadDataView(
           services.dataViews,
           services.uiSettings,
           nextState.index
         );
-        savedSearch.searchSource.setField('index', nextDataView.loaded);
+        const nextDataView = resolveDataView(
+          nextDataViewData,
+          savedSearch.searchSource,
+          services.toastNotifications
+        );
 
+        // If the requested data view is not found, don't try to load it,
+        // and instead reset the app state to the fallback data view
+        if (!nextDataViewData.stateValFound) {
+          replaceUrlAppState({ index: nextDataView.id });
+          return;
+        }
+
+        savedSearch.searchSource.setField('index', nextDataView);
         reset();
       }
 
@@ -206,7 +218,16 @@ export function useDiscoverState({
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [services, appStateContainer, state, refetch$, data$, reset, savedSearch.searchSource]);
+  }, [
+    services,
+    appStateContainer,
+    state,
+    refetch$,
+    data$,
+    reset,
+    savedSearch.searchSource,
+    replaceUrlAppState,
+  ]);
 
   /**
    * function to revert any changes to a given saved search

@@ -26,6 +26,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 const supportedTypes = new Set([
   'string',
@@ -186,6 +187,13 @@ export const cardinalityOperation: OperationDefinition<
       emptyAsNull: column.params?.emptyAsNull,
     }).toAst();
   },
+  getGroupByKey: (agg) => {
+    return getGroupByKey(
+      agg,
+      ['aggCardinality'],
+      [{ name: 'field' }, { name: 'emptyAsNull', transformer: (val) => String(Boolean(val)) }]
+    );
+  },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -210,4 +218,12 @@ Example: Calculate the number of different products from the "clothes" group:
       `,
     }),
   },
+  quickFunctionDocumentation: i18n.translate(
+    'xpack.lens.indexPattern.cardinality.documentation.quick',
+    {
+      defaultMessage: `
+The number of unique values for a specified number, string, date, or boolean field.
+      `,
+    }
+  ),
 };

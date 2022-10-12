@@ -43,7 +43,7 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import { DataType } from '../..';
+import type { DataType } from '../..';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -68,6 +68,7 @@ interface ColumnChange {
   columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
   references?: Array<Omit<ColumnChange, 'layer'>>;
+  respectOrder?: boolean;
 }
 
 interface ColumnCopy {
@@ -362,6 +363,7 @@ export function insertNewColumn({
   columnParams,
   initialParams,
   references,
+  respectOrder,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -394,7 +396,14 @@ export function insertNewColumn({
       : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
+      addOperationFn(
+        layer,
+        buildColumnFn,
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
+      ),
       indexPattern
     );
   }
@@ -445,7 +454,14 @@ export function insertNewColumn({
         )
       : operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds });
     return updateDefaultLabels(
-      addOperationFn(tempLayer, buildColumnFn, columnId, visualizationGroups, targetGroup),
+      addOperationFn(
+        tempLayer,
+        buildColumnFn,
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
+      ),
       indexPattern
     );
   }
@@ -468,7 +484,8 @@ export function insertNewColumn({
           operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
           columnId,
           visualizationGroups,
-          targetGroup
+          targetGroup,
+          respectOrder
         ),
         indexPattern
       );
@@ -508,7 +525,82 @@ export function insertNewColumn({
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
-    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup),
+    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup, respectOrder),
+    indexPattern
+  );
+}
+
+function replaceFormulaColumn(
+  {
+    operationDefinition,
+    layer,
+    previousColumn,
+    indexPattern,
+    previousDefinition,
+    columnId,
+  }: {
+    operationDefinition: Extract<GenericOperationDefinition, { input: 'managedReference' }>;
+    previousDefinition: GenericOperationDefinition;
+    layer: IndexPatternLayer;
+    previousColumn: IndexPatternLayer['columns'][number];
+    indexPattern: IndexPattern;
+    columnId: string;
+  },
+  { shouldResetLabel }: { shouldResetLabel?: boolean }
+) {
+  const baseOptions = {
+    columns: layer.columns,
+    previousColumn,
+    indexPattern,
+  };
+  let tempLayer = layer;
+  const newColumn = operationDefinition.buildColumn(
+    { ...baseOptions, layer: tempLayer },
+    'params' in previousColumn ? previousColumn.params : undefined,
+    operationDefinitionMap
+  ) as FormulaIndexPatternColumn;
+
+  // now remove the previous references
+  if (previousDefinition.input === 'fullReference') {
+    (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+      tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
+    });
+  }
+
+  const basicLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
+  // rebuild the references again for the specific AST generated
+  let newLayer;
+
+  try {
+    newLayer = newColumn.params.formula
+      ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
+          indexPattern,
+        }).layer
+      : basicLayer;
+  } catch (e) {
+    newLayer = basicLayer;
+  }
+
+  // when coming to Formula keep the custom label
+  const regeneratedColumn = newLayer.columns[columnId];
+  if (
+    !shouldResetLabel &&
+    regeneratedColumn.operationType !== previousColumn.operationType &&
+    previousColumn.customLabel
+  ) {
+    regeneratedColumn.customLabel = true;
+    regeneratedColumn.label = previousColumn.label;
+  }
+
+  return updateDefaultLabels(
+    adjustColumnReferencesForChangedColumn(
+      {
+        ...tempLayer,
+        columnOrder: getColumnOrder(newLayer),
+        columns: newLayer.columns,
+      },
+      columnId
+    ),
     indexPattern
   );
 }
@@ -661,54 +753,16 @@ export function replaceColumn({
     // TODO: Refactor all this to be more generic and know less about Formula
     // if managed it has to look at the full picture to have a seamless transition
     if (operationDefinition.input === 'managedReference') {
-      const newColumn = operationDefinition.buildColumn(
-        { ...baseOptions, layer: tempLayer },
-        'params' in previousColumn ? previousColumn.params : undefined,
-        operationDefinitionMap
-      ) as FormulaIndexPatternColumn;
-
-      // now remove the previous references
-      if (previousDefinition.input === 'fullReference') {
-        (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-          tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
-        });
-      }
-
-      const basicLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
-      // rebuild the references again for the specific AST generated
-      let newLayer;
-
-      try {
-        newLayer = newColumn.params.formula
-          ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
-              indexPattern,
-            }).layer
-          : basicLayer;
-      } catch (e) {
-        newLayer = basicLayer;
-      }
-
-      // when coming to Formula keep the custom label
-      const regeneratedColumn = newLayer.columns[columnId];
-      if (
-        !shouldResetLabel &&
-        regeneratedColumn.operationType !== previousColumn.operationType &&
-        previousColumn.customLabel
-      ) {
-        regeneratedColumn.customLabel = true;
-        regeneratedColumn.label = previousColumn.label;
-      }
-
-      return updateDefaultLabels(
-        adjustColumnReferencesForChangedColumn(
-          {
-            ...tempLayer,
-            columnOrder: getColumnOrder(newLayer),
-            columns: newLayer.columns,
-          },
-          columnId
-        ),
-        indexPattern
+      return replaceFormulaColumn(
+        {
+          operationDefinition,
+          layer: tempLayer,
+          previousColumn,
+          indexPattern,
+          previousDefinition,
+          columnId,
+        },
+        { shouldResetLabel }
       );
     }
 
@@ -820,6 +874,20 @@ export function replaceColumn({
         columnOrder: getColumnOrder(newLayer),
       },
       columnId
+    );
+  } else if (operationDefinition.input === 'managedReference') {
+    // Just changing a param in a formula column should trigger
+    // a full formula regeneration for side effects on referenced columns
+    return replaceFormulaColumn(
+      {
+        operationDefinition,
+        layer,
+        previousColumn,
+        indexPattern,
+        previousDefinition,
+        columnId,
+      },
+      { shouldResetLabel }
     );
   } else {
     throw new Error('nothing changed');
@@ -1154,7 +1222,8 @@ function addBucket(
   column: BaseIndexPatternColumn,
   addedColumnId: string,
   visualizationGroups: VisualizationDimensionGroupConfig[],
-  targetGroup?: string
+  targetGroup?: string,
+  respectOrder?: boolean
 ): IndexPatternLayer {
   const [buckets, metrics] = partition(
     layer.columnOrder,
@@ -1166,7 +1235,7 @@ function addBucket(
   );
 
   let updatedColumnOrder: string[] = [];
-  if (oldDateHistogramIndex > -1 && column.operationType === 'terms') {
+  if (oldDateHistogramIndex > -1 && column.operationType === 'terms' && !respectOrder) {
     // Insert the new terms bucket above the first date histogram
     updatedColumnOrder = [
       ...buckets.slice(0, oldDateHistogramIndex),

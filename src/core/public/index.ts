@@ -226,6 +226,6 @@ export type {
 
 export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 
-export type { CoreSystem } from './core_system';
+export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
-export { __kbnBootstrap__ } from './kbn_bootstrap';
+export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';

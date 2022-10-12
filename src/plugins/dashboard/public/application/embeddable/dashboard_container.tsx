@@ -32,7 +32,7 @@ import type { Query } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
@@ -153,13 +153,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       isProjectEnabledInLabs('labs:dashboard:dashboardControls')
     ) {
       this.controlGroup = controlGroup;
-      syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
-        (result) => {
+      this.controlGroup.untilReady().then(() => {
+        if (!this.controlGroup || isErrorEmbeddable(this.controlGroup)) return;
+        syncDashboardControlGroup({
+          dashboardContainer: this,
+          controlGroup: this.controlGroup,
+        }).then((result) => {
           if (!result) return;
           const { onDestroyControlGroup } = result;
           this.onDestroyControlGroup = onDestroyControlGroup;
-        }
-      );
+        });
+      });
     }
 
     this.subscriptions.add(

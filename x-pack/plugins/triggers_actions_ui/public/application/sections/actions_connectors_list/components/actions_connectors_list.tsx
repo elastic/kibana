@@ -525,7 +525,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
           }}
           onConnectorUpdated={(connector) => {
-            setEditConnectorProps({ initialConnector: connector });
+            setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
             loadActions();
           }}
           actionTypeRegistry={actionTypeRegistry}
