@@ -52,7 +52,9 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
         await retry.waitFor('advanced settings to be shown', async () => {
           return await testSubjects.isDisplayed('readPollTimeoutInput');
         });
-        await testSubjects.setValue('readPollTimeoutInput', readPollTimeout);
+        if (readPollTimeout) {
+          await testSubjects.setValue('readPollTimeoutInput', readPollTimeout);
+        }
       }
       await testSubjects.click('submitButton');
       await retry.waitForWithTimeout('follower index to be in table', 45000, async () => {
