@@ -166,12 +166,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
-      <GraphOverlay
-        scopeId={tableId}
-        isActiveTimelines={false}
-        SessionView={SessionView}
-        Navigation={Navigation}
-      />
+      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
     ) : null;
   }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
