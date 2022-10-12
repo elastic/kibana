@@ -116,7 +116,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.events})`}
         >
           <EventsQueryTabBody
-            pageFilters={networkDetailsPageFilters}
+            additionalFilters={networkDetailsPageFilters}
             timelineId={TimelineId.networkPageEvents}
             {...commonProps}
           />

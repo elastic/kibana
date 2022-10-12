@@ -38,7 +38,7 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
     indexNames: string[];
-    pageFilters?: Filter[];
+    hostDetailsFilter: Filter[];
     filterQuery?: string;
     indexPattern: DataViewBase;
     type: hostsModel.HostsType;

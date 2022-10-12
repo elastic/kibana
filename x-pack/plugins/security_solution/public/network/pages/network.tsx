@@ -51,7 +51,7 @@ import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
-import { filterNetworkExternalAlertData } from '../../common/components/visualization_actions/utils';
+import { sourceOrDestinationIpExistsFilter } from '../../common/components/visualization_actions/utils';
 import { LandingPageComponent } from '../../common/components/landing_page';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -78,7 +78,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
-    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+    const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -89,12 +89,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {
-        return filters.length > 0
-          ? [...filters, ...filterNetworkExternalAlertData]
-          : filterNetworkExternalAlertData;
+        return [...globalFilters, ...sourceOrDestinationIpExistsFilter];
       }
-      return filters;
-    }, [tabName, filters]);
+      return globalFilters;
+    }, [tabName, globalFilters]);
 
     const updateDateRange = useCallback<UpdateDateRange>(
       ({ x }) => {
@@ -143,8 +141,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
-      filters,
+      filters: globalFilters,
     });
+
     const [tabsFilterQuery] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -185,7 +184,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     >
                       <EmbeddedMap
                         query={query}
-                        filters={filters}
+                        filters={globalFilters}
                         startDate={from}
                         endDate={to}
                         setQuery={setQuery}

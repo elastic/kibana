@@ -34,20 +34,14 @@ export const hostNameExistsFilter: Filter[] = [
   {
     query: {
       bool: {
-        filter: [
+        should: [
           {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'host.name',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+            exists: {
+              field: 'host.name',
             },
           },
         ],
+        minimum_should_match: 1,
       },
     },
     meta: {
@@ -97,43 +91,23 @@ export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
       ]
     : [];
 
-export const filterNetworkExternalAlertData: Filter[] = [
+export const sourceOrDestinationIpExistsFilter: Filter[] = [
   {
     query: {
       bool: {
-        filter: [
+        should: [
           {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'source.ip',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'destination.ip',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+            exists: {
+              field: 'source.ip',
+            },
+          },
+          {
+            exists: {
+              field: 'destination.ip',
             },
           },
         ],
+        minimum_should_match: 1,
       },
     },
     meta: {

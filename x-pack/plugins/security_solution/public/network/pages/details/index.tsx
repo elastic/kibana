@@ -76,7 +76,7 @@ const NetworkDetailsComponent: React.FC = () => {
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
@@ -109,14 +109,14 @@ const NetworkDetailsComponent: React.FC = () => {
         buildEsQuery(
           indexPattern,
           [query],
-          [...getNetworkDetailsPageFilter(ip), ...filters],
+          [...getNetworkDetailsPageFilter(ip), ...globalFilters],
           getEsQueryConfig(uiSettings)
         ),
       ];
     } catch (e) {
       return [undefined, e];
     }
-  }, [filters, indexPattern, ip, query, uiSettings]);
+  }, [globalFilters, indexPattern, ip, query, uiSettings]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -148,12 +148,6 @@ const NetworkDetailsComponent: React.FC = () => {
   const headerDraggableArguments = useMemo(
     () => ({ field: `${flowTarget}.ip`, value: ip }),
     [flowTarget, ip]
-  );
-
-  // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
-  const shouldSkip = useMemo(
-    () => isInitializing || rawFilteredQuery === undefined,
-    [isInitializing, rawFilteredQuery]
   );
 
   const entityFilter = useMemo(
@@ -243,7 +237,7 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               filterQuery={stringifiedAdditionalFilters}
               indexNames={selectedPatterns}
-              skip={shouldSkip}
+              skip={isInitializing || !!kqlError}
               setQuery={setQuery}
               indexPattern={indexPattern}
               flowTarget={flowTarget}
