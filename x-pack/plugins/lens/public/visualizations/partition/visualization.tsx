@@ -37,11 +37,11 @@ import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
-import type { IndexPatternLayer } from '../..';
+import type { FormBasedLayer } from '../..';
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
-  layers: IndexPatternLayer[];
+  layers: FormBasedLayer[];
 }
 
 export interface PartitionSuggestion extends Suggestion {
@@ -201,6 +201,7 @@ export const getPieVisualization = ({
             supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+            hideGrouping: true,
           };
         case 'mosaic':
           return {
@@ -229,6 +230,7 @@ export const getPieVisualization = ({
             dimensionsTooMany:
               totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
+            hideGrouping: state.shape === 'treemap',
           };
       }
     };
