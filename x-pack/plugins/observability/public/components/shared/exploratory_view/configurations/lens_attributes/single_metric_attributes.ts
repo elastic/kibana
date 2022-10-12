@@ -14,6 +14,7 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
+import { Query } from '@kbn/es-query';
 import { FORMULA_COLUMN } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
@@ -70,6 +71,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
           label: columnLabel,
           dataView: indexPattern,
           format,
+          filter: columnFilter,
         });
       }
 
@@ -119,10 +121,12 @@ export class SingleMetricLensAttributes extends LensAttributes {
     label,
     dataView,
     format,
+    filter,
   }: {
     formula: string;
     label?: string;
     format?: string;
+    filter?: Query;
     dataView: DataView;
   }) {
     const layer = this.lensFormulaHelper?.insertOrReplaceFormulaColumn(
@@ -130,6 +134,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       {
         formula,
         label,
+        filter,
         format:
           format === 'percent' || !format
             ? {

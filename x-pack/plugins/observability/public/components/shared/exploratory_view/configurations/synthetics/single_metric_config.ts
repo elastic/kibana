@@ -68,6 +68,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           },
           titlePosition: 'bottom',
         },
+        columnFilter: { language: 'kuery', query: 'summary.up: *' },
       },
       {
         id: 'monitor_duration',
@@ -78,6 +79,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         metricStateOptions: {
           titlePosition: 'bottom',
         },
+        columnFilter: { language: 'kuery', query: 'summary.up: *' },
       },
       {
         id: 'step_duration',
