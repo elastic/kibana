@@ -9,10 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
   const indexPatterns = getService('indexPatterns');
