@@ -40,7 +40,7 @@ export const HostsContent: React.FunctionComponent = () => {
     { type: 'rx' },
     { type: 'tx' },
     { type: 'memory' },
-    { type: 'cpu' },
+    { type: 'cpuCores' },
     // add others
   ];
 
@@ -50,7 +50,7 @@ export const HostsContent: React.FunctionComponent = () => {
     [],
     'host',
     sourceId,
-    1665066458353, // currentTime.  need to add support for TimeRange?
+    1665482950000, // currentTime.  need to add support for TimeRange?
     '',
     '',
     true

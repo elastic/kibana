@@ -56,6 +56,10 @@ export const applyMetadataToLastPath = (
           lastPath.ip = ipAddresses;
         }
       }
+      if (inventoryFields.os) {
+        const inventoryFieldsOs = get(firstMetaDoc, inventoryFields.os) as string;
+        lastPath.os = inventoryFieldsOs;
+      }
       return [...node.path.slice(0, node.path.length - 1), lastPath];
     }
   }
