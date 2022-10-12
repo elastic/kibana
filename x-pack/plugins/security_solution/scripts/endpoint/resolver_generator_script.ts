@@ -41,6 +41,97 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
+interface RoleInfo {
+  roleName: string;
+  // rbacPermissions: ResponseActionsApiCommandNames[];
+}
+
+async function addRole(
+  esClient: Client,
+  role: {
+    roleName: string;
+    //  rbacPermissions: ResponseActionsApiCommandNames[]
+  }
+): Promise<RoleInfo | undefined> {
+  const path = `_security/role/${role.roleName}?createOnly=true`;
+
+  // add role if doesn't exist already
+  try {
+    console.log(`Adding ${role.roleName}`);
+    const addedRole = await esClient.transport.request<Promise<{ created: boolean }>>({
+      method: 'PUT',
+      path,
+      body: {
+        elasticsearch: {
+          cluster: ['manage'],
+          indices: [
+            {
+              names: [
+                '.alerts-security.alerts-default',
+                '.alerts-security.alerts-*',
+                '.siem-signals-*',
+                '.items-*',
+                '.lists-*',
+              ],
+              privileges: ['all'],
+            },
+          ],
+          run_as: [],
+        },
+        // has host isolation but not process or getfile
+        kibana: [
+          {
+            base: [],
+            feature: {
+              actions: ['all'],
+              advancedSettings: ['all'],
+              dev_tools: ['all'],
+              fleet: ['all'],
+              generalCases: ['all'],
+              indexPatterns: ['all'],
+              osquery: ['all'],
+              savedObjectsManagement: ['all'],
+              savedObjectsTagging: ['all'],
+              siem: [
+                'minimal_all',
+                'endpoint_list_all',
+                'endpoint_list_read',
+                'trusted_applications_all',
+                'trusted_applications_read',
+                'host_isolation_exceptions_all',
+                'host_isolation_exceptions_read',
+                'blocklist_all',
+                'blocklist_read',
+                'event_filters_all',
+                'event_filters_read',
+                'policy_management_all',
+                'policy_management_read',
+                'actions_log_management_all',
+                'actions_log_management_read',
+                'host_isolation_all',
+              ],
+              stackAlerts: ['all'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      },
+    });
+
+    if (addedRole.created) {
+      console.log(`Role ${role.roleName} added successfully!`);
+    } else {
+      console.log(`Role ${role.roleName} already exists!`);
+    }
+    return {
+      roleName: role.roleName,
+      // rbacPermissions: role.rbacPermissions,
+    };
+  } catch (error) {
+    handleErr(error);
+  }
+}
+
 interface UserInfo {
   username: string;
   password: string;
@@ -49,6 +140,7 @@ interface UserInfo {
 async function addUser(
   esClient: Client,
   user?: { username: string; password: string }
+  // roles?: string[]
 ): Promise<UserInfo | undefined> {
   if (!user) {
     return;
