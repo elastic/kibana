@@ -179,7 +179,9 @@ export const calculateEndpointAuthz = (
     canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
     canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
-    canAccessResponseConsole: hasEndpointManagementAccess && isEnterpriseLicense,
+    canAccessResponseConsole:
+      isEnterpriseLicense &&
+      (canIsolateHost || canWriteProcessOperations || canWriteFileOperations),
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     // artifacts
     canWriteTrustedApplications,

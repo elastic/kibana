@@ -17,6 +17,7 @@ import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { getDeferred } from '../../../mocks/utils';
+import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
@@ -45,6 +46,10 @@ describe('When using the release action from response actions console', () => {
                 commands: getEndpointResponseActionsConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
+                  endpointPrivileges: {
+                    ...getEndpointAuthzInitialState(),
+                    loading: false,
+                  },
                 }),
               },
             };
