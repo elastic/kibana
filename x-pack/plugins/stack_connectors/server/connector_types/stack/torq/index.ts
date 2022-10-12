@@ -7,14 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
-import { inspect } from 'util';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { AlertingConnectorFeatureId, UptimeConnectorFeatureId, SecurityConnectorFeatureId, ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -60,7 +58,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
+  payload: schema.maybe(schema.string()),
 });
 
 export const ActionTypeId = '.torq';
@@ -102,9 +100,9 @@ function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
-  if (!params.body) return params;
+  if (!params.payload) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    payload: renderMustacheString(params.payload, variables, 'json'),
   };
 }
 
@@ -137,7 +135,7 @@ function validateActionTypeConfig(
     }));
   }
 
-  if (configureUrlObj.hostname !== 'hooks.torq.io') {
+  if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
     throw new Error(i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
       defaultMessage:
         'error configuring send to Torq action: url must begin with https://hooks.torq.io',
@@ -154,13 +152,14 @@ export async function executor(
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const { webhookIntegrationUrl } = execOptions.config;
-  const { body: data } = execOptions.params;
+  const { payload: data } = execOptions.params;
   const configurationUtilities = execOptions.configurationUtilities;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const token = secrets.token;
 
   const axiosInstance = axios.create();
+  console.log("token: %s", token);
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
@@ -168,11 +167,12 @@ export async function executor(
       method: 'post',
       headers: {
         'X-Torq-Token': token || '',
+        'Content-Type': "application/json",
       },
-      params: {},
-      data,
+      data: JSON.parse(data || "null"),
       configurationUtilities,
       logger,
+      validateStatus: (status: number) => status >= 200 && status < 300,
     })
   );
 
@@ -181,7 +181,6 @@ export async function executor(
       value: { status, statusText },
     } = result;
     logger.debug(`response from Torq action "${actionId}": [HTTP ${status}] ${statusText}`);
-
     return successResult(actionId, data);
   }
   const { error } = result;
@@ -205,6 +204,7 @@ async function handleExecutionError(error: AxiosError<{ message: string }>, logg
     if (status >= 500) {
       return retryResult(actionId, message);
     }
+
     // special handling for rate limiting
     if (status === 429) {
       return pipe(
@@ -213,6 +213,15 @@ async function handleExecutionError(error: AxiosError<{ message: string }>, logg
         getOrElse(() => retryResult(actionId, message))
       );
     }
+
+    if (status === 405) {
+      return errorResultInvalidMethod(actionId, message);
+    }
+
+    if (status === 401) {
+      return errorResultUnauthorised(actionId, message);
+    }
+
     return errorResultInvalid(actionId, message);
   } else if (error.code) {
     const message = `[${error.code}] ${error.message}`;
@@ -253,6 +262,36 @@ function errorResultRequestFailed(
 ): ActionTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.actions.builtin.torq.requestFailedErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, request failed',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage,
+  };
+}
+
+function errorResultInvalidMethod(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<unknown> {
+  const errMessage = i18n.translate('xpack.actions.builtin.torq.invalidMethodErrorMessage', {
+    defaultMessage: 'error triggering Torq workflow, method is not supported',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage,
+  };
+}
+
+function errorResultUnauthorised(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<unknown> {
+  const errMessage = i18n.translate('xpack.actions.builtin.torq.invalidMethodErrorMessage', {
+    defaultMessage: 'error triggering Torq workflow, unauthorised',
   });
   return {
     status: 'error',
