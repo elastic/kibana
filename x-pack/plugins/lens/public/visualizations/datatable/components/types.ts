@@ -69,7 +69,7 @@ export interface DataContextType {
   handleFilterClick?: (
     field: string,
     value: unknown,
-    colIndex: number,
+    colIndex: number[],
     rowIndex: number,
     negate?: boolean
   ) => void;

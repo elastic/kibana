@@ -73,17 +73,21 @@ export const createGridFilterHandler =
     tableRef: React.MutableRefObject<Datatable>,
     onClickValue: (data: ClickTriggerEvent['data']) => void
   ) =>
-  (field: string, value: unknown, colIndex: number, rowIndex: number, negate: boolean = false) => {
+  (
+    field: string,
+    value: unknown,
+    colIndex: number[],
+    rowIndex: number,
+    negate: boolean = false
+  ) => {
     const data: ClickTriggerEvent['data'] = {
       negate,
-      data: [
-        {
-          row: rowIndex,
-          column: colIndex,
-          value,
-          table: tableRef.current,
-        },
-      ],
+      data: colIndex.map((ind) => ({
+        row: rowIndex,
+        column: ind,
+        value,
+        table: tableRef.current,
+      })),
     };
 
     onClickValue(data);
