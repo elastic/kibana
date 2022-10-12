@@ -64,10 +64,10 @@ import {
 
 import {
   getFiltersInLayer,
-  getTSDBRollupWarningMessages,
+  getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
-  cloneLayer,
+  cloneLayer
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { normalizeOperationDataType } from './pure_utils';
@@ -81,12 +81,12 @@ import {
   TermsIndexPatternColumn,
 } from './operations';
 import { getReferenceRoot } from './operations/layer_helpers';
-import { FormBasedPrivateState, FormBasedPersistedState } from './types';
+import type { FormBasedPrivateState, FormBasedPersistedState } from './types';
 import { mergeLayer } from './state_helpers';
-import { Datasource, VisualizeEditorContext } from '../../types';
+import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { DraggingIdentifier } from '../../drag_drop';
+import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
@@ -692,7 +692,7 @@ export function getFormBasedDatasource({
       ];
     },
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getTSDBRollupWarningMessages(state, warning, request, response, core.theme)];
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];

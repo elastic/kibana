@@ -170,7 +170,7 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   />
 );
 
-export function getTSDBRollupWarningMessages(
+export function getShardFailuresWarningMessages(
   state: FormBasedPersistedState,
   warning: SearchResponseWarning,
   request: SearchRequest,
