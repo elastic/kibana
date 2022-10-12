@@ -7,8 +7,8 @@
 
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -Delastic.apm.service_name=my-application \\
--Delastic.apm.server_urls={{{apmServerUrl}}} \\
 -Delastic.apm.secret_token={{{secretToken}}} \\
+-Delastic.apm.server_urls={{{apmServerUrl}}} \\
 -Delastic.apm.environment=production \\
 -Delastic.apm.application_packages=org.example \\
 -jar my-application.jar`;

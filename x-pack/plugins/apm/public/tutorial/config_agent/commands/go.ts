@@ -31,6 +31,14 @@ export const go = `# ${i18n.translate(
 export ELASTIC_APM_SERVICE_NAME=
 
 # ${i18n.translate(
+  'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
+  {
+    defaultMessage: 'Use if APM Server requires a secret token',
+  }
+)}
+export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
+
+# ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.setCustomApmServerUrlComment',
   {
     defaultMessage:
@@ -39,14 +47,6 @@ export ELASTIC_APM_SERVICE_NAME=
   }
 )}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
-
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a secret token',
-  }
-)}
-export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.setServiceEnvironment',
