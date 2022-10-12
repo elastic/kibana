@@ -17,14 +17,7 @@ import type { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
-export const setDataView = actionCreator<{
-  browserFields: SourcererDataView['browserFields'];
-  id: SourcererDataView['id'];
-  patternList: SourcererDataView['patternList'];
-  indexFields: SourcererDataView['indexFields'];
-  loading: SourcererDataView['loading'];
-  runtimeMappings: SourcererDataView['runtimeMappings'];
-}>('SET_DATA_VIEW');
+export const setDataView = actionCreator<Partial<SourcererDataView>>('SET_DATA_VIEW');
 
 export const setDataViewLoading = actionCreator<{
   id: string;

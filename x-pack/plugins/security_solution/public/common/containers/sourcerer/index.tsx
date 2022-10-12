@@ -76,17 +76,21 @@ export const useInitSourcerer = (
   const activeTimeline = useDeepEqualSelector((state) =>
     getTimelineSelector(state, TimelineId.active)
   );
-  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
+
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
-    selectedDataViewId: scopeDataViewId,
-    selectedPatterns,
-    missingPatterns,
-  } = useDeepEqualSelector((state) => scopeIdSelector(state, scopeId));
+    sourcererScope: { selectedDataViewId: scopeDataViewId, selectedPatterns, missingPatterns },
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
   const {
-    selectedDataViewId: timelineDataViewId,
-    selectedPatterns: timelineSelectedPatterns,
-    missingPatterns: timelineMissingPatterns,
-  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
+    selectedDataView: timelineSelectedDataView,
+    sourcererScope: {
+      selectedDataViewId: timelineDataViewId,
+      selectedPatterns: timelineSelectedPatterns,
+      missingPatterns: timelineMissingPatterns,
+    },
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, SourcererScopeName.timeline));
+
   const { indexFieldsSearch } = useDataView();
 
   const onInitializeUrlParam = useCallback(
@@ -140,6 +144,20 @@ export const useInitSourcerer = (
     activeDataViewIds.forEach((id) => {
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
+        if (
+          id === scopeDataViewId
+            ? selectedPatterns.length === 0 && missingPatterns.length === 0
+            : timelineDataViewId === id
+            ? timelineMissingPatterns.length === 0 &&
+              timelineSelectedDataView?.patternList.length === 0
+            : false
+        ) {
+          console.log(
+            'skip scope update?',
+            timelineSelectedPatterns.length > 0 && timelineDataViewId === id,
+            { timelineSelectedPatterns, timelineDataViewId, id }
+          );
+        }
         indexFieldsSearch({
           dataViewId: id,
           scopeId:
@@ -148,8 +166,10 @@ export const useInitSourcerer = (
             id === scopeDataViewId
               ? selectedPatterns.length === 0 && missingPatterns.length === 0
               : timelineDataViewId === id
-              ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+              ? timelineMissingPatterns.length === 0 &&
+                timelineSelectedDataView?.patternList.length === 0
               : false,
+          skipScopeUpdate: timelineSelectedPatterns.length > 0 && timelineDataViewId === id,
         });
       }
     });
@@ -160,6 +180,7 @@ export const useInitSourcerer = (
     selectedPatterns.length,
     timelineDataViewId,
     timelineMissingPatterns.length,
+    timelineSelectedDataView,
     timelineSelectedPatterns.length,
   ]);
 
