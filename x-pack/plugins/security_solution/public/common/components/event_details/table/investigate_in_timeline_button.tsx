@@ -7,12 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 
 import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { inputsActions } from '../../../store/inputs';
-import { updateProviders } from '../../../../timelines/store/timeline/actions';
+import { updateProviders, setFilters } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
 import type { DataProvider } from '../../../../../common/types';
@@ -23,8 +24,9 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
-  dataProviders: DataProvider[];
-}> = ({ asEmptyButton, children, dataProviders, ...rest }) => {
+  dataProviders: DataProvider[] | null;
+  filters?: Filter[] | null;
+}> = ({ asEmptyButton, children, dataProviders, filters, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(
@@ -41,16 +43,27 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
   });
 
   const configureAndOpenTimeline = React.useCallback(() => {
-    if (dataProviders) {
+    if (dataProviders || filters) {
       // Reset the current timeline
       clearTimeline();
-      // Update the timeline's providers to match the current prevalence field query
-      dispatch(
-        updateProviders({
-          id: TimelineId.active,
-          providers: dataProviders,
-        })
-      );
+      if (dataProviders) {
+        // Update the timeline's providers to match the current prevalence field query
+        dispatch(
+          updateProviders({
+            id: TimelineId.active,
+            providers: dataProviders,
+          })
+        );
+      }
+      // Use filters if more than a certain amount of ids for dom performance.
+      if (filters) {
+        dispatch(
+          setFilters({
+            id: TimelineId.active,
+            filters,
+          })
+        );
+      }
       // Only show detection alerts
       // (This is required so the timeline event count matches the prevalence count)
       dispatch(
@@ -63,7 +76,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }
-  }, [dataProviders, clearTimeline, dispatch, defaultDataView.id, signalIndexName]);
+  }, [dataProviders, clearTimeline, dispatch, defaultDataView.id, signalIndexName, filters]);
 
   return asEmptyButton ? (
     <EuiButtonEmpty

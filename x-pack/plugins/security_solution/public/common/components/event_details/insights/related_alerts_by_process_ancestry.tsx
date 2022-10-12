@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { Filter } from '@kbn/es-query';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
@@ -22,6 +23,7 @@ import {
   PROCESS_ANCESTRY_COUNT,
   PROCESS_ANCESTRY_EMPTY,
   PROCESS_ANCESTRY_ERROR,
+  PROCESS_ANCESTRY_FILTER,
 } from './translations';
 import { BETA } from '../../../translations';
 
@@ -36,6 +38,8 @@ interface Props {
 interface Cache {
   alertIds: string[];
 }
+
+const dataProviderLimit = 5;
 
 /**
  * Fetches and displays alerts that were generated in the associated process'
@@ -171,18 +175,55 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
   eventId: string;
   timelineId?: string;
 }> = ({ alertIds, eventId, timelineId }) => {
+  const shouldUseFilters = alertIds && alertIds.length && alertIds.length >= dataProviderLimit;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
-      return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-        const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
-        result.push(getDataProvider('_id', id, alertId));
-        return result;
-      }, []);
+      if (shouldUseFilters) {
+        return null;
+      } else {
+        return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+          const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
+          result.push(getDataProvider('_id', id, alertId));
+          return result;
+        }, []);
+      }
     }
     return null;
-  }, [alertIds, eventId, timelineId]);
+  }, [alertIds, eventId, timelineId, shouldUseFilters]);
 
-  if (!dataProviders) {
+  const filters: Filter[] | null = useMemo(() => {
+    if (shouldUseFilters) {
+      return [
+        {
+          meta: {
+            alias: PROCESS_ANCESTRY_FILTER,
+            type: 'phrases',
+            key: '_id',
+            params: [...alertIds],
+            negate: false,
+            disabled: false,
+            value: alertIds.join(),
+          },
+          query: {
+            bool: {
+              should: alertIds.map((id) => {
+                return {
+                  match_phrase: {
+                    _id: id,
+                  },
+                };
+              }),
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+    } else {
+      return null;
+    }
+  }, [alertIds, shouldUseFilters]);
+
+  if (!dataProviders && !filters) {
     return null;
   }
 
@@ -193,6 +234,7 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
       <InvestigateInTimelineButton
         asEmptyButton={false}
         dataProviders={dataProviders}
+        filters={filters}
         data-test-subj="investigate-ancestry-in-timeline"
       >
         {ACTION_INVESTIGATE_IN_TIMELINE}
