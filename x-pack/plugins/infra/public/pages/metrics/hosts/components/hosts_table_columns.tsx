@@ -29,7 +29,7 @@ export interface HostNodeRow {
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   {
     name: 'Name',
-    field: 'name',
+    field: 'label',
     truncateText: true,
     render: (name: string) => <div>{name}</div>,
   },
@@ -41,7 +41,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   {
     name: '# of CPUs',
     field: 'cpuCores',
-    render: (cpuCores: number) => <NumberCell value={cpuCores} />,
+    render: (cpuCores: { value: number }) => <NumberCell value={cpuCores.value} />,
   },
   {
     name: 'Disk Latency',

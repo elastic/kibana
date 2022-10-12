@@ -9,7 +9,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
 import { HostsTableColumns } from './hosts_table_columns';
 interface Props {
   dataView: DataView;
@@ -24,42 +24,22 @@ export const HostsTable: React.FunctionComponent<Props> = ({
   query,
   nodes,
 }) => {
-  // return <div> eui table here from nodes </div>;
+  // WIP Mapping, Add types/optimize
+  const assignBy = (key) => {
+    return (data, item) => {
+      data[item[key]] = item;
+      return data;
+    };
+  };
 
-  const items = [
-    {
-      os: 'MacOs',
-      cpuCores: 10,
-      name: 'Jennys-MBP.fritz.box',
-      rx: {
-        avg: 1234,
-      },
-      tx: {
-        avg: 321,
-      },
-      memory: {
-        avg: 543,
-      },
-      servicesOnHost: 10,
-      averageMemoryUsagePercent: 5,
-    },
-    {
-      os: 'Ubuntu',
-      cpuCores: 4,
-      name: 'Jennys-Ubuntu.fritz.box',
-      rx: {
-        avg: 223,
-      },
-      tx: {
-        avg: 775,
-      },
-      memory: {
-        avg: 3323,
-      },
-      servicesOnHost: 4,
-      averageMemoryUsagePercent: 55,
-    },
-  ];
+  const mapMetrics = (metrics: SnapshotNodeMetric[]): { string: SnapshotNodeMetric } => {
+    return metrics.reduce(assignBy('name'), {});
+  };
+
+  const items = nodes.map(({ metrics, path }) => ({
+    ...path[0],
+    ...mapMetrics(metrics),
+  }));
 
   return (
     <EuiBasicTable

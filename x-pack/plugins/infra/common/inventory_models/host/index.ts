@@ -33,7 +33,7 @@ export const host: InventoryModel = {
   fields: {
     id: 'host.name',
     name: 'host.name',
-    os: 'host.os.platform', // TODO Change to name
+    os: 'host.os.type', // TODO Change to name
     ip: 'host.ip',
   },
   metrics,
