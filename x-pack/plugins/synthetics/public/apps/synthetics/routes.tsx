@@ -176,10 +176,7 @@ const getRoutes = (
                 defaultMessage="Management"
               />
             ),
-            onClick: () =>
-              history.push({
-                pathname: MONITORS_ROUTE,
-              }),
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
           },
         ],
       },
@@ -208,10 +205,7 @@ const getRoutes = (
                 defaultMessage="Overview"
               />
             ),
-            onClick: () =>
-              history.push({
-                pathname: OVERVIEW_ROUTE,
-              }),
+            href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
           },
           {
             label: (
