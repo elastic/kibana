@@ -277,9 +277,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       explicitInput: { selectedOptions, runPastTimeout },
     } = getState();
 
+    dispatch(setLoading(true));
     if (searchString.valid) {
       // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
-      dispatch(setLoading(true));
       const {
         ignoreParentSettings,
         filters,
@@ -349,6 +349,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         dispatch(setLoading(false));
         dispatch(publishFilters(newFilters));
       });
+    } else {
+      dispatch(
+        updateQueryResults({
+          availableOptions: [],
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
