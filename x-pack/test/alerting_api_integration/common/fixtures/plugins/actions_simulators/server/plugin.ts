@@ -27,6 +27,7 @@ import { initPlugin as initTorq } from './torq_simulation';
 export const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
+  OPSGENIE = 'opsgenie',
   PAGERDUTY = 'pagerduty',
   SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
