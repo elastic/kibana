@@ -85,9 +85,9 @@ export const SyncJobs: React.FC = () => {
     <EuiBasicTable
       items={syncJobs}
       columns={columns}
-      onChange={({ page: { index } }: { page: { index: number } }) => {
+      onChange={({ page: { index, size } }: { page: { index: number; size: number } }) => {
         if (connectorId) {
-          fetchSyncJobs({ connectorId, page: index, size: syncJobsPagination.pageSize });
+          fetchSyncJobs({ connectorId, page: index, size });
         }
       }}
       pagination={{
