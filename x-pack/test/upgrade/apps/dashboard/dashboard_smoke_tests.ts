@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import semver from 'semver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -45,10 +44,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
             await PageObjects.header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
-            const todayYearMonthDay = moment().format('MMM D, YYYY');
-            const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-            const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-            await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
             const panelCount = await PageObjects.dashboard.getPanelCount();
             expect(panelCount).to.be.above(numPanels);
           });
