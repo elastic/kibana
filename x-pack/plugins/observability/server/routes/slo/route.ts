@@ -13,6 +13,7 @@ import {
   KibanaSavedObjectsSLORepository,
   GetSLO,
   UpdateSLO,
+  DefaultSLIClient,
 } from '../../services/slo';
 import {
   ApmTransactionDurationTransformGenerator,
@@ -101,8 +102,10 @@ const getSLORoute = createObservabilityServerRoute({
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
     const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const getSLO = new GetSLO(repository);
+    const sliClient = new DefaultSLIClient(esClient);
+    const getSLO = new GetSLO(repository, sliClient);
 
     const response = await getSLO.execute(params.path.id);
 

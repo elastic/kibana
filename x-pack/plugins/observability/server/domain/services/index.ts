@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './indicators';
-export * from './error_budget';
+export * from './compute_error_budget';
+export * from './compute_sli';
