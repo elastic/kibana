@@ -16,7 +16,7 @@ export const bulkDeleteRulesRoute = ({ router, licenseState }: RouteOptions) => 
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
       validate: {
         body: schema.object({
-          filter: schema.maybe(schema.any()),
+          filter: schema.maybe(schema.string()),
           ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         }),
       },

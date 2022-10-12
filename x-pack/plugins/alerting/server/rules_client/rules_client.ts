@@ -295,13 +295,11 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsIds<Params>;
 
 export interface BulkDeleteOptionsFilter {
-  filter: string | KueryNode;
-  ids?: never;
+  filter?: string | KueryNode;
 }
 
 export interface BulkDeleteOptionsIds {
-  ids: string[];
-  filter?: never;
+  ids?: string[];
 }
 
 export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
@@ -1727,7 +1725,10 @@ export class RulesClient {
     }
   };
 
-  public bulkDeleteRules = async ({ filter, ids }: BulkDeleteOptions) => {
+  public bulkDeleteRules = async (options: BulkDeleteOptions) => {
+    const filter = (options as BulkDeleteOptionsFilter).filter;
+    const ids = (options as BulkDeleteOptionsIds).ids;
+
     if (ids && filter) {
       throw Boom.badRequest(
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
