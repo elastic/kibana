@@ -8,7 +8,6 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { debounce } from 'lodash';
 
 import {
   DataViewsServicePublic,
@@ -73,7 +72,7 @@ export class DataViewEditorService {
     const indexRequests = [];
 
     if (query?.endsWith('*')) {
-      const exactMatchedQuery = this.debounceGetIndices({
+      const exactMatchedQuery = this.getIndicesCached({
         pattern: query,
         showAllIndices: allowHidden,
       });
@@ -81,11 +80,11 @@ export class DataViewEditorService {
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
-      const exactMatchQuery = this.debounceGetIndices({
+      const exactMatchQuery = this.getIndicesCached({
         pattern: query,
         showAllIndices: allowHidden,
       });
-      const partialMatchQuery = this.debounceGetIndices({
+      const partialMatchQuery = this.getIndicesCached({
         pattern: `${query}*`,
         showAllIndices: allowHidden,
       });
@@ -110,7 +109,7 @@ export class DataViewEditorService {
   };
 
   loadIndices = async (title: string, allowHidden: boolean) => {
-    const allSrcs = await this.debounceGetIndices({
+    const allSrcs = await this.getIndicesCached({
       pattern: '*',
       showAllIndices: allowHidden,
     });
@@ -136,15 +135,12 @@ export class DataViewEditorService {
   };
 
   private getIndicesMemory: Record<string, Promise<MatchedItem[]>> = {};
-  debounceGetIndices = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
-    const debouncedRequest = debounce(this.dataViews.getIndices, 60000, {
-      leading: true,
-    });
-
+  getIndicesCached = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
     const key = JSON.stringify(props);
+
     this.getIndicesMemory[key] =
       this.getIndicesMemory[key] ||
-      debouncedRequest({ ...props, isRollupIndex: await this.getIsRollupIndex() });
+      this.dataViews.getIndices({ ...props, isRollupIndex: await this.getIsRollupIndex() });
     return await this.getIndicesMemory[key];
   };
 
@@ -157,17 +153,14 @@ export class DataViewEditorService {
     return extractTimeFields(fields as DataViewField[], requireTimestampField);
   };
 
-  private debounceGetTimestampOptionsForWildcard = async (
+  private getTimestampOptionsForWildcardCached = async (
     getFieldsOptions: GetFieldsOptions,
     requireTimestampField: boolean
   ) => {
-    const debouncedRequest = debounce(this.getTimestampOptionsForWildcard, 60000, {
-      leading: true,
-    });
-
     const key = JSON.stringify(getFieldsOptions) + requireTimestampField;
     this.timeStampOptionsMemory[key] =
-      this.timeStampOptionsMemory[key] || debouncedRequest(getFieldsOptions, requireTimestampField);
+      this.timeStampOptionsMemory[key] ||
+      this.getTimestampOptionsForWildcard(getFieldsOptions, requireTimestampField);
     return await this.timeStampOptionsMemory[key];
   };
 
@@ -191,13 +184,17 @@ export class DataViewEditorService {
       getFieldsOptions.rollupIndex = rollupIndex;
     }
 
-    const timestampOptions = await this.debounceGetTimestampOptionsForWildcard(
-      getFieldsOptions,
-      requireTimestampField
-    );
-    if (currentLoadingTimestampFieldsIdx === this.currentLoadingTimestampFields) {
-      this.timestampFieldOptions$.next(timestampOptions);
-      this.loadingTimestampFields$.next(false);
+    let timestampOptions: TimestampOption[] = [];
+    try {
+      timestampOptions = await this.getTimestampOptionsForWildcardCached(
+        getFieldsOptions,
+        requireTimestampField
+      );
+    } finally {
+      if (currentLoadingTimestampFieldsIdx === this.currentLoadingTimestampFields) {
+        this.timestampFieldOptions$.next(timestampOptions);
+        this.loadingTimestampFields$.next(false);
+      }
     }
   };
 }

@@ -236,7 +236,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
         loadingMatchedIndices$.current.next(true);
 
-        const allSrcs = await dataViewEditorService.debounceGetIndices({
+        const allSrcs = await dataViewEditorService.getIndicesCached({
           pattern: '*',
           showAllIndices: allowHidden,
         });
@@ -428,7 +428,7 @@ const loadMatchedIndices = memoizeOne(
     const indexRequests = [];
 
     if (query?.endsWith('*')) {
-      const exactMatchedQuery = dataViewEditorService.debounceGetIndices({
+      const exactMatchedQuery = dataViewEditorService.getIndicesCached({
         pattern: query,
         showAllIndices: allowHidden,
       });
@@ -436,11 +436,11 @@ const loadMatchedIndices = memoizeOne(
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
-      const exactMatchQuery = dataViewEditorService.debounceGetIndices({
+      const exactMatchQuery = dataViewEditorService.getIndicesCached({
         pattern: query,
         showAllIndices: allowHidden,
       });
-      const partialMatchQuery = dataViewEditorService.debounceGetIndices({
+      const partialMatchQuery = dataViewEditorService.getIndicesCached({
         pattern: `${query}*`,
         showAllIndices: allowHidden,
       });
