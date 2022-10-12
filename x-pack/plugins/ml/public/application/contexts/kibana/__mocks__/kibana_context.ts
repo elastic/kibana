@@ -6,7 +6,9 @@
  */
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 
 export const chartsServiceMock = {
   theme: {
@@ -30,6 +32,7 @@ export const chartsServiceMock = {
     }),
   },
 };
+
 export const kibanaContextMock = {
   services: {
     uiSettings: { get: jest.fn() },
@@ -45,6 +48,10 @@ export const kibanaContextMock = {
     },
     data: dataPluginMock.createStartContract(),
     charts: chartsServiceMock,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    mlServices: {
+      mlApiServices: mlApiServicesMock,
+    },
   },
 };
 
