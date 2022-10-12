@@ -274,7 +274,7 @@ export class Plugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: CONNECTORS_PLUGIN_ID,
       title: connectorsFeatureTitle,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
