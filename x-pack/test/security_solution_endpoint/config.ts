@@ -48,7 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...getRegistryUrlAsArray(),
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.fleet.packages.0.version=8.5.0`,
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
       ],
