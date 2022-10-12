@@ -9,16 +9,17 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';
+import { useFilePickerContext } from '../context';
+import { useBehaviorSubject } from '../../use_behavior_subject';
 
-interface Props {
-  onChange: (filterValue: string) => void;
-}
-
-export const SearchField: FunctionComponent<Props> = ({ onChange }) => {
+export const SearchField: FunctionComponent = () => {
+  const { state } = useFilePickerContext();
+  const query = useBehaviorSubject(state.query$);
   return (
     <EuiFieldSearch
+      value={query ?? ''}
       placeholder={i18nTexts.searchFieldPlaceholder}
-      onChange={(ev) => onChange(ev.target.value)}
+      onChange={(ev) => state.setQuery(ev.target.value)}
     />
   );
 };

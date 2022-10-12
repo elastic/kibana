@@ -14,13 +14,12 @@ import {
   EuiModalHeader,
   EuiModalFooter,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
 import { css } from '@emotion/react';
-import { FilePickerContext } from './context';
 
-import { useFilesContext } from '../context';
-import { useFilePickerContext } from './context';
+import { useBehaviorSubject } from '../use_behavior_subject';
+import { useFilePickerContext, FilePickerContext } from './context';
 
 import { Title } from './components/title';
 import { ErrorContent } from './components/error_content';
@@ -28,9 +27,9 @@ import { UploadFilesPrompt } from './components/upload_files';
 import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { SelectButton } from './components/select_button';
-import { useBehaviorSubject } from '../use_behavior_subject';
 
 import './file_picker.scss';
+import { ClearFilterButton } from './components/clear_filter_button';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -48,24 +47,19 @@ export interface Props<Kind extends string = string> {
   /**
    * The number of results to show per page.
    */
-  perPage?: number;
+  pageSize?: number;
 }
 
-const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
-  const { client } = useFilesContext();
+const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
   const { state, kind } = useFilePickerContext();
-  const { status, error, data } = useQuery({
-    queryFn: () => client.list({ kind, perPage }),
-    retry: false,
-  });
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
+  const isLoading = useBehaviorSubject(state.isLoading$);
+  const error = useBehaviorSubject(state.loadingError$);
 
   useEffect(() => {
-    if (data?.files.length) state.setFiles(data.files);
-  }, [data, state]);
-
-  useEffect(() => () => state.dispose(), [state]);
+    state.load();
+  }, [state]);
 
   return (
     <EuiModal
@@ -75,9 +69,9 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
     >
       <EuiModalHeader>
         <Title />
-        {hasFiles && <SearchField onChange={state.setQuery} />}
+        {hasFiles && <SearchField />}
       </EuiModalHeader>
-      {status === 'loading' ? (
+      {isLoading ? (
         <EuiModalBody
           css={css`
             place-self: center stretch;
@@ -85,13 +79,13 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
         >
           <EuiLoadingSpinner size="xl" />
         </EuiModalBody>
-      ) : status === 'error' ? (
+      ) : Boolean(error) ? (
         <EuiModalBody
           css={css`
             place-self: center stretch;
           `}
         >
-          <ErrorContent error={error as Error} />
+          <ErrorContent onRetry={state.load} error={error as Error} />
         </EuiModalBody>
       ) : !hasFiles ? (
         <EuiModalBody>
@@ -101,6 +95,8 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
         <>
           <EuiModalBody>
             <FileGrid />
+            <EuiSpacer />
+            <ClearFilterButton onClick={() => state.setQuery(undefined)} />
           </EuiModalBody>
           <EuiModalFooter>
             <SelectButton onClick={onDone} />
@@ -112,7 +108,7 @@ const Component: FunctionComponent<Props> = ({ perPage, onClose, onDone }) => {
 };
 
 export const FilePicker: FunctionComponent<Props> = (props) => (
-  <FilePickerContext kind={props.kind}>
+  <FilePickerContext pageSize={props.pageSize ?? 100} kind={props.kind}>
     <Component {...props} />
   </FilePickerContext>
 );

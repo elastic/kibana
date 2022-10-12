@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useEffect } from 'react';
 import type { FunctionComponent } from 'react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { useFilesContext } from '../context';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
 
 interface FilePickerContextValue {
@@ -21,18 +21,20 @@ const FilePickerCtx = createContext<FilePickerContextValue>(
 
 interface FilePickerContextProps {
   kind: string;
+  pageSize: number;
 }
 export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   kind,
+  pageSize,
   children,
 }) => {
-  const client = useMemo(() => new QueryClient(), []);
-  const state = useMemo(createFilePickerState, []);
-  return (
-    <QueryClientProvider client={client}>
-      <FilePickerCtx.Provider value={{ state, kind }}>{children}</FilePickerCtx.Provider>
-    </QueryClientProvider>
+  const { client } = useFilesContext();
+  const state = useMemo(
+    () => createFilePickerState({ initialPageSize: pageSize, client, kind }),
+    [pageSize, client, kind]
   );
+  useEffect(() => state.dispose, [state]);
+  return <FilePickerCtx.Provider value={{ state, kind }}>{children}</FilePickerCtx.Provider>;
 };
 
 export const useFilePickerContext = (): FilePickerContextValue => {

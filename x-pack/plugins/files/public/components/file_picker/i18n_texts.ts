@@ -12,7 +12,7 @@ export const i18nTexts = {
     defaultMessage: 'Select a file',
   }),
   loadingFilesErrorTitle: i18n.translate('xpack.fileUpload.filePicker.error.loadingTitle', {
-    defaultMessage: 'Something went wrong while loading files',
+    defaultMessage: 'Something went wrong',
   }),
   emptyStatePrompt: i18n.translate('xpack.fileUpload.filePicker.emptyStatePrompt', {
     defaultMessage: 'No files found, upload your first file.',
@@ -29,6 +29,9 @@ export const i18nTexts = {
     defaultMessage: 'Filter by name',
   }),
   emptyFileGridPrompt: i18n.translate('xpack.fileUpload.filePicker.emptyGridPrompt', {
-    defaultMessage: 'No files matched your search',
+    defaultMessage: 'No files matched filter',
+  }),
+  loadMoreButtonLabel: i18n.translate('xpack.fileUpload.filePicker.loadMoreButtonLabel', {
+    defaultMessage: 'Load more',
   }),
 };

@@ -11,8 +11,13 @@ import {
   combineLatest,
   BehaviorSubject,
   distinctUntilChanged,
+  Observable,
+  from,
+  finalize,
+  shareReplay,
 } from 'rxjs';
 import { FileJSON } from '../../../common';
+import { FilesClient } from '../../types';
 
 const filterFiles = (files: FileJSON[], filter?: string) => {
   if (!filter) return files;
@@ -21,6 +26,9 @@ const filterFiles = (files: FileJSON[], filter?: string) => {
     return file.name.toLowerCase().includes(lowerFilter);
   });
 };
+
+const getFilteredCount = (unfilteredCount: number, filteredCount: number) =>
+  unfilteredCount - filteredCount;
 
 export class FilePickerState {
   /**
@@ -35,19 +43,26 @@ export class FilePickerState {
    * @note This is not explicitly kept in sync with the selected files!
    */
   public readonly files$ = new BehaviorSubject<FileJSON[]>([]);
+  public readonly isLoading$ = new BehaviorSubject<boolean>(false);
+  public readonly loadingError$ = new BehaviorSubject<undefined | Error>(undefined);
   public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
+  public readonly query$ = new BehaviorSubject<undefined | string>(undefined);
 
+  private pageSize$: BehaviorSubject<number>;
   /**
    * This is how we keep a deduplicated list of file ids representing files a user
    * has selected
    */
   private readonly fileSet = new Set<string>();
-
   private readonly unfilteredFiles$ = new BehaviorSubject<FileJSON[]>([]);
-  private readonly query$ = new BehaviorSubject<undefined | string>(undefined);
   private readonly subscriptions: Subscription[] = [];
 
-  constructor() {
+  constructor(
+    private readonly client: FilesClient,
+    private readonly kind: string,
+    private readonly initialPageSize: number
+  ) {
+    this.pageSize$ = new BehaviorSubject<number>(this.initialPageSize);
     this.subscriptions = [
       this.unfilteredFiles$
         .pipe(
@@ -66,13 +81,37 @@ export class FilePickerState {
     this.selectedFileIds$.next(this.getSelectedFileIds());
   }
 
-  public hasFilesSelected = (): boolean => {
-    return this.fileSet.size > 0;
-  };
-
   public selectFile = (fileId: string | string[]): void => {
     (Array.isArray(fileId) ? fileId : [fileId]).forEach((id) => this.fileSet.add(id));
     this.sendNextSelectedFiles();
+  };
+
+  private loadFiles = (pageSize: number): Observable<void> => {
+    return from(this.client.list({ kind: this.kind, page: 1, perPage: pageSize })).pipe(
+      map(({ files }) => {
+        this.unfilteredFiles$.next(files);
+        this.pageSize$.next(pageSize);
+      }),
+      shareReplay()
+    );
+  };
+
+  public load = (): Observable<void> => {
+    this.isLoading$.next(true);
+    this.loadingError$.next(undefined);
+    const request$ = this.loadFiles(this.initialPageSize).pipe(
+      finalize(() => this.isLoading$.next(false))
+    );
+    request$.subscribe({ error: (e) => this.loadingError$.next(e) });
+    return request$;
+  };
+
+  public loadMore = (): Observable<void> => {
+    return this.loadFiles(this.pageSize$.getValue() + this.initialPageSize);
+  };
+
+  public hasFilesSelected = (): boolean => {
+    return this.fileSet.size > 0;
   };
 
   public unselectFile = (fileId: string): void => {
@@ -87,15 +126,7 @@ export class FilePickerState {
     return Array.from(this.fileSet);
   };
 
-  public hasFiles = (): boolean => {
-    return Boolean(this.files$.getValue().length);
-  };
-
-  public setFiles = (files: FileJSON[]): void => {
-    this.unfilteredFiles$.next(files);
-  };
-
-  public setQuery = (query: string): void => {
+  public setQuery = (query: undefined | string): void => {
     if (query) this.query$.next(query);
     else this.query$.next(undefined);
   };
@@ -105,6 +136,15 @@ export class FilePickerState {
   };
 }
 
-export const createFilePickerState = (): FilePickerState => {
-  return new FilePickerState();
+interface CreateFilePickerArgs {
+  client: FilesClient;
+  kind: string;
+  initialPageSize: number;
+}
+export const createFilePickerState = ({
+  initialPageSize,
+  client,
+  kind,
+}: CreateFilePickerArgs): FilePickerState => {
+  return new FilePickerState(client, kind, initialPageSize);
 };

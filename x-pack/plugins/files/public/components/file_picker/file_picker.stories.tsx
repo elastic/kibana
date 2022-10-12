@@ -139,3 +139,25 @@ BasicManyMany.decorators = [
     );
   },
 ];
+
+export const ErrorLoading = Template.bind({});
+ErrorLoading.decorators = [
+  (Story) => {
+    const array = new Array(102);
+    array.fill(createFileJSON());
+    return (
+      <FilesContext
+        client={
+          {
+            getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+            list: async () => {
+              throw new Error('stop');
+            },
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    );
+  },
+];

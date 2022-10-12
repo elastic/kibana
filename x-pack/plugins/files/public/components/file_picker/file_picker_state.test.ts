@@ -24,7 +24,7 @@ const getTestScheduler = () =>
 describe('FilePickerState', () => {
   let filePickerState: FilePickerState;
   beforeEach(() => {
-    filePickerState = new FilePickerState();
+    filePickerState = new FilePickerState(100);
   });
   it('starts off empty', () => {
     expect(filePickerState.hasFilesSelected()).toBe(false);
