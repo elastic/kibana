@@ -117,3 +117,25 @@ BasicMany.decorators = [
     </FilesContext>
   ),
 ];
+
+export const BasicManyMany = Template.bind({});
+BasicManyMany.decorators = [
+  (Story) => {
+    const array = new Array(102);
+    array.fill(createFileJSON());
+    return (
+      <FilesContext
+        client={
+          {
+            getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+            list: async (): Promise<FilesClientResponses['list']> => ({
+              files: array,
+            }),
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    );
+  },
+];
