@@ -35,9 +35,6 @@ export function streamReducer(
     return action.reduce(streamReducer, state);
   }
 
-  // eslint-disable-next-line no-console
-  console.log('action', action);
-
   switch (action.type) {
     case API_ACTION_NAME.ADD_CHANGE_POINTS:
       return { ...state, changePoints: [...state.changePoints, ...action.payload] };
