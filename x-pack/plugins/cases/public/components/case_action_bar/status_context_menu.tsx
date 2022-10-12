@@ -15,20 +15,33 @@ import { CHANGE_STATUS } from '../all_cases/translations';
 interface Props {
   currentStatus: CaseStatuses;
   disabled?: boolean;
+  isLoading?: boolean;
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
 const StatusContextMenuComponent: React.FC<Props> = ({
   currentStatus,
   disabled = false,
+  isLoading = false,
   onStatusChanged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = useCallback(
+    () => setIsPopoverOpen((prevPopoverStatus) => !prevPopoverStatus),
+    []
+  );
+
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const openPopover = useCallback(() => setIsPopoverOpen(true), []);
+
   const popOverButton = useMemo(
-    () => <StatusPopoverButton disabled={disabled} status={currentStatus} onClick={openPopover} />,
-    [disabled, currentStatus, openPopover]
+    () => (
+      <StatusPopoverButton
+        disabled={disabled || isLoading}
+        status={currentStatus}
+        onClick={togglePopover}
+      />
+    ),
+    [disabled, currentStatus, togglePopover, isLoading]
   );
 
   const onContextMenuItemClick = useCallback(
@@ -55,6 +68,10 @@ const StatusContextMenuComponent: React.FC<Props> = ({
       )),
     [currentStatus, onContextMenuItemClick]
   );
+
+  if (disabled) {
+    return <Status status={currentStatus} />;
+  }
 
   return (
     <EuiPopover
