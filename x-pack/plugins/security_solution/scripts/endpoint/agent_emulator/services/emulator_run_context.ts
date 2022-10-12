@@ -62,6 +62,7 @@ export class EmulatorRunContext {
 
     this.settings = new SettingsStorage<AgentEmulatorSettings>('endpoint_agent_emulator.json', {
       defaultSettings: {
+        version: 1,
         endpointLoader: {
           count: 2,
         },

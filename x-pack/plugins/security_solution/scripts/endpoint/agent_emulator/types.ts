@@ -6,6 +6,8 @@
  */
 
 export interface AgentEmulatorSettings {
+  /** Version of the settings. Can be used in the future if we need to do settings migration */
+  version: number;
   endpointLoader: LoadEndpointsConfig;
 }
 
