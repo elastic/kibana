@@ -25,7 +25,10 @@ import {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  apmAWSLambdaArchitecture,
+  apmAWSLambdaPricePerGbSeconds,
 } from '../common/ui_settings_keys';
+import { AwsLambdaArchitecture } from '../common/aws_lambda_architecture';
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
@@ -39,7 +42,7 @@ function feedbackLink({ href }: { href: string }) {
   )}</a>`;
 }
 
-type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
+type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
 /**
  * uiSettings definitions for Observability.
@@ -308,5 +311,65 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+  },
+  [apmAWSLambdaArchitecture]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaArchitecture', {
+      defaultMessage: 'AWS lambda architecture',
+    }),
+    description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Select which architecture your AWS lambda functions are running',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    value: AwsLambdaArchitecture.arm,
+    schema: schema.oneOf([
+      schema.literal(AwsLambdaArchitecture.arm),
+      schema.literal(AwsLambdaArchitecture.x86),
+    ]),
+    requiresPageReload: false,
+    type: 'select',
+    options: [AwsLambdaArchitecture.arm, AwsLambdaArchitecture.x86],
+    optionLabels: {
+      [AwsLambdaArchitecture.arm]: i18n.translate(
+        'xpack.observability.apmAWSLambdaArchitecture.arm',
+        { defaultMessage: 'Arm' }
+      ),
+      [AwsLambdaArchitecture.x86]: i18n.translate(
+        'xpack.observability.apmAWSLambdaArchitecture.x86',
+        { defaultMessage: 'x86' }
+      ),
+    },
+    showInLabs: true,
+  },
+  [apmAWSLambdaPricePerGbSeconds]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSeconds', {
+      defaultMessage: 'AWS lambda price factor',
+    }),
+    type: 'json',
+    value: JSON.stringify(
+      {
+        x86: {
+          6: 0.0000166667,
+          9: 0.000015,
+          15: 0.0000133334,
+        },
+        arm: {
+          7.5: 0.0000133334,
+          11.25: 0.0000120001,
+          18.75: 0.0000106667,
+        },
+      },
+      null,
+      2
+    ),
+    description: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSecondsDescription', {
+      defaultMessage: 'Price per Gb-seconds. *Key in billions',
+    }),
+    schema: schema.object({
+      arm: schema.mapOf(schema.number(), schema.number()),
+      x86: schema.mapOf(schema.number(), schema.number()),
+    }),
   },
 };
