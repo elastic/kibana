@@ -20,6 +20,7 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourc
 export const setDataView = actionCreator<{
   browserFields: SourcererDataView['browserFields'];
   id: SourcererDataView['id'];
+  patternList: SourcererDataView['patternList'];
   indexFields: SourcererDataView['indexFields'];
   loading: SourcererDataView['loading'];
   runtimeMappings: SourcererDataView['runtimeMappings'];

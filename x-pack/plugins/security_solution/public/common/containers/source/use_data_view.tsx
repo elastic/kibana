@@ -169,6 +169,7 @@ export const useDataView = (): {
                   dispatch(
                     sourcererActions.setDataView({
                       ...dataViewInfo,
+                      patternList: response.indicesExist,
                       id: dataViewId,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
