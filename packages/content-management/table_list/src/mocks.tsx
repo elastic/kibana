@@ -30,10 +30,19 @@ const tags = [
   },
 ];
 
-export const TagList: Services['TagList'] = ({ onClick }) => {
+interface Props {
+  onClick?: (tag: { name: string }) => void;
+  tags?: typeof tags | null;
+}
+
+export const TagList = ({ onClick, tags: _tags = tags }: Props) => {
+  if (_tags === null) {
+    return null;
+  }
+
   return (
     <EuiBadgeGroup>
-      {tags.map((tag) => (
+      {_tags.map((tag) => (
         <EuiBadge
           key={tag.name}
           onClick={() => {
@@ -53,6 +62,12 @@ export const TagList: Services['TagList'] = ({ onClick }) => {
     </EuiBadgeGroup>
   );
 };
+
+export const getTagList =
+  ({ tags: _tags }: Props = {}) =>
+  ({ onClick }: Props) => {
+    return <TagList onClick={onClick} tags={_tags} />;
+  };
 
 /**
  * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.

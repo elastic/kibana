@@ -86,6 +86,8 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/react",
+  "@npm//@emotion/css",
+  "@npm//@emotion/react",
   "@npm//@elastic/eui",
   "@npm//react-use",
   "@npm//rxjs",
@@ -101,7 +103,7 @@ jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  web = True,
+  web = True
 )
 
 ts_config(
