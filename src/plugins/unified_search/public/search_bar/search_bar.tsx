@@ -450,7 +450,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       />
     );
 
-    const queryBarMenu = (
+    const queryBarMenu = this.props.showQueryBar ? (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
         language={
@@ -490,7 +490,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             : undefined
         }
       />
-    );
+    ) : undefined;
 
     let filterBar;
     if (this.shouldRenderFilterBar()) {

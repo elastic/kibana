@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { buildEsQuery, DataViewBase, Query } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
 import { BuiltEsQuery } from '../log_stream';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useSubscription } from '../../../utils/use_observable';
 
 interface ILogFilterState {
   filterQuery: {
@@ -19,7 +21,6 @@ interface ILogFilterState {
     originalQuery: Query;
   } | null;
   filterQueryDraft: Query;
-  validationErrors: string[];
 }
 
 const initialLogFilterState: ILogFilterState = {
@@ -28,12 +29,14 @@ const initialLogFilterState: ILogFilterState = {
     language: 'kuery',
     query: '',
   },
-  validationErrors: [],
 };
 
-const validationDebounceTimeout = 1000; // milliseconds
-
 export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase }) => {
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = useKibanaContextForPlugin().services;
   const [logFilterState, setLogFilterState] = useState<ILogFilterState>(initialLogFilterState);
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -42,38 +45,8 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     [indexPattern, kibanaQuerySettings]
   );
 
-  const setLogFilterQueryDraft = useCallback((filterQueryDraft: Query) => {
-    setLogFilterState((previousLogFilterState) => ({
-      ...previousLogFilterState,
-      filterQueryDraft,
-      validationErrors: [],
-    }));
-  }, []);
-
-  const [, cancelPendingValidation] = useDebounce(
-    () => {
-      setLogFilterState((previousLogFilterState) => {
-        try {
-          parseQuery(logFilterState.filterQueryDraft);
-          return {
-            ...previousLogFilterState,
-            validationErrors: [],
-          };
-        } catch (error) {
-          return {
-            ...previousLogFilterState,
-            validationErrors: [`${error}`],
-          };
-        }
-      });
-    },
-    validationDebounceTimeout,
-    [logFilterState.filterQueryDraft, parseQuery]
-  );
-
   const applyLogFilterQuery = useCallback(
     (filterQuery: Query) => {
-      cancelPendingValidation();
       try {
         const parsedQuery = parseQuery(filterQuery);
         setLogFilterState((previousLogFilterState) => ({
@@ -83,24 +56,26 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
             serializedQuery: JSON.stringify(parsedQuery),
             originalQuery: filterQuery,
           },
-          filterQueryDraft: filterQuery,
-          validationErrors: [],
         }));
       } catch (error) {
-        setLogFilterState((previousLogFilterState) => ({
-          ...previousLogFilterState,
-          validationErrors: [`${error}`],
-        }));
+        // This shouldn't really happen as the Unified Search Bar handles passing through the query.
       }
     },
-    [cancelPendingValidation, parseQuery]
+    [parseQuery]
+  );
+
+  useSubscription(
+    useMemo(() => queryString.getUpdates$(), [queryString]),
+    {
+      next: useCallback(() => {
+        const esQuery = queryString.getQuery();
+        applyLogFilterQuery(esQuery as Query);
+      }, [applyLogFilterQuery, queryString]),
+    }
   );
 
   return {
     filterQuery: logFilterState.filterQuery,
-    filterQueryDraft: logFilterState.filterQueryDraft,
-    isFilterQueryDraftValid: logFilterState.validationErrors.length === 0,
-    setLogFilterQueryDraft,
     applyLogFilterQuery,
   };
 };
