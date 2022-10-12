@@ -80,8 +80,8 @@ const getCardFooter = (
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     // TODO error handling
   };
-  // guide has not started yet or is currently not active or no steps have been started in the guide
-  if (!guideState || !guideState.isActive || guideState.status === 'not_started') {
+  // guide has not started yet
+  if (!guideState || guideState.status === 'not_started') {
     return (
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
