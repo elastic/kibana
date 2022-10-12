@@ -37,6 +37,8 @@ const TABLE_SORTING = {
   },
 } as const;
 
+export const ENTITY_ANALYTICS_ANOMALIES_PANEL = 'entity_analytics_anomalies';
+
 export const EntityAnalyticsAnomalies = () => {
   const {
     services: { ml, http },
@@ -86,7 +88,7 @@ export const EntityAnalyticsAnomalies = () => {
   }, [getSecuritySolutionLinkProps]);
 
   return (
-    <EuiPanel hasBorder data-test-subj="entity_analytics_anomalies">
+    <EuiPanel hasBorder data-test-subj={ENTITY_ANALYTICS_ANOMALIES_PANEL}>
       <HeaderSection
         title={i18n.ANOMALIES_TITLE}
         titleSize="s"
