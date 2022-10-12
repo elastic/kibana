@@ -250,6 +250,15 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     supportedPanelTypes,
     supportedTimeRangeModes,
   },
+  variance: {
+    name: 'formula',
+    isFormula: true,
+    formula: 'pow',
+    isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes,
+    supportedTimeRangeModes,
+  },
 } as const;
 
 type SupportedMetricsKeys = keyof LocalSupportedMetrics;

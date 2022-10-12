@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
-      await visualBuilder.selectAggType('Variance');
+      await visualBuilder.selectAggType('Sum of Squares');
       await visualBuilder.setFieldForAggregation('machine.ram');
 
       await header.waitUntilLoadingHasFinished();
