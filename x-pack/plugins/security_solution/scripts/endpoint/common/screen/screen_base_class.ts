@@ -10,7 +10,7 @@
 import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdin, stdout } from 'node:process';
 import * as readline from 'node:readline';
-import { blue, green, red } from 'chalk';
+import { blue, green, red, bold, cyan } from 'chalk';
 import type { QuestionCollection } from 'inquirer';
 import inquirer from 'inquirer';
 import { QuitChoice } from './common_choices';
@@ -68,10 +68,10 @@ export class ScreenBaseClass {
     const paddedSubTitle = subTitle ? `| ${`${subTitle} `.padStart(CONTENT_40_PERCENT)}` : '';
 
     return title || subTitle
-      ? `${HORIZONTAL_LINE}\n${paddedTitle}${
-          subTitle ? `${paddedSubTitle}` : ''
-        }\n${HORIZONTAL_LINE}`
-      : HORIZONTAL_LINE;
+      ? `${blue(HORIZONTAL_LINE)}\n${blue(bold(paddedTitle))}${
+          subTitle ? `${cyan(paddedSubTitle)}` : ''
+        }\n${blue(HORIZONTAL_LINE)}`
+      : blue(HORIZONTAL_LINE);
   }
 
   /**
@@ -87,7 +87,7 @@ export class ScreenBaseClass {
         : '';
 
     return `
-${displayChoices}${HORIZONTAL_LINE}`;
+${displayChoices}${blue(HORIZONTAL_LINE)}`;
   }
 
   /**

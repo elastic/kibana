@@ -7,7 +7,7 @@
 
 /* eslint-disable require-atomic-updates */
 
-import { blue } from 'chalk';
+import { blue, green } from 'chalk';
 import type { DistinctQuestion } from 'inquirer';
 import { loadEndpoints } from '../services/endpoint_loader';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
@@ -34,9 +34,9 @@ const promptQuestion = <TAnswers extends object = object>(
     type: 'input',
     name: 'Unknown?',
     message: 'Unknown?',
-    // @ts-expect-error unclear why this is not defined in the defintion file
+    // @ts-expect-error unclear why this is not defined in the definition file
     askAnswered: true,
-    prefix: '    ==> ',
+    prefix: green('    ==> '),
     ...options,
   };
 
@@ -179,7 +179,6 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
       Count: ${this.config.count}
 
   Options:
-
   ${this.choices.output}`;
   }
 
