@@ -9,9 +9,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, lens } = getPageObjects(['visualBuilder', 'visualize', 'lens']);
+  const { visualize, visualBuilder, lens, header } = getPageObjects([
+    'visualBuilder',
+    'visualize',
+    'lens',
+    'header',
+  ]);
 
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const find = getService('find');
 
   describe('Metric', function describeIndexTests() {
     before(async () => {
@@ -39,6 +46,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).to.eql('Count of records');
+    });
+
+    it('should draw static value', async () => {
+      await visualBuilder.selectAggType('Static Value');
+      await visualBuilder.setStaticValue(10);
+
+      await header.waitUntilLoadingHasFinished();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('mtrVis');
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(1);
+        expect(await dimensions[0].getVisibleText()).to.be('10');
+      });
     });
   });
 }
