@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // open the filter dropdown
     const filterButton = await testSubjects
       .find('loadSearchForm')
-      .then((wrapper) => wrapper.findByCssSelector(TAGFILTER_DROPDOWN_SELECTOR));
+      .then((wrapper) => wrapper.findByCssSelector('.euiFilterGroup .euiFilterButton'));
     await filterButton.click();
     // select the tags
     for (const tagName of tagNames) {
