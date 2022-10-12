@@ -53,8 +53,8 @@ const unknownInfo: ExistingFieldsInfo = {
   numberOfFetches: 0,
 };
 
-// TODO: when should it be reset fully?
 const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData); // for syncing between hooks
+let lastFetchRequestedAtTimestamp: number = 0; // persist last fetching time to skip older handlers if any
 
 export const useExistingFieldsFetcher = (
   params: FetchExistenceInfoParams
@@ -133,7 +133,8 @@ export const useExistingFieldsFetcher = (
         info.fetchStatus = ExistenceFetchStatus.failed;
       }
 
-      if (mountedRef.current) {
+      // skip redundant results
+      if (mountedRef.current && Date.now() >= lastFetchRequestedAtTimestamp) {
         globalMap$.next({
           ...globalMap$.getValue(),
           [dataViewId]: info,
@@ -146,6 +147,7 @@ export const useExistingFieldsFetcher = (
   const dataViewsHash = getDataViewsHash(params.dataViews);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
+      lastFetchRequestedAtTimestamp = Date.now();
       // refetch only for the specified data view
       if (dataViewId) {
         await fetchFieldsExistenceInfo({
