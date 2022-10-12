@@ -130,27 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.'
         );
       });
-      it('still shows other warnings as toast', async () => {
-        await es.indices.delete({ index: [testRollupIndex] });
-        // index a document which will produce a shard failure because a string field doesn't support median
-        await es.create({
-          id: '1',
-          index: testRollupIndex,
-          document: {
-            'kubernetes.container.memory.available.bytes': 'fsdfdsf',
-            '@timestamp': '2022-06-20',
-          },
-          wait_for_active_shards: 1,
-        });
-        await retry.try(async () => {
-          await queryBar.clickQuerySubmitButton();
-          expect(
-            await (await testSubjects.find('euiToastHeader__title', 1000)).getVisibleText()
-          ).to.equal('1 of 3 shards failed');
-        });
-        // as the rollup index is gone, there is no inline warning left
-        await PageObjects.lens.assertNoInlineWarning();
-      });
     });
   });
 }
