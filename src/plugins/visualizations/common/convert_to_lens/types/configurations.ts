@@ -206,6 +206,7 @@ export interface MetricVisConfiguration {
   subtitle?: string;
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
+  showBar?: boolean;
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;

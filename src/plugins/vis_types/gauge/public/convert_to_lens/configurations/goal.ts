@@ -37,6 +37,7 @@ export const getConfiguration = (
     metricAccessor,
     breakdownByAccessor,
     maxAccessor,
+    showBar: Boolean(maxAccessor),
     collapseFn: Object.values(bucketCollapseFn ?? {})[0],
     subtitle: gauge.labels.show && gauge.style.subText ? gauge.style.subText : undefined,
   };
