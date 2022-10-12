@@ -6,11 +6,25 @@
  */
 
 import * as t from 'io-ts';
+import { dateTimeType, durationType } from './common';
 
 const rollingTimeWindowSchema = t.type({
-  duration: t.string,
   is_rolling: t.literal<boolean>(true),
 });
+
+const calendarAlignedTimeWindowSchema = t.type({
+  calendar: t.type({
+    start_time: dateTimeType,
+    time_zone: t.string,
+  }),
+});
+
+const timeWindowSchema = t.intersection([
+  t.type({ duration: durationType }),
+  t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]),
+]);
+
+type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
 
 const budgetingMethodSchema = t.literal('occurrences');
 
@@ -18,4 +32,12 @@ const objectiveSchema = t.type({
   target: t.number,
 });
 
-export { rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };
+export {
+  timeWindowSchema,
+  calendarAlignedTimeWindowSchema,
+  rollingTimeWindowSchema,
+  budgetingMethodSchema,
+  objectiveSchema,
+};
+
+export type { TimeWindow };
