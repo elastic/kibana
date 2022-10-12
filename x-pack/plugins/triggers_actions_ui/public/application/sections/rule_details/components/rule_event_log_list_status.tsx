@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import type { EcsEventOutcome } from '@kbn/core/server';
+import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 
 interface RuleEventLogListStatusProps {
-  status: EcsEventOutcome;
+  status: RuleAlertingOutcome;
 }
 
 const statusContainerStyles = {
@@ -23,10 +23,11 @@ const iconStyles = {
   marginRight: '8px',
 };
 
-const STATUS_TO_COLOR: Record<EcsEventOutcome, string> = {
+const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
   success: 'success',
   failure: 'danger',
   unknown: 'gray',
+  warning: 'warning',
 };
 
 export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {

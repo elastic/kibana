@@ -27,6 +27,7 @@ describe('getRuleExecutionKPIRoute', () => {
     success: 3,
     unknown: 0,
     failure: 0,
+    warning: 0,
     activeAlerts: 5,
     newAlerts: 5,
     recoveredAlerts: 0,
