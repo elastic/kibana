@@ -5,6 +5,7 @@
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "bfetch": "src/plugins/bfetch",
+    "cases": ["packages/kbn-cases-components"],
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
     "contentManagement": "packages/content-management",
