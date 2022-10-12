@@ -74,6 +74,7 @@ export function AgentConfigInstructions({
   );
 }
 
+// TODO move it seperatly and fix types
 function AgentConfigurationTable({ variables, data }) {
   if (!variables) return null;
 
@@ -95,7 +96,7 @@ function AgentConfigurationTable({ variables, data }) {
 
   const items = Object.keys(variables).map((k) => ({
     setting: variables[k],
-    value: get(data, k),
+    value: get(data, k), // TODO do we want default values?
   }));
 
   return <EuiBasicTable items={items} columns={columns}></EuiBasicTable>;
