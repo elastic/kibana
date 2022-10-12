@@ -82,15 +82,14 @@ export const getMlModelConfigsForModelIds = async (
                                                 // use exact model name matching, that returns an
                                                 // error for models that cannot be found
   ]);
-
-  const modelsNamesInCurrentSpace = trainedModelsInCurrentSpace.trained_model_configs
+  const modelNamesInCurrentSpace = trainedModelsInCurrentSpace.trained_model_configs
     .map((modelConfig) => modelConfig.model_id);
 
   const modelConfigs: Record<string, InferencePipelineData> = {};
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
     const trainedModelName = trainedModelData.model_id;
 
-    if (modelsNamesInCurrentSpace.includes(trainedModelName)) {
+    if (trainedModelNames.includes(trainedModelName) && modelNamesInCurrentSpace.includes(trainedModelName)) {
       modelConfigs[trainedModelName] = {
         modelState: TrainedModelState.NotDeployed,
         pipelineName: '',
