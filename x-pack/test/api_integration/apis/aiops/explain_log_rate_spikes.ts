@@ -82,6 +82,14 @@ export default ({ getService }: FtrProviderContext) => {
         .send(body)
         .expect(200);
 
+      // compression is on by default so if the request body is undefined
+      // the response header should include "gzip" and otherwise be "undefined"
+      if (body.compressResponse === undefined) {
+        expect(resp.header['content-encoding']).to.be('gzip');
+      } else if (body.compressResponse === false) {
+        expect(resp.header['content-encoding']).to.be(undefined);
+      }
+
       expect(Buffer.isBuffer(resp.body)).to.be(true);
 
       const chunks: string[] = resp.body.toString().split('\n');
@@ -142,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
-      const response = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
+      const resp = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,10 +159,18 @@ export default ({ getService }: FtrProviderContext) => {
         body: JSON.stringify(body),
       });
 
-      expect(response.ok).to.be(true);
-      expect(response.status).to.be(200);
+      // compression is on by default so if the request body is undefined
+      // the response header should include "gzip" and otherwise be "null"
+      if (body.compressResponse === undefined) {
+        expect(resp.headers.get('content-encoding')).to.be('gzip');
+      } else if (body.compressResponse === false) {
+        expect(resp.headers.get('content-encoding')).to.be(null);
+      }
 
-      const stream = response.body;
+      expect(resp.ok).to.be(true);
+      expect(resp.status).to.be(200);
+
+      const stream = resp.body;
 
       expect(stream).not.to.be(null);
 
