@@ -99,38 +99,33 @@ export const isStepReadyToComplete = (
 export const getUpdatedSteps = (
   guideState: GuideState,
   stepId: GuideStepIds,
-  readyToComplete?: boolean
-): [GuideStep[], boolean] => {
-  const stepConfig = getGuideConfig(guideState.guideId)?.steps.find((step) => step.id === stepId);
-  const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
+  setToReadyToComplete?: boolean
+): GuideStep[] => {
   const currentStepIndex = guideState.steps.findIndex((step) => step.id === stepId);
   const currentStep = guideState.steps[currentStepIndex];
-  return [
-    guideState.steps.map((step, stepIndex) => {
-      const isCurrentStep = step.id === currentStep!.id;
-      const isNextStep = stepIndex === currentStepIndex + 1;
+  return guideState.steps.map((step, stepIndex) => {
+    const isCurrentStep = step.id === currentStep!.id;
+    const isNextStep = stepIndex === currentStepIndex + 1;
 
-      // Mark the current step as complete
-      if (isCurrentStep) {
-        return {
-          id: step.id,
-          status: isManualCompletion && !readyToComplete ? 'ready_to_complete' : 'complete',
-        };
-      }
+    if (isCurrentStep) {
+      return {
+        id: step.id,
+        status: setToReadyToComplete ? 'ready_to_complete' : 'complete',
+      };
+    }
 
-      // Update the next step to active status
-      if (isNextStep) {
-        return isManualCompletion && !readyToComplete
-          ? step
-          : {
-              id: step.id,
-              status: 'active',
-            };
-      }
+    // if the current step is being updated to 'ready_to_complete, the next step stays inactive
+    // otherwise update the next step to active status
+    if (isNextStep) {
+      return setToReadyToComplete
+        ? step
+        : {
+            id: step.id,
+            status: 'active',
+          };
+    }
 
-      // All other steps return as-is
-      return step;
-    }),
-    isManualCompletion,
-  ];
+    // All other steps return as-is
+    return step;
+  });
 };

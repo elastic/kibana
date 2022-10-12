@@ -41,6 +41,10 @@ export const securityAddDataInProgressState: GuideState = {
       id: 'rules',
       status: 'inactive',
     },
+    {
+      id: 'alertsCases',
+      status: 'inactive',
+    },
   ],
 };
 
@@ -75,6 +79,10 @@ export const noGuideActiveState: GuideState = {
     },
     {
       id: 'rules',
+      status: 'inactive',
+    },
+    {
+      id: 'alertsCases',
       status: 'inactive',
     },
   ],

@@ -13,6 +13,7 @@ import { GuidedOnboardingApi } from '../types';
 import {
   getGuideConfig,
   getInProgressStepId,
+  getStepConfig,
   getUpdatedSteps,
   isIntegrationInGuideStep,
   isLastStep,
@@ -279,11 +280,16 @@ export class ApiService implements GuidedOnboardingApi {
     const isCurrentStepInProgress = isStepInProgress(guideState, guideId, stepId);
     const isCurrentStepReadyToComplete = isStepReadyToComplete(guideState, guideId, stepId);
 
+    const stepConfig = getStepConfig(guideState.guideId, stepId);
+    const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
+
     if (isCurrentStepInProgress || isCurrentStepReadyToComplete) {
-      const [updatedSteps, isManualCompletion] = getUpdatedSteps(
+      const updatedSteps = getUpdatedSteps(
         guideState,
         stepId,
-        isCurrentStepReadyToComplete
+        // if current step is in progress and configured for manual completion,
+        // set the status to ready_to_complete
+        isManualCompletion && isCurrentStepInProgress
       );
 
       const currentGuide: GuideState = {
@@ -295,6 +301,9 @@ export class ApiService implements GuidedOnboardingApi {
 
       return await this.updateGuideState(
         currentGuide,
+        // the panel is opened when the step is being set to complete.
+        // that happens when the step is not configured for manual completion
+        // or it's already ready_to_complete
         !isManualCompletion || isCurrentStepReadyToComplete
       );
     }
