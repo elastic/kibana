@@ -8,8 +8,10 @@ export const phpVariables = {
   apmServiceName: 'elastic_apm.service_name',
   secretToken: 'elastic_apm.secret_token',
   apmServerUrl: 'elastic_apm.server_url',
+  apmEnvironment: 'elastic_apm.environment',
 };
 export const php = `${phpVariables.apmServiceName}="{{{apmServiceName}}}"
 ${phpVariables.secretToken}="{{{secretToken}}}"
 ${phpVariables.apmServerUrl}="{{{apmServerUrl}}}"
+${phpVariables.apmEnvironment}="{{{apmEnvironment}}}"
 `;
