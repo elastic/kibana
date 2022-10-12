@@ -11,7 +11,7 @@ import { ReportTypes } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const MonitorErrorsCount = () => {
+export const MonitorErrorsCount = ({ time }: { time?: { to: string; from: string } }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -24,8 +24,8 @@ export const MonitorErrorsCount = () => {
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: {
-            from: 'now-1h',
+          time: time ?? {
+            from: 'now-30d/d',
             to: 'now',
           },
           reportDefinitions: { config_id: [monitorId] },
