@@ -77,6 +77,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
         requestRefresh={requestRefresh}
         fetchRuleSummary={fetchRuleSummary}
       />
+      <EuiSpacer />
       <RuleEventLogListTableWithApi
         localStorageKey={localStorageKey}
         ruleId={ruleId}

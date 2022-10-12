@@ -16,6 +16,7 @@ export interface CreateCaseParams {
   tag?: string;
   severity?: CaseSeverity;
   owner?: string;
+  assignees?: [];
 }
 
 export function CasesCreateViewServiceProvider(
@@ -55,36 +56,48 @@ export function CasesCreateViewServiceProvider(
       severity = CaseSeverity.LOW,
       owner,
     }: CreateCaseParams) {
-      await this.setCaseTitle(title);
-
-      await this.setCaseTags(tag);
-
-      // case description
-      const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
-      await descriptionArea.focus();
-      await descriptionArea.type(description);
+      await this.setTitle(title);
+      await this.setDescription(description);
+      await this.setTags(tag);
 
       if (severity !== CaseSeverity.LOW) {
-        await common.clickAndValidate(
-          'case-severity-selection',
-          `case-severity-selection-${severity}`
-        );
+        await this.setSeverity(severity);
       }
 
       if (owner) {
-        await testSubjects.click(`${owner}RadioButton`);
+        await this.setSolution(owner);
       }
 
-      // save
-      await testSubjects.click('create-case-submit');
+      await this.submitCase();
     },
 
-    async setCaseTitle(title: string) {
+    async setTitle(title: string) {
       await testSubjects.setValue('input', title);
     },
 
-    async setCaseTags(tag: string) {
+    async setDescription(description: string) {
+      const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
+      await descriptionArea.focus();
+      await descriptionArea.type(description);
+    },
+
+    async setTags(tag: string) {
       await comboBox.setCustom('caseTags', tag);
+    },
+
+    async setSolution(owner: string) {
+      await testSubjects.click(`${owner}RadioButton`);
+    },
+
+    async setSeverity(severity: CaseSeverity) {
+      await common.clickAndValidate(
+        'case-severity-selection',
+        `case-severity-selection-${severity}`
+      );
+    },
+
+    async submitCase() {
+      await testSubjects.click('create-case-submit');
     },
 
     async assertCreateCaseFlyoutVisible(expectVisible = true) {
