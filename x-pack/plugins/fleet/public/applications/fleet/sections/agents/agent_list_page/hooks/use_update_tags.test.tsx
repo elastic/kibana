@@ -45,7 +45,7 @@ describe('useUpdateTags', () => {
     await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
-      'Tags updated'
+      'Tag(s) updated'
     );
   });
 
@@ -57,7 +57,7 @@ describe('useUpdateTags', () => {
     expect(mockOnSuccess).not.toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
       'error',
-      { title: 'Tags update failed' }
+      { title: 'Tag(s) update failed' }
     );
   });
 
@@ -68,7 +68,7 @@ describe('useUpdateTags', () => {
     await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
-      'Tags updated'
+      'Tag(s) updated'
     );
   });
 
@@ -80,7 +80,7 @@ describe('useUpdateTags', () => {
     expect(mockOnSuccess).not.toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
       'error',
-      { title: 'Tags update failed' }
+      { title: 'Tag(s) update failed' }
     );
   });
 });

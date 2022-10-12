@@ -61,6 +61,8 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
+      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
     },
   };
 };

@@ -7,62 +7,66 @@
 
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import {
-  ruleReferenceSchema,
+  exceptionListRuleReferencesSchema,
   rulesReferencedByExceptionListsSchema,
 } from './find_exception_list_references_schema';
 import type {
-  RuleReferenceSchema,
+  ExceptionListRuleReferencesSchema,
   RulesReferencedByExceptionListsSchema,
 } from './find_exception_list_references_schema';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 describe('find_exception_list_references_schema', () => {
-  describe('ruleReferenceSchema', () => {
+  describe('exceptionListRuleReferencesSchema', () => {
     test('validates all fields', () => {
-      const payload: RuleReferenceSchema = {
-        name: 'My rule',
-        id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-        rule_id: 'my-rule-id',
-        exception_lists: [
+      const payload: ExceptionListRuleReferencesSchema = {
+        ...getExceptionListSchemaMock(),
+        referenced_rules: [
           {
-            id: 'myListId',
-            list_id: 'my-list-id',
-            namespace_type: 'single',
-            type: 'detection',
+            name: 'My rule',
+            id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+            rule_id: 'my-rule-id',
+            exception_lists: [
+              {
+                id: 'myListId',
+                list_id: 'my-list-id',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+            ],
           },
         ],
       };
 
-      const decoded = ruleReferenceSchema.decode(payload);
+      const decoded = exceptionListRuleReferencesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const output = foldLeftRight(checked);
       expect(formatErrors(output.errors)).toEqual([]);
-      expect(output.schema).toEqual({
-        exception_lists: [
-          { id: 'myListId', list_id: 'my-list-id', namespace_type: 'single', type: 'detection' },
-        ],
-        id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-        name: 'My rule',
-        rule_id: 'my-rule-id',
-      });
+      expect(output.schema).toEqual(payload);
     });
 
     test('cannot add extra values', () => {
-      const payload: RuleReferenceSchema & { extra_value?: string } = {
-        name: 'My rule',
-        id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-        rule_id: 'my-rule-id',
+      const payload: ExceptionListRuleReferencesSchema & { extra_value?: string } = {
         extra_value: 'foo',
-        exception_lists: [
+        ...getExceptionListSchemaMock(),
+        referenced_rules: [
           {
-            id: 'myListId',
-            list_id: 'my-list-id',
-            namespace_type: 'single',
-            type: 'detection',
+            name: 'My rule',
+            id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+            rule_id: 'my-rule-id',
+            exception_lists: [
+              {
+                id: 'myListId',
+                list_id: 'my-list-id',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+            ],
           },
         ],
       };
 
-      const decoded = ruleReferenceSchema.decode(payload);
+      const decoded = exceptionListRuleReferencesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const output = foldLeftRight(checked);
       expect(formatErrors(output.errors)).toEqual(['invalid keys "extra_value"']);
@@ -75,21 +79,24 @@ describe('find_exception_list_references_schema', () => {
       const payload: RulesReferencedByExceptionListsSchema = {
         references: [
           {
-            'my-list-id': [
-              {
-                name: 'My rule',
-                id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-                rule_id: 'my-rule-id',
-                exception_lists: [
-                  {
-                    id: 'myListId',
-                    list_id: 'my-list-id',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                ],
-              },
-            ],
+            'my-list-id': {
+              ...getExceptionListSchemaMock(),
+              referenced_rules: [
+                {
+                  name: 'My rule',
+                  id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+                  rule_id: 'my-rule-id',
+                  exception_lists: [
+                    {
+                      id: 'myListId',
+                      list_id: 'my-list-id',
+                      namespace_type: 'single',
+                      type: 'detection',
+                    },
+                  ],
+                },
+              ],
+            },
           },
         ],
       };
@@ -98,27 +105,7 @@ describe('find_exception_list_references_schema', () => {
       const checked = exactCheck(payload, decoded);
       const output = foldLeftRight(checked);
       expect(formatErrors(output.errors)).toEqual([]);
-      expect(output.schema).toEqual({
-        references: [
-          {
-            'my-list-id': [
-              {
-                exception_lists: [
-                  {
-                    id: 'myListId',
-                    list_id: 'my-list-id',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                ],
-                id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-                name: 'My rule',
-                rule_id: 'my-rule-id',
-              },
-            ],
-          },
-        ],
-      });
+      expect(output.schema).toEqual(payload);
     });
 
     test('validates "references" with empty array', () => {
@@ -140,21 +127,24 @@ describe('find_exception_list_references_schema', () => {
         extra_value: 'foo',
         references: [
           {
-            'my-list-id': [
-              {
-                name: 'My rule',
-                id: '4656dc92-5832-11ea-8e2d-0242ac130003',
-                rule_id: 'my-rule-id',
-                exception_lists: [
-                  {
-                    id: 'myListId',
-                    list_id: 'my-list-id',
-                    namespace_type: 'single',
-                    type: 'detection',
-                  },
-                ],
-              },
-            ],
+            'my-list-id': {
+              ...getExceptionListSchemaMock(),
+              referenced_rules: [
+                {
+                  name: 'My rule',
+                  id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+                  rule_id: 'my-rule-id',
+                  exception_lists: [
+                    {
+                      id: 'myListId',
+                      list_id: 'my-list-id',
+                      namespace_type: 'single',
+                      type: 'detection',
+                    },
+                  ],
+                },
+              ],
+            },
           },
         ],
       };

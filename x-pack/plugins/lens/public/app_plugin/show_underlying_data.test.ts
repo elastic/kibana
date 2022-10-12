@@ -93,7 +93,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of getFilters returning errors', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'indexpattern',
+      datasourceId: 'formBased',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
@@ -118,10 +118,22 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should not be visible if discover is not available', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'indexpattern',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
+      getFilters: jest.fn(() => ({ error: 'filters error' })),
+      isTextBasedLanguage: jest.fn(() => false),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     // both capabilities should be enabled to enable discover
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
@@ -136,7 +148,7 @@ describe('getLayerMetaInfo', () => {
     ).toBeFalsy();
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
@@ -154,7 +166,7 @@ describe('getLayerMetaInfo', () => {
   it('should basically work collecting fields and filters in the visualization', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'indexpattern',
+      datasourceId: 'formBased',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),

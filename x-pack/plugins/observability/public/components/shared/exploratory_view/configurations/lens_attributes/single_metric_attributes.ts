@@ -49,13 +49,20 @@ export class SingleMetricLensAttributes extends LensAttributes {
   getSingleMetricLayer() {
     const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
 
-    const { columnFilter, columnField, columnLabel, columnType, formula, metricStateOptions } =
-      parseCustomFieldName(seriesConfig, selectedMetricField);
+    const {
+      columnFilter,
+      columnField,
+      columnLabel,
+      columnType,
+      formula,
+      metricStateOptions,
+      format,
+    } = parseCustomFieldName(seriesConfig, selectedMetricField);
 
     this.metricStateOptions = metricStateOptions;
 
     if (columnType === FORMULA_COLUMN && formula) {
-      return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
+      return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern, format });
     }
 
     const getSourceField = () => {
@@ -99,9 +106,11 @@ export class SingleMetricLensAttributes extends LensAttributes {
     formula,
     label,
     dataView,
+    format,
   }: {
     formula: string;
     label?: string;
+    format?: string;
     dataView: DataView;
   }) {
     const layer = this.lensFormulaHelper?.insertOrReplaceFormulaColumn(
@@ -109,12 +118,15 @@ export class SingleMetricLensAttributes extends LensAttributes {
       {
         formula,
         label,
-        format: {
-          id: 'percent',
-          params: {
-            decimals: 1,
-          },
-        },
+        format:
+          format === 'percent' || !format
+            ? {
+                id: 'percent',
+                params: {
+                  decimals: 1,
+                },
+              }
+            : undefined,
       },
       { columns: {}, columnOrder: [] },
       dataView
@@ -176,7 +188,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       state: {
         visualization,
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: this.layers,
           },
         },

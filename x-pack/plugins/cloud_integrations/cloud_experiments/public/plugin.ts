@@ -6,21 +6,26 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import LaunchDarkly, { type LDClient } from 'launchdarkly-js-client-sdk';
+import type { LDClient } from 'launchdarkly-js-client-sdk';
 import { get, has } from 'lodash';
+import { Sha256 } from '@kbn/crypto-browser';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   CloudExperimentsFeatureFlagNames,
   CloudExperimentsMetric,
-  CloudExperimentsPluginSetup,
   CloudExperimentsPluginStart,
 } from '../common';
 import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
+
+interface CloudExperimentsPluginSetupDeps {
+  cloud: CloudSetup;
+}
 
 /**
  * Browser-side implementation of the Cloud Experiments plugin
  */
 export class CloudExperimentsPlugin
-  implements Plugin<CloudExperimentsPluginSetup, CloudExperimentsPluginStart>
+  implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
 {
   private launchDarklyClient?: LDClient;
   private readonly clientId?: string;
@@ -53,30 +58,32 @@ export class CloudExperimentsPlugin
   }
 
   /**
-   * Returns the contract {@link CloudExperimentsPluginSetup}
+   * Sets up the A/B testing client only if cloud is enabled
    * @param core {@link CoreSetup}
+   * @param deps {@link CloudExperimentsPluginSetupDeps}
    */
-  public setup(core: CoreSetup): CloudExperimentsPluginSetup {
-    return {
-      identifyUser: (userId, userMetadata) => {
-        if (!this.clientId) return; // Only applies in dev mode.
-
-        if (!this.launchDarklyClient) {
-          // If the client has not been initialized, create it with the user data..
+  public setup(core: CoreSetup, deps: CloudExperimentsPluginSetupDeps) {
+    if (deps.cloud.isCloudEnabled && deps.cloud.cloudId && this.clientId) {
+      import('launchdarkly-js-client-sdk').then(
+        (LaunchDarkly) => {
           this.launchDarklyClient = LaunchDarkly.initialize(
-            this.clientId,
-            { key: userId, custom: userMetadata },
+            this.clientId!,
+            {
+              // We use the Hashed Cloud Deployment ID as the userId in the Cloud Experiments
+              key: sha256(deps.cloud.cloudId!),
+              custom: {
+                kibanaVersion: this.kibanaVersion,
+              },
+            },
             { application: { id: 'kibana-browser', version: this.kibanaVersion } }
           );
-        } else {
-          // Otherwise, call the `identify` method.
-          this.launchDarklyClient
-            .identify({ key: userId, custom: userMetadata })
-            // eslint-disable-next-line no-console
-            .catch((err) => console.warn(err));
+        },
+        (err) => {
+          // eslint-disable-next-line no-console
+          console.debug(`Error setting up LaunchDarkly: ${err.toString()}`);
         }
-      },
-    };
+      );
+    }
   }
 
   /**
@@ -124,4 +131,8 @@ export class CloudExperimentsPlugin
       });
     }
   };
+}
+
+function sha256(str: string) {
+  return new Sha256().update(str, 'utf8').digest('hex');
 }
