@@ -63,15 +63,54 @@ describe('rule_event_log_list_kpi', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="centerJustifiedSpinner"]').exists()).toBeTruthy();
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-successOutcome"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-unknownOutcome"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-failureOutcome"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogKpi-activeAlerts"] .euiStat__title').first().text()
+    ).toEqual('--');
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogKpi-newAlerts"] .euiStat__title').first().text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-recoveredAlerts"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-erroredActions"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-triggeredActions"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
 
     // Let the load resolve
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
-
-    expect(wrapper.find('[data-test-subj="centerJustifiedSpinner"]').exists()).toBeFalsy();
 
     expect(loadExecutionKPIAggregationsMock).toHaveBeenCalledWith(
       expect.objectContaining({
