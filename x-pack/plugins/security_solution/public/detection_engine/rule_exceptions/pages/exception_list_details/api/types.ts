@@ -7,9 +7,9 @@
 
 import type {
   NamespaceType,
-  Pagination,
   UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { Pagination } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
 export interface FetchItems {
