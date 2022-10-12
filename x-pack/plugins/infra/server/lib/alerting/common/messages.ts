@@ -218,41 +218,41 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
 export const cloudActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.cloudActionVariableDescription',
   {
-    defaultMessage: 'Cloud action variable',
+    defaultMessage: 'The cloud object defined by ECS if available in the source.',
   }
 );
 
 export const hostActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.hostActionVariableDescription',
   {
-    defaultMessage: 'Host action variable',
+    defaultMessage: 'The host object defined by ECS if available in the source.',
   }
 );
 
 export const containerActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.containerActionVariableDescription',
   {
-    defaultMessage: 'Container action variable',
+    defaultMessage: 'The container object defined by ECS if available in the source.',
   }
 );
 
 export const orchestratorActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.orchestratorActionVariableDescription',
   {
-    defaultMessage: 'Orchestrator action variable',
+    defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
   }
 );
 
 export const labelsActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.labelsActionVariableDescription',
   {
-    defaultMessage: 'Labels action variable',
+    defaultMessage: 'List of labels associated with the entity where this alert triggered.',
   }
 );
 
 export const tagsActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.tagsActionVariableDescription',
   {
-    defaultMessage: 'Tags action variable',
+    defaultMessage: 'List of tags associated with the entity where this alert triggered.',
   }
 );
