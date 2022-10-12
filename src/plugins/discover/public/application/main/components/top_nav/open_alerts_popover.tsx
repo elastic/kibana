@@ -104,7 +104,7 @@ export function AlertsPopover({
     }
     return triggersActionsUi?.getAddAlertFlyout({
       consumer: 'discover',
-      beforeSave: async (rule) => {
+      onBeforeSave: async (rule) => {
         const searchConfiguration = rule.params.searchConfiguration as SerializedSearchSourceFields;
         if (
           !searchConfiguration ||
@@ -119,7 +119,7 @@ export function AlertsPopover({
           (searchConfiguration!.index as DataViewSpec).id!
         );
         if (!dataViewInstance.isPersisted()) {
-          const updatedDataView = await updateAdHocDataViewId(dataViewInstance, false);
+          const updatedDataView = await updateAdHocDataViewId(dataViewInstance);
 
           const tempSearchSource = await data.search.searchSource.create(
             rule.params.searchConfiguration as SerializedSearchSourceFields
@@ -238,7 +238,6 @@ export function openAlertsPopover({
       'unifiedSearch',
       'uiSettings',
       'notifications',
-      'savedObjects',
       'application',
       'http',
       'storage',
@@ -247,7 +246,8 @@ export function openAlertsPopover({
       'data',
       'dataViewEditor',
     ]),
-    appName: 's',
+    savedObjects: services.core.savedObjects,
+    appName: 'stackAlerts',
   };
 
   if (isOpen) {

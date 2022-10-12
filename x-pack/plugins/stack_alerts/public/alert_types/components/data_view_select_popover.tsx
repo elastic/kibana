@@ -81,7 +81,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const onAdHocDataView = useCallback(
     (adHocDataView: DataView) => {
-      // populate discover state
+      // sync discover state
       discoverContext.addAdHocDataView?.(adHocDataView);
       setAdHocDataViews((prev) => [...prev, toDataViewListItem(adHocDataView)]);
     },

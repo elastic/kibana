@@ -163,6 +163,7 @@ function mountComponent(
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
     adHocDataViewList: [],
+    onAddAdHocDataView: jest.fn(),
   };
 
   return mountWithIntl(

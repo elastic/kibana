@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AlertsPopover } from './open_alerts_popover';
+import { AlertsPopover, type DiscoverAlertServices } from './open_alerts_popover';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../../../__mocks__/data_view';
+
+const Context = ({ children }: { children: ReactNode }) => <>{children}</>;
 
 const mount = (dataView = dataViewMock) =>
   mountWithIntl(
@@ -23,7 +25,13 @@ const mount = (dataView = dataViewMock) =>
         searchSource={createSearchSourceMock({ index: dataView })}
         anchorElement={document.createElement('div')}
         savedQueryId={undefined}
-        onClose={() => {}}
+        adHocDataViews={[]}
+        services={discoverServiceMock}
+        addAdHocDataView={jest.fn()}
+        updateAdHocDataViewId={jest.fn()}
+        onClose={jest.fn()}
+        discoverAlertServices={{} as DiscoverAlertServices}
+        I18nContext={Context}
       />
     </KibanaContextProvider>
   );

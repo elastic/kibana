@@ -38,6 +38,8 @@ test('getTopNavLinks result', () => {
     onOpenSavedSearch: () => {},
     isPlainRecord: false,
     persistDataView: jest.fn(),
+    addAdHocDataView: jest.fn(),
+    adHocDataViews: [],
     updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
@@ -102,6 +104,8 @@ test('getTopNavLinks result for sql mode', () => {
     onOpenSavedSearch: () => {},
     isPlainRecord: true,
     persistDataView: jest.fn(),
+    addAdHocDataView: jest.fn(),
+    adHocDataViews: [],
     updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
