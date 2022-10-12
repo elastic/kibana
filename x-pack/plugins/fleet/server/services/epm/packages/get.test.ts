@@ -188,7 +188,6 @@ describe('When using EPM `get` services', () => {
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      // TODO: is this mock needed?
       MockRegistry.fetchInfo.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
