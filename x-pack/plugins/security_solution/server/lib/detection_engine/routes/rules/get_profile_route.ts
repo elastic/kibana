@@ -4,14 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { parseDuration } from '@kbn/alerting-plugin/common';
+import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import type { Alert } from '@kbn/alerting-plugin/server';
 import type { StartPlugins, SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
+import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -21,11 +32,14 @@ import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PROFILE,
 } from '../../../../../common/constants';
+import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_monitoring';
 
 import type { ConfigType } from '../../../../config';
+import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import type { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
 import {
   createEqlAlertType,
@@ -38,10 +52,7 @@ import {
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import {
-  getEventProfile,
-  getThreatListProfile,
-} from '../../signals/threat_mapping/get_threat_profile';
+import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 
@@ -76,15 +87,12 @@ export const getProfileRoute = async (
         const [, { data, security: securityService }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
-        const { client } = (await context.core).elasticsearch;
-        const esClient = client.asCurrentUser;
-
         const siemClient = (await context.securitySolution).getAppClient();
         const { getQueryRuleAdditionalOptions: queryRuleAdditionalOptions } =
           await context.securitySolution;
 
         const timeframeEnd = request.body.timeframeEnd;
-        const invocationCount = request.body.invocationCount;
+        let invocationCount = request.body.invocationCount;
         if (invocationCount < 1) {
           return response.ok({
             body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
@@ -112,7 +120,8 @@ export const getProfileRoute = async (
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
-        const isAborted = false;
+        let isAborted = false;
+        const profile = true;
 
         const { hasAllRequested } = await securityService.authz
           .checkPrivilegesWithRequest(request)
@@ -148,67 +157,288 @@ export const getProfileRoute = async (
           ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
         });
 
-        const runProfile = async (ruleTypeId: string, ruleTypeName: string, params: TParams) => {
-          await Promise.all([
-            getEventProfile({
-              esClient,
-              ...params,
-            }),
-            getThreatListProfile({
-              esClient,
-              ...params,
-            }),
-          ]);
+        const runExecutors = async <
+          TParams extends RuleParams,
+          TState extends RuleTypeState,
+          TInstanceState extends AlertInstanceState,
+          TInstanceContext extends AlertInstanceContext,
+          TActionGroupIds extends string = ''
+        >(
+          executor: ExecutorType<
+            TParams,
+            TState,
+            TInstanceState,
+            TInstanceContext,
+            TActionGroupIds
+          >,
+          ruleTypeId: string,
+          ruleTypeName: string,
+          params: TParams,
+          shouldWriteAlerts: () => boolean,
+          alertFactory: {
+            create: (
+              id: string
+            ) => Pick<
+              Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
+              | 'getState'
+              | 'replaceState'
+              | 'scheduleActions'
+              | 'setContext'
+              | 'getContext'
+              | 'hasContext'
+            >;
+            alertLimit: {
+              getValue: () => number;
+              setLimitReached: () => void;
+            };
+            done: () => { getRecoveredAlerts: () => [] };
+          }
+        ) => {
+          let statePreview = runState as TState;
+
+          const abortController = new AbortController();
+          setTimeout(() => {
+            abortController.abort();
+            isAborted = true;
+          }, PREVIEW_TIMEOUT_SECONDS * 1000);
+
+          const startedAt = moment(timeframeEnd);
+          const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
+          startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
+
+          let previousStartedAt = null;
+
+          const rule = {
+            ...internalRule,
+            createdAt: new Date(),
+            createdBy: username ?? 'preview-created-by',
+            producer: 'preview-producer',
+            ruleTypeId,
+            ruleTypeName,
+            updatedAt: new Date(),
+            updatedBy: username ?? 'preview-updated-by',
+          };
+
+          let invocationStartTime;
+
+          while (invocationCount > 0 && !isAborted) {
+            invocationStartTime = moment();
+
+            statePreview = (await executor({
+              alertId: previewId,
+              createdBy: rule.createdBy,
+              executionId: uuid.v4(),
+              name: rule.name,
+              params,
+              previousStartedAt,
+              rule,
+              services: {
+                shouldWriteAlerts,
+                shouldStopExecution: () => false,
+                alertFactory,
+                savedObjectsClient: coreContext.savedObjects.client,
+                scopedClusterClient: wrapScopedClusterClient({
+                  abortController,
+                  scopedClusterClient: coreContext.elasticsearch.client,
+                }),
+                searchSourceClient: wrapSearchSourceClient({
+                  abortController,
+                  searchSourceClient,
+                }),
+                uiSettingsClient: coreContext.uiSettings.client,
+              },
+              spaceId,
+              startedAt: startedAt.toDate(),
+              state: statePreview,
+              tags: [],
+              updatedBy: rule.updatedBy,
+            })) as TState;
+            // console.log('rule----------', JSON.stringify(rule));
+
+            const errors = loggedStatusChanges
+              .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+              .map((item) => item.message ?? 'Unkown Error');
+
+            const warnings = loggedStatusChanges
+              .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
+              .map((item) => item.message ?? 'Unknown Warning');
+
+            logs.push({
+              errors,
+              warnings,
+              startedAt: startedAt.toDate().toISOString(),
+              duration: moment().diff(invocationStartTime, 'milliseconds'),
+            });
+
+            loggedStatusChanges.length = 0;
+
+            if (errors.length) {
+              break;
+            }
+
+            previousStartedAt = startedAt.toDate();
+            startedAt.add(parseInterval(internalRule.schedule.interval));
+            invocationCount--;
+          }
+
+          return statePreview;
         };
 
+        let profileResponse = null;
         switch (previewRuleParams.type) {
-          // case 'query':
-          //   const queryAlertType = previewRuleTypeWrapper(
-          //     createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
-          //   );
-          //   await runProfile(queryAlertType.id, queryAlertType.name, previewRuleParams);
-          //   break;
-          // case 'saved_query':
-          //   const savedQueryAlertType = previewRuleTypeWrapper(
-          //     createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
-          //   );
-          //   await runProfile(savedQueryAlertType.id, savedQueryAlertType.name, previewRuleParams);
-          //   break;
-          // case 'threshold':
-          //   const thresholdAlertType = previewRuleTypeWrapper(
-          //     createThresholdAlertType(ruleOptions)
-          //   );
-          //   await runProfile(thresholdAlertType.id, thresholdAlertType.name, previewRuleParams);
-          //   break;
+          case 'query':
+            const queryAlertType = previewRuleTypeWrapper(
+              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+            );
+            await runExecutors(
+              queryAlertType.executor,
+              queryAlertType.id,
+              queryAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'saved_query':
+            const savedQueryAlertType = previewRuleTypeWrapper(
+              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+            );
+            await runExecutors(
+              savedQueryAlertType.executor,
+              savedQueryAlertType.id,
+              savedQueryAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'threshold':
+            const thresholdAlertType = previewRuleTypeWrapper(
+              createThresholdAlertType(ruleOptions)
+            );
+
+            await runExecutors(
+              thresholdAlertType.executor,
+              thresholdAlertType.id,
+              thresholdAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
           case 'threat_match':
             const threatMatchAlertType = previewRuleTypeWrapper(
-              createIndicatorMatchAlertType(ruleOptions)
+              createIndicatorMatchAlertType(ruleOptions, profile)
             );
-            await runProfile(threatMatchAlertType.id, threatMatchAlertType.name, previewRuleParams);
-            break;
-          // case 'eql':
-          //   const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
-          //   await runProfile(eqlAlertType.id, eqlAlertType.name, previewRuleParams);
-          //   break;
-          // case 'machine_learning':
-          //   const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
-          //   await runProfile(mlAlertType.id, mlAlertType.name, previewRuleParams);
-          //   break;
-          // case 'new_terms':
-          //   const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
-          //   await runProfile(newTermsAlertType.id, newTermsAlertType.name, previewRuleParams);
-          //   break;
-          default:
-            return response.ok({
-              body: null,
-            });
-        }
 
+            profileResponse = await runExecutors(
+              threatMatchAlertType.executor,
+              threatMatchAlertType.id,
+              threatMatchAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'eql':
+            const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
+            await runExecutors(
+              eqlAlertType.executor,
+              eqlAlertType.id,
+              eqlAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'machine_learning':
+            const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
+            await runExecutors(
+              mlAlertType.executor,
+              mlAlertType.id,
+              mlAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'new_terms':
+            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
+            await runExecutors(
+              newTermsAlertType.executor,
+              newTermsAlertType.id,
+              newTermsAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          default:
+            assertUnreachable(previewRuleParams);
+        }
+        console.log('-----------profileResponse--------', JSON.stringify(profileResponse));
+        // Refreshes alias to ensure index is able to be read before returning
+        await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
+          {
+            index: previewRuleDataClient.indexNameWithNamespace(spaceId),
+          },
+          { ignore: [404] }
+        );
         return response.ok({
           body: {
             previewId,
             logs,
             isAborted,
+            profileResponse,
           },
         });
       } catch (err) {

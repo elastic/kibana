@@ -6,6 +6,7 @@
  */
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -98,6 +99,11 @@ const EditRulePageComponent: FC = () => {
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
+  const [checked, setChecked] = useState(false);
+
+  const onChange = (e) => {
+    setChecked(e.target.checked);
+  };
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
   const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
@@ -478,12 +484,22 @@ const EditRulePageComponent: FC = () => {
               title={i18n.PAGE_TITLE}
             >
               {defineStep.data && aboutStep.data && scheduleStep.data && (
-                <EuiButton
-                  iconType="visBarVerticalStacked"
-                  onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
-                >
-                  {ruleI18n.RULE_PREVIEW_TITLE}
-                </EuiButton>
+                <>
+                  <span style={{ paddingRight: '6px' }}>
+                    <EuiSwitch
+                      label="Indices profile"
+                      checked={checked}
+                      onChange={(e) => onChange(e)}
+                    />
+                  </span>
+
+                  <EuiButton
+                    iconType="visBarVerticalStacked"
+                    onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+                  >
+                    {ruleI18n.RULE_PREVIEW_TITLE}
+                  </EuiButton>
+                </>
               )}
             </HeaderPage>
             {invalidSteps.length > 0 && (

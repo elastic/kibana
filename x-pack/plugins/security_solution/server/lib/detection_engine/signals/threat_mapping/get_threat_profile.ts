@@ -6,7 +6,7 @@
  */
 
 import type {
-  CreateThreatSignalsOptions,
+  CreateThreatProfileOptions,
   EventCountOptions,
   ThreatListCountOptions,
 } from './types';
@@ -14,7 +14,7 @@ import { getMappingFilters } from './get_mapping_filters';
 import { getQueryFilter } from '../get_query_filter';
 import { buildEventsSearchQuery } from '../build_events_query';
 
-export const getEventProfile = async ({
+const getEventProfile = async ({
   esClient,
   query,
   language,
@@ -51,7 +51,7 @@ export const getEventProfile = async ({
   return response;
 };
 
-export const getThreatListProfile = async ({
+const getThreatListProfile = async ({
   esClient,
   query,
   language,
@@ -77,7 +77,7 @@ export const getThreatListProfile = async ({
   return response;
 };
 
-export const getThreatProfile = async ({
+export const getThreatMatchProfile = async ({
   filters,
   inputIndex,
   language,
@@ -92,34 +92,32 @@ export const getThreatProfile = async ({
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
-}: CreateThreatSignalsOptions) => {
+}: CreateThreatProfileOptions) => {
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
 
-  const eventProfile = await getEventProfile({
-    esClient: services.scopedClusterClient.asCurrentUser,
-    index: inputIndex,
-    tuple,
-    query,
-    language,
-    filters: allEventFilters,
-    primaryTimestamp,
-    secondaryTimestamp,
-    exceptionFilter,
-  });
+  return Promise.all([
+    getEventProfile({
+      esClient: services.scopedClusterClient.asCurrentUser,
+      index: inputIndex,
+      tuple,
+      query,
+      language,
+      filters: allEventFilters,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionFilter,
+    }),
+    getThreatListProfile({
+      esClient: services.scopedClusterClient.asCurrentUser,
+      threatFilters: allThreatFilters,
+      query: threatQuery,
+      language: threatLanguage,
+      index: threatIndex,
+      exceptionFilter,
+    }),
+  ]);
 
-  const threatListProfile = await getThreatListProfile({
-    esClient: services.scopedClusterClient.asCurrentUser,
-    threatFilters: allThreatFilters,
-    query: threatQuery,
-    language: threatLanguage,
-    index: threatIndex,
-    exceptionFilter,
-  });
-  console.log('-------eventProfile-------', JSON.stringify(eventProfile));
-  return {
-    eventProfile,
-    threatListProfile,
-  };
+  // console.log('-------eventProfile-------', JSON.stringify(eventProfile));
 };

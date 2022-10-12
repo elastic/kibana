@@ -12,11 +12,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
+import { getThreatMatchProfile } from '../../signals/threat_mapping/get_threat_profile';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export const createIndicatorMatchAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions,
+  profile = false
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
   const { eventsTelemetry, version } = createOptions;
   return {
@@ -61,8 +63,12 @@ export const createIndicatorMatchAlertType = (
     minimumLicenseRequired: 'basic',
     isExportable: false,
     producer: SERVER_APP_ID,
+    profile,
     async executor(execOptions) {
       const {
+        filters,
+        language,
+        query,
         runOpts: {
           inputIndex,
           runtimeMappings,
@@ -79,8 +85,32 @@ export const createIndicatorMatchAlertType = (
           unprocessedExceptions,
         },
         services,
+        threatFilters,
+        threatIndex,
+        threatLanguage,
+        threatMapping,
+        threatQuery,
         state,
       } = execOptions;
+      if (profile) {
+        const profileResult = await getThreatMatchProfile({
+          filters,
+          inputIndex,
+          language,
+          query,
+          services,
+          threatFilters,
+          threatIndex,
+          threatLanguage,
+          threatMapping,
+          threatQuery,
+          tuple,
+          primaryTimestamp,
+          secondaryTimestamp,
+          exceptionFilter,
+        });
+        return { profileResult, state };
+      }
 
       const result = await threatMatchExecutor({
         inputIndex,

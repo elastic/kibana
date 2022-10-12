@@ -73,6 +73,23 @@ export interface CreateThreatSignalsOptions {
   unprocessedExceptions: ExceptionListItemSchema[];
 }
 
+export interface CreateThreatProfileOptions {
+  filters: unknown[];
+  inputIndex: string[];
+  language: LanguageOrUndefined;
+  query: string;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatFilters: unknown[];
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatMapping: ThreatMapping;
+  threatQuery: ThreatQuery;
+  tuple: RuleRangeTuple;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  exceptionFilter: Filter | undefined;
+}
+
 export interface CreateThreatSignalOptions {
   alertId: string;
   bulkCreate: BulkCreate;

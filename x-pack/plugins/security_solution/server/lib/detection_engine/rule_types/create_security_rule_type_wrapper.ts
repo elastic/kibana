@@ -55,6 +55,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           injectReferences({ logger, params, savedObjectReferences }),
       },
       async executor(options) {
+        console.log('------profile------', type.profile);
         agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
         return withSecuritySpan('securityRuleTypeExecutor', async () => {
           const {
@@ -73,6 +74,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const {
+            filters,
+            language,
+            query,
+            threatFilters,
+            threatIndex,
+            threatLanguage,
+            threatMapping,
+            threatQuery,
             from,
             maxSignals,
             meta,
@@ -81,6 +90,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             timestampOverrideFallbackDisabled,
             to,
           } = params;
+          // console.log('params----------', JSON.stringify(params));
+
           const {
             alertWithPersistence,
             savedObjectsClient,
@@ -315,6 +326,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ...options,
                   services,
                   state: runState,
+                  filters,
+                  language,
+                  query,
+                  threatFilters,
+                  threatIndex,
+                  threatLanguage,
+                  threatMapping,
+                  threatQuery,
                   runOpts: {
                     completeRule,
                     inputIndex,
@@ -338,6 +357,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     aggregatableTimestampField,
                   },
                 });
+                // if (type.profile) console.log('=======================', JSON.stringify(runResult));
 
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
@@ -353,9 +373,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   success: result.success && runResult.success,
                   warning: warningMessages.length > 0,
                   warningMessages,
+                  profile: (result.profile ?? []).concat(runResult.profileResult),
                 };
+
                 runState = runResult.state;
               }
+              if (type.profile) return result.profile;
             } else {
               result = {
                 bulkCreateTimes: [],
@@ -368,6 +391,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 success: true,
                 warning: false,
                 warningMessages: [],
+                profile: [],
               };
             }
 

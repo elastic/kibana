@@ -16,6 +16,7 @@ import type {
   ScheduleStepRule,
   TimeframePreviewOptions,
 } from '../../../pages/detection_engine/rules/types';
+import { useProfile } from './use_profile';
 
 interface PreviewRouteParams {
   defineRuleData?: DefineStepRule;
@@ -42,7 +43,7 @@ export const usePreviewRoute = ({
     isLoading: isProfileLoading,
     response: profileResponse,
     setRule: setProfileRule,
-  } = usePreviewRule({
+  } = useProfile({
     timeframeOptions,
   });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
