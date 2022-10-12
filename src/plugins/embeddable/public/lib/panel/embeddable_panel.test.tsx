@@ -203,7 +203,7 @@ describe('HelloWorldContainer in error state', () => {
       </I18nProvider>
     );
 
-    jest.spyOn(embeddable, 'renderError');
+    jest.spyOn(embeddable, 'catchError');
   });
 
   test('renders a custom error', () => {
@@ -212,9 +212,9 @@ describe('HelloWorldContainer in error state', () => {
 
     const embeddableError = findTestSubject(component, 'embeddableError');
 
-    expect(embeddable.renderError).toHaveBeenCalledWith(
-      expect.any(HTMLElement),
-      new Error('something')
+    expect(embeddable.catchError).toHaveBeenCalledWith(
+      new Error('something'),
+      expect.any(HTMLElement)
     );
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.text()).toBe('something');
@@ -227,21 +227,21 @@ describe('HelloWorldContainer in error state', () => {
 
     const embeddableError = findTestSubject(component, 'embeddableError');
 
-    expect(embeddable.renderError).toHaveBeenCalledWith(
-      expect.any(HTMLElement),
-      new Error('something')
+    expect(embeddable.catchError).toHaveBeenCalledWith(
+      new Error('something'),
+      expect.any(HTMLElement)
     );
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.text()).toBe('something');
   });
 
   test('destroys previous error', () => {
-    const { renderError } = embeddable as Required<typeof embeddable>;
-    let destroyError: jest.MockedFunction<ReturnType<typeof renderError>>;
+    const { catchError } = embeddable as Required<typeof embeddable>;
+    let destroyError: jest.MockedFunction<ReturnType<typeof catchError>>;
 
-    (embeddable.renderError as jest.MockedFunction<typeof renderError>).mockImplementationOnce(
+    (embeddable.catchError as jest.MockedFunction<typeof catchError>).mockImplementationOnce(
       (...args) => {
-        destroyError = jest.fn(renderError(...args));
+        destroyError = jest.fn(catchError(...args));
 
         return destroyError;
       }
@@ -259,7 +259,7 @@ describe('HelloWorldContainer in error state', () => {
   });
 
   test('renders a default error', async () => {
-    embeddable.renderError = undefined;
+    embeddable.catchError = undefined;
     embeddable.triggerError(new Error('something'));
     component.update();
 
@@ -270,16 +270,12 @@ describe('HelloWorldContainer in error state', () => {
   });
 
   test('renders a React node', () => {
-    (embeddable.renderError as jest.Mock).mockReturnValueOnce(<div>Something</div>);
+    (embeddable.catchError as jest.Mock).mockReturnValueOnce(<div>Something</div>);
     embeddable.triggerError(new Error('something'));
     component.update();
 
     const embeddableError = findTestSubject(component, 'embeddableError');
 
-    expect(embeddable.renderError).toHaveBeenCalledWith(
-      expect.any(HTMLElement),
-      new Error('something')
-    );
     expect(embeddableError).toHaveProperty('length', 1);
     expect(embeddableError.text()).toBe('Something');
   });

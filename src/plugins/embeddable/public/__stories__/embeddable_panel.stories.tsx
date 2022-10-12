@@ -252,7 +252,7 @@ export function DefaultWithCustomError({ message, ...props }: DefaultWithErrorPr
 
   useEffect(() => {
     if (ref.current) {
-      ref.current.embeddable.renderError = (node, error) => {
+      ref.current.embeddable.catchError = (error) => {
         return <EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />;
       };
     }

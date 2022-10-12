@@ -7,7 +7,7 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -21,7 +21,7 @@ export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
   return Boolean(embeddable.fatalError || (embeddable as ErrorEmbeddable).error !== undefined);
 }
 
-export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
+export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput, ReactNode> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
 

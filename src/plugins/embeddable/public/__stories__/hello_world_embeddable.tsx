@@ -9,16 +9,14 @@
 import React, { ReactNode } from 'react';
 import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Embeddable } from '..';
+import { EmbeddableInput, EmbeddableOutput, Embeddable } from '..';
 import { createStore, State } from '../store';
 
-export class HelloWorldEmbeddable extends Embeddable {
+export class HelloWorldEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput, ReactNode> {
   // eslint-disable-next-line @kbn/eslint/no_this_in_property_initializers
   readonly store = createStore(this);
 
   readonly type = 'hello-world';
-
-  renderError?: (node: unknown, error: Error) => ReactNode;
 
   reload() {}
 

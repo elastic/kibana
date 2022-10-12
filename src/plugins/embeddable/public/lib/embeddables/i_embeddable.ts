@@ -179,10 +179,11 @@ export interface IEmbeddable<
 
   /**
    * Renders a custom embeddable error at the given node.
+   * @param error
    * @param domNode
    * @returns A React node or callback that will be called on error destroy.
    */
-  renderError?(domNode: HTMLElement | Element, error: ErrorLike): N | (() => void);
+  catchError?(error: EmbeddableError, domNode: HTMLElement | Element): N | (() => void);
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

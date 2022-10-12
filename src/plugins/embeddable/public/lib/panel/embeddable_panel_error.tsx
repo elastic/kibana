@@ -67,14 +67,14 @@ export function EmbeddablePanelError({
       return;
     }
 
-    if (!embeddable.renderError) {
+    if (!embeddable.catchError) {
       const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id });
       setNode(errorEmbeddable.render());
 
       return () => errorEmbeddable.destroy();
     }
 
-    const renderedNode = embeddable.renderError(ref.current, error);
+    const renderedNode = embeddable.catchError(error, ref.current);
     if (isFunction(renderedNode)) {
       return renderedNode;
     }
