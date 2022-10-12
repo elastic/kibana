@@ -233,6 +233,24 @@ export async function searchEventsGroupByStackTrace({
   return { totalCount, stackTraceEvents };
 }
 
+function summarizeCacheAndQuery(
+  logger: Logger,
+  name: string,
+  cacheHits: number,
+  cacheTotal: number,
+  queryHits: number,
+  queryTotal: number
+) {
+  logger.info(`found ${cacheHits} out of ${cacheTotal} ${name} in the cache`);
+  if (cacheHits === cacheTotal) {
+    return;
+  }
+  logger.info(`found ${queryHits} out of ${queryTotal} ${name}`);
+  if (queryHits < queryTotal) {
+    logger.info(`failed to find ${queryTotal - queryHits} ${name}`);
+  }
+}
+
 const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
 
 export async function mgetStackTraces({
@@ -247,6 +265,7 @@ export async function mgetStackTraces({
   const stackTraceIDs = new Set([...events.keys()]);
   const stackTraces = new Map<StackTraceID, StackTrace>();
 
+  let cacheHits = 0;
   let totalFrames = 0;
   const stackFrameDocIDs = new Set<string>();
   const executableDocIDs = new Set<string>();
@@ -254,6 +273,7 @@ export async function mgetStackTraces({
   for (const stackTraceID of stackTraceIDs) {
     const stackTrace = traceLRU.get(stackTraceID);
     if (stackTrace) {
+      cacheHits++;
       stackTraceIDs.delete(stackTraceID);
       stackTraces.set(stackTraceID, stackTrace);
 
@@ -268,6 +288,7 @@ export async function mgetStackTraces({
   }
 
   if (stackTraceIDs.size === 0) {
+    summarizeCacheAndQuery(logger, 'stacktraces', cacheHits, events.size, 0, 0);
     return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
   }
 
@@ -283,6 +304,7 @@ export async function mgetStackTraces({
     _source_includes: [ProfilingESField.StacktraceFrameIDs, ProfilingESField.StacktraceFrameTypes],
   });
 
+  let queryHits = 0;
   const t0 = Date.now();
 
   await withProfilingSpan('decode_stacktraces', async () => {
@@ -294,6 +316,7 @@ export async function mgetStackTraces({
       // This is due to ES delays writing (data is not immediately seen after write).
       // Also, ES doesn't know about transactions.
       if (trace.found) {
+        queryHits++;
         const traceid = trace._id as StackTraceID;
         const stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
 
@@ -317,11 +340,14 @@ export async function mgetStackTraces({
     logger.info('Average size of stacktrace: ' + totalFrames / stackTraces.size);
   }
 
-  if (stackTraces.size < events.size) {
-    logger.info(
-      'failed to find ' + (events.size - stackTraces.size) + ' stacktraces (todo: find out why)'
-    );
-  }
+  summarizeCacheAndQuery(
+    logger,
+    'stacktraces',
+    cacheHits,
+    events.size,
+    queryHits,
+    stackTraceIDs.size
+  );
 
   return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
@@ -339,15 +365,20 @@ export async function mgetStackFrames({
 }): Promise<Map<StackFrameID, StackFrame>> {
   const stackFrames = new Map<StackFrameID, StackFrame>();
 
+  let cacheHits = 0;
+  const cacheTotal = stackFrameIDs.size;
+
   for (const stackFrameID of stackFrameIDs) {
     const stackFrame = frameLRU.get(stackFrameID);
     if (stackFrame) {
+      cacheHits++;
       stackFrames.set(stackFrameID, stackFrame);
       stackFrameIDs.delete(stackFrameID);
     }
   }
 
   if (stackFrameIDs.size === 0) {
+    summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, 0, 0);
     return stackFrames;
   }
 
@@ -358,7 +389,7 @@ export async function mgetStackFrames({
   });
 
   // Create a lookup map StackFrameID -> StackFrame.
-  let framesFound = 0;
+  let queryHits = 0;
   const t0 = Date.now();
   const docs = resStackFrames.docs;
   for (const frame of docs) {
@@ -366,6 +397,7 @@ export async function mgetStackFrames({
       continue;
     }
     if (frame.found) {
+      queryHits++;
       const stackFrame = {
         FileName: frame._source!.Stackframe.file?.name,
         FunctionName: frame._source!.Stackframe.function?.name,
@@ -375,16 +407,16 @@ export async function mgetStackFrames({
       };
       stackFrames.set(frame._id, stackFrame);
       frameLRU.set(frame._id, stackFrame);
-      framesFound++;
       continue;
     }
 
     stackFrames.set(frame._id, emptyStackFrame);
     frameLRU.set(frame._id, emptyStackFrame);
   }
+
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
-  logger.info('found ' + framesFound + ' / ' + stackFrameIDs.size + ' frames');
+  summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, queryHits, stackFrameIDs.size);
 
   return stackFrames;
 }
@@ -402,15 +434,20 @@ export async function mgetExecutables({
 }): Promise<Map<FileID, Executable>> {
   const executables = new Map<FileID, Executable>();
 
+  let cacheHits = 0;
+  const cacheTotal = executableIDs.size;
+
   for (const fileID of executableIDs) {
     const executable = executableLRU.get(fileID);
     if (executable) {
+      cacheHits++;
       executables.set(fileID, executable);
       executableIDs.delete(fileID);
     }
   }
 
   if (executableIDs.size === 0) {
+    summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, 0, 0);
     return executables;
   }
 
@@ -420,8 +457,8 @@ export async function mgetExecutables({
     _source_includes: [ProfilingESField.ExecutableFileName],
   });
 
-  // Create a lookup map StackFrameID -> StackFrame.
-  let exeFound = 0;
+  // Create a lookup map FileID -> Executable.
+  let queryHits = 0;
   const t0 = Date.now();
   const docs = resExecutables.docs;
   for (const exe of docs) {
@@ -429,21 +466,29 @@ export async function mgetExecutables({
       continue;
     }
     if (exe.found) {
+      queryHits++;
       const executable = {
         FileName: exe._source!.Executable.file.name,
       };
       executables.set(exe._id, executable);
       executableLRU.set(exe._id, executable);
-      exeFound++;
       continue;
     }
 
     executables.set(exe._id, emptyExecutable);
     executableLRU.set(exe._id, emptyExecutable);
   }
+
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
-  logger.info('found ' + exeFound + ' / ' + executableIDs.size + ' executables');
+  summarizeCacheAndQuery(
+    logger,
+    'executables',
+    cacheHits,
+    cacheTotal,
+    queryHits,
+    executableIDs.size
+  );
 
   return executables;
 }
