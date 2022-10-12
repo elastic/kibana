@@ -62,7 +62,8 @@ the URL, the default space is used.
 types of alerts. If you don't need this, set this value to `default`.
 
 `id`:::
-(Required, string) The ID of the connector saved object.
+(Required, string) The ID of the connector saved object, which you can obtain by
+using <<get-all-connectors-api>>.
 
 `params`:::
 (Required, object) The map to the `params` that the
@@ -131,7 +132,8 @@ is `onThrottleInterval`.
 [[create-rule-api-example]]
 === {api-examples-title}
 
-Create a rule that has actions associated with a server log connector:
+Create an <<rule-type-index-threshold,index threshold rule>> that has actions
+associated with a server log connector:
 
 [source,sh]
 --------------------------------------------------

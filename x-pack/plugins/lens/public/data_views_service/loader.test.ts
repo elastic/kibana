@@ -14,7 +14,7 @@ import {
   syncExistingFields,
 } from './loader';
 import { sampleIndexPatterns, mockDataViewsService } from './mocks';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';

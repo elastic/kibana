@@ -180,6 +180,10 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('gauge');
   }
 
+  public async clickGoal() {
+    await this.clickVisType('goal');
+  }
+
   public async clickPieChart() {
     await this.clickVisType('pie');
   }
