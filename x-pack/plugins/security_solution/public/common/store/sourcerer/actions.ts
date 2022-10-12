@@ -7,12 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import type {
-  KibanaDataView,
-  SelectedDataView,
-  SourcererDataView,
-  SourcererScopeName,
-} from './model';
+import type { SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
 import type { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
@@ -42,7 +37,3 @@ export interface SelectedDataViewPayload {
   shouldValidateSelectedPatterns?: boolean;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
-
-export const updateSourcererDataViews = actionCreator<{
-  dataView: KibanaDataView;
-}>('UPDATE_SOURCERER_DATA_VIEWS');

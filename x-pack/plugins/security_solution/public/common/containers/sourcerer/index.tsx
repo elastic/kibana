@@ -144,20 +144,6 @@ export const useInitSourcerer = (
     activeDataViewIds.forEach((id) => {
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
-        if (
-          id === scopeDataViewId
-            ? selectedPatterns.length === 0 && missingPatterns.length === 0
-            : timelineDataViewId === id
-            ? timelineMissingPatterns.length === 0 &&
-              timelineSelectedDataView?.patternList.length === 0
-            : false
-        ) {
-          console.log(
-            'skip scope update?',
-            timelineSelectedPatterns.length > 0 && timelineDataViewId === id,
-            { timelineSelectedPatterns, timelineDataViewId, id }
-          );
-        }
         indexFieldsSearch({
           dataViewId: id,
           scopeId:
