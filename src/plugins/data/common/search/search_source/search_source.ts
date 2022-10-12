@@ -511,7 +511,8 @@ export class SearchSource {
             this,
             options.inspector?.adapter,
             options.abortSignal,
-            options.sessionId
+            options.sessionId,
+            options.disableShardFailureWarning
           );
         }
       }
