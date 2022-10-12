@@ -27,7 +27,7 @@ export const sampleAttributeWithReferenceLines = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [
