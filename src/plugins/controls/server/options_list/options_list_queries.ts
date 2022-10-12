@@ -173,7 +173,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         if (!validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
           // simply don't return an aggregation query for the ES search request
-          return;
+          return undefined;
         }
         rangeQuery = testRangeQuery;
       }
@@ -196,9 +196,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
       };
     },
     parse: (rawEsResult) => {
-      if (!get(rawEsResult, 'aggregation.suggestions')) {
-        // if this is happens, that means there is an invalid search that snuck through to the server side code
-        // so might as well early return with no suggestions
+      if (!Boolean(rawEsResult.aggregations?.suggestions)) {
+        // if this is happens, that means there is an invalid search that snuck through to the server side code;
+        // so, might as well early return with no suggestions
         return [];
       }
 

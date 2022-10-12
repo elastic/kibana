@@ -28,20 +28,25 @@ const getIpSegments = (searchString: string): IpSegments => {
   return { segments: [searchString], type: 'unknown' };
 };
 
-const fullIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery['rangeQuery'] => {
-  const isIpv4 = type === 'ipv4';
-  const searchIp = segments.join(isIpv4 ? '.' : ':');
+const buildFullIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['rangeQuery'] => {
+  const { type: ipType, segments: ipSegments } = segments;
+
+  const isIpv4 = ipType === 'ipv4';
+  const searchIp = ipSegments.join(isIpv4 ? '.' : ':');
   if (ipaddr.isValid(searchIp)) {
     return [
       {
-        key: type,
+        key: ipType,
         mask: isIpv4 ? searchIp + '/32' : searchIp + '/64',
       },
     ];
   }
 };
 
-const partialIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuery['rangeQuery'] => {
+const getMinMaxIp = (
+  type: 'ipv4' | 'ipv6',
+  segments: IpSegments['segments']
+): { min: string; max: string } => {
   const isIpv4 = type === 'ipv4';
   const minIp = isIpv4
     ? segments.concat(Array(4 - segments.length).fill('0')).join('.')
@@ -49,15 +54,41 @@ const partialIpSearch = (type: 'ipv4' | 'ipv6', segments: string[]): IpRangeQuer
   const maxIp = isIpv4
     ? segments.concat(Array(4 - segments.length).fill('255')).join('.')
     : segments.concat(Array(8 - segments.length).fill('ffff')).join(':');
-  if (ipaddr.isValid(minIp) && ipaddr.isValid(maxIp)) {
-    return [
-      {
-        key: type,
-        from: minIp,
-        to: maxIp,
-      },
-    ];
+  return {
+    min: minIp,
+    max: maxIp,
+  };
+};
+
+const buildPartialIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['rangeQuery'] => {
+  const { type: ipType, segments: ipSegments } = segments;
+
+  const ranges = [];
+  if (ipType === 'unknown' || ipType === 'ipv4') {
+    const { min: minIpv4, max: maxIpv4 } = getMinMaxIp('ipv4', ipSegments);
+
+    if (ipaddr.isValid(minIpv4) && ipaddr.isValid(maxIpv4)) {
+      ranges.push({
+        key: 'ipv4',
+        from: minIpv4,
+        to: maxIpv4,
+      });
+    }
   }
+
+  if (ipType === 'unknown' || ipType === 'ipv6') {
+    const { min: minIpv6, max: maxIpv6 } = getMinMaxIp('ipv6', ipSegments);
+
+    if (ipaddr.isValid(minIpv6) && ipaddr.isValid(maxIpv6)) {
+      ranges.push({
+        key: 'ipv6',
+        from: minIpv6,
+        to: maxIpv6,
+      });
+    }
+  }
+
+  return ranges;
 };
 
 export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
@@ -65,31 +96,29 @@ export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
     return { validSearch: false };
   }
 
-  const { type: ipType, segments: ipSegments } = getIpSegments(searchString);
-  let ipv4RangeQuery;
-  let ipv6RangeQuery;
-  if (ipType === 'ipv4' && ipSegments.length === 4) {
-    ipv4RangeQuery = fullIpSearch('ipv4', ipSegments);
+  const ipSegments = getIpSegments(searchString);
+
+  if (ipSegments.type === 'ipv4' && ipSegments.segments.length === 4) {
+    const ipv4RangeQuery = buildFullIpSearchRangeQuery(ipSegments);
     if (!Boolean(ipv4RangeQuery)) {
       return { validSearch: false };
     }
     return { validSearch: true, rangeQuery: ipv4RangeQuery };
   }
-  if (ipType === 'ipv6' && ipSegments.length === 8) {
-    ipv6RangeQuery = fullIpSearch('ipv6', ipSegments);
+  if (ipSegments.type === 'ipv6' && ipSegments.segments.length === 8) {
+    const ipv6RangeQuery = buildFullIpSearchRangeQuery(ipSegments);
     if (!Boolean(ipv6RangeQuery)) {
       return { validSearch: false };
     }
     return { validSearch: true, rangeQuery: ipv6RangeQuery };
   }
 
-  ipv4RangeQuery = partialIpSearch('ipv4', ipSegments);
-  ipv6RangeQuery = partialIpSearch('ipv6', ipSegments);
-  if (!Boolean(ipv4RangeQuery) && !Boolean(Boolean(ipv6RangeQuery))) {
+  const partialRangeQuery = buildPartialIpSearchRangeQuery(ipSegments);
+  if (partialRangeQuery === []) {
     return { validSearch: false };
   }
   return {
     validSearch: true,
-    rangeQuery: (ipv4RangeQuery ?? []).concat(ipv6RangeQuery ?? []),
+    rangeQuery: partialRangeQuery,
   };
 };
