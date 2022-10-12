@@ -36,7 +36,7 @@ describe('rule_event_log_list_status_filter', () => {
     wrapper.find(EuiFilterButton).simulate('click');
 
     const statusItems = wrapper.find(EuiFilterSelectItem);
-    expect(statusItems.length).toEqual(3);
+    expect(statusItems.length).toEqual(4);
 
     statusItems.at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
