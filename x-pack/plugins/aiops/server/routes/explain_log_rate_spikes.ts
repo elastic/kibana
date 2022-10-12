@@ -51,9 +51,6 @@ import {
   markDuplicates,
 } from './queries/get_simple_hierarchical_tree';
 
-// 10s ping frequency to keep the stream alive.
-const PING_FREQUENCY = 10000;
-
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
 const PROGRESS_STEP_P_VALUES = 0.5;
@@ -80,12 +77,12 @@ export const defineExplainLogRateSpikesRoute = (
 
       let logMessageCounter = 1;
 
-      function logDebugMessage(msg: string) {
-        logger.debug(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
+      function logInfoMessage(msg: string) {
+        logger.info(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
         logMessageCounter++;
       }
 
-      logDebugMessage('Starting analysis.');
+      logInfoMessage('Starting analysis.');
 
       const groupingEnabled = !!request.body.grouping;
 
@@ -97,12 +94,12 @@ export const defineExplainLogRateSpikesRoute = (
       let loaded = 0;
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
-        logDebugMessage('aborted$ subscription trigger.');
+        logInfoMessage('aborted$ subscription trigger.');
         shouldStop = true;
         controller.abort();
       });
       request.events.completed$.subscribe(() => {
-        logDebugMessage('completed$ subscription trigger.');
+        logInfoMessage('completed$ subscription trigger.');
         shouldStop = true;
         controller.abort();
       });
@@ -121,16 +118,16 @@ export const defineExplainLogRateSpikesRoute = (
       function pushPingWithTimeout() {
         setTimeout(() => {
           if (isRunning) {
-            logDebugMessage('Ping message.');
+            logger.info('DO THE PING');
             push(pingAction());
             pushPingWithTimeout();
           }
-        }, PING_FREQUENCY);
+        }, 1000);
       }
 
       function end() {
         isRunning = false;
-        logDebugMessage('Ending analysis.');
+        logInfoMessage('Ending analysis.');
         streamEnd();
       }
 
@@ -152,16 +149,16 @@ export const defineExplainLogRateSpikesRoute = (
       }
 
       function pushError(m: string) {
-        logDebugMessage('Push error.');
+        logInfoMessage('Push error.');
         push(addErrorAction(m));
       }
 
       async function runAnalysis() {
         isRunning = true;
-        logDebugMessage('Reset.');
+        logInfoMessage('Reset.');
         push(resetAction());
         pushPingWithTimeout();
-        logDebugMessage('Load field candidates.');
+        logInfoMessage('Load field candidates.');
         push(
           updateLoadingStateAction({
             ccsWarning: false,
@@ -218,11 +215,11 @@ export const defineExplainLogRateSpikesRoute = (
 
         const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
-        logDebugMessage('Fetch p-values.');
+        logInfoMessage('Fetch p-values.');
 
         for (const fieldCandidatesChunk of fieldCandidatesChunks) {
           chunkCount++;
-          logDebugMessage(`Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`);
+          logInfoMessage(`Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`);
           let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
           try {
             pValues = await fetchChangePointPValues(
@@ -272,7 +269,7 @@ export const defineExplainLogRateSpikesRoute = (
           );
 
           if (shouldStop) {
-            logDebugMessage('shouldStop fetching p-values.');
+            logInfoMessage('shouldStop fetching p-values.');
 
             end();
             return;
@@ -280,7 +277,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (changePoints?.length === 0) {
-          logDebugMessage('Stopping analysis, did not find change points.');
+          logInfoMessage('Stopping analysis, did not find change points.');
           endWithUpdatedLoadingState();
           return;
         }
@@ -289,7 +286,7 @@ export const defineExplainLogRateSpikesRoute = (
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
         ];
 
-        logDebugMessage('Fetch overall histogram.');
+        logInfoMessage('Fetch overall histogram.');
 
         let overallTimeSeries: NumericChartData | undefined;
         try {
@@ -327,7 +324,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (groupingEnabled) {
-          logDebugMessage('Group results.');
+          logInfoMessage('Group results.');
 
           push(
             updateLoadingStateAction({
@@ -512,7 +509,7 @@ export const defineExplainLogRateSpikesRoute = (
 
               pushHistogramDataLoadingState();
 
-              logDebugMessage('Fetch group histograms.');
+              logInfoMessage('Fetch group histograms.');
 
               await asyncForEach(changePointGroups, async (cpg) => {
                 if (overallTimeSeries !== undefined) {
@@ -591,7 +588,7 @@ export const defineExplainLogRateSpikesRoute = (
 
         loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
-        logDebugMessage('Fetch field/value histograms.');
+        logInfoMessage('Fetch field/value histograms.');
 
         // time series filtered by fields
         if (changePoints && overallTimeSeries !== undefined) {
