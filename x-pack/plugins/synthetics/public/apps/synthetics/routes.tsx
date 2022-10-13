@@ -334,14 +334,14 @@ const getMonitorSummaryHeader = (
         href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
       },
       {
-        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
+        label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
           defaultMessage: 'History',
         }),
         isSelected: selectedTab === 'history',
         href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
       },
       {
-        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
+        label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
           defaultMessage: 'Errors',
         }),
         prepend: <EuiIcon type="alert" color="danger" />,
