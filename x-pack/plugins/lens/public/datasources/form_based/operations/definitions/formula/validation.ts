@@ -19,6 +19,7 @@ import {
   getValueOrName,
   groupArgsByType,
   isMathNode,
+  nonNullable,
   tinymathFunctions,
 } from './util';
 
@@ -44,6 +45,10 @@ interface ValidationErrors {
   wrongTypeParameter: {
     message: string;
     type: { operation: string; params: string };
+  };
+  wrongTypeArgument: {
+    message: string;
+    type: { operation: string; name: string; type: string; expectedType: string };
   };
   wrongFirstArgument: {
     message: string;
@@ -109,6 +114,26 @@ export interface ErrorWrapper {
   severity?: 'error' | 'warning';
 }
 
+function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
+  return [node.location].filter(nonNullable);
+}
+
+function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
+  if (!isObject(arg)) {
+    return typeof arg;
+  }
+  if (arg.type === 'function') {
+    if (tinymathFunctions[arg.name]) {
+      return tinymathFunctions[arg.name].outputType ?? 'number';
+    }
+    // Assume it's a number for now
+    if (operations[arg.name]) {
+      return 'number';
+    }
+  }
+  // leave for now other argument types
+}
+
 export function isParsingError(message: string) {
   return message.includes('Failed to parse expression');
 }
@@ -118,7 +143,7 @@ function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
     if (!isObject(node) || node.type !== 'function') {
       return [];
     }
-    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
+    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(nonNullable);
   }
 
   return flattenFunctionNodes(root);
@@ -132,14 +157,15 @@ export function hasInvalidOperations(
   return {
     // avoid duplicates
     names: Array.from(new Set(nodes.map(({ name }) => name))),
-    locations: nodes.map(({ location }) => location).filter((a) => a) as TinymathLocation[],
+    locations: nodes.map(({ location }) => location).filter(nonNullable),
   };
 }
 
 export const getRawQueryValidationError = (text: string, operations: Record<string, unknown>) => {
   // try to extract the query context here
   const singleLine = text.split('\n').join('');
-  const allArgs = singleLine.split(',').filter((args) => /(kql|lucene)/.test(args));
+  const languagesRegexp = /(kql|lucene)/;
+  const allArgs = singleLine.split(',').filter((args) => languagesRegexp.test(args));
   // check for the presence of a valid ES operation
   const containsOneValidOperation = Object.keys(operations).some((operation) =>
     singleLine.includes(operation)
@@ -153,7 +179,7 @@ export const getRawQueryValidationError = (text: string, operations: Record<stri
   // For instance: count(kql=...) + count(lucene=...) - count(kql=...)
   // therefore before partition them, split them by "count" keywork and filter only string with a length
   const flattenArgs = allArgs.flatMap((arg) =>
-    arg.split('count').filter((subArg) => /(kql|lucene)/.test(subArg))
+    arg.split('count').filter((subArg) => languagesRegexp.test(subArg))
   );
   const [kqlQueries, luceneQueries] = partition(flattenArgs, (arg) => /kql/.test(arg));
   const errors = [];
@@ -260,6 +286,18 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { operation: out.operation, params: out.params },
       });
       break;
+    case 'wrongTypeArgument':
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongTypeArgument', {
+        defaultMessage:
+          'The {name} argument for the operation {operation} in the Formula is of the wrong type: {type} instead of {expectedType}',
+        values: {
+          operation: out.operation,
+          name: out.name,
+          type: out.type,
+          expectedType: out.expectedType,
+        },
+      });
+      break;
     case 'duplicateArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
         defaultMessage:
@@ -332,21 +370,20 @@ function getMessageFromId<K extends ErrorTypes>({
       break;
     case 'wrongReturnedType':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
-        defaultMessage:
-          'The return value type of the operation {text} is not supported in Formula.',
+        defaultMessage: 'The return value type of the operation {text} is not supported in Formula',
         values: { text: out.text },
       });
       break;
     case 'filtersTypeConflict':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
         defaultMessage:
-          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation.',
+          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation',
         values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
       });
       break;
     case 'useAlternativeFunction':
       message = i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
-        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead.`,
+        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead`,
         values: { operation: out.operation, params: out.params, alternativeFn: out.alternativeFn },
       });
       break;
@@ -404,6 +441,7 @@ export function runASTValidation(
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
+    ...checkTopNodeReturnType(ast),
     ...runFullASTValidation(ast, layer, indexPattern, operations, currentColumn),
   ];
 }
@@ -548,7 +586,7 @@ function validateFiltersArguments(
             innerType,
             outerType,
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     }
@@ -574,7 +612,7 @@ function validateNameArguments(
           operation: node.name,
           params: missingParams.map(({ name }) => name).join(', '),
         },
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }
@@ -587,7 +625,7 @@ function validateNameArguments(
           operation: node.name,
           params: wrongTypeParams.map(({ name }) => name).join(', '),
         },
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }
@@ -600,7 +638,7 @@ function validateNameArguments(
           operation: node.name,
           params: duplicateParams.join(', '),
         },
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }
@@ -614,11 +652,32 @@ function validateNameArguments(
       getMessageFromId({
         messageId: 'tooManyQueries',
         values: {},
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }
   return errors;
+}
+
+const DEFAULT_RETURN_TYPE = 'number';
+function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
+  if (
+    isObject(ast) &&
+    ast.type === 'function' &&
+    ast.text &&
+    (tinymathFunctions[ast.name]?.outputType || DEFAULT_RETURN_TYPE) !== DEFAULT_RETURN_TYPE
+  ) {
+    return [
+      getMessageFromId({
+        messageId: 'wrongReturnedType',
+        values: {
+          text: ast.text,
+        },
+        locations: getNodeLocation(ast),
+      }),
+    ];
+  }
+  return [];
 }
 
 function runFullASTValidation(
@@ -645,7 +704,7 @@ function runFullASTValidation(
     const [firstArg] = node?.args || [];
 
     if (!nodeOperation) {
-      errors.push(...validateMathNodes(node, missingVariablesSet));
+      errors.push(...validateMathNodes(node, missingVariablesSet, operations));
       // carry on with the validation for all the functions within the math operation
       if (functions?.length) {
         return errors.concat(functions.flatMap((fn) => validateNode(fn)));
@@ -664,7 +723,7 @@ function runFullASTValidation(
                   }),
                   argument: `math operation`,
                 },
-                locations: node.location ? [node.location] : [],
+                locations: getNodeLocation(node),
               })
             );
           } else {
@@ -683,7 +742,7 @@ function runFullASTValidation(
                         defaultMessage: 'no field',
                       }),
                   },
-                  locations: node.location ? [node.location] : [],
+                  locations: getNodeLocation(node),
                 })
               );
             }
@@ -716,7 +775,7 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
               },
-              locations: node.location ? [node.location] : [],
+              locations: getNodeLocation(node),
             })
           );
         } else {
@@ -742,7 +801,8 @@ function runFullASTValidation(
         // In general this should be handled down the Esaggs route rather than here
         const isFirstArgumentNotValid = Boolean(
           !isArgumentValidType(firstArg, 'function') ||
-            (isMathNode(firstArg) && validateMathNodes(firstArg, missingVariablesSet).length)
+            (isMathNode(firstArg) &&
+              validateMathNodes(firstArg, missingVariablesSet, operations).length)
         );
         // First field has a special handling
         if (isFirstArgumentNotValid) {
@@ -760,7 +820,7 @@ function runFullASTValidation(
                     defaultMessage: 'no operation',
                   }),
               },
-              locations: node.location ? [node.location] : [],
+              locations: getNodeLocation(node),
             })
           );
         }
@@ -786,7 +846,7 @@ function runFullASTValidation(
               values: {
                 operation: node.name,
               },
-              locations: node.location ? [node.location] : [],
+              locations: getNodeLocation(node),
             })
           );
         } else {
@@ -946,22 +1006,27 @@ export function isArgumentValidType(arg: TinymathAST | string, type: TinymathNod
   return isObject(arg) && arg.type === type;
 }
 
-export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<string>) {
+export function validateMathNodes(
+  root: TinymathAST,
+  missingVariableSet: Set<string>,
+  operations: Record<string, GenericOperationDefinition>
+) {
   const mathNodes = findMathNodes(root);
   const errors: ErrorWrapper[] = [];
   mathNodes.forEach((node: TinymathFunction) => {
     const { positionalArguments } = tinymathFunctions[node.name];
+    const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
     if (!node.args.length) {
       // we can stop here
       return errors.push(
         getMessageFromId({
-          messageId: 'wrongFirstArgument',
+          messageId: 'missingMathArgument',
           values: {
             operation: node.name,
-            type: 'operation',
-            argument: `()`,
+            count: mandatoryArguments.length,
+            params: mandatoryArguments.map(({ name }) => name).join(', '),
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     }
@@ -973,12 +1038,12 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           values: {
             operation: node.name,
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     }
 
-    // no need to iterate all the arguments, one field is anough to trigger the error
+    // no need to iterate all the arguments, one field is enough to trigger the error
     const hasFieldAsArgument = positionalArguments.some((requirements, index) => {
       const arg = node.args[index];
       if (arg != null && typeof arg !== 'number') {
@@ -992,12 +1057,11 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
           values: {
             operation: node.name,
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     }
 
-    const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
     // if there is only 1 mandatory arg, this is already handled by the wrongFirstArgument check
     if (mandatoryArguments.length > 1 && node.args.length < mandatoryArguments.length) {
       const missingArgs = mandatoryArguments.filter((_, i) => node.args[i] == null);
@@ -1020,7 +1084,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
               count: mandatoryArguments.length - node.args.length,
               params: missingArgsWithoutAlternative.map(({ name }) => name).join(', '),
             },
-            locations: node.location ? [node.location] : [],
+            locations: getNodeLocation(node),
           })
         );
       }
@@ -1035,10 +1099,36 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
               params: firstArg.name,
               alternativeFn: firstArg.alternativeWhenMissing,
             },
-            locations: node.location ? [node.location] : [],
+            locations: getNodeLocation(node),
           })
         );
       }
+    }
+    const wrongTypeArgumentIndexes = positionalArguments
+      .map(({ type }, index) => {
+        const arg = node.args[index];
+        if (arg != null) {
+          const argType = getArgumentType(arg, operations);
+          if (argType && argType !== type) {
+            return index;
+          }
+        }
+      })
+      .filter(nonNullable);
+    for (const wrongTypeArgumentIndex of wrongTypeArgumentIndexes) {
+      const arg = node.args[wrongTypeArgumentIndex];
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongTypeArgument',
+          values: {
+            operation: node.name,
+            name: positionalArguments[wrongTypeArgumentIndex].name,
+            type: getArgumentType(arg, operations) || 'number',
+            expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
+          },
+          locations: getNodeLocation(node),
+        })
+      );
     }
   });
   return errors;
@@ -1073,7 +1163,7 @@ function validateFieldArguments(
           supported: 1,
           text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
         },
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }
@@ -1085,7 +1175,7 @@ function validateFieldArguments(
           values: {
             text: node.text ?? `${node.name}(${getValueOrName(firstArg)})`,
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     }
@@ -1101,7 +1191,7 @@ function validateFieldArguments(
             defaultMessage: 'field',
           }),
         },
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }
@@ -1133,7 +1223,7 @@ function validateFunctionArguments(
               defaultMessage: 'metric',
             }),
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     } else {
@@ -1146,7 +1236,7 @@ function validateFunctionArguments(
             supported: requiredFunctions,
             text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
           },
-          locations: node.location ? [node.location] : [],
+          locations: getNodeLocation(node),
         })
       );
     }
@@ -1164,7 +1254,7 @@ function validateFunctionArguments(
           type,
           text: (mathOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
         },
-        locations: node.location ? [node.location] : [],
+        locations: getNodeLocation(node),
       })
     );
   }

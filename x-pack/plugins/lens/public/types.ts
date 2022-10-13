@@ -299,6 +299,7 @@ export interface Datasource<T = unknown, P = unknown> {
     getDimensionGroups: (layerId: string) => VisualizationDimensionGroupConfig[];
     indexPatterns: IndexPatternMap;
   }) => T;
+  getSelectedFields?: (state: T) => string[];
 
   renderDataPanel: (
     domElement: Element,
