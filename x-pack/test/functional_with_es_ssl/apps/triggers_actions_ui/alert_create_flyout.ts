@@ -43,6 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
     await indexComboBox.click();
@@ -71,8 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/126873
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -238,10 +238,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":""}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
+      await testSubjects.setValue('queryJsonEditor', '');
+      await discardNewRuleCreation();
+    });
+
     it('should successfully test valid es_query alert', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
       // Valid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
         clearWithKeyboard: true,
@@ -249,23 +274,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
-
-      await discardNewRuleCreation();
-    });
-
-    it('should show error when es_query is invalid', async () => {
-      const alertName = generateUniqueKey();
-      await defineEsQueryAlert(alertName);
-
-      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
-      await queryJsonEditor.clearValue();
-      // Invalid query
-      await testSubjects.setValue('queryJsonEditor', JSON.stringify({ query: { foo: {} } }), {
-        clearWithKeyboard: true,
-      });
-      await testSubjects.click('testQuery');
-      await testSubjects.missingOrFail('testQuerySuccess');
-      await testSubjects.existOrFail('testQueryError');
 
       await discardNewRuleCreation();
     });

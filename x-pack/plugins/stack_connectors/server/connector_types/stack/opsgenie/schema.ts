@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
@@ -23,22 +22,12 @@ const responderTypes = schema.oneOf([
   schema.literal('schedule'),
 ]);
 
-const validateDetails = (details: Record<string, string>): string | void => {
-  let totalChars = 0;
-
-  for (const [key, value] of Object.entries(details)) {
-    totalChars += key.length + value.length;
-
-    if (totalChars > 8000) {
-      return i18n.translate('xpack.stackConnectors.opsgenie.invalidDetails', {
-        defaultMessage: 'details field character count exceeds the 8000 limit',
-      });
-    }
-  }
-};
-
 export const CreateAlertParamsSchema = schema.object({
   message: schema.string({ maxLength: 130 }),
+  /**
+   * The max length here should be 512 according to Opsgenie's docs but we will sha256 hash the alias if it is longer than 512
+   * so we'll not impose a limit on the schema otherwise it'll get rejected prematurely.
+   */
   alias: schema.maybe(schema.string()),
   description: schema.maybe(schema.string({ maxLength: 15000 })),
   responders: schema.maybe(
@@ -78,9 +67,12 @@ export const CreateAlertParamsSchema = schema.object({
   ),
   actions: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 10 })),
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 20 })),
-  details: schema.maybe(
-    schema.recordOf(schema.string(), schema.string(), { validate: validateDetails })
-  ),
+  /**
+   * The validation requirement here is that the total characters between the key and value do not exceed 8000. Opsgenie
+   * will truncate the value if it would exceed the 8000 but it doesn't throw an error. Because of this I'm intentionally
+   * not validating the length of the keys and values here.
+   */
+  details: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   entity: schema.maybe(schema.string({ maxLength: 512 })),
   source: schema.maybe(schema.string({ maxLength: 100 })),
   priority: schema.maybe(
@@ -119,7 +111,7 @@ const FailureResponse = schema.object(
 export const Response = schema.oneOf([SuccessfulResponse, FailureResponse]);
 
 export const CloseAlertParamsSchema = schema.object({
-  alias: schema.string({ maxLength: 512 }),
+  alias: schema.string(),
   user: schema.maybe(schema.string({ maxLength: 100 })),
   source: schema.maybe(schema.string({ maxLength: 100 })),
   note: schema.maybe(schema.string({ maxLength: 25000 })),

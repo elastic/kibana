@@ -138,97 +138,347 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
 
     describe('executor', () => {
       describe('validation', () => {
-        describe('error response', () => {
-          const simulator = new OpsgenieSimulator({
-            proxy: {
-              config: configService.get('kbnTestServer.serverArgs'),
-            },
-          });
-          let simulatorUrl: string;
-          let opsgenieActionId: string;
+        const simulator = new OpsgenieSimulator({
+          proxy: {
+            config: configService.get('kbnTestServer.serverArgs'),
+          },
+        });
+        let simulatorUrl: string;
+        let opsgenieActionId: string;
 
-          before(async () => {
-            simulatorUrl = await simulator.start();
-            opsgenieActionId = await createConnector(simulatorUrl);
-          });
+        before(async () => {
+          simulatorUrl = await simulator.start();
+          opsgenieActionId = await createConnector(simulatorUrl);
+        });
 
-          after(() => {
-            simulator.close();
-          });
+        after(() => {
+          simulator.close();
+        });
 
-          it('should fail when the params is empty', async () => {
-            await supertest
-              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: {},
-              })
-              .then((resp: any) => {
-                expect(Object.keys(resp.body)).to.eql([
-                  'status',
-                  'message',
-                  'retry',
-                  'connector_id',
-                ]);
-                expect(resp.body.connector_id).to.eql(opsgenieActionId);
-                expect(resp.body.status).to.eql('error');
+        it('should fail when the params is empty', async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {},
+            });
+          expect(200);
+
+          expect(Object.keys(body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+          expect(body.connector_id).to.eql(opsgenieActionId);
+          expect(body.status).to.eql('error');
+        });
+
+        it('should fail when the subAction is invalid', async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { subAction: 'invalidAction' },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            connector_id: opsgenieActionId,
+            status: 'error',
+            retry: false,
+            message: 'an error occurred while running the action',
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${opsgenieActionId}. Connector name: Opsgenie. Connector type: .opsgenie`,
+          });
+        });
+
+        it("should fail to create an alert when the message parameter isn't included", async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { subAction: 'createAlert', subActionParams: {} },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            connector_id: opsgenieActionId,
+            status: 'error',
+            retry: false,
+            message: 'an error occurred while running the action',
+            service_message:
+              'Request validation failed (Error: [message]: expected value of type [string] but got [undefined])',
+          });
+        });
+
+        it("should fail to close an alert when the alias parameter isn't included", async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { subAction: 'closeAlert', subActionParams: {} },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            connector_id: opsgenieActionId,
+            status: 'error',
+            retry: false,
+            message: 'an error occurred while running the action',
+            service_message:
+              'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
+          });
+        });
+
+        describe('optional parameters', async () => {
+          describe('responders', () => {
+            it('should fail to create an alert when the responders is an invalid type', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      responders: [
+                        {
+                          name: 'sam',
+                          type: 'invalidType',
+                        },
+                      ],
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.type]: types that failed validation:\n - [responders.0.type.0]: expected value to equal [team]\n - [responders.0.type.1]: expected value to equal [user]\n - [responders.0.type.2]: expected value to equal [escalation]\n - [responders.0.type.3]: expected value to equal [schedule]\n- [responders.0.1.id]: expected value of type [string] but got [undefined])',
               });
+            });
+
+            it('should fail to create an alert when the responders is missing the id', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      responders: [
+                        {
+                          type: 'schedule',
+                        },
+                      ],
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.name]: expected value of type [string] but got [undefined]\n- [responders.0.1.id]: expected value of type [string] but got [undefined])',
+              });
+            });
+
+            it('should succeed to create an alert when the responders has a valid team and id', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      responders: [
+                        {
+                          id: '123',
+                          type: 'team',
+                        },
+                        {
+                          id: '456',
+                          type: 'team',
+                        },
+                      ],
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'ok',
+                data: {
+                  requestId: '43a29c5c-3dbf-4fa4-9c26-f4f71023e120',
+                  result: 'Request will be processed',
+                  took: 0.107,
+                },
+              });
+            });
+
+            it('should succeed to create an alert when the responders has a valid escalation and name', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      responders: [
+                        {
+                          name: 'sam',
+                          type: 'escalation',
+                        },
+                        {
+                          name: 'bob',
+                          type: 'escalation',
+                        },
+                      ],
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'ok',
+                data: {
+                  requestId: '43a29c5c-3dbf-4fa4-9c26-f4f71023e120',
+                  result: 'Request will be processed',
+                  took: 0.107,
+                },
+              });
+            });
           });
 
-          it('should fail when the subAction is invalid', async () => {
-            await supertest
-              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: { subAction: 'invalidAction' },
-              })
-              .then((resp: any) => {
-                expect(resp.body).to.eql({
-                  connector_id: opsgenieActionId,
-                  status: 'error',
-                  retry: false,
-                  message: 'an error occurred while running the action',
-                  service_message: `Sub action "invalidAction" is not registered. Connector id: ${opsgenieActionId}. Connector name: Opsgenie Connector. Connector type: .opsgenie`,
-                });
+          describe('visibleTo', () => {
+            it('should fail to create an alert when the visibleTo uses the name field with type user', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      visibleTo: [
+                        {
+                          name: 'sam',
+                          type: 'user',
+                        },
+                      ],
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  'Request validation failed (Error: [visibleTo.0]: types that failed validation:\n- [visibleTo.0.0.type]: expected value to equal [team]\n- [visibleTo.0.1.id]: expected value of type [string] but got [undefined]\n- [visibleTo.0.2.id]: expected value of type [string] but got [undefined]\n- [visibleTo.0.3.username]: expected value of type [string] but got [undefined])',
               });
+            });
+
+            it('should succeed to create an alert when the visibleTo is set to a user', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      visibleTo: [
+                        {
+                          username: 'sam',
+                          type: 'user',
+                        },
+                        {
+                          username: 'bob',
+                          type: 'user',
+                        },
+                      ],
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'ok',
+                data: {
+                  requestId: '43a29c5c-3dbf-4fa4-9c26-f4f71023e120',
+                  result: 'Request will be processed',
+                  took: 0.107,
+                },
+              });
+            });
           });
 
-          it("should fail to create an alert when the message parameter isn't included", async () => {
-            await supertest
-              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: { subAction: 'createAlert', subActionParams: {} },
-              })
-              .then((resp: any) => {
-                expect(resp.body).to.eql({
-                  connector_id: opsgenieActionId,
-                  status: 'error',
-                  retry: false,
-                  message: 'an error occurred while running the action',
-                  service_message:
-                    'Request validation failed (Error: [message]: expected value of type [string] but got [undefined])',
-                });
-              });
-          });
+          describe('details', () => {
+            it('should fail to create an alert when the details field is a record of string to number', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      details: {
+                        bananas: 1,
+                      },
+                    },
+                  },
+                })
+                .expect(200);
 
-          it("should fail to close an alert when the alias parameter isn't included", async () => {
-            await supertest
-              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                params: { subAction: 'closeAlert', subActionParams: {} },
-              })
-              .then((resp: any) => {
-                expect(resp.body).to.eql({
-                  connector_id: opsgenieActionId,
-                  status: 'error',
-                  retry: false,
-                  message: 'an error occurred while running the action',
-                  service_message:
-                    'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
-                });
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  'Request validation failed (Error: [details.bananas]: expected value of type [string] but got [number])',
               });
+            });
+
+            it('should succeed to create an alert when the details field a record of string to string', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'createAlert',
+                    subActionParams: {
+                      message: 'hello',
+                      details: {
+                        bananas: 'hello',
+                      },
+                    },
+                  },
+                })
+                .expect(200);
+
+              expect(body).to.eql({
+                connector_id: opsgenieActionId,
+                status: 'ok',
+                data: {
+                  requestId: '43a29c5c-3dbf-4fa4-9c26-f4f71023e120',
+                  result: 'Request will be processed',
+                  took: 0.107,
+                },
+              });
+            });
           });
         });
       });
@@ -299,7 +549,8 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             const alias = 'a'.repeat(513);
 
             // sha256 hash for 513 a characters
-            const hashedAlias = '02425c0f5b0dabf3d2b9115f3f7723a02ad8bcfb1534a0d231614fd42b8188f6';
+            const hashedAlias =
+              'sha-02425c0f5b0dabf3d2b9115f3f7723a02ad8bcfb1534a0d231614fd42b8188f6';
 
             const { body } = await supertest
               .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
@@ -314,6 +565,35 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
 
             expect(simulator.requestData).to.eql({ message: 'message', alias: hashedAlias });
             expect(simulator.requestUrl).to.eql(createAlertUrl);
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: opsgenieActionId,
+              data: opsgenieSuccessResponse,
+            });
+          });
+
+          it('should sha256 hash the alias when it is over 512 characters when closing an alert', async () => {
+            const alias = 'a'.repeat(513);
+
+            // sha256 hash for 513 a characters
+            const hashedAlias =
+              'sha-02425c0f5b0dabf3d2b9115f3f7723a02ad8bcfb1534a0d231614fd42b8188f6';
+
+            const { body } = await supertest
+              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'closeAlert',
+                  subActionParams: { alias },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({});
+            expect(simulator.requestUrl).to.eql(
+              createCloseAlertUrl(simulatorUrl, `v2/alerts/${hashedAlias}/close`)
+            );
             expect(body).to.eql({
               status: 'ok',
               connector_id: opsgenieActionId,
@@ -402,7 +682,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: false,
               connector_id: opsgenieActionId,
-              service_message: 'Message: failed.',
+              service_message: 'Status code: undefined. Message: Message: failed',
             });
           });
 
@@ -424,7 +704,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: false,
               connector_id: opsgenieActionId,
-              service_message: 'Message: failed.',
+              service_message: 'Status code: undefined. Message: Message: failed',
             });
           });
         });
@@ -443,7 +723,8 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             secrets: {
               apiKey: '123',
             },
-          });
+          })
+          .expect(200);
 
         return body.id;
       };

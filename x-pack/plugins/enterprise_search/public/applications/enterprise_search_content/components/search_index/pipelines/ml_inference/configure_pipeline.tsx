@@ -26,6 +26,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { MLInferenceLogic } from './ml_inference_logic';
 
 const NoSourceFieldsError: React.FC = () => (
@@ -53,6 +55,7 @@ export const ConfigurePipeline: React.FC = () => {
     sourceFields,
   } = useValues(MLInferenceLogic);
   const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
   const models = supportedMLModels ?? [];
@@ -104,6 +107,7 @@ export const ConfigurePipeline: React.FC = () => {
           isInvalid={nameError}
         >
           <EuiFieldText
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
             fullWidth
             placeholder={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
@@ -131,6 +135,7 @@ export const ConfigurePipeline: React.FC = () => {
           fullWidth
         >
           <EuiSelect
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
             fullWidth
             value={modelID}
             options={[
@@ -166,6 +171,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={emptySourceFields}
             >
               <EuiSelect
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
                 value={sourceField}
                 options={[
                   {
@@ -215,6 +221,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={formErrors.destinationField !== undefined}
             >
               <EuiFieldText
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-destionationField`}
                 placeholder="custom_field_name"
                 value={destinationField}
                 onChange={(e) =>

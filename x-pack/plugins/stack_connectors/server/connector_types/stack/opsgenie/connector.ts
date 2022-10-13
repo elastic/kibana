@@ -39,14 +39,17 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
   public getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
     return `Message: ${
-      error.response?.data.errors?.message ?? error.response?.data.message ?? i18n.UNKNOWN_ERROR
-    }.`;
+      error.response?.data.errors?.message ??
+      error.response?.data.message ??
+      error.message ??
+      i18n.UNKNOWN_ERROR
+    }`;
   }
 
   public async createAlert(params: CreateAlertParams) {
     const res = await this.request({
       method: 'post',
-      url: this.concatPathToURL('v2/alerts'),
+      url: this.concatPathToURL('v2/alerts').toString(),
       data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
       headers: this.createHeaders(),
       responseSchema: Response,
@@ -60,17 +63,23 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
       return {};
     }
 
+    const newAlias = OpsgenieConnector.createAlias(alias);
+
+    return { alias: newAlias };
+  }
+
+  private static createAlias(alias: string) {
     // opsgenie v2 requires that the alias length be no more than 512 characters
     // see their docs for more details https://docs.opsgenie.com/docs/alert-api#create-alert
     if (alias.length <= 512) {
-      return { alias };
+      return alias;
     }
 
     // To give preference to avoiding collisions we're using sha256 over of md5 but we are compromising on speed a bit here
     const hasher = crypto.createHash('sha256');
     const sha256Hash = hasher.update(alias);
 
-    return { alias: sha256Hash.digest('hex') };
+    return `sha-${sha256Hash.digest('hex')}`;
   }
 
   private createHeaders() {
@@ -78,7 +87,9 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async closeAlert(params: CloseAlertParams) {
-    const fullURL = new URL(`v2/alerts/${params.alias}/close`, this.config.apiUrl);
+    const newAlias = OpsgenieConnector.createAlias(params.alias);
+
+    const fullURL = this.concatPathToURL(`v2/alerts/${newAlias}/close`);
     fullURL.searchParams.set('identifierType', 'alias');
 
     const { alias, ...paramsWithoutAlias } = params;
@@ -97,6 +108,6 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   private concatPathToURL(path: string) {
     const fullURL = new URL(path, this.config.apiUrl);
 
-    return fullURL.toString();
+    return fullURL;
   }
 }
