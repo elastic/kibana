@@ -43,7 +43,7 @@ export const GuideButtonPopover = ({
         /* do nothing, the popover is closed once the panel is opened */
       }}
     >
-      {title && <EuiPopoverTitle>{title}</EuiPopoverTitle>}
+      {title && <EuiTitle size="xxs"><h3>{title}</h3></EuiTitle>}
       <EuiText style={{ width: 300 }}>{description && <p>{description}</p>}</EuiText>
     </EuiPopover>
   );
