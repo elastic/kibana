@@ -68,6 +68,7 @@ export type Props = Omit<
   frame: FramePublicAPI;
   indexPatternService: IndexPatternServiceAPI;
   onIndexPatternRefresh: () => void;
+  layerFields?: string[];
 };
 
 const supportedFieldTypes = new Set([
@@ -129,6 +130,7 @@ export function FormBasedDataPanel({
   frame,
   onIndexPatternRefresh,
   usedIndexPatterns,
+  layerFields,
 }: Props) {
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
@@ -190,6 +192,7 @@ export function FormBasedDataPanel({
           indexPatternService={indexPatternService}
           onIndexPatternRefresh={onIndexPatternRefresh}
           frame={frame}
+          layerFields={layerFields}
           showNoDataPopover={showNoDataPopover}
           activeIndexPatterns={activeIndexPatterns}
         />
@@ -228,6 +231,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
+  layerFields,
   showNoDataPopover,
   activeIndexPatterns,
 }: Omit<
@@ -244,6 +248,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   onIndexPatternRefresh: () => void;
+  layerFields?: string[];
   activeIndexPatterns: IndexPattern[];
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
