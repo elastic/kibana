@@ -502,11 +502,11 @@ export default async function ({ readConfigFile }) {
 
         follower_index_user: {
           elasticsearch: {
-            cluster: ['manage', 'monitor'],
+            cluster: ['monitor'],
             indices: [
               {
                 names: ['*'],
-                privileges: ['all'],
+                privileges: ['write', 'monitor', 'manage_follow_index'],
               },
             ],
           },

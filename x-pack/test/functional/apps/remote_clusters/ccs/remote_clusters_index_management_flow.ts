@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     before(async () => {
-      await security.testUser.setRoles(['global_ccr_role', 'follower_index_user', 'superuser']);
+      await security.testUser.setRoles(['global_ccr_role', 'follower_index_user']);
     });
 
     describe('Remote Clusters', function () {
