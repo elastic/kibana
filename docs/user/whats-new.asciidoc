@@ -253,6 +253,6 @@ The user search UI includes auto-complete and search highlights.
 image::images/highlights-cases-user-search.png[User search view with auto-complete, highlights, user avatars, user email, width="75%"]
 
 User search adheres to {kib} role-based access control. Users who do not have access to *Cases* within the
-space will not surface in the results.
+space will not surface in the results. For more details, go to <<setup-cases>>.
 
 // end::notable-highlights[]
