@@ -70,8 +70,8 @@ export class ScreenBaseClass {
     return title || subTitle
       ? `${blue(HORIZONTAL_LINE)}\n${blue(bold(paddedTitle))}${
           subTitle ? `${cyan(paddedSubTitle)}` : ''
-        }\n${blue(HORIZONTAL_LINE)}`
-      : blue(HORIZONTAL_LINE);
+        }\n${blue(HORIZONTAL_LINE)}\n`
+      : `${blue(HORIZONTAL_LINE)}\n`;
   }
 
   /**
@@ -108,6 +108,11 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
    * @protected
    */
   protected onEnterChoice(choice: string) {
+    if (choice.toUpperCase() === 'Q') {
+      this.hide();
+      return;
+    }
+
     throw new Error(`${this.constructor.name}.onEnterChoice() not implemented!`);
   }
 

@@ -6,6 +6,7 @@
  */
 
 import { bgCyan, red } from 'chalk';
+import { ActionResponderScreen } from './actions_responder';
 import { SCREEN_ROW_MAX_WIDTH } from '../../common/screen/constants';
 import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
@@ -15,13 +16,16 @@ import { ScreenBaseClass, ChoiceMenuFormatter } from '../../common/screen';
 import type { DataFormatter } from '../../common/screen/data_formatter';
 
 export class MainScreen extends ScreenBaseClass {
-  private readonly loadEndpointsScreen;
+  private readonly loadEndpointsScreen: LoadEndpointsScreen;
+  private readonly actionsResponderScreen: ActionResponderScreen;
+
   private actionColumnWidthPrc = 30;
   private runningStateColumnWidthPrc = 70;
 
   constructor(private readonly emulatorContext: EmulatorRunContext) {
     super();
     this.loadEndpointsScreen = new LoadEndpointsScreen(this.emulatorContext);
+    this.actionsResponderScreen = new ActionResponderScreen(this.emulatorContext);
   }
 
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
@@ -30,13 +34,14 @@ export class MainScreen extends ScreenBaseClass {
 
   protected body(): string | DataFormatter {
     return `\n${
-      new ColumnLayoutFormatter(
-        [new ChoiceMenuFormatter(['Load endpoints']), this.runStateView()],
-        {
-          widths: [this.actionColumnWidthPrc, this.runningStateColumnWidthPrc],
-        }
-      ).output
+      new ColumnLayoutFormatter([this.getMenuOptions(), this.runStateView()], {
+        widths: [this.actionColumnWidthPrc, this.runningStateColumnWidthPrc],
+      }).output
     }`;
+  }
+
+  private getMenuOptions(): ChoiceMenuFormatter {
+    return new ChoiceMenuFormatter(['Load endpoints', 'Actions Responder']);
   }
 
   private runStateView(): ColumnLayoutFormatter {
@@ -85,6 +90,12 @@ export class MainScreen extends ScreenBaseClass {
         });
         return;
 
+      case '2':
+        this.pause();
+        this.actionsResponderScreen.show({ resume: true }).then(() => {
+          this.show({ resume: true });
+        });
+        return;
       case 'E':
         this.hide();
         return;
