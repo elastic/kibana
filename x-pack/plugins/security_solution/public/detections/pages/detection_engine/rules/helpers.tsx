@@ -411,6 +411,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
     case 'new_terms':
     case 'threat_match':
     case 'query':
+    case 'risk_score':
     case 'saved_query':
     case 'eql':
       return queryRuleParams;

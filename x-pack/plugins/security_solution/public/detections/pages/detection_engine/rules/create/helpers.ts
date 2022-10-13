@@ -165,6 +165,16 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatMapping'
   | 'eqlOptions'
 >;
+type RiskRuleFields<T> = QueryRuleFields<T>;
+
+type AllRuleFields<T> =
+  | QueryRuleFields<T>
+  | EqlQueryRuleFields<T>
+  | MlRuleFields<T>
+  | ThresholdRuleFields<T>
+  | ThreatMatchRuleFields<T>
+  | NewTermsRuleFields<T>
+  | RiskRuleFields<T>;
 
 const isMlFields = <T>(
   fields:
@@ -219,13 +229,7 @@ const isEqlFields = <T>(
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
   type: Type
-):
-  | QueryRuleFields<T>
-  | EqlQueryRuleFields<T>
-  | MlRuleFields<T>
-  | ThresholdRuleFields<T>
-  | ThreatMatchRuleFields<T>
-  | NewTermsRuleFields<T> => {
+): AllRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
       const {
@@ -267,6 +271,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
       return threatMatchRuleFields;
     case 'query':
     case 'saved_query':
+    case 'risk_score':
       const {
         anomalyThreshold: _a,
         machineLearningJobId: _m,

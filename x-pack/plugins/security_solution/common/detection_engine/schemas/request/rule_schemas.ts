@@ -401,6 +401,30 @@ const {
 } = buildAPISchemas(newTermsRuleParams);
 
 export { newTermsCreateParams, newTermsResponseParams };
+
+const riskRuleParams = {
+  required: {
+    type: t.literal('risk_score'),
+    query,
+  },
+  optional: {
+    index,
+    data_view_id,
+    filters,
+    saved_id,
+    response_actions: ResponseActionArray,
+  },
+  defaultable: {
+    language: t.keyof({ kuery: null, lucene: null }),
+  },
+};
+const {
+  create: riskCreateParams,
+  patch: riskPatchParams,
+  response: riskResponseParams,
+} = buildAPISchemas(riskRuleParams);
+
+export { riskCreateParams, riskResponseParams };
 // ---------------------------------------
 // END type specific parameter definitions
 
@@ -412,6 +436,7 @@ export const createTypeSpecific = t.union([
   thresholdCreateParams,
   machineLearningCreateParams,
   newTermsCreateParams,
+  riskCreateParams,
 ]);
 export type CreateTypeSpecific = t.TypeOf<typeof createTypeSpecific>;
 
@@ -426,6 +451,7 @@ export type MachineLearningCreateSchema = CreateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
 export type NewTermsCreateSchema = CreateSchema<t.TypeOf<typeof newTermsCreateParams>>;
+export type RiskCreateSchema = CreateSchema<t.TypeOf<typeof riskCreateParams>>;
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
@@ -451,6 +477,7 @@ export const patchTypeSpecific = t.union([
   thresholdPatchParams,
   machineLearningPatchParams,
   newTermsPatchParams,
+  riskPatchParams,
 ]);
 export {
   eqlPatchParams,
@@ -460,6 +487,7 @@ export {
   thresholdPatchParams,
   machineLearningPatchParams,
   newTermsPatchParams,
+  riskPatchParams,
 };
 
 export type EqlPatchParams = t.TypeOf<typeof eqlPatchParams>;
@@ -469,6 +497,7 @@ export type SavedQueryPatchParams = t.TypeOf<typeof savedQueryPatchParams>;
 export type ThresholdPatchParams = t.TypeOf<typeof thresholdPatchParams>;
 export type MachineLearningPatchParams = t.TypeOf<typeof machineLearningPatchParams>;
 export type NewTermsPatchParams = t.TypeOf<typeof newTermsPatchParams>;
+export type RiskPatchParams = t.TypeOf<typeof riskPatchParams>;
 
 const responseTypeSpecific = t.union([
   eqlResponseParams,
@@ -478,6 +507,7 @@ const responseTypeSpecific = t.union([
   thresholdResponseParams,
   machineLearningResponseParams,
   newTermsResponseParams,
+  riskResponseParams,
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
