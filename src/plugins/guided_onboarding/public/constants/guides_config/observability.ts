@@ -13,7 +13,7 @@ export const observabilityConfig: GuideConfig = {
   description: `We'll help you quickly gain visibility into your Kubernetes environment using Elastic's out-of-the-box integration. Gain deep insights from your logs, metrics, and traces, and proactively detect issues and take action to resolve issues.`,
   docs: {
     text: 'Kubernetes documentation',
-    url: 'example.com', // TODO update link to correct docs page
+    url: 'https://docs.elastic.co/en/integrations/kubernetes',
   },
   steps: [
     {
@@ -33,6 +33,11 @@ export const observabilityConfig: GuideConfig = {
       location: {
         appID: 'dashboards',
         path: '#/view/kubernetes-e0195ce0-bcaf-11ec-b64f-7dd6e8e82013',
+      },
+      manualCompletion: {
+        title: 'Explore the pre-built Kubernetes dashboards',
+        description: `Take your time to explore out-of-the-box dashboards that are included with the Kubernetes integration. When you're ready, you can access the next step of the guide in the button above.`,
+        readyToCompleteOnNavigation: true,
       },
     },
     {
