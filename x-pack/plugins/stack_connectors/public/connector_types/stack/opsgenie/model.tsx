@@ -23,7 +23,6 @@ import { DEFAULT_ALIAS } from './constants';
 const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.selectMessageText',
   {
-    // TODO: figure out the right text here
     defaultMessage: 'Create or close an alert in Opsgenie.',
   }
 );
