@@ -22,12 +22,9 @@ import type {
   UpdateArgs,
   FileDescriptor,
   GetUsageMetricsArgs,
-  ListArg,
 } from '../file_metadata_client';
 
 import { filterArgsToKuery } from './query_filters';
-
-const arrayOrUndefined = (value: undefined | string) => (value ? [value] : undefined);
 
 interface TermsAgg {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -64,31 +61,10 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     };
   }
 
-  async list({ fileKind, filter, page, perPage }: ListArg = {}): Promise<{
+  async find({ page, perPage, ...filterArgs }: FindFileArgs = {}): Promise<{
     total: number;
     files: Array<FileDescriptor<unknown>>;
   }> {
-    const result = await this.soClient.find({
-      type: this.soType,
-      filter: filterArgsToKuery({
-        attrPrefix: `${this.soType}.attributes`,
-        kind: arrayOrUndefined(fileKind),
-        name: arrayOrUndefined(filter?.name),
-        status: arrayOrUndefined(filter?.status),
-      }),
-      page,
-      perPage,
-    });
-    return {
-      total: result.total,
-      files: result.saved_objects.map((file) => ({
-        id: file.id,
-        metadata: file.attributes as FileDescriptor['metadata'],
-      })),
-    };
-  }
-
-  async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {
     const result = await this.soClient.find({
       type: this.soType,
       filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes` }),
@@ -97,10 +73,13 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       sortOrder: 'desc',
       sortField: 'created',
     });
-    return result.saved_objects.map((so) => ({
-      id: so.id,
-      metadata: so.attributes as FileMetadata,
-    }));
+    return {
+      files: result.saved_objects.map((so) => ({
+        id: so.id,
+        metadata: so.attributes as FileMetadata,
+      })),
+      total: result.total,
+    };
   }
 
   async delete({ id }: { id: string }): Promise<void> {

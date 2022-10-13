@@ -99,7 +99,7 @@ describe('FileService', () => {
   }
   afterEach(async () => {
     await Promise.all(disposables.map((file) => file.delete()));
-    const { files } = await fileService.list({ fileKind });
+    const { files } = await fileService.find({ kind: [fileKind] });
     expect(files.length).toBe(0);
     disposables = [];
   });
@@ -146,7 +146,7 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'test-3' }),
       createDisposableFile({ fileKind, name: 'test-3' /* Also test file with same name */ }),
     ]);
-    const result = await fileService.list({ fileKind });
+    const result = await fileService.find({ kind: [fileKind] });
     expect(result.files.length).toBe(4);
   });
 
@@ -158,9 +158,9 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'test-3' }),
     ]);
     {
-      const { files, total } = await fileService.list({
-        fileKind,
-        filter: { name: 'foo*' },
+      const { files, total } = await fileService.find({
+        kind: [fileKind],
+        name: ['foo*'],
         perPage: 2,
         page: 1,
       });
@@ -169,9 +169,9 @@ describe('FileService', () => {
     }
 
     {
-      const { files, total } = await fileService.list({
-        fileKind,
-        filter: { name: 'foo*' },
+      const { files, total } = await fileService.find({
+        kind: [fileKind],
+        name: ['foo*'],
         perPage: 2,
         page: 2,
       });
@@ -182,10 +182,10 @@ describe('FileService', () => {
 
   it('deletes files', async () => {
     const file = await fileService.create({ fileKind, name: 'test' });
-    const result = await fileService.list({ fileKind });
+    const result = await fileService.find({ kind: [fileKind] });
     expect(result.files.length).toBe(1);
     await file.delete();
-    expect(await fileService.list({ fileKind })).toEqual({ files: [], total: 0 });
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
   });
 
   interface CustomMeta {
