@@ -359,4 +359,39 @@ describe('bulkDelete', () => {
       total: 2,
     });
   });
+
+  test('should thow an error if number of matched rules greater than 10.000', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      aggregations: {
+        alertTypeId: {
+          buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 2 }],
+        },
+      },
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+      total: 10001,
+    });
+
+    await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrow(
+      'More than 10000 rules matched for bulk delete'
+    );
+  });
+
+  test('should throw an error if we do not get buckets', async () => {
+    mockCreatePointInTimeFinderAsInternalUser();
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      aggregations: {
+        alertTypeId: {},
+      },
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+      total: 2,
+    });
+
+    await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrow(
+      'No rules found for bulk delete'
+    );
+  });
 });
