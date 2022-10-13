@@ -130,7 +130,9 @@ export function useDiscoverState({
       dataViews,
       stateContainer,
       savedSearch,
-      onChangeDataView,
+      setUrlTracking,
+      filterManager,
+      toastNotifications,
     });
 
   /**
