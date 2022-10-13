@@ -23,7 +23,7 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
 import { isEmpty } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
@@ -39,12 +39,6 @@ import type {
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/schemas/common';
-import {
-  subtechniquesOptions,
-  tacticsOptions,
-  techniquesOptions,
-} from '../../../mitre/mitre_tactics_techniques';
-
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
@@ -54,6 +48,22 @@ import type {
   AboutStepSeverity,
 } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import type {
+  MitreSubtechniquesOptions,
+  MitreTacticsOptions,
+  MitreTechniquesOptions,
+} from '../../../mitre/types';
+
+const lazyMitreConfiguration = () => {
+  /**
+   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+   * See https://webpack.js.org/api/module-methods/#magic-comments
+   */
+  return import(
+    /* webpackChunkName: "lazy_mitre_configuration" */
+    '../../../mitre/mitre_tactics_techniques'
+  );
+};
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -189,6 +199,25 @@ const TechniqueLinkItem = styled(EuiButtonEmpty)`
 
 export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
   if (threat.length > 0) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [tacticsOptions, setTacticsOptions] = useState<MitreTacticsOptions[]>([]);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>(
+      []
+    );
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      async function getMitre() {
+        const mitreConfig = await lazyMitreConfiguration();
+        setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+        setTechniquesOptions(mitreConfig.techniquesOptions);
+        setTacticsOptions(mitreConfig.tacticsOptions);
+      }
+      getMitre();
+    }, []);
     return [
       {
         title: label,
