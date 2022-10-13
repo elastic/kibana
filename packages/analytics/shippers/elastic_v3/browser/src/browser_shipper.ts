@@ -87,6 +87,19 @@ export class ElasticV3BrowserShipper implements IShipper {
    * @param events batched events {@link Event}
    */
   public reportEvents(events: Event[]) {
+    const performanceEvents = events.filter((e) => {
+      return e.event_type === 'performance_metric';
+    });
+
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      // @ts-ignore
+      console.error(`[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${
+        events.length
+      } performance events - ${eventNames.join(',')}`);
+    }
+
+
     events.forEach((event) => {
       this.internalQueue$.next(event);
     });
@@ -97,6 +110,8 @@ export class ElasticV3BrowserShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
+    // @ts-ignore
+    console.error('shutdown');
     this.internalQueue$.complete(); // NOTE: When completing the observable, the buffer logic does not wait and releases any buffered events.
   }
 
@@ -131,6 +146,10 @@ export class ElasticV3BrowserShipper implements IShipper {
 
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      // @ts-ignore
+      console.error(`[${ElasticV3BrowserShipper.shipperName}]: sending ${
+        events.length
+      } performance events - ${eventNames.join(',')}`);
       this.initContext.logger.debug(
         `[${ElasticV3BrowserShipper.shipperName}]: sending ${
           events.length
@@ -148,6 +167,9 @@ export class ElasticV3BrowserShipper implements IShipper {
     });
 
     if (performanceEvents.length > 0) {
+      // @ts-ignore
+      console.error(
+        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`);
       this.initContext.logger.debug(
         `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`
       );
