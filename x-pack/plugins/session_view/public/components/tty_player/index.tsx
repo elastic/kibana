@@ -59,6 +59,7 @@ export const TTYPlayer = ({
   const { lines, processStartMarkers } = useIOLines(data?.pages);
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentAutoSeekEntityId, setCurrentAutoSeekEntityId] = useState('');
   const { getUrlForApp } = useKibana<CoreStart>().services.application;
   const policiesUrl = useMemo(
@@ -128,11 +129,18 @@ export const TTYPlayer = ({
 
   const styles = useStyles(tty, show);
 
+  const clearSearch = useCallback(() => {
+    if (searchQuery) {
+      setSearchQuery('');
+    }
+  }, [searchQuery]);
+
   const onSeekLine = useMemo(() => {
     return throttle((line: number) => {
+      clearSearch();
       seekToLine(line);
     }, 100);
-  }, [seekToLine]);
+  }, [clearSearch, seekToLine]);
 
   const onTogglePlayback = useCallback(() => {
     // if at the end, seek to beginning
@@ -141,6 +149,12 @@ export const TTYPlayer = ({
     }
     setIsPlaying(!isPlaying);
   }, [currentLine, isPlaying, lines.length, seekToLine]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      clearSearch();
+    }
+  }, [clearSearch, isPlaying]);
 
   return (
     <div css={styles.container}>
@@ -155,6 +169,9 @@ export const TTYPlayer = ({
               seekToLine={seekToLine}
               xTermSearchFn={search}
               setIsPlaying={setIsPlaying}
+              currentLine={currentLine}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
             />
           </EuiFlexItem>
 

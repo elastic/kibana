@@ -9,15 +9,14 @@ import { i18n } from '@kbn/i18n';
 export const PROCESS_DATA_LIMIT_EXCEEDED = i18n.translate(
   'xpack.sessionView.processDataLimitExceeded',
   {
-    defaultMessage: '  ⚠  Data limit reached for process',
+    defaultMessage: '  ⚠  Data limit reached for',
   }
 );
 
 export const PROCESS_DATA_LIMIT_EXCEEDED_2 = i18n.translate(
   'xpack.sessionView.processDataLimitExceeded2',
   {
-    defaultMessage:
-      'See: "linux.advanced.tty_io.max_kilobytes_per_process" advanced policy configuration.',
+    defaultMessage: 'See "max_kilobytes_per_process" in advanced policy configuration.',
   }
 );
 

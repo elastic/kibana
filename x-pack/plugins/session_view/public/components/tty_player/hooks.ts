@@ -247,9 +247,7 @@ export const useXtermPlayer = ({
           )}G\x1b[1m\x1b]8;;${policiesUrl}\x1b\\[ ${VIEW_POLICIES} ]\x1b]8;;\x1b\\\x1b[22m`
         : '';
 
-      return `\n\n\x1b[33m${lineBreak}\n${message}${link}\n${lineBreak}\x1b[0m
-
-`;
+      return `\n\x1b[33m${lineBreak}\n${message}${link}\n${lineBreak}\x1b[0m\n\n`;
     }
   }, [policiesUrl, processName, tty?.columns]);
 
@@ -286,7 +284,7 @@ export const useXtermPlayer = ({
         // if next line is start of next event
         // and process has exceeded max bytes
         // render msg
-        if ((!nextLine || nextLine.event !== line.event) && maxBytesExceeded) {
+        if (!clear && (!nextLine || nextLine.event !== line.event) && maxBytesExceeded) {
           const msg = renderTruncatedMsg();
           if (msg) {
             terminal.write(msg);
