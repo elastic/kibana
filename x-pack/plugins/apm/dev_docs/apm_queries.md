@@ -222,6 +222,57 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 }
 ```
 
+# Transactions in service inventory page
+
+A new aggregated metric document introduced and holds latency and throughput metrics pivoted by `service.name+service.environment+transaction.type`
+
+The decision to use service metrics aggregation or not is determined in [getServiceInventorySearchSource](https://github.com/elastic/kibana/blob/5d585ea375be551a169a0bea49b011819b9ac669/x-pack/plugins/apm/server/lib/helpers/get_service_inventory_search_source.ts#L12) and [getSearchServiceMetrics](https://github.com/elastic/kibana/blob/5d585ea375be551a169a0bea49b011819b9ac669/x-pack/plugins/apm/server/lib/helpers/service_metrics/index.ts#L38)
+
+A pre-aggregated document where `_doc_count` is the number of transaction events
+
+```
+{
+  "_doc_count": 2,
+  "@timestamp": "2021-09-01T10:00:00.000Z",
+  "processor.event": "metric",
+  "metricset.name": "service",
+  "service": {
+    "environment": "production",
+    "name": "web-go"
+  },
+  "transaction": {
+    "duration.summary": {
+        "sum": 376492831,
+        "value_count": 775
+    },
+    "success_count": 476,
+    "failure_count": 151,
+    "type": "request"
+  }
+}
+```
+
+- `_doc_count` is the number of bucket counts
+- `transaction.duration.summary` is an [aggregate_metric_double](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/aggregate-metric-double.html) field and holds an aggregated transaction duration summary, for service metrics
+- `failure_count` holds an aggregated count of transactions with the outcome "failure"
+- `success_count` holds an aggregated count of transactions with the outcome "success"
+
+### Latency
+
+```
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "metricset.name": "service" } }]
+    }
+  },
+  "aggs": {
+    "latency": { "avg": { "field": "transaction.duration.summary" }}
+  }
+}
+```
+
 # System metrics
 
 System metrics are captured periodically (every 60 seconds by default). You can find all the System Metrics fields [here](https://www.elastic.co/guide/en/apm/server/current/exported-fields-system.html).
