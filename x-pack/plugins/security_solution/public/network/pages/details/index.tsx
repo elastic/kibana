@@ -101,7 +101,9 @@ const NetworkDetailsComponent: React.FC = () => {
   }, [detailName, dispatch]);
 
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+
   const ip = decodeIpv6(detailName);
+  const networkDetailsFilter = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -109,14 +111,14 @@ const NetworkDetailsComponent: React.FC = () => {
         buildEsQuery(
           indexPattern,
           [query],
-          [...getNetworkDetailsPageFilter(ip), ...globalFilters],
+          [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
         ),
       ];
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, indexPattern, ip, query, uiSettings]);
+  }, [globalFilters, indexPattern, ip, networkDetailsFilter, query, uiSettings]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -241,6 +243,7 @@ const NetworkDetailsComponent: React.FC = () => {
               setQuery={setQuery}
               indexPattern={indexPattern}
               flowTarget={flowTarget}
+              networkDetailsFilter={networkDetailsFilter}
             />
           </SecuritySolutionPageWrapper>
         </>
