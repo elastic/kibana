@@ -19,8 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const remoteEs = getService('remoteEs' as 'es');
-  const localEs = getService('es');
-  const log = getService('log');
 
   describe('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
