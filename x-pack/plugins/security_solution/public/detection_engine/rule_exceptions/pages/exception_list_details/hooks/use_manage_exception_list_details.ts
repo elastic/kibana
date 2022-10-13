@@ -33,14 +33,14 @@ export const useManageExceptionListDetails = ({
             list_id: list.list_id,
             type: list.type,
             name: listDetails.name,
-            description: listDetails.description,
+            description: listDetails.description || list.description,
           },
         });
       } catch (error) {
         handleErrorStatus(error);
       }
     },
-    [handleErrorStatus, http, list.id, list.list_id, list.type]
+    [handleErrorStatus, http, list.description, list.id, list.list_id, list.type]
   );
   const onExportList = useCallback(async () => {
     try {
