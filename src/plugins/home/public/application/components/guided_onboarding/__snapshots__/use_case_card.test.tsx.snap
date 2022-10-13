@@ -9,8 +9,8 @@ exports[`use case card should render use case card component for observability 1
   }
   description={
     <EuiText
-      color="subdued"
-      size="xs"
+      size="s"
+      textAlign="center"
     >
       <p>
         testDescription
@@ -31,15 +31,15 @@ exports[`use case card should render use case card component for observability 1
   }
   textAlign="left"
   title={
-    <EuiTitle
-      size="xs"
+    <EuiText
+      textAlign="center"
     >
       <h4>
         <strong>
           testTitle
         </strong>
       </h4>
-    </EuiTitle>
+    </EuiText>
   }
 />
 `;
@@ -53,8 +53,8 @@ exports[`use case card should render use case card component for search 1`] = `
   }
   description={
     <EuiText
-      color="subdued"
-      size="xs"
+      size="s"
+      textAlign="center"
     >
       <p>
         testDescription
@@ -75,15 +75,15 @@ exports[`use case card should render use case card component for search 1`] = `
   }
   textAlign="left"
   title={
-    <EuiTitle
-      size="xs"
+    <EuiText
+      textAlign="center"
     >
       <h4>
         <strong>
           testTitle
         </strong>
       </h4>
-    </EuiTitle>
+    </EuiText>
   }
 />
 `;
@@ -97,8 +97,8 @@ exports[`use case card should render use case card component for security 1`] = 
   }
   description={
     <EuiText
-      color="subdued"
-      size="xs"
+      size="s"
+      textAlign="center"
     >
       <p>
         testDescription
@@ -119,15 +119,15 @@ exports[`use case card should render use case card component for security 1`] = 
   }
   textAlign="left"
   title={
-    <EuiTitle
-      size="xs"
+    <EuiText
+      textAlign="center"
     >
       <h4>
         <strong>
           testTitle
         </strong>
       </h4>
-    </EuiTitle>
+    </EuiText>
   }
 />
 `;

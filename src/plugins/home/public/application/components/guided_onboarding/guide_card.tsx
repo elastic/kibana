@@ -80,27 +80,25 @@ const getCardFooter = (
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     // TODO error handling
   };
+  const viewGuideButton = (
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          // Used for FS tracking
+          data-test-subj={`onboarding--guideCard--view--${useCase}`}
+          fill
+          onClick={activateGuide}
+        >
+          {i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel', {
+            defaultMessage: 'View guide',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
   // guide has not started yet
   if (!guideState || guideState.status === 'not_started') {
-    return (
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            // Used for FS tracking
-            data-test-subj={`onboarding--guideCard--view--${useCase}`}
-            fill
-            onClick={activateGuide}
-          >
-            {i18n.translate(
-              'home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel',
-              {
-                defaultMessage: 'View guide',
-              }
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return viewGuideButton;
   }
   const numberSteps = guideState.steps.length;
   const numberCompleteSteps = guideState.steps.filter((step) => step.status === 'complete').length;
@@ -113,18 +111,38 @@ const getCardFooter = (
   // guide is completed
   if (guideState.status === 'complete') {
     return (
-      <EuiProgress
-        valueText={stepsLabel}
-        value={numberCompleteSteps}
-        max={numberSteps}
-        size="s"
-        label={i18n.translate(
-          'home.guidedOnboarding.gettingStarted.guideCard.progress.completedLabel',
-          {
-            defaultMessage: 'Completed',
-          }
-        )}
-      />
+      <>
+        <EuiProgress
+          valueText={stepsLabel}
+          value={numberCompleteSteps}
+          max={numberSteps}
+          size="s"
+          label={i18n.translate(
+            'home.guidedOnboarding.gettingStarted.guideCard.progress.completedLabel',
+            {
+              defaultMessage: 'Completed',
+            }
+          )}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              // Used for FS tracking
+              data-test-subj={`onboarding--guideCard--view--${useCase}`}
+              fill
+              onClick={activateGuide}
+            >
+              {i18n.translate(
+                'home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel',
+                {
+                  defaultMessage: 'View guide',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
   // guide is in progress or ready to complete
