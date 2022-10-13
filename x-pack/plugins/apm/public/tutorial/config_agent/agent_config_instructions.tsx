@@ -6,20 +6,13 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
-import {
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiBasicTable,
-  EuiText,
-  EuiBasicTableColumn,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { OpenTelemetryInstructions } from './opentelemetry_instructions';
 import {
   getApmAgentCommands,
   getApmAgentVariables,
 } from './commands/get_apm_agent_commands';
-import { i18n } from '@kbn/i18n';
+import { AgentConfigurationTable } from './agent_config_table';
 
 export function AgentConfigInstructions({
   variantId,
@@ -72,32 +65,4 @@ export function AgentConfigInstructions({
       </EuiCodeBlock>
     </>
   );
-}
-
-// TODO move it seperatly and fix types
-function AgentConfigurationTable({ variables, data }) {
-  if (!variables) return null;
-
-  const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
-    {
-      field: 'setting',
-      name: i18n.translate('xpack.apm.tutorial.agent.column.configSettings', {
-        defaultMessage: 'Configuration setting',
-      }),
-    },
-    {
-      field: 'value',
-      name: i18n.translate('xpack.apm.tutorial.agent.column.configValue', {
-        defaultMessage: 'Configuration value',
-      }),
-      render: (_, { value }) => <EuiText color="accent">{value}</EuiText>,
-    },
-  ];
-
-  const items = Object.keys(variables).map((k) => ({
-    setting: variables[k],
-    value: get(data, k), // TODO do we want default values?
-  }));
-
-  return <EuiBasicTable items={items} columns={columns}></EuiBasicTable>;
 }

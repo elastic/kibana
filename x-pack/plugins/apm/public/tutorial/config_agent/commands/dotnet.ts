@@ -16,6 +16,6 @@ export const dotnet = `{
     "${dotnetVariables.apmServiceName}": "{{{apmServiceName}}}", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
     "${dotnetVariables.secretToken}": "{{{secretToken}}}",
     "${dotnetVariables.apmServerUrl}": "{{{apmServerUrl}}}", //Set custom APM Server URL (default: http://localhost:8200)
-    "${dotnetVariables.apmEnvironment}": "{{{apmEnvironement}}}", // Set the service environment
+    "${dotnetVariables.apmEnvironment}": "{{{apmEnvironment}}}", // Set the service environment
   }
 }`;

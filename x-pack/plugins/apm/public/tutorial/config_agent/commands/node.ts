@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const nodeVariables = {
   apmServiceName: 'serviceName',
   secretToken: 'secretToken',
-  apmServerUrl: 'secretUrl',
+  apmServerUrl: 'serverUrl',
   apmEnvironment: 'environment',
 };
 
