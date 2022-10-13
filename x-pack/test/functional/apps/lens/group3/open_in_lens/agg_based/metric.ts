@@ -82,5 +82,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       ]);
     });
+
+    it('should convert sibling pipeline aggregation', async () => {
+      await visEditor.clickMetricEditor();
+      await visEditor.selectAggregation('Max Bucket', 'metrics');
+      await visEditor.clickGo();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('mtrVis');
+
+      expect(await lens.getLayerCount()).to.be(1);
+
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      expect(dimensions).to.have.length(2);
+      expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
+      expect(await dimensions[1].getVisibleText()).to.be('@timestamp');
+
+      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
+      expect(await lens.getMetricVisualizationData()).to.eql([
+        {
+          title: 'Overall Max of Count',
+          subtitle: undefined,
+          extraText: '',
+          value: '1.44K',
+          color: 'rgba(245, 247, 250, 1)',
+          showingBar: false,
+        },
+      ]);
+    });
   });
 }
