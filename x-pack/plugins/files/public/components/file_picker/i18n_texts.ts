@@ -20,7 +20,7 @@ export const i18nTexts = {
   emptyStatePrompt: i18n.translate('xpack.files.filePicker.emptyStatePrompt', {
     defaultMessage: 'No files found',
   }),
-  emptyStatePromptSubtitle: i18n.translate('xpack.files.filePicker.emptyStatePrompt', {
+  emptyStatePromptSubtitle: i18n.translate('xpack.files.filePicker.emptyStatePromptSubtitle', {
     defaultMessage: 'Upload your first file.',
   }),
   selectFileLabel: i18n.translate('xpack.files.filePicker.selectFileButtonLable', {
