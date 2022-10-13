@@ -674,7 +674,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.notFound).toBeCalled();
       const message = mockResponse.notFound.mock.calls[0][0]?.body;
@@ -706,7 +705,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
@@ -741,7 +739,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
@@ -778,7 +775,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
@@ -814,7 +810,37 @@ describe('test endpoint routes', () => {
       expect(mockResponse.badRequest).toBeCalled();
     });
 
-    it('should get forbidden if no security solution access', async () => {
+    it('should work if no security solution access but has fleet access', async () => {
+      const response = legacyMetadataSearchResponseMock(
+        new EndpointDocGenerator().generateHostMetadata()
+      );
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: response.hits.hits[0]._id },
+      });
+      const esSearchMock = mockScopedClient.asInternalUser.search;
+
+      mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
+      esSearchMock.mockResponseOnce(response);
+
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith(HOST_METADATA_GET_ROUTE)
+      )!;
+
+      const contextOverrides = {
+        endpointAuthz: getEndpointAuthzInitialStateMock({
+          canReadSecuritySolution: false,
+        }),
+      };
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toBeCalled();
+    });
+
+    it('should get forbidden if no security solution or fleet access', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -822,7 +848,10 @@ describe('test endpoint routes', () => {
       )!;
 
       const contextOverrides = {
-        endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
+        endpointAuthz: getEndpointAuthzInitialStateMock({
+          canAccessFleet: false,
+          canReadSecuritySolution: false,
+        }),
       };
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
