@@ -6,11 +6,11 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 import {
   createMockedIndexPattern,
   createMockedRestrictedIndexPattern,
-} from '../indexpattern_datasource/mocks';
+} from '../datasources/form_based/mocks';
 import { DataViewsState } from '../state_management';
 import { ExistingFieldsMap, IndexPattern } from '../types';
 import { getFieldByNameFactory } from './loader';

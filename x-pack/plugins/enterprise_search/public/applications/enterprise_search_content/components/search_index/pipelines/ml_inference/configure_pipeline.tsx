@@ -22,10 +22,30 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { MLInferenceLogic } from './ml_inference_logic';
+
+const NoSourceFieldsError: React.FC = () => (
+  <FormattedMessage
+    id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.error"
+    defaultMessage="Selecting a source field is required for pipeline configuration, but this index does not have a field mapping. {learnMore}"
+    values={{
+      learnMore: (
+        <EuiLink href={docLinks.elasticsearchMapping} target="_blank" color="danger">
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.error.docLink',
+            { defaultMessage: 'Learn more about field mapping' }
+          )}
+        </EuiLink>
+      ),
+    }}
+  />
+);
 
 export const ConfigurePipeline: React.FC = () => {
   const {
@@ -35,10 +55,12 @@ export const ConfigurePipeline: React.FC = () => {
     sourceFields,
   } = useValues(MLInferenceLogic);
   const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
   const models = supportedMLModels ?? [];
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
+  const emptySourceFields = (sourceFields?.length ?? 0) === 0;
 
   return (
     <>
@@ -85,6 +107,7 @@ export const ConfigurePipeline: React.FC = () => {
           isInvalid={nameError}
         >
           <EuiFieldText
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
             fullWidth
             placeholder={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
@@ -112,6 +135,7 @@ export const ConfigurePipeline: React.FC = () => {
           fullWidth
         >
           <EuiSelect
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
             fullWidth
             value={modelID}
             options={[
@@ -143,8 +167,11 @@ export const ConfigurePipeline: React.FC = () => {
                   defaultMessage: 'Source field',
                 }
               )}
+              error={emptySourceFields && <NoSourceFieldsError />}
+              isInvalid={emptySourceFields}
             >
               <EuiSelect
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
                 value={sourceField}
                 options={[
                   {
@@ -194,6 +221,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={formErrors.destinationField !== undefined}
             >
               <EuiFieldText
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-destionationField`}
                 placeholder="custom_field_name"
                 value={destinationField}
                 onChange={(e) =>

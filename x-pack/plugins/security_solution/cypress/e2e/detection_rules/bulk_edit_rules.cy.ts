@@ -94,13 +94,13 @@ import {
   getNewThreatIndicatorRule,
   getNewRule,
   getNewThresholdRule,
-  totalNumberOfPrebuiltRules,
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../objects/rule';
 import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
+import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -189,7 +189,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+      });
 
       // user can proceed with custom rule editing
       cy.get(MODAL_CONFIRMATION_BTN)
@@ -210,7 +212,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+      });
 
       // user cancels action and modal disappears
       cancelConfirmationModal();
