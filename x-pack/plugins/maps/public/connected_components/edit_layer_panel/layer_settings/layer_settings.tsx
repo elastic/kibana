@@ -26,6 +26,7 @@ import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../../classes/layers/vector_layer';
 import { AttributionFormRow } from './attribution_form_row';
+import { isLayerGroup } from '../../../classes/layers/layer_group';
 
 export interface Props {
   layer: ILayer;
@@ -87,7 +88,7 @@ export function LayerSettings(props: Props) {
   };
 
   const renderIncludeInFitToBounds = () => {
-    if (!props.supportsFitToBounds) {
+    if (!props.supportsFitToBounds || isLayerGroup(props.layer)) {
       return null;
     }
     return (
@@ -113,7 +114,7 @@ export function LayerSettings(props: Props) {
   };
 
   const renderZoomSliders = () => {
-    return (
+    return isLayerGroup(props.layer) ? null : (
       <ValidatedDualRange
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
           defaultMessage: 'Visibility',
@@ -256,10 +257,14 @@ export function LayerSettings(props: Props) {
         <EuiSpacer size="m" />
         {renderLabel()}
         {renderZoomSliders()}
-        <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
+        {isLayerGroup(props.layer) ? null : (
+          <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
+        )}
         {renderShowLabelsOnTop()}
         {renderShowLocaleSelector()}
-        <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        {isLayerGroup(props.layer) ? null : (
+          <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        )}
         {renderIncludeInFitToBounds()}
         {renderDisableTooltips()}
       </EuiPanel>

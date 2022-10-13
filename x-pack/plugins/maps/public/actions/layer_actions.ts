@@ -75,6 +75,7 @@ import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
+import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -160,8 +161,12 @@ export function cloneLayer(layerId: string) {
       return;
     }
 
-    const clonedDescriptor = await layer.cloneDescriptor();
-    dispatch(addLayer(clonedDescriptor));
+    (await layer.cloneDescriptor()).forEach((layerDescriptor) => {
+      dispatch(addLayer(layerDescriptor));
+      if (layer.getParent()) {
+        dispatch(moveLayerToLeftOfTarget(layerDescriptor.id, layerId));
+      }
+    });
   };
 }
 
@@ -249,12 +254,19 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    // if the current-state is invisible, we also want to sync data
-    // e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    if (isLayerGroup(layer)) {
+      (layer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(setLayerVisibility(childLayer.getId(), makeVisible));
+      });
+    }
 
     // If the layer visibility is already what we want it to be, do nothing
-    if (!layer || layer.isVisible() === makeVisible) {
+    if (layer.isVisible() === makeVisible) {
       return;
     }
 
@@ -263,6 +275,9 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       layerId,
       visibility: makeVisible,
     });
+
+    // if the current-state is invisible, we also want to sync data
+    // e.g. if a layer was invisible at start-up, it won't have any data loaded
     if (makeVisible) {
       dispatch(syncDataForLayerId(layerId, false));
     }
@@ -290,7 +305,7 @@ export function hideAllLayers() {
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (layer.isVisible() && !layer.isBasemap(index)) {
+      if (!layer.isBasemap(index)) {
         dispatch(setLayerVisibility(layer.getId(), false));
       }
     });
@@ -303,9 +318,7 @@ export function showAllLayers() {
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (!layer.isVisible()) {
-        dispatch(setLayerVisibility(layer.getId(), true));
-      }
+      dispatch(setLayerVisibility(layer.getId(), true));
     });
   };
 }
@@ -316,23 +329,20 @@ export function showThisLayerOnly(layerId: string) {
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (layer.isBasemap(index)) {
-        return;
-      }
-
-      // show target layer
-      if (layer.getId() === layerId) {
-        if (!layer.isVisible()) {
-          dispatch(setLayerVisibility(layerId, true));
-        }
+      if (layer.isBasemap(index) || layer.getId() === layerId) {
         return;
       }
 
       // hide all other layers
-      if (layer.isVisible()) {
-        dispatch(setLayerVisibility(layer.getId(), false));
-      }
+      dispatch(setLayerVisibility(layer.getId(), false));
     });
+
+    // show target layer after hiding all other layers
+    // since hiding layer group will hide its children
+    const targetLayer = getLayerById(layerId, getState());
+    if (targetLayer) {
+      dispatch(setLayerVisibility(layerId, true));
+    }
   };
 }
 
@@ -602,6 +612,15 @@ export function setLayerQuery(id: string, query: Query) {
   };
 }
 
+export function setLayerParent(id: string, parent: string | undefined) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'parent',
+    newValue: parent,
+  };
+}
+
 export function removeSelectedLayer() {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -656,6 +675,12 @@ function removeLayerFromLayerList(layerId: string) {
     const openTOCDetails = getOpenTOCDetails(getState());
     if (openTOCDetails.includes(layerId)) {
       dispatch(hideTOCDetails(layerId));
+    }
+
+    if (isLayerGroup(layerGettingRemoved)) {
+      (layerGettingRemoved as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(removeLayerFromLayerList(childLayer.getId()));
+      });
     }
   };
 }
@@ -786,7 +811,7 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
 }
 
 function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
-  if (!layer.getSource().isESSource()) {
+  if (isLayerGroup(layer) || !layer.getSource().isESSource()) {
     return;
   }
 
@@ -810,4 +835,94 @@ function hasByValueStyling(styleDescriptor: StyleDescriptor) {
       return (styleProperty as { type?: STYLE_TYPE })?.type === STYLE_TYPE.DYNAMIC;
     })
   );
+}
+
+export function createLayerGroup(draggedLayerId: string, combineLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const group = LayerGroup.createDescriptor({});
+    const combineLayerDescriptor = getLayerDescriptor(getState(), combineLayerId);
+    if (combineLayerDescriptor?.parent) {
+      group.parent = combineLayerDescriptor.parent;
+    }
+    dispatch({
+      type: ADD_LAYER,
+      layer: group,
+    });
+    // Move group to left of combine-layer
+    dispatch(moveLayerToLeftOfTarget(group.id, combineLayerId));
+
+    dispatch(showTOCDetails(group.id));
+    dispatch(setLayerParent(draggedLayerId, group.id));
+    dispatch(setLayerParent(combineLayerId, group.id));
+
+    // Move dragged-layer to left of combine-layer
+    dispatch(moveLayerToLeftOfTarget(draggedLayerId, combineLayerId));
+  };
+}
+
+export function moveLayerToLeftOfTarget(moveLayerId: string, targetLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layers = getLayerList(getState());
+    const moveLayerIndex = layers.findIndex((layer) => layer.getId() === moveLayerId);
+    const targetLayerIndex = layers.findIndex((layer) => layer.getId() === targetLayerId);
+    if (moveLayerIndex === -1 || targetLayerIndex === -1) {
+      return;
+    }
+    const moveLayer = layers[moveLayerIndex];
+
+    const newIndex =
+      moveLayerIndex > targetLayerIndex
+        ? // When layer is moved to the right, new left sibling index is to the left of destination
+          targetLayerIndex + 1
+        : // When layer is moved to the left, new left sibling index is the destination index
+          targetLayerIndex;
+    const newOrder = [];
+    for (let i = 0; i < layers.length; i++) {
+      newOrder.push(i);
+    }
+    newOrder.splice(moveLayerIndex, 1);
+    newOrder.splice(newIndex, 0, moveLayerIndex);
+    dispatch(updateLayerOrder(newOrder));
+
+    if (isLayerGroup(moveLayer)) {
+      (moveLayer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(moveLayerToLeftOfTarget(childLayer.getId(), targetLayerId));
+      });
+    }
+  };
+}
+
+export function moveLayerToBottom(moveLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layers = getLayerList(getState());
+    const moveLayerIndex = layers.findIndex((layer) => layer.getId() === moveLayerId);
+    if (moveLayerIndex === -1) {
+      return;
+    }
+    const moveLayer = layers[moveLayerIndex];
+
+    const newIndex = 0;
+    const newOrder = [];
+    for (let i = 0; i < layers.length; i++) {
+      newOrder.push(i);
+    }
+    newOrder.splice(moveLayerIndex, 1);
+    newOrder.splice(newIndex, 0, moveLayerIndex);
+    dispatch(updateLayerOrder(newOrder));
+
+    if (isLayerGroup(moveLayer)) {
+      (moveLayer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(moveLayerToBottom(childLayer.getId()));
+      });
+    }
+  };
 }
