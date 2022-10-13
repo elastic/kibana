@@ -176,102 +176,6 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
-<<<<<<< HEAD
-=======
-  describe('updateGuideState', () => {
-    it('sends a request to the put API', async () => {
-      const updatedState: GuideState = testGuideStep1InProgressState;
-      await apiService.updateGuideState(updatedState, false);
-      expect(httpClient.put).toHaveBeenCalledTimes(1);
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(updatedState),
-      });
-    });
-
-    it('the completed state is being broadcast after the update', async () => {
-      const completedState = {
-        ...readyToCompleteGuideState,
-        isActive: false,
-        status: 'complete' as GuideStatus,
-      };
-      await apiService.updateGuideState(completedState, false);
-      const state = await firstValueFrom(apiService.fetchActiveGuideState$());
-      expect(state).toMatchObject(completedState);
-    });
-  });
-
-  describe('isGuideStepActive$', () => {
-    it('returns true if the step has been started', (done) => {
-      httpClient.get.mockResolvedValueOnce({
-        state: [testGuideStep1InProgressState],
-      });
-
-      subscription = apiService
-        .isGuideStepActive$(testGuide, testGuideFirstStep)
-        .subscribe((isStepActive) => {
-          if (isStepActive) {
-            subscription.unsubscribe();
-            done();
-          }
-        });
-    });
-
-    it('returns false if the step is not been started', (done) => {
-      subscription = apiService
-        .isGuideStepActive$(testGuide, testGuideFirstStep)
-        .subscribe((isStepActive) => {
-          if (!isStepActive) {
-            subscription.unsubscribe();
-            done();
-          }
-        });
-    });
-
-    it(`doesn't duplicate requests when there are several subscriptions and no guide state`, async () => {
-      httpClient.get.mockResolvedValue({
-        state: [],
-      });
-      apiService.setup(httpClient);
-
-      subscription = apiService.isGuideStepActive$(testGuide, testGuideFirstStep).subscribe();
-
-      // wait for the get request to resolve
-      await new Promise((resolve) => process.nextTick(resolve));
-      anotherSubscription = apiService
-        .isGuideStepActive$(testGuide, testGuideFirstStep)
-        .subscribe();
-
-      expect(httpClient.get).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('activateGuide', () => {
-    it('activates a new guide', async () => {
-      // update the mock to no active guides
-      httpClient.get.mockResolvedValue({
-        state: [],
-      });
-      apiService.setup(httpClient);
-
-      await apiService.activateGuide(testGuide);
-
-      expect(httpClient.put).toHaveBeenCalledTimes(1);
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({ ...testGuideStep1ActiveState, status: 'not_started' }),
-      });
-    });
-
-    it('reactivates a guide that has already been started', async () => {
-      await apiService.activateGuide(testGuide, testGuideStep1ActiveState);
-
-      expect(httpClient.put).toHaveBeenCalledTimes(1);
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(testGuideStep1ActiveState),
-      });
-    });
-  });
-
->>>>>>> d56f49d834e (Upgrade to Jest 28)
   describe('completeGuide', () => {
     beforeEach(async () => {
       httpClient.get.mockResolvedValue({
@@ -351,6 +255,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (isStepActive) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -361,6 +266,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (!isStepActive) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -504,6 +410,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (isIntegrationInGuideStep) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -518,6 +425,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuidedOnboardingActiveForIntegration$(wrongIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (!isIntegrationInGuideStep) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -532,6 +440,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (!isIntegrationInGuideStep) {
+            subscription.unsubscribe();
             done();
           }
         });

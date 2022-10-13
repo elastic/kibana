@@ -51,6 +51,11 @@ jest.mock('../storage', () => ({
 
 describe('useMlNotifications', () => {
   beforeEach(() => {
+    // Set mocks to the default values
+    (useMlKibana as jest.MockedFunction<typeof useMlKibana>).mockReturnValue(
+      mockKibana as unknown as ReturnType<typeof useMlKibana>
+    );
+
     jest.useFakeTimers();
     jest.setSystemTime(1663945337063);
   });
