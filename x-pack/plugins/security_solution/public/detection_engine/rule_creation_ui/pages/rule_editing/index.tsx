@@ -96,7 +96,7 @@ const EditRulePageComponent: FC = () => {
   const { data: dataServices } = useKibana().services;
   const { navigateToApp } = useKibana().services.application;
 
-  const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
+  const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { data: rule, isLoading: ruleLoading } = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 

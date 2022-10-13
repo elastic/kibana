@@ -20,8 +20,10 @@ import { getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks
 
 jest.mock('../../rule_management/logic/crud/patch_rules');
 
-jest.mock('../../rules/utils', () => {
-  const actual = jest.requireActual('../../rules/utils');
+jest.mock('../../rule_management/logic/rule_actions/legacy_action_migration', () => {
+  const actual = jest.requireActual(
+    '../../rule_management/logic/rule_actions/legacy_action_migration'
+  );
   return {
     ...actual,
     legacyMigrate: jest.fn(),

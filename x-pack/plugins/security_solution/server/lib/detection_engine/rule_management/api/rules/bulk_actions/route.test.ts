@@ -37,8 +37,8 @@ import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
 
-jest.mock('../../../../rules/utils', () => {
-  const actual = jest.requireActual('../../../../rules/utils');
+jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
+  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
   return {
     ...actual,
     legacyMigrate: jest.fn(),

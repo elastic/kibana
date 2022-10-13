@@ -37,12 +37,11 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../../logic/use_add_exception');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../rule_management/logic/use_rule_async');
+jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
@@ -222,8 +221,8 @@ describe('When the edit exception modal is opened', () => {
   describe('when an exception assigned to a sequence eql rule type is passed', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      (useRuleAsync as jest.Mock).mockImplementation(() => ({
-        rule: {
+      (useRule as jest.Mock).mockImplementation(() => ({
+        data: {
           ...getRulesEqlSchemaMock(),
           query:
             'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',

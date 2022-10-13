@@ -12,7 +12,10 @@ export { legacyRulesNotificationAlertType } from './logic/notifications/legacy_r
 // eslint-disable-next-line no-restricted-imports
 export { legacyIsNotificationAlertExecutor } from './logic/notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
-export type { LegacyRuleNotificationAlertType } from './logic/notifications/legacy_types';
+export type {
+  LegacyRuleNotificationAlertType,
+  LegacyRuleNotificationAlertTypeParams,
+} from './logic/notifications/legacy_types';
 export type { NotificationRuleTypeParams } from './logic/notifications/schedule_notification_actions';
 export { scheduleNotificationActions } from './logic/notifications/schedule_notification_actions';
 export { scheduleThrottledNotificationActions } from './logic/notifications/schedule_throttle_notification_actions';

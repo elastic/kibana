@@ -26,7 +26,7 @@ import type {
 import { useFetchOrCreateRuleExceptionList } from './use_fetch_or_create_rule_exception_list';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-jest.mock('../../../detections/containers/detection_engine/rules/api');
+jest.mock('../../rule_management/api/api');
 jest.mock('@kbn/securitysolution-list-api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {

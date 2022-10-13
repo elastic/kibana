@@ -21,10 +21,7 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 
 import type { Rule } from '../../rule_management/logic/types';
-import {
-  fetchRuleById,
-  patchRule,
-} from '../../rule_management/api/api';
+import { fetchRuleById, patchRule } from '../../rule_management/api/api';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
 

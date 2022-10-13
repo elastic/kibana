@@ -49,17 +49,8 @@ jest.mock('../../../../common/components/query_bar', () => ({
 jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../detections/components/user_info');
-jest.mock('../../../../detections/containers/detection_engine/rules', () => {
-  const original = jest.requireActual('../../../../detections/containers/detection_engine/rules');
-  return {
-    ...original,
-    useRuleStatus: jest.fn(),
-  };
-});
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
-  const original = jest.requireActual(
-    '../../../../detections/containers/detection_engine/rules/use_rule_with_fallback'
-  );
+jest.mock('../../../rule_management/logic/use_rule_with_fallback', () => {
+  const original = jest.requireActual('../../../rule_management/logic/use_rule_with_fallback');
   return {
     ...original,
     useRuleWithFallback: jest.fn(),

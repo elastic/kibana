@@ -43,7 +43,7 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
-jest.mock('../../../containers/detection_engine/rules/api', () => ({
+jest.mock('../../../../detection_engine/rule_management/api/api', () => ({
   getPrePackagedRulesStatus: jest.fn().mockResolvedValue({
     rules_not_installed: 0,
     rules_installed: 0,
