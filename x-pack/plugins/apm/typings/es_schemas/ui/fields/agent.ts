@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-export type ElasticAgentName =
-  | 'go'
-  | 'java'
-  | 'js-base'
-  | 'iOS/swift'
-  | 'rum-js'
-  | 'nodejs'
-  | 'python'
-  | 'dotnet'
-  | 'ruby'
-  | 'php'
-  | 'android/java';
+const elasticAgentNames = [
+  'go',
+  'java',
+  'js-base',
+  'iOS/swift',
+  'rum-js',
+  'nodejs',
+  'python',
+  'dotnet',
+  'ruby',
+  'php',
+  'android/java'
+] as const;
+
+export type ElasticAgentName = typeof elasticAgentNames[number];
+
+export const isElasticAgentName = (agentName: AgentName) =>
+  elasticAgentNames.includes(agentName as ElasticAgentName);
 
 export type OpenTelemetryAgentName =
   | 'otlp'

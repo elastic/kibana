@@ -5,25 +5,114 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { capitalize, uniqBy } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import uuid from 'uuid';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { KueryBar } from '../../shared/kuery_bar';
 import * as urlHelpers from '../../shared/links/url_helpers';
+import { AgentList } from './agent_list';
+import { orderAgentItems } from './agent_list/order_agent_items';
 import { FilterSelect } from './filter_select';
+
+const INITIAL_PAGE_SIZE = 25;
+
+function useServicesMainStatisticsFetcher() {
+	const {
+		query: {
+			environment,
+			kuery,
+			page = 0,
+			pageSize = INITIAL_PAGE_SIZE,
+			sortDirection,
+			sortField,
+		},
+	} = useApmParams('/agent-explorer');
+
+	const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
+
+	return useProgressiveFetcher(
+		(callApmApi) => {
+			if (start && end) {
+				return callApmApi('GET /internal/apm/services', {
+					params: {
+						query: {
+							environment,
+							kuery,
+							start,
+							end,
+						},
+					},
+				}).then((mainStatisticsData) => {
+					return {
+						requestId: uuid(),
+						...mainStatisticsData,
+					};
+				});
+			}
+		},
+		[
+			environment,
+			kuery,
+			start,
+			end,
+			// not used, but needed to update the requestId to call the details statistics API when table is options are updated
+			page,
+			pageSize,
+			sortField,
+			sortDirection,
+		]
+	);
+}
 
 export function AgentExplorerDetails() {
 	const history = useHistory();
-  
-  const {
-    query: { serviceName, agentLanguage },
-  } = useApmParams('/agent-explorer');
 
-	const serviceNameOptions: Array<EuiComboBoxOptionOption<string>> = [];
-	const agentLanguageOptions: Array<EuiComboBoxOptionOption<string>> = [];
+	const {
+		query: { serviceName, agentLanguage, sortField, sortDirection },
+	} = useApmParams('/agent-explorer');
+
+	const servicesReq = useServicesMainStatisticsFetcher();
+	const services = (servicesReq.data?.items ?? [])
+		.map((service) => ({
+			serviceName: service.serviceName,
+			environments: service.environments,
+			agentName: service.agentName,
+			agentVersion: '',
+			latestVersion: '',
+		}));
+
+	const isLoading = servicesReq.status === FETCH_STATUS.LOADING;
+
+	const serviceNameOptions = uniqBy(
+		services.map((service) => ({ label: service.serviceName, value: service.serviceName })),
+		'value',
+	);
+
+	const agentLanguageOptions = uniqBy(
+		services.map((service) => ({ label: capitalize(service.agentName ?? ''), value: service.agentName ?? '' })),
+		'value',
+	).filter((option) => option.label !== '');
+
+	const isFailure = servicesReq.status === FETCH_STATUS.FAILURE;
+	const noItemsMessage = (
+    <EuiEmptyPrompt
+      title={
+        <div>
+          {i18n.translate('xpack.apm.agentExplorer.notFoundLabel', {
+            defaultMessage: 'No Agents found',
+          })}
+        </div>
+      }
+      titleSize="s"
+    />
+  );
 
 	return (
 		<EuiFlexGroup direction="column" gutterSize="s">
@@ -35,7 +124,7 @@ export function AgentExplorerDetails() {
 				<EuiFlexItem grow={false}>
 					<FilterSelect
 						title={i18n.translate(
-							'xpack.apm.agentsExplorer.serviceNameSelect.label',
+							'xpack.apm.agentExplorer.serviceNameSelect.label',
 							{
 								defaultMessage: 'service.name',
 							}
@@ -43,44 +132,65 @@ export function AgentExplorerDetails() {
 						options={serviceNameOptions}
 						value={serviceName}
 						placeholder={i18n.translate(
-							'xpack.apm.agentsExplorer.serviceNameSelect.placeholder',
+							'xpack.apm.agentExplorer.serviceNameSelect.placeholder',
 							{
 								defaultMessage: 'All',
 							}
 						)}
+						isLoading={isLoading}
 						onChange={(value) => {
 							urlHelpers.push(history, {
 								query: { serviceName: value ?? '' },
 							});
 						}}
-						dataTestSubj='agentsExplorerServiceNameSelect'
+						dataTestSubj='agentExplorerServiceNameSelect'
 					/>
 				</EuiFlexItem>
 				<EuiFlexItem grow={false}>
 					<FilterSelect
 						title={i18n.translate(
-							'xpack.apm.agentsExplorer.agentLanguageSelect.label',
+							'xpack.apm.agentExplorer.agentLanguageSelect.label',
 							{
-								defaultMessage: 'agent.name',
+								defaultMessage: 'agent.language',
 							}
 						)}
 						options={agentLanguageOptions}
 						value={agentLanguage}
 						placeholder={i18n.translate(
-							'xpack.apm.agentsExplorer.agentLanguageSelect.placeholder',
+							'xpack.apm.agentExplorer.agentLanguageSelect.placeholder',
 							{
 								defaultMessage: 'All',
 							}
 						)}
+						isLoading={isLoading}
 						onChange={(value) => {
 							urlHelpers.push(history, {
 								query: { agentLanguage: value ?? '' },
 							});
 						}}
-						dataTestSubj='agentsExplorerAgentLanguageSelect'
+						dataTestSubj='agentExplorerAgentLanguageSelect'
 					/>
 				</EuiFlexItem>
 			</EuiFlexGroup>
+			<EuiSpacer />
+			<EuiFlexItem>
+				<AgentList
+					isLoading={isLoading}
+					isFailure={isFailure}
+					items={services}
+					initialSortField={sortField}
+					initialSortDirection={sortDirection}
+					sortFn={(itemsToSort, sortField, sortDirection) => {
+						return orderAgentItems({
+							items: itemsToSort,
+							primarySortField: sortField,
+							sortDirection,
+						});
+					}}
+					noItemsMessage={noItemsMessage}
+					initialPageSize={INITIAL_PAGE_SIZE}
+				/>
+			</EuiFlexItem>
 		</EuiFlexGroup>
 	);
 };
