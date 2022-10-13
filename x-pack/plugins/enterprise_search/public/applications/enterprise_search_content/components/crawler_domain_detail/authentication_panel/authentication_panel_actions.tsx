@@ -37,6 +37,7 @@ export const AuthenticationPanelActions: React.FC = () => {
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <EuiButtonEmpty
+          data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-save"
           iconType="checkInCircleFilled"
           size="s"
           color="primary"
@@ -47,6 +48,7 @@ export const AuthenticationPanelActions: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonEmpty
+          data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-cancel"
           iconType="crossInACircleFilled"
           size="s"
           color="danger"
@@ -58,6 +60,7 @@ export const AuthenticationPanelActions: React.FC = () => {
     </EuiFlexGroup>
   ) : currentAuth === null ? (
     <EuiButton
+      data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-addCredentials"
       color="success"
       iconType="plusInCircle"
       size="s"
@@ -72,6 +75,7 @@ export const AuthenticationPanelActions: React.FC = () => {
     </EuiButton>
   ) : (
     <EuiButtonEmpty
+      data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-deleteCredentials"
       color="primary"
       size="s"
       onClick={() => {

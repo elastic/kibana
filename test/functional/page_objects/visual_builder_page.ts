@@ -417,6 +417,16 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
+  public async createColorRule(nth = 0) {
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new color rule is added', async () => {
+      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
+      return currentAddButtons.length > elements.length;
+    });
+  }
+
   public async selectAggType(value: string, nth = 0) {
     const elements = await this.testSubjects.findAll('aggSelector');
     await this.comboBox.setElement(elements[nth], value);
@@ -698,16 +708,16 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setColorRuleOperator(condition: string): Promise<void> {
     await this.retry.try(async () => {
-      await this.comboBox.clearInputField('colorRuleOperator');
-      await this.comboBox.set('colorRuleOperator', condition);
+      await this.comboBox.clearLastInputField('colorRuleOperator');
+      await this.comboBox.setForLastInput('colorRuleOperator', condition);
     });
   }
 
-  public async setColorRuleValue(value: number): Promise<void> {
+  public async setColorRuleValue(value: number, nth: number = 0): Promise<void> {
     await this.retry.try(async () => {
-      const colorRuleValueInput = await this.find.byCssSelector(
-        '[data-test-subj="colorRuleValue"]'
-      );
+      const colorRuleValueInput = (
+        await this.find.allByCssSelector('[data-test-subj="colorRuleValue"]')
+      )[nth];
       await colorRuleValueInput.type(value.toString());
     });
   }
