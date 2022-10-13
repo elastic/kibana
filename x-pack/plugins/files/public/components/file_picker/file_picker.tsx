@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { useBehaviorSubject } from '../use_behavior_subject';
 import { useFilePickerContext, FilePickerContext } from './context';
@@ -69,19 +68,11 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
         {hasFiles && <SearchField />}
       </EuiModalHeader>
       {isLoading ? (
-        <EuiModalBody
-          css={css`
-            place-self: center stretch;
-          `}
-        >
+        <EuiModalBody>
           <EuiLoadingSpinner size="xl" />
         </EuiModalBody>
       ) : Boolean(error) ? (
-        <EuiModalBody
-          css={css`
-            place-self: center stretch;
-          `}
-        >
+        <EuiModalBody>
           <ErrorContent onRetry={state.loadFiles} error={error as Error} />
         </EuiModalBody>
       ) : !hasFiles ? (
