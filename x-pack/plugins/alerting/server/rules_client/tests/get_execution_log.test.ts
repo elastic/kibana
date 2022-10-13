@@ -152,6 +152,9 @@ const aggregateResults = {
                         },
                         kibana: {
                           version: '8.2.0',
+                          alerting: {
+                            outcome: 'success',
+                          },
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -255,6 +258,9 @@ const aggregateResults = {
                         },
                         kibana: {
                           version: '8.2.0',
+                          alerting: {
+                            outcome: 'success',
+                          },
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
