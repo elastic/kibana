@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
 import { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
@@ -46,21 +54,40 @@ export function DynamicSizeForm({
     });
   };
 
+  const onInvertChange = (event: EuiSwitchEvent) => {
+    onDynamicStyleChange(styleProperty.getStyleName(), {
+      ...styleOptions,
+      invert: event.target.checked,
+    });
+  };
+
   let sizeRange;
   if (styleOptions.field && styleOptions.field.name) {
     sizeRange = (
-      <SizeRangeSelector
-        onChange={onSizeRangeChange}
-        minSize={styleOptions.minSize}
-        maxSize={styleOptions.maxSize}
-        showLabels
-        compressed
-      />
+      <>
+        <SizeRangeSelector
+          onChange={onSizeRangeChange}
+          minSize={styleOptions.minSize}
+          maxSize={styleOptions.maxSize}
+          showLabels
+          compressed
+        />
+        <EuiFormRow display="columnCompressedSwitch">
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.style.revereseSizeLabel', {
+              defaultMessage: `Reverse size`,
+            })}
+            checked={!!styleOptions.invert}
+            onChange={onInvertChange}
+            compressed
+          />
+        </EuiFormRow>
+      </>
     );
   }
 
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
         <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
           {staticDynamicSelect}
@@ -77,6 +104,6 @@ export function DynamicSizeForm({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {sizeRange}
-    </Fragment>
+    </>
   );
 }

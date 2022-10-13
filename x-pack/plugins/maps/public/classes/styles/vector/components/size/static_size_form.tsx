@@ -6,9 +6,9 @@
  */
 
 import React, { ReactNode } from 'react';
-// @ts-expect-error
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+// @ts-expect-error
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { SizeStaticOptions } from '../../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../../common/constants';

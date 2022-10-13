@@ -160,7 +160,7 @@ export function DynamicColorForm({
         {!!styleOptions.useCustomColorRamp ? null : (
           <EuiFormRow display="columnCompressedSwitch">
             <EuiSwitch
-              label={i18n.translate('xpack.maps.style.revereseColors', {
+              label={i18n.translate('xpack.maps.style.revereseColorsLabel', {
                 defaultMessage: `Reverse colors`,
               })}
               checked={!!styleOptions.invert}
