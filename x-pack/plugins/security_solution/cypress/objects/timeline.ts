@@ -147,6 +147,8 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
     updated: timelineBody.updated,
     updatedBy: 'elastic',
     timelineType: 'default',
+    templateTimelineId: null,
+    templateTimelineVersion: null,
     sort: [],
     eventNotes: [],
     globalNotes: [],
