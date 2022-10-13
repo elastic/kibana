@@ -6,20 +6,20 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const PROCESS_DATA_LIMIT_EXCEEDED = i18n.translate(
-  'xpack.sessionView.processDataLimitExceeded',
+export const PROCESS_DATA_LIMIT_EXCEEDED_START = i18n.translate(
+  'xpack.sessionView.processDataLimitExceededStart',
   {
-    defaultMessage: '  ⚠  Data limit reached for',
+    defaultMessage: 'Data limit reached for',
   }
 );
 
-export const PROCESS_DATA_LIMIT_EXCEEDED_2 = i18n.translate(
-  'xpack.sessionView.processDataLimitExceeded2',
+export const PROCESS_DATA_LIMIT_EXCEEDED_END = i18n.translate(
+  'xpack.sessionView.processDataLimitExceededEnd',
   {
     defaultMessage: 'See "max_kilobytes_per_process" in advanced policy configuration.',
   }
 );
 
-export const VIEW_POLICIES = i18n.translate('xpack.sessionView.viewPolicies', {
+export const VIEW_POLICIES = i18n.translate('xpack.sessionView.viewPoliciesLink', {
   defaultMessage: 'VIEW POLICIES',
 });

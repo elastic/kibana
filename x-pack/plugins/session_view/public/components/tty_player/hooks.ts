@@ -12,6 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
+import { renderTruncatedMsg } from './ansi_helpers';
 
 import {
   IOLine,
@@ -236,21 +237,6 @@ export const useXtermPlayer = ({
     };
   }, [terminal, ref]);
 
-  const renderTruncatedMsg = useCallback(() => {
-    if (tty?.columns) {
-      const lineBreak = '-'.repeat(tty.columns);
-      const message = `${PROCESS_DATA_LIMIT_EXCEEDED} \x1b[1m${processName}.\x1b[22m ${PROCESS_DATA_LIMIT_EXCEEDED_2}`;
-      const link = policiesUrl
-        ? `\x1b[${Math.min(
-            message.length + 2,
-            tty.columns - VIEW_POLICIES.length - 4
-          )}G\x1b[1m\x1b]8;;${policiesUrl}\x1b\\[ ${VIEW_POLICIES} ]\x1b]8;;\x1b\\\x1b[22m`
-        : '';
-
-      return `\n\x1b[33m${lineBreak}\n${message}${link}\n${lineBreak}\x1b[0m\n\n`;
-    }
-  }, [policiesUrl, processName, tty?.columns]);
-
   const render = useCallback(
     (lineNumber: number, clear: boolean) => {
       if (lines.length === 0) {
@@ -285,14 +271,14 @@ export const useXtermPlayer = ({
         // and process has exceeded max bytes
         // render msg
         if (!clear && (!nextLine || nextLine.event !== line.event) && maxBytesExceeded) {
-          const msg = renderTruncatedMsg();
+          const msg = renderTruncatedMsg(tty, policiesUrl, processName);
           if (msg) {
             terminal.write(msg);
           }
         }
       });
     },
-    [lines, renderTruncatedMsg, terminal]
+    [lines, policiesUrl, processName, terminal, tty]
   );
 
   useEffect(() => {
