@@ -25,6 +25,7 @@ import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetche
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import { DependencyOperationDetailTraceList } from './dependency_operation_detail_trace_list';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
+import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
 
 export function DependencyOperationDetailView() {
   const router = useApmRouter();
@@ -123,31 +124,15 @@ export function DependencyOperationDetailView() {
   queryRef.current = query;
 
   useEffect(() => {
-    if (spanFetch.status !== FETCH_STATUS.SUCCESS) {
-      // we're still loading, don't do anything
-      return;
-    }
-
-    const nextSpanId =
-      samples.find((sample) => sample.spanId === spanId)?.spanId ||
-      samples[0]?.spanId ||
-      '';
-
-    const indexOfNextSample =
-      samples.findIndex((sample) => sample.spanId === nextSpanId) ?? 0;
-
-    const nextPageIndex = Math.floor(
-      (indexOfNextSample + 1) / (queryRef.current.pageSize ?? 10)
-    );
-
-    if (
-      (queryRef.current.page ?? 1) !== nextPageIndex ||
-      (queryRef.current.spanId ?? '') !== nextSpanId
-    ) {
-      replace(history, {
-        query: { spanId: nextSpanId, page: nextPageIndex.toString() },
-      });
-    }
+    maybeRedirectToAvailableSpanSample({
+      history,
+      page: queryRef.current.page ?? 0,
+      pageSize: queryRef.current.pageSize ?? 10,
+      replace,
+      samples,
+      spanFetchStatus: spanFetch.status,
+      spanId,
+    });
   }, [samples, spanId, history, queryRef, router, spanFetch.status]);
 
   const isWaterfallLoading =
