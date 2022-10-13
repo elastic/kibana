@@ -10,7 +10,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
-import { HostsTableColumns } from './hosts_table_columns';
+import { HostsTableColumns, HostMetics } from './hosts_table_columns';
 interface Props {
   dataView: DataView;
   timeRange: TimeRange;
@@ -18,27 +18,20 @@ interface Props {
   nodes: SnapshotNode[];
 }
 
+type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
+
 export const HostsTable: React.FunctionComponent<Props> = ({
   dataView,
   timeRange,
   query,
   nodes,
 }) => {
-  // WIP Mapping, Add types/optimize
-  const assignBy = (key) => {
-    return (data, item) => {
-      data[item[key]] = item;
-      return data;
-    };
-  };
-
-  const mapMetrics = (metrics: SnapshotNodeMetric[]): { string: SnapshotNodeMetric } => {
-    return metrics.reduce(assignBy('name'), {});
-  };
-
   const items = nodes.map(({ metrics, path }) => ({
     ...path[0],
-    ...mapMetrics(metrics),
+    ...metrics.reduce((data, metric) => {
+      data[metric.name as keyof HostMetics] = metric;
+      return data;
+    }, {} as MappedMetrics),
   }));
 
   return (

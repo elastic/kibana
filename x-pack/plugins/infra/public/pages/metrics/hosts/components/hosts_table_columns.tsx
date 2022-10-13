@@ -7,23 +7,20 @@
 
 import { EuiBasicTableColumn } from '@elastic/eui';
 import React from 'react';
+import { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
 
-export interface HostNodeRow {
-  name: string;
-  cpuCores: number | null;
-  os: string;
-  rx: {
-    avg: number | null;
-  };
-  tx: {
-    avg: number | null;
-  };
-  memory: {
-    avg: number | null;
-  };
-  servicesOnHost: number | null;
-  averageMemoryUsagePercent: number | null;
+interface HostNodeRow extends HostMetics {
+  os?: string | null | undefined;
+  servicesOnHost?: number | null | undefined;
+}
+
+export interface HostMetics {
+  cpuCores: SnapshotNodeMetric;
+  rx: SnapshotNodeMetric;
+  tx: SnapshotNodeMetric;
+  memory: SnapshotNodeMetric;
+  memoryTotal: SnapshotNodeMetric;
 }
 
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
