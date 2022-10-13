@@ -10,12 +10,6 @@ import React, { useState } from 'react';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
-interface AllRulesProps {
-  createPrePackagedRules: () => void;
-  hasPermissions: boolean;
-  loadingCreatePrePackagedRules: boolean;
-}
-
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
  * by name, sort by enabled, and perform the following actions:
@@ -24,23 +18,16 @@ interface AllRulesProps {
  *   * Delete
  *   * Import/Export
  */
-export const AllRules = React.memo<AllRulesProps>(
-  ({ createPrePackagedRules, hasPermissions, loadingCreatePrePackagedRules }) => {
-    const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
+export const AllRules = React.memo(() => {
+  const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
 
-    return (
-      <>
-        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
-        <EuiSpacer />
-        <RulesTables
-          createPrePackagedRules={createPrePackagedRules}
-          hasPermissions={hasPermissions}
-          loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          selectedTab={activeTab}
-        />
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
+      <EuiSpacer />
+      <RulesTables selectedTab={activeTab} />
+    </>
+  );
+});
 
 AllRules.displayName = 'AllRules';

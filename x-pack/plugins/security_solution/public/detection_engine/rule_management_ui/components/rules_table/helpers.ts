@@ -9,16 +9,6 @@ import type { Query } from '@elastic/eui';
 import type { ExportRulesDetails } from '../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
 import type { BulkActionSummary } from '../../../rule_management/logic';
 
-export const showRulesTable = ({
-  rulesCustomInstalled,
-  rulesInstalled,
-}: {
-  rulesCustomInstalled?: number;
-  rulesInstalled?: number;
-}) =>
-  (rulesCustomInstalled != null && rulesCustomInstalled > 0) ||
-  (rulesInstalled != null && rulesInstalled > 0);
-
 export const caseInsensitiveSort = (tags: string[]): string[] => {
   return tags.sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())); // Case insensitive
 };

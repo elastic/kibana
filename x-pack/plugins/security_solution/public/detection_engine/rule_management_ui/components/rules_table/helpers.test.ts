@@ -7,51 +7,9 @@
 
 import { Query } from '@elastic/eui';
 import { EXCEPTIONS_SEARCH_SCHEMA } from '../../../rule_exceptions_ui/pages/exceptions/exceptions_search_bar';
-import { caseInsensitiveSort, getSearchFilters, showRulesTable } from './helpers';
+import { caseInsensitiveSort, getSearchFilters } from './helpers';
 
 describe('AllRulesTable Helpers', () => {
-  describe('showRulesTable', () => {
-    test('returns false when rulesCustomInstalled and rulesInstalled are null', () => {
-      const result = showRulesTable({
-        rulesCustomInstalled: undefined,
-        rulesInstalled: undefined,
-      });
-      expect(result).toBeFalsy();
-    });
-
-    test('returns false when rulesCustomInstalled and rulesInstalled are 0', () => {
-      const result = showRulesTable({
-        rulesCustomInstalled: 0,
-        rulesInstalled: 0,
-      });
-      expect(result).toBeFalsy();
-    });
-
-    test('returns false when both rulesCustomInstalled and rulesInstalled checks return false', () => {
-      const result = showRulesTable({
-        rulesCustomInstalled: 0,
-        rulesInstalled: undefined,
-      });
-      expect(result).toBeFalsy();
-    });
-
-    test('returns true if rulesCustomInstalled is not null or 0', () => {
-      const result = showRulesTable({
-        rulesCustomInstalled: 5,
-        rulesInstalled: undefined,
-      });
-      expect(result).toBeTruthy();
-    });
-
-    test('returns true if rulesInstalled is not null or 0', () => {
-      const result = showRulesTable({
-        rulesCustomInstalled: undefined,
-        rulesInstalled: 5,
-      });
-      expect(result).toBeTruthy();
-    });
-  });
-
   describe('caseInsensitiveSort', () => {
     describe('when an array of differently cased tags is passed', () => {
       const unsortedTags = ['atest', 'Ctest', 'Btest', 'ctest', 'btest', 'Atest'];
