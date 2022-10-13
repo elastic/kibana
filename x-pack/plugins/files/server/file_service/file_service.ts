@@ -62,7 +62,7 @@ export interface FileServiceStart {
    *
    * @param args - list files args
    */
-  list<M>(args: ListFilesArgs): Promise<Array<File<M>>>;
+  list<M>(args: ListFilesArgs): Promise<{ files: Array<File<M>>; total: number }>;
 
   /**
    * Get an instance of a share object

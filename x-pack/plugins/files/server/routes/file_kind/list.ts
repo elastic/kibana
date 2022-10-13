@@ -15,19 +15,27 @@ const rt = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1 })),
     perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+    status: schema.maybe(schema.string()),
+    name: schema.maybe(schema.string()),
   }),
 };
 
-export type Endpoint<M = unknown> = CreateRouteDefinition<typeof rt, { files: Array<FileJSON<M>> }>;
+export type Endpoint<M = unknown> = CreateRouteDefinition<
+  typeof rt,
+  { files: Array<FileJSON<M>>; total: number }
+>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {
-    query: { page, perPage },
+    query: { page, perPage, status, name },
   } = req;
   const { fileService } = await files;
-  const response = await fileService.asCurrentUser().list({ fileKind, page, perPage });
+  const response = await fileService
+    .asCurrentUser()
+    .list({ fileKind, page, perPage, filter: { status, name } });
   const body: Endpoint['output'] = {
-    files: response.map((result) => result.toJSON()),
+    total: response.total,
+    files: response.files.map((result) => result.toJSON()),
   };
   return res.ok({ body });
 };

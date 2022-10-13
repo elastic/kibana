@@ -13,19 +13,21 @@ import type {
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
-import { escapeKuery } from '@kbn/es-query';
 
 import { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
-import type { FileMetadata, FilesMetrics, FileStatus, Pagination } from '../../../../common/types';
+import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
 import type {
   FileMetadataClient,
   UpdateArgs,
   FileDescriptor,
   GetUsageMetricsArgs,
+  ListArg,
 } from '../file_metadata_client';
 
 import { filterArgsToKuery } from './query_filters';
+
+const arrayOrUndefined = (value: undefined | string) => (value ? [value] : undefined);
 
 interface TermsAgg {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -61,23 +63,29 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       metadata: result.attributes as FileDescriptor['metadata'],
     };
   }
-  async list({ fileKind, page, perPage }: { fileKind?: string } & Pagination = {}): Promise<
-    FileDescriptor[]
-  > {
-    let filter = `NOT ${this.soType}.attributes.Status: DELETED`;
-    if (fileKind) {
-      filter = `${this.soType}.attributes.FileKind: ${escapeKuery(fileKind)} AND ${filter}`;
-    }
+
+  async list({ fileKind, filter, page, perPage }: ListArg = {}): Promise<{
+    total: number;
+    files: Array<FileDescriptor<unknown>>;
+  }> {
     const result = await this.soClient.find({
       type: this.soType,
-      filter,
+      filter: filterArgsToKuery({
+        attrPrefix: `${this.soType}.attributes`,
+        kind: arrayOrUndefined(fileKind),
+        name: arrayOrUndefined(filter?.name),
+        status: arrayOrUndefined(filter?.status),
+      }),
       page,
       perPage,
     });
-    return result.saved_objects.map((file) => ({
-      id: file.id,
-      metadata: file.attributes as FileDescriptor['metadata'],
-    }));
+    return {
+      total: result.total,
+      files: result.saved_objects.map((file) => ({
+        id: file.id,
+        metadata: file.attributes as FileDescriptor['metadata'],
+      })),
+    };
   }
 
   async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {

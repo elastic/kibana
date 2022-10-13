@@ -192,10 +192,14 @@ export class FileClientImpl implements FileClient {
     return this.blobStorageClient.delete(arg);
   };
 
-  public async list(arg?: P1<FileMetadataClient['list']>): Promise<File[]> {
-    return this.metadataClient
-      .list(arg)
-      .then((r) => r.map(({ id, metadata }) => this.instantiateFile(id, metadata)));
+  public async list(
+    arg?: P1<FileMetadataClient['list']>
+  ): Promise<{ files: File[]; total: number }> {
+    const result = await this.metadataClient.list(arg);
+    return {
+      total: result.total,
+      files: result.files.map(({ id, metadata }) => this.instantiateFile(id, metadata)),
+    };
   }
 
   /**

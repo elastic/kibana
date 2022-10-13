@@ -77,6 +77,14 @@ export interface ListArg extends Pagination {
    * The file kind to scope this query to
    */
   fileKind?: string;
+
+  /**
+   * An string to filter against searchable values
+   */
+  filter?: {
+    name?: string;
+    status?: string;
+  };
 }
 
 export interface FindArg extends Pagination {
@@ -121,7 +129,7 @@ export interface FileMetadataClient {
    *
    * @param arg - Arguments to list file metadata
    */
-  list(arg?: ListArg): Promise<FileDescriptor[]>;
+  list(arg?: ListArg): Promise<{ total: number; files: FileDescriptor[] }>;
   /**
    * Search for a set of file kind instances that match the filters.
    *

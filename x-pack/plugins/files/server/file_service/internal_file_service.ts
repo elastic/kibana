@@ -92,15 +92,22 @@ export class InternalFileService {
     fileKind: fileKindId,
     page = 1,
     perPage = 100,
-  }: ListFilesArgs): Promise<IFile[]> {
+    filter,
+  }: ListFilesArgs): Promise<{ files: IFile[]; total: number }> {
     const fileKind = this.getFileKind(fileKindId);
     const result = await this.metadataClient.list({
       fileKind: fileKind.id,
       page,
       perPage,
+      filter,
     });
     const fileClient = this.createFileClient(fileKind.id);
-    return result.map((file) => this.toFile(file.id, file.metadata, fileKind.id, fileClient));
+    return {
+      files: result.files.map((file) =>
+        this.toFile(file.id, file.metadata, fileKind.id, fileClient)
+      ),
+      total: result.total,
+    };
   }
 
   public getFileKind(id: string): FileKind {

@@ -108,7 +108,7 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
         return internalFileService.findFilesJSON(args) as Promise<Array<FileJSON<M>>>;
       },
       async list<M>(args: ListFilesArgs) {
-        return internalFileService.list(args) as Promise<Array<File<M>>>;
+        return internalFileService.list(args) as Promise<{ files: Array<File<M>>; total: number }>;
       },
       async getUsageMetrics() {
         return internalFileService.getUsageMetrics();

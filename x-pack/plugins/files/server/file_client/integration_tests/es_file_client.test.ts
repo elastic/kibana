@@ -178,10 +178,10 @@ describe('ES-index-backed file client', () => {
       },
     });
 
-    const list = await fileClient.list();
+    const { files } = await fileClient.list();
 
-    expect(list).toHaveLength(1);
-    expect(list[0].toJSON()).toEqual(
+    expect(files).toHaveLength(1);
+    expect(files[0].toJSON()).toEqual(
       expect.objectContaining({
         id: '123',
         fileKind: 'none',

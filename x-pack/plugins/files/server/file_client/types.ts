@@ -98,7 +98,7 @@ export interface FileClient {
    *
    * @param arg - Argument to list files
    */
-  list(arg?: P1<FileMetadataClient['list']>): Promise<File[]>;
+  list(arg?: P1<FileMetadataClient['list']>): Promise<{ files: File[]; total: number }>;
 
   /**
    * See {@link FileMetadataClient.find}.
