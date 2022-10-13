@@ -22,7 +22,7 @@ const mockIndexPatterns = [
     title: 'logstash-*',
     fields: [
       {
-        name: 'response',
+        name: 'bytes',
         type: 'number',
         esTypes: ['integer'],
         aggregatable: true,
@@ -30,6 +30,7 @@ const mockIndexPatterns = [
         searchable: true,
       },
     ],
+    getName: () => 'logstash-*',
   },
   {
     id: '1235',
@@ -44,6 +45,7 @@ const mockIndexPatterns = [
         searchable: true,
       },
     ],
+    getName: () => 'test-*',
   },
 ] as DataView[];
 
