@@ -141,6 +141,7 @@ export function DynamicColorForm({
       return null;
     }
 
+    const invert = styleOptions.invert === undefined ? false : styleOptions.invert;
     const showColorMapTypeToggle = !CATEGORICAL_DATA_TYPES.includes(field.type);
 
     return styleProperty.isOrdinal() ? (
@@ -156,6 +157,7 @@ export function DynamicColorForm({
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
+          invert={invert}
         />
         {!!styleOptions.useCustomColorRamp ? null : (
           <EuiFormRow display="columnCompressedSwitch">
@@ -163,7 +165,7 @@ export function DynamicColorForm({
               label={i18n.translate('xpack.maps.style.revereseColorsLabel', {
                 defaultMessage: `Reverse colors`,
               })}
-              checked={!!styleOptions.invert}
+              checked={invert}
               onChange={onInvertChange}
               compressed
             />
@@ -183,6 +185,7 @@ export function DynamicColorForm({
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
+          invert={false}
         />
         <OtherCategoryColorPicker
           onChange={onOtherCategoryColorChange}
