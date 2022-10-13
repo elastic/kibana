@@ -383,12 +383,6 @@ save_kbn() {
   #  node scripts/kbn_archiver.js --config x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
 }
 
-load_my_kbn() {
-  set -x
-  node scripts/kbn_archiver.js --config "$test_config" load my-es-archive.json
-  set +x
-}
-
 load_kbn() {
   local space=${1:-default}
   local archive=${2:-${new_archive}}
