@@ -172,7 +172,7 @@ export const loadEndpoints = async ({
       updateProgress();
     },
     {
-      concurrency: 10,
+      concurrency: 4,
     }
   );
 
