@@ -49,6 +49,7 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
+  additionalContext?: [x: string] | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => InventoryMetricThresholdAlert;
@@ -66,12 +67,13 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
     const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate } = services;
-    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
+    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
+          ...additionalContext,
         },
       });
 
@@ -184,7 +186,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const actionGroupId =
           nextState === AlertStates.WARNING ? WARNING_ACTIONS.id : FIRED_ACTIONS.id;
 
-        const alert = alertFactory(group, reason);
+        const additionalContext = results && results.length > 0 ? results[0][group].context : null;
+
+        const alert = alertFactory(group, reason, additionalContext);
         const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
         const viewInAppUrl = getViewInAppUrlInventory(
           criteria,
@@ -193,6 +197,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           libs.basePath
         );
         scheduledActionsCount++;
+
         const context = {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -204,6 +209,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           ),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
+          ...additionalContext,
         };
         alert.scheduleActions(actionGroupId, context);
       }
