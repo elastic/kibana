@@ -21,6 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { groupBy } from 'lodash';
 import type { IndexPattern } from '../../../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
@@ -193,31 +194,40 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     items: [],
   });
 
-  const availableFunctions = getPossibleFunctions(indexPattern);
+  const {
+    elasticsearch: esFunction,
+    calculation: calculationFunction,
+    math: mathOperations,
+    comparison: comparisonOperations,
+  } = useMemo(
+    () =>
+      groupBy(getPossibleFunctions(indexPattern), (key) => {
+        if (key in operationDefinitionMap) {
+          return operationDefinitionMap[key].documentation?.section;
+        }
+        if (key in tinymathFunctions) {
+          return tinymathFunctions[key].section;
+        }
+      }),
+    [operationDefinitionMap, indexPattern]
+  );
 
   // Es aggs
   helpGroups[2].items.push(
-    ...availableFunctions
-      .filter(
-        (key) =>
-          key in operationDefinitionMap &&
-          operationDefinitionMap[key].documentation?.section === 'elasticsearch'
-      )
-      .sort()
-      .map((key) => ({
-        label: key,
-        description: (
-          <>
-            <h3>
-              {key}({operationDefinitionMap[key].documentation?.signature})
-            </h3>
+    ...esFunction.sort().map((key) => ({
+      label: key,
+      description: (
+        <>
+          <h3>
+            {key}({operationDefinitionMap[key].documentation?.signature})
+          </h3>
 
-            {operationDefinitionMap[key].documentation?.description ? (
-              <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
-            ) : null}
-          </>
-        ),
-      }))
+          {operationDefinitionMap[key].documentation?.description ? (
+            <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
+          ) : null}
+        </>
+      ),
+    }))
   );
 
   helpGroups.push({
@@ -236,31 +246,24 @@ max(system.network.in.bytes, reducedTimeRange="30m")
 
   // Calculations aggs
   helpGroups[3].items.push(
-    ...availableFunctions
-      .filter(
-        (key) =>
-          key in operationDefinitionMap &&
-          operationDefinitionMap[key].documentation?.section === 'calculation'
-      )
-      .sort()
-      .map((key) => ({
-        label: key,
-        description: (
-          <>
-            <h3>
-              {key}({operationDefinitionMap[key].documentation?.signature})
-            </h3>
+    ...calculationFunction.sort().map((key) => ({
+      label: key,
+      description: (
+        <>
+          <h3>
+            {key}({operationDefinitionMap[key].documentation?.signature})
+          </h3>
 
-            {operationDefinitionMap[key].documentation?.description ? (
-              <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
-            ) : null}
-          </>
-        ),
-        checked:
-          selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
-            ? ('on' as const)
-            : undefined,
-      }))
+          {operationDefinitionMap[key].documentation?.description ? (
+            <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
+          ) : null}
+        </>
+      ),
+      checked:
+        selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
+          ? ('on' as const)
+          : undefined,
+    }))
   );
 
   helpGroups.push({
@@ -274,22 +277,55 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     items: [],
   });
 
-  const tinymathFns = useMemo(() => {
-    return getPossibleFunctions(indexPattern)
-      .filter((key) => key in tinymathFunctions)
-      .sort()
-      .map((key) => {
-        const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
-        return {
-          label: key,
-          description: description.replace(/\n/g, '\n\n'),
-          examples: examples ? `\`\`\`${examples}\`\`\`` : '',
-        };
-      });
-  }, [indexPattern]);
+  const mathFns = useMemo(() => {
+    return mathOperations.sort().map((key) => {
+      const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
+      return {
+        label: key,
+        description: description.replace(/\n/g, '\n\n'),
+        examples: examples ? `\`\`\`${examples}\`\`\`` : '',
+      };
+    });
+  }, [mathOperations]);
 
   helpGroups[4].items.push(
-    ...tinymathFns.map(({ label, description, examples }) => {
+    ...mathFns.map(({ label, description, examples }) => {
+      return {
+        label,
+        description: (
+          <>
+            <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
+
+            <Markdown markdown={`${description}${examples}`} />
+          </>
+        ),
+      };
+    })
+  );
+
+  helpGroups.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.comparisonSection', {
+      defaultMessage: 'Comparison',
+    }),
+    description: i18n.translate('xpack.lens.formulaDocumentation.comparisonSectionDescription', {
+      defaultMessage: 'These functions are used to perform value comparison.',
+    }),
+    items: [],
+  });
+
+  const comparisonFns = useMemo(() => {
+    return comparisonOperations.sort().map((key) => {
+      const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
+      return {
+        label: key,
+        description: description.replace(/\n/g, '\n\n'),
+        examples: examples ? `\`\`\`${examples}\`\`\`` : '',
+      };
+    });
+  }, [comparisonOperations]);
+
+  helpGroups[5].items.push(
+    ...comparisonFns.map(({ label, description, examples }) => {
       return {
         label,
         description: (

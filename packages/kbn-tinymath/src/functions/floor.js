@@ -17,11 +17,11 @@
  * floor([1.7, 2.8, 3.9]) // returns [1, 2, 3]
  */
 
-module.exports = { floor };
-
 function floor(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.floor(a));
   }
   return Math.floor(a);
 }
+
+module.exports = { floor };

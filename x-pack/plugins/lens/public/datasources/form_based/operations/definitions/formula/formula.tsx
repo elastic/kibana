@@ -13,7 +13,7 @@ import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
-import { filterByVisibleOperation } from './util';
+import { filterByVisibleOperation, nonNullable } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { getFilter, isColumnFormatted } from '../helpers';
 
@@ -77,7 +77,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap, column);
 
       if (errors.length) {
-        return errors.map(({ message }) => message);
+        // remove duplicates
+        return Array.from(new Set(errors.map(({ message }) => message)));
       }
 
       const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
@@ -90,7 +91,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           }
           return [];
         })
-        .filter((marker) => marker);
+        .filter(nonNullable);
       const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
       const hasOtherMetrics = layer.columnOrder.some((colId) => {
         const col = layer.columns[colId];
