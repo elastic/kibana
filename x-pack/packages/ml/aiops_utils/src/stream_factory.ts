@@ -68,7 +68,7 @@ export function streamFactory<T = string>(
 export function streamFactory<T = unknown>(
   headers: Headers,
   logger: Logger,
-  compressOverride = true,
+  compressOverride: boolean = true,
   flushFix: boolean = false
 ): StreamFactoryReturnType<T> {
   let streamType: StreamType;

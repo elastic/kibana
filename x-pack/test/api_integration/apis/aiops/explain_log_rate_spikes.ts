@@ -141,12 +141,20 @@ export default ({ getService }: FtrProviderContext) => {
       });
     }
 
-    it('should return full data without streaming with compression', async () => {
+    it('should return full data without streaming with compression with flushFix', async () => {
       await requestWithoutStreaming(requestBody);
     });
 
-    it('should return full data without streaming without compression', async () => {
+    it('should return full data without streaming with compression without flushFix', async () => {
+      await requestWithoutStreaming({ ...requestBody, flushFix: false });
+    });
+
+    it('should return full data without streaming without compression with flushFix', async () => {
       await requestWithoutStreaming({ ...requestBody, compressResponse: false });
+    });
+
+    it('should return full data without streaming without compression without flushFix', async () => {
+      await requestWithoutStreaming({ ...requestBody, compressResponse: false, flushFix: false });
     });
 
     async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
@@ -176,13 +184,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       if (stream !== null) {
         const data: any[] = [];
+        let chunkCounter = 0;
+        const parseStreamCallback = (c: number) => (chunkCounter = c);
 
-        for await (const action of parseStream(stream)) {
+        for await (const action of parseStream(stream, parseStreamCallback)) {
           expect(action.type).not.to.be('error');
           data.push(action);
         }
 
+        // If streaming works correctly we should receive more than one chunk.
+        expect(chunkCounter).to.be.greaterThan(1);
+
         expect(data.length).to.be(expected.actionsLength);
+
         const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
         expect(addChangePointsActions.length).to.greaterThan(0);
 
@@ -215,12 +229,20 @@ export default ({ getService }: FtrProviderContext) => {
       }
     }
 
-    it('should return data in chunks with streaming with compression', async () => {
+    it('should return data in chunks with streaming with compression with flushFix', async () => {
       await requestWithStreaming(requestBody);
     });
 
-    it('should return data in chunks with streaming without compression', async () => {
+    it('should return data in chunks with streaming with compression without flushFix', async () => {
+      await requestWithStreaming({ ...requestBody, flushFix: false });
+    });
+
+    it('should return data in chunks with streaming without compression with flushFix', async () => {
       await requestWithStreaming({ ...requestBody, compressResponse: false });
+    });
+
+    it('should return data in chunks with streaming without compression without flushFix', async () => {
+      await requestWithStreaming({ ...requestBody, compressResponse: false, flushFix: false });
     });
 
     it('should return an error for non existing index without streaming', async () => {

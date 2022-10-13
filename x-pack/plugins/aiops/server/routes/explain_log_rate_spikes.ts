@@ -115,7 +115,7 @@ export const defineExplainLogRateSpikesRoute = (
         request.headers,
         logger,
         request.body.compressResponse,
-        true
+        request.body.flushFix
       );
 
       function pushPingWithTimeout() {
