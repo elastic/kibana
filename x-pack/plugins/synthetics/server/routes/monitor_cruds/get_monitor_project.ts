@@ -43,7 +43,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
           filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
           fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
           perPage: size,
-          sortField: 'journey_id',
+          sortField: ConfigKey.JOURNEY_ID,
           sortOrder: 'asc',
           searchAfter: decodedAfterId ? [...decodedAfterId.split(',')] : undefined,
         },

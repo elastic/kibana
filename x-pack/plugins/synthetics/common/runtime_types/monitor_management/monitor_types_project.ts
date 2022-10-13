@@ -21,7 +21,6 @@ export const ProjectMonitorCodec = t.intersection([
     name: t.string,
     schedule: t.number,
     locations: t.array(t.string),
-    hash: t.string,
   }),
   t.partial({
     content: t.string,
@@ -41,6 +40,7 @@ export const ProjectMonitorCodec = t.intersection([
     hosts: t.union([t.string, t.array(t.string)]),
     max_redirects: t.string,
     wait: t.string,
+    hash: t.string,
   }),
 ]);
 
