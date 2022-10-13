@@ -109,10 +109,8 @@ import {
   AggParamsMovingAvgSerialized,
   AggParamsSerialDiffSerialized,
   AggParamsTopHitSerialized,
-  aggRandomSampler,
 } from '.';
 import { AggParamsSampler } from './buckets/sampler';
-import { AggParamsRandomSampler } from './buckets/random_sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 import { AggParamsSignificantText } from './buckets/significant_text';
 import { aggTopMetrics } from './metrics/top_metrics_fn';
@@ -187,7 +185,6 @@ interface SerializedAggParamsMapping {
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTermsSerialized;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
-  [BUCKET_TYPES.RANDOM_SAMPLER]: AggParamsRandomSampler;
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
@@ -233,7 +230,6 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
-  [BUCKET_TYPES.RANDOM_SAMPLER]: AggParamsRandomSampler;
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
@@ -269,7 +265,6 @@ export interface AggFunctionsMapping {
   aggFilter: ReturnType<typeof aggFilter>;
   aggFilters: ReturnType<typeof aggFilters>;
   aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
-  aggRandomSampler: ReturnType<typeof aggRandomSampler>;
   aggIpRange: ReturnType<typeof aggIpRange>;
   aggDateRange: ReturnType<typeof aggDateRange>;
   aggRange: ReturnType<typeof aggRange>;

@@ -69,7 +69,6 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.GEOHASH_GRID, fn: buckets.getGeoHashBucketAgg },
     { name: BUCKET_TYPES.GEOTILE_GRID, fn: buckets.getGeoTitleBucketAgg },
     { name: BUCKET_TYPES.SAMPLER, fn: buckets.getSamplerBucketAgg },
-    { name: BUCKET_TYPES.RANDOM_SAMPLER, fn: buckets.getRandomSamplerBucketAgg },
     { name: BUCKET_TYPES.DIVERSIFIED_SAMPLER, fn: buckets.getDiversifiedSamplerBucketAgg },
   ],
 });
@@ -91,7 +90,6 @@ export const getAggTypesFunctions = () => [
   buckets.aggMultiTerms,
   buckets.aggRareTerms,
   buckets.aggSampler,
-  buckets.aggRandomSampler,
   buckets.aggDiversifiedSampler,
   metrics.aggAvg,
   metrics.aggBucketAvg,

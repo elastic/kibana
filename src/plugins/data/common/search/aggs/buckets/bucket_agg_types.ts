@@ -23,5 +23,4 @@ export enum BUCKET_TYPES {
   DATE_HISTOGRAM = 'date_histogram',
   SAMPLER = 'sampler',
   DIVERSIFIED_SAMPLER = 'diversified_sampler',
-  RANDOM_SAMPLER = 'random_sampler',
 }
