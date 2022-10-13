@@ -279,7 +279,7 @@ export function FilterItem({
                                 iconType="returnKey"
                                 size="s"
                                 aria-label={i18n.translate(
-                                  'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonIcon',
+                                  'unifiedSearch.filter.filtersBuilder.addCombinedFilterGroupButtonIcon',
                                   {
                                     defaultMessage: 'Add filter group with OR',
                                   }

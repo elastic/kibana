@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'timeToVisualize',
     'common',
+    'discover',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
@@ -102,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow removing a field', async () => {
       await PageObjects.lens.clickField('runtimefield');
-      await PageObjects.lens.removeField();
+      await PageObjects.lens.removeField('runtimefield');
       await fieldEditor.confirmDelete();
       await PageObjects.lens.waitForFieldMissing('runtimefield');
     });
@@ -156,8 +157,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.sleep(15000);
-
       const actualIndexPattern = await (
         await testSubjects.find('discover-dataView-switch-link')
       ).getVisibleText();
@@ -165,6 +164,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
       expect(actualDiscoverQueryHits).to.be('14,005');
+
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit(doc["bytes"].value.toString())`
+      );
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(newDataViewId).not.to.equal(prevDataViewId);
     });
   });
 }

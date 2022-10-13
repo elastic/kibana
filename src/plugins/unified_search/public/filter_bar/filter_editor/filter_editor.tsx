@@ -29,8 +29,8 @@ import {
   buildCustomFilter,
   cleanFilter,
   getFilterParams,
-  buildOrFilter,
-  isOrFilter,
+  buildCombinedFilter,
+  isCombinedFilter,
 } from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -44,7 +44,6 @@ import {
   getFilterableFields,
   getOperatorFromFilter,
   getOperatorOptions,
-  isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
@@ -101,7 +100,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      filters: isOrFilter(props.filter) ? props.filter.meta.params[0] : [props.filter],
+      filters: isCombinedFilter(props.filter) ? props.filter.meta.params[0] : [props.filter],
     };
   }
 
@@ -491,7 +490,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     //   .map((filter) =>
     //     isFilterValid(
     //       indexPattern,
-    //       getFieldFromFilter(isOrFilter(filter), indexPattern!),
+    //       getFieldFromFilter(isCombinedFilter(filter), indexPattern!),
     //       getOperatorFromFilter(filter),
     //       getFilterParams(filter)
     //     )
@@ -583,7 +582,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       );
 
       this.props.onSubmit(
-        filters.length === 1 ? filters[0] : buildOrFilter([filters], indexPattern?.id)
+        filters.length === 1 ? filters[0] : buildCombinedFilter([filters], indexPattern?.id)
       );
     }
   };

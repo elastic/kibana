@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { buildOrFilter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
   isFilterPinned,

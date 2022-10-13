@@ -7,7 +7,7 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { FilterMeta, Filter, isOrFilter } from '../build_filters';
+import { FilterMeta, Filter, isCombinedFilter } from '../build_filters';
 
 /** @public */
 export interface FilterCompareOptions {
@@ -87,8 +87,10 @@ export const compareFilters = (
   if (!comparators.state) excludedAttributes.push('$state');
 
   if (
-    Array.isArray(first) && isOrFilter(first[0]) &&
-    Array.isArray(second) && isOrFilter(second[0])
+    Array.isArray(first) &&
+    isCombinedFilter(first[0]) &&
+    Array.isArray(second) &&
+    isCombinedFilter(second[0])
   ) {
     return isEqual(
       mapFilterArray(first[0].meta.params[0] as Filter[], comparators, excludedAttributes),
