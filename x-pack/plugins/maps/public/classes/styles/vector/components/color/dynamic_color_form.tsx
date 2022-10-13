@@ -8,12 +8,23 @@
 import _ from 'lodash';
 import React, { ChangeEvent, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import { FieldSelect } from '../field_select';
 // @ts-expect-error
 import { ColorMapSelect } from './color_map_select';
 import { OtherCategoryColorPicker } from './other_category_color_picker';
-import { CategoryColorStop, ColorDynamicOptions, OrdinalColorStop } from '../../../../../../common/descriptor_types';
+import {
+  CategoryColorStop,
+  ColorDynamicOptions,
+  OrdinalColorStop,
+} from '../../../../../../common/descriptor_types';
 import {
   CATEGORICAL_DATA_TYPES,
   COLOR_MAP_TYPE,
@@ -75,7 +86,7 @@ export function DynamicColorForm({
     onDynamicStyleChange(styleProperty.getStyleName(), newColorOptions);
   };
 
-  const onFieldChange = async ({ field }: { field: StyleField | null }) => {
+  const onFieldChange = ({ field }: { field: StyleField | null }) => {
     if (!field) {
       return;
     }
@@ -91,7 +102,7 @@ export function DynamicColorForm({
     });
   };
 
-  const onColorMapTypeChange = async (e: ChangeEvent<HTMLSelectElement>) => {
+  const onColorMapTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const colorMapType = e.target.value as COLOR_MAP_TYPE;
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
@@ -132,22 +143,22 @@ export function DynamicColorForm({
 
     const showColorMapTypeToggle = !CATEGORICAL_DATA_TYPES.includes(field.type);
 
-    return styleProperty.isOrdinal()
-      ? (
-        <>
-          <ColorMapSelect
-            isCustomOnly={!field.supportsAutoDomain}
-            onChange={onColorMapSelect}
-            onColorMapTypeChange={onColorMapTypeChange}
-            colorMapType={COLOR_MAP_TYPE.ORDINAL}
-            colorPaletteId={styleOptions.color}
-            customColorMap={styleOptions.customColorRamp}
-            useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
-            styleProperty={styleProperty}
-            showColorMapTypeToggle={showColorMapTypeToggle}
-            swatches={swatches}
-          />
-          {!!styleOptions.useCustomColorRamp ? null : <EuiFormRow display="columnCompressedSwitch">
+    return styleProperty.isOrdinal() ? (
+      <>
+        <ColorMapSelect
+          isCustomOnly={!field.supportsAutoDomain}
+          onChange={onColorMapSelect}
+          onColorMapTypeChange={onColorMapTypeChange}
+          colorMapType={COLOR_MAP_TYPE.ORDINAL}
+          colorPaletteId={styleOptions.color}
+          customColorMap={styleOptions.customColorRamp}
+          useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
+          styleProperty={styleProperty}
+          showColorMapTypeToggle={showColorMapTypeToggle}
+          swatches={swatches}
+        />
+        {!!styleOptions.useCustomColorRamp ? null : (
+          <EuiFormRow display="columnCompressedSwitch">
             <EuiSwitch
               label={i18n.translate('xpack.maps.style.revereseColors', {
                 defaultMessage: `Reverse colors`,
@@ -156,28 +167,29 @@ export function DynamicColorForm({
               onChange={onInvertChange}
               compressed
             />
-          </EuiFormRow>}
-        </>
-      ) : (
-        <>
-          <ColorMapSelect
-            isCustomOnly={!field.supportsAutoDomain}
-            onColorMapTypeChange={onColorMapTypeChange}
-            onChange={onColorMapSelect}
-            colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
-            colorPaletteId={styleOptions.colorCategory}
-            customColorMap={styleOptions.customColorPalette}
-            useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
-            styleProperty={styleProperty}
-            showColorMapTypeToggle={showColorMapTypeToggle}
-            swatches={swatches}
-          />
-          <OtherCategoryColorPicker
-            onChange={onOtherCategoryColorChange}
-            color={styleOptions.otherCategoryColor}
-          />
-        </>
-      );
+          </EuiFormRow>
+        )}
+      </>
+    ) : (
+      <>
+        <ColorMapSelect
+          isCustomOnly={!field.supportsAutoDomain}
+          onColorMapTypeChange={onColorMapTypeChange}
+          onChange={onColorMapSelect}
+          colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
+          colorPaletteId={styleOptions.colorCategory}
+          customColorMap={styleOptions.customColorPalette}
+          useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
+          styleProperty={styleProperty}
+          showColorMapTypeToggle={showColorMapTypeToggle}
+          swatches={swatches}
+        />
+        <OtherCategoryColorPicker
+          onChange={onOtherCategoryColorChange}
+          color={styleOptions.otherCategoryColor}
+        />
+      </>
+    );
   };
 
   return (

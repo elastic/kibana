@@ -179,7 +179,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       const colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
         percentilesFieldMeta,
-        invert,
+        invert
       );
       if (!colorStops) {
         return null;
@@ -208,7 +208,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       this._options.color ? this._options.color : null,
       rangeFieldMeta.min,
       rangeFieldMeta.max,
-      invert,
+      invert
     );
     if (!colorStops) {
       return null;
@@ -369,7 +369,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
         percentilesFieldMeta,
-        invert,
+        invert
       );
       getValuePrefix = function (i: number, isNext: boolean) {
         const percentile = isNext

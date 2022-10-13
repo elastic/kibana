@@ -6,13 +6,19 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
-import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
+import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
 import { i18n } from '@kbn/i18n';
+import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
 
-export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
-  const onSizeChange = ([min, max]) => {
+interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
+  minSize: number;
+  maxSize: number;
+  onChange: ({ maxSize, minSize }: { maxSize: number; minSize: number }) => void;
+}
+
+export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }: Props) {
+  const onSizeChange = ([min, max]: [string, string]) => {
     onChange({
       minSize: Math.max(MIN_SIZE, parseInt(min, 10)),
       maxSize: Math.min(MAX_SIZE, parseInt(max, 10)),
@@ -37,9 +43,3 @@ export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {
     />
   );
 }
-
-SizeRangeSelector.propTypes = {
-  minSize: PropTypes.number.isRequired,
-  maxSize: PropTypes.number.isRequired,
-  onChange: PropTypes.func.isRequired,
-};

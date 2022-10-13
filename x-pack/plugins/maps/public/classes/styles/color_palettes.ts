@@ -209,7 +209,7 @@ export function getOrdinalMbColorRampStops(
 export function getPercentilesMbColorRampStops(
   colorPaletteId: string | null,
   percentiles: PercentilesFieldMeta,
-  invert: boolean,
+  invert: boolean
 ): Array<number | string> | null {
   if (!colorPaletteId) {
     return null;
@@ -228,8 +228,8 @@ export function getPercentilesMbColorRampStops(
     palette.reverse();
   }
   return palette.reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
-      return [...accu, percentiles[idx].value, stopColor];
-    }, []);
+    return [...accu, percentiles[idx].value, stopColor];
+  }, []);
 }
 
 export function getLinearGradient(colorStrings: string[]): string {

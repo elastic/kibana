@@ -177,6 +177,7 @@ export type SizeDynamicOptions = {
   maxSize: number;
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
+  invert?: boolean;
 };
 
 export type SizeStaticOptions = {

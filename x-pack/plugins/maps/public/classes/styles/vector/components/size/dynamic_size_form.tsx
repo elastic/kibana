@@ -5,24 +5,40 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
+import { StyleField } from '../../style_fields_helper';
+
+interface Props {
+  fields: StyleField[];
+  onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: SizeDynamicOptions) => void;
+  staticDynamicSelect?: ReactNode;
+  styleProperty: DynamicSizeProperty;
+}
 
 export function DynamicSizeForm({
   fields,
   onDynamicStyleChange,
   staticDynamicSelect,
   styleProperty,
-}) {
+}: Props) {
   const styleOptions = styleProperty.getOptions();
 
-  const onFieldChange = ({ field }) => {
-    onDynamicStyleChange(styleProperty.getStyleName(), { ...styleOptions, field });
+  const onFieldChange = ({ field }: { field: StyleField | null }) => {
+    if (field) {
+      onDynamicStyleChange(styleProperty.getStyleName(), {
+        ...styleOptions,
+        field: { name: field.name, origin: field.origin },
+      });
+    }
   };
 
-  const onSizeRangeChange = ({ minSize, maxSize }) => {
+  const onSizeRangeChange = ({ minSize, maxSize }: { minSize: number; maxSize: number }) => {
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       minSize,
