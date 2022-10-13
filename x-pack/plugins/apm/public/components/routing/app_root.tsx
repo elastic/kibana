@@ -11,9 +11,9 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   KibanaContextProvider,
+  RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import {
@@ -56,9 +56,10 @@ export function ApmAppRoot({
 
   return (
     <RedirectAppLinks
-      coreStart={core}
+      application={core.application}
       className={APP_WRAPPER_CLASS}
       data-test-subj="apmMainContainer"
+      role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
