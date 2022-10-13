@@ -15,6 +15,7 @@ import { getServerlessFunctionsOverview } from './by_agent/serverless/get_server
 import { getServerlessSummary } from './by_agent/serverless/get_serverless_summary';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
+import { getServiceNodes } from './get_service_nodes';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -67,6 +68,44 @@ const metricsChartsRoute = createApmServerRoute({
     });
 
     return { charts };
+  },
+});
+
+const serviceMetricsJvm = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    serviceNodes: Array<{
+      name: string;
+      cpu: number | null;
+      heapMemory: number | null;
+      hostName: string | null | undefined;
+      nonHeapMemory: number | null;
+      threadCount: number | null;
+    }>;
+  }> => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end } = params.query;
+
+    const serviceNodes = await getServiceNodes({
+      kuery,
+      setup,
+      serviceName,
+      environment,
+      start,
+      end,
+    });
+    return { serviceNodes };
   },
 });
 
@@ -128,5 +167,6 @@ const serverlessMetricsRoute = createApmServerRoute({
 
 export const metricsRouteRepository = {
   ...metricsChartsRoute,
+  ...serviceMetricsJvm,
   ...serverlessMetricsRoute,
 };

@@ -14,10 +14,7 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { agentName: 'java' },
-        { agentName: 'opentelemetry/java' },
         { agentName: 'ios/swift' },
-        { agentName: 'ruby', runtimeName: 'jruby' },
         { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
@@ -34,6 +31,9 @@ describe('APM service template', () => {
         { agentName: 'nodejs' },
         { agentName: 'php' },
         { agentName: 'python' },
+        { agentName: 'ruby', runtimeName: 'jruby' },
+        { agentName: 'java' },
+        { agentName: 'opentelemetry/java' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeFalsy();

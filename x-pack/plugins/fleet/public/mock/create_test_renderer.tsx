@@ -67,7 +67,6 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   ExperimentalFeaturesService.init({
     createPackagePolicyMultiPageLayout: true,
     packageVerification: true,
-    noLargeFeaturedIntegrations: true,
     showDevtoolsRequest: false,
   });
 

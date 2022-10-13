@@ -14,13 +14,13 @@ import {
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerLessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
-import { ServiceNodeOverview } from './service_node_overview';
+import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
   const { agentName, runtimeName } = useApmServiceContext();
 
   if (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) {
-    return <ServiceNodeOverview />;
+    return <JvmMetricsOverview />;
   }
 
   if (isServerlessAgent(runtimeName)) {
