@@ -47,6 +47,5 @@ export const getStubPluginServices = (): ControlsPluginStart => {
   return {
     getControlFactory: pluginServices.getServices().controls.getControlFactory,
     getControlTypes: pluginServices.getServices().controls.getControlTypes,
-    ControlGroupRenderer: jest.fn(),
   };
 };

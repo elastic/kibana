@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { useLifecycles } from 'react-use/lib';
+import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -78,3 +78,7 @@ export const ControlGroupRenderer = ({ input, onEmbeddableLoad }: ControlGroupRe
 
   return <div ref={controlsRoot} />;
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ControlGroupRenderer;

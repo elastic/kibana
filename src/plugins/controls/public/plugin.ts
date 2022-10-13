@@ -16,7 +16,6 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '.';
-import { ControlGroupRenderer } from './control_group/control_group_renderer';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
 import { TimeSliderEmbeddableFactory, TimeSliderControlEmbeddableInput } from './time_slider';
@@ -121,7 +120,6 @@ export class ControlsPlugin
     return {
       getControlFactory,
       getControlTypes,
-      ControlGroupRenderer,
     };
   }
 
