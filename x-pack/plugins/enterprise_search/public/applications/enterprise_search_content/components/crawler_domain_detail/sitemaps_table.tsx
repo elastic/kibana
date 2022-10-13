@@ -41,6 +41,7 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
     {
       editingRender: (sitemap, onChange, { isInvalid, isLoading }) => (
         <EuiFieldText
+          data-telemetry-id="entSearchContent-crawler-domainDetail-siteMaps-editSitemap"
           fullWidth
           value={(sitemap as Sitemap)[field]}
           onChange={(e) => onChange(e.target.value)}

@@ -30,8 +30,6 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { getHeaderActions } from './components/header_actions/header_actions';
-import { IndexCreatedCallout } from './components/index_created_callout/callout';
-import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
@@ -58,7 +56,6 @@ export enum SearchIndexTabId {
 
 export const SearchIndex: React.FC = () => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
@@ -177,7 +174,6 @@ export const SearchIndex: React.FC = () => {
       }}
     >
       <>
-        {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
         {indexName === indexData?.name && (
           <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
         )}

@@ -28,11 +28,14 @@ import { docLinks } from '../../../../shared/doc_links';
 import { HttpLogic } from '../../../../shared/http';
 import { isManagedPipeline } from '../../../../shared/pipelines/is_managed';
 
+import { IndexViewLogic } from '../index_view_logic';
+
 import { PipelineJSONBadges } from './pipeline_json_badges';
 import { IndexPipelinesConfigurationsLogic } from './pipelines_json_configurations_logic';
 
 export const PipelinesJSONConfigurations: React.FC = () => {
   const { http } = useValues(HttpLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { pipelineNames, selectedPipeline, selectedPipelineId, selectedPipelineJSON } = useValues(
     IndexPipelinesConfigurationsLogic
   );
@@ -79,6 +82,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
           )}
         >
           <EuiSelect
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-selectPipeline`}
             fullWidth
             options={pipelineNames.map((name) => ({ text: name, value: name }))}
             value={selectedPipelineId}
@@ -95,6 +99,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
               <EuiFlexItem grow={false}>
                 {isManagedPipeline(selectedPipeline) ? (
                   <EuiButtonEmpty
+                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-viewInStackManagement`}
                     size="s"
                     flush="both"
                     iconType="eye"
@@ -112,6 +117,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
                   </EuiButtonEmpty>
                 ) : (
                   <EuiButtonEmpty
+                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-editInStackManagement`}
                     size="s"
                     flush="both"
                     iconType="pencil"

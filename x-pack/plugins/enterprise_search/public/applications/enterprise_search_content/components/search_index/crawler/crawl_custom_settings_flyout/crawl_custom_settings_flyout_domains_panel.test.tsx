@@ -50,11 +50,13 @@ describe('CrawlCustomSettingsFlyoutDomainsPanel', () => {
   it('allows the user to select domains', () => {
     const domainAccordionWrapper = wrapper.find(EuiAccordion);
 
-    expect(domainAccordionWrapper.find(SimplifiedSelectable).props()).toEqual({
-      options: ['https://www.elastic.co', 'https://www.swiftype.com'],
-      selectedOptions: ['https://www.elastic.co'],
-      onChange: MOCK_ACTIONS.onSelectDomainUrls,
-    });
+    expect(domainAccordionWrapper.find(SimplifiedSelectable).props()).toEqual(
+      expect.objectContaining({
+        options: ['https://www.elastic.co', 'https://www.swiftype.com'],
+        selectedOptions: ['https://www.elastic.co'],
+        onChange: MOCK_ACTIONS.onSelectDomainUrls,
+      })
+    );
   });
 
   it('indicates how many domains are selected', () => {

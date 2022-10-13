@@ -16,7 +16,8 @@ import { IngestionStatus } from '../../../../types';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncButton: React.FC = () => {
-  const { ingestionStatus, isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
+  const { ingestionMethod, ingestionStatus, isSyncing, isWaitingForSync } =
+    useValues(IndexViewLogic);
   const { startSync } = useActions(IndexViewLogic);
 
   const getSyncButtonText = () => {
@@ -39,6 +40,7 @@ export const SyncButton: React.FC = () => {
   };
   return (
     <EuiButton
+      data-telemetry-id={`entSearchContent-${ingestionMethod}-header-syncNow-startSync`}
       onClick={startSync}
       fill
       disabled={ingestionStatus === IngestionStatus.INCOMPLETE}

@@ -216,6 +216,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
                             onClick={() => recheckIndex()}
                             isLoading={recheckIndexLoading}
@@ -274,6 +275,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         <EuiFlexGroup>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
+                              data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
                               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                                 indexName,
                                 tabId: SearchIndexTabId.SCHEDULING,

@@ -28,11 +28,13 @@ import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
 
 export interface SearchEnginesPopoverProps {
   indexName?: string;
+  ingestionMethod: string;
   isHiddenIndex?: boolean;
 }
 
 export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
   indexName,
+  ingestionMethod,
   isHiddenIndex,
 }) => {
   const { isSearchEnginesPopoverOpen } = useValues(SearchEnginesPopoverLogic);
@@ -43,7 +45,12 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
       isOpen={isSearchEnginesPopoverOpen}
       closePopover={toggleSearchEnginesPopover}
       button={
-        <EuiButton iconSide="right" iconType="arrowDown" onClick={toggleSearchEnginesPopover}>
+        <EuiButton
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines`}
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={toggleSearchEnginesPopover}
+        >
           {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.label', {
             defaultMessage: 'Search engines',
           })}
@@ -54,6 +61,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
         size="s"
         items={[
           <EuiContextMenuItem
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines-viewEngines`}
             icon="eye"
             onClick={() => {
               KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL, {
@@ -78,10 +86,18 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
                 }
               )}
             >
-              <CreateEngineMenuItem indexName={indexName} isHiddenIndex={isHiddenIndex} />
+              <CreateEngineMenuItem
+                indexName={indexName}
+                ingestionMethod={ingestionMethod}
+                isHiddenIndex={isHiddenIndex}
+              />
             </EuiToolTip>
           ) : (
-            <CreateEngineMenuItem indexName={indexName} isHiddenIndex={isHiddenIndex} />
+            <CreateEngineMenuItem
+              indexName={indexName}
+              ingestionMethod={ingestionMethod}
+              isHiddenIndex={isHiddenIndex}
+            />
           ),
         ]}
       />
