@@ -17,6 +17,7 @@ import {
   getDataViews,
   getSavedObjectsClient,
   getTimefilter,
+  getShare,
 } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
@@ -70,7 +71,13 @@ export async function resolver(
     layerIndex = undefined;
   }
 
-  const jobCreator = new QuickJobCreator(getDataViews(), getUiSettings(), getTimefilter(), ml);
+  const jobCreator = new QuickJobCreator(
+    getDataViews(),
+    getUiSettings(),
+    getTimefilter(),
+    getShare(),
+    ml
+  );
   await jobCreator.createAndStashADJob(vis, from, to, query, filters, layerIndex);
 }
 

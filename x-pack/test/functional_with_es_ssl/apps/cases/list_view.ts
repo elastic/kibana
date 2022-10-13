@@ -91,7 +91,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('change the status of cases to in-progress correctly', async () => {
           await cases.casesTable.selectAndChangeStatusOfAllCases(CaseStatuses['in-progress']);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('status-badge-open');
+          await testSubjects.missingOrFail('case-status-badge-open');
         });
       });
 
@@ -223,19 +223,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('filters cases by status', async () => {
         await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
-        await testSubjects.existOrFail(`status-badge-${CaseStatuses['in-progress']}`);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      it('filters cases by the first cases all user assignee', async () => {
-        await cases.casesTable.filterByAssignee('all');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
-      });
+      describe('assignees filtering', () => {
+        it('filters cases by the first cases all user assignee', async () => {
+          await cases.casesTable.filterByAssignee('all');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user');
+        });
 
-      it('filters cases by the casesAllUser2 assignee', async () => {
-        await cases.casesTable.filterByAssignee('2');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
+        it('filters cases by the casesAllUser2 assignee', async () => {
+          await cases.casesTable.filterByAssignee('2');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+        });
       });
     });
 
@@ -322,17 +326,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('to in progress', async () => {
           await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
-          await testSubjects.existOrFail(`status-badge-${CaseStatuses['in-progress']}`);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         });
 
         it('to closed', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
-          await testSubjects.existOrFail(`status-badge-${CaseStatuses.closed}`);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
         });
 
         it('to open', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.open, 0);
-          await testSubjects.existOrFail(`status-badge-${CaseStatuses.open}`);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.open}`);
         });
       });
 
