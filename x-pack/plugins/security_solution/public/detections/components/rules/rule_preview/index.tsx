@@ -79,6 +79,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   aboutRuleData,
   scheduleRuleData,
   exceptionsList,
+  setProfile,
 }) => {
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
@@ -141,6 +142,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     scheduleRuleData: previewData.scheduleRuleData,
     exceptionsList,
     timeframeOptions: previewData.timeframeOptions,
+    setProfile,
   });
 
   const { startTransaction } = useStartTransaction();

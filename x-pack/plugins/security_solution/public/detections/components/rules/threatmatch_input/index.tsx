@@ -23,19 +23,58 @@ import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
 import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
+import { initDataFor } from '../rule_preview/profile/init_data';
+import type { Index } from '../rule_preview/profile/types';
+import { msToPretty } from '../rule_preview/profile/ms_to_pretty';
 
 const CommonUseField = getUseField({ component: Field });
-const optionsStatic = [
-  {
-    label: 'Titan',
-    'data-test-subj': 'titanOption',
-    color: 'success',
-  },
-  {
-    label: 'Enceladus',
-    color: 'warning',
-  },
-];
+
+export const getIndicesColor = ({
+  indices,
+  profile,
+  indicesType,
+}: {
+  indices: string[];
+  profile: {
+    profileResponse: Array<{
+      profile: {
+        shards: Array<{
+          id: string;
+          searches: Array<{
+            query: Array<{ time_in_nanos: number }>;
+          }>;
+        }>;
+      };
+    }>;
+  };
+  indicesType: 'sourceIndices' | 'threatIndices';
+}) => {
+  if (!indices) {
+    return null;
+  }
+  if (!profile) {
+    return indices;
+  }
+  const responseMapping: Record<'sourceIndices' | 'threatIndices', number> = {
+    sourceIndices: 0,
+    threatIndices: 1,
+  };
+  const sortedIndices: Index[] = initDataFor('searches')(
+    profile.profileResponse[responseMapping[indicesType]].profile.shards
+  );
+  return indices.map((i) => {
+    const temp = sortedIndices.find((index) => index.name.match(i));
+    if (temp) {
+      const { time, badgeColor } = msToPretty(temp.time, 3);
+      return {
+        label: i,
+        color: badgeColor,
+      };
+    } else {
+      return { label: i };
+    }
+  });
+};
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
   threatBrowserFields: Readonly<Record<string, Partial<BrowserField>>>;
@@ -57,6 +96,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   threatBrowserFields,
   onValidityChange,
   formThreatIndex,
+  profile,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
 
@@ -99,12 +139,13 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
                 fullWidth: true,
                 isDisabled: false,
                 placeholder: '',
-                ...(formThreatIndex
+                ...(formThreatIndex && profile
                   ? {
-                      selectedOptions: formThreatIndex?.map((i) => ({
-                        label: i,
-                        color: 'success',
-                      })),
+                      selectedOptions: getIndicesColor({
+                        indices: formThreatIndex,
+                        profile,
+                        indicesType: 'threatIndices',
+                      }),
                     }
                   : {}),
               },

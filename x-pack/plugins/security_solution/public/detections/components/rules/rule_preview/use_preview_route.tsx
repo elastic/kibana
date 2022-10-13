@@ -32,6 +32,7 @@ export const usePreviewRoute = ({
   scheduleRuleData,
   exceptionsList,
   timeframeOptions,
+  setProfile,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -45,6 +46,7 @@ export const usePreviewRoute = ({
     setRule: setProfileRule,
   } = useProfile({
     timeframeOptions,
+    setProfile,
   });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
@@ -65,7 +67,8 @@ export const usePreviewRoute = ({
     setIsAborted(false);
     setIsRequestTriggered(false);
     setHasNoiseWarning(false);
-  }, [setRule]);
+    setProfile(null);
+  }, [setProfile, setRule]);
 
   useEffect(() => {
     clearPreview();

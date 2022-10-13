@@ -69,7 +69,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
-import { ThreatMatchInput } from '../threatmatch_input';
+import { getIndicesColor, ThreatMatchInput } from '../threatmatch_input';
 import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
@@ -127,6 +127,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onRuleDataChange,
   onPreviewDisabledStateChange,
   defaultSavedQuery,
+  profile,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -417,13 +418,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     threatIndexField.setValue(threatIndicesConfig);
   }, [getFields, threatIndicesConfig]);
 
-  const enrichThrestIndices = useMemo(() => {
-    const threatIndexField = getFields().threatIndex;
-
-    return threatIndexField;
-  }, [getFields]);
-  console.log(formThreatIndex);
-
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -449,7 +443,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   `;
 
   SourcererFlex.displayName = 'SourcererFlex';
-
+  console.log('-----profile-----', profile);
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }) => (
       <ThreatMatchInput
@@ -462,12 +456,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         threatMapping={threatMapping}
         onValidityChange={setIsThreatQueryBarValid}
         formThreatIndex={formThreatIndex}
+        profile={profile}
       />
     ),
     [
       formThreatIndex,
       handleResetThreatIndices,
       indexPattern,
+      profile,
       threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
@@ -578,6 +574,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   euiFieldProps: {
                     fullWidth: true,
                     placeholder: '',
+                    ...(formIndex && profile
+                      ? {
+                          selectedOptions: getIndicesColor({
+                            indices: formIndex,
+                            profile,
+                            indicesType: 'sourceIndices',
+                          }),
+                        }
+                      : {}),
                   },
                 }}
               />
@@ -593,6 +598,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
+    formIndex,
+    profile,
   ]);
 
   const QueryBarMemo = useMemo(

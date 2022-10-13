@@ -99,11 +99,8 @@ const EditRulePageComponent: FC = () => {
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
-  const [checked, setChecked] = useState(false);
+  const [profile, setProfile] = useState(null);
 
-  const onChange = (e) => {
-    setChecked(e.target.checked);
-  };
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
   const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
@@ -243,6 +240,7 @@ const EditRulePageComponent: FC = () => {
                   onRuleDataChange={onDataChange}
                   onPreviewDisabledStateChange={setIsPreviewDisabled}
                   defaultSavedQuery={savedQuery}
+                  profile={profile}
                 />
               )}
               <EuiSpacer />
@@ -328,20 +326,21 @@ const EditRulePageComponent: FC = () => {
       rule?.immutable,
       rule?.type,
       loading,
-      defineStep.data,
-      isLoading,
       isSavedQueryLoading,
       defineStepDataWithSavedQuery,
+      isLoading,
       setFormHook,
       dataViewOptions,
       indicesConfig,
       threatIndicesConfig,
       onDataChange,
+      savedQuery,
+      profile,
       aboutStep.data,
+      defineStep.data,
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
-      savedQuery,
     ]
   );
 
@@ -560,6 +559,7 @@ const EditRulePageComponent: FC = () => {
                 scheduleStepData={scheduleStep.data}
                 exceptionsList={rule?.exceptions_list}
                 onClose={onPreviewClose}
+                setProfile={setProfile}
               />
             )}
           </MaxWidthEuiFlexItem>

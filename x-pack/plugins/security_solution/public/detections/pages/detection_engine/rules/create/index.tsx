@@ -132,6 +132,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+  const [profile, setProfile] = useState(null);
 
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
@@ -432,6 +433,7 @@ const CreateRulePageComponent: React.FC = () => {
                   threatIndicesConfig={threatIndicesConfig}
                   onRuleDataChange={updateCurrentDataState}
                   onPreviewDisabledStateChange={setIsPreviewDisabled}
+                  profile={profile}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -555,6 +557,7 @@ const CreateRulePageComponent: React.FC = () => {
                 aboutStepData={aboutRuleData}
                 scheduleStepData={scheduleRuleData}
                 onClose={() => setIsRulePreviewVisible(false)}
+                setProfile={setProfile}
               />
             )}
           </MaxWidthEuiFlexItem>

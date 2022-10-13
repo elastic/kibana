@@ -25,7 +25,12 @@ const emptyPreviewRule: PreviewResponse = {
   isAborted: false,
 };
 
-export const useProfile = ({ timeframeOptions }: { timeframeOptions: TimeframePreviewOptions }) => {
+export const useProfile = ({
+  timeframeOptions,
+  setProfile,
+}: {
+  timeframeOptions: TimeframePreviewOptions;
+}) => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +71,7 @@ export const useProfile = ({ timeframeOptions }: { timeframeOptions: TimeframePr
           });
           if (isSubscribed) {
             setResponse(previewRuleResponse);
+            setProfile(previewRuleResponse);
           }
         } catch (error) {
           if (isSubscribed) {

@@ -49,6 +49,7 @@ const PreviewFlyoutComponent: React.FC<PreviewFlyoutProps> = ({
   scheduleStepData,
   exceptionsList,
   onClose,
+  setProfile,
 }) => {
   return (
     <EuiFlyout type="push" size="550px" ownFocus={false} onClose={onClose}>
@@ -68,6 +69,7 @@ const PreviewFlyoutComponent: React.FC<PreviewFlyoutProps> = ({
           aboutRuleData={aboutStepData}
           scheduleRuleData={scheduleStepData}
           exceptionsList={exceptionsList}
+          setProfile={setProfile}
         />
       </StyledEuiFlyoutBody>
       <EuiFlyoutFooter>
