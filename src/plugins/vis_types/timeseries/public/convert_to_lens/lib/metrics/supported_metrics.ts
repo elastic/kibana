@@ -55,6 +55,7 @@ interface LocalSupportedMetrics {
   [TSVB_METRIC_TYPES.STATIC]: Metric<typeof Operations.STATIC_VALUE>;
   [TSVB_METRIC_TYPES.POSITIVE_RATE]: Metric<typeof Operations.COUNTER_RATE>;
   [TSVB_METRIC_TYPES.MOVING_AVERAGE]: Metric<typeof Operations.MOVING_AVERAGE>;
+  [TSVB_METRIC_TYPES.VARIANCE]: Metric<typeof Operations.FORMULA>;
 }
 
 type UnsupportedSupportedMetrics = Exclude<MetricType, keyof LocalSupportedMetrics>;
