@@ -61,6 +61,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
+      triggersActionsConnectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
+      },
     },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),

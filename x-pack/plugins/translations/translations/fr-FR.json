@@ -32297,7 +32297,6 @@
     "xpack.triggersActionsUI.fieldBrowser.viewSelected": "sélectionné",
     "xpack.triggersActionsUI.home.appTitle": "Règles et connecteurs",
     "xpack.triggersActionsUI.home.breadcrumbTitle": "Règles et connecteurs",
-    "xpack.triggersActionsUI.home.connectorsTabTitle": "Connecteurs",
     "xpack.triggersActionsUI.home.docsLinkText": "Documentation",
     "xpack.triggersActionsUI.home.rulesTabTitle": "Règles",
     "xpack.triggersActionsUI.home.sectionDescription": "Détecter les conditions à l'aide des règles, et entreprendre des actions à l'aide des connecteurs.",

@@ -32308,7 +32308,6 @@
     "xpack.triggersActionsUI.fieldBrowser.viewSelected": "已选定",
     "xpack.triggersActionsUI.home.appTitle": "规则和连接器",
     "xpack.triggersActionsUI.home.breadcrumbTitle": "规则和连接器",
-    "xpack.triggersActionsUI.home.connectorsTabTitle": "连接器",
     "xpack.triggersActionsUI.home.docsLinkText": "文档",
     "xpack.triggersActionsUI.home.rulesTabTitle": "规则",
     "xpack.triggersActionsUI.home.sectionDescription": "使规则检测条件，并使用连接器采取操作。",
