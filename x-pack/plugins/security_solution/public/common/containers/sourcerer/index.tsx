@@ -141,21 +141,29 @@ export const useInitSourcerer = (
   const searchedIds = useRef<string[]>([]);
   useEffect(() => {
     const activeDataViewIds = [...new Set([scopeDataViewId, timelineDataViewId])];
-    activeDataViewIds.forEach((id) => {
+    activeDataViewIds.forEach((id, i) => {
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
+
+        const currentScope = i === 0 ? SourcererScopeName.default : SourcererScopeName.timeline;
+
+        const needToBeInit =
+          id === scopeDataViewId
+            ? selectedPatterns.length === 0 && missingPatterns.length === 0
+            : timelineDataViewId === id
+            ? timelineMissingPatterns.length === 0 &&
+              timelineSelectedDataView?.patternList.length === 0
+            : false;
+
         indexFieldsSearch({
           dataViewId: id,
-          scopeId:
-            id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
-          needToBeInit:
-            id === scopeDataViewId
-              ? selectedPatterns.length === 0 && missingPatterns.length === 0
-              : timelineDataViewId === id
-              ? timelineMissingPatterns.length === 0 &&
-                timelineSelectedDataView?.patternList.length === 0
-              : false,
-          skipScopeUpdate: timelineSelectedPatterns.length > 0 && timelineDataViewId === id,
+          scopeId: currentScope,
+          needToBeInit,
+          ...(needToBeInit && currentScope === SourcererScopeName.timeline
+            ? {
+                skipScopeUpdate: timelineSelectedPatterns.length > 0,
+              }
+            : {}),
         });
       }
     });
