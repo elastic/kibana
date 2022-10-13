@@ -41,6 +41,12 @@ export const searchConfig: GuideConfig = {
         appID: 'guidedOnboardingExample',
         path: 'stepTwo',
       },
+      manualCompletion: {
+        title: 'Manual completion step title',
+        description:
+          'Mark the step complete by opening the panel and clicking the button "Mark done"',
+        readyToCompleteOnNavigation: true,
+      },
     },
     {
       id: 'search_experience',

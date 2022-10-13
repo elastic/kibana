@@ -11,7 +11,7 @@ import { isIntegrationInGuideStep, isLastStep } from './helpers';
 import {
   noGuideActiveState,
   securityAddDataInProgressState,
-  securityRulesActivesState,
+  securityRulesActiveState,
 } from './api.mocks';
 
 const searchGuide = 'search';
@@ -42,7 +42,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
       expect(result).toBe(false);
     });
     it('returns false if no integration is defined in the guide step', () => {
-      const result = isIntegrationInGuideStep(securityRulesActivesState, 'endpoint');
+      const result = isIntegrationInGuideStep(securityRulesActiveState, 'endpoint');
       expect(result).toBe(false);
     });
     it('returns false if no guide is active', () => {
