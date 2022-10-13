@@ -223,34 +223,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('when requesting spans without a transaction', () => {
-        it('should return the spans without transaction metadata', async () => {
-          const response = await callApi({
-            dependencyName: 'elasticsearch',
-            spanName: 'without transaction',
-          });
-
-          const { spans } = response.body;
-
-          const spanNames = uniq(spans.map((span) => span.spanName));
-
-          expect(spanNames).to.eql(['without transaction']);
-
-          expect(omit(spans[0], 'traceId')).to.eql({
-            '@timestamp': 1609459200000,
-            agentName: 'java',
-            duration: 200000,
-            serviceName: 'java',
-            spanName: 'without transaction',
-            outcome: 'unknown',
-          });
-
-          expect(spans[0].transactionType).not.to.be.ok();
-          expect(spans[0].transactionId).not.to.be.ok();
-          expect(spans[0].transactionName).not.to.be.ok();
-        });
-      });
-
       describe('when requesting spans within a specific sample range', () => {
         it('returns only spans whose duration falls into the requested range', async () => {
           const response = await callApi({
