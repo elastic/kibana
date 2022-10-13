@@ -44,7 +44,7 @@ export const useMonitorDetail = (
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,
-    [monitorId],
+    [monitorId, location],
     {
       name: 'getMonitorStatusByLocation',
     }
