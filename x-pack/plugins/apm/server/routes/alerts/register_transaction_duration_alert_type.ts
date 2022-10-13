@@ -154,17 +154,19 @@ export function registerTransactionDurationAlertType({
                 missing: ENVIRONMENT_NOT_DEFINED.value,
               },
               aggs: {
-                latency:
-                  ruleParams.aggregationType === 'avg'
-                    ? { avg: { field } }
-                    : {
+                ...(ruleParams.aggregationType === 'avg'
+                  ? { avgLatency: { avg: { field } } }
+                  : {
+                      pctLatency: {
                         percentiles: {
                           field,
                           percents: [
                             ruleParams.aggregationType === '95th' ? 95 : 99,
                           ],
+                          keyed: false as const,
                         },
                       },
+                    }),
               },
             },
           },
@@ -185,11 +187,12 @@ export function registerTransactionDurationAlertType({
 
       const triggeredEnvironmentDurations =
         response.aggregations.environments.buckets
-          .map(({ key: environment, latency }) => {
+          .map((bucket) => {
+            const { key: environment } = bucket;
             const transactionDuration =
-              'values' in latency
-                ? Object.values(latency.values)[0]
-                : latency?.value;
+              'avgLatency' in bucket // only true if ruleParams.aggregationType === 'avg'
+                ? bucket.avgLatency.value
+                : bucket.pctLatency.values[0].value;
             return { transactionDuration, environment };
           })
           .filter(
