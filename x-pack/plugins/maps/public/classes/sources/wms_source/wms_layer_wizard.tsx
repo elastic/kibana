@@ -9,13 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
-// @ts-ignore
 import { sourceTitle, WMSSource } from './wms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { WebMapServiceLayerIcon } from '../../layers/wizards/icons/web_map_service_layer_icon';
-
+import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export const wmsLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.WMS_LAYER,
   order: 10,
@@ -25,14 +24,14 @@ export const wmsLayerWizardConfig: LayerWizard = {
   }),
   icon: WebMapServiceLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: unknown) => {
+    const onSourceConfigChange = (sourceConfig: Partial<WMSSourceDescriptor>) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
       }
 
       const layerDescriptor = RasterTileLayer.createDescriptor({
-        sourceDescriptor: WMSSource.createDescriptor(sourceConfig),
+        sourceDescriptor: WMSSource.createDescriptor(sourceConfig as Partial<WMSSourceDescriptor>),
       });
       previewLayers([layerDescriptor]);
     };

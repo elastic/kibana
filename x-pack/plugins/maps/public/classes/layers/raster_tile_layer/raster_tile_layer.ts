@@ -6,6 +6,7 @@
  */
 
 import type { Map as MbMap, RasterTileSource } from '@kbn/mapbox-gl';
+import { ReactElement } from 'react';
 import _ from 'lodash';
 import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
@@ -39,6 +40,16 @@ export class RasterTileLayer extends AbstractLayer {
 
   getSource(): IRasterSource {
     return super.getSource() as IRasterSource;
+  }
+
+  async hasLegendDetails(): Promise<boolean> {
+    const source = this.getSource();
+    return await source.hasLegendDetails();
+  }
+
+  renderLegendDetails(): ReactElement<any> | null {
+    const source = this.getSource();
+    return source.renderLegendDetails();
   }
 
   getStyleForEditing() {
