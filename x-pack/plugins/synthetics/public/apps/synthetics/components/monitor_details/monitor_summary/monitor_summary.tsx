@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
@@ -56,7 +57,9 @@ export const MonitorSummary = () => {
               <EuiFlexItem>
                 <DurationPanel />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <DurationSparklines />
+              </EuiFlexItem>
               <EuiFlexItem>
                 <MonitorErrorsCount />
               </EuiFlexItem>
