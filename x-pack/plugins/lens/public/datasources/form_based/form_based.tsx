@@ -36,6 +36,7 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
+  DatasourceLayerSettingsProps,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -91,6 +92,7 @@ import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
+import { LayerSettingsPanel } from './layer_settings';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -265,6 +267,32 @@ export function getFormBasedDatasource({
 
     toExpression: (state, layerId, indexPatterns) =>
       toExpression(state, layerId, indexPatterns, uiSettings),
+
+    renderLayerSettings(
+      domElement: Element,
+      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
+    ) {
+      render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                discover,
+              }}
+            >
+              <LayerSettingsPanel {...props} />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
@@ -445,7 +473,7 @@ export function getFormBasedDatasource({
           }),
           execute: openLayerSettings,
           icon: 'gear',
-          isCompatible: true,
+          isCompatible: Boolean(state.layers[layerId]),
         },
       ];
     },

@@ -282,6 +282,10 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => T;
 
+  renderLayerSettings?: (
+    domElement: Element,
+    props: DatasourceLayerSettingsProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   renderDataPanel: (
     domElement: Element,
     props: DatasourceDataPanelProps<T>
@@ -496,6 +500,12 @@ export interface DatasourcePublicAPI {
   getMaxPossibleNumValues: (columnId: string) => number | null;
 }
 
+export interface DatasourceLayerSettingsProps<T = unknown> {
+  layerId: string;
+  state: T;
+  setState: StateSetter<T>;
+}
+
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
@@ -700,6 +710,11 @@ export interface VisualizationToolbarProps<T = unknown> {
   frame: FramePublicAPI;
   state: T;
 }
+
+export type VisualizationLayerSettingsProps<T = unknown> = VisualizationConfigProps<T> & {
+  setState(newState: T | ((currState: T) => T)): void;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
+};
 
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
@@ -1059,6 +1074,11 @@ export interface Visualization<T = unknown, P = unknown> {
   getDropProps?: (
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
+
+  renderLayerSettings?: (
+    domElement: Element,
+    props: VisualizationLayerSettingsProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
 
   /**
    * Additional editor that gets rendered inside the dimension popover.

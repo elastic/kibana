@@ -26,6 +26,7 @@ import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
 import { getTime, calculateBounds } from '../..';
 import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
+import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -235,14 +236,11 @@ export class AggConfigs {
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
-    if (this.opts.probability !== 1) {
-      dslTopLvl.sampling = {
-        random_sampler: {
-          probability: this.opts.probability,
-          seed: this.opts.samplerSeed,
-        },
-        aggs: {},
-      };
+    if (isSamplingEnabled(this.opts.probability)) {
+      dslTopLvl.sampling = createSamplerAgg({
+        probability: this.opts.probability,
+        seed: this.opts.samplerSeed,
+      });
     }
 
     const timeShifts = this.getTimeShifts();
@@ -275,7 +273,7 @@ export class AggConfigs {
         // start at the top level
         dslLvlCursor = dslTopLvl;
         // when sampling jump directly to the aggs
-        if (this.opts.probability !== 1) {
+        if (isSamplingEnabled(this.opts.probability)) {
           dslLvlCursor = dslLvlCursor.sampling.aggs;
         }
       } else {

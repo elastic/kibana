@@ -529,6 +529,11 @@ function getEmptyLayerSuggestionsForField(
     newLayer = createNewLayerWithMetricAggregation(indexPattern, field);
   }
 
+  // copy the sampling rate to the new layer
+  if (newLayer) {
+    newLayer.sampling = state.layers[layerId].sampling;
+  }
+
   const newLayerSuggestions = newLayer
     ? [
         buildSuggestion({
