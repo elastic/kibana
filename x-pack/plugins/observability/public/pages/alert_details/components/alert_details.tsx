@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
@@ -31,14 +33,21 @@ export function AlertDetails() {
       helpers: { canUseCases },
       ui: { getCasesContext },
     },
+    triggersActionsUi: { ruleTypeRegistry },
   } = useKibana<ObservabilityAppServices>().services;
+
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alert] = useFetchAlertDetail(alertId);
-
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases();
+  const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
+  useEffect(() => {
+    if (alert) {
+      setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
+    }
+  }, [alert, ruleTypeRegistry]);
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -47,7 +56,6 @@ export function AlertDetails() {
       }),
     },
   ]);
-
   // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
   if (!config.unsafe.alertDetails.enabled) {
     return <PageNotFound />;
@@ -80,7 +88,7 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
-
+  const AlertDetailsAppSection = ruleTypeModel?.alertDetailsAppSection;
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -99,6 +107,7 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <AlertSummary alert={alert} />
+      <AlertDetailsAppSection alert={alert} />
     </ObservabilityPageTemplate>
   );
 }

@@ -86,6 +86,7 @@ export function registerApmAlerts(
     ruleParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
     ),
+    alertDetailsAppSection: lazy(() => import('./alert_details_app_section')),
     validate: () => ({
       errors: [],
     }),
