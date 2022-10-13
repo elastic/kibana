@@ -1717,7 +1717,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.BULK_EDIT,
+          action: RuleAuditAction.BULK_DELETE,
           error,
         })
       );
@@ -1784,7 +1784,7 @@ export class RulesClient {
           await this.authorization.ensureAuthorized({
             ruleTypeId: ruleType,
             consumer,
-            operation: WriteOperations.BulkEdit,
+            operation: WriteOperations.BulkDelete,
             entity: AlertingAuthorizationEntity.Rule,
           });
         } catch (error) {
