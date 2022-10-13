@@ -31,7 +31,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   isDisabled?: boolean;
   cancelClickHandler?: React.ReactEventHandler;
   cancelUrl?: string;
-  cancelMessage: React.ReactElement;
+  cancelMessage?: React.ReactElement;
   actionMessage: React.ReactElement;
   onNext: () => void;
   noAnimation?: boolean;
@@ -89,7 +89,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
 };
 
 export const AgentStandaloneBottomBar: React.FC<{
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   cancelUrl?: string;
   onNext: () => void;
   noAnimation?: boolean;
