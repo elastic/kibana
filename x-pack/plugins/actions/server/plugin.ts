@@ -101,6 +101,9 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
+import { UnsecuredActionsClientAccessRegistry } from './unsecured_actions_client/unsecured_actions_client_access_registry';
+import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -117,6 +120,7 @@ export interface PluginSetupContract {
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+  registerUnsecuredActionsClientAccess(featureId: string): void;
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
@@ -137,6 +141,8 @@ export interface PluginStartContract {
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
   preconfiguredActions: PreConfiguredAction[];
+
+  getUnsecuredActionsClient(): Promise<PublicMethodsOf<UnsecuredActionsClient>>;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -188,6 +194,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly preconfiguredActions: PreConfiguredAction[];
   private inMemoryMetrics: InMemoryMetrics;
   private kibanaIndex?: string;
+  private unsecuredActionsClientAccessRegistry?: UnsecuredActionsClientAccessRegistry;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -265,6 +272,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+
+    this.unsecuredActionsClientAccessRegistry = new UnsecuredActionsClientAccessRegistry();
 
     setupSavedObjects(
       core.savedObjects,
@@ -361,6 +370,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         subActionFramework.registerConnector(connector);
       },
+      registerUnsecuredActionsClientAccess: (featureId: string) => {
+        this.unsecuredActionsClientAccessRegistry?.register(featureId);
+      },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.preconfiguredActions.find(
           (preconfigured) => preconfigured.id === connectorId
@@ -452,6 +464,29 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     };
 
+    const getUnsecuredActionsClient = async () => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create unsecured actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]);
+
+      return new UnsecuredActionsClient({
+        internalSavedObjectsRepository,
+        unsecuredActionsClientAccessRegistry: this.unsecuredActionsClientAccessRegistry!,
+        executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          connectorTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredConnectors: preconfiguredActions,
+        }),
+      });
+    };
+
     // Ensure the public API cannot be used to circumvent authorization
     // using our legacy exemption mechanism by passing in a legacy SO
     // as authorizationContext which would then set a Legacy AuthorizationMode
@@ -532,6 +567,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getUnsecuredActionsClient,
       preconfiguredActions,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),
