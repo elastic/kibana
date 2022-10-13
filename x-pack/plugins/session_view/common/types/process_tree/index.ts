@@ -72,6 +72,7 @@ export interface IOLine {
 export interface ProcessStartMarker {
   event: ProcessEvent;
   line: number;
+  maxBytesExceeded?: boolean;
 }
 
 export interface IOFields {

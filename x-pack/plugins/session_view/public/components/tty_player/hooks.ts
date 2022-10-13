@@ -110,6 +110,15 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
           newMarkers.push(processLineInfo);
         }
 
+        if (process.io.max_bytes_per_process_exceeded) {
+          const marker = newMarkers.find(
+            (item) => item.event.process?.entity_id === process.entity_id
+          );
+          if (marker) {
+            marker.maxBytesExceeded = true;
+          }
+        }
+
         const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
         const combinedLines = [splitLines[0]];
 

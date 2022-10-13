@@ -44,10 +44,9 @@ export const TTYPlayerControlsMarkers = ({
       return [];
     }
     return processStartMarkers.map(
-      ({ event, line }) =>
+      ({ event, line, maxBytesExceeded }) =>
         ({
-          type:
-            event.process?.io?.max_bytes_per_process_exceeded === true ? 'data_limited' : 'output',
+          type: maxBytesExceeded ? 'data_limited' : 'output',
           line,
           name: event.process?.name,
         } as TTYPlayerLineMarker)
