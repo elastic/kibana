@@ -49,6 +49,7 @@ import {
   createSavedQueryAlertType,
   createThresholdAlertType,
   createNewTermsAlertType,
+  createRiskAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -309,6 +310,26 @@ export const previewRulesRoute = async (
               savedQueryAlertType.executor,
               savedQueryAlertType.id,
               savedQueryAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'risk_score':
+            const riskAlertType = previewRuleTypeWrapper(
+              createRiskAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+            );
+            await runExecutors(
+              riskAlertType.executor,
+              riskAlertType.id,
+              riskAlertType.name,
               previewRuleParams,
               () => true,
               {

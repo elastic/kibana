@@ -36,6 +36,8 @@ import type {
   InternalRuleUpdate,
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
+  RiskSpecificRuleParams,
+  RiskRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import type {
@@ -49,6 +51,7 @@ import {
   machineLearningPatchParams,
   newTermsPatchParams,
   queryPatchParams,
+  riskPatchParams,
   savedQueryPatchParams,
   threatMatchPatchParams,
   thresholdPatchParams,
@@ -62,6 +65,7 @@ import type {
   NewTermsPatchParams,
   QueryPatchParams,
   ResponseTypeSpecific,
+  RiskPatchParams,
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
@@ -182,6 +186,18 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
+      };
+    }
+    case 'risk_score': {
+      return {
+        type: params.type,
+        language: params.language ?? 'kuery',
+        index: params.index,
+        dataViewId: params.data_view_id,
+        query: params.query ?? '',
+        filters: params.filters,
+        savedId: params.saved_id,
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     default: {
@@ -313,6 +329,22 @@ const patchNewTermsParams = (
   };
 };
 
+const patchRiskParams = (
+  params: RiskPatchParams,
+  existingRule: RiskRuleParams
+): RiskSpecificRuleParams => ({
+  type: existingRule.type,
+  language: params.language ?? existingRule.language,
+  index: params.index ?? existingRule.index,
+  dataViewId: params.data_view_id ?? existingRule.dataViewId,
+  query: params.query ?? existingRule.query,
+  filters: params.filters ?? existingRule.filters,
+  savedId: params.saved_id ?? existingRule.savedId,
+  responseActions:
+    params.response_actions?.map(transformRuleToAlertResponseAction) ??
+    existingRule.responseActions,
+});
+
 const parseValidationError = (error: string | null): BadRequestError => {
   if (error != null) {
     return new BadRequestError(error);
@@ -379,6 +411,13 @@ export const patchTypeSpecificSnakeToCamel = (
         throw parseValidationError(error);
       }
       return patchNewTermsParams(validated, existingRule);
+    }
+    case 'risk_score': {
+      const [validated, error] = validateNonExact(params, riskPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchRiskParams(validated, existingRule);
     }
     default: {
       return assertUnreachable(existingRule);
@@ -577,6 +616,18 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
       };
     }
     case 'saved_query': {
+      return {
+        type: params.type,
+        language: params.language,
+        index: params.index,
+        query: params.query,
+        filters: params.filters,
+        saved_id: params.savedId,
+        data_view_id: params.dataViewId,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+      };
+    }
+    case 'risk_score': {
       return {
         type: params.type,
         language: params.language,

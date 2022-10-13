@@ -12,6 +12,7 @@ import {
   ML_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
+  RISK_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from './rule_type_constants';
@@ -27,6 +28,7 @@ export const ruleTypeMappings = {
   threat_match: INDICATOR_RULE_TYPE_ID,
   threshold: THRESHOLD_RULE_TYPE_ID,
   new_terms: NEW_TERMS_RULE_TYPE_ID,
+  risk_score: RISK_RULE_TYPE_ID,
 };
 type RuleTypeMappings = typeof ruleTypeMappings;
 

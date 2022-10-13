@@ -113,6 +113,7 @@ export const getFilter = async ({
     case 'threat_match':
     case 'threshold':
     case 'new_terms':
+    case 'risk_score':
     case 'query': {
       return queryFilter();
     }

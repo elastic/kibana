@@ -12,3 +12,4 @@ export { createQueryAlertType } from './query/create_query_alert_type';
 export { createSavedQueryAlertType } from './saved_query/create_saved_query_alert_type';
 export { createThresholdAlertType } from './threshold/create_threshold_alert_type';
 export { createNewTermsAlertType } from './new_terms/create_new_terms_alert_type';
+export { createRiskAlertType } from './risk_score/create_risk_alert_type';

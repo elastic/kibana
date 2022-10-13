@@ -165,67 +165,36 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatMapping'
   | 'eqlOptions'
 >;
+type RiskRuleFields<T> = QueryRuleFields<T>;
 
-const isMlFields = <T>(
-  fields:
-    | QueryRuleFields<T>
-    | EqlQueryRuleFields<T>
-    | MlRuleFields<T>
-    | ThresholdRuleFields<T>
-    | ThreatMatchRuleFields<T>
-    | NewTermsRuleFields<T>
-): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
-
-const isThresholdFields = <T>(
-  fields:
-    | QueryRuleFields<T>
-    | EqlQueryRuleFields<T>
-    | MlRuleFields<T>
-    | ThresholdRuleFields<T>
-    | ThreatMatchRuleFields<T>
-    | NewTermsRuleFields<T>
-): fields is ThresholdRuleFields<T> => has('threshold', fields);
-
-const isThreatMatchFields = <T>(
-  fields:
-    | QueryRuleFields<T>
-    | EqlQueryRuleFields<T>
-    | MlRuleFields<T>
-    | ThresholdRuleFields<T>
-    | ThreatMatchRuleFields<T>
-    | NewTermsRuleFields<T>
-): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
-
-const isNewTermsFields = <T>(
-  fields:
-    | QueryRuleFields<T>
-    | EqlQueryRuleFields<T>
-    | MlRuleFields<T>
-    | ThresholdRuleFields<T>
-    | ThreatMatchRuleFields<T>
-    | NewTermsRuleFields<T>
-): fields is NewTermsRuleFields<T> => has('newTermsFields', fields);
-
-const isEqlFields = <T>(
-  fields:
-    | QueryRuleFields<T>
-    | EqlQueryRuleFields<T>
-    | MlRuleFields<T>
-    | ThresholdRuleFields<T>
-    | ThreatMatchRuleFields<T>
-    | NewTermsRuleFields<T>
-): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
-
-export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
-  fields: T,
-  type: Type
-):
+type RuleFieldsUnion<T> =
   | QueryRuleFields<T>
   | EqlQueryRuleFields<T>
   | MlRuleFields<T>
   | ThresholdRuleFields<T>
   | ThreatMatchRuleFields<T>
-  | NewTermsRuleFields<T> => {
+  | NewTermsRuleFields<T>
+  | RiskRuleFields<T>;
+
+const isMlFields = <T>(fields: RuleFieldsUnion<T>): fields is MlRuleFields<T> =>
+  has('anomalyThreshold', fields);
+
+const isThresholdFields = <T>(fields: RuleFieldsUnion<T>): fields is ThresholdRuleFields<T> =>
+  has('threshold', fields);
+
+const isThreatMatchFields = <T>(fields: RuleFieldsUnion<T>): fields is ThreatMatchRuleFields<T> =>
+  has('threatIndex', fields);
+
+const isNewTermsFields = <T>(fields: RuleFieldsUnion<T>): fields is NewTermsRuleFields<T> =>
+  has('newTermsFields', fields);
+
+const isEqlFields = <T>(fields: RuleFieldsUnion<T>): fields is EqlQueryRuleFields<T> =>
+  has('eqlOptions', fields);
+
+export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
+  fields: T,
+  type: Type
+): RuleFieldsUnion<T> => {
   switch (type) {
     case 'machine_learning':
       const {
@@ -267,6 +236,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
       return threatMatchRuleFields;
     case 'query':
     case 'saved_query':
+    case 'risk_score':
       const {
         anomalyThreshold: _a,
         machineLearningJobId: _m,
@@ -440,7 +410,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: undefined,
-        type: 'query' as Type,
         // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
         ...(['query', 'saved_query'].includes(ruleType) &&
           ruleFields.queryBar?.saved_id &&

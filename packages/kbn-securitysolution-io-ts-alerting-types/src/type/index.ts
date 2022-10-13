@@ -12,6 +12,7 @@ export const type = t.keyof({
   eql: null,
   machine_learning: null,
   query: null,
+  risk_score: null,
   saved_query: null,
   threshold: null,
   threat_match: null,

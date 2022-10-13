@@ -16,6 +16,7 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isNewTermsRule,
+  isRiskRule,
 } from '../../../../../common/detection_engine/utils';
 import type { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -50,6 +51,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
   const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
+  const setRisk = useCallback(() => setType('risk_score'), [setType]);
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
   });
@@ -101,6 +103,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isSelected: isNewTermsRule(ruleType),
     }),
     [ruleType, setNewTerms]
+  );
+
+  const riskSelectableConfig = useMemo(
+    () => ({
+      onClick: setRisk,
+      isSelected: isRiskRule(ruleType),
+    }),
+    [ruleType, setRisk]
   );
 
   return (
@@ -191,6 +201,19 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="magnifyWithPlus" />}
               selectable={newTermsSelectableConfig}
+              layout="horizontal"
+            />
+          </EuiFlexItem>
+        )}
+        {(!isUpdateView || riskSelectableConfig.isSelected) && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="RiskRuleType"
+              title={i18n.RISK_TYPE_TITLE}
+              titleSize="xs"
+              description={i18n.RISK_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="magnifyWithExclamation" />}
+              selectable={riskSelectableConfig}
               layout="horizontal"
             />
           </EuiFlexItem>
