@@ -20,6 +20,7 @@ export interface Layer {
   indexPatternId: string;
   layerId: string;
   columns: Column[];
+  metrics: string[];
   columnOrder: never[];
   seriesId: string;
   isReferenceLineLayer: boolean;
@@ -57,6 +58,11 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     timefilter,
     timeRange: timefilter.getAbsoluteTime(),
   });
+
+  // doesn't support multi split series
+  if (visSchemas.group && visSchemas.group.length > 1) {
+    return null;
+  }
 
   const firstValueAxesId = vis.params.valueAxes[0].id;
   const updatedSeries = getSeriesParams(
@@ -146,6 +152,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       indexPatternId,
       layerId,
       columns: l.columns.map(excludeMetaFromColumn),
+      metrics: l.metrics,
       columnOrder: [],
       seriesId: series?.data.id!,
       collapseFn,
@@ -154,11 +161,13 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
   });
 
   if (vis.params.thresholdLine.show) {
+    const staticValueColumn = createStaticValueColumn(vis.params.thresholdLine.value || 0);
     layers.push({
       indexPatternId,
       layerId: uuid.default(),
-      columns: [createStaticValueColumn(vis.params.thresholdLine.value || 0)],
+      columns: [staticValueColumn],
       columnOrder: [],
+      metrics: [staticValueColumn.columnId],
       isReferenceLineLayer: true,
       collapseFn: undefined,
       seriesId: '',

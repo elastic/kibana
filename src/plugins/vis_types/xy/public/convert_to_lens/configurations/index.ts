@@ -113,12 +113,6 @@ function getDataLayers(
 ): XYDataLayerConfig[] {
   return layers.map((layer) => {
     const xColumn = layer.columns.find((c) => c.isBucketed && !c.isSplit);
-    const yAccessors = layer.columns.reduce<string[]>((acc, column) => {
-      if (!column.isBucketed) {
-        acc.push(column.columnId);
-      }
-      return acc;
-    }, []);
     const splitAccessor = layer.columns.find(
       (column) => column.isBucketed && column.isSplit
     )?.columnId;
@@ -134,15 +128,15 @@ function getDataLayers(
     const seriesType = getSeriesType(serie?.type, serie?.mode, isHorizontal, isPercentage);
     return {
       layerId: layer.layerId,
-      accessors: yAccessors,
+      accessors: layer.metrics,
       layerType: 'data',
       seriesType,
       xAccessor: xColumn?.columnId,
       simpleView: false,
       splitAccessor,
       palette: vis.params.palette ?? vis.type.visConfig.defaults.palette,
-      yConfig: yAccessors.map((accessor) => ({
-        forAccessor: accessor,
+      yConfig: layer.metrics.map((metricId) => ({
+        forAccessor: metricId,
         axisMode: getYAxisPosition(yAxis?.position ?? 'left'),
       })),
       xScaleType: getXScaleType(xColumn),
@@ -153,15 +147,7 @@ function getDataLayers(
 }
 
 function getReferenceLineLayers(
-  layers: Array<{
-    indexPatternId: string;
-    layerId: string;
-    columns: Column[];
-    columnOrder: never[];
-    seriesId: string;
-    isReferenceLineLayer: boolean;
-    collapseFn?: string;
-  }>,
+  layers: Layer[],
   vis: Vis<VisParams>
 ): XYReferenceLineLayerConfig[] {
   const thresholdLineConfig = vis.params.thresholdLine ?? vis.type.visConfig.defaults.thresholdLine;
@@ -171,10 +157,10 @@ function getReferenceLineLayers(
     return {
       layerType: 'referenceLine',
       layerId: layer.layerId,
-      accessors: layer.columns.map((c) => c.columnId),
-      yConfig: layer.columns.map((c) => {
+      accessors: layer.metrics,
+      yConfig: layer.metrics.map((metricId) => {
         return {
-          forAccessor: c.columnId,
+          forAccessor: metricId,
           axisMode: getYAxisPosition(yAxis?.position ?? 'left'),
           color: thresholdLineConfig.color,
           lineWidth: thresholdLineConfig.width !== null ? thresholdLineConfig.width : undefined,
@@ -261,6 +247,7 @@ export const getConfiguration = (
     xTitle: xAxis.title.text,
     valueLabels:
       vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
+    valuesInLegend: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show),
     curveType: getCurveType(
       series[0].interpolate === InterpolationMode.StepAfter
         ? InterpolationMode.Linear

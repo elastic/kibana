@@ -49,6 +49,16 @@ describe('convertToLens', () => {
     expect(result).toBeNull();
   });
 
+  test('should return null if  multi split series defined', async () => {
+    mockGetVisSchemas.mockReturnValue({
+      metric: [{ aggId: '1' }],
+      group: [{}, {}],
+    });
+    const result = await convertToLens(sampleAreaVis as any, { getAbsoluteTime: () => {} } as any);
+    expect(mockGetVisSchemas).toBeCalledTimes(1);
+    expect(result).toBeNull();
+  });
+
   test('should return null if sibling pipeline agg defined together with split series', async () => {
     mockGetColumnsFromVis.mockReturnValue([
       {

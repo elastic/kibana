@@ -434,6 +434,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
+    valuesInLegend: vis.params.labels.show,
     singleTable: true,
   });
 
