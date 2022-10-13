@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { blue } from 'chalk';
+import { HORIZONTAL_LINE } from '../../common/constants';
+import { RunServiceStatus } from './components/run_service_status_formatter';
+import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
 import { TOOL_TITLE } from '../constants';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
 import type { DataFormatter } from '../../common/screen';
-import { ScreenBaseClass } from '../../common/screen';
+import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
 
 export class ActionResponderScreen extends ScreenBaseClass {
   constructor(private readonly emulatorContext: EmulatorRunContext) {
@@ -20,17 +24,24 @@ export class ActionResponderScreen extends ScreenBaseClass {
   }
 
   protected body(): string | DataFormatter {
+    const isServiceRunning = this.emulatorContext.getActionResponderService().isRunning;
+    const actionsAndStatus = new ColumnLayoutFormatter([
+      new ChoiceMenuFormatter([isServiceRunning ? 'Stop Service' : 'Start Service']),
+      `Status:                ${new RunServiceStatus(isServiceRunning).output}`,
+    ]);
+
     return `Service checks for new Endpoint Actions and automatically responds to them.
   The following tokens can be used in the Action request 'comment' to drive
   the type of response that is sent:
   Token                         Description
-  ---------------------------   -------------------------------------------------------
-  RESPOND.STATE=SUCCESS         Will ensure the Endpoint Action response is success
-  RESPOND.STATE=FAILURE         Will ensure the Endpoint Action response is a failure
-  RESPOND.FLEET.STATE=SUCCESS   Will ensure the Fleet Action response is success
-  RESPOND.FLEET.STATE=FAILURE   Will ensure the Fleet Action response is a failure
+  ---------------------------   ------------------------------------
+  RESPOND.STATE=SUCCESS         Respond with success
+  RESPOND.STATE=FAILURE         Respond with failure
+  RESPOND.FLEET.STATE=SUCCESS   Respond to Fleet Action with success
+  RESPOND.FLEET.STATE=FAILURE   Respond to Fleet Action with failure
 
-`;
+${blue(HORIZONTAL_LINE.substring(0, HORIZONTAL_LINE.length - 2))}
+  ${actionsAndStatus.output}`;
   }
 
   protected onEnterChoice(choice: string) {
@@ -39,6 +50,14 @@ export class ActionResponderScreen extends ScreenBaseClass {
     switch (choiceValue) {
       case 'Q':
         this.hide();
+
+      case '1':
+        this.emulatorContext.getActionResponderService().stop();
+        this.reRender();
+        return;
+
+      default:
+        this.throwUnknownChoiceError(choice);
     }
   }
 }

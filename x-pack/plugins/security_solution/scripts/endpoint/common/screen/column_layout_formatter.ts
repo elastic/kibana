@@ -56,7 +56,11 @@ export class ColumnLayoutFormatter extends DataFormatter {
         .map((columnDataRows, colIndex) => {
           return this.fillColumnToWidth(columnDataRows[rowIndex] ?? '', columnSizes[colIndex]);
         })
-        .join(colSeparator)}\n`;
+        .join(colSeparator)}`;
+
+      if (row !== rowCount) {
+        output += '\n';
+      }
     }
 
     return output;

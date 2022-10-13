@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { bgCyan, red } from 'chalk';
 import { ActionResponderScreen } from './actions_responder';
 import { SCREEN_ROW_MAX_WIDTH } from '../../common/screen/constants';
 import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
@@ -14,6 +13,7 @@ import { LoadEndpointsScreen } from './load_endpoints';
 import { TOOL_TITLE } from '../constants';
 import { ScreenBaseClass, ChoiceMenuFormatter } from '../../common/screen';
 import type { DataFormatter } from '../../common/screen/data_formatter';
+import { RunServiceStatus } from './components/run_service_status_formatter';
 
 export class MainScreen extends ScreenBaseClass {
   private readonly loadEndpointsScreen: LoadEndpointsScreen;
@@ -51,8 +51,8 @@ export class MainScreen extends ScreenBaseClass {
       [
         ['Agent Keep Alive Service', 'Actions Responder Service'].join('\n'),
         [
-          this.getRunServiceOutputStatus(context.getAgentKeepAliveService().isRunning),
-          this.getRunServiceOutputStatus(context.getActionResponderService().isRunning),
+          new RunServiceStatus(context.getAgentKeepAliveService()).output,
+          new RunServiceStatus(context.getActionResponderService()).output,
         ].join('\n'),
       ],
       {
@@ -61,14 +61,6 @@ export class MainScreen extends ScreenBaseClass {
         widths: [70, 30],
       }
     );
-  }
-
-  private getRunServiceOutputStatus(isRunning: boolean) {
-    if (isRunning) {
-      return bgCyan(' Running ');
-    }
-
-    return red(' Stopped ');
   }
 
   protected footer(): string | DataFormatter {

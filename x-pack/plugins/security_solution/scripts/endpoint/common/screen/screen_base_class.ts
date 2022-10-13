@@ -193,7 +193,7 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
 
       // TODO:PT experiment with using `rl.prompt()` instead of `question()` and possibly only initialize `rl` once
 
-      rl.question(prompt ?? 'Enter choice: ', (selection) => {
+      rl.question(green(prompt ?? 'Enter choice: '), (selection) => {
         if (this.isPaused || this.isHidden) {
           return;
         }
