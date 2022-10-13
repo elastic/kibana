@@ -14,5 +14,5 @@ export type { ControlGroupInput, ControlGroupOutput } from './types';
 export { CONTROL_GROUP_TYPE } from './types';
 export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
 
-export { ControlGroupRendererProps } from './control_group_renderer';
+export type { ControlGroupRendererProps } from './control_group_renderer';
 export const LazyControlGroupRenderer = React.lazy(() => import('./control_group_renderer'));
