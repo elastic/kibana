@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
+import { EuiPopover, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 interface GuideButtonPopoverProps {
