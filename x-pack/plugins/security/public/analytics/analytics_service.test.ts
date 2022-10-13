@@ -34,9 +34,12 @@ describe('AnalyticsService', () => {
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
+    const { analytics, http } = coreMock.createSetup();
+
     analyticsService.setup({
       authc,
-      analytics: coreMock.createSetup().analytics,
+      analytics,
+      http,
       securityLicense: licenseMock.create({ allowLogin: true }),
     });
     analyticsService.start({ http: mockCore.http });
@@ -63,9 +66,12 @@ describe('AnalyticsService', () => {
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
+    const { analytics, http } = coreMock.createSetup();
+
     analyticsService.setup({
       authc,
-      analytics: coreMock.createSetup().analytics,
+      analytics,
+      http,
       securityLicense: licenseMock.create(licenseFeatures$.asObservable()),
     });
     analyticsService.start({ http: mockCore.http });
@@ -116,9 +122,12 @@ describe('AnalyticsService', () => {
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
+    const { analytics, http } = coreMock.createSetup();
+
     analyticsService.setup({
       authc,
-      analytics: coreMock.createSetup().analytics,
+      analytics,
+      http,
       securityLicense: licenseMock.create({ allowLogin: true }),
     });
     analyticsService.start({ http: mockCore.http });
@@ -141,9 +150,12 @@ describe('AnalyticsService', () => {
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
+    const { analytics, http } = coreMock.createSetup();
+
     analyticsService.setup({
       authc,
-      analytics: coreMock.createSetup().analytics,
+      analytics,
+      http,
       securityLicense: licenseMock.create({ allowLogin: false }),
     });
     analyticsService.start({ http: mockCore.http });
@@ -167,9 +179,12 @@ describe('AnalyticsService', () => {
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
+    const { analytics, http } = coreMock.createSetup();
+
     analyticsService.setup({
       authc,
-      analytics: coreMock.createSetup().analytics,
+      analytics,
+      http,
       securityLicense: licenseMock.create({ allowLogin: true }),
     });
     analyticsService.start({ http: mockCore.http });
@@ -183,6 +198,44 @@ describe('AnalyticsService', () => {
     );
     expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toBe(
       mockCurrentAuthTypeInfo
+    );
+  });
+
+  it('does not register the analytics context provider if the page is anonymous', () => {
+    const authc = authenticationMock.createSetup();
+    const { analytics, http } = coreMock.createSetup();
+
+    http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+    analyticsService.setup({
+      authc,
+      analytics,
+      http,
+      securityLicense: licenseMock.create({ allowLogin: false }),
+    });
+
+    expect(analytics.registerContextProvider).not.toHaveBeenCalled();
+  });
+
+  it('registers the user_id analytics context provider if the page is not anonymous', () => {
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
+    const { analytics, http } = coreMock.createSetup();
+
+    http.anonymousPaths.isAnonymous.mockReturnValue(false);
+
+    analyticsService.setup({
+      authc,
+      analytics,
+      http,
+      securityLicense: licenseMock.create({ allowLogin: false }),
+    });
+
+    expect(analytics.registerContextProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'user_id',
+      })
     );
   });
 });
