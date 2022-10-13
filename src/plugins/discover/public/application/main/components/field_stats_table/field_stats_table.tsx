@@ -21,7 +21,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AvailableFields$, DataTotalHits$ } from '../../services/discover_data_state_container';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
@@ -67,6 +66,14 @@ export interface FieldStatisticsTableProps {
    */
   savedSearch?: SavedSearch;
   /**
+   * Optional query to update the table content
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Filters query to update the table content
+   */
+  filters?: Filter[];
+  /**
    * State container with persisted settings
    */
   stateContainer?: DiscoverStateContainer;
@@ -90,16 +97,15 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     availableFields$,
     dataView,
     savedSearch,
+    query,
     columns,
+    filters,
     stateContainer,
     onAddFilter,
     trackUiMetric,
     searchSessionId,
     savedSearchDataTotalHits$,
   } = props;
-  const query = useAppStateSelector((state) => state.query);
-  const filters = useAppStateSelector((state) => state.filters);
-
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable

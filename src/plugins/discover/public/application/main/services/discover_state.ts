@@ -196,11 +196,10 @@ export function getDiscoverStateContainer({
         const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();
         if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
           addLog("🧭 [discoverState] onOpenSavedSearch just reset since id didn't change");
-          await savedSearchContainer.reset(currentSavedSearch.id);
+          const nextSavedSearch = await savedSearchContainer.reset(currentSavedSearch.id);
+          await appStateContainer.reset(nextSavedSearch);
         } else {
           addLog('🧭 [discoverState] onOpenSavedSearch open view URL');
-          // await savedSearchContainer.resetUrl(newSavedSearchId);
-          // dataStateContainer.reset();
           history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
         }
       },
