@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiLoadingContent,
   EuiToolTip,
   EuiSpacer,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import { usePendingActionsStatuses } from '../../endpoint_list/hooks/use_pending_actions_statuses';
 import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 
@@ -32,23 +32,10 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     refetchInterval: 10000,
   });
 
-  const pendingActionRequests = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingActions'>
-  >(() => {
-    const pendingActions = endpointPendingActions?.data?.[0].pending_actions;
-    return {
-      pendingActions: {
-        pendingIsolate: pendingActions?.isolate ?? 0,
-        pendingUnIsolate: pendingActions?.unisolate ?? 0,
-        pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
-        pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
-        pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
-      },
-    };
-  }, [endpointPendingActions?.data]);
+  const pendingActionRequests = usePendingActionsStatuses(endpointPendingActions);
 
   if (isFetching && endpointPendingActions === undefined) {
-    return <EuiLoadingContent lines={2} />;
+    return <EuiSkeletonText lines={2} />;
   }
 
   if (!endpointDetails) {

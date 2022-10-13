@@ -30,7 +30,6 @@ import type {
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import type { AppAction } from '../../../../common/store/actions';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
@@ -45,13 +44,7 @@ import {
   sendGetEndpointSecurityPackage,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
-import type {
-  AgentIdsPendingActions,
-  EndpointState,
-  PolicyIds,
-  TransformStats,
-  TransformStatsResponse,
-} from '../types';
+import type { EndpointState, PolicyIds, TransformStats, TransformStatsResponse } from '../types';
 import type { EndpointPackageInfoStateChanged } from './action';
 import {
   endpointPackageInfo,
@@ -60,10 +53,8 @@ import {
   getIsEndpointPackageInfoUninitialized,
   getIsIsolationRequestPending,
   getMetadataTransformStats,
-  hasSelectedEndpoint,
   isMetadataTransformStatsLoading,
   isOnEndpointPage,
-  listData,
   nonExistingPolicies,
   patterns,
   searchBarQuery,
@@ -119,16 +110,9 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     // Endpoint list
     if (
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
-      isOnEndpointPage(getState()) &&
-      !hasSelectedEndpoint(getState())
+      isOnEndpointPage(getState())
     ) {
-      await endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
-    }
-
-    // Endpoint Details
-    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState())) {
-      const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
-      await endpointDetailsMiddleware({ store, coreStart, selectedEndpoint });
+      await endpointListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Isolate Host
@@ -307,54 +291,7 @@ async function getEndpointPackageInfo(
   }
 }
 
-/**
- * retrieves the Endpoint pending actions for all of the existing endpoints being displayed on the list
- * or the details tab.
- *
- * @param store
- */
-const loadEndpointsPendingActions = async ({
-  getState,
-  dispatch,
-}: EndpointPageStore): Promise<void> => {
-  const state = getState();
-  const detailsEndpoint = detailsData(state);
-  const listEndpoints = listData(state);
-  const agentsIds = new Set<string>();
-
-  // get all agent ids for the endpoints in the list
-  if (detailsEndpoint) {
-    agentsIds.add(detailsEndpoint.elastic.agent.id);
-  }
-
-  for (const endpointInfo of listEndpoints) {
-    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
-  }
-
-  if (agentsIds.size === 0) {
-    return;
-  }
-
-  try {
-    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
-    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
-
-    for (const pendingAction of pendingActions) {
-      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
-    }
-
-    dispatch({
-      type: 'endpointPendingActionsStateChanged',
-      payload: createLoadedResourceState(agentIdToPendingActions),
-    });
-  } catch (error) {
-    // TODO should handle the error instead of logging it to the browser
-    // Also this is an anti-pattern we shouldn't use
-    logError(error);
-  }
-};
-
-async function endpointDetailsListMiddleware({
+async function endpointListMiddleware({
   store,
   coreStart,
   fetchIndexPatterns,
@@ -383,8 +320,6 @@ async function endpointDetailsListMiddleware({
       type: 'serverReturnedEndpointList',
       payload: endpointResponse,
     });
-
-    loadEndpointsPendingActions(store);
 
     dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {
@@ -457,53 +392,6 @@ async function endpointDetailsListMiddleware({
     dispatch({
       type: 'serverReturnedEndpointExistValue',
       payload: true,
-    });
-  }
-}
-
-async function endpointDetailsMiddleware({
-  coreStart,
-  selectedEndpoint,
-  store,
-}: {
-  coreStart: CoreStart;
-  selectedEndpoint?: string;
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-}) {
-  const { getState, dispatch } = store;
-  dispatch({
-    type: 'serverCancelledPolicyItemsLoading',
-  });
-
-  if (typeof selectedEndpoint === 'undefined') {
-    return;
-  }
-  // If user navigated directly to a endpoint details page, load the endpoint list
-  if (listData(getState()).length === 0) {
-    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-    try {
-      const response = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
-        query: {
-          page: pageIndex,
-          pageSize,
-        },
-      });
-
-      dispatch({
-        type: 'serverReturnedEndpointList',
-        payload: response,
-      });
-
-      dispatchIngestPolicies({ http: coreStart.http, hosts: response.data, store });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnEndpointList',
-        payload: error,
-      });
-    }
-  } else {
-    dispatch({
-      type: 'serverCancelledEndpointListLoading',
     });
   }
 }
