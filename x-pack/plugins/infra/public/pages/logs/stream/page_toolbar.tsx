@@ -16,7 +16,6 @@ import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
 import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights/log_highlights';
 import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
@@ -26,14 +25,7 @@ export const LogsToolbar = () => {
   const { derivedDataView } = useLogViewContext();
   const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } =
     useLogViewConfigurationContext();
-  const { setSurroundingLogsId } = useLogEntryFlyoutContext();
   const {
-    http,
-    notifications,
-    docLinks,
-    uiSettings,
-    data,
-    storage,
     unifiedSearch: {
       ui: { SearchBar },
     },
