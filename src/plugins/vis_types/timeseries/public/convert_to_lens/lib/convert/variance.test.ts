@@ -22,7 +22,9 @@ describe('convertVarianceToFormulaColumn', () => {
   };
   const field = dataView.fields[0].name;
 
-  test.each<[string, Parameters<typeof convertVarianceToFormulaColumn>, FormulaColumn | null]>([
+  test.each<
+    [string, Parameters<typeof convertVarianceToFormulaColumn>, Partial<FormulaColumn> | null]
+  >([
     ['null if field is not provided', [{ series, metrics: [metric], dataView }], null],
     [
       'correct formula column',
