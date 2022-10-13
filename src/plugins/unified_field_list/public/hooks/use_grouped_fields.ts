@@ -21,11 +21,13 @@ import { type ExistingFieldsReader } from './use_existing_fields';
 
 const defaultFieldGroups: {
   specialFields: DataViewField[];
+  selectedFields: DataViewField[];
   availableFields: DataViewField[];
   emptyFields: DataViewField[];
   metaFields: DataViewField[];
 } = {
   specialFields: [],
+  selectedFields: [],
   availableFields: [],
   emptyFields: [],
   metaFields: [],
@@ -42,6 +44,7 @@ export interface GroupedFieldsParams {
     groupName: FieldsGroupNames
   ) => Partial<FieldsGroupDetails> | undefined | null;
   onSupportedFieldFilter?: (field: DataViewField) => boolean;
+  onSelectedFieldFilter?: (field: DataViewField) => boolean;
   onFilterField?: (field: DataViewField) => boolean;
 }
 
@@ -56,6 +59,7 @@ export const useGroupedFields = ({
   fieldsExistenceReader,
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
+  onSelectedFieldFilter,
   onFilterField,
 }: GroupedFieldsParams): GroupedFieldsResult => {
   const [dataView, setDataView] = useState<DataView | null>(null);
@@ -81,6 +85,9 @@ export const useGroupedFields = ({
     const allSupportedTypesFields = onSupportedFieldFilter
       ? allFields.filter(onSupportedFieldFilter)
       : allFields;
+    const selectedFields = onSelectedFieldFilter
+      ? allSupportedTypesFields.filter(onSelectedFieldFilter)
+      : allSupportedTypesFields;
     const sorted = allSupportedTypesFields.sort(sortFields);
     const groupedFields = {
       ...defaultFieldGroups,
@@ -105,6 +112,19 @@ export const useGroupedFields = ({
         showInAccordion: false,
         title: '',
         hideDetails: true,
+      },
+      SelectedFields: {
+        fields: selectedFields,
+        fieldCount: selectedFields.length,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.selectedFieldsLabel', {
+          defaultMessage: 'Selected fields',
+        }),
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: true,
+        hideDetails: false,
+        hideIfEmpty: true,
       },
       AvailableFields: {
         fields: groupedFields.availableFields,
@@ -200,6 +220,7 @@ export const useGroupedFields = ({
   }, [
     allFields,
     onSupportedFieldFilter,
+    onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
     dataView,
     dataViewId,

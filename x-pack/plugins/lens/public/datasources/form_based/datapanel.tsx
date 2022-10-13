@@ -313,19 +313,29 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [nameFilter, typeFilter]
   );
 
-  const onFilterField = (field: IndexPatternField | DataViewField) => {
-    if (
-      localState.nameFilter.length &&
-      !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
-      !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
-    ) {
-      return false;
-    }
-    if (localState.typeFilter.length > 0) {
-      return localState.typeFilter.includes(getFieldType(field) as DataType);
-    }
-    return true;
-  };
+  const onSelectedFieldFilter = useCallback(
+    (field: IndexPatternField | DataViewField): boolean => {
+      return Boolean(layerFields?.includes(field.name));
+    },
+    [layerFields]
+  );
+
+  const onFilterField = useCallback(
+    (field: IndexPatternField | DataViewField) => {
+      if (
+        localState.nameFilter.length &&
+        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+        !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
+      ) {
+        return false;
+      }
+      if (localState.typeFilter.length > 0) {
+        return localState.typeFilter.includes(getFieldType(field) as DataType);
+      }
+      return true;
+    },
+    [localState]
+  );
 
   const { fieldGroups } = useGroupedFields({
     dataViewId: currentIndexPatternId,
@@ -336,6 +346,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     fieldsExistenceReader,
     onFilterField,
     onSupportedFieldFilter,
+    onSelectedFieldFilter,
     onOverrideFieldGroupDetails: (groupName) => {
       if (groupName === FieldsGroupNames.AvailableFields) {
         const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
@@ -350,6 +361,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
                 defaultMessage:
                   'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
               }),
+          isAffectedByGlobalFilter: !!filters.length,
+        };
+      }
+      if (groupName === FieldsGroupNames.SelectedFields) {
+        return {
           isAffectedByGlobalFilter: !!filters.length,
         };
       }

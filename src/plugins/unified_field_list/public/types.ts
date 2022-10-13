@@ -28,6 +28,7 @@ export enum ExistenceFetchStatus {
 
 export enum FieldsGroupNames {
   SpecialFields = 'SpecialFields',
+  SelectedFields = 'SelectedFields',
   AvailableFields = 'AvailableFields',
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
@@ -42,6 +43,7 @@ export interface FieldsGroupDetails {
   isAffectedByTimeFilter: boolean;
   hideDetails?: boolean;
   defaultNoFieldsMessage?: string;
+  hideIfEmpty?: boolean;
 }
 
 export interface FieldsGroup extends FieldsGroupDetails {
