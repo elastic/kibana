@@ -568,14 +568,14 @@ export class SessionService {
       this.state.transitions.store(searchSessionSavedObject);
 
       // trigger a poll for all the searches that are not yet stored to propagate them into newly created search session saved object and extend their keepAlive
-      const notStoredSearches = this.state
+      const searchesToExtend = this.state
         .get()
         .trackedSearches.filter(
           (s) => s.state !== TrackedSearchState.Errored && !s.searchMeta.isStored
         );
 
-      const pollNotStoredSearchesPromise = Promise.all(
-        notStoredSearches.map((s) =>
+      const extendSearchesPromise = Promise.all(
+        searchesToExtend.map((s) =>
           s.searchDescriptor.poll().catch((e) => {
             // eslint-disable-next-line no-console
             console.warn('Failed to extend search after session was saved', e);
@@ -599,7 +599,7 @@ export class SessionService {
         })
       );
 
-      await pollNotStoredSearchesPromise;
+      await extendSearchesPromise;
     }
   }
 
