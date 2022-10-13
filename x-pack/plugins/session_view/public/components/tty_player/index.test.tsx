@@ -95,12 +95,8 @@ describe('TTYPlayer component', () => {
         userEvent.click(seekToEndBtn);
       });
 
-      await waitFor(() => {
-        expect(
-          renderResult.queryByTestId('sessionView:TTYPlayer')?.querySelector('.xterm-rows')
-        ).toHaveTextContent('Data limit reached');
-        expect(renderResult.queryByText('[ VIEW POLICIES ]')).toBeFalsy();
-      });
+      waitFor(() => expect(renderResult.queryAllByText('Data limit reached')).toHaveLength(1));
+      expect(renderResult.queryByText('[ VIEW POLICIES ]')).toBeFalsy();
     });
 
     it('renders a message warning when max_bytes exceeded with link to policies page', async () => {
@@ -117,9 +113,7 @@ describe('TTYPlayer component', () => {
         userEvent.click(seekToEndBtn);
       });
 
-      await waitFor(() => {
-        expect(renderResult.queryByText('[ VIEW POLICIES ]')).toBeFalsy();
-      });
+      waitFor(() => expect(renderResult.queryAllByText('[ VIEW POLICIES ]')).toHaveLength(1));
     });
   });
 });
