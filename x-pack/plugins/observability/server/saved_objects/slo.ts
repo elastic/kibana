@@ -33,8 +33,7 @@ export const slo: SavedObjectsType = {
           is_rolling: { type: 'boolean' },
           calendar: {
             properties: {
-              start_time: { type: 'text' },
-              time_zone: { type: 'keyword' },
+              start_time: { type: 'date' },
             },
           },
         },

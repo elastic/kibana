@@ -107,8 +107,7 @@ describe('SLIClient', () => {
           time_window: {
             duration: new Duration(1, DurationUnit.M),
             calendar: {
-              start_time: '2022-09-01T00:00',
-              time_zone: 'Europe/Berlin',
+              start_time: new Date('2022-09-01T00:00:00.000Z'),
             },
           },
         });

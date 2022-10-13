@@ -9,41 +9,32 @@ import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { dateTimeType } from './common';
+import { dateType } from './common';
 import { Duration, DurationUnit } from './duration';
 
 describe('Schema', () => {
-  describe('DateTime', () => {
+  describe('DateType', () => {
     it('encodes', () => {
-      expect(dateTimeType.encode('2022-06-01T08:00')).toEqual('2022-06-01T08:00');
+      expect(dateType.encode(new Date('2022-06-01T08:00:00.000Z'))).toEqual(
+        '2022-06-01T08:00:00.000Z'
+      );
     });
 
     it('decodes', () => {
       expect(
         pipe(
-          dateTimeType.decode('2022-06-01T08:00'),
+          dateType.decode('2022-06-01T08:00:00.000Z'),
           fold((e) => {
             throw new Error('irrelevant');
           }, t.identity)
         )
-      ).toEqual('2022-06-01T08:00');
+      ).toEqual(new Date('2022-06-01T08:00:00.000Z'));
     });
 
-    it('fails decoding when seconds are provided', () => {
+    it('fails decoding when invalid date', () => {
       expect(() =>
         pipe(
-          dateTimeType.decode('2022-06-01T08:00:23'),
-          fold((e) => {
-            throw new Error('decode');
-          }, t.identity)
-        )
-      ).toThrow(new Error('decode'));
-    });
-
-    it('fails decoding when offset are provided', () => {
-      expect(() =>
-        pipe(
-          dateTimeType.decode('2022-06-01T08:00+03:00'),
+          dateType.decode('invalid date'),
           fold((e) => {
             throw new Error('decode');
           }, t.identity)

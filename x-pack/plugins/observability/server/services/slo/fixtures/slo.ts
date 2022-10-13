@@ -79,7 +79,7 @@ export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO 
   return createSLO({
     time_window: {
       duration: new Duration(7, DurationUnit.d),
-      calendar: { start_time: '2022-10-01T00:00', time_zone: 'America/Chicago' },
+      calendar: { start_time: new Date('2022-10-01T00:00:00.000Z') },
     },
     ...params,
   });

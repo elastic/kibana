@@ -6,23 +6,19 @@
  */
 
 import * as t from 'io-ts';
-import { dateTimeType } from './common';
+import { dateType } from './common';
 import { durationType } from './duration';
 
 const rollingTimeWindowSchema = t.type({
+  duration: durationType,
   is_rolling: t.literal<boolean>(true),
 });
 
 const calendarAlignedTimeWindowSchema = t.type({
-  calendar: t.type({
-    start_time: dateTimeType,
-    time_zone: t.string,
-  }),
+  duration: durationType,
+  calendar: t.type({ start_time: dateType }),
 });
 
-const timeWindowSchema = t.intersection([
-  t.type({ duration: durationType }),
-  t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]),
-]);
+const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);
 
 export { rollingTimeWindowSchema, calendarAlignedTimeWindowSchema, timeWindowSchema };
