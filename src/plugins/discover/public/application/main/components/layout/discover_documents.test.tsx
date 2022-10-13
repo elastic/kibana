@@ -13,7 +13,6 @@ import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -22,6 +21,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
 import { AppState } from '../../services/discover_app_state_container';
+import { DataDocuments$ } from '../../services/discover_data_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 

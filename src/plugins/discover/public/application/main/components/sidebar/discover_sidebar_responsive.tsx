@@ -23,12 +23,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';

@@ -20,11 +20,11 @@ import {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AvailableFields$, DataTotalHits$ } from '../../services/discover_data_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
-import { AvailableFields$, DataTotalHits$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;

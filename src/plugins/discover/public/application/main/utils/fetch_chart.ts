@@ -15,9 +15,9 @@ import {
   ISearchSource,
   tabifyAggResponse,
 } from '@kbn/data-plugin/public';
+import { TimechartBucketInterval } from '../services/discover_data_state_container';
 import { getChartAggConfigs, getDimensions } from '.';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
-import { TimechartBucketInterval } from '../hooks/use_saved_search';
 import { FetchDeps } from './fetch_all';
 
 interface Result {

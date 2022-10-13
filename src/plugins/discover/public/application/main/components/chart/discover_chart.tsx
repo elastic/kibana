@@ -22,10 +22,10 @@ import {
   getVisualizeInformation,
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
+import { DataCharts$, DataTotalHits$ } from '../../services/discover_data_state_container';
 import { HitsCounter } from '../hits_counter';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';

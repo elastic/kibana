@@ -16,7 +16,6 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { Chart } from './point_series';
@@ -25,6 +24,7 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ReactWrapper } from 'enzyme';
+import { DataCharts$, DataTotalHits$ } from '../../services/discover_data_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 

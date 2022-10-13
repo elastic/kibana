@@ -14,8 +14,8 @@ import {
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { DataMainMsg, RecordRawType } from './use_saved_search';
 import { filter } from 'rxjs/operators';
+import { DataMainMsg, RecordRawType } from '../services/discover_data_state_container';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {

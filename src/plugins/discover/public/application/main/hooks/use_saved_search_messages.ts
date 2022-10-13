@@ -7,7 +7,6 @@
  */
 
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { FetchStatus } from '../../types';
 import {
   DataCharts$,
   DataDocuments$,
@@ -15,7 +14,8 @@ import {
   DataTotalHits$,
   RecordRawType,
   SavedSearchData,
-} from './use_saved_search';
+} from '../services/discover_data_state_container';
+import { FetchStatus } from '../../types';
 
 /**
  * Sends COMPLETE message to the main$ observable with the information

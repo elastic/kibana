@@ -12,14 +12,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import {
-  AvailableFields$,
-  DataCharts$,
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-  RecordRawType,
-} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { Chart } from '../chart/point_series';
@@ -43,6 +35,14 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverStateProvider } from '../../services/discover_state_react';
+import {
+  AvailableFields$,
+  DataCharts$,
+  DataDocuments$,
+  DataMain$,
+  DataTotalHits$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 
 const mountComponent = async ({
   isPlainRecord = false,

@@ -13,13 +13,13 @@ import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
-import { DataDocuments$, RecordRawType } from './use_saved_search';
 import { DataTableRecord } from '../../../types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { AppState } from '../services/discover_app_state_container';
+import { DataDocuments$, RecordRawType } from '../services/discover_data_state_container';
 
 function getHookProps(
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,

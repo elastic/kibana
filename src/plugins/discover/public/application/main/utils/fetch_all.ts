@@ -9,6 +9,14 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  DataCharts$,
+  DataDocuments$,
+  DataMain$,
+  DataTotalHits$,
+  RecordRawType,
+  SavedSearchData,
+} from '../services/discover_data_state_container';
 import { updateSavedSearch } from './update_saved_search';
 import { AppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
@@ -25,14 +33,6 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
 import { FetchStatus } from '../../types';
-import {
-  DataCharts$,
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-  RecordRawType,
-  SavedSearchData,
-} from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
 

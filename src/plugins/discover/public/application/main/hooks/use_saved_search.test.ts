@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
-import { RecordRawType, useSavedSearch } from './use_saved_search';
+import { useSavedSearch } from './use_saved_search';
 import { getDiscoverStateContainer } from '../services/discover_state';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
@@ -18,6 +18,7 @@ import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
+import { RecordRawType } from '../services/discover_data_state_container';
 
 setUrlTracker(urlTrackerMock);
 describe('test useSavedSearch', () => {

@@ -11,7 +11,6 @@ import { SearchSource } from '@kbn/data-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
-import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
   DataCharts$,
@@ -19,7 +18,8 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../../hooks/use_saved_search';
+} from '../../../services/discover_data_state_container';
+import { FetchStatus } from '../../../../types';
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { Chart } from '../../chart/point_series';

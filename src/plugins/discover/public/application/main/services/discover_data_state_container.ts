@@ -5,32 +5,95 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import { Chart } from '../components/chart/point_series';
+import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
 import { SavedSearchContainer } from './discover_saved_search_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { getRawRecordType } from '../utils/get_raw_record_type';
-import {
-  DataAvailableFieldsMsg,
-  DataChartsMessage,
-  DataDocumentsMsg,
-  DataMainMsg,
-  DataRefetch$,
-  DataRefetchMsg,
-  DataTotalHitsMsg,
-  SavedSearchData,
-} from '../hooks/use_saved_search';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { FetchStatus } from '../../types';
 import { getFetch$ } from '../utils/get_fetch_observable';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { fetchAll } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
+
+export interface SavedSearchData {
+  main$: DataMain$;
+  documents$: DataDocuments$;
+  totalHits$: DataTotalHits$;
+  charts$: DataCharts$;
+  availableFields$: AvailableFields$;
+}
+
+export interface TimechartBucketInterval {
+  scaled?: boolean;
+  description?: string;
+  scale?: number;
+}
+
+export type DataMain$ = BehaviorSubject<DataMainMsg>;
+export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
+export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
+export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
+export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
+export type DataRefetch$ = Subject<DataRefetchMsg>;
+
+export interface UseSavedSearch {
+  refetch$: DataRefetch$;
+  data$: SavedSearchData;
+  reset: () => void;
+  inspectorAdapters: { requests: RequestAdapter };
+}
+
+export enum RecordRawType {
+  /**
+   * Documents returned Elasticsearch, nested structure
+   */
+  DOCUMENT = 'document',
+  /**
+   * Data returned e.g. SQL queries, flat structure
+   * */
+  PLAIN = 'plain',
+}
+
+export type DataRefetchMsg = 'reset' | undefined;
+
+export interface DataMsg {
+  fetchStatus: FetchStatus;
+  error?: Error;
+  recordRawType?: RecordRawType;
+  query?: AggregateQuery | Query | undefined;
+}
+
+export interface DataMainMsg extends DataMsg {
+  foundDocuments?: boolean;
+}
+
+export interface DataDocumentsMsg extends DataMsg {
+  result?: DataTableRecord[];
+}
+
+export interface DataTotalHitsMsg extends DataMsg {
+  fetchStatus: FetchStatus;
+  error?: Error;
+  result?: number;
+}
+
+export interface DataChartsMessage extends DataMsg {
+  bucketInterval?: TimechartBucketInterval;
+  chartData?: Chart;
+}
+
+export interface DataAvailableFieldsMsg extends DataMsg {
+  fields?: string[];
+}
 
 export interface DataStateContainer {
   fetch: () => void;

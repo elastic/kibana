@@ -16,6 +16,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import {
+  DataDocuments$,
+  DataDocumentsMsg,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -29,7 +34,6 @@ import {
   HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';

@@ -20,14 +20,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
-import {
-  AvailableFields$,
-  DataCharts$,
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-  RecordRawType,
-} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -37,6 +29,14 @@ import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import {
+  AvailableFields$,
+  DataCharts$,
+  DataDocuments$,
+  DataMain$,
+  DataTotalHits$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 

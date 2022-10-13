@@ -41,8 +41,8 @@ import {
   renderEndzoneTooltip,
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { DataCharts$, DataChartsMessage } from '../../services/discover_data_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { DiscoverStateContainer } from '../../services/discover_state';
