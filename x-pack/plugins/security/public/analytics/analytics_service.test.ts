@@ -217,7 +217,7 @@ describe('AnalyticsService', () => {
     expect(analytics.registerContextProvider).not.toHaveBeenCalled();
   });
 
-  it('registers the user_id analytics context provider if the page is anonymous', () => {
+  it('registers the user_id analytics context provider if the page is not anonymous', () => {
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
