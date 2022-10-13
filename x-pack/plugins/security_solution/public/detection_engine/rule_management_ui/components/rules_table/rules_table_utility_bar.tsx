@@ -27,6 +27,8 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import type { PaginationOptions } from '../../../rule_management/logic/types';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 export const getShowingRulesParams = ({ page, perPage, total: totalRules }: PaginationOptions) => {
   const firstInPage = totalRules === 0 ? 0 : (page - 1) * perPage + 1;
@@ -37,35 +39,27 @@ export const getShowingRulesParams = ({ page, perPage, total: totalRules }: Pagi
 
 interface RulesTableUtilityBarProps {
   canBulkEdit: boolean;
-  isAllSelected?: boolean;
-  isAutoRefreshOn?: boolean;
-  numberSelectedItems: number;
   onGetBulkItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
-  onRefresh: () => void;
-  onRefreshSwitch: (checked: boolean) => void;
   onToggleSelectAll: () => void;
-  pagination: PaginationOptions;
   isBulkActionInProgress?: boolean;
-  hasDisabledActions?: boolean;
 }
 
 export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
-  ({
-    canBulkEdit,
-    isAllSelected,
-    isAutoRefreshOn,
-    numberSelectedItems,
-    onGetBulkItemsPopoverContent,
-    onRefresh,
-    onRefreshSwitch,
-    onToggleSelectAll,
-    pagination,
-    isBulkActionInProgress,
-    hasDisabledActions,
-  }) => {
+  ({ canBulkEdit, onGetBulkItemsPopoverContent, onToggleSelectAll, isBulkActionInProgress }) => {
     const { timelines } = useKibana().services;
+    const { startTransaction } = useStartTransaction();
     const rulesTableContext = useRulesTableContext();
-    const isAnyRuleSelected = numberSelectedItems > 0;
+    const { pagination, selectedRuleIds, isRefreshOn, isAllSelected, loadingRulesAction } =
+      rulesTableContext.state;
+    const { reFetchRules, setIsRefreshOn } = rulesTableContext.actions;
+    const selectedRulesCount = isAllSelected ? pagination.total : selectedRuleIds.length;
+    const isAnyRuleSelected = selectedRulesCount > 0;
+    const hasDisabledActions = loadingRulesAction != null;
+
+    const handleRefreshRules = useCallback(() => {
+      startTransaction({ name: RULES_TABLE_ACTIONS.REFRESH });
+      reFetchRules();
+    }, [reFetchRules, startTransaction]);
 
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -85,12 +79,15 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
 
     const handleAutoRefreshSwitch = useCallback(
       (closePopover: () => void) => (e: EuiSwitchEvent) => {
-        if (onRefreshSwitch != null) {
-          onRefreshSwitch(e.target.checked);
-          closePopover();
+        const refreshOn = e.target.checked;
+        if (refreshOn) {
+          // TODO move to tables context
+          reFetchRules();
         }
+        setIsRefreshOn(refreshOn);
+        closePopover();
       },
-      [onRefreshSwitch]
+      [reFetchRules, setIsRefreshOn]
     );
 
     const handleGetRefreshSettingsPopoverContent = useCallback(
@@ -100,7 +97,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
             <EuiSwitch
               key="allRulesAutoRefreshSwitch"
               label={i18n.REFRESH_RULE_POPOVER_DESCRIPTION}
-              checked={isAutoRefreshOn ?? false}
+              checked={isRefreshOn ?? false}
               onChange={handleAutoRefreshSwitch(closePopover)}
               compressed
               disabled={isAnyRuleSelected}
@@ -122,7 +119,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
           ]}
         />
       ),
-      [isAutoRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
+      [isRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
     );
 
     return (
@@ -136,7 +133,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
           <>
             <UtilityBarGroup data-test-subj="tableBulkActions">
               <UtilityBarText dataTestSubj="selectedRules">
-                {i18n.SELECTED_RULES(numberSelectedItems)}
+                {i18n.SELECTED_RULES(selectedRulesCount)}
               </UtilityBarText>
 
               {canBulkEdit && (
@@ -170,7 +167,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                 dataTestSubj="refreshRulesAction"
                 iconSide="left"
                 iconType="refresh"
-                onClick={onRefresh}
+                onClick={handleRefreshRules}
               >
                 {i18n.REFRESH}
               </UtilityBarAction>

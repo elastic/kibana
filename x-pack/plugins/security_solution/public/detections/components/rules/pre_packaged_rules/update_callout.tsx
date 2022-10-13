@@ -5,51 +5,42 @@
  * 2.0.
  */
 
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-
-import { EuiCallOut, EuiButton, EuiLink } from '@elastic/eui';
-
 import { useKibana } from '../../../../common/lib/kibana';
+import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
+import { LoadPrePackagedRules } from './load_prepackaged_rules';
 import * as i18n from './translations';
 
-interface UpdatePrePackagedRulesCallOutProps {
-  loading: boolean;
-  numberOfUpdatedRules: number;
-  numberOfUpdatedTimelines: number;
-  updateRules: () => void;
-}
-
-const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCallOutProps> = ({
-  loading,
-  numberOfUpdatedRules,
-  numberOfUpdatedTimelines,
-  updateRules,
-}) => {
+const UpdatePrePackagedRulesCallOutComponent = () => {
   const { services } = useKibana();
+  const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
+  const rulesNotUpdated = prePackagedRulesStatus?.rulesNotUpdated ?? 0;
+  const timelinesNotUpdated = prePackagedRulesStatus?.timelinesNotUpdated ?? 0;
 
   const prepackagedRulesOrTimelines = useMemo(() => {
-    if (numberOfUpdatedRules > 0 && numberOfUpdatedTimelines === 0) {
+    if (rulesNotUpdated > 0 && timelinesNotUpdated === 0) {
       return {
-        callOutMessage: i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules),
-        buttonTitle: i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules),
+        callOutMessage: i18n.UPDATE_PREPACKAGED_RULES_MSG(rulesNotUpdated),
+        buttonTitle: i18n.UPDATE_PREPACKAGED_RULES(rulesNotUpdated),
       };
-    } else if (numberOfUpdatedRules === 0 && numberOfUpdatedTimelines > 0) {
+    } else if (rulesNotUpdated === 0 && timelinesNotUpdated > 0) {
       return {
-        callOutMessage: i18n.UPDATE_PREPACKAGED_TIMELINES_MSG(numberOfUpdatedTimelines),
-        buttonTitle: i18n.UPDATE_PREPACKAGED_TIMELINES(numberOfUpdatedTimelines),
+        callOutMessage: i18n.UPDATE_PREPACKAGED_TIMELINES_MSG(timelinesNotUpdated),
+        buttonTitle: i18n.UPDATE_PREPACKAGED_TIMELINES(timelinesNotUpdated),
       };
-    } else if (numberOfUpdatedRules > 0 && numberOfUpdatedTimelines > 0)
+    } else if (rulesNotUpdated > 0 && timelinesNotUpdated > 0)
       return {
         callOutMessage: i18n.UPDATE_PREPACKAGED_RULES_AND_TIMELINES_MSG(
-          numberOfUpdatedRules,
-          numberOfUpdatedTimelines
+          rulesNotUpdated,
+          timelinesNotUpdated
         ),
         buttonTitle: i18n.UPDATE_PREPACKAGED_RULES_AND_TIMELINES(
-          numberOfUpdatedRules,
-          numberOfUpdatedTimelines
+          rulesNotUpdated,
+          timelinesNotUpdated
         ),
       };
-  }, [numberOfUpdatedRules, numberOfUpdatedTimelines]);
+  }, [rulesNotUpdated, timelinesNotUpdated]);
 
   return (
     <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE} data-test-subj="update-callout">
@@ -60,14 +51,13 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
           {i18n.RELEASE_NOTES_HELP}
         </EuiLink>
       </p>
-      <EuiButton
-        onClick={updateRules}
-        size="s"
-        isLoading={loading}
-        data-test-subj="update-callout-button"
-      >
-        {prepackagedRulesOrTimelines?.buttonTitle}
-      </EuiButton>
+      <LoadPrePackagedRules>
+        {(renderProps) => (
+          <EuiButton size="s" data-test-subj="update-callout-button" {...renderProps}>
+            {prepackagedRulesOrTimelines?.buttonTitle}
+          </EuiButton>
+        )}
+      </LoadPrePackagedRules>
     </EuiCallOut>
   );
 };
