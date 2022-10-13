@@ -10,7 +10,10 @@ import {
   EXPRESSION_METRIC_NAME,
   EXPRESSION_METRIC_TRENDLINE_NAME,
 } from '@kbn/expression-metric-vis-plugin/public';
-import { Ast, AstFunction } from '@kbn/interpreter';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { Ast } from '@kbn/interpreter';
+import { CollapseArgs } from '../../../common/expressions';
+import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
 import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
@@ -28,8 +31,7 @@ function computePaletteParams(params: CustomPaletteParams) {
 
 const getTrendlineExpression = (
   state: MetricVisualizationState,
-  datasourceExpressionsByLayers: Record<string, Ast>,
-  collapseExpression: AstFunction | undefined
+  datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | undefined => {
   if (!state.trendlineLayerId || !state.trendlineMetricAccessor || !state.trendlineTimeAccessor) {
     return;
@@ -46,9 +48,10 @@ const getTrendlineExpression = (
         arguments: {
           metric: [state.trendlineMetricAccessor],
           timeField: [state.trendlineTimeAccessor],
-          breakdownBy: state.trendlineBreakdownByAccessor
-            ? [state.trendlineBreakdownByAccessor]
-            : [],
+          breakdownBy:
+            state.trendlineBreakdownByAccessor && !state.collapseFn
+              ? [state.trendlineBreakdownByAccessor]
+              : [],
           inspectorTableId: [state.trendlineLayerId],
           ...(datasourceExpression
             ? {
@@ -57,7 +60,15 @@ const getTrendlineExpression = (
                     ...datasourceExpression,
                     chain: [
                       ...datasourceExpression.chain,
-                      ...(collapseExpression ? [collapseExpression] : []),
+                      ...(state.collapseFn
+                        ? [
+                            buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+                              by: [state.trendlineTimeAccessor],
+                              metric: [state.trendlineMetricAccessor],
+                              fn: [state.collapseFn],
+                            }).toAst(),
+                          ]
+                        : []),
                     ],
                   },
                 ],
@@ -88,21 +99,23 @@ export const toExpression = (
       ? datasource?.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
-  const getCollapseFnArguments = () => {
+  const getCollapseFnArguments = (): CollapseArgs => {
     const metric = [state.metricAccessor, state.secondaryMetricAccessor, state.maxAccessor].filter(
       Boolean
-    );
+    ) as string[];
+
+    const collapseFn = state.collapseFn as CollapseArgs['fn'][number];
 
     const fn = metric.map((accessor) => {
       if (accessor !== state.maxAccessor) {
-        return state.collapseFn;
+        return collapseFn;
       } else {
         const isMaxStatic = Boolean(
           datasource?.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
         );
         // we do this because the user expects the static value they set to be the same
         // even if they define a collapse on the breakdown by
-        return isMaxStatic ? 'max' : state.collapseFn;
+        return isMaxStatic ? 'max' : collapseFn;
       }
     });
 
@@ -114,18 +127,13 @@ export const toExpression = (
   };
 
   const collapseExpressionFunction = state.collapseFn
-    ? ({
-        type: 'function',
-        function: 'lens_collapse',
-        arguments: getCollapseFnArguments(),
-      } as AstFunction)
+    ? buildExpressionFunction<CollapseExpressionFunction>(
+        'lens_collapse',
+        getCollapseFnArguments()
+      ).toAst()
     : undefined;
 
-  const trendlineExpression = getTrendlineExpression(
-    state,
-    datasourceExpressionsByLayers,
-    collapseExpressionFunction
-  );
+  const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
 
   return {
     type: 'expression',

@@ -21,6 +21,7 @@ import {
 import { GROUP_ID } from './constants';
 import { getMetricVisualization, MetricVisualizationState } from './visualization';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { Ast } from '@kbn/interpreter';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -270,6 +271,7 @@ describe('metric visualization', () => {
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
+        second: mockDatasource.publicAPIMock,
       };
     });
 
@@ -418,12 +420,22 @@ describe('metric visualization', () => {
     });
 
     describe('trendline expression', () => {
-      const getTrendlineExpression = (state: MetricVisualizationState) =>
-        (visualization.toExpression(state, datasourceLayers) as ExpressionAstExpression).chain![1]
-          .arguments.trendline[0];
+      const getTrendlineExpression = (state: MetricVisualizationState) => {
+        const expression = visualization.toExpression(
+          state,
+          datasourceLayers,
+          {},
+          {
+            [trendlineProps.trendlineLayerId]: { chain: [] } as unknown as Ast,
+          }
+        ) as ExpressionAstExpression;
+
+        return expression.chain!.find((fn) => fn.function === 'metricVis')!.arguments.trendline[0];
+      };
 
       it('adds trendline if prerequisites are present', () => {
-        expect(getTrendlineExpression(fullStateWTrend)).toMatchInlineSnapshot(`
+        expect(getTrendlineExpression({ ...fullStateWTrend, collapseFn: undefined }))
+          .toMatchInlineSnapshot(`
           Object {
             "chain": Array [
               Object {
@@ -436,6 +448,11 @@ describe('metric visualization', () => {
                   ],
                   "metric": Array [
                     "trendline-metric-col-id",
+                  ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [],
+                    },
                   ],
                   "timeField": Array [
                     "trendline-time-col-id",
@@ -462,6 +479,74 @@ describe('metric visualization', () => {
                   ],
                   "metric": Array [
                     "trendline-metric-col-id",
+                  ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "by": Array [
+                              "trendline-time-col-id",
+                            ],
+                            "fn": Array [
+                              "sum",
+                            ],
+                            "metric": Array [
+                              "trendline-metric-col-id",
+                            ],
+                          },
+                          "function": "lens_collapse",
+                          "type": "function",
+                        },
+                      ],
+                    },
+                  ],
+                  "timeField": Array [
+                    "trendline-time-col-id",
+                  ],
+                },
+                "function": "metricTrendline",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          }
+        `);
+      });
+
+      it('should apply collapse-by fn', () => {
+        expect(getTrendlineExpression(fullStateWTrend)).toMatchInlineSnapshot(`
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "breakdownBy": Array [],
+                  "inspectorTableId": Array [
+                    "second",
+                  ],
+                  "metric": Array [
+                    "trendline-metric-col-id",
+                  ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "by": Array [
+                              "trendline-time-col-id",
+                            ],
+                            "fn": Array [
+                              "sum",
+                            ],
+                            "metric": Array [
+                              "trendline-metric-col-id",
+                            ],
+                          },
+                          "function": "lens_collapse",
+                          "type": "function",
+                        },
+                      ],
+                    },
                   ],
                   "timeField": Array [
                     "trendline-time-col-id",

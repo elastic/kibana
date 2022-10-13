@@ -16,6 +16,7 @@ import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { CollapseArgs } from '../../../common/expressions';
 import type { LayerType } from '../../../common';
 import { layerTypes } from '../../../common/layer_types';
 import { getSuggestions } from './suggestions';
@@ -54,7 +55,7 @@ export interface MetricVisualizationState {
   breakdownByAccessor?: string;
   // the dimensions can optionally be single numbers
   // computed by collapsing all rows
-  collapseFn?: string;
+  collapseFn?: CollapseArgs['fn'][number];
   subtitle?: string;
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
