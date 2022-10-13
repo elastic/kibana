@@ -75,7 +75,6 @@ export const DiscoverMainContent = ({
   const { trackUiMetric, storage } = useDiscoverServices();
   const hideChart = useAppStateSelector((state) => state.hideChart);
   const interval = useAppStateSelector((state) => state.interval);
-
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.setAppState({ viewMode: mode });
