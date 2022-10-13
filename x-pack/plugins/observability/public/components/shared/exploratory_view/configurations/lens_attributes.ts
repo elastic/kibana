@@ -325,6 +325,7 @@ export class LensAttributes {
     columnType,
     columnFilter,
     operationType,
+    shortLabel,
   }: {
     sourceField: string;
     columnType?: string;
@@ -332,6 +333,7 @@ export class LensAttributes {
     operationType?: SupportedOperations | 'last_value';
     label?: string;
     seriesConfig: SeriesConfig;
+    shortLabel?: boolean;
   }) {
     if (columnType === 'operation' || operationType) {
       if (
@@ -344,6 +346,7 @@ export class LensAttributes {
           label,
           seriesConfig,
           columnFilter,
+          shortLabel,
         });
       }
       if (operationType === 'last_value') {
@@ -393,12 +396,14 @@ export class LensAttributes {
     seriesConfig,
     operationType,
     columnFilter,
+    shortLabel,
   }: {
     sourceField: string;
     operationType: SupportedOperations;
     label?: string;
     seriesConfig: SeriesConfig;
     columnFilter?: ColumnFilter;
+    shortLabel?: boolean;
   }):
     | MinIndexPatternColumn
     | MaxIndexPatternColumn
@@ -408,13 +413,15 @@ export class LensAttributes {
     | CardinalityIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.operation.label', {
-        defaultMessage: '{operationType} of {sourceField}',
-        values: {
-          sourceField: label || seriesConfig.labels[sourceField],
-          operationType: capitalize(operationType),
-        },
-      }),
+      label: shortLabel
+        ? label || seriesConfig.labels[sourceField]
+        : i18n.translate('xpack.observability.expView.columns.operation.label', {
+            defaultMessage: '{operationType} of {sourceField}',
+            values: {
+              sourceField: label || seriesConfig.labels[sourceField],
+              operationType: capitalize(operationType),
+            },
+          }),
       filter: columnFilter,
       operationType,
     };
@@ -535,6 +542,7 @@ export class LensAttributes {
     colIndex,
     layerId,
     metricOption,
+    shortLabel,
   }: {
     sourceField: string;
     metricOption?: MetricOption;
@@ -543,6 +551,7 @@ export class LensAttributes {
     layerId: string;
     layerConfig: LayerConfig;
     colIndex?: number;
+    shortLabel?: boolean;
   }) {
     const { breakdown, seriesConfig } = layerConfig;
     const fieldMetaInfo = this.getFieldMeta(sourceField, layerConfig, metricOption);
@@ -609,6 +618,7 @@ export class LensAttributes {
         operationType,
         label: columnLabel || label,
         seriesConfig: layerConfig.seriesConfig,
+        shortLabel,
       });
     }
     if (operationType === 'unique_count') {
@@ -647,7 +657,6 @@ export class LensAttributes {
       if (Array.isArray(metricOption)) {
         return {
           fieldName: sourceField,
-          isMultiMetric: true,
           items: metricOption,
         };
       }
@@ -714,6 +723,7 @@ export class LensAttributes {
         return this.getColumnBasedOnType({
           layerConfig,
           layerId,
+          shortLabel: true,
           label: item.label,
           sourceField: REPORT_METRIC_FIELD,
           metricOption: item,
