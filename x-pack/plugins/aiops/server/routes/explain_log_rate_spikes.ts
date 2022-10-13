@@ -33,6 +33,7 @@ import {
   addErrorAction,
   pingAction,
   resetAction,
+  resetErrorsAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -87,7 +88,7 @@ export const defineExplainLogRateSpikesRoute = (
       let logMessageCounter = 1;
 
       function logDebugMessage(msg: string) {
-        logger.debug(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
+        logger.info(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
         logMessageCounter++;
       }
 
@@ -170,67 +171,88 @@ export const defineExplainLogRateSpikesRoute = (
       async function runAnalysis() {
         try {
           isRunning = true;
-          logDebugMessage('Reset.');
-          push(resetAction());
+
+          if (!request.body.overrides) {
+            logDebugMessage('Full Reset.');
+            push(resetAction());
+          } else {
+            logDebugMessage('Reset Errors.');
+            push(resetErrorsAction());
+          }
+
+          if (request.body.overrides?.loaded) {
+            logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
+            loaded = request.body.overrides?.loaded;
+          }
+
           pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
 
-          const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
+          let fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
+          let fieldCandidatesCount = fieldCandidates.length;
+
           let sampleProbability = 1;
           let totalDocCount = 0;
 
-          logDebugMessage('Fetch index information.');
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
-                {
-                  defaultMessage: 'Loading index information.',
-                }
-              ),
-            })
-          );
+          if (request.body.overrides?.fieldCandidates) {
+            logDebugMessage('Use field candidates overrides.');
+            fieldCandidates = request.body.overrides?.fieldCandidates;
+            fieldCandidatesCount = fieldCandidates.length;
+          } else {
+            logDebugMessage('Fetch index information.');
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
+                  {
+                    defaultMessage: 'Loading index information.',
+                  }
+                ),
+              })
+            );
 
-          try {
-            const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
-            fieldCandidates.push(...indexInfo.fieldCandidates);
-            sampleProbability = indexInfo.sampleProbability;
-            totalDocCount = indexInfo.totalDocCount;
-          } catch (e) {
-            if (!isRequestAbortedError(e)) {
-              logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-              pushError(`Failed to fetch index information.`);
+            try {
+              const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
+              fieldCandidates.push(...indexInfo.fieldCandidates);
+              fieldCandidatesCount = fieldCandidates.length;
+              sampleProbability = indexInfo.sampleProbability;
+              totalDocCount = indexInfo.totalDocCount;
+            } catch (e) {
+              if (!isRequestAbortedError(e)) {
+                logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
+                pushError(`Failed to fetch index information.`);
+              }
+              end();
+              return;
             }
-            end();
-            return;
+
+            logDebugMessage(`Total document count: ${totalDocCount}`);
+            logDebugMessage(`Sample probability: ${sampleProbability}`);
+
+            loaded += LOADED_FIELD_CANDIDATES;
+
+            pushPingWithTimeout();
+
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
+                  {
+                    defaultMessage:
+                      'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
+                    values: {
+                      fieldCandidatesCount,
+                    },
+                  }
+                ),
+              })
+            );
           }
-
-          logDebugMessage(`Total document count: ${totalDocCount}`);
-          logDebugMessage(`Sample probability: ${sampleProbability}`);
-
-          loaded += LOADED_FIELD_CANDIDATES;
-
-          const fieldCandidatesCount = fieldCandidates.length;
-
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
-                {
-                  defaultMessage:
-                    'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
-                  values: {
-                    fieldCandidatesCount,
-                  },
-                }
-              ),
-            })
-          );
 
           if (fieldCandidatesCount === 0) {
             endWithUpdatedLoadingState();
@@ -240,6 +262,8 @@ export const defineExplainLogRateSpikesRoute = (
             return;
           }
 
+          // Step 2: Significant Terms
+
           const changePoints: ChangePoint[] = [];
           const fieldsToSample = new Set<string>();
 
@@ -247,10 +271,28 @@ export const defineExplainLogRateSpikesRoute = (
           // regarding a limit of abort signal listeners of more than 10.
           const MAX_CONCURRENT_QUERIES = 10;
 
+          let remainingFieldCandidates: string[];
+          let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+
+          if (request.body.overrides?.remainingFieldCandidates) {
+            fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
+            remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
+            loadingStepSizePValues =
+              LOADED_FIELD_CANDIDATES +
+              PROGRESS_STEP_P_VALUES -
+              (request.body.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+          } else {
+            remainingFieldCandidates = fieldCandidates;
+          }
+
           logDebugMessage('Fetch p-values.');
 
           const pValuesQueue = queue(async function (fieldCandidate: string) {
-            loaded += (1 / fieldCandidatesCount) * PROGRESS_STEP_P_VALUES;
+            // if (fieldCandidatesChunks.length === 3 && request.body.overrides === undefined) {
+            //   throw new Error('simulate error');
+            // }
+
+            loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
 
@@ -273,6 +315,8 @@ export const defineExplainLogRateSpikesRoute = (
               }
               return;
             }
+
+            remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
 
             if (pValues.length > 0) {
               pValues.forEach((d) => {
@@ -297,6 +341,7 @@ export const defineExplainLogRateSpikesRoute = (
                     },
                   }
                 ),
+                remainingFieldCandidates,
               })
             );
 

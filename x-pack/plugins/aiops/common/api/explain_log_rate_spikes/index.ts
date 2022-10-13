@@ -13,6 +13,7 @@ export {
   addErrorAction,
   pingAction,
   resetAction,
+  resetErrorsAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
 } from './actions';

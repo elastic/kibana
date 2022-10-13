@@ -16,6 +16,7 @@ interface StreamState {
   errors: string[];
   loaded: number;
   loadingState: string;
+  remainingFieldCandidatesChunks?: string[][];
 }
 
 export const initialState: StreamState = {
@@ -34,6 +35,9 @@ export function streamReducer(
   if (Array.isArray(action)) {
     return action.reduce(streamReducer, state);
   }
+
+  // eslint-disable-next-line no-console
+  console.log('action', action);
 
   switch (action.type) {
     case API_ACTION_NAME.ADD_CHANGE_POINTS:
@@ -62,6 +66,8 @@ export function streamReducer(
       return { ...state, changePointsGroups };
     case API_ACTION_NAME.ADD_ERROR:
       return { ...state, errors: [...state.errors, action.payload] };
+    case API_ACTION_NAME.RESET_ERRORS:
+      return { ...state, errors: [] };
     case API_ACTION_NAME.RESET:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:

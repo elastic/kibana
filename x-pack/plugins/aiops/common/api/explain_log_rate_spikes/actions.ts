@@ -20,6 +20,7 @@ export const API_ACTION_NAME = {
   ADD_ERROR: 'add_error',
   PING: 'ping',
   RESET: 'reset',
+  RESET_ERRORS: 'reset_errors',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
@@ -90,6 +91,16 @@ export function addErrorAction(payload: ApiActionAddError['payload']): ApiAction
   };
 }
 
+interface ApiActionResetErrors {
+  type: typeof API_ACTION_NAME.RESET_ERRORS;
+}
+
+export function resetErrorsAction() {
+  return {
+    type: API_ACTION_NAME.RESET_ERRORS,
+  };
+}
+
 interface ApiActionPing {
   type: typeof API_ACTION_NAME.PING;
 }
@@ -112,6 +123,7 @@ interface ApiActionUpdateLoadingState {
     ccsWarning: boolean;
     loaded: number;
     loadingState: string;
+    remainingFieldCandidates?: string[];
   };
 }
 
@@ -132,4 +144,5 @@ export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionAddError
   | ApiActionPing
   | ApiActionReset
+  | ApiActionResetErrors
   | ApiActionUpdateLoadingState;
