@@ -26,7 +26,7 @@ import { DateFormatter } from '../../../../components/date_formatter/date_format
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
 import { IndicatorsFlyoutTable } from './table_tab';
-import { unwrapValue } from '../../utils/unwrap_value';
+import { unwrapValue } from '../../utils';
 import { IndicatorsFlyoutOverview } from './overview_tab';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';

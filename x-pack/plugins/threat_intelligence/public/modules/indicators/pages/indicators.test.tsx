@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { IndicatorsPage } from './indicators_page';
-import { useIndicators } from './hooks/use_indicators';
-import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
-import { useFilters } from '../query_bar/hooks/use_filters';
+import { IndicatorsPage } from '.';
+import { useAggregatedIndicators, useIndicators } from '../hooks';
+import { useFilters } from '../../query_bar/hooks/use_filters';
 import moment from 'moment';
-import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { TABLE_TEST_ID } from './components/table';
-import { mockTimeRange } from '../../common/mocks/mock_indicators_filters_context';
+import { TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { TABLE_TEST_ID } from '../components/table';
+import { mockTimeRange } from '../../../common/mocks/mock_indicators_filters_context';
 
-jest.mock('../query_bar/hooks/use_filters');
-jest.mock('./hooks/use_indicators');
-jest.mock('./hooks/use_aggregated_indicators');
+jest.mock('../../query_bar/hooks/use_filters');
+jest.mock('../hooks/use_indicators');
+jest.mock('../hooks/use_aggregated_indicators');
 
 const stub = () => {};
 
