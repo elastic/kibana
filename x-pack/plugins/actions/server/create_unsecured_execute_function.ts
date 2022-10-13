@@ -1,0 +1,160 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { compact } from 'lodash';
+import { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  ActionTypeRegistryContract as ConnectorTypeRegistryContract,
+  PreConfiguredAction as PreconfiguredConnector,
+} from './types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { RelatedSavedObjects } from './lib/related_saved_objects';
+
+interface CreateBulkUnsecuredExecuteFunctionOptions {
+  taskManager: TaskManagerStartContract;
+  isESOCanEncrypt: boolean;
+  connectorTypeRegistry: ConnectorTypeRegistryContract;
+  preconfiguredConnectors: PreconfiguredConnector[];
+}
+
+export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
+  id: string;
+  spaceId: string;
+  apiKey: string | null;
+  executionId: string;
+  consumer?: string;
+  relatedSavedObjects?: RelatedSavedObjects;
+}
+
+export interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
+  actionId: string;
+  apiKey: string | null;
+  executionId: string;
+  consumer?: string;
+  relatedSavedObjects?: RelatedSavedObjects;
+}
+
+export type BulkUnsecuredExecutionEnqueuer<T> = (
+  internalSavedObjectsRepository: ISavedObjectsRepository,
+  actionsToExectute: ExecuteOptions[]
+) => Promise<T>;
+
+export function createBulkUnsecuredExecutionEnqueuerFunction({
+  taskManager,
+  connectorTypeRegistry,
+  isESOCanEncrypt,
+  preconfiguredConnectors,
+}: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<void> {
+  return async function execute(
+    internalSavedObjectsRepository: ISavedObjectsRepository,
+    actionsToExecute: ExecuteOptions[]
+  ) {
+    if (!isESOCanEncrypt) {
+      throw new Error(
+        `Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    const connectorTypeIds: Record<string, string> = {};
+    const spaceIds: Record<string, string> = {};
+    const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
+
+    const notPreconfiguredConnectors = connectorIds.filter(
+      (connectorId) =>
+        preconfiguredConnectors.find((connector) => connector.id === connectorId) == null
+    );
+
+    if (notPreconfiguredConnectors.length > 0) {
+      // log warning or throw error?
+    }
+
+    const connectors: PreconfiguredConnector[] = compact(
+      connectorIds.map((connectorId) =>
+        preconfiguredConnectors.find((pConnector) => pConnector.id === connectorId)
+      )
+    );
+
+    connectors.forEach((connector) => {
+      const { id, actionTypeId } = connector;
+      if (!connectorTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+        connectorTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+      }
+
+      connectorTypeIds[id] = actionTypeId;
+    });
+
+    const actions = await Promise.all(
+      actionsToExecute.map(async (actionToExecute) => {
+        // Get saved object references from action ID and relatedSavedObjects
+        const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
+          actionToExecute.id,
+          true,
+          actionToExecute.relatedSavedObjects
+        );
+        const executionSourceReference = executionSourceAsSavedObjectReferences(
+          actionToExecute.source
+        );
+
+        const taskReferences = [];
+        if (executionSourceReference.references) {
+          taskReferences.push(...executionSourceReference.references);
+        }
+        if (references) {
+          taskReferences.push(...references);
+        }
+
+        spaceIds[actionToExecute.id] = actionToExecute.spaceId;
+
+        return {
+          type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          attributes: {
+            actionId: actionToExecute.id,
+            params: actionToExecute.params,
+            apiKey: actionToExecute.apiKey,
+            executionId: actionToExecute.executionId,
+            consumer: actionToExecute.consumer,
+            relatedSavedObjects: relatedSavedObjectWithRefs,
+          },
+          references: taskReferences,
+        };
+      })
+    );
+
+    const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
+      await internalSavedObjectsRepository.bulkCreate(actions);
+
+    const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
+      const actionId = so.attributes.actionId;
+      return {
+        taskType: `actions:${connectorTypeIds[actionId]}`,
+        params: {
+          spaceId: spaceIds[actionId],
+          actionTaskParamsId: so.id,
+        },
+        state: {},
+        scope: ['actions'],
+      };
+    });
+    await taskManager.bulkSchedule(taskInstances);
+  };
+}
+
+function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
+  return isSavedObjectExecutionSource(executionSource)
+    ? {
+        references: [
+          {
+            name: 'source',
+            ...executionSource.source,
+          },
+        ],
+      }
+    : {};
+}
