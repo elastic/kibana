@@ -6,11 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteOptions } from '.';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { handleDisabledApiKeysError, verifyAccessAndContext } from './lib';
+import { IRouter } from '@kbn/core/server';
+import { verifyAccessAndContext, handleDisabledApiKeysError } from './lib';
+import { ILicenseState } from '../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
-export const bulkDeleteRulesRoute = ({ router, licenseState }: RouteOptions) => {
+export const bulkDeleteRulesRoute = ({
+  router,
+  licenseState,
+}: {
+  router: IRouter<AlertingRequestHandlerContext>;
+  licenseState: ILicenseState;
+}) => {
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
