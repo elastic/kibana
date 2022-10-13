@@ -27,6 +27,8 @@ export function Histogram({
   dataView,
   chart: { timeInterval, bucketInterval, data: chartData },
 }: HistogramProps) {
+  const filters = data.query.filterManager.getFilters();
+  const query = data.query.queryString.getQuery();
   const attributes = useMemo<TypedLensByValueInput['attributes']>(
     () => ({
       title: '',
@@ -72,11 +74,8 @@ export function Histogram({
             },
           },
         },
-        filters: [],
-        query: {
-          language: 'kuery',
-          query: '',
-        },
+        filters,
+        query: 'language' in query ? query : { language: 'kuery', query: '' },
         visualization: {
           axisTitlesVisibilitySettings: {
             x: false,
@@ -118,7 +117,7 @@ export function Histogram({
       },
       visualizationType: 'lnsXY',
     }),
-    [dataView.id, dataView.timeFieldName, timeInterval]
+    [dataView.id, dataView.timeFieldName, filters, query, timeInterval]
   );
 
   const { timefilter } = data.query.timefilter;
