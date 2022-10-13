@@ -69,7 +69,12 @@ and transfer costs by compressing multiple, similar spans into a single span.
 
 [float]
 ===== Reduce the number of metrics
-??
+To reduce the number of system, runtime, and application metrics,
+tune the APM agent or agents that are collecting the data.
+You can disable the collection of specific metrics with the **disable metrics** configuration.
+Or, you can set the **metrics interval** to zero seconds to deactivate metrics entirely.
+Most APM agents support both options.
+See the relevant {apm-agents-ref}[agent configuration options] for more details.
 
 [float]
 ===== Reduce the number of errors
