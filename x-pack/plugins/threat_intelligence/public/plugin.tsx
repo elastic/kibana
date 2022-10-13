@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense, VFC } from 'react';
@@ -21,7 +21,7 @@ import {
 import { SecuritySolutionContext } from './containers/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
-import { IntegrationsGuard } from './containers/integrations_guard';
+import { IntegrationsGuard, setHttpClient } from './containers/integrations_guard';
 
 interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;
@@ -62,7 +62,8 @@ export const createApp =
     );
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
-  public async setup(): Promise<ThreatIntelligencePluginSetup> {
+  public async setup(core: CoreSetup): Promise<ThreatIntelligencePluginSetup> {
+    setHttpClient(core.http);
     return {};
   }
 
