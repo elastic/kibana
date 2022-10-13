@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
@@ -85,9 +84,10 @@ const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => (
   ...(initialNamespaces && { initialNamespaces }),
 });
 
-export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
+export function bulkCreateTestSuiteFactory(context: FtrProviderContext, useEsArchiver?: boolean) {
   const testDataLoader = getTestDataLoader(context);
   const supertest = context.getService('supertestWithoutAuth');
+  const esArchiver = context.getService('esArchiver');
 
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody =
@@ -172,29 +172,41 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
 
       describeFn(description, () => {
         before(async () => {
-          await testDataLoader.createFtrSpaces();
-          await testDataLoader.createFtrSavedObjectsData([
-            {
-              spaceName: null,
-              dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
-            },
-            {
-              spaceName: SPACE_1.id,
-              dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
-            },
-            {
-              spaceName: SPACE_2.id,
-              dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
-            },
-          ]);
+          if (useEsArchiver) {
+            await esArchiver.load(
+              'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            );
+          } else {
+            await testDataLoader.createFtrSpaces();
+            await testDataLoader.createFtrSavedObjectsData([
+              {
+                spaceName: null,
+                dataUrl:
+                  'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+              },
+              {
+                spaceName: SPACE_1.id,
+                dataUrl:
+                  'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+              },
+              {
+                spaceName: SPACE_2.id,
+                dataUrl:
+                  'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+              },
+            ]);
+          }
         });
 
         after(async () => {
-          await testDataLoader.deleteFtrSpaces();
-          await testDataLoader.deleteFtrSavedObjectsData();
+          if (useEsArchiver) {
+            await esArchiver.unload(
+              'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            );
+          } else {
+            await testDataLoader.deleteFtrSpaces();
+            await testDataLoader.deleteFtrSavedObjectsData();
+          }
         });
 
         const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };

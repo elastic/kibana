@@ -98,7 +98,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
 
 export default function (context: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    bulkCreateTestSuiteFactory(context);
+    bulkCreateTestSuiteFactory(context, false);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,
