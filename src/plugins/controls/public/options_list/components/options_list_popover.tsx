@@ -266,6 +266,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
                 dispatch(setNegate(optionId === 'optionsList__excludeResults'))
               }
               buttonSize="compressed"
+              data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

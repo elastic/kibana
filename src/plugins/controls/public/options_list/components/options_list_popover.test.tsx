@@ -97,4 +97,22 @@ describe('Options list popover', () => {
       expect(child.text()).toBe(selections[i]);
     });
   });
+
+  test('should default to negate = false', () => {
+    const popover = mountComponent();
+    const includeButton = findTestSubject(popover, 'optionsList__includeResults');
+    const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
+    expect(includeButton.prop('checked')).toBe(true);
+    expect(excludeButton.prop('checked')).toBeFalsy();
+  });
+
+  test('if negated, select appropriate button in button group', () => {
+    const popover = mountComponent({
+      explicitInput: { negate: true },
+    });
+    const includeButton = findTestSubject(popover, 'optionsList__includeResults');
+    const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
+    expect(includeButton.prop('checked')).toBeFalsy();
+    expect(excludeButton.prop('checked')).toBe(true);
+  });
 });
