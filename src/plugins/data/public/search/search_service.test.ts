@@ -219,7 +219,13 @@ describe('Search service', () => {
         const responder1 = inspector.adapter.start('request1');
         const responder2 = inspector.adapter.start('request2');
         responder1.ok(getMockResponseWithShards(shards));
-        responder2.ok(getMockResponseWithShards(shards));
+        responder2.ok({
+          json: {
+            rawResponse: {
+              timed_out: true,
+            },
+          },
+        });
 
         data.showWarnings(inspector.adapter, callback);
 
@@ -229,8 +235,7 @@ describe('Search service', () => {
           text: expect.any(Function),
         });
         expect(notifications.toasts.addWarning).nthCalledWith(2, {
-          title: '2 of 4 shards failed',
-          text: expect.any(Function),
+          title: 'Data might be incomplete because your request timed out',
         });
       });
     });
