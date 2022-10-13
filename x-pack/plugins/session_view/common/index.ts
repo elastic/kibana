@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '../common/constants';
-import { EventAction } from '../common/types/process_tree';
-import { SessionViewPlugin } from './plugin';
-
-export type { SessionViewStart } from './types';
+import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from './constants';
+import { EventAction } from './types/process_tree';
 export { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction };
-
-export function plugin() {
-  return new SessionViewPlugin();
-}
