@@ -29,7 +29,7 @@ const argTypes = mock.getArgumentTypes();
 
 export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
   return (
-    // The markdown component is wrapped in the EuiFlexItem with width set to 50% 
+    // The markdown component is wrapped in the EuiFlexItem with width set to 50%
     // Height can be set for the markdown component
     <EuiFlexItem style={{ width: '450px' }}>
       <Markdown {...params} />
