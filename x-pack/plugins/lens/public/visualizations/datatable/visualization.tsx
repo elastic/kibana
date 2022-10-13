@@ -29,7 +29,7 @@ import type { LayerType } from '../../../common';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import type { ColumnState, SortingState, PagingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-import type { IndexPatternLayer } from '../../indexpattern_datasource/types';
+import type { FormBasedLayer } from '../../datasources/form_based/types';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -45,7 +45,7 @@ export interface DatatableVisualizationState {
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
-  layers: IndexPatternLayer[];
+  layers: FormBasedLayer[];
 }
 
 export interface DatatableSuggestion extends Suggestion {
