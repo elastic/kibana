@@ -23,7 +23,7 @@ Object {
   "deb": Array [
     Object {
       "x": 1664121600000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664123400000,
@@ -31,11 +31,11 @@ Object {
     },
     Object {
       "x": 1664125200000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664127000000,
-      "y": null,
+      "y": NaN,
     },
   ],
   "gz": Array [
@@ -45,7 +45,7 @@ Object {
     },
     Object {
       "x": 1664123400000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664125200000,
@@ -53,35 +53,35 @@ Object {
     },
     Object {
       "x": 1664127000000,
-      "y": null,
+      "y": NaN,
     },
   ],
   "rpm": Array [
     Object {
       "x": 1664121600000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664123400000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664125200000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664127000000,
-      "y": null,
+      "y": NaN,
     },
   ],
   "zip": Array [
     Object {
       "x": 1664121600000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664123400000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664125200000,
@@ -89,11 +89,11 @@ Object {
     },
     Object {
       "x": 1664127000000,
-      "y": null,
+      "y": NaN,
     },
     Object {
       "x": 1664128800000,
-      "y": null,
+      "y": NaN,
     },
   ],
 }
