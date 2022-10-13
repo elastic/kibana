@@ -265,6 +265,8 @@ async function getPackageInfoFromArchiveOrCache(
       archiveBuffer,
       ensureContentType(archivePath)
     );
+    // set the download URL as it isn't contained in the manifest
+    // this allows us to re-download the archive during package install
     setPackageInfo({ packageInfo: { ...packageInfo, download: archivePath }, name, version });
     return packageInfo;
   } else {
