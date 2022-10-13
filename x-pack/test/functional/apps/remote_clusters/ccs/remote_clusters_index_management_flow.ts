@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
-    // const remoteCluster = 'ftr-remote';
+    const remoteCluster = 'ftr-remote';
     before(async () => {
       await security.testUser.setRoles(['global_ccr_role', 'follower_index_user', 'superuser']);
     });
@@ -108,16 +108,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         index: followerName,
       });
       await log.debug(JSON.stringify(ccrInfo));
-      // await localEs.ccr.forgetFollower({
-      //   index: leaderName,
-      //   body: {
-      //     leader_remote_cluster: remoteCluster,
-      //     follower_index: followerName,
-      //   },
-      // });
-      // await remoteEs.indices.delete({
-      //   index: leaderName,
-      // });
+      await remoteEs.indices.delete({
+        index: leaderName,
+      });
       await security.testUser.restoreDefaults();
     });
   });

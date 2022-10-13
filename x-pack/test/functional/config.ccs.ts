@@ -16,8 +16,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
 
     testFiles: [
-      // require.resolve('./apps/canvas'),
-      // require.resolve('./apps/lens/group1'),
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/lens/group1'),
       require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
     ],
 

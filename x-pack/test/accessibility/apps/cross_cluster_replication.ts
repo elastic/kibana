@@ -46,7 +46,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.common.navigateToApp('crossClusterReplication');
             await PageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
             await a11y.testAppSnapshot();
-            await PageObjects.crossClusterReplication.createFollowerIndex(testLeader, testFollower);
+            await PageObjects.crossClusterReplication.createFollowerIndex(
+              testLeader,
+              testFollower,
+              false
+            );
           });
           it('follower index flyout', async () => {
             // https://github.com/elastic/kibana/issues/135503
