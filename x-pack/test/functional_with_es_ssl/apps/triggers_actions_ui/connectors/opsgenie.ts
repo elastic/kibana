@@ -115,9 +115,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
-        const nameInputAfterCancel = await testSubjects.find('nameInput');
-        const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-        expect(textAfterCancel).to.eql(connectorName);
+        expect(await testSubjects.getAttribute('nameInput', 'value')).to.eql(connectorName);
         await testSubjects.click('euiFlyoutCloseButton');
       });
 
@@ -140,40 +138,87 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     describe('alerts page', () => {
+      const defaultAlias = '{{rule.id}}:{{alert.id}}';
+      const connectorName = generateUniqueKey();
+
       before(async () => {
+        const createdAction = await createOpsgenieConnector(connectorName);
+        objectRemover.add(createdAction.id, 'action', 'actions');
+
         await testSubjects.click('rulesTab');
       });
 
-      it('should default to the create alert action', async () => {
+      beforeEach(async () => {
         await setupRule();
+        await selectOpsgenieConnectorInRuleAction(connectorName);
+      });
 
-        await createOpsgenieConnectorInRuleAction();
-
-        const selectAction = await find.byCssSelector('[data-test-subj="opsgenie-subActionSelect');
-
-        expect(await selectAction.getAttribute('value')).to.eql('createAlert');
-
-        const alias = await find.byCssSelector('[data-test-subj="aliasInput');
-        expect(await alias.getAttribute('value')).to.eql('{{rule.id}}:{{alert.id}}');
-
+      afterEach(async () => {
         await rules.common.cancelRuleCreation();
       });
 
-      it('should default to the close alert action when setting the run when to recovered', async () => {
-        await setupRule();
-        await createOpsgenieConnectorInRuleAction();
+      it('should default to the create alert action', async () => {
+        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.eql(
+          'createAlert'
+        );
 
+        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
+      });
+
+      it('should default to the close alert action when setting the run when to recovered', async () => {
         await testSubjects.click('addNewActionConnectorActionGroup-0');
         await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
 
-        const selectAction = await find.byCssSelector('[data-test-subj="opsgenie-subActionSelect');
+        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.eql(
+          'closeAlert'
+        );
+        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
+      });
 
-        expect(await selectAction.getAttribute('value')).to.eql('closeAlert');
+      it('should preserve the alias when switching between create and close alert actions', async () => {
+        await testSubjects.setValue('aliasInput', 'new alias');
+        await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
 
-        const alias = await find.byCssSelector('[data-test-subj="aliasInput');
-        expect(await alias.getAttribute('value')).to.eql('{{rule.id}}:{{alert.id}}');
+        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
+          'closeAlert'
+        );
+        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('new alias');
+      });
 
-        await rules.common.cancelRuleCreation();
+      it('should not preserve the message when switching to close alert and back to create alert', async () => {
+        await testSubjects.setValue('messageTextArea', 'a message');
+        await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+        await testSubjects.missingOrFail('messageTextArea');
+        await retry.try(async () => {
+          await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
+          await testSubjects.exists('messageTextArea');
+        });
+
+        expect(await testSubjects.getAttribute('messageTextArea', 'value')).to.be('');
+      });
+
+      it('should not preserve the alias when switching run when to recover', async () => {
+        await testSubjects.setValue('aliasInput', 'an alias');
+        await testSubjects.click('addNewActionConnectorActionGroup-0');
+        await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
+
+        await testSubjects.missingOrFail('messageTextArea');
+
+        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
+      });
+
+      it('should not preserve the alias when switching run when to threshold met', async () => {
+        await testSubjects.click('addNewActionConnectorActionGroup-0');
+        await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
+        await testSubjects.missingOrFail('messageTextArea');
+
+        await testSubjects.setValue('aliasInput', 'an alias');
+        await testSubjects.click('addNewActionConnectorActionGroup-0');
+        await testSubjects.click('addNewActionConnectorActionGroup-0-option-threshold met');
+        await testSubjects.exists('messageTextArea');
+
+        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
     });
 
@@ -184,20 +229,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await rules.common.setNotifyThrottleInput();
     };
 
-    const createOpsgenieConnectorInRuleAction = async () => {
+    const selectOpsgenieConnectorInRuleAction = async (name: string) => {
       await testSubjects.click('.opsgenie-alerting-ActionTypeSelectOption');
-      await testSubjects.click('addNewActionConnectorButton-.opsgenie');
-
-      const connectorName = generateUniqueKey();
-      await actions.opsgenie.setConnectorFields({
-        name: connectorName,
-        apiUrl: 'https://test.com',
-        apiKey: 'apiKey',
-      });
-
-      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
-      expect(createdConnectorToastTitle).to.eql(`Created '${connectorName}'`);
+      await testSubjects.selectValue('comboBoxInput', name);
     };
 
     const createOpsgenieConnector = async (name: string) => {

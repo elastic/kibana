@@ -38,7 +38,7 @@ export function ActionsOpsgenieServiceProvider(
     },
 
     async updateConnectorFields(fields: ConnectorFormFields) {
-      this.setConnectorFields(fields);
+      await this.setConnectorFields(fields);
 
       await find.clickByCssSelector(
         '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
