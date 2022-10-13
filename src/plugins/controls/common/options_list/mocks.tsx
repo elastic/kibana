@@ -18,7 +18,7 @@ const mockOptionsListComponentState = {
   availableOptions: ['woof', 'bark', 'meow', 'quack', 'moo'],
   invalidSelections: [],
   validSelections: [],
-  searchString: '',
+  searchString: { value: '', valid: true },
 } as OptionsListComponentState;
 
 const mockOptionsListEmbeddableInput = {

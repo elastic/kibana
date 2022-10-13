@@ -7,15 +7,19 @@
  */
 
 import { get, isEmpty } from 'lodash';
-
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
 import { OptionsListRequestBody } from '../../common/options_list/types';
-
+import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 export interface OptionsListAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
   parse: (response: SearchResponse) => string[];
+}
+
+interface EsBucket {
+  key: string;
+  doc_count: number;
 }
 
 /**
@@ -62,6 +66,9 @@ export const getSuggestionAggregationBuilder = ({
   if (fieldSpec?.type === 'boolean') {
     return suggestionAggSubtypes.boolean;
   }
+  if (fieldSpec?.type === 'ip') {
+    return suggestionAggSubtypes.ip;
+  }
   if (fieldSpec && getFieldSubtypeNested(fieldSpec)) {
     return suggestionAggSubtypes.subtypeNested;
   }
@@ -70,6 +77,16 @@ export const getSuggestionAggregationBuilder = ({
 
 const getEscapedQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
+
+const getIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
+  const results = get(
+    rawEsResult,
+    `aggregations.suggestions.buckets.${type}.filteredSuggestions.buckets`
+  );
+  if (results) {
+    results.forEach((suggestion: EsBucket) => combinedBuckets.push(suggestion));
+  }
+};
 
 const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = {
   /**
@@ -137,6 +154,65 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
       get(rawEsResult, 'aggregations.suggestions.buckets')?.map(
         (suggestion: { key_as_string: string }) => suggestion.key_as_string
       ),
+  },
+
+  /**
+   * the "IP" query / parser should be used when the options list is built on a field of type IP.
+   */
+  ip: {
+    buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
+      let ipRangeQuery: IpRangeQuery = {
+        validSearch: true,
+        rangeQuery: [
+          {
+            key: 'ipv6',
+            from: '::',
+            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+          },
+        ],
+      };
+
+      if (searchString) {
+        ipRangeQuery = getIpRangeQuery(searchString);
+        if (!ipRangeQuery.validSearch) {
+          // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
+          // simply don't return an aggregation query for the ES search request
+          return undefined;
+        }
+      }
+
+      return {
+        ip_range: {
+          field: fieldName,
+          ranges: ipRangeQuery.rangeQuery,
+          keyed: true,
+        },
+        aggs: {
+          filteredSuggestions: {
+            terms: {
+              field: fieldName,
+              execution_hint: 'map',
+              shard_size: 10,
+            },
+          },
+        },
+      };
+    },
+    parse: (rawEsResult) => {
+      if (!Boolean(rawEsResult.aggregations?.suggestions)) {
+        // if this is happens, that means there is an invalid search that snuck through to the server side code;
+        // so, might as well early return with no suggestions
+        return [];
+      }
+
+      const buckets: EsBucket[] = [];
+      getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
+      getIpBuckets(rawEsResult, buckets, 'ipv6');
+      return buckets
+        .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
+        .slice(0, 10) // only return top 10 results
+        .map((bucket: EsBucket) => bucket.key);
+    },
   },
 
   /**
