@@ -17,17 +17,15 @@ import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { RelatedSavedObjects } from './lib/related_saved_objects';
 
+const ALLOWED_CONNECTOR_TYPE_IDS = ['.email', '.slack'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  isESOCanEncrypt: boolean;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
   preconfiguredConnectors: PreconfiguredConnector[];
 }
 
 export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
   id: string;
-  spaceId: string;
-  apiKey: string | null;
   executionId: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
@@ -49,21 +47,13 @@ export type BulkUnsecuredExecutionEnqueuer<T> = (
 export function createBulkUnsecuredExecutionEnqueuerFunction({
   taskManager,
   connectorTypeRegistry,
-  isESOCanEncrypt,
   preconfiguredConnectors,
 }: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<void> {
   return async function execute(
     internalSavedObjectsRepository: ISavedObjectsRepository,
     actionsToExecute: ExecuteOptions[]
   ) {
-    if (!isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-      );
-    }
-
     const connectorTypeIds: Record<string, string> = {};
-    const spaceIds: Record<string, string> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
 
     const notPreconfiguredConnectors = connectorIds.filter(
@@ -72,7 +62,11 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
     );
 
     if (notPreconfiguredConnectors.length > 0) {
-      // log warning or throw error?
+      throw new Error(
+        `${notPreconfiguredConnectors.join(
+          ','
+        )} are not preconfigured connectors and can't be scheduled for unsecured actions execution`
+      );
     }
 
     const connectors: PreconfiguredConnector[] = compact(
@@ -85,6 +79,12 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       const { id, actionTypeId } = connector;
       if (!connectorTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
         connectorTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+      }
+
+      if (!ALLOWED_CONNECTOR_TYPE_IDS.includes(actionTypeId)) {
+        throw new Error(
+          `${actionTypeId} actions cannot be scheduled for unsecured actions execution`
+        );
       }
 
       connectorTypeIds[id] = actionTypeId;
@@ -110,14 +110,12 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
           taskReferences.push(...references);
         }
 
-        spaceIds[actionToExecute.id] = actionToExecute.spaceId;
-
         return {
           type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           attributes: {
             actionId: actionToExecute.id,
             params: actionToExecute.params,
-            apiKey: actionToExecute.apiKey,
+            apiKey: null,
             executionId: actionToExecute.executionId,
             consumer: actionToExecute.consumer,
             relatedSavedObjects: relatedSavedObjectWithRefs,
@@ -135,7 +133,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       return {
         taskType: `actions:${connectorTypeIds[actionId]}`,
         params: {
-          spaceId: spaceIds[actionId],
+          spaceId: 'default',
           actionTaskParamsId: so.id,
         },
         state: {},

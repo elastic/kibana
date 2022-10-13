@@ -465,12 +465,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     };
 
     const getUnsecuredActionsClient = async () => {
-      if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create unsecured actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
-
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);
@@ -481,7 +475,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredConnectors: preconfiguredActions,
         }),
       });
