@@ -342,6 +342,7 @@ export const SnapshotMetricTypeKeys = {
   cpuCores: null,
   load: null,
   memory: null,
+  memoryTotal: null,
   tx: null,
   rx: null,
   logRate: null,

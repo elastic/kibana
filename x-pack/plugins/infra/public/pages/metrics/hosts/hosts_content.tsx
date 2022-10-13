@@ -41,6 +41,7 @@ export const HostsContent: React.FunctionComponent = () => {
     { type: 'tx' },
     { type: 'memory' },
     { type: 'cpuCores' },
+    { type: 'memoryTotal' },
     // add others
   ];
 

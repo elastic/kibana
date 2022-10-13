@@ -60,8 +60,10 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   },
   {
     name: 'Memory total (avg.)',
-    field: 'memory',
-    render: (memory: { avg: number }) => <NumberCell value={memory.avg} unit=" MB" />,
+    field: 'memoryTotal',
+    render: (memoryTotal: { avg: number }) => (
+      <NumberCell value={Math.floor(memoryTotal.avg)} unit=" MB" />
+    ),
   },
   {
     name: 'Services on Host',
@@ -70,9 +72,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   },
   {
     name: 'Memory usage (avg.)',
-    field: 'averageMemoryUsagePercent',
-    render: (averageMemoryUsagePercent: number) => (
-      <NumberCell value={averageMemoryUsagePercent} unit="%" />
-    ),
+    field: 'memory',
+    render: (memory: { avg: number }) => <NumberCell value={memory.avg} unit="%" />,
   },
 ];
