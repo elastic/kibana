@@ -1431,7 +1431,7 @@ describe('embeddable', () => {
       visualizationType: 'testVis',
     };
 
-    const createEmbeddable = (noPadding?: boolean) => {
+    const createEmbeddable = (displayOptions?: { noPadding: boolean }, noPadding?: boolean) => {
       return new Embeddable(
         {
           timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -1451,9 +1451,7 @@ describe('embeddable', () => {
           theme: themeServiceMock.createStartContract(),
           visualizationMap: {
             [visDocument.visualizationType as string]: {
-              getDisplayOptions: () => ({
-                noPadding: false,
-              }),
+              getDisplayOptions: displayOptions ? () => displayOptions : undefined,
             } as unknown as Visualization,
           },
           datasourceMap: {},
@@ -1481,6 +1479,7 @@ describe('embeddable', () => {
       );
     };
 
+    // no display options and no override
     let embeddable = createEmbeddable();
     embeddable.render(mountpoint);
 
@@ -1490,13 +1489,34 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
     expect(expressionRenderer.mock.calls[0][0]!.padding).toBe('s');
 
-    embeddable = createEmbeddable(true);
+    // display options and no override
+    embeddable = createEmbeddable({ noPadding: true });
     embeddable.render(mountpoint);
 
     // wait one tick to give embeddable time to initialize
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
+    expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
+
+    // no display options and override
+    embeddable = createEmbeddable(undefined, true);
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(3);
+    expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
+
+    // display options and override
+    embeddable = createEmbeddable({ noPadding: false }, true);
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(4);
     expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
   });
 });

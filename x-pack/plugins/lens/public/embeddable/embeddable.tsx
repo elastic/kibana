@@ -700,7 +700,7 @@ export class Embeddable
           onRuntimeError={() => {
             this.logError('runtime');
           }}
-          noPadding={this.visDisplayOptions?.noPadding}
+          noPadding={this.visDisplayOptions.noPadding}
         />
         <div
           css={css({
@@ -1057,20 +1057,17 @@ export class Embeddable
 
   public getSelfStyledOptions() {
     return {
-      hideTitle: this.visDisplayOptions?.noPanelTitle,
+      hideTitle: this.visDisplayOptions.noPanelTitle,
     };
   }
 
-  private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
-    if (
-      !this.savedVis?.visualizationType ||
-      !this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions
-    ) {
-      return;
+  private get visDisplayOptions(): VisualizationDisplayOptions {
+    if (!this.savedVis?.visualizationType) {
+      return {};
     }
 
     let displayOptions =
-      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+      this.deps.visualizationMap[this.savedVis.visualizationType]?.getDisplayOptions?.() ?? {};
 
     if (this.input.noPadding !== undefined) {
       displayOptions = {

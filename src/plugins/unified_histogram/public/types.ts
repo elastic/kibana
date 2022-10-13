@@ -13,6 +13,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Duration, Moment } from 'moment';
 import type { Unit } from '@kbn/datemath';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 /**
  * The fetch status of a unified histogram request
@@ -32,6 +33,7 @@ export interface UnifiedHistogramServices {
   theme: Theme;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
+  lens: LensPublicStart;
 }
 
 interface Column {

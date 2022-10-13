@@ -106,6 +106,7 @@ export const DiscoverMainContent = ({
     <UnifiedHistogramLayout
       className="dscPageContent__inner"
       services={services}
+      dataView={dataView}
       hits={hits}
       chart={chart}
       resizeRef={resizeRef}

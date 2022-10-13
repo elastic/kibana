@@ -8,7 +8,6 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import moment from 'moment';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -21,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -33,6 +33,7 @@ import type {
 export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
+  dataView: DataView;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   appendHitsCounter?: ReactElement;
@@ -48,6 +49,7 @@ const HistogramMemoized = memo(Histogram);
 export function Chart({
   className,
   services,
+  dataView,
   hits,
   chart,
   appendHitsCounter,
@@ -57,7 +59,6 @@ export function Chart({
   onChartHiddenChange,
   onTimeIntervalChange,
 }: ChartProps) {
-  const { data } = services;
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
@@ -85,17 +86,6 @@ export function Chart({
     onChartHiddenChange?.(chartHidden);
   }, [chart?.hidden, onChartHiddenChange]);
 
-  const timefilterUpdateHandler = useCallback(
-    (ranges: { from: number; to: number }) => {
-      data.query.timefilter.timefilter.setTime({
-        from: moment(ranges.from).toISOString(),
-        to: moment(ranges.to).toISOString(),
-        mode: 'absolute',
-      });
-    },
-    [data]
-  );
-
   const panels = useChartPanels({
     chart,
     toggleHideChart,
@@ -106,8 +96,8 @@ export function Chart({
 
   const { euiTheme } = useEuiTheme();
   const resultCountCss = css`
-    padding: ${euiTheme.size.s};
-    min-height: ${euiTheme.base * 3}px;
+    padding: ${euiTheme.size.s} ${euiTheme.size.s} 0 ${euiTheme.size.s};
+    min-height: ${euiTheme.base * 2.5}px;
   `;
   const resultCountTitleCss = css`
     ${useEuiBreakpoint(['xs', 's'])} {
@@ -214,11 +204,7 @@ export function Chart({
             })}
             css={timechartCss}
           >
-            <HistogramMemoized
-              services={services}
-              chart={chart}
-              timefilterUpdateHandler={timefilterUpdateHandler}
-            />
+            <HistogramMemoized services={services} dataView={dataView} chart={chart} />
           </section>
           {appendHistogram}
         </EuiFlexItem>

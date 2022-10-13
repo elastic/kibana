@@ -11,6 +11,7 @@ import type { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -22,6 +23,7 @@ import type {
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   className?: string;
   services: UnifiedHistogramServices;
+  dataView: DataView;
   /**
    * Context object for the hits count -- leave undefined to hide the hits count
    */
@@ -63,6 +65,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
 export const UnifiedHistogramLayout = ({
   className,
   services,
+  dataView,
   hits,
   chart,
   resizeRef,
@@ -119,6 +122,7 @@ export const UnifiedHistogramLayout = ({
         <Chart
           className={chartClassName}
           services={services}
+          dataView={dataView}
           hits={hits}
           chart={chart}
           appendHitsCounter={appendHitsCounter}

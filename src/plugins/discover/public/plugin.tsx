@@ -40,6 +40,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -184,6 +185,7 @@ export interface DiscoverStartPlugins {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
 }
 
 /**
