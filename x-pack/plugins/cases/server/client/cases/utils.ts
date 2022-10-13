@@ -30,6 +30,7 @@ import { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
 import { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
+import * as i18n from './translations';
 
 interface CreateIncidentArgs {
   theCase: CaseResponse;
@@ -240,13 +241,17 @@ export const addKibanaInformationToDescription = (
   userProfiles?: Map<string, UserProfile>,
   publicBaseUrl?: IBasePath['publicBaseUrl']
 ) => {
-  const descriptionWithKibanaInformation = `${theCase.description}\n\nAdded by ${getEntity(
-    {
-      createdBy: theCase.created_by,
-      updatedBy: theCase.updated_by,
-    },
-    userProfiles
-  )}.`;
+  const addedBy = i18n.ADDED_BY(
+    getEntity(
+      {
+        createdBy: theCase.created_by,
+        updatedBy: theCase.updated_by,
+      },
+      userProfiles
+    )
+  );
+
+  const descriptionWithKibanaInformation = `${theCase.description}\n\n${addedBy}.`;
 
   if (!publicBaseUrl) {
     return descriptionWithKibanaInformation;
@@ -254,7 +259,9 @@ export const addKibanaInformationToDescription = (
 
   const caseUrl = getCaseViewPath({ publicBaseUrl, caseId: theCase.id, owner: theCase.owner });
 
-  return `${descriptionWithKibanaInformation}\nFor more details view this case in Kibana.\nCase URL: ${caseUrl}`;
+  return `${descriptionWithKibanaInformation}\n${i18n.VIEW_THIS_IN_KIBANA}.\n${i18n.CASE_URL(
+    caseUrl
+  )}`;
 };
 
 const addKibanaInformationToComments = (
@@ -262,14 +269,18 @@ const addKibanaInformationToComments = (
   userProfiles?: Map<string, UserProfile>
 ): ExternalServiceComment[] =>
   comments.map((theComment) => {
-    return {
-      comment: `${getCommentContent(theComment)}\n\nAdded by ${getEntity(
+    const addedBy = i18n.ADDED_BY(
+      getEntity(
         {
           createdBy: theComment.created_by,
           updatedBy: theComment.updated_by,
         },
         userProfiles
-      )}.`,
+      )
+    );
+
+    return {
+      comment: `${getCommentContent(theComment)}\n\n${addedBy}.`,
       commentId: theComment.id,
     };
   });

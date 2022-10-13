@@ -16,6 +16,8 @@ import {
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
+  commentExternalReference,
+  commentPersistableState,
 } from './mock';
 
 import {
@@ -42,6 +44,8 @@ const allComments = [
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
+  commentExternalReference,
+  commentPersistableState,
 ];
 
 describe('utils', () => {
@@ -249,7 +253,7 @@ describe('utils', () => {
           parent: null,
           summary: 'Super Bad Security Issue',
           description:
-            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
           externalId: null,
         },
         comments: [],
@@ -428,7 +432,7 @@ describe('utils', () => {
       ]);
     });
 
-    it('adds the user profile information correctly', () => {
+    it('filters unsupported comments and adds the user profile information correctly', () => {
       const theCase = {
         ...flattenCaseSavedObject({
           savedObject: mockCases[0],
@@ -452,17 +456,23 @@ describe('utils', () => {
         },
         {
           comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n\nAdded by Damaged Raccoon.',
+            'Isolated host windows-host-1 with comment: Isolating this for investigation\n' +
+            '\n' +
+            'Added by Damaged Raccoon.',
           commentId: 'mock-action-comment-1',
         },
         {
           comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n\nAdded by Damaged Raccoon.',
+            'Released host windows-host-1 with comment: Releasing this for investigation\n' +
+            '\n' +
+            'Added by Damaged Raccoon.',
           commentId: 'mock-action-comment-2',
         },
         {
           comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n\nAdded by Damaged Raccoon.',
+            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n' +
+            '\n' +
+            'Added by Damaged Raccoon.',
           commentId: 'mock-action-comment-3',
         },
         {
@@ -572,7 +582,7 @@ describe('utils', () => {
           publicBaseUrl
         )
       ).toBe(
-        'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.\nFor more details view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1'
+        'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1'
       );
     });
 
@@ -587,7 +597,7 @@ describe('utils', () => {
     it('it returns the latest push information correctly', async () => {
       const res = getLatestPushInfo('456', userActions);
       expect(res).toEqual({
-        index: 7,
+        index: 9,
         pushedInfo: {
           connector_id: '456',
           connector_name: 'ServiceNow SN',

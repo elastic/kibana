@@ -13,6 +13,7 @@ import {
   ConnectorTypes,
   Actions,
   ConnectorMappingsAttributes,
+  ExternalReferenceStorageType,
 } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
@@ -181,6 +182,56 @@ export const commentAlertMultipleIds: CommentResponseAlertsType = {
   index: 'alert-index-1',
   type: CommentType.alert as const,
   owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const commentExternalReference: CommentResponse = {
+  id: 'comment-external-reference-1',
+  type: CommentType.externalReference as const,
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.elasticSearchDoc as const,
+  },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  created_at: '2019-11-25T21:55:00.177Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
+};
+
+export const commentPersistableState: CommentResponse = {
+  id: 'comment-persistable-state-1',
+  type: CommentType.persistableState,
+  persistableStateAttachmentTypeId: '.test',
+  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
+  created_at: '2019-11-25T21:55:00.177Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
 };
 
 export const basicParams = {
@@ -382,6 +433,53 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '0818e5e0-6648-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: isolateCommentActionsMultipleTargets.id,
+    owner: SECURITY_SOLUTION_OWNER,
+  },
+  {
+    type: 'comment',
+    action: Actions.create,
+    created_at: '2021-02-03T17:48:30.616Z',
+    created_by: {
+      email: 'elastic@elastic.co',
+      full_name: 'Elastic',
+      username: 'elastic',
+    },
+    payload: {
+      comment: {
+        type: commentExternalReference.type,
+        owner: commentExternalReference.owner,
+        externalReferenceId: commentExternalReference.externalReferenceId,
+        externalReferenceAttachmentTypeId:
+          commentExternalReference.externalReferenceAttachmentTypeId,
+        externalReferenceMetadata: commentExternalReference.externalReferenceMetadata,
+        externalReferenceStorage: commentExternalReference.externalReferenceStorage,
+      },
+    },
+    action_id: '0818e5e0-6648-11eb-a291-51bf6b175a53',
+    case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
+    comment_id: commentExternalReference.id,
+    owner: SECURITY_SOLUTION_OWNER,
+  },
+  {
+    type: 'comment',
+    action: Actions.create,
+    created_at: '2021-02-03T17:48:30.616Z',
+    created_by: {
+      email: 'elastic@elastic.co',
+      full_name: 'Elastic',
+      username: 'elastic',
+    },
+    payload: {
+      comment: {
+        type: commentPersistableState.type,
+        owner: commentPersistableState.owner,
+        persistableStateAttachmentState: commentPersistableState.persistableStateAttachmentState,
+        persistableStateAttachmentTypeId: commentPersistableState.persistableStateAttachmentTypeId,
+      },
+    },
+    action_id: '0818e5e0-6648-11eb-a291-51bf6b175a53',
+    case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
+    comment_id: commentPersistableState.id,
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
