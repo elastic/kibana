@@ -45,7 +45,7 @@ export const SimpleMonitorForm = () => {
     setMonitorData(data);
   };
 
-  const { loading } = useSimpleMonitor({ monitorData });
+  const { loading, data: newMonitor } = useSimpleMonitor({ monitorData });
 
   const hasURLError = !!errors?.[ConfigKey.URLS];
 
@@ -53,7 +53,7 @@ export const SimpleMonitorForm = () => {
     <EuiForm
       onSubmit={handleSubmit(onSubmit)}
       component="form"
-      isInvalid={isSubmitted && !isValid && !loading}
+      isInvalid={isSubmitted && !isValid && !loading && !newMonitor?.id}
       noValidate
     >
       <EuiFormRow

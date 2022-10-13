@@ -70,5 +70,5 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
     }
   }, [application, data, loading, refreshApp, serviceLocations]);
 
-  return { data, loading };
+  return { data: data as SyntheticsMonitorWithId, loading };
 };
