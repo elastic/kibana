@@ -1065,7 +1065,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1079,7 +1079,7 @@
             "signature": [
               "\"unique_count\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,7 +1095,7 @@
               "ValueFormatConfig",
               " | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1818,7 +1818,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1832,7 +1832,7 @@
             "signature": [
               "\"date_histogram\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1846,7 +1846,7 @@
             "signature": [
               "{ interval: string; ignoreTimeRange?: boolean | undefined; includeEmptyRows?: boolean | undefined; dropPartials?: boolean | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1871,7 +1871,7 @@
           " extends ",
           "BaseIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1882,7 +1882,7 @@
             "tags": [],
             "label": "sourceField",
             "description": [],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1907,7 +1907,7 @@
           " extends ",
           "BaseIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/filters/filters.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1921,7 +1921,7 @@
             "signature": [
               "\"filters\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/filters/filters.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1937,7 +1937,126 @@
               "Filter",
               "[]; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/filters/filters.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.FormBasedLayer",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormBasedLayer",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.columnOrder",
+            "type": "Array",
+            "tags": [],
+            "label": "columnOrder",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.columns",
+            "type": "Object",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GenericIndexPatternColumn",
+                "text": "GenericIndexPatternColumn"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.indexPatternId",
+            "type": "string",
+            "tags": [],
+            "label": "indexPatternId",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.incompleteColumns",
+            "type": "Object",
+            "tags": [],
+            "label": "incompleteColumns",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.IncompleteColumn",
+                "text": "IncompleteColumn"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.FormBasedPersistedState",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormBasedPersistedState",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedPersistedState.layers",
+            "type": "Object",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              "{ [x: string]: Omit<",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedLayer",
+                "text": "FormBasedLayer"
+              },
+              ", \"indexPatternId\">; }"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1962,7 +2081,7 @@
           " extends ",
           "ReferenceBasedIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1976,7 +2095,7 @@
             "signature": [
               "\"formula\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1990,7 +2109,7 @@
             "signature": [
               "{ formula?: string | undefined; isFormulaBroken?: boolean | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2004,7 +2123,7 @@
         "tags": [],
         "label": "FormulaPublicApi",
         "description": [],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2044,7 +2163,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2060,7 +2179,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2072,7 +2191,7 @@
                 "tags": [],
                 "label": "column",
                 "description": [],
-                "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2083,7 +2202,7 @@
                     "tags": [],
                     "label": "formula",
                     "description": [],
-                    "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                    "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2097,7 +2216,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                    "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2111,7 +2230,7 @@
                     "signature": [
                       "{ id: string; params?: { decimals: number; } | undefined; } | undefined"
                     ],
-                    "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                    "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2135,7 +2254,7 @@
                     "text": "PersistedIndexPatternLayer"
                   }
                 ],
-                "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2158,7 +2277,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2176,7 +2295,7 @@
         "tags": [],
         "label": "IncompleteColumn",
         "description": [],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2190,7 +2309,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2204,126 +2323,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.IndexPatternLayer",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexPatternLayer",
-        "description": [],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.IndexPatternLayer.columnOrder",
-            "type": "Array",
-            "tags": [],
-            "label": "columnOrder",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.IndexPatternLayer.columns",
-            "type": "Object",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              "{ [x: string]: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.GenericIndexPatternColumn",
-                "text": "GenericIndexPatternColumn"
-              },
-              "; }"
-            ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.IndexPatternLayer.indexPatternId",
-            "type": "string",
-            "tags": [],
-            "label": "indexPatternId",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.IndexPatternLayer.incompleteColumns",
-            "type": "Object",
-            "tags": [],
-            "label": "incompleteColumns",
-            "description": [],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.IncompleteColumn",
-                "text": "IncompleteColumn"
-              },
-              "> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.IndexPatternPersistedState",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexPatternPersistedState",
-        "description": [],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.IndexPatternPersistedState.layers",
-            "type": "Object",
-            "tags": [],
-            "label": "layers",
-            "description": [],
-            "signature": [
-              "{ [x: string]: Omit<",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.IndexPatternLayer",
-                "text": "IndexPatternLayer"
-              },
-              ", \"indexPatternId\">; }"
-            ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2354,7 +2354,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/last_value.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2368,7 +2368,7 @@
             "signature": [
               "\"last_value\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/last_value.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2384,7 +2384,7 @@
               "ValueFormatConfig",
               " | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/last_value.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3093,7 +3093,7 @@
           " extends ",
           "ReferenceBasedIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/math.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3107,7 +3107,7 @@
             "signature": [
               "\"math\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/math.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3125,7 +3125,7 @@
               "ValueFormatConfig",
               " | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/math.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3240,7 +3240,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3254,7 +3254,7 @@
             "signature": [
               "\"percentile\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3268,7 +3268,7 @@
             "signature": [
               "{ percentile: number; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3299,7 +3299,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile_ranks.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile_ranks.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3313,7 +3313,7 @@
             "signature": [
               "\"percentile_rank\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile_ranks.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile_ranks.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3327,7 +3327,7 @@
             "signature": [
               "{ value: number; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile_ranks.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile_ranks.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3422,7 +3422,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/ranges/ranges.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3436,7 +3436,7 @@
             "signature": [
               "\"range\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/ranges/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3454,7 +3454,7 @@
               "RangeTypeLens",
               "[]; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; includeEmptyRows?: boolean | undefined; parentFormat?: { id: string; params?: { id?: string | undefined; template?: string | undefined; replaceInfinity?: boolean | undefined; } | undefined; } | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/ranges/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3809,7 +3809,7 @@
           " extends ",
           "ReferenceBasedIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/static_value.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/static_value.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3823,7 +3823,7 @@
             "signature": [
               "\"static_value\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/static_value.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/static_value.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3839,7 +3839,7 @@
               "ValueFormatConfig",
               " | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/static_value.tsx",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/static_value.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4108,7 +4108,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/terms/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4122,7 +4122,7 @@
             "signature": [
               "\"terms\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/terms/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4146,7 +4146,7 @@
               "ValueFormatConfig",
               " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
+            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/terms/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7207,6 +7207,28 @@
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.syncTooltips",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.syncColors",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncColors",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8183,7 +8205,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8238,7 +8260,7 @@
           "ReferenceBasedIndexPatternColumn",
           " & { operationType: \"counter_rate\"; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/counter_rate.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/calculations/counter_rate.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8262,7 +8284,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/count.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/count.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8280,7 +8302,7 @@
           "ReferenceBasedIndexPatternColumn",
           " & { operationType: \"cumulative_sum\"; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/calculations/cumulative_sum.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8348,7 +8370,7 @@
           "ReferenceBasedIndexPatternColumn",
           " & { operationType: \"differences\"; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/differences.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/calculations/differences.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8467,7 +8489,7 @@
           " | ",
           "ReferenceBasedIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8638,7 +8660,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8662,7 +8684,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8686,7 +8708,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8704,7 +8726,7 @@
           "ReferenceBasedIndexPatternColumn",
           " & { operationType: \"moving_average\"; params: { window: number; }; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/moving_average.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/calculations/moving_average.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8721,7 +8743,7 @@
         "signature": [
           "string"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8739,7 +8761,7 @@
           "ReferenceBasedIndexPatternColumn",
           " & { operationType: \"overall_sum\"; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/overall_metric.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/calculations/overall_metric.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8770,7 +8792,7 @@
           },
           "> | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8870,7 +8892,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8894,7 +8916,7 @@
           "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8912,7 +8934,7 @@
           "ReferenceBasedIndexPatternColumn",
           " & { operationType: \"normalize_by_unit\"; params: { unit?: string | undefined; }; }"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/time_scale.tsx",
+        "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/calculations/time_scale.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9142,15 +9164,75 @@
         "parentPluginId": "lens",
         "id": "def-public.layerTypes",
         "type": "Object",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "layerTypes",
         "description": [],
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
         ],
-        "path": "x-pack/plugins/lens/common/constants.ts",
-        "deprecated": false,
+        "path": "x-pack/plugins/lens/public/index.ts",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lens/choropleth_chart/visualization.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/visualization_extractor.ts"
+          }
+        ],
         "initialIsOpen": false
       }
     ]
@@ -10409,6 +10491,47 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-server.LensDocShape860",
+        "type": "Type",
+        "tags": [],
+        "label": "LensDocShape860",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShape850",
+            "text": "LensDocShape850"
+          },
+          "<VisualizationState>, \"state\"> & { state: Omit<Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
+          "Query",
+          "; filters: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.PersistableFilter",
+            "text": "PersistableFilter"
+          },
+          "[]; }, \"datasourceStates\"> & { datasourceStates: { indexpattern: Omit<{ currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }, \"layers\"> & { layers: Record<string, Omit<{ columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }, \"columns\"> & { columns: Record<string, { [key: string]: unknown; operationType: \"terms\"; params: { secondaryFields?: string[] | undefined; }; } | { [key: string]: unknown; operationType: ",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
+          },
+          "; params: Record<string, unknown>; }>; }>; }; }; }, \"datasourceStates\"> & { datasourceStates: { formBased: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; }; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-server.OperationTypePost712",
         "type": "Type",
         "tags": [],
@@ -10801,39 +10924,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.isPartitionShape",
-        "type": "Function",
-        "tags": [],
-        "label": "isPartitionShape",
-        "description": [],
-        "signature": [
-          "(shape: string) => boolean"
-        ],
-        "path": "x-pack/plugins/lens/common/visualizations/partition/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.isPartitionShape.$1",
-            "type": "string",
-            "tags": [],
-            "label": "shape",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/lens/common/visualizations/partition/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -11492,22 +11582,6 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-common.CustomPaletteParamsConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "CustomPaletteParamsConfig",
-        "description": [],
-        "signature": [
-          "CustomPaletteParams",
-          " & { maxSteps?: number | undefined; }"
-        ],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.DOC_TYPE",
         "type": "string",
         "tags": [],
@@ -11815,21 +11889,6 @@
         "description": [],
         "signature": [
           "{ readonly DEFAULT: \"default\"; readonly INSIDE: \"inside\"; readonly HIDE: \"hide\"; }"
-        ],
-        "path": "x-pack/plugins/lens/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.layerTypes",
-        "type": "Object",
-        "tags": [],
-        "label": "layerTypes",
-        "description": [],
-        "signature": [
-          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
         "deprecated": false,
