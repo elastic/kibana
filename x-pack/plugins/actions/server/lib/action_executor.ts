@@ -105,12 +105,6 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
-    if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-      );
-    }
-
     return withSpan(
       {
         name: `execute_action`,
@@ -137,6 +131,7 @@ export class ActionExecutor {
 
         const actionInfo = await getActionInfoInternal(
           await getActionsClientWithRequest(request, source),
+          this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
           preconfiguredActions,
           actionId,
@@ -319,6 +314,7 @@ export class ActionExecutor {
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
         await getActionsClientWithRequest(request, source),
+        this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
         preconfiguredActions,
         actionId,
@@ -370,6 +366,7 @@ interface ActionInfo {
 
 async function getActionInfoInternal(
   actionsClient: PublicMethodsOf<ActionsClient>,
+  isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
@@ -387,6 +384,12 @@ async function getActionInfoInternal(
       secrets: pcAction.secrets,
       actionId,
     };
+  }
+
+  if (!isESOCanEncrypt) {
+    throw new Error(
+      `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+    );
   }
 
   // if not pre-configured action, should be a saved object

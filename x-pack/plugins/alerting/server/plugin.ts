@@ -473,8 +473,6 @@ export class AlertingPlugin {
             subject: 'hello from Kibana!',
             message: 'does this work??',
           },
-          spaceId: 'default',
-          apiKey: null,
           executionId: 'abc',
         },
       ]);
