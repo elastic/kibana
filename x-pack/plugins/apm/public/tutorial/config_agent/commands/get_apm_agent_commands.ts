@@ -13,7 +13,7 @@ import { rails, railsVariables } from './rails';
 import { rack, rackVariables } from './rack';
 import { go, goVariables } from './go';
 import { dotnet, dotnetVariables } from './dotnet';
-import { php } from './php';
+import { php, phpVariables } from './php';
 import { rum, rumScript, rumVariables } from './rum';
 
 const apmAgentCommandsMap: Record<string, string> = {
@@ -30,7 +30,11 @@ const apmAgentCommandsMap: Record<string, string> = {
   js_script: rumScript,
 };
 
-const apmAgentVariablesMap: Record<string, object> = {
+interface Variables {
+  [key: string]: string;
+}
+
+const apmAgentVariablesMap: Record<string, Variables> = {
   java: javaVariables,
   node: nodeVariables,
   django: djangoVariables,
@@ -39,6 +43,7 @@ const apmAgentVariablesMap: Record<string, object> = {
   rack: rackVariables,
   go: goVariables,
   dotnet: dotnetVariables,
+  php: phpVariables,
   js: rumVariables,
 };
 
