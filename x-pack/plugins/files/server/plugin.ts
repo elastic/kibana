@@ -27,7 +27,6 @@ import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './typ
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
-import { filesFeature } from './feature';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
