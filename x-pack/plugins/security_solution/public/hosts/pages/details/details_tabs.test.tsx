@@ -87,8 +87,8 @@ describe('body', () => {
   });
 
   const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
-    events: { pageFilters: mockHostDetailsPageFilters },
-    alerts: { pageFilters: mockHostDetailsPageFilters },
+    events: { hostDetailsFilter: mockHostDetailsPageFilters },
+    alerts: { hostDetailsFilter: mockHostDetailsPageFilters },
   };
   const mount = useMountAppended();
 
@@ -105,7 +105,7 @@ describe('body', () => {
               indexNames={[]}
               indexPattern={mockIndexPattern}
               type={type}
-              pageFilters={mockHostDetailsPageFilters}
+              hostDetailsFilter={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
               from={'2020-07-07T08:20:18.966Z'}
               to={'2020-07-08T08:20:18.966Z'}
