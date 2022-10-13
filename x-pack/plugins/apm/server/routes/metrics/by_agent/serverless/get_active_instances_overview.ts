@@ -28,7 +28,7 @@ interface ActiveInstanceTimeseries {
   memorySize: Coordinate[];
 }
 
-interface ActiveInstanceOverview {
+export interface ActiveInstanceOverview {
   activeInstanceName: string;
   serverlessFunctionName: string;
   timeseries: ActiveInstanceTimeseries;

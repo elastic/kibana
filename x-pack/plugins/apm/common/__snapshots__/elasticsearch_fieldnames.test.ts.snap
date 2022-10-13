@@ -75,6 +75,8 @@ exports[`Error FAAS_DURATION 1`] = `undefined`;
 
 exports[`Error FAAS_ID 1`] = `undefined`;
 
+exports[`Error FAAS_NAME 1`] = `undefined`;
+
 exports[`Error FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Error HOST 1`] = `
@@ -330,6 +332,8 @@ exports[`Span FAAS_DURATION 1`] = `undefined`;
 
 exports[`Span FAAS_ID 1`] = `undefined`;
 
+exports[`Span FAAS_NAME 1`] = `undefined`;
+
 exports[`Span FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Span HOST 1`] = `undefined`;
@@ -580,6 +584,8 @@ exports[`Transaction FAAS_COLDSTART_DURATION 1`] = `undefined`;
 exports[`Transaction FAAS_DURATION 1`] = `undefined`;
 
 exports[`Transaction FAAS_ID 1`] = `undefined`;
+
+exports[`Transaction FAAS_NAME 1`] = `undefined`;
 
 exports[`Transaction FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
