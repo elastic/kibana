@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   describe('Metric', function describeIndexTests() {
     before(async () => {
@@ -58,8 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await button.click();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
@@ -77,8 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await button.click();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
