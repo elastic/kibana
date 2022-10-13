@@ -33,6 +33,7 @@ import {
   CommentRequestExternalReferenceType,
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
+  CasesFindQueryParams,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -43,7 +44,6 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
-import { ConstructQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -319,6 +319,58 @@ export const buildRangeFilter = ({
   }
 };
 
+export const buildAssigneesFilter = ({
+  assignees,
+}: {
+  assignees: CasesFindQueryParams['assignees'];
+}): KueryNode | undefined => {
+  if (assignees === undefined) {
+    return;
+  }
+
+  const assigneesAsArray = Array.isArray(assignees) ? assignees : [assignees];
+
+  if (assigneesAsArray.length === 0) {
+    return;
+  }
+
+  /**
+   * URLSearchParams converts null values to a literal string 'null'.
+   * For that reason, we need to check for 'null'.
+   */
+  const isNotNull = (value: string | null): value is string => value !== null && value !== 'null';
+
+  const assigneesWithoutNull = assigneesAsArray.filter<string>(isNotNull);
+  /**
+   * assigneesWithoutNull contains all assignees without the null value.
+   * assigneesAsArray contains all assignees with the null value.
+   * By doing a length comparison we can detect if there is the null value
+   * in the assigneesAsArray array. If there is we need to filter for cases
+   * without assignees.
+   */
+  const filterCasesWithoutAssignees = assigneesAsArray.length > assigneesWithoutNull.length;
+
+  const assigneesFilter = nodeBuilder.or(
+    assigneesWithoutNull.map((filter) =>
+      nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+    )
+  );
+
+  if (!filterCasesWithoutAssignees) {
+    return assigneesFilter;
+  }
+
+  const filterCasesWithoutAssigneesKueryNode = stringToKueryNode(
+    `not ${CASE_SAVED_OBJECT}.attributes.assignees.uid: *`
+  );
+
+  if (!filterCasesWithoutAssigneesKueryNode) {
+    return assigneesFilter;
+  }
+
+  return nodeBuilder.or([assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -330,7 +382,7 @@ export const constructQueryOptions = ({
   from,
   to,
   assignees,
-}: ConstructQueryParams): SavedObjectFindOptionsKueryNode => {
+}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortField = sortToSnake(sortByField);
@@ -339,11 +391,7 @@ export const constructQueryOptions = ({
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
   const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
-  const assigneesFilter = buildFilter({
-    filters: assignees,
-    field: 'assignees.uid',
-    operator: 'or',
-  });
+  const assigneesFilter = buildAssigneesFilter({ assignees });
 
   const filters = combineFilters([
     statusFilter,

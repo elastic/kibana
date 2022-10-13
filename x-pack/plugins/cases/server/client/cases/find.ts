@@ -18,6 +18,7 @@ import {
   throwErrors,
   CasesFindResponseRt,
   excess,
+  CasesFindQueryParams,
 } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
@@ -26,7 +27,6 @@ import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
-import { ConstructQueryParams } from '../types';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
@@ -71,7 +71,7 @@ export const find = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
-    const queryArgs: ConstructQueryParams = {
+    const queryArgs: CasesFindQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,

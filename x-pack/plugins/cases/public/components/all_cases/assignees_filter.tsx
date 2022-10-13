@@ -117,6 +117,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         emptyMessage: <EmptyMessage />,
         noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
         singleSelection: false,
+        nullOptionLabel: i18n.NO_ASSIGNEES,
       }}
     />
   );

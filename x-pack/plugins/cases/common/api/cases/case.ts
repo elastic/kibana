@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 
+import { KueryNode } from '@kbn/es-query';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
@@ -184,9 +185,9 @@ export const CasesFindRequestRt = rt.partial({
    */
   severity: CaseSeverityRt,
   /**
-   * The uids of the user profiles to filter by
+   * The uids of the user profiles to filter by. If null all cases with no assignees will be returned
    */
-  assignees: rt.union([rt.array(rt.string), rt.string]),
+  assignees: rt.union([rt.array(rt.string), rt.string, rt.null]),
   /**
    * The reporters to filter by
    */
@@ -352,3 +353,10 @@ export type AllReportersFindRequest = AllTagsFindRequest;
 
 export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
+
+export type CasesFindQueryParams = Partial<
+  Pick<
+    CasesFindRequest,
+    'tags' | 'reporters' | 'status' | 'severity' | 'owner' | 'from' | 'to' | 'assignees'
+  > & { sortByField?: string; authorizationFilter?: KueryNode }
+>;
