@@ -41,8 +41,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       const MEMORY_TOTAL = 536870912; // 0.5gb;
       const MEMORY_FREE = 94371840; // ~0.08 gb;
-      const expectedMemory = 1 - MEMORY_FREE / MEMORY_TOTAL;
-
+      const expectedMemoryUsedRate = (MEMORY_TOTAL - MEMORY_FREE) / MEMORY_TOTAL;
+      const expectedMemoryUsed = MEMORY_TOTAL - MEMORY_FREE;
       const BILLED_DURATION_MS = 4000;
       const FAAS_TIMEOUT_MS = 10000;
       const COLD_START_DURATION_PYTHON = 4000;
@@ -142,7 +142,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('serverless function summary', () => {
           it('returns correct memory avg', () => {
-            expect(serverlessMetrics.serverlessSummary.memoryUsageAvg).to.eql(expectedMemory);
+            expect(serverlessMetrics.serverlessSummary.memoryUsageAvgRate).to.eql(
+              expectedMemoryUsedRate
+            );
           });
           it('returns correct serverless function total', () => {
             expect(serverlessMetrics.serverlessSummary.serverlessFunctionsTotal).to.eql(
@@ -176,8 +178,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               expect(functionOverview?.serverlessDurationAvg).to.eql(FAAS_DURATION);
               expect(functionOverview?.serverlessDurationAvg).to.eql(BILLED_DURATION_MS);
               expect(functionOverview?.coldStartCount).to.eql(numberOfTransactionsCreated);
-              expect(functionOverview?.memoryMax).to.eql(expectedMemory);
-              expect(functionOverview?.memorySize).to.eql(expectedMemory);
+              expect(functionOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);
+              expect(functionOverview?.memorySize).to.eql(MEMORY_TOTAL);
             });
           });
         });
@@ -207,8 +209,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
               expect(activeInstanceOverview?.serverlessDurationAvg).to.eql(FAAS_DURATION);
               expect(activeInstanceOverview?.serverlessDurationAvg).to.eql(BILLED_DURATION_MS);
-              expect(activeInstanceOverview?.memoryMax).to.eql(expectedMemory);
-              expect(activeInstanceOverview?.memorySize).to.eql(expectedMemory);
+              expect(activeInstanceOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);
+              expect(activeInstanceOverview?.memorySize).to.eql(MEMORY_TOTAL);
             });
           });
 
@@ -220,33 +222,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     (item) => item.serverlessFunctionName === name
                   );
 
-                function removeNullValue(coordinate: Coordinate) {
-                  return coordinate.y !== null;
+                function removeNullAndZeroValue(coordinate: Coordinate) {
+                  return coordinate.y !== null && coordinate.y !== 0;
                 }
 
                 const meanDuration = meanBy(
-                  activeInstanceOverview?.timeseries.serverlessDuration.filter(removeNullValue),
+                  activeInstanceOverview?.timeseries.serverlessDuration.filter(
+                    removeNullAndZeroValue
+                  ),
                   'y'
                 );
                 expect(meanDuration).to.eql(FAAS_DURATION);
 
                 const meanBilledDuration = meanBy(
-                  activeInstanceOverview?.timeseries.billedDuration.filter(removeNullValue),
+                  activeInstanceOverview?.timeseries.billedDuration.filter(removeNullAndZeroValue),
                   'y'
                 );
                 expect(meanBilledDuration).to.eql(BILLED_DURATION_MS);
 
-                const meanMemoryMax = meanBy(
-                  activeInstanceOverview?.timeseries.memoryMax.filter(removeNullValue),
+                const meanAvgMemoryUsed = meanBy(
+                  activeInstanceOverview?.timeseries.avgMemoryUsed.filter(removeNullAndZeroValue),
                   'y'
                 );
-                expect(meanMemoryMax).to.eql(expectedMemory);
+                expect(meanAvgMemoryUsed).to.eql(expectedMemoryUsed);
 
                 const meanMemorySize = meanBy(
-                  activeInstanceOverview?.timeseries.memorySize.filter(removeNullValue),
+                  activeInstanceOverview?.timeseries.memorySize.filter(removeNullAndZeroValue),
                   'y'
                 );
-                expect(meanMemorySize).to.eql(expectedMemory);
+                expect(meanMemorySize).to.eql(MEMORY_TOTAL);
               });
             });
           });

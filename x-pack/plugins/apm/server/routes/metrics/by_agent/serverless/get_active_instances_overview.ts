@@ -10,6 +10,8 @@ import {
   FAAS_BILLED_DURATION,
   FAAS_DURATION,
   FAAS_NAME,
+  METRIC_SYSTEM_FREE_MEMORY,
+  METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
@@ -17,12 +19,12 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { Coordinate } from '../../../../../typings/timeseries';
 import { getBucketSize } from '../../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { percentMemoryUsedScript } from '../shared/memory';
+import { calcMemoryUsed } from './helper';
 
 interface ActiveInstanceTimeseries {
   serverlessDuration: Coordinate[];
   billedDuration: Coordinate[];
-  memoryMax: Coordinate[];
+  avgMemoryUsed: Coordinate[];
   memorySize: Coordinate[];
 }
 
@@ -32,7 +34,7 @@ interface ActiveInstanceOverview {
   timeseries: ActiveInstanceTimeseries;
   serverlessDurationAvg: number | null;
   billedDurationAvg: number | null;
-  memoryMax: number | null;
+  avgMemoryUsed: number | null;
   memorySize: number | null;
 }
 
@@ -62,12 +64,9 @@ export async function getServerlessActiveInstancesOverview({
   const aggs = {
     faasDurationAvg: { avg: { field: FAAS_DURATION } },
     faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
-    systemMemoryUsedMax: {
-      max: { script: percentMemoryUsedScript },
-    },
-    systemMemoryUsedAvg: {
-      avg: { script: percentMemoryUsedScript },
-    },
+    maxTotalMemory: { max: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
   };
 
   const params = {
@@ -146,18 +145,21 @@ export async function getServerlessActiveInstancesOverview({
                         y: timeseriesCurr.faasBilledDurationAvg.value,
                       },
                     ],
-                    memoryMax: [
-                      ...timeseriesAcc.memoryMax,
+                    avgMemoryUsed: [
+                      ...timeseriesAcc.avgMemoryUsed,
                       {
                         x: timeseriesCurr.key,
-                        y: timeseriesCurr.systemMemoryUsedMax.value,
+                        y: calcMemoryUsed({
+                          memoryFree: timeseriesCurr.avgFreeMemory.value,
+                          memoryTotal: timeseriesCurr.avgTotalMemory.value,
+                        }),
                       },
                     ],
                     memorySize: [
                       ...timeseriesAcc.memorySize,
                       {
                         x: timeseriesCurr.key,
-                        y: timeseriesCurr.systemMemoryUsedAvg.value,
+                        y: timeseriesCurr.maxTotalMemory.value,
                       },
                     ],
                   };
@@ -165,7 +167,7 @@ export async function getServerlessActiveInstancesOverview({
                 {
                   serverlessDuration: [],
                   billedDuration: [],
-                  memoryMax: [],
+                  avgMemoryUsed: [],
                   memorySize: [],
                 }
               );
@@ -177,8 +179,11 @@ export async function getServerlessActiveInstancesOverview({
                 timeseries,
                 serverlessDurationAvg: curr.faasDurationAvg.value,
                 billedDurationAvg: curr.faasBilledDurationAvg.value,
-                memoryMax: curr.systemMemoryUsedMax.value,
-                memorySize: curr.systemMemoryUsedAvg.value,
+                avgMemoryUsed: calcMemoryUsed({
+                  memoryFree: curr.avgFreeMemory.value,
+                  memoryTotal: curr.avgTotalMemory.value,
+                }),
+                memorySize: curr.avgTotalMemory.value,
               },
             ];
           },

@@ -11,11 +11,14 @@ import {
   FAAS_COLDSTART,
   FAAS_DURATION,
   FAAS_NAME,
+  METRIC_SYSTEM_FREE_MEMORY,
+  METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { getMemoryInfo } from '../shared/memory';
+import { calcMemoryUsed } from './helper';
 
 export async function getServerlessFunctionsOverview({
   end,
@@ -58,12 +61,9 @@ export async function getServerlessFunctionsOverview({
             faasDurationAvg: { avg: { field: FAAS_DURATION } },
             faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
             coldStartCount: { sum: { field: FAAS_COLDSTART } },
-            // systemMemoryUsedMax: {
-            //   max: { script: percentMemoryUsedScript },
-            // },
-            // systemMemoryUsedAvg: {
-            //   avg: { script: percentMemoryUsedScript },
-            // },
+            maxTotalMemory: { max: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+            avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+            avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
           },
         },
       },
@@ -84,8 +84,11 @@ export async function getServerlessFunctionsOverview({
         serverlessDurationAvg: bucket.faasDurationAvg.value,
         billedDurationAvg: bucket.faasBilledDurationAvg.value,
         coldStartCount: bucket.coldStartCount.value,
-        memoryMax: 0, // bucket.systemMemoryUsedMax.value,
-        memorySize: 0, // bucket.systemMemoryUsedAvg.value,
+        avgMemoryUsed: calcMemoryUsed({
+          memoryFree: bucket.avgFreeMemory.value,
+          memoryTotal: bucket.avgTotalMemory.value,
+        }),
+        memorySize: bucket.maxTotalMemory.value,
       };
     });
 
