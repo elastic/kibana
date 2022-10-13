@@ -13,7 +13,7 @@ const lazySuricataLibConfiguration = () => {
    * See https://webpack.js.org/api/module-methods/#magic-comments
    */
   return import(
-    /* webpackChunkName: "lazy_register_alerts_table_configuration" */
+    /* webpackChunkName: "lazy_suricata_lib_configuration" */
     'suricata-sid-db'
   );
 };
