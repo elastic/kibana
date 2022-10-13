@@ -26,50 +26,26 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { guidesConfig } from '../constants/guides_config';
-import type { GuideState, GuideStepIds } from '../../common/types';
-import type { GuideConfig, StepConfig } from '../types';
+import { ApplicationStart } from '@kbn/core/public';
+
+import type { GuideState, GuideStep as GuideStepStatus } from '../../common/types';
+import type { StepConfig } from '../types';
 
 import type { ApiService } from '../services/api';
+import { getGuideConfig } from '../services/helpers';
 
 import { GuideStep } from './guide_panel_step';
 import { QuitGuideModal } from './quit_guide_modal';
 import { getGuidePanelStyles } from './guide_panel.styles';
+import { GuideButton } from './guide_button';
 
 interface GuidePanelProps {
   api: ApiService;
   application: ApplicationStart;
 }
-
-const getConfig = (state?: GuideState): GuideConfig | undefined => {
-  if (state) {
-    return guidesConfig[state.guideId];
-  }
-
-  return undefined;
-};
-
-const getStepNumber = (state?: GuideState): number | undefined => {
-  let stepNumber: number | undefined;
-
-  state?.steps.forEach((step, stepIndex) => {
-    // If the step is in_progress, show that step number
-    if (step.status === 'in_progress') {
-      stepNumber = stepIndex + 1;
-    }
-
-    // If the step is active, show the previous step number
-    if (step.status === 'active') {
-      stepNumber = stepIndex;
-    }
-  });
-
-  return stepNumber;
-};
 
 const getProgress = (state?: GuideState): number => {
   if (state) {
@@ -95,10 +71,26 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
   };
 
-  const navigateToStep = async (stepId: GuideStepIds, stepLocation: StepConfig['location']) => {
-    await api.startGuideStep(guideState!.guideId, stepId);
-    if (stepLocation) {
-      application.navigateToApp(stepLocation.appID, { path: stepLocation.path });
+  const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
+    if (guideState) {
+      const { id, status } = step;
+      if (status === 'ready_to_complete') {
+        return await api.completeGuideStep(guideState?.guideId, id);
+      }
+
+      if (status === 'active') {
+        await api.startGuideStep(guideState!.guideId, id);
+      }
+      if (status === 'active' || status === 'in_progress') {
+        if (stepConfig.location) {
+          await application.navigateToApp(stepConfig.location.appID, {
+            path: stepConfig.location.path,
+          });
+          if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
+            await api.completeGuideStep(guideState.guideId, id);
+          }
+        }
+      }
     }
   };
 
@@ -136,7 +128,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getConfig(guideState);
+  const guideConfig = getGuideConfig(guideState?.guideId);
 
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
@@ -157,23 +149,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     );
   }
 
-  const stepNumber = getStepNumber(guideState);
   const stepsCompleted = getProgress(guideState);
 
   return (
     <>
-      <EuiButton onClick={toggleGuide} color="success" fill size="s" data-test-subj="guideButton">
-        {Boolean(stepNumber)
-          ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
-              defaultMessage: 'Setup guide: step {stepNumber}',
-              values: {
-                stepNumber,
-              },
-            })
-          : i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
-              defaultMessage: 'Setup guide',
-            })}
-      </EuiButton>
+      <GuideButton
+        guideState={guideState!}
+        toggleGuidePanel={toggleGuide}
+        isGuidePanelOpen={isGuideOpen}
+      />
 
       {isGuideOpen && (
         <EuiFlyout
@@ -259,7 +243,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                       stepStatus={stepState.status}
                       stepConfig={step}
                       stepNumber={index + 1}
-                      navigateToStep={navigateToStep}
+                      handleButtonClick={() => handleStepButtonClick(stepState, step)}
                       key={accordionId}
                     />
                   );
