@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import { UploadFile } from '../../upload_file';
 import { useFilePickerContext } from '../context';
@@ -18,11 +19,21 @@ interface Props {
 export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
   const { state } = useFilePickerContext();
   return (
-    <UploadFile
-      kind={kind}
-      immediate
-      onDone={(file) => state.selectFile(file.map(({ id }) => id))}
-      initialPromptText={i18nTexts.emptyStatePrompt}
+    <EuiEmptyPrompt
+      title={<h3>{i18nTexts.emptyStatePrompt}</h3>}
+      body={
+        <EuiText color="subdued" size="s">
+          <p>{i18nTexts.emptyStatePromptSubtitle}</p>
+        </EuiText>
+      }
+      titleSize="s"
+      actions={[
+        <UploadFile
+          kind={kind}
+          immediate
+          onDone={(file) => state.selectFile(file.map(({ id }) => id))}
+        />,
+      ]}
     />
   );
 };
