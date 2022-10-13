@@ -350,12 +350,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         dispatch(publishFilters(newFilters));
       });
     } else {
-      dispatch(
-        updateQueryResults({
-          availableOptions: [],
-        })
-      );
-      dispatch(setLoading(false));
+      batch(() => {
+        dispatch(
+          updateQueryResults({
+            availableOptions: [],
+          })
+        );
+        dispatch(setLoading(false));
+      });
     }
   };
 

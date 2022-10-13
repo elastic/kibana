@@ -161,27 +161,30 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    */
   ip: {
     buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => {
-      let rangeQuery: IpRangeQuery['rangeQuery'] = [
-        {
-          key: 'ipv6',
-          from: '::',
-          to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
-        },
-      ];
+      let ipRangeQuery: IpRangeQuery = {
+        validSearch: true,
+        rangeQuery: [
+          {
+            key: 'ipv6',
+            from: '::',
+            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+          },
+        ],
+      };
+
       if (searchString) {
-        const { rangeQuery: testRangeQuery, validSearch } = getIpRangeQuery(searchString);
-        if (!validSearch) {
+        ipRangeQuery = getIpRangeQuery(searchString);
+        if (!ipRangeQuery.validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
           // simply don't return an aggregation query for the ES search request
           return undefined;
         }
-        rangeQuery = testRangeQuery;
       }
 
       return {
         ip_range: {
           field: fieldName,
-          ranges: rangeQuery,
+          ranges: ipRangeQuery.rangeQuery,
           keyed: true,
         },
         aggs: {
