@@ -35,6 +35,8 @@ import {
 } from '../../../../../shared/constants';
 import { IndexNameLogic } from '../../index_name_logic';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { ConfigurePipeline } from './configure_pipeline';
 import { AddInferencePipelineSteps, MLInferenceLogic } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
@@ -76,6 +78,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
 };
 
 const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
     supportedMLModels,
@@ -117,7 +120,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
       </EuiModalBody>
-      <ModalFooter onClose={onClose} />
+      <ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />
     </>
   );
 };
@@ -180,7 +183,10 @@ const ModalSteps: React.FC = () => {
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-const ModalFooter: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
+const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod: string }> = ({
+  ingestionMethod,
+  onClose,
+}) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
   const { createPipeline, setAddInferencePipelineStep } = useActions(MLInferenceLogic);
 
@@ -214,11 +220,17 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) =>
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
+            onClick={onClose}
+          >
+            {CANCEL_BUTTON_LABEL}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {nextStep !== undefined ? (
             <EuiButton
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
               iconType="arrowRight"
               iconSide="right"
               onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
@@ -230,6 +242,7 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) =>
           ) : (
             <EuiButton
               color="success"
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
               disabled={!isPipelineDataValid}
               fill
               onClick={createPipeline}

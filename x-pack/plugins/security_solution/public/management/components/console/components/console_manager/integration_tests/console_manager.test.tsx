@@ -7,23 +7,23 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook as _renderHook, act } from '@testing-library/react-hooks';
-import { useConsoleManager } from './console_manager';
+import { useConsoleManager } from '../console_manager';
 import React from 'react';
 import type {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
   RegisteredConsoleClient,
-} from './types';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+} from '../types';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
   getNewConsoleRegistrationMock,
-} from './mocks';
+} from '../mocks';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
-import { enterConsoleCommand } from '../../mocks';
+import { enterConsoleCommand } from '../../../mocks';
 
 describe('When using ConsoleManager', () => {
   describe('and using the ConsoleManagerInterface via the hook', () => {
