@@ -50,13 +50,17 @@ export const OverviewGrid = () => {
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
-    rootMargin: '640px', // Height of 4 rows of monitors, minus the gutters
-    threshold: 1,
+    rootMargin: '0px 640px', // Height of 4 rows of monitors, minus the gutters
+    threshold: 0.1,
   });
-  const hasIntersected = intersection && intersection.intersectionRatio === 1;
+  const hasIntersected = intersection && intersection.intersectionRatio > 0;
 
   useThrottle(() => {
-    if (hasIntersected) {
+    if (
+      hasIntersected &&
+      currentMonitors.length === page * perPage &&
+      currentMonitors.length !== monitors.length
+    ) {
       setLoadNextPage(true);
     } else {
       setLoadNextPage(false);
@@ -101,8 +105,9 @@ export const OverviewGrid = () => {
       ) : (
         <OverviewLoader />
       )}
-      {currentMonitors.length !== monitors.length && <span ref={intersectionRef} />}
-      <EuiSpacer size="l" />
+      <span ref={intersectionRef}>
+        <EuiSpacer size="l" />
+      </span>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {currentMonitors.length === monitors.length && (
           <EuiFlexItem grow={false}>
