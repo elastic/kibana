@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useState, useEffect } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-
+import React, { FC, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiHighlight,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
+import { MLJobWizardFieldStatsFlyoutContext } from '../field_stats_flyout/field_stats_flyout';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../../../../common/types/fields';
 
@@ -38,6 +48,8 @@ interface Props {
 
 export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, removeOptions }) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const { setIsFlyoutVisible, setFieldName } = useContext(MLJobWizardFieldStatsFlyoutContext);
+
   const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
   // create list of labels based on already selected detectors
   // so they can be removed from the dropdown list
@@ -66,6 +78,43 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
+  const renderOption = (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
+    const field = (option as DropDownLabel).field;
+    return option.isGroupLabelOption || !field ? (
+      option.label
+    ) : (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <FieldIcon type={field.type} fill="none" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="inspect"
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              if (ev.type === 'click') {
+                ev.currentTarget.focus();
+              }
+              ev.preventDefault();
+              ev.stopPropagation();
+
+              if (typeof field.id === 'string') {
+                setFieldName(field.id);
+                setIsFlyoutVisible(true);
+              }
+            }}
+            aria-label={i18n.translate('xpack.ml.fieldContextPopover.topFieldValuesAriaLabel', {
+              defaultMessage: 'Show top 10 field values',
+            })}
+            data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <EuiFormRow
       error={validation.message}
@@ -79,6 +128,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
         onChange={changeHandler}
         isClearable={false}
         isInvalid={validation.valid === false}
+        // @todo: remove
+        renderOption={renderOption}
       />
     </EuiFormRow>
   );
