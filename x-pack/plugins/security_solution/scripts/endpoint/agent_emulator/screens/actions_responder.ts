@@ -50,14 +50,22 @@ ${blue(HORIZONTAL_LINE.substring(0, HORIZONTAL_LINE.length - 2))}
     switch (choiceValue) {
       case 'Q':
         this.hide();
-
-      case '1':
-        this.emulatorContext.getActionResponderService().stop();
-        this.reRender();
         return;
 
-      default:
-        this.throwUnknownChoiceError(choice);
+      case '1':
+        {
+          const actionsResponderService = this.emulatorContext.getActionResponderService();
+          const isRunning = actionsResponderService.isRunning;
+          if (isRunning) {
+            actionsResponderService.stop();
+          } else {
+            actionsResponderService.start();
+          }
+        }
+        this.reRender();
+        return;
     }
+
+    this.throwUnknownChoiceError(choice);
   }
 }

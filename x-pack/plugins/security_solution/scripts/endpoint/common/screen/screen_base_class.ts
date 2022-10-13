@@ -55,6 +55,7 @@ export class ScreenBaseClass {
   private screenRenderInfo: RenderedScreen | undefined;
   private isPaused: boolean = false;
   private isHidden: boolean = true;
+  private autoClearMessageId: undefined | NodeJS.Timeout = undefined;
 
   /**
    * Provides content for the header of the screen.
@@ -148,8 +149,17 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
       .join('\n');
   }
 
-  private showMessage(message: string, color: 'blue' | 'red' | 'green' = 'blue') {
+  public showMessage(
+    message: string,
+    color: 'blue' | 'red' | 'green' = 'blue',
+    autoClear: boolean = false
+  ) {
     const { screenRenderInfo, ttyOut } = this;
+
+    if (this.autoClearMessageId) {
+      clearTimeout(this.autoClearMessageId);
+      this.autoClearMessageId = undefined;
+    }
 
     if (screenRenderInfo) {
       ttyOut.cursorTo(0, screenRenderInfo.statusPos);
@@ -159,18 +169,24 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
 
       switch (color) {
         case 'green':
-          coloredMessage = green(`(+) ${message}`);
+          coloredMessage = green(`\u2713 ${message}`);
           break;
         case 'red':
-          coloredMessage = red(`(x) ${message}`);
+          coloredMessage = red(`\u24e7  ${message}`);
           break;
 
         case 'blue':
-          coloredMessage = blue(`(i) ${message}`);
+          coloredMessage = blue(`\u24d8  ${message}`);
           break;
       }
 
       ttyOut.write(` ${coloredMessage}`);
+
+      if (autoClear) {
+        this.autoClearMessageId = setTimeout(() => {
+          this.showMessage('');
+        }, 4000);
+      }
     }
   }
 
