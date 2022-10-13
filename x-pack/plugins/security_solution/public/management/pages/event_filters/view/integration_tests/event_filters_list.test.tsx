@@ -8,13 +8,13 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { EVENT_FILTERS_PATH } from '../../../../../common/constants';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { EventFiltersList } from './event_filters_list';
-import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
-import { SEARCHABLE_FIELDS } from '../constants';
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { EVENT_FILTERS_PATH } from '../../../../../../common/constants';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { EventFiltersList } from '../event_filters_list';
+import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
+import { SEARCHABLE_FIELDS } from '../../constants';
+import { parseQueryFilterToKQL } from '../../../../common/utils';
 
 describe('When on the Event Filters list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
