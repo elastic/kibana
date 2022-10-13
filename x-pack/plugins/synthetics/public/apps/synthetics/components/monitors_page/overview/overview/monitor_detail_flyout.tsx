@@ -156,7 +156,6 @@ function LocationSelect({
   const [isOpen, setIsOpen] = useState(false);
   const { locations } = locationData;
   const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
-  console.log('current location', currentLocation);
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={2}>
@@ -193,7 +192,6 @@ function LocationSelect({
                     id: 0,
                     title: GO_TO_LOCATIONS_LABEL,
                     items: locations.map((l) => {
-                      console.log(l);
                       return {
                         name: l.observer?.geo?.name,
                         icon: <EuiHealth color={!!l.summary?.down ? 'danger' : 'success'} />,
@@ -256,8 +254,6 @@ export function MonitorDetailFlyout(props: Props) {
   const monitorDetail = useMonitorDetail(id, location);
   const locationStatuses = useStatusByLocation(id);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
-  console.log(monitorSavedObject);
-  console.log('locations', locations);
   return (
     <EuiFlyout size="s" type="push" onClose={props.onClose}>
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
