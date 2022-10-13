@@ -4,13 +4,15 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": true
   },
   "include": [
     "common/**/*",
     "public/**/*",
+    "server/**/*",
     "scripts/**/*",
     "public/**/*.json",
+    "server/**/*.json",
     "../../../typings/**/*"
   ],
   "references": [

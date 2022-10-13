@@ -12,3 +12,15 @@ export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 
 export const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';
+
+export const THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME = 'threatIntelligenceSearchStrategy';
+
+export const BARCHART_AGGREGATION_NAME = 'barchartAggregation';
+
+/**
+ * Used inside custom search strategy
+ */
+export const enum FactoryQueryType {
+  IndicatorGrid = 'indicatorGrid',
+  Barchart = 'barchart',
+}
