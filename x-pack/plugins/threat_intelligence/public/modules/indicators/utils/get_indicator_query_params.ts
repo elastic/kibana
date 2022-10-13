@@ -6,14 +6,13 @@
  */
 
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { THREAT_QUERY_BASE } from '../../../common/constants';
-import { RawIndicatorFieldId } from '..';
-import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from './display_name';
+import { THREAT_QUERY_BASE } from '../../../../common/constants';
+import { RawIndicatorFieldId } from '../../../../common/types';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
 
 /**
- * Prepare shared `runtime_mappings` and `query` fields used within indicator search request
+ * Prepare shared `query` fields used within indicator search request
  */
 export const getIndicatorQueryParams = ({
   filters,
@@ -25,20 +24,6 @@ export const getIndicatorQueryParams = ({
   timeRange?: TimeRange;
 }) => {
   return {
-    runtime_mappings: {
-      [RawIndicatorFieldId.Name]: {
-        type: 'keyword',
-        script: {
-          source: threatIndicatorNamesScript(),
-        },
-      },
-      [RawIndicatorFieldId.NameOrigin]: {
-        type: 'keyword',
-        script: {
-          source: threatIndicatorNamesOriginScript(),
-        },
-      },
-    } as const,
     query: buildEsQuery(
       undefined,
       [
