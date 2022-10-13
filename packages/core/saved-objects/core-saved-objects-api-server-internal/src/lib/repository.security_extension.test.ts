@@ -130,7 +130,7 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#get', () => {
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(
         getSuccess(client, repository, registry, type, id, { namespace })
@@ -139,7 +139,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -265,7 +265,7 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#update', () => {
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(
         updateSuccess(client, repository, registry, type, id, attributes, { namespace })
@@ -274,7 +274,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -420,7 +420,7 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#create', () => {
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
         checkAuthError
@@ -429,7 +429,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -602,7 +602,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       mockDeleteLegacyUrlAliases.mockClear();
     });
 
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
@@ -611,7 +611,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -718,7 +718,7 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#removeReferencesTo', () => {
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
@@ -727,7 +727,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -829,7 +829,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     const obj1 = { type, id: 'one' };
     const obj2 = { type, id: 'two' };
 
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
@@ -838,7 +838,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -930,7 +930,7 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#openPointInTimeForType', () => {
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(repository.openPointInTimeForType(type)).rejects.toThrow(checkAuthError);
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
@@ -1022,7 +1022,7 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#find', () => {
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(findSuccess(client, repository, { type })).rejects.toThrow(checkAuthError);
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
@@ -1042,6 +1042,22 @@ describe('SavedObjectsRepository Security Extension', () => {
         })
       );
     });
+
+    // test.only(`calls es search onlywith authorized spaces when partially authorized`, async () => {
+    //   setupCheckPartiallyAuthorized(mockSecurityExt);
+
+    //   // const result = await repository.find({ type, namespaces: [namespace, 'ns-1'] });
+    //   await findSuccess(client, repository, { type, namespaces: [namespace, 'ns-1'] }, namespace);
+    //   expect(client.search).toBeCalledWith(expect.objectContaining({}));
+
+    //   // expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+    //   // expect(result).toEqual(
+    //   //   expect.objectContaining({
+    //   //     saved_objects: [],
+    //   //     total: 0,
+    //   //   })
+    //   // );
+    // });
 
     test(`returns result of es find when fully authorized`, async () => {
       setupCheckAuthorized(mockSecurityExt);
@@ -1071,6 +1087,27 @@ describe('SavedObjectsRepository Security Extension', () => {
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
         });
       });
+    });
+
+    test(`uses the authorization map when partially authorized`, async () => {
+      setupCheckPartiallyAuthorized(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+
+      await findSuccess(
+        client,
+        repository,
+        { type: [type, NAMESPACE_AGNOSTIC_TYPE], namespaces: [namespace, 'ns-1'] }, // include multiple types and spaces
+        namespace
+      );
+
+      // make sure the authorized map gets passed to the es client call
+      expect(mockGetSearchDsl).toHaveBeenCalledWith(
+        expect.objectContaining({}),
+        expect.objectContaining({}),
+        expect.objectContaining({
+          typeToNamespacesMap: authMap,
+        })
+      );
     });
 
     test(`returns result of es find when partially authorized`, async () => {
@@ -1211,7 +1248,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       namespaces: [namespace],
     };
 
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(
         bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace })
@@ -1220,7 +1257,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -1425,7 +1462,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
     };
 
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(bulkCreateSuccess(client, repository, [obj1, obj2])).rejects.toThrow(
         checkAuthError
@@ -1434,7 +1471,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 
@@ -1636,7 +1673,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       attributes: { title: 'Test Two' },
     };
 
-    test(`propogates decorated error when checkAuthorization rejects promise`, async () => {
+    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
       mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
       await expect(bulkUpdateSuccess(client, repository, registry, [obj1, obj2])).rejects.toThrow(
         checkAuthError
@@ -1645,7 +1682,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
     });
 
-    test(`propogates decorated error when unauthorized`, async () => {
+    test(`propagates decorated error when unauthorized`, async () => {
       setupCheckUnauthorized(mockSecurityExt);
       setupEnforceFailure(mockSecurityExt);
 

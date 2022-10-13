@@ -193,7 +193,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
       describe('#update', () => {
         test(`throws error if options.namespace is specified`, async () => {
-          // Just makes sure the error propogstes from the extension through the repo call
+          // Just makes sure the error propagates from the extension through the repo call
           await expect(
             repository.update('foo', 'some-id', { attr: 'value' }, { namespace: 'bar' })
           ).rejects.toThrowError(
@@ -465,7 +465,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       });
 
       describe('#openPointInTimeForType', () => {
-        test(`propogates options.namespaces: ['*']`, async () => {
+        test(`propagates options.namespaces: ['*']`, async () => {
           await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE, { namespaces: ['*'] });
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(['*']);
@@ -783,7 +783,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           );
         });
 
-        test(`propogates options.namespaces: ['*']`, async () => {
+        test(`propagates options.namespaces: ['*']`, async () => {
           const type = 'index-pattern';
           await findSuccess(client, repository, { type, namespaces: ['*'] });
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);

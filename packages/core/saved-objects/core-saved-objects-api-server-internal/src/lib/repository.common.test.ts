@@ -216,7 +216,7 @@ export const mappings: SavedObjectsTypeMappingDefinition = {
 };
 
 export const authRecord: Record<string, AuthorizationTypeEntry> = {
-  get: { authorizedSpaces: ['bar'] },
+  find: { authorizedSpaces: ['bar'] },
 };
 export const authMap = Object.freeze(new Map([['foo', authRecord]]));
 

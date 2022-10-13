@@ -28,12 +28,11 @@ import { SavedObjectsExtensions } from './extensions';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
- * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
+ * or registering Saved Object types, and creating and registering Saved Object client factories.
  *
  * @remarks
  * When plugins access the Saved Objects client, a new client is created using
- * the factory provided to `setClientFactory` and wrapped by all wrappers
- * registered through `addClientWrapper`.
+ * the factory provided to `setClientFactory`.
  *
  * @example
  * ```ts
@@ -152,8 +151,7 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch. If other plugins have registered Saved Objects client
-   * wrappers, these will be applied to extend the functionality of the client.
+   * Elasticsearch.
    *
    * A client that is already scoped to the incoming request is also exposed
    * from the route handler context see {@link RequestHandlerContext}.

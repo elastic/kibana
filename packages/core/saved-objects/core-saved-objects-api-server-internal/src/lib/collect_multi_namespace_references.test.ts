@@ -494,7 +494,7 @@ describe('collectMultiNamespaceReferences', () => {
     });
 
     describe(`errors`, () => {
-      test(`propogates decorated error when not authorized`, async () => {
+      test(`propagates decorated error when not authorized`, async () => {
         setupCheckUnauthorized(mockSecurityExt);
         // Unlike other functions, it doesn't validate the level of authorization first, so we need to
         // carry on and mock the enforce function as well to create an unauthorized condition

@@ -150,7 +150,7 @@ export interface SavedObjectsRepositoryOptions {
   migrator: IKibanaMigrator;
   allowedTypes: string[];
   logger: Logger;
-  extensions: SavedObjectsExtensions | undefined;
+  extensions?: SavedObjectsExtensions;
 }
 
 export const DEFAULT_REFRESH_SETTING = 'wait_for';

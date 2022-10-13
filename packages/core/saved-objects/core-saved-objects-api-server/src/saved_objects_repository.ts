@@ -53,7 +53,7 @@ import type {
  * @internal
  */
 export interface SavedObjectsFindInternalOptions {
-  /** This is used for calls internal to the SO doamain that need to use a PIT finder but want to prevent extensions from functioning.
+  /** This is used for calls internal to the SO domain that need to use a PIT finder but want to prevent extensions from functioning.
    * We use the SOR's PointInTimeFinder internally when searching for aliases and shared origins for saved objects, but we
    * need to disable the extensions for that to function correctly.
    * Before, when we had SOC wrappers, the SOR's PointInTimeFinder did not have any of the wrapper functionality applied.
