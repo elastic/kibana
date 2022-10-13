@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const localEs = getService('es');
   const log = getService('log');
 
-  describe('CCS Remote Clusters > Index Management', function () {
+  describe.only('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     const remoteCluster = 'ftr-remote';
@@ -104,13 +104,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      const ccrInfo = await localEs.ccr.followInfo({
-        index: followerName,
-      });
-      await log.debug(JSON.stringify(ccrInfo));
-      await remoteEs.indices.delete({
-        index: leaderName,
-      });
       await security.testUser.restoreDefaults();
     });
   });
