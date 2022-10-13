@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN = {
-  ID: 'triggersActionsUi',
-  getI18nName: (i18n: any): string => {
-    return i18n.translate('xpack.triggersActionsUI.appName', {
-      defaultMessage: 'Rules',
-    });
-  },
-};
+export { isLayerGroup, LayerGroup } from './layer_group';

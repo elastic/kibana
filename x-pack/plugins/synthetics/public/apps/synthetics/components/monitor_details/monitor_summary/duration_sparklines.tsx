@@ -11,7 +11,7 @@ import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const AvailabilitySparklines = () => {
+export const DurationSparklines = () => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
@@ -32,10 +32,10 @@ export const AvailabilitySparklines = () => {
           {
             seriesType: 'area',
             time: { from: 'now-30d/d', to: 'now' },
-            name: 'Monitor availability',
+            name: 'Monitor duration',
             dataType: 'synthetics',
-            selectedMetricField: 'monitor_availability',
-            reportDefinitions: { 'monitor.id': [monitorId] },
+            selectedMetricField: 'monitor.duration.us',
+            reportDefinitions: { config_id: [monitorId] },
             color: theme.eui.euiColorVis1,
           },
         ]}

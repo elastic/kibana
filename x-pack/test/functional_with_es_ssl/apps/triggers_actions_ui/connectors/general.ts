@@ -18,6 +18,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
   let objectRemover: ObjectRemover;
+  const browser = getService('browser');
 
   describe('General connector functionality', function () {
     before(async () => {
@@ -72,6 +73,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         getService,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -109,6 +111,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const indexName = generateUniqueKey();
       const createdAction = await createIndexConnector(connectorName, indexName);
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -138,6 +141,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const indexName = generateUniqueKey();
       const createdAction = await createIndexConnector(connectorName, indexName);
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -169,6 +173,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         getService,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
+
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -200,6 +206,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         getService,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -229,6 +236,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         getService,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -295,7 +303,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         secrets: {},
       })
       .expect(200);
-    await testSubjects.click('connectorsTab');
     return createdAction;
   }
 };

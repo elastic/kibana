@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { ManagementContainer } from '.';
-import '../../common/mock/match_media';
-import type { AppContextTestRender } from '../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../common/mock/endpoint';
-import { useUserPrivileges } from '../../common/components/user_privileges';
-import { endpointPageHttpMock } from './endpoint_hosts/mocks';
+import { ManagementContainer } from '..';
+import '../../../common/mock/match_media';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
 
-jest.mock('../../common/components/user_privileges');
+jest.mock('../../../common/components/user_privileges');
 
 describe('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -34,8 +34,7 @@ describe('when in the Administration tab', () => {
     expect(await render().findByTestId('noIngestPermissions')).not.toBeNull();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/135166
-  it.skip('should display the Management view if user has privileges', async () => {
+  it('should display the Management view if user has privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
     });

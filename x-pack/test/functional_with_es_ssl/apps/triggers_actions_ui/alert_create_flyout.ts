@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     afterEach(async () => {
       // Reset the Rules tab without reloading the entire page
       // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
-      await testSubjects.click('connectorsTab');
+      await testSubjects.click('logsTab');
       await testSubjects.click('rulesTab');
     });
 
