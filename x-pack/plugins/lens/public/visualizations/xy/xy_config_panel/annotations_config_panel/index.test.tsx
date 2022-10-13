@@ -8,9 +8,9 @@
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../../types';
-import { layerTypes } from '../../../..';
 import { createMockFramePublicAPI } from '../../../../mocks';
 import { State } from '../../types';
 import { Position } from '@elastic/charts';
@@ -18,7 +18,9 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { createMockDataViewsState } from '../../../../data_views_service/mocks';
-import { createMockedIndexPattern } from '../../../../indexpattern_datasource/mocks';
+import { createMockedIndexPattern } from '../../../../datasources/form_based/mocks';
+import { act } from 'react-dom/test-utils';
+import { EuiButtonGroup } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -28,6 +30,12 @@ jest.mock('lodash', () => {
     debounce: (fn: unknown) => fn,
   };
 });
+
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  QueryStringInput: () => {
+    return 'QueryStringInput';
+  },
+}));
 
 const customLineStaticAnnotation: EventAnnotationConfig = {
   id: 'ann1',
@@ -51,10 +59,11 @@ describe('AnnotationsPanel', () => {
       preferredSeriesType: 'bar',
       layers: [
         {
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           layerId: 'annotation',
           indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],
+          ignoreGlobalFilters: true,
         },
       ],
     };
@@ -129,6 +138,7 @@ describe('AnnotationsPanel', () => {
         layerId: 'annotation',
         layerType: 'annotations',
         indexPatternId: 'indexPattern1',
+        ignoreGlobalFilters: true,
       };
       const component = mount(
         <AnnotationsPanel
@@ -207,6 +217,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -231,6 +242,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -260,6 +272,7 @@ describe('AnnotationsPanel', () => {
         layerId: 'annotation',
         layerType: 'annotations',
         indexPatternId: indexPattern.id,
+        ignoreGlobalFilters: true,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -284,16 +297,16 @@ describe('AnnotationsPanel', () => {
       );
 
       expect(
-        component.find('[data-test-subj="annotation-query-based-field-picker"]').exists()
+        component.find('[data-test-subj="lnsXY-annotation-query-based-field-picker"]').exists()
       ).toBeTruthy();
       expect(
-        component.find('[data-test-subj="annotation-query-based-query-input"]').exists()
+        component.find('[data-test-subj="lnsXY-annotation-query-based-query-input"]').exists()
       ).toBeTruthy();
 
       // The provided indexPattern has 2 date fields
       expect(
         component
-          .find('[data-test-subj="annotation-query-based-field-picker"]')
+          .find('[data-test-subj="lnsXY-annotation-query-based-field-picker"]')
           .at(0)
           .prop('options')
       ).toHaveLength(2);
@@ -304,6 +317,324 @@ describe('AnnotationsPanel', () => {
       expect(
         component.find('[data-test-subj="lnsXY-annotation-tooltip-add_field"]').exists()
       ).toBeTruthy();
+    });
+
+    test('should prefill timeField with the default time field when switching to query based annotations', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [customLineStaticAnnotation],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        ignoreGlobalFilters: true,
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [expect.objectContaining({ timeField: 'timestamp' })],
+            }),
+          ],
+        })
+      );
+    });
+
+    test('should avoid to retain specific manual configurations when switching to query based annotations', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [customLineStaticAnnotation],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        ignoreGlobalFilters: true,
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [
+                expect.objectContaining({
+                  key: expect.not.objectContaining({ timestamp: expect.any('string') }),
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+    });
+
+    test('should avoid to retain range manual configurations when switching to query based annotations', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [
+          {
+            color: 'red',
+            icon: 'triangle',
+            id: 'ann1',
+            type: 'manual',
+            isHidden: undefined,
+            key: {
+              endTimestamp: '2022-03-21T10:49:00.000Z',
+              timestamp: '2022-03-18T08:25:00.000Z',
+              type: 'range',
+            },
+            label: 'Event range',
+            lineStyle: 'dashed',
+            lineWidth: 3,
+          },
+        ],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        ignoreGlobalFilters: true,
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [
+                expect.objectContaining({ label: expect.not.stringContaining('Event range') }),
+              ],
+            }),
+          ],
+        })
+      );
+    });
+
+    test('should set a default tiemstamp when switching from query based to manual annotations', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [
+          {
+            color: 'red',
+            icon: 'triangle',
+            id: 'ann1',
+            type: 'query',
+            isHidden: undefined,
+            timeField: 'timestamp',
+            key: {
+              type: 'point_in_time',
+            },
+            label: 'Query based event',
+            lineStyle: 'dashed',
+            lineWidth: 3,
+            filter: { type: 'kibana_query', query: '', language: 'kuery' },
+          },
+        ],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        indexPatternId: indexPattern.id,
+        ignoreGlobalFilters: true,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_manual');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [
+                expect.objectContaining({
+                  key: { type: 'point_in_time', timestamp: expect.any(String) },
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+
+      // also check query specific props are not carried over
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [expect.not.objectContaining({ timeField: 'timestamp' })],
+            }),
+          ],
+        })
+      );
+    });
+
+    test('should fallback to the first date field available in the dataView if not time-based', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern({ timeFieldName: '' });
+      state.layers[0] = {
+        annotations: [customLineStaticAnnotation],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        ignoreGlobalFilters: true,
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [expect.objectContaining({ timeField: 'timestampLabel' })],
+            }),
+          ],
+        })
+      );
     });
   });
 });

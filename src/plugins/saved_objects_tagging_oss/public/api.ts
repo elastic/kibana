@@ -13,7 +13,7 @@ import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { SavedObject as SavedObjectClass } from '@kbn/saved-objects-plugin/public';
 import { TagDecoratedSavedObject } from './decorator';
-import { ITagsClient, Tag } from '../common';
+import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 
 /**
  * @public
@@ -217,7 +217,11 @@ export interface TagListComponentProps {
   /**
    * The object to display tags for.
    */
-  object: SavedObject;
+  object: { references: SavedObject['references'] };
+  /**
+   * Handler to execute when clicking on a tag
+   */
+  onClick?: (tag: TagWithOptionalId) => void;
 }
 
 /**

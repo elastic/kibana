@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
 import {
+  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -29,9 +30,11 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
+import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const ACTIONS_COLUMN_WIDTH = '60px';
+const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -47,20 +50,18 @@ interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
   dataViewId?: string;
   loading: boolean;
-  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
-  selectedChangePoint?: ChangePoint;
 }
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
   dataViewId,
   loading,
-  onPinnedChangePoint,
-  onSelectedChangePoint,
-  selectedChangePoint,
 }) => {
   const euiTheme = useEuiTheme();
+  const primaryBackgroundColor = useEuiBackgroundColor('primary');
+
+  const { pinnedChangePoint, selectedChangePoint, setPinnedChangePoint, setSelectedChangePoint } =
+    useSpikeAnalysisTableRowContext();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -129,21 +130,21 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldName',
       field: 'fieldName',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
-        { defaultMessage: 'Field name' }
-      ),
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldNameLabel', {
+        defaultMessage: 'Field name',
+      }),
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldValue',
       field: 'fieldValue',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel',
-        { defaultMessage: 'Field value' }
-      ),
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldValueLabel', {
+        defaultMessage: 'Field value',
+      }),
       render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnLogRate',
@@ -153,7 +154,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.logRateColumnTooltip',
             {
               defaultMessage:
                 'A visual representation of the impact of the field on the message rate difference',
@@ -162,7 +163,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.logRateLabel"
               defaultMessage="Log rate"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -177,6 +178,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         />
       ),
       sortable: false,
+      valign: 'top',
+    },
+    {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'doc_count',
+      name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.docCountLabel', {
+        defaultMessage: 'Doc count',
+      }),
+      sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnPValue',
@@ -186,7 +198,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueColumnTooltip',
             {
               defaultMessage:
                 'The significance of changes in the frequency of values; lower values indicate greater change',
@@ -195,15 +207,16 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel"
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueLabel"
               defaultMessage="p-value"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
-      render: (pValue: number) => pValue.toPrecision(3),
+      render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnImpact',
@@ -213,7 +226,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
+            'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
             {
               defaultMessage: 'The level of impact of the field on the message rate difference',
             }
@@ -221,7 +234,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel"
+              id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabel"
               defaultMessage="Impact"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -229,10 +242,12 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
+        if (!pValue) return NOT_AVAILABLE;
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
       sortable: true,
+      valign: 'top',
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
@@ -258,6 +273,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         },
       ],
       width: ACTIONS_COLUMN_WIDTH,
+      valign: 'top',
     },
   ];
 
@@ -302,6 +318,32 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     };
   }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
 
+  const getRowStyle = (changePoint: ChangePoint) => {
+    if (
+      pinnedChangePoint &&
+      pinnedChangePoint.fieldName === changePoint.fieldName &&
+      pinnedChangePoint.fieldValue === changePoint.fieldValue
+    ) {
+      return {
+        backgroundColor: primaryBackgroundColor,
+      };
+    }
+
+    if (
+      selectedChangePoint &&
+      selectedChangePoint.fieldName === changePoint.fieldName &&
+      selectedChangePoint.fieldValue === changePoint.fieldValue
+    ) {
+      return {
+        backgroundColor: euiTheme.euiColorLightestShade,
+      };
+    }
+
+    return {
+      backgroundColor: euiTheme.euiColorEmptyShade,
+    };
+  };
+
   // Don't pass on the `loading` state to the table itself because
   // it disables hovering events. Because the mini histograms take a while
   // to load, hovering would not update the main chart. Instead,
@@ -323,28 +365,22 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         return {
           'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
           onClick: () => {
-            if (onPinnedChangePoint) {
-              onPinnedChangePoint(changePoint);
+            if (
+              changePoint.fieldName === pinnedChangePoint?.fieldName &&
+              changePoint.fieldValue === pinnedChangePoint?.fieldValue
+            ) {
+              setPinnedChangePoint(null);
+            } else {
+              setPinnedChangePoint(changePoint);
             }
           },
           onMouseEnter: () => {
-            if (onSelectedChangePoint) {
-              onSelectedChangePoint(changePoint);
-            }
+            setSelectedChangePoint(changePoint);
           },
           onMouseLeave: () => {
-            if (onSelectedChangePoint) {
-              onSelectedChangePoint(null);
-            }
+            setSelectedChangePoint(null);
           },
-          style:
-            selectedChangePoint &&
-            selectedChangePoint.fieldValue === changePoint.fieldValue &&
-            selectedChangePoint.fieldName === changePoint.fieldName
-              ? {
-                  backgroundColor: euiTheme.euiColorLightestShade,
-                }
-              : null,
+          style: getRowStyle(changePoint),
         };
       }}
     />

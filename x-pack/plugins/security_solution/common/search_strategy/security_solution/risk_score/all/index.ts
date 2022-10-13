@@ -97,3 +97,19 @@ export const enum RiskSeverity {
 
 export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is UserRiskScore =>
   'user' in risk;
+
+export const EMPTY_SEVERITY_COUNT = {
+  [RiskSeverity.critical]: 0,
+  [RiskSeverity.high]: 0,
+  [RiskSeverity.low]: 0,
+  [RiskSeverity.moderate]: 0,
+  [RiskSeverity.unknown]: 0,
+};
+
+export const SEVERITY_UI_SORT_ORDER = [
+  RiskSeverity.unknown,
+  RiskSeverity.low,
+  RiskSeverity.moderate,
+  RiskSeverity.high,
+  RiskSeverity.critical,
+];

@@ -95,6 +95,12 @@ export const iconSet = [
     label: i18n.translate('expressionXY.xyChart.iconSelect.starLabel', { defaultMessage: 'Star' }),
   },
   {
+    value: AvailableReferenceLineIcons.STAR_FILLED,
+    label: i18n.translate('expressionXY.xyChart.iconSelect.starFilledLabel', {
+      defaultMessage: 'Star filled',
+    }),
+  },
+  {
     value: AvailableReferenceLineIcons.TAG,
     label: i18n.translate('expressionXY.xyChart.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',

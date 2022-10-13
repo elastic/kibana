@@ -23,7 +23,22 @@ describe('startSync', () => {
       const result = startSync({ connectorId: 'connectorId' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/connectors/connectorId/start_sync'
+        '/internal/enterprise_search/connectors/connectorId/start_sync',
+        { body: '{}' }
+      );
+      await expect(result).resolves.toEqual('result');
+    });
+
+    it('calls correct api with nextSyncConfig', async () => {
+      const promise = Promise.resolve('result');
+      http.post.mockReturnValue(promise);
+      const nextSyncConfig = { max_crawl_depth: 3 };
+      const result = startSync({ connectorId: 'connectorId', nextSyncConfig });
+      const body = JSON.stringify({ nextSyncConfig: JSON.stringify(nextSyncConfig) });
+      await nextTick();
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/enterprise_search/connectors/connectorId/start_sync',
+        { body }
       );
       await expect(result).resolves.toEqual('result');
     });

@@ -109,6 +109,7 @@ describe('validateMonitor', () => {
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.HOSTS]: 'https://host1.com',
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
+      [ConfigKey.PORT]: null,
     };
 
     testTCPAdvancedFields = {
@@ -131,6 +132,7 @@ describe('validateMonitor', () => {
       [ConfigKey.MAX_REDIRECTS]: '3',
       [ConfigKey.URLS]: 'https://example.com',
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+      [ConfigKey.PORT]: null,
     };
 
     testHTTPAdvancedFields = {
@@ -453,7 +455,8 @@ function getJsonPayload() {
     '    },' +
     '    "url": "https://example-url.com",' +
     '    "isServiceManaged": true' +
-    '  }]' +
+    '  }],' +
+    '  "url.port": null' +
     '}';
 
   return JSON.parse(json);

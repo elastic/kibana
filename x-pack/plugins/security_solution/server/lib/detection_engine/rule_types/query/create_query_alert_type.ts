@@ -9,22 +9,24 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { QueryRuleParams } from '../../schemas/rule_schemas';
-import { queryRuleParams } from '../../schemas/rule_schemas';
+import type { UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
+import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
+
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
+  createOptions: CreateQueryRuleOptions
+): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
+  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction, licensing } =
+    createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, queryRuleParams);
+          const [validated, errors] = validateNonExact(object, unifiedQueryRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -66,7 +68,6 @@ export const createQueryAlertType = (
           runtimeMappings,
           completeRule,
           tuple,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           searchAfterSize,
@@ -74,15 +75,15 @@ export const createQueryAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          unprocessedExceptions,
+          exceptionFilter,
         },
         services,
         state,
       } = execOptions;
-
       const result = await queryExecutor({
         completeRule,
         tuple,
-        exceptionItems,
         listClient,
         experimentalFeatures,
         ruleExecutionLogger,
@@ -96,6 +97,10 @@ export const createQueryAlertType = (
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        unprocessedExceptions,
+        exceptionFilter,
+        osqueryCreateAction,
+        licensing,
       });
       return { ...result, state };
     },

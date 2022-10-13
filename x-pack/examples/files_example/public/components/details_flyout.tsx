@@ -7,7 +7,6 @@
 import moment from 'moment';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -22,10 +21,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { FileJSON } from '@kbn/files-plugin/common';
+import { css } from '@emotion/react';
+import type { MyImageMetadata } from '../../common';
 import { FileClients } from '../types';
+import { Image } from '../imports';
 
 interface Props {
-  file: FileJSON;
+  file: FileJSON<MyImageMetadata>;
   files: FileClients;
   onDismiss: () => void;
 }
@@ -39,8 +41,24 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <div
+          css={css`
+            display: grid;
+            place-items: center;
+          `}
+        >
+          <Image
+            size="l"
+            alt={file.alt ?? 'unknown'}
+            src={files.example.getDownloadHref(file)}
+            meta={file.meta}
+          />
+        </div>
+        <EuiSpacer size="xl" />
         <EuiDescriptionList
           type="column"
+          align="center"
+          textStyle="reverse"
           listItems={[
             {
               title: 'Name',
@@ -66,15 +84,13 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
               title: 'Last updated',
               description: moment(file.updated).fromNow(),
             },
+            {
+              title: 'Custom meta',
+              description: (
+                <pre>{file.meta ? JSON.stringify(file.meta, null, 2) : '<no custom metadata>'}</pre>
+              ),
+            },
           ]}
-        />
-        <EuiSpacer size="xl" />
-        <img
-          css={css`
-            height: 400px;
-          `}
-          alt={file.alt ?? 'unknown'}
-          src={files.example.getDownloadHref(file)}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

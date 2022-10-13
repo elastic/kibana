@@ -42,7 +42,6 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 import { ConnectorsSelection } from './connectors_selection';
 
 export type ActionTypeFormProps = {
@@ -56,7 +55,7 @@ export type ActionTypeFormProps = {
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
-  defaultParams: DefaultActionParams;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 } & Pick<
   ActionAccordionFormProps,
@@ -92,7 +91,7 @@ export const ActionTypeForm = ({
   setActionGroupIdByIndex,
   actionTypeRegistry,
   isActionGroupDisabledForActionType,
-  defaultParams,
+  recoveryActionGroup,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -107,26 +106,47 @@ export const ActionTypeForm = ({
     errors: {},
   });
 
+  const getDefaultParams = async () => {
+    const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
+    let defaultParams;
+    if (actionItem.group === recoveryActionGroup) {
+      defaultParams = connectorType.defaultRecoveredActionParams;
+    }
+
+    if (!defaultParams) {
+      defaultParams = connectorType.defaultActionParams;
+    }
+
+    return defaultParams;
+  };
+
   useEffect(() => {
-    setAvailableActionVariables(
-      messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
-    );
-    if (defaultParams) {
-      for (const [key, paramValue] of Object.entries(defaultParams)) {
-        if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
-          setActionParamsProperty(key, paramValue, index);
+    (async () => {
+      setAvailableActionVariables(
+        messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+      );
+
+      const defaultParams = await getDefaultParams();
+      if (defaultParams) {
+        for (const [key, paramValue] of Object.entries(defaultParams)) {
+          if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
+            setActionParamsProperty(key, paramValue, index);
+          }
         }
       }
-    }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
 
   useEffect(() => {
-    if (defaultParams && actionGroup) {
-      for (const [key, paramValue] of Object.entries(defaultParams)) {
-        setActionParamsProperty(key, paramValue, index);
+    (async () => {
+      const defaultParams = await getDefaultParams();
+      if (defaultParams && actionGroup) {
+        for (const [key, paramValue] of Object.entries(defaultParams)) {
+          setActionParamsProperty(key, paramValue, index);
+        }
       }
-    }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionGroup]);
 

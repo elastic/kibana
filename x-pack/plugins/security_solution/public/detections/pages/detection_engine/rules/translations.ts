@@ -187,6 +187,13 @@ export const BULK_ACTION_ADD_RULE_ACTIONS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_SET_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setScheduleTitle',
+  {
+    defaultMessage: 'Update rule schedules',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
@@ -1077,16 +1084,31 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     }
   );
 
-export const NEW_TERMS_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsTitle',
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
   {
-    defaultMessage: 'A new Security Rule type is available!',
+    defaultMessage: 'Rule preview',
   }
 );
 
-export const NEW_TERMS_TOUR_CONTENT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsContent',
+export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
   {
-    defaultMessage: '"New Terms" rules alert on values that have not previously been seen',
+    defaultMessage:
+      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
+  }
+);
+
+export const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
   }
 );

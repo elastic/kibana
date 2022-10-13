@@ -30,7 +30,7 @@ async function tryToGetSyntheticPackageMap(log) {
 }
 
 /**
- * @param {*} packageDir
+ * @param {string} packageDir
  * @returns {string[]}
  */
 export function readCleanPatterns(packageDir) {

@@ -37,16 +37,6 @@ export const alertInstanceFactoryStub = <
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
   },
-  scheduleActionsWithSubGroup(
-    actionGroup: TActionGroupIds,
-    subgroup: string,
-    alertcontext: TInstanceContext
-  ) {
-    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
-      state: {} as TInstanceState,
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-    });
-  },
   setContext(alertContext: TInstanceContext) {
     return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,

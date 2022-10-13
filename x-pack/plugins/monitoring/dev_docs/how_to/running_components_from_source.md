@@ -100,7 +100,7 @@ And finally start the server, with or without internal collection enabled (make 
 
 Or:
 ```shell
-./bin/elasticsearch -E cluster.name=secondary -E http.port=9201 -E transport.port=9301 -E path.data=data2 -E xpack.license.self_generated.type=trial
+./bin/elasticsearch -E cluster.name=secondary -E http.port=9210 -E transport.port=9310 -E path.data=data2 -E xpack.license.self_generated.type=trial
 ```
 
 You'll likely want to reset the passwords for the secondary cluster as well:

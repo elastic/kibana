@@ -46,7 +46,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 85,
+  "risk_score": 73,
   "rule_id": "df6f62d9-caab-4b88-affa-044f4395a1e0",
   "severity": "high",
   "tags": [
@@ -82,5 +82,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 100
 }

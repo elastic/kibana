@@ -16,7 +16,7 @@ import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
-import { newTransformValidate } from './validate';
+import { transformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRules } from '../../rules/create_rules';
 import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
@@ -89,7 +89,7 @@ export const createRulesRoute = (
 
         const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
 
-        const [validated, errors] = newTransformValidate(createdRule, ruleExecutionSummary);
+        const [validated, errors] = transformValidate(createdRule, ruleExecutionSummary);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

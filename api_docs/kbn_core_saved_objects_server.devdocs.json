@@ -2754,9 +2754,7 @@
               "\nRegister a {@link SavedObjectsType | savedObjects type} definition.\n\nSee the {@link SavedObjectsTypeMappingDefinition | mappings format} and\n{@link SavedObjectMigrationMap | migration format} for more details about these.\n"
             ],
             "signature": [
-              "<Attributes extends ",
-              "SavedObjectAttributes",
-              " = any>(type: ",
+              "<Attributes = unknown>(type: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "server",

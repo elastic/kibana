@@ -15,8 +15,7 @@ import {
   FieldOption,
   FieldOptionValue,
   FieldPicker,
-  QueryInput,
-  validateQuery,
+  FilterQueryInput,
 } from '../../../../shared_components';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
@@ -32,17 +31,18 @@ export const ConfigPanelQueryAnnotation = ({
   state,
   onChange,
   layer,
+  queryInputShouldOpen,
 }: {
   annotation?: QueryPointEventAnnotationConfig;
   onChange: (annotations: Partial<QueryPointEventAnnotationConfig> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
   layer: XYAnnotationLayerConfig;
+  queryInputShouldOpen?: boolean;
 }) => {
-  const inputQuery = annotation?.filter ?? defaultQuery;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
   const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
-  // list only supported field by operation, remove the rest
+  // list only date fields
   const options = currentIndexPattern.fields
     .filter((field) => field.type === 'date' && field.displayName)
     .map((field) => {
@@ -58,54 +58,39 @@ export const ConfigPanelQueryAnnotation = ({
         'data-test-subj': `lns-fieldOption-${field.name}`,
       } as FieldOption<FieldOptionValue>;
     });
-  const { isValid: isQueryInputValid, error: queryInputError } = validateQuery(
-    annotation?.filter,
-    currentIndexPattern
-  );
 
   const selectedField =
     annotation?.timeField || currentIndexPattern.timeFieldName || options[0]?.value.field;
   const fieldIsValid = selectedField
     ? Boolean(currentIndexPattern.getFieldByName(selectedField))
     : true;
+
   return (
     <>
       <EuiFormRow
+        hasChildLabel
         display="rowCompressed"
         className="lnsRowCompressedMargin"
         fullWidth
         label={i18n.translate('xpack.lens.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',
         })}
-        isInvalid={!isQueryInputValid}
-        error={queryInputError}
+        data-test-subj="annotation-query-based-query-input"
       >
-        <QueryInput
-          value={inputQuery}
-          onChange={function (input: Query): void {
-            onChange({ filter: { type: 'kibana_query', ...input } });
+        <FilterQueryInput
+          initiallyOpen={queryInputShouldOpen}
+          label=""
+          inputFilter={annotation?.filter ?? defaultQuery}
+          onChange={(query: Query) => {
+            onChange({ filter: { type: 'kibana_query', ...query } });
           }}
-          disableAutoFocus
-          indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}
-          isInvalid={!isQueryInputValid || inputQuery.query === ''}
-          onSubmit={() => {}}
-          data-test-subj="annotation-query-based-query-input"
-          placeholder={
-            inputQuery.language === 'kuery'
-              ? i18n.translate('xpack.lens.annotations.query.queryPlaceholderKql', {
-                  defaultMessage: '{example}',
-                  values: { example: 'method : "GET"' },
-                })
-              : i18n.translate('xpack.lens.annotations.query.queryPlaceholderLucene', {
-                  defaultMessage: '{example}',
-                  values: { example: 'method:GET' },
-                })
-          }
+          data-test-subj="lnsXY-annotation-query-based-query-input"
+          indexPattern={currentIndexPattern}
         />
       </EuiFormRow>
+
       <EuiFormRow
         display="rowCompressed"
-        className="lnsRowCompressedMargin"
         fullWidth
         label={i18n.translate('xpack.lens.xyChart.annotation.queryField', {
           defaultMessage: 'Target date field',
@@ -129,7 +114,7 @@ export const ConfigPanelQueryAnnotation = ({
             }
           }}
           fieldIsInvalid={!fieldIsValid}
-          data-test-subj="annotation-query-based-field-picker"
+          data-test-subj="lnsXY-annotation-query-based-field-picker"
         />
       </EuiFormRow>
     </>

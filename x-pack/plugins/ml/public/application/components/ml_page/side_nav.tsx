@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
+import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -19,7 +20,7 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
-  name: string;
+  name: ReactNode;
   disabled?: boolean;
   items?: Tab[];
   testSubj?: string;
@@ -79,6 +80,19 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab overview',
+          },
+          {
+            id: 'notifications',
+            pathId: ML_PAGES.NOTIFICATIONS,
+            name: disableLinks ? (
+              i18n.translate('xpack.ml.navMenu.notificationsTabLinkText', {
+                defaultMessage: 'Notifications',
+              })
+            ) : (
+              <NotificationsIndicator />
+            ),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab notifications',
           },
         ],
       },
@@ -226,7 +240,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       mlTabs.push({
         id: 'aiops_section',
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
-          defaultMessage: 'AIOps',
+          defaultMessage: 'AIOps Labs',
         }),
         disabled: disableLinks,
         items: [
@@ -234,10 +248,19 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'explainlogratespikes',
             pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
-              defaultMessage: 'Explain log rate spikes',
+              defaultMessage: 'Explain Log Rate Spikes',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+          {
+            id: 'logCategorization',
+            pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
+              defaultMessage: 'Log Pattern Analysis',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab logCategorization',
           },
         ],
       });

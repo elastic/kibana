@@ -32,6 +32,9 @@ const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
+  release: schema.maybe(
+    schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
+  ),
   data_stream: schema.object({
     dataset: schema.string(),
     type: schema.string(),
@@ -76,6 +79,15 @@ const PackagePolicyInputsSchema = {
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
+const ExperimentalDataStreamFeatures = schema.arrayOf(
+  schema.object({
+    data_stream: schema.string(),
+    features: schema.object({
+      synthetic_source: schema.boolean(),
+    }),
+  })
+);
+
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
@@ -87,6 +99,7 @@ const PackagePolicyBaseSchema = {
       name: schema.string(),
       title: schema.string(),
       version: schema.string(),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
     })
   ),
   // Deprecated TODO create remove issue
@@ -111,6 +124,14 @@ const CreatePackagePolicyProps = {
       name: schema.string(),
       title: schema.maybe(schema.string()),
       version: schema.string(),
+      experimental_data_stream_features: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            data_stream: schema.string(),
+            features: schema.object({ synthetic_source: schema.boolean() }),
+          })
+        )
+      ),
     })
   ),
   // Deprecated TODO create remove issue
@@ -151,6 +172,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
   package: schema.object({
     name: schema.string(),
     version: schema.string(),
+    experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
   }),
   force: schema.maybe(schema.boolean()),
   vars: schema.maybe(SimplifiedVarsSchema),

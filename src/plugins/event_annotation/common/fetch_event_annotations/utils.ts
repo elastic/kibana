@@ -156,6 +156,7 @@ export const postprocessAnnotations = (
         .map((col) => {
           return {
             ...col,
+            name: swappedFieldsColIdMap[col.id], // we need to overwrite the name because esaggs column name is per bucket and not per row (eg. "First 10 fields...")
             id: `field:${swappedFieldsColIdMap[col.id]}`,
           };
         });

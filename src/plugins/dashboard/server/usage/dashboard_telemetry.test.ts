@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedDashboardPanel730ToLatest } from '../../common';
+import { SavedDashboardPanel } from '../../common';
 import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
@@ -18,7 +18,7 @@ const visualizationType1ByValue = {
     },
   },
   type: 'visualization',
-} as unknown as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
 const visualizationType2ByValue = {
   embeddableConfig: {
@@ -27,7 +27,7 @@ const visualizationType2ByValue = {
     },
   },
   type: 'visualization',
-} as unknown as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
 const visualizationType2ByReference = {
   ...visualizationType2ByValue,
@@ -41,7 +41,7 @@ const lensTypeAByValue = {
       visualizationType: 'a',
     },
   },
-} as unknown as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
 const lensTypeAByReference = {
   ...lensTypeAByValue,
@@ -60,7 +60,7 @@ const lensXYSeriesA = {
       },
     },
   },
-} as unknown as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
 const lensXYSeriesB = {
   type: 'lens',
@@ -90,7 +90,7 @@ const lensXYSeriesB = {
       },
     },
   },
-} as unknown as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
 const embeddablePersistableStateService = createEmbeddablePersistableStateServiceMock();
 

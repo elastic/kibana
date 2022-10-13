@@ -9,13 +9,21 @@ import * as t from 'io-ts';
 import { NonEmptyStringArray } from '@kbn/securitysolution-io-ts-types';
 import { DefaultNamespaceArray } from '@kbn/securitysolution-io-ts-list-types';
 
-export const findExceptionReferencesOnRuleSchema = t.exact(
-  t.type({
-    ids: NonEmptyStringArray,
-    list_ids: NonEmptyStringArray,
-    namespace_types: DefaultNamespaceArray,
-  })
-);
+// If ids and list_ids are undefined, route will fetch all lists matching the
+// specified namespace type
+export const findExceptionReferencesOnRuleSchema = t.intersection([
+  t.exact(
+    t.type({
+      namespace_types: DefaultNamespaceArray,
+    })
+  ),
+  t.exact(
+    t.partial({
+      ids: NonEmptyStringArray,
+      list_ids: NonEmptyStringArray,
+    })
+  ),
+]);
 
 export type FindExceptionReferencesOnRuleSchema = t.OutputOf<
   typeof findExceptionReferencesOnRuleSchema

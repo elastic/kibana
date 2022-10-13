@@ -10,7 +10,15 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  DataViewBase,
+  EsQueryConfig,
+  Filter,
+  Query,
+  AggregateQuery,
+  TimeRange,
+  isOfQueryType,
+} from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
@@ -103,6 +111,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onFilter?: (data: ClickTriggerEvent['data']) => void;
@@ -152,7 +161,7 @@ export interface ViewUnderlyingDataArgs {
   indexPatternId: string;
   timeRange: TimeRange;
   filters: Filter[];
-  query: Query | undefined;
+  query: Query | AggregateQuery | undefined;
   columns: string[];
 }
 
@@ -202,9 +211,21 @@ function getViewUnderlyingDataArgs({
   if (error || !meta) {
     return;
   }
+  const luceneOrKuery: Query[] = [];
+  const aggregateQuery: AggregateQuery[] = [];
+
+  if (Array.isArray(query)) {
+    query.forEach((q) => {
+      if (isOfQueryType(q)) {
+        luceneOrKuery.push(q);
+      } else {
+        aggregateQuery.push(q);
+      }
+    });
+  }
 
   const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-    query as Query,
+    luceneOrKuery.length > 0 ? luceneOrKuery : (query as Query),
     filters,
     meta,
     dataViews,
@@ -215,7 +236,7 @@ function getViewUnderlyingDataArgs({
     indexPatternId: meta.id,
     timeRange,
     filters: newFilters,
-    query: newQuery,
+    query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
     columns: meta.columns,
   };
 }
@@ -283,13 +304,21 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
+    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
-      .then(() => this.onContainerStateChanged(initialInput))
+      .then(() => {
+        if (!containerStateChangedCalledAlready) {
+          this.onContainerStateChanged(initialInput);
+        } else {
+          this.reload();
+        }
+      })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this.subscription = this.getUpdated$().subscribe(() => {
+      containerStateChangedCalledAlready = true;
+      this.onContainerStateChanged(this.input);
+    });
 
     const input$ = this.getInput$();
     this.embeddableTitle = this.getTitle();
@@ -562,10 +591,18 @@ export class Embeddable
 
     const executionContext = this.getExecutionContext();
 
-    trackUiCounterEvents(
-      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
-      executionContext
-    );
+    const events = [
+      ...datasourceEvents,
+      ...visualizationEvents,
+      ...getExecutionContextEvents(executionContext),
+    ];
+
+    const adHocDataViews = Object.values(this.savedVis?.state.adHocDataViews || {});
+    adHocDataViews.forEach(() => {
+      events.push('ad_hoc_data_view');
+    });
+
+    trackUiCounterEvents(events, executionContext);
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -1016,6 +1053,17 @@ export class Embeddable
     ) {
       return;
     }
-    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    let displayOptions =
+      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    if (this.input.noPadding !== undefined) {
+      displayOptions = {
+        ...displayOptions,
+        noPadding: this.input.noPadding,
+      };
+    }
+
+    return displayOptions;
   }
 }

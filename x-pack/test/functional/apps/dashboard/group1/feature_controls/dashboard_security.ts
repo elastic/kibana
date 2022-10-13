@@ -6,10 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  createDashboardEditUrl,
-  DashboardConstants,
-} from '@kbn/dashboard-plugin/public/dashboard_constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -31,6 +27,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const kbnServer = getService('kibanaServer');
+
+  const navigationArgs = {
+    ensureCurrentUrl: false,
+    shouldLoginIfPrompted: false,
+  };
 
   describe('dashboard feature controls security', () => {
     before(async () => {
@@ -97,14 +98,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.LANDING_PAGE_PATH,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -116,28 +112,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({ args: navigationArgs });
         await testSubjects.existOrFail('emptyDashboardWidget', {
           timeout: config.get('timeouts.waitFor'),
         });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({
+          id: 'i-exist',
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -307,14 +292,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.LANDING_PAGE_PATH,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -322,38 +302,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.LANDING_PAGE_PATH,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: navigationArgs,
+        });
         await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({
+          id: 'i-exist',
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -438,14 +404,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.LANDING_PAGE_PATH,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
@@ -455,26 +416,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({
+          args: navigationArgs,
+        });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
@@ -552,50 +501,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows 403`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.LANDING_PAGE_PATH,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardListingURL({
+          args: navigationArgs,
+        });
         await PageObjects.error.expectForbidden();
       });
 
       it(`create new dashboard shows 403`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({ args: navigationArgs });
         await PageObjects.error.expectForbidden();
       });
 
       it(`edit dashboard for object which doesn't exist shows 403`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-dont-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-dont-exist', args: navigationArgs });
         await PageObjects.error.expectForbidden();
       });
 
       it(`edit dashboard for object which exists shows 403`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
         await PageObjects.error.expectForbidden();
       });
     });

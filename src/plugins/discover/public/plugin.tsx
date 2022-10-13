@@ -38,6 +38,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -51,7 +52,7 @@ import {
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition, HistoryLocationState } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
@@ -180,6 +181,7 @@ export interface DiscoverStartPlugins {
   expressions: ExpressionsStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -257,9 +259,15 @@ export class DiscoverPlugin
       ),
     });
 
-    const { setTrackedUrl, restorePreviousUrl, stopUrlTracker, appMounted, appUnMounted } =
-      initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
+    const {
+      setTrackedUrl,
+      restorePreviousUrl,
+      stopUrlTracker,
+      appMounted,
+      appUnMounted,
+      setTrackingEnabled,
+    } = initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl, setTrackingEnabled });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -278,6 +286,10 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+        const historyLocationState = params.history.location.state as
+          | HistoryLocationState
+          | undefined;
+
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = params.history.listen(() => {
@@ -298,7 +310,7 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services, isDev);
+        const unmount = renderApp(params.element, services, isDev, historyLocationState);
         return () => {
           unlistenParentHistory();
           unmount();

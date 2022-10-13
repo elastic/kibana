@@ -21,6 +21,7 @@ import {
   PreconfiguredPackagesSchema,
   PreconfiguredAgentPoliciesSchema,
   PreconfiguredOutputsSchema,
+  PreconfiguredFleetServerHostsSchema,
 } from './types';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
@@ -115,6 +116,7 @@ export const config: PluginConfigDescriptor = {
     packages: PreconfiguredPackagesSchema,
     agentPolicies: PreconfiguredAgentPoliciesSchema,
     outputs: PreconfiguredOutputsSchema,
+    fleetServerHosts: PreconfiguredFleetServerHostsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),

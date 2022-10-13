@@ -205,6 +205,7 @@ export const EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS = [
   'process.command_line.caseless',
   'process.command_line.text',
   'process.entity_id',
+  'process.entry_leader.interactive',
   'process.executable',
   'process.executable.caseless',
   'process.executable.text',

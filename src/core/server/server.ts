@@ -57,18 +57,22 @@ import {
 } from '@kbn/core-deprecations-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
-import { CoreApp } from './core_app';
-import { HttpResourcesService } from './http_resources';
-import { RenderingService } from './rendering';
-import { UiSettingsService } from './ui_settings';
-import { PluginsService, config as pluginsConfig } from './plugins';
+import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreRouteHandlerContext,
+  PrebootCoreRouteHandlerContext,
+} from '@kbn/core-http-request-handler-context-server-internal';
+import type {
+  RequestHandlerContext,
+  PrebootRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import { RenderingService } from '@kbn/core-rendering-server-internal';
 
-import { config as uiSettingsConfig } from './ui_settings';
+import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import { CoreApp } from './core_app';
+import { PluginsService, config as pluginsConfig } from './plugins';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { DiscoveredPlugins } from './plugins';
-import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -276,7 +280,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({
+      http: httpSetup,
+      elasticsearchService: elasticsearchServiceSetup,
+    });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,

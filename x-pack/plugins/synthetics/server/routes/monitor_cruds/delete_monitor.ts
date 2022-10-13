@@ -88,6 +88,8 @@ export const deleteMonitor = async ({
   request: KibanaRequest;
 }) => {
   const { logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
+  const spaceId = server.spaces.spacesService.getSpaceId(request);
+
   const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
   let normalizedMonitor;
   try {
@@ -107,15 +109,18 @@ export const deleteMonitor = async ({
 
     normalizedMonitor = normalizeSecrets(monitor);
 
-    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitor(
-      {
-        ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          monitorId,
-      },
+    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
+      [
+        {
+          ...normalizedMonitor.attributes,
+          id:
+            (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+            monitorId,
+        },
+      ],
       request,
-      savedObjectsClient
+      savedObjectsClient,
+      spaceId
     );
     const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 

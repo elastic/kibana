@@ -58,3 +58,7 @@ const MonacoCodeContainer = euiStyled.div`
     z-index: 0;
   }
 `;
+
+export const JSONEditor = (props: any) => {
+  return <CodeEditor languageId={MonacoEditorLangId.JSON} {...props} />;
+};

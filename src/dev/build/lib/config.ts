@@ -154,7 +154,7 @@ export class Config {
       return ALL_PLATFORMS;
     }
 
-    if (process.platform === 'linux') {
+    if (process.platform === 'linux' && process.arch === 'x64') {
       return [this.getPlatform('linux', 'x64')];
     }
 

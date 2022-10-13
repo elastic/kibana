@@ -177,15 +177,13 @@ export const TableActions = ({
     },
   ];
 
-  const testSubject = `openFieldActionsButton-${field}`;
-
   if (mode === 'inline') {
     return (
       <EuiFlexGroup
         responsive={false}
         gutterSize="xs"
         className="kbnDocViewer__buttons"
-        data-test-subj={testSubject}
+        data-test-subj={`fieldActionsGroup-${field}`}
       >
         {panels[0].items.map((item) => (
           <EuiFlexItem key={item.icon} grow={false}>
@@ -210,7 +208,7 @@ export const TableActions = ({
     <EuiPopover
       button={
         <EuiButtonIcon
-          data-test-subj={testSubject}
+          data-test-subj={`openFieldActionsButton-${field}`}
           aria-label={openActionsLabel}
           onClick={toggleOpenPopover}
           iconType="boxesHorizontal"

@@ -8,16 +8,13 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type {
-  PostAgentUnenrollResponse,
-  PostBulkAgentUnenrollResponse,
-} from '../../../common/types';
+import type { PostAgentUnenrollResponse } from '../../../common/types';
 import type {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
@@ -36,7 +33,7 @@ export const postAgentUnenrollHandler: RequestHandler<
     const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -59,16 +56,9 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       force: request.body?.force,
       batchSize: request.body?.batchSize,
     });
-    const body = results.items.reduce<PostBulkAgentUnenrollResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

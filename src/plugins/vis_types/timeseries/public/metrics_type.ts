@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/common';
 import {
   Vis,
   VIS_EVENT_TO_TRIGGER,
@@ -169,8 +168,19 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  navigateToLens: async (params?: VisParams, timeRange?: TimeRange) =>
-    params ? await convertTSVBtoLensConfiguration(params as Panel, timeRange) : null,
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(
+        vis?.params
+          ? await convertTSVBtoLensConfiguration(vis.params as Panel, timeFilter?.getAbsoluteTime())
+          : null
+      ),
+    };
+  },
+  navigateToLens: async (vis, timeFilter) =>
+    vis?.params
+      ? await convertTSVBtoLensConfiguration(vis?.params as Panel, timeFilter?.getAbsoluteTime())
+      : null,
 
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),
