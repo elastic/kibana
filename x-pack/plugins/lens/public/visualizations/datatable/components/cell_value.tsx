@@ -82,7 +82,7 @@ export const createGridCell = (
         >
           <EuiLink
             onClick={() => {
-              handleFilterClick?.(columnId, rowValue, [colIndex], rowIndex);
+              handleFilterClick?.(columnId, rowValue, colIndex, rowIndex);
             }}
           >
             {content}

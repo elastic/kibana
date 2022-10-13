@@ -28,7 +28,7 @@ export const createGridColumns = (
     | ((
         field: string,
         value: unknown,
-        colIndex: number[],
+        colIndex: number,
         rowIndex: number,
         negate?: boolean
       ) => void)
@@ -58,8 +58,6 @@ export const createGridColumns = (
     return memo;
   }, {});
 
-  const bucketLookup = new Set(bucketColumns);
-
   const getContentData = ({
     rowIndex,
     columnId,
@@ -78,14 +76,6 @@ export const createGridColumns = (
     const filterable = columnFilterable?.[colIndex] || false;
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
-
-    const additionalColumnIndices: number[] = [];
-
-    if (!bucketLookup.has(field)) {
-      bucketColumns.forEach((c) => {
-        additionalColumnIndices.push(columnsReverseLookup[c].index);
-      });
-    }
 
     const cellActions =
       filterable && handleFilterClick && !columnArgs?.oneClickFilter
@@ -118,12 +108,7 @@ export const createGridColumns = (
                     aria-label={filterForAriaLabel}
                     data-test-subj="lensDatatableFilterFor"
                     onClick={() => {
-                      handleFilterClick(
-                        field,
-                        rowValue,
-                        [colIndex, ...additionalColumnIndices],
-                        rowIndex
-                      );
+                      handleFilterClick(field, rowValue, colIndex, rowIndex);
                       closeCellPopover?.();
                     }}
                     iconType="plusInCircle"
@@ -161,13 +146,7 @@ export const createGridColumns = (
                     data-test-subj="lensDatatableFilterOut"
                     aria-label={filterOutAriaLabel}
                     onClick={() => {
-                      handleFilterClick(
-                        field,
-                        rowValue,
-                        [colIndex, ...additionalColumnIndices],
-                        rowIndex,
-                        true
-                      );
+                      handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                       closeCellPopover?.();
                     }}
                     iconType="minusInCircle"
