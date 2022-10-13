@@ -72,7 +72,7 @@ export const LogsToolbar = () => {
             useDefaultBehaviors={true}
             indexPatterns={[derivedDataView as DataView]}
             showQueryInput={true}
-            showQueryBar={false}
+            showQueryMenu={false}
             showFilterBar={false}
             showDatePicker={false}
           />
