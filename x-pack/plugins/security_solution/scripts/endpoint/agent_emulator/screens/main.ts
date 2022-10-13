@@ -44,7 +44,7 @@ export class MainScreen extends ScreenBaseClass {
 
     return new ColumnLayoutFormatter(
       [
-        ['Agent Keep Alive Service', 'Response Actions Responder Service'].join('\n'),
+        ['Agent Keep Alive Service', 'Actions Responder Service'].join('\n'),
         [
           this.getRunServiceOutputStatus(context.getAgentKeepAliveService().isRunning),
           this.getRunServiceOutputStatus(context.getActionResponderService().isRunning),
