@@ -25,6 +25,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
 import { DebouncedInput } from '../../shared_components/debounced_input';
 import { DatasourcePublicAPI } from '../..';
+import { CollapseFunction } from '../../../common/expressions';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -535,7 +536,7 @@ describe('dimension editor', () => {
         return this.collapseSetting.props().value;
       }
 
-      public setCollapseFn(fn: string) {
+      public setCollapseFn(fn: CollapseFunction) {
         return this.collapseSetting.props().onChange(fn);
       }
 

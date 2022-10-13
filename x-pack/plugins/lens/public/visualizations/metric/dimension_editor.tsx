@@ -123,7 +123,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
       </EuiFormRow>
       <CollapseSetting
         value={state.collapseFn || ''}
-        onChange={(collapseFn: string) => {
+        onChange={(collapseFn) => {
           setState({
             ...state,
             collapseFn,

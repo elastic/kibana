@@ -14,6 +14,7 @@ import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 import { layerTypes } from './layer_types';
+import { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 
@@ -59,7 +60,7 @@ export interface SharedPieLayerState {
   primaryGroups: string[];
   secondaryGroups?: string[];
   metric?: string;
-  collapseFns?: Record<string, string>;
+  collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;

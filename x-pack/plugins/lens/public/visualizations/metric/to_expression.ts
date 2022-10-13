@@ -12,7 +12,7 @@ import {
 } from '@kbn/expression-metric-vis-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
-import { CollapseArgs } from '../../../common/expressions';
+import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
 import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
@@ -104,7 +104,7 @@ export const toExpression = (
       Boolean
     ) as string[];
 
-    const collapseFn = state.collapseFn as CollapseArgs['fn'][number];
+    const collapseFn = state.collapseFn as CollapseFunction;
 
     const fn = metric.map((accessor) => {
       if (accessor !== state.maxAccessor) {
