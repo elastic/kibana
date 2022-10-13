@@ -223,11 +223,17 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) =>
               iconSide="right"
               onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
               disabled={!isPipelineDataValid}
+              fill
             >
               {CONTINUE_BUTTON_LABEL}
             </EuiButton>
           ) : (
-            <EuiButton color="success" disabled={!isPipelineDataValid} onClick={createPipeline}>
+            <EuiButton
+              color="success"
+              disabled={!isPipelineDataValid}
+              fill
+              onClick={createPipeline}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.create',
                 {
