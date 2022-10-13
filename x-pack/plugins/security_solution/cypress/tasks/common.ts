@@ -156,23 +156,6 @@ export const deleteConnectors = () => {
   });
 };
 
-export const deleteSavedQueries = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'query',
-            },
-          },
-        ],
-      },
-    },
-  });
-};
-
 export const postDataView = (dataSource: string) => {
   cy.request({
     method: 'POST',
