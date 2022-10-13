@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { TestSubjects } from '../../../../../test/functional/services/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { TAGFILTER_DROPDOWN_SELECTOR } from './constants';
 
@@ -17,14 +16,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'visualize',
+    'header',
     'tagManagement',
     'visEditor',
     'common',
-    'header',
   ]);
-  const retry = getService('retry');
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -55,71 +54,38 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }
     await testSubjects.click('savedObjectTitle');
   };
+  // note: I need to refactor to allow for multiple tags
+  const createSimpleMarkdownVis = async (opts: Record<string, string>) => {
+    const { visName, visText, tagName } = opts;
+    await PageObjects.visualize.navigateToNewVisualization();
 
-  const newSelectSavedObjectTag = async (tagName: string) => {
-    await testSubjects.click('savedObjectTagSelector');
-    const testSubjectName = `tagSelectorOption-${PageObjects.tagManagement.testSubjFriendly(
-      tagName
-    )}`;
-    const tagNameOptionExists = await testSubjects.exists(testSubjectName, { timeout: 5000 });
-    if (tagNameOptionExists) {
-      await testSubjects.click(testSubjectName);
-    } else {
-      throw new Error('tag not available to select');
-    }
-    // click the tagSelector option again to close the dropdown
-    await testSubjects.click('savedObjectTagSelector');
-  };
+    await PageObjects.visualize.clickMarkdownWidget();
+    await PageObjects.visEditor.setMarkdownTxt(visText);
+    await PageObjects.visEditor.clickGo();
 
-  const clickSaveVisShowModal = async (waitTime = 2000) => {
-    const isOpen = await testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
-    if (!isOpen) {
-      await testSubjects.click('visualizeSaveButton');
-    }
-  };
-
-  const newSetSaveModalValues = async () => {
-    const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-    const label = await dashboardSelector.findByCssSelector(`label[for="add-to-library-option"]`);
-    await label.click();
-  };
-
-  const newWaitUntilTableIsLoaded = async () => {
-    return retry.waitFor('visualize listing table visible', async () => {
-      const isLoaded = await find.existsByDisplayedByCssSelector(
-        '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
-      );
-      if (isLoaded) {
-        return true;
-      } else {
-        throw new Error('Waiting for visualize listing table visible');
-      }
+    await PageObjects.visualize.ensureSavePanelOpen();
+    await PageObjects.visualize.setSaveModalValues(visName, {
+      saveAsNew: false,
+      redirectToOrigin: true,
     });
-  };
-  const newGetAllItemsNamesOnCurrentPage = async () => {
-    const visNames: string[] = [];
-    await retry.try(async () => {
-      const links = await find.allByCssSelector('.euiTableRow .euiLink');
-      for (let i = 0; i < links.length; i++) {
-        visNames.push(await links[i].getVisibleText());
-      }
-    });
-    return visNames;
+
+    await selectSavedObjectTags(tagName);
+
+    await testSubjects.click('confirmSaveSavedObjectButton');
+    await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
+      testSubjects
+        .missingOrFail('confirmSaveSavedObjectButton')
+        .then(() => true)
+        .catch(() => false)
+    );
+
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const waitNewVisualizationModalIsLoaded = async () => {
-    return retry.waitFor('visualize create new visualization modal visible', async () => {
-      const isVisible = await find.existsByDisplayedByCssSelector('.euiModal .visNewVisDialog');
-      if (isVisible) {
-        return true;
-      } else {
-        throw new Error('Waiting for new visualize modal visible');
-      }
-    });
-  };
-
+  // Failing: See https://github.com/elastic/kibana/issues/89958
   describe('visualize integration', () => {
     before(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['visualization'] });
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
       );
@@ -131,90 +97,118 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
       );
-      await kibanaServer.savedObjects.clean({ types: ['tag'] });
+
       await esArchiver.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
 
     describe('listing', () => {
-      beforeEach(async () => {
-        // await PageObjects.visualize.gotoVisualizationLandingPage(); // ok, under the covers uses PageObjects.common.navigateToApp('visualize').
-        await PageObjects.common.navigateToApp('visualize');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        // await listingTable.waitUntilTableIsLoaded(); // should be ok but let's convert this to retryForTime
-        await newWaitUntilTableIsLoaded();
+      before(async function () {
+        // delete all loaded visualizations (in case create ran first)
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.deleteAllVisualizations();
+        // create two visualizations with tags
+        let selectedTagName = 'tag-1';
+        let newVisName = 'Visualization 1';
+        await createSimpleMarkdownVis({
+          visName: newVisName,
+          visText: 'Just some markdown 1',
+          tagName: selectedTagName,
+        });
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+        selectedTagName = 'tag-2';
+        newVisName = 'Visualization 2';
+        await createSimpleMarkdownVis({
+          visName: newVisName,
+          visText: 'Just some markdown 2',
+          tagName: selectedTagName,
+        });
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+        selectedTagName = 'tag-1';
+        newVisName = 'Visualization 3';
+        await createSimpleMarkdownVis({
+          visName: newVisName,
+          visText: 'Just some markdown 3',
+          tagName: selectedTagName,
+        });
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
-      it('OK: allows to manually type tag filter query', async () => {
+      it('allows to manually type tag filter query', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('tag:(tag-1)', { escape: false });
         await listingTable.expectItemsCount('visualize', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql(['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']);
+        expect(itemNames).to.contain('Visualization 1');
+        expect(itemNames).to.contain('Visualization 3');
       });
 
-      it('OK: allows to filter by selecting a tag in the filter menu', async () => {
+      it('allows to filter by selecting a tag in the filter menu', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
         await selectFilterTags('tag-1');
-        await listingTable.expectItemsCount('visualize', 2);
 
-        // const itemNames = await listingTable.getAllItemsNames(); // ugly, uses while true that's hard coded
-        const itemNamesArray = await newGetAllItemsNamesOnCurrentPage();
-        expect(itemNamesArray.length).to.equal(2);
-        expect(itemNamesArray).to.eql([
-          'Visualization 1 (tag-1)',
-          'Visualization 3 (tag-1 + tag-3)',
-        ]);
+        await listingTable.expectItemsCount('visualize', 2);
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('Visualization 1');
+        expect(itemNames).to.contain('Visualization 3');
       });
 
-      it('OK: allows to filter by multiple tags', async () => {
-        await selectFilterTags('tag-2', 'tag-3');
+      it('allows to filter by multiple tags', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await selectFilterTags('tag-2', 'tag-1');
 
-        await listingTable.expectItemsCount('visualize', 2);
-        // const itemNames = await listingTable.getAllItemsNames(); // ugly, uses while true that's hard coded
-        const itemNamesArray = await newGetAllItemsNamesOnCurrentPage();
-        expect(itemNamesArray.length).to.equal(2);
-        expect(itemNamesArray).to.eql([
-          'Visualization 2 (tag-2)',
-          'Visualization 3 (tag-1 + tag-3)',
-        ]);
+        await listingTable.expectItemsCount('visualize', 3);
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('Visualization 2');
+        expect(itemNames).to.contain('Visualization 1');
+        expect(itemNames).to.contain('Visualization 3');
       });
     });
 
-    describe.only('creating', () => {
-      beforeEach(async () => {
+    describe('creating', () => {
+      before(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await PageObjects.visualize.clickNewVisualization();
-        await waitNewVisualizationModalIsLoaded();
-        // await listingTable.waitUntilTableIsLoaded(); // should be ok but let's convert this to retryForTime
+        await PageObjects.visualize.deleteAllVisualizations();
       });
-      it('TO TEST: allows to assign tags to the new visualization', async () => {
-        await PageObjects.visualize.clickMarkdownWidget();
-        await PageObjects.visEditor.setMarkdownTxt('Just some markdown');
-        await PageObjects.visEditor.clickGo();
-        // await PageObjects.visualize.ensureSavePanelOpen(); // includes waiting for loading/rendering to complete
-        await clickSaveVisShowModal(); // actually save the visualization; Replaces PageObjects.visualize.ensureSavePanelOpen();
-        // await await PageObjects.visualize.setSaveModalValues('My new markdown viz'); //replaced by stripped down version below
-        await newSetSaveModalValues();
+      after(async () => {
+        await PageObjects.visualize.deleteAllVisualizations();
+      });
 
-        // await selectSavedObjectTags('tag-1');
-        await newSelectSavedObjectTag('tag-1');
-        // await PageObjects.visualize.saveVisualization('My new markdown viz'); not needed, replaced
+      it('allows to assign tags to the new visualization', async () => {
+        const selectedTagName = 'tag-1';
+        const newVisName = 'My new markdown viz';
+        await createSimpleMarkdownVis({
+          visName: newVisName,
+          visText: 'Just some markdown',
+          tagName: selectedTagName,
+        });
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
 
-        await testSubjects.click('confirmSaveSavedObjectButton');
-        await PageObjects.common.waitForSaveModalToClose();
-        // end creating new vis with a tag
-
-        await PageObjects.visualize.gotoVisualizationLandingPage(); // OK to keep
-        await listingTable.waitUntilTableIsLoaded(); // OK to keep
-
-        await selectFilterTags('tag-1'); // OK to keep
+        // open the filter dropdown
+        const filterButton = await find.byCssSelector(
+          '.euiFilterGroup .euiPopover:nth-child(2) .euiFilterButton'
+        );
+        await filterButton.click();
+        await testSubjects.click(
+          `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(selectedTagName)}`
+        );
+        // click elsewhere to close the filter dropdown
+        const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
+        await searchFilter.click();
+        // wait until the table refreshes
+        await listingTable.waitUntilTableIsLoaded();
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain('My new markdown viz');
+        expect(itemNames).to.contain(newVisName);
       });
 
-      it.skip('TODO: allows to create a tag from the tag selector', async () => {
-        const { tagModal } = PageObjects.tagManagement;
-
+      it('allows to create a tag from the tag selector', async () => {
+        const newTagName = 'my-new-tag';
+        const newVisName = 'vis-with-new-tag';
         await PageObjects.visualize.navigateToNewVisualization();
 
         await PageObjects.visualize.clickMarkdownWidget();
@@ -222,14 +216,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await PageObjects.visualize.setSaveModalValues('vis-with-new-tag');
+        await PageObjects.visualize.setSaveModalValues(newVisName, {
+          saveAsNew: false,
+          redirectToOrigin: true,
+        });
 
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
 
-        expect(await tagModal.isOpened()).to.be(true);
+        expect(await PageObjects.tagManagement.tagModal.isOpened()).to.be(true);
 
-        await tagModal.fillForm(
+        await PageObjects.tagManagement.tagModal.fillForm(
           {
             name: 'my-new-tag',
             color: '#FFCC33',
@@ -240,42 +237,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        expect(await tagModal.isOpened()).to.be(false);
-
+        expect(await PageObjects.tagManagement.tagModal.isOpened()).to.be(false);
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await PageObjects.common.waitForSaveModalToClose();
-
+        await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
+          testSubjects
+            .missingOrFail('confirmSaveSavedObjectButton')
+            .then(() => true)
+            .catch(() => false)
+        );
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('my-new-tag');
-        const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain('vis-with-new-tag');
+        await selectFilterTags(newTagName);
+        const itemNames = await listingTable.getAllItemsNamesSkipPagination();
+        expect(itemNames).to.contain(newVisName);
       });
     });
 
-    describe('editing', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/88639
+    describe.skip('editing', () => {
       beforeEach(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
       });
+
       it('allows to assign tags to an existing visualization', async () => {
-        // ensure we have the item we want to selecte in the listing table.
-        await listingTable.searchAndExpectItemsCount('visualize', 'Visualization 1 (tag-1)', 1);
-        // click the visualization
-        await listingTable.clickItemLink('visualize', 'Visualization 1 (tag-1)'); // Question: what happens now?
+        await listingTable.clickItemLink('visualize', 'Visualization 1 (tag-1)');
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await selectSavedObjectTags('tag-2'); // here
+        await selectSavedObjectTags('tag-2');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
         await PageObjects.common.waitForSaveModalToClose();
-        // debugger;
-        // between these two lines is where the visualization isn't being re-saved.
+
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('tag-2'); // the tag list doesn't include tagnames already selected.
+        await selectFilterTags('tag-2');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('Visualization 1 (tag-1)');
       });

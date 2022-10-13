@@ -50,6 +50,15 @@ export class ListingTableService extends FtrService {
     this.log.debug(`Found ${visualizationNames.length} visualizations on current page`);
     return visualizationNames;
   }
+  /**
+   * public implementation of getAllItemsNamesOnCurrentPage, needed for saved object tagging tests
+   */
+  public async getAllItemsNamesSkipPagination(): Promise<string[]> {
+    let visualizationOnCurrentPageNames: string[] = [];
+    const visualizationNames = await this.getAllItemsNamesOnCurrentPage();
+    visualizationOnCurrentPageNames = visualizationOnCurrentPageNames.concat(visualizationNames);
+    return visualizationOnCurrentPageNames;
+  }
 
   public async waitUntilTableIsLoaded() {
     return this.retry.try(async () => {
