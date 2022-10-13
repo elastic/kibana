@@ -19,7 +19,7 @@ How long {kib} stores search results from unsaved sessions,
 after the last search in the session completes. The default is `5m`.
 
 `data.search.sessions.maxUpdateRetries` {ess-icon}::
-How many retries {kib} can perform while attempting to save a search session. The default is `3`.
+How many retries {kib} can perform while attempting to save a search session. The default is `10`.
 
 `data.search.sessions.defaultExpiration` {ess-icon}::
 How long search session results are stored before they are deleted.

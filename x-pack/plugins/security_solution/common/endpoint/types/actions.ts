@@ -12,7 +12,10 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
-import type { ResponseActionStatus, ResponseActions } from '../service/response_actions/constants';
+import type {
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+} from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -140,7 +143,7 @@ export interface EndpointActionData<
   T extends EndpointActionDataParameterTypes = never,
   TOutputContent extends object = object
 > {
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: T;
   output?: ActionResponseOutput<TOutputContent>;
@@ -282,7 +285,7 @@ export interface ActionDetails<TOutputContent extends object = object> {
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
