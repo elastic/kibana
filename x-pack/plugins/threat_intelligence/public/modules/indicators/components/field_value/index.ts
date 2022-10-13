@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicator_field_label';
+export * from './field_value';

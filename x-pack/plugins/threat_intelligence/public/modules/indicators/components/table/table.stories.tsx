@@ -11,7 +11,7 @@ import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indi
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from '.';
-import { IndicatorsFiltersContext } from '../../containers/indicators_filters/context';
+import { IndicatorsFiltersContext } from '../../containers/filters/context';
 import { DEFAULT_COLUMNS } from './hooks';
 
 export default {

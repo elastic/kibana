@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSecurityContext } from '../../../../hooks/use_security_context';
-import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from './context';
+import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '.';
 
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
