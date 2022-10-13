@@ -111,5 +111,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       ]);
     });
+
+    it('should not convert aggregation with not supported field type', async () => {
+      await visEditor.clickMetricEditor();
+      await visEditor.selectAggregation('Top metrics', 'metrics');
+      await visEditor.selectField('extension.raw', 'metrics');
+
+      await visEditor.clickGo();
+
+      const button = await testSubjects.exists('visualizeEditInLensButton');
+      expect(button).to.be(false);
+    });
   });
 }
