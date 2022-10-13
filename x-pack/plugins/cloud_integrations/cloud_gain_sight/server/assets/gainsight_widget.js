@@ -6,14 +6,10 @@
  */
 /* @notice
  * Portions of this code are licensed under the following license:
- *
- */
-/*!
- * 
  *     Gainsight PX Agent Wrapper
  *     Agent Version:  0.46.0
  *     Installed:      2022-08-25 08:07
- * 
+ *
  */
 /* eslint-disable prettier/prettier,no-var,eqeqeq,new-cap,no-nested-ternary,no-use-before-define,no-sequences,block-scoped-var,one-var,
     dot-notation,no-script-url,no-restricted-globals,no-unused-vars,guard-for-in,no-proto,camelcase,no-empty,no-redeclare,no-caller,

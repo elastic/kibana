@@ -251,6 +251,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 Portions of this code are licensed under the following license:
+    Gainsight PX Agent Wrapper
+    Agent Version:  0.46.0
+    Installed:      2022-08-25 08:07
 
 ---
 Portions of this code are licensed under the following license:
