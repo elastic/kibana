@@ -7,10 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type {
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   GetExceptionItemProps,
@@ -25,8 +22,9 @@ import {
 } from '../api';
 import * as i18n from '../translations';
 import { useExceptionListDetailsContext } from '../context';
+import type { ExceptionListWithRules } from '../types';
 
-export const useManageListWithSearchComponent = (list: ExceptionListSchema) => {
+export const useManageListWithSearchComponent = (list: ExceptionListWithRules) => {
   const {
     viewerStatus,
     isReadOnly,

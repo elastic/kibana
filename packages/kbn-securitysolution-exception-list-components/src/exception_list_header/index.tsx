@@ -19,7 +19,7 @@ import {
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
 import { EditModal } from './edit_modal';
-import { ListDetails } from '../types';
+import { ListDetails, Rule } from '../types';
 import { useExceptionListHeader } from './hooks/use_exception_list_header';
 
 interface ExceptionListHeaderComponentProps {
@@ -27,7 +27,9 @@ interface ExceptionListHeaderComponentProps {
   description?: string;
   listId?: string;
   isReadonly: boolean;
+  linkedRules: Rule[];
   dataTestSubj?: string;
+  securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onEditListDetails: (listDetails: ListDetails) => void;
   onExportList: () => void;
   onDeleteList: () => void;
@@ -37,8 +39,10 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   name,
   description,
   listId,
+  linkedRules,
   isReadonly,
   dataTestSubj,
+  securityLinkAnchorComponent,
   onEditListDetails,
   onExportList,
   onDeleteList,
@@ -78,7 +82,10 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         }
         rightSideItems={[
           <MenuItems
+            dataTestSubj={dataTestSubj}
+            linkedRules={linkedRules}
             isReadonly={isReadonly}
+            securityLinkAnchorComponent={securityLinkAnchorComponent}
             onExportList={onExportList}
             onDeleteList={onDeleteList}
           />,

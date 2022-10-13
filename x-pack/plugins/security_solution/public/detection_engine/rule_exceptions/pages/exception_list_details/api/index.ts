@@ -32,10 +32,11 @@ import type {
   FetchItems,
   UpdateExceptionList,
 } from './types';
+import type { ExceptionListWithRules } from '../types';
 
 export const prepareFetchExceptionItemsParams = (
   exceptions: ListArray | null,
-  list: ExceptionListSchema | null,
+  list: ExceptionListWithRules | null,
   options?: GetExceptionItemProps
 ) => {
   const { pagination, search, filters } = options || {};

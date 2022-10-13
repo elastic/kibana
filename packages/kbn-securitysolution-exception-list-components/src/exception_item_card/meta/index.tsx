@@ -7,8 +7,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { EuiContextMenuPanelProps } from '@elastic/eui';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { css } from '@emotion/react';
@@ -17,6 +16,7 @@ import * as i18n from '../translations';
 import type { Rule } from '../../types';
 import { MetaInfoDetails } from './details_info';
 import { HeaderMenu } from '../../header_menu';
+import { generateLinedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 
 const itemCss = css`
   border-right: 1px solid #d3dae6;
@@ -34,24 +34,16 @@ export interface ExceptionItemCardMetaInfoProps {
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
   ({ item, rules, dataTestSubj, securityLinkAnchorComponent, formattedDateComponent }) => {
     const FormattedDateComponent = formattedDateComponent;
-    const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
-      if (!rules.length || securityLinkAnchorComponent === null) {
-        return [];
-      }
 
-      const SecurityLinkAnchor = securityLinkAnchorComponent;
-      return rules.map((rule) => (
-        <EuiContextMenuItem
-          data-test-subj={`${dataTestSubj || ''}ActionItem${rule.id}`}
-          key={rule.id}
-        >
-          <EuiToolTip content={rule.name} anchorClassName="eui-textTruncate">
-            <SecurityLinkAnchor referenceName={rule.name} referenceId={rule.id} />
-          </EuiToolTip>
-        </EuiContextMenuItem>
-      ));
-    }, [rules, securityLinkAnchorComponent, dataTestSubj]);
-
+    const referencedLinks = useMemo(
+      () =>
+        generateLinedRulesMenuItems({
+          dataTestSubj,
+          linkedRules: rules,
+          securityLinkAnchorComponent,
+        }),
+      [dataTestSubj, rules, securityLinkAnchorComponent]
+    );
     return (
       <EuiFlexGroup alignItems="center" responsive gutterSize="s" data-test-subj={dataTestSubj}>
         {FormattedDateComponent !== null && (
@@ -86,7 +78,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             emptyButton
             useCustomActions
             iconType="list"
-            actions={itemActions}
+            actions={referencedLinks}
             disableActions={false}
             text={i18n.AFFECTED_RULES(rules.length)}
             dataTestSubj={dataTestSubj}

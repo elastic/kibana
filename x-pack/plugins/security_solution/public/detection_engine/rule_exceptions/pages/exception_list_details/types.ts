@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListInfo } from '../../../../detections/pages/detection_engine/rules/all/exceptions/use_all_exception_lists';
+
+export { ExceptionListInfo as ExceptionListWithRules };
 
 export interface ExceptionListDetailsComponentProps {
   isReadOnly: boolean;
-  list: ExceptionListSchema;
+  list: ExceptionListInfo;
 }

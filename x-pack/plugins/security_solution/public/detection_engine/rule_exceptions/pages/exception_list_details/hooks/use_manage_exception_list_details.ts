@@ -9,13 +9,19 @@ import type { ListDetails } from '@kbn/securitysolution-exception-list-component
 import { useExceptionListDetailsContext } from '../context';
 import type { ExceptionListDetailsComponentProps } from '../types';
 import { deleteList, exportList, updateList } from '../api';
+import * as i18n from '../translations';
 
 export const useManageExceptionListDetails = ({
   isReadOnly,
   list,
 }: ExceptionListDetailsComponentProps) => {
   const [exportedList, setExportedList] = useState<Blob>();
-  const { name: listName, description: listDescription, list_id: listId } = list;
+  const {
+    name: listName,
+    description: listDescription,
+    list_id: listId,
+    rules: linkedRules,
+  } = list;
 
   const { toasts, viewerStatus, http, setIsReadOnly, handleErrorStatus } =
     useExceptionListDetailsContext();
@@ -51,7 +57,7 @@ export const useManageExceptionListDetails = ({
         namespaceType: list.namespace_type,
       });
       setExportedList(result);
-      toasts?.addSuccess(`${listName} Successfully exported`);
+      toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(listName));
     } catch (error) {
       handleErrorStatus(error);
     }
@@ -64,7 +70,7 @@ export const useManageExceptionListDetails = ({
         http,
         namespaceType: list.namespace_type,
       });
-      toasts?.addSuccess(`${listName} Successfully deleted`);
+      toasts?.addSuccess(i18n.EXCEPTION_LIST_DELETED_SUCCESSFULLY(listName));
       // TODO redirect to all lists
     } catch (error) {
       handleErrorStatus(error);
@@ -72,6 +78,7 @@ export const useManageExceptionListDetails = ({
   }, [handleErrorStatus, http, list.id, list.namespace_type, listName, toasts]);
 
   return {
+    linkedRules,
     exportedList,
     viewerStatus,
     listName,

@@ -17,12 +17,14 @@ import { AutoDownload } from '../../../../common/components/auto_download/auto_d
 import { ListWithSearch } from './list_with_search';
 import { useManageExceptionListDetails } from './hooks/use_manage_exception_list_details';
 import type { ExceptionListDetailsComponentProps } from './types';
+import { ListDetailsLinkAnchor } from '../../components/list_details_link_anchor';
 
 export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProps> = ({
   isReadOnly = false,
   list,
 }) => {
   const {
+    linkedRules,
     exportedList,
     viewerStatus,
     listName,
@@ -38,7 +40,9 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         name={listName}
         description={listDescription}
         listId={listId}
+        linkedRules={linkedRules}
         isReadonly={false}
+        securityLinkAnchorComponent={ListDetailsLinkAnchor}
         onEditListDetails={onEditListDetails}
         onExportList={onExportList}
         onDeleteList={onDeleteList}

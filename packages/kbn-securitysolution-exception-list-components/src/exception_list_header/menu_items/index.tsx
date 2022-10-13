@@ -6,76 +6,95 @@
  * Side Public License, v 1.
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { FC, memo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
 import { headerMenuCss } from '../exception_list_header.styles';
 import * as i18n from '../../translations';
-
+import { Rule } from '../../types';
+import { generateLinedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;
-  // linkedRules:[]
+  linkedRules: Rule[];
+  securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onExportList: () => void;
   onDeleteList: () => void;
 }
 
-const MenuItemsComponent: FC<MenuItemsProps> = memo(
-  ({ isReadonly, onExportList, dataTestSubj, onDeleteList }) => {
-    return (
-      <EuiFlexGroup
-        direction="row"
-        alignItems="baseline"
-        justifyContent="center"
-        responsive
-        data-test-subj={`${dataTestSubj || ''}MenuItems`}
-        gutterSize="l"
-      >
-        <EuiFlexItem css={headerMenuCss}>
-          <HeaderMenu
-            data-test-subj={`${dataTestSubj || ''}LinkedRulesMenu`}
-            emptyButton
-            text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(4)} // TODO add reference no.
-            actions={[]}
-            disableActions={isReadonly}
-            iconType="arrowDown"
-            iconSide="right"
-          />
-        </EuiFlexItem>
+const MenuItemsComponent: FC<MenuItemsProps> = ({
+  dataTestSubj,
+  linkedRules,
+  securityLinkAnchorComponent,
+  isReadonly,
+  onExportList,
+  onDeleteList,
+}) => {
+  const referencedLinks = useMemo(
+    () =>
+      generateLinedRulesMenuItems({
+        leftIcon: 'check',
+        dataTestSubj,
+        linkedRules,
+        securityLinkAnchorComponent,
+      }),
+    [dataTestSubj, linkedRules, securityLinkAnchorComponent]
+  );
+  return (
+    <EuiFlexGroup
+      direction="row"
+      alignItems="baseline"
+      justifyContent="center"
+      responsive
+      data-test-subj={`${dataTestSubj || ''}MenuItems`}
+      gutterSize="l"
+    >
+      <EuiFlexItem css={headerMenuCss}>
+        <HeaderMenu
+          data-test-subj={`${dataTestSubj || ''}LinkedRulesMenu`}
+          emptyButton
+          useCustomActions
+          text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
+          actions={referencedLinks}
+          disableActions={isReadonly}
+          iconType="arrowDown"
+          iconSide="right"
+          panelPaddingSize="none"
+        />
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiButton data-test-subj={`${dataTestSubj || ''}ManageRulesButton`} fill>
-            {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButton data-test-subj={`${dataTestSubj || ''}ManageRulesButton`} fill>
+          {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
+        </EuiButton>
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <HeaderMenu
-            actions={[
-              {
-                key: '1',
-                icon: 'exportAction',
-                label: i18n.EXCEPTION_LIST_HEADER_EXPORT_ACTION,
-                onClick: () => {
-                  if (typeof onExportList === 'function') onExportList();
-                },
+      <EuiFlexItem>
+        <HeaderMenu
+          actions={[
+            {
+              key: '1',
+              icon: 'exportAction',
+              label: i18n.EXCEPTION_LIST_HEADER_EXPORT_ACTION,
+              onClick: () => {
+                if (typeof onExportList === 'function') onExportList();
               },
-              {
-                key: '2',
-                icon: 'trash',
-                label: i18n.EXCEPTION_LIST_HEADER_DELETE_ACTION,
-                onClick: () => {
-                  if (typeof onDeleteList === 'function') onDeleteList();
-                },
+            },
+            {
+              key: '2',
+              icon: 'trash',
+              label: i18n.EXCEPTION_LIST_HEADER_DELETE_ACTION,
+              onClick: () => {
+                if (typeof onDeleteList === 'function') onDeleteList();
               },
-            ]}
-            disableActions={isReadonly}
-            anchorPosition="downCenter"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+            },
+          ]}
+          disableActions={isReadonly}
+          anchorPosition="downCenter"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 MenuItemsComponent.displayName = 'MenuItemsComponent';
 
