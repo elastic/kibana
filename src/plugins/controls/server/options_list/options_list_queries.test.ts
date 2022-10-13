@@ -310,7 +310,7 @@ describe('options list queries', () => {
               "ranges": Array [
                 Object {
                   "key": "ipv6",
-                  "mask": "f688:fb50:6433:bba2:604:f2c:194a:d3c5/64",
+                  "mask": "f688:fb50:6433:bba2:604:f2c:194a:d3c5/128",
                 },
               ],
             },
