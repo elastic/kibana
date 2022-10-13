@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Visualization } from '../../../..';
-import { LayerAction } from './types';
+import type { LayerAction } from '../../../../types';
+import type { Visualization } from '../../../..';
 
 interface CloneLayerAction {
   execute: () => void;

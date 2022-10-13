@@ -62,6 +62,7 @@ export type GaugeInput = Datatable;
 export interface GaugeExpressionProps {
   data: Datatable;
   args: GaugeArguments;
+  canNavigateToLens: boolean;
 }
 
 export interface GaugeRender {

@@ -9,6 +9,8 @@ import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskDetailsTabBody } from '../../../risk_score/components/risk_details_tab_body';
 import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -22,7 +24,6 @@ import { type } from './utils';
 import {
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
-  HostRiskTabBody,
   SessionsTabBody,
 } from '../navigation';
 import { TimelineId } from '../../../../common/types';
@@ -77,7 +78,11 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
-          <HostRiskTabBody {...tabProps} />
+          <RiskDetailsTabBody
+            {...tabProps}
+            riskEntity={RiskScoreEntity.host}
+            entityName={tabProps.hostName}
+          />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
           <SessionsTabBody {...tabProps} />

@@ -31,9 +31,6 @@ export const Settings: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
-          defaultMessage: 'Content',
-        }),
         i18n.translate('xpack.enterpriseSearch.content.settings.breadcrumb', {
           defaultMessage: 'Settings',
         }),
@@ -75,8 +72,11 @@ export const Settings: React.FC = () => {
               'Allow all ingestion mechanisms on your Enterprise Search deployment to extract searchable content from binary files, like PDFs and Word documents. This setting applies to all new Elasticsearch indices created by an Enterprise Search ingestion mechanism.',
           }
         )}
+        label={i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.label', {
+          defaultMessage: 'Content extraction',
+        })}
         link={
-          <EuiLink href={docLinks.contentExtraction} target="_blank">
+          <EuiLink href={docLinks.ingestPipelines} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.link', {
               defaultMessage: 'Learn more about content extraction',
             })}
@@ -102,8 +102,11 @@ export const Settings: React.FC = () => {
               'Whitespace reduction will strip your full-text content of whitespace by default.',
           }
         )}
+        label={i18n.translate('xpack.enterpriseSearch.content.settings.whitespaceReduction.label', {
+          defaultMessage: 'Whitespace reduction',
+        })}
         link={
-          <EuiLink href="TODO TODO TODO TODO" external>
+          <EuiLink href={docLinks.ingestPipelines} external>
             {i18n.translate('xpack.enterpriseSearch.content.settings.whitespaceReduction.link', {
               defaultMessage: 'Learn more about whitespace reduction',
             })}
@@ -132,8 +135,11 @@ export const Settings: React.FC = () => {
               'ML Inference Pipelines will run as part of your pipelines. You will have to configure processors for each index individually on its pipelines page.',
           }
         )}
+        label={i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.label', {
+          defaultMessage: 'ML Inference',
+        })}
         link={
-          <EuiLink href={docLinks.contentExtraction} target="_blank">
+          <EuiLink href={docLinks.ingestPipelines} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
               defaultMessage: 'Learn more about content extraction',
             })}
