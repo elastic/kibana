@@ -42,7 +42,10 @@ import {
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
 import type { BulkEditError } from '@kbn/alerting-plugin/server';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import {
+  BrowserFields,
+  RuleRegistrySearchRequestPagination,
+} from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
@@ -435,7 +438,7 @@ export interface AlertsTableProps {
   visibleColumns: string[];
   'data-test-subj': string;
   updatedAt: number;
-  browserFields: any;
+  browserFields: BrowserFields;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
