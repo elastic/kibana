@@ -116,16 +116,23 @@ function getDataLayers(
     const splitAccessor = layer.columns.find(
       (column) => column.isBucketed && column.isSplit
     )?.columnId;
-    const serie = series.find((s) => s.data.id === layer.seriesId);
+    // as type and mode will be the same for all metrics we can use first to define it
+    const firstSeries = series.find((s) => s.data.id === layer.seriesIdsMap[layer.metrics[0]]);
     const isHistogram =
       xColumn?.operationType === 'date_histogram' ||
       (xColumn?.operationType === 'range' && xColumn.params.type === 'histogram');
-    const yAxis = (vis.params.valueAxes ?? vis.type.visConfig.defaults.valueAxes).find(
-      (axis) => axis.id === serie?.valueAxis
+    const firstYAxis = (vis.params.valueAxes ?? vis.type.visConfig.defaults.valueAxes).find(
+      (axis) => axis.id === firstSeries?.valueAxis
     );
-    const isPercentage = yAxis?.scale.mode === 'percentage';
-    const isHorizontal = yAxis?.position !== Position.Left && yAxis?.position !== Position.Right;
-    const seriesType = getSeriesType(serie?.type, serie?.mode, isHorizontal, isPercentage);
+    const isPercentage = firstYAxis?.scale.mode === 'percentage';
+    const isHorizontal =
+      firstYAxis?.position !== Position.Left && firstYAxis?.position !== Position.Right;
+    const seriesType = getSeriesType(
+      firstSeries?.type,
+      firstSeries?.mode,
+      isHorizontal,
+      isPercentage
+    );
     return {
       layerId: layer.layerId,
       accessors: layer.metrics,
@@ -135,10 +142,16 @@ function getDataLayers(
       simpleView: false,
       splitAccessor,
       palette: vis.params.palette ?? vis.type.visConfig.defaults.palette,
-      yConfig: layer.metrics.map((metricId) => ({
-        forAccessor: metricId,
-        axisMode: getYAxisPosition(yAxis?.position ?? 'left'),
-      })),
+      yConfig: layer.metrics.map((metricId) => {
+        const serie = series.find((s) => s.data.id === layer.seriesIdsMap[metricId]);
+        const yAxis = (vis.params.valueAxes ?? vis.type.visConfig.defaults.valueAxes).find(
+          (axis) => axis.id === serie?.valueAxis
+        );
+        return {
+          forAccessor: metricId,
+          axisMode: getYAxisPosition(yAxis?.position ?? 'left'),
+        };
+      }),
       xScaleType: getXScaleType(xColumn),
       isHistogram,
       collapseFn: layer.collapseFn,
@@ -248,6 +261,9 @@ export const getConfiguration = (
     valueLabels:
       vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
     valuesInLegend: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show),
+    showCurrentTimeMarker: isTimeChart
+      ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
+      : undefined,
     curveType: getCurveType(
       series[0].interpolate === InterpolationMode.StepAfter
         ? InterpolationMode.Linear

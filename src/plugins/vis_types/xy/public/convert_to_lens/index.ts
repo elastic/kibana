@@ -22,7 +22,7 @@ export interface Layer {
   columns: Column[];
   metrics: string[];
   columnOrder: never[];
-  seriesId: string;
+  seriesIdsMap: Record<string, string>;
   isReferenceLineLayer: boolean;
   collapseFn?: string;
 }
@@ -95,7 +95,17 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       supportMixedSiblingPipelineAggs: true,
       isPercentageMode: false,
     },
-    visibleSeries.map((s) => ({ metrics: [s.data.id] }))
+    visibleSeries
+      .reduce<Array<{ metrics: string[]; type: string; mode: string }>>((acc, s) => {
+        const series = acc.find(({ type, mode }) => type === s.type && mode === s.mode);
+        if (series) {
+          series.metrics.push(s.data.id);
+        } else {
+          acc.push({ metrics: [s.data.id], type: s.type, mode: s.mode });
+        }
+        return acc;
+      }, [])
+      .map(({ metrics }) => ({ metrics }))
   );
 
   if (dataLayers === null) {
@@ -140,9 +150,15 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const layers = dataLayers.map<Layer>((l) => {
     const layerId = uuid.default();
-    const series = visibleSeries.find((s) =>
-      l.columns.some((c) => !c.isBucketed && c.meta.aggId.split('.')[0] === s.data.id)
-    );
+    const seriesIdsMap: Record<string, string> = {};
+    visibleSeries.forEach((s) => {
+      const column = l.columns.find(
+        (c) => !c.isBucketed && c.meta.aggId.split('.')[0] === s.data.id
+      );
+      if (column) {
+        seriesIdsMap[column.columnId] = s.data.id;
+      }
+    });
     const collapseFn = l.bucketCollapseFn
       ? Object.keys(l.bucketCollapseFn).find((key) =>
           l.bucketCollapseFn[key].includes(l.buckets.customBuckets[l.metrics[0]])
@@ -154,7 +170,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       columns: l.columns.map(excludeMetaFromColumn),
       metrics: l.metrics,
       columnOrder: [],
-      seriesId: series?.data.id!,
+      seriesIdsMap,
       collapseFn,
       isReferenceLineLayer: false,
     };
@@ -170,13 +186,13 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       metrics: [staticValueColumn.columnId],
       isReferenceLineLayer: true,
       collapseFn: undefined,
-      seriesId: '',
+      seriesIdsMap: {},
     });
   }
 
   return {
     type: 'lnsXY',
-    layers: layers.map(({ seriesId, collapseFn, isReferenceLineLayer, ...rest }) => rest),
+    layers: layers.map(({ seriesIdsMap, collapseFn, isReferenceLineLayer, ...rest }) => rest),
     configuration: getConfiguration(layers, visibleSeries, vis),
     indexPatternIds: [indexPatternId],
   };

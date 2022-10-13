@@ -25,7 +25,7 @@ describe('getConfiguration', () => {
       ] as Column[],
       metrics: ['1'],
       columnOrder: [],
-      seriesId: '1',
+      seriesIdsMap: { 1: '1' },
       collapseFn: 'max',
       isReferenceLineLayer: false,
     },
@@ -38,7 +38,7 @@ describe('getConfiguration', () => {
       ] as Column[],
       metrics: ['4'],
       columnOrder: [],
-      seriesId: '2',
+      seriesIdsMap: { 4: '2' },
       collapseFn: undefined,
       isReferenceLineLayer: false,
     },
@@ -48,7 +48,7 @@ describe('getConfiguration', () => {
       columns: [{ columnId: '7', isBucketed: false }] as Column[],
       columnOrder: [],
       metrics: ['7'],
-      seriesId: '',
+      seriesIdsMap: {},
       collapseFn: undefined,
       isReferenceLineLayer: true,
     },
@@ -154,6 +154,7 @@ describe('getConfiguration', () => {
       yRightScale: 'linear',
       yRightTitle: undefined,
       yTitle: 'Sum of total_quantity',
+      showCurrentTimeMarker: false,
     });
   });
 });
