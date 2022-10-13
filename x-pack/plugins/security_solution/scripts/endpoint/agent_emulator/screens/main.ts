@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { bgCyan, red } from 'chalk';
+import { SCREEN_ROW_MAX_WIDTH } from '../../common/screen/constants';
+import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { LoadEndpointsScreen } from './load_endpoints';
 import { TOOL_TITLE } from '../constants';
@@ -13,6 +16,8 @@ import type { DataFormatter } from '../../common/screen/data_formatter';
 
 export class MainScreen extends ScreenBaseClass {
   private readonly loadEndpointsScreen;
+  private actionColumnWidthPrc = 30;
+  private runningStateColumnWidthPrc = 70;
 
   constructor(private readonly emulatorContext: EmulatorRunContext) {
     super();
@@ -24,9 +29,41 @@ export class MainScreen extends ScreenBaseClass {
   }
 
   protected body(): string | DataFormatter {
-    return `
+    return `\n${
+      new ColumnLayoutFormatter(
+        [new ChoiceMenuFormatter(['Load endpoints']), this.runStateView()],
+        {
+          widths: [this.actionColumnWidthPrc, this.runningStateColumnWidthPrc],
+        }
+      ).output
+    }`;
+  }
 
-${new ChoiceMenuFormatter(['Load endpoints']).output}\n`;
+  private runStateView(): ColumnLayoutFormatter {
+    const context = this.emulatorContext;
+
+    return new ColumnLayoutFormatter(
+      [
+        ['Agent Keep Alive Service', 'Response Actions Responder Service'].join('\n'),
+        [
+          this.getRunServiceOutputStatus(context.getAgentKeepAliveService().isRunning),
+          this.getRunServiceOutputStatus(context.getActionResponderService().isRunning),
+        ].join('\n'),
+      ],
+      {
+        rowLength: Math.floor(SCREEN_ROW_MAX_WIDTH * (this.runningStateColumnWidthPrc / 100)),
+        separator: ': ',
+        widths: [70, 30],
+      }
+    );
+  }
+
+  private getRunServiceOutputStatus(isRunning: boolean) {
+    if (isRunning) {
+      return bgCyan(' Running ');
+    }
+
+    return red(' Stopped ');
   }
 
   protected footer(): string | DataFormatter {

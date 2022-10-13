@@ -17,7 +17,7 @@ export class BaseRunningService {
   private nextRunId: ReturnType<typeof setTimeout> | undefined;
   private markRunComplete: (() => void) | undefined;
 
-  protected isRunning = false;
+  protected wasStarted = false;
 
   /** Promise that remains pending while the service is running */
   public whileRunning: Promise<void> = Promise.resolve();
@@ -34,12 +34,16 @@ export class BaseRunningService {
     this.logger.verbose(`${this.logPrefix} run interval: [ ${this.intervalMs} ]`);
   }
 
+  public get isRunning(): boolean {
+    return this.wasStarted;
+  }
+
   start() {
-    if (this.isRunning) {
+    if (this.wasStarted) {
       return;
     }
 
-    this.isRunning = true;
+    this.wasStarted = true;
     this.whileRunning = new Promise((resolve) => {
       this.markRunComplete = () => resolve();
     });
@@ -52,9 +56,9 @@ export class BaseRunningService {
   }
 
   stop() {
-    if (this.isRunning) {
+    if (this.wasStarted) {
       this.clearNextRun();
-      this.isRunning = false;
+      this.wasStarted = false;
 
       if (this.markRunComplete) {
         this.markRunComplete();
@@ -68,7 +72,7 @@ export class BaseRunningService {
   protected scheduleNextRun() {
     this.clearNextRun();
 
-    if (this.isRunning) {
+    if (this.wasStarted) {
       this.nextRunId = setTimeout(async () => {
         const startedAt = new Date();
 

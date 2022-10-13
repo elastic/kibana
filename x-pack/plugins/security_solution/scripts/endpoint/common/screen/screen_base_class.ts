@@ -18,10 +18,10 @@ import type { Choice } from './types';
 import { ChoiceMenuFormatter } from './choice_menu_formatter';
 import { DataFormatter } from './data_formatter';
 import { HORIZONTAL_LINE } from '../constants';
+import { SCREEN_ROW_MAX_WIDTH } from './constants';
 
-const CONTENT_MAX_WIDTH = HORIZONTAL_LINE.length - 1;
-const CONTENT_60_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.6);
-const CONTENT_40_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.4);
+const CONTENT_60_PERCENT = Math.floor(SCREEN_ROW_MAX_WIDTH * 0.6);
+const CONTENT_40_PERCENT = Math.floor(SCREEN_ROW_MAX_WIDTH * 0.4);
 
 /**
  * Base class for creating a CLI screen.
@@ -65,7 +65,7 @@ export class ScreenBaseClass {
    */
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
     const paddedTitle = title ? ` ${title}`.padEnd(CONTENT_60_PERCENT) : '';
-    const paddedSubTitle = subTitle ? `| ${`${subTitle} `.padStart(CONTENT_40_PERCENT)}` : '';
+    const paddedSubTitle = subTitle ? `| ${`${subTitle} `.padStart(CONTENT_40_PERCENT - 2)}` : '';
 
     return title || subTitle
       ? `${blue(HORIZONTAL_LINE)}\n${blue(bold(paddedTitle))}${

@@ -9,20 +9,24 @@ import stripAnsi from 'strip-ansi';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ansiRegex from 'ansi-regex'; // its a dependency of `strip-ansi` so it should be fine
 import { blue } from 'chalk';
-import { HORIZONTAL_LINE } from '../constants';
 import { DataFormatter } from './data_formatter';
-
-const MAX_SCREEN_LINE_WIDTH = HORIZONTAL_LINE.length;
+import { SCREEN_ROW_MAX_WIDTH } from './constants';
 
 interface ColumnLayoutFormatterOptions {
   /**
    * The width (percentage) for each of the columns. Example: 80 (for 80%).
    */
   widths?: number[];
+
+  /** The column separator */
+  separator?: string;
+
+  /** The max length for each screen row. Defaults to the overall screen width */
+  rowLength?: number;
 }
 
 export class ColumnLayoutFormatter extends DataFormatter {
-  private readonly colSeparator = ` ${blue('\u2506')} `;
+  private readonly defaultSeparator = ` ${blue('\u2506')} `;
 
   constructor(
     private readonly columns: Array<string | DataFormatter>,
@@ -32,7 +36,7 @@ export class ColumnLayoutFormatter extends DataFormatter {
   }
 
   protected getOutput(): string {
-    const colSeparator = this.colSeparator;
+    const colSeparator = this.options.separator ?? this.defaultSeparator;
     let rowCount = 0;
     const columnData: string[][] = this.columns.map((item) => {
       const itemOutput = (typeof item === 'string' ? item : item.output).split('\n');
@@ -59,11 +63,12 @@ export class ColumnLayoutFormatter extends DataFormatter {
   }
 
   private calculateColumnSizes(): number[] {
+    const maxWidth = this.options.rowLength ?? SCREEN_ROW_MAX_WIDTH;
     const widths = this.options.widths ?? [];
     const defaultWidthPrct = Math.floor(100 / this.columns.length);
 
     return this.columns.map((_, colIndex) => {
-      return Math.floor(MAX_SCREEN_LINE_WIDTH * ((widths[colIndex] ?? defaultWidthPrct) / 100));
+      return Math.floor(maxWidth * ((widths[colIndex] ?? defaultWidthPrct) / 100));
     });
   }
 
@@ -71,8 +76,8 @@ export class ColumnLayoutFormatter extends DataFormatter {
     const countOfControlChar = (colData.match(ansiRegex()) || []).length;
     const colDataNoControlChar = stripAnsi(colData);
     const colDataFilled = colDataNoControlChar.padEnd(width).substring(0, width);
-    const fillCount = colDataFilled.length - colDataNoControlChar.length;
+    const fillCount = colDataFilled.length - colDataNoControlChar.length - countOfControlChar;
 
-    return colData + (fillCount > 0 ? ' '.repeat(fillCount - countOfControlChar) : '');
+    return colData + (fillCount > 0 ? ' '.repeat(fillCount) : '');
   }
 }

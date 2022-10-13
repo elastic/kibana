@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { green } from 'chalk';
-import { HORIZONTAL_LINE } from '../constants';
+import { SCREEN_ROW_MAX_WIDTH } from './constants';
 import { DataFormatter } from './data_formatter';
 
-const MAX_WIDTH = HORIZONTAL_LINE.length - 14;
+const MAX_WIDTH = SCREEN_ROW_MAX_WIDTH - 14;
 
 export class ProgressFormatter extends DataFormatter {
   private percentDone: number = 0;
