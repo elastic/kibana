@@ -7,7 +7,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiCard, EuiText, EuiTitle, EuiImage } from '@elastic/eui';
+import { EuiCard, EuiText, EuiImage } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

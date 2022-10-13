@@ -94,7 +94,7 @@ export const GettingStarted = () => {
             <h1>{title}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s" textAlign="center">
+          <EuiText size="m" textAlign="center">
             <p>{subtitle}</p>
           </EuiText>
           <EuiSpacer size="s" />
