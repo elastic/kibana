@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visEditor, visualize, lens, timePicker } = getPageObjects([
+    'visEditor',
+    'visualize',
+    'lens',
+    'timePicker',
+  ]);
 
   const testSubjects = getService('testSubjects');
 
@@ -43,6 +48,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '14.01K',
+          color: 'rgba(245, 247, 250, 1)',
+          showingBar: false,
+        },
+      ]);
+    });
+
+    it('should convert aggregation with params', async () => {
+      await visEditor.clickMetricEditor();
+      await visEditor.selectAggregation('Average', 'metrics');
+      await visEditor.selectField('machine.ram', 'metrics');
+      await visEditor.clickGo();
+
+      const button = await testSubjects.find('visualizeEditInLensButton');
+      await button.click();
+      await lens.waitForVisualization('mtrVis');
+
+      expect(await lens.getLayerCount()).to.be(1);
+
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      expect(dimensions).to.have.length(1);
+      expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
+
+      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
+      expect(await lens.getMetricVisualizationData()).to.eql([
+        {
+          title: 'Average machine.ram',
+          subtitle: undefined,
+          extraText: '',
+          value: '13.1B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
         },
