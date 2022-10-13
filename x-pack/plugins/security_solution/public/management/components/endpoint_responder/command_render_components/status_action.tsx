@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from '../types';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../../hooks';
@@ -21,6 +20,7 @@ import { FormattedError } from '../../formatted_error';
 import { ConsoleCodeBlock } from '../../console/components/console_code_block';
 import { POLICY_STATUS_TO_TEXT } from '../../../pages/endpoint_hosts/view/host_constants';
 import { getAgentStatusText } from '../../../../common/components/endpoint/agent_status_text';
+import { usePendingActionsStatuses } from '../../endpoint_list/hooks/use_pending_actions_statuses';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<
@@ -53,25 +53,9 @@ export const EndpointStatusActionResult = memo<
     queryKey: [queryKey, endpointId],
   });
 
-  const pendingIsolationActions = useMemo<
-    Pick<
-      Required<EndpointHostIsolationStatusProps['pendingActions']>,
-      'pendingIsolate' | 'pendingUnIsolate'
-    >
-  >(() => {
-    if (endpointPendingActions?.data.length) {
-      const pendingActions = endpointPendingActions.data[0].pending_actions;
-
-      return {
-        pendingIsolate: pendingActions.isolate ?? 0,
-        pendingUnIsolate: pendingActions.unisolate ?? 0,
-      };
-    }
-    return {
-      pendingIsolate: 0,
-      pendingUnIsolate: 0,
-    };
-  }, [endpointPendingActions?.data]);
+  const {
+    pendingActions: { pendingIsolate, pendingUnIsolate },
+  } = usePendingActionsStatuses(endpointPendingActions);
 
   useEffect(() => {
     if (!apiCalled) {
@@ -126,14 +110,14 @@ export const EndpointStatusActionResult = memo<
     const agentStatus = () => {
       let isolateStatus = '';
 
-      if (pendingIsolationActions.pendingIsolate > 0) {
+      if (pendingIsolate > 0) {
         isolateStatus = i18n.translate(
           'xpack.securitySolution.endpointResponseActions.status.isolating',
           {
             defaultMessage: 'Isolating',
           }
         );
-      } else if (pendingIsolationActions.pendingUnIsolate > 0) {
+      } else if (pendingUnIsolate > 0) {
         isolateStatus = i18n.translate(
           'xpack.securitySolution.endpointResponseActions.status.releasing',
           {
@@ -220,11 +204,7 @@ export const EndpointStatusActionResult = memo<
         data-test-subj={'agent-status-console-output'}
       />
     );
-  }, [
-    pendingIsolationActions.pendingIsolate,
-    pendingIsolationActions.pendingUnIsolate,
-    endpointDetails,
-  ]);
+  }, [pendingIsolate, pendingUnIsolate, endpointDetails]);
 
   if (detailsFetchError) {
     return (

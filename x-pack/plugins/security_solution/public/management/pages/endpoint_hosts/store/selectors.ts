@@ -11,7 +11,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
+import type { Immutable } from '../../../../../common/endpoint/types';
 import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -27,8 +27,6 @@ import {
 } from '../../../state';
 
 import type { ServerApiError } from '../../../../common/types';
-import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -231,54 +229,6 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
-
-export const getEndpointPendingActionsState = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointPendingActions']> => {
-  return state.endpointPendingActions;
-};
-
-/**
- * Returns a function (callback) that can be used to retrieve the props for the `EndpointHostIsolationStatus`
- * component for a given Endpoint
- */
-export const getEndpointHostIsolationStatusPropsCallback: (
-  state: Immutable<EndpointState>
-) => (endpoint: HostMetadata) => EndpointHostIsolationStatusProps = createSelector(
-  getEndpointPendingActionsState,
-  (pendingActionsState) => {
-    return (endpoint: HostMetadata) => {
-      let pendingIsolate = 0;
-      let pendingUnIsolate = 0;
-      let pendingKillProcess = 0;
-      let pendingSuspendProcess = 0;
-      let pendingRunningProcesses = 0;
-
-      if (isLoadedResourceState(pendingActionsState)) {
-        const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
-
-        if (endpointPendingActions) {
-          pendingIsolate = endpointPendingActions?.isolate ?? 0;
-          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
-          pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
-          pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
-          pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
-        }
-      }
-
-      return {
-        isIsolated: isEndpointHostIsolated(endpoint),
-        pendingActions: {
-          pendingIsolate,
-          pendingUnIsolate,
-          pendingKillProcess,
-          pendingSuspendProcess,
-          pendingRunningProcesses,
-        },
-      };
-    };
-  }
-);
 
 export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
   state.metadataTransformStats;

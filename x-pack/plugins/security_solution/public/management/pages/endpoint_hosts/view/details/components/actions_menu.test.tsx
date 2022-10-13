@@ -17,6 +17,7 @@ import { licenseService } from '../../../../../../common/hooks/use_license';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../../common/components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
+import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
   const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');
@@ -39,7 +40,6 @@ jest.mock('../../../../../../common/components/user_privileges');
 describe('When using the Endpoint Details Actions Menu', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let coreStart: AppContextTestRender['coreStart'];
-  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let httpMocks: ReturnType<typeof endpointPageHttpMock>;
 
@@ -60,7 +60,6 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
     coreStart = mockedContext.coreStart;
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
 
     (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
@@ -72,11 +71,8 @@ describe('When using the Endpoint Details Actions Menu', () => {
     });
 
     render = async () => {
-      renderResult = mockedContext.render(<ActionsMenu />);
-
-      await act(async () => {
-        await waitForAction('serverReturnedEndpointDetails');
-      });
+      const metadata = new EndpointDocGenerator().generateHostMetadata();
+      renderResult = mockedContext.render(<ActionsMenu hostMetadata={metadata} />);
 
       act(() => {
         fireEvent.click(renderResult.getByTestId('endpointDetailsActionsButton'));

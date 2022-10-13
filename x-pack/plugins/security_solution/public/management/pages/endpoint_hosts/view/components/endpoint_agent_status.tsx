@@ -8,10 +8,11 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { usePendingActionsStatuses } from '../../../../components/endpoint_list/hooks/use_pending_actions_statuses';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { useGetEndpointPendingActionsSummary } from '../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
 import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
-import { useEndpointSelector } from '../hooks';
-import { getEndpointHostIsolationStatusPropsCallback } from '../../store/selectors';
 import { AgentStatus } from '../../../../../common/components/endpoint/agent_status';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
@@ -26,9 +27,12 @@ export interface EndpointAgentStatusProps {
 }
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
   ({ endpointMetadata, hostStatus }) => {
-    const getEndpointIsolationStatusProps = useEndpointSelector(
-      getEndpointHostIsolationStatusPropsCallback
-    );
+    const endpointId = endpointMetadata.agent.id;
+    const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
+      queryKey: ['endpoint-agent-status', endpointId],
+    });
+
+    const pendingActionRequests = usePendingActionsStatuses(endpointPendingActions);
 
     return (
       <EuiFlexGroupStyled gutterSize="none" responsive={false} className="eui-textTruncate">
@@ -38,7 +42,8 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
         <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
           <EndpointHostIsolationStatus
             data-test-subj="rowIsolationStatus"
-            {...getEndpointIsolationStatusProps(endpointMetadata)}
+            isIsolated={isEndpointHostIsolated(endpointMetadata)}
+            {...pendingActionRequests}
           />
         </EuiFlexItem>
       </EuiFlexGroupStyled>
