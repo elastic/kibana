@@ -348,6 +348,32 @@ describe('utils', () => {
         comments: [],
       });
     });
+
+    it('adds a backlink to the total alert comments correctly', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [commentObj, commentAlert, commentAlertMultipleIds],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        publicBaseUrl: 'https://example.com',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment:
+            'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
   });
 
   describe('mapCaseFieldsToExternalSystemFields', () => {
@@ -557,6 +583,34 @@ describe('utils', () => {
       expect(
         formatComments({ userActions, theCase, latestPushInfo, userProfiles: userProfilesMap })
       ).toEqual([]);
+    });
+
+    it('adds a backlink to the total alerts comment', () => {
+      const theCase = {
+        ...flattenCaseSavedObject({
+          savedObject: mockCases[0],
+        }),
+        comments: [commentAlert],
+        totalComments: 1,
+      };
+
+      const latestPushInfo = getLatestPushInfo('not-exists', userActions);
+
+      expect(
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          publicBaseUrl: 'https://example.com',
+        })
+      ).toEqual([
+        {
+          comment:
+            'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
     });
   });
 

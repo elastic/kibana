@@ -6,6 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  postCommentUserReq,
+  postCommentAlertReq,
+  postCommentAlertMultipleIdsReq,
+  postCommentActionsReq,
+  postCommentActionsReleaseReq,
+  postExternalReferenceESReq,
+  persistableStateAttachment,
+} from '../../../common/lib/mock';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
@@ -14,6 +23,7 @@ import {
   deleteAllCaseItems,
   createCaseWithConnector,
   getRecordingServiceNowSimulatorServer,
+  bulkCreateAttachments,
 } from '../../../common/lib/utils';
 import { RecordingServiceNowSimulator } from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
 
@@ -66,6 +76,66 @@ export default ({ getService }: FtrProviderContext): void => {
           caller_id: 'admin',
           opened_by: 'admin',
         });
+      });
+
+      it('should format the comments correctly', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        const patchedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            postCommentAlertReq,
+            postCommentAlertMultipleIdsReq,
+            postCommentActionsReq,
+            postCommentActionsReleaseReq,
+            postExternalReferenceESReq,
+            persistableStateAttachment,
+          ],
+        });
+
+        await pushCase({
+          supertest,
+          caseId: patchedCase.id,
+          connectorId: connector.id,
+        });
+
+        /**
+         * If the request contains the work_notes property then
+         * it is a create comment request
+         */
+        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
+          Boolean(request.work_notes)
+        );
+
+        /**
+         * For each of these comments a request is made:
+         * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
+         * total alerts attach to a case. All other type of comments should be filtered. Specifically,
+         * postCommentAlertReq, postCommentAlertMultipleIdsReq, postExternalReferenceESReq, and persistableStateAttachment
+         */
+        expect(allCommentRequests.length).be(4);
+
+        // User comment: postCommentUserReq
+        expect(allCommentRequests[0].work_notes).eql('This is a cool comment\n\nAdded by elastic.');
+
+        // Isolate host comment: postCommentActionsReq
+        expect(allCommentRequests[1].work_notes).eql(
+          'Isolated host host-name with comment: comment text\n\nAdded by elastic.'
+        );
+
+        // Unisolate host comment: postCommentActionsReleaseReq
+        expect(allCommentRequests[2].work_notes).eql(
+          'Released host host-name with comment: comment text\n\nAdded by elastic.'
+        );
+
+        // Total alerts
+        expect(allCommentRequests[3].work_notes).eql('Elastic Alerts attached to the case: 3');
       });
     });
   });

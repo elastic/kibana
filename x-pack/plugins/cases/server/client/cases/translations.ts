@@ -13,12 +13,22 @@ export const ADDED_BY = (user: string) =>
     values: { user },
   });
 
-export const VIEW_THIS_IN_KIBANA = i18n.translate('xpack.cases.server.viewThisInKibana', {
+export const VIEW_IN_KIBANA = i18n.translate('xpack.cases.server.viewCaseInKibana', {
   defaultMessage: 'For more details, view this case in Kibana',
+});
+
+export const VIEW_ALERTS_IN_KIBANA = i18n.translate('xpack.cases.server.viewAlertsInKibana', {
+  defaultMessage: 'For more details, view the alerts in Kibana',
 });
 
 export const CASE_URL = (url: string) =>
   i18n.translate('xpack.cases.server.caseUrl', {
     defaultMessage: 'Case URL: {url}',
+    values: { url },
+  });
+
+export const ALERTS_URL = (url: string) =>
+  i18n.translate('xpack.cases.server.alertsUrl', {
+    defaultMessage: 'Alerts URL: {url}',
     values: { url },
   });

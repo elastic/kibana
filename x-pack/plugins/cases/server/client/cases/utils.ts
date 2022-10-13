@@ -8,6 +8,7 @@
 import { uniqBy, isEmpty } from 'lodash';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { IBasePath } from '@kbn/core-http-browser';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
@@ -127,18 +128,32 @@ const getAlertsInfo = (
 };
 
 const addAlertMessage = (
-  caseId: string,
+  theCase: CaseResponse,
   caseComments: CaseResponse['comments'],
-  comments: ExternalServiceComment[]
+  comments: ExternalServiceComment[],
+  publicBaseUrl?: IBasePath['publicBaseUrl']
 ): ExternalServiceComment[] => {
   const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
 
   const newComments = [...comments];
 
   if (hasUnpushedAlertComments) {
+    let comment = `Elastic Alerts attached to the case: ${totalAlerts}`;
+
+    if (publicBaseUrl) {
+      const alertsTableUrl = getCaseViewPath({
+        publicBaseUrl,
+        caseId: theCase.id,
+        owner: theCase.owner,
+        tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+      });
+
+      comment = `${comment}\n\n${i18n.VIEW_ALERTS_IN_KIBANA}\n${i18n.ALERTS_URL(alertsTableUrl)}`;
+    }
+
     newComments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${caseId}-total-alerts`,
+      comment,
+      commentId: `${theCase.id}-total-alerts`,
     });
   }
 
@@ -167,7 +182,13 @@ export const createIncident = async ({
     publicBaseUrl
   );
 
-  const comments = formatComments({ userActions, latestPushInfo, theCase, userProfiles });
+  const comments = formatComments({
+    userActions,
+    latestPushInfo,
+    theCase,
+    userProfiles,
+    publicBaseUrl,
+  });
 
   const mappedIncident = mapCaseFieldsToExternalSystemFields(
     { title: theCase.title, description: descriptionWithKibanaInformation },
@@ -206,11 +227,13 @@ export const formatComments = ({
   latestPushInfo,
   theCase,
   userProfiles,
+  publicBaseUrl,
 }: {
   theCase: CaseResponse;
   latestPushInfo: LatestPushInfo;
   userActions: CaseUserActionsResponse;
   userProfiles?: Map<string, UserProfile>;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
 }): ExternalServiceComment[] => {
   const commentsIdsToBeUpdated = new Set(
     userActions
@@ -232,7 +255,7 @@ export const formatComments = ({
     comments = addKibanaInformationToComments(commentsToBeUpdated, userProfiles);
   }
 
-  comments = addAlertMessage(theCase.id, theCase.comments, comments);
+  comments = addAlertMessage(theCase, theCase.comments, comments, publicBaseUrl);
   return comments;
 };
 
@@ -259,9 +282,7 @@ export const addKibanaInformationToDescription = (
 
   const caseUrl = getCaseViewPath({ publicBaseUrl, caseId: theCase.id, owner: theCase.owner });
 
-  return `${descriptionWithKibanaInformation}\n${i18n.VIEW_THIS_IN_KIBANA}.\n${i18n.CASE_URL(
-    caseUrl
-  )}`;
+  return `${descriptionWithKibanaInformation}\n${i18n.VIEW_IN_KIBANA}.\n${i18n.CASE_URL(caseUrl)}`;
 };
 
 const addKibanaInformationToComments = (

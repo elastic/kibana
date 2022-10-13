@@ -208,7 +208,9 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Total alerts
-        expect(allCommentRequests[3].work_notes).eql('Elastic Alerts attached to the case: 3');
+        expect(allCommentRequests[3].work_notes).eql(
+          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
+        );
       });
     });
 
