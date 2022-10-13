@@ -22,8 +22,10 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { legacyMigrate } from '../../../rule_management';
 
-jest.mock('../../../rules/utils', () => {
-  const actual = jest.requireActual('../../../rules/utils');
+jest.mock('../../../rule_management/logic/rule_actions/legacy_action_migration', () => {
+  const actual = jest.requireActual(
+    '../../../rule_management/logic/rule_actions/legacy_action_migration'
+  );
   return {
     ...actual,
     legacyMigrate: jest.fn(),

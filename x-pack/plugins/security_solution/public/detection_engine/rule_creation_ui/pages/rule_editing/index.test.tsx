@@ -16,11 +16,11 @@ import { useParams } from 'react-router-dom';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../../containers/detection_engine/rules/use_find_rules_query');
-jest.mock('../../../../../common/components/link_to');
-jest.mock('../../../../components/user_info');
+jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../rule_management/logic/use_find_rules_query');
+jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../detections/components/user_info');
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 
@@ -30,8 +30,8 @@ jest.mock('react-router-dom', () => {
     useParams: jest.fn(),
   };
 });
-jest.mock('../../../../../common/hooks/use_app_toasts');
-jest.mock('../use_get_saved_query', () => ({
+jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../detections/pages/detection_engine/rules/use_get_saved_query', () => ({
   __esModule: true,
   useGetSavedQuery: jest.fn().mockReturnValue({}),
 }));

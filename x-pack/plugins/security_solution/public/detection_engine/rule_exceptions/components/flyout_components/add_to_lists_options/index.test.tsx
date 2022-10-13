@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { ExceptionsAddToListsOptions } from '.';
 
-jest.mock('../../../../../detections/pages/detection_engine/rules/all/rules_table/use_find_rules');
+jest.mock('../../../../rule_management/logic/use_find_rules_query');
 
 describe('ExceptionsAddToListsOptions', () => {
   it('it displays radio option as disabled if there are no "sharedLists"', () => {

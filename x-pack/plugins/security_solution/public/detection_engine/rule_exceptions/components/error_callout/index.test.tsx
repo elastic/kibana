@@ -10,13 +10,11 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { getListMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { useDisassociateExceptionList } from '../../../../detections/containers/detection_engine/rules/use_disassociate_exception_list';
+import { useDisassociateExceptionList } from '../../../rule_management/logic/use_disassociate_exception_list';
 import { ErrorCallout } from '.';
 import { savedRuleMock } from '../../../rule_management/logic/mock';
 
-jest.mock(
-  '../../../../detections/containers/detection_engine/rules/use_disassociate_exception_list'
-);
+jest.mock('../../../rule_management/logic/use_disassociate_exception_list');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 

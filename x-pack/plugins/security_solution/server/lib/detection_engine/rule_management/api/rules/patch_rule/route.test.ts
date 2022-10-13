@@ -28,8 +28,8 @@ import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migrati
 
 jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-jest.mock('../../../../rules/utils', () => {
-  const actual = jest.requireActual('../../../../rules/utils');
+jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
+  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
   return {
     ...actual,
     legacyMigrate: jest.fn(),

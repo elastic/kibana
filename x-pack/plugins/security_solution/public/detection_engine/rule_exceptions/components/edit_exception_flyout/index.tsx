@@ -462,7 +462,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
             <ErrorCallout
               http={http}
               errorInfo={updateError}
-              rule={maybeRule}
+              rule={maybeRule ?? null}
               onCancel={onCancel}
               onSuccess={handleDissasociationSuccess}
               onError={handleDissasociationError}

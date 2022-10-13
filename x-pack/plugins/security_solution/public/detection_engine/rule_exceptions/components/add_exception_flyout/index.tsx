@@ -472,7 +472,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <ErrorCallout
             http={http}
             errorInfo={fetchOrCreateListError}
-            rule={maybeRule}
+            rule={maybeRule ?? null}
             onCancel={onCancel}
             onSuccess={handleDissasociationSuccess}
             onError={handleDissasociationError}

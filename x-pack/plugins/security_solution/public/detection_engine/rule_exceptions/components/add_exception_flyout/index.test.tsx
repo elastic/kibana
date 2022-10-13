@@ -35,7 +35,6 @@ import type { AlertData } from '../../utils/types';
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
-jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../../logic/use_add_exception');
 jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
 jest.mock('@kbn/securitysolution-hook-utils', () => ({

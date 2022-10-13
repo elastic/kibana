@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { estypes } from '@elastic/elasticsearch';
 import endpointPrePackagedRule from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json';
-import { Rule } from '@kbn/security-solution-plugin/public/detections/containers/detection_engine/rules';
+import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class DetectionsTestService extends FtrService {

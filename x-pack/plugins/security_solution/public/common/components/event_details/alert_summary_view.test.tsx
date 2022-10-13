@@ -20,7 +20,7 @@ import * as i18n from './translations';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
   return {
     useRuleWithFallback: jest.fn(),
   };

@@ -6,10 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type {
-  Rule,
-  SortingOptions,
-} from '../../../../rule_management/logic/types';
+import type { Rule, SortingOptions } from '../../../../rule_management/logic/types';
 
 /**
  * Returns a comparator function to be used with .sort()
