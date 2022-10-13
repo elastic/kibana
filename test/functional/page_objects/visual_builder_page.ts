@@ -417,6 +417,18 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
+  public async createColorRule(nth = 0) {
+    await this.clickPanelOptions('metric');
+
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new color rule is added', async () => {
+      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
+      return currentAddButtons.length > elements.length;
+    });
+  }
+
   public async selectAggType(value: string, nth = 0) {
     const elements = await this.testSubjects.findAll('aggSelector');
     await this.comboBox.setElement(elements[nth], value);
