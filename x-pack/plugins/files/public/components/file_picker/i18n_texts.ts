@@ -8,36 +8,36 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  title: i18n.translate('xpack.fileUpload.filePicker.title', {
+  title: i18n.translate('xpack.files.filePicker.title', {
     defaultMessage: 'Select a file',
   }),
-  loadingFilesErrorTitle: i18n.translate('xpack.fileUpload.filePicker.error.loadingTitle', {
+  loadingFilesErrorTitle: i18n.translate('xpack.files.filePicker.error.loadingTitle', {
     defaultMessage: 'Could not load files',
   }),
-  retryButtonLabel: i18n.translate('xpack.fileUpload.filePicker.error.retryButtonLabel', {
+  retryButtonLabel: i18n.translate('xpack.files.filePicker.error.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
-  emptyStatePrompt: i18n.translate('xpack.fileUpload.filePicker.emptyStatePrompt', {
+  emptyStatePrompt: i18n.translate('xpack.files.filePicker.emptyStatePrompt', {
     defaultMessage: 'No files found',
   }),
-  emptyStatePromptSubtitle: i18n.translate('xpack.fileUpload.filePicker.emptyStatePrompt', {
+  emptyStatePromptSubtitle: i18n.translate('xpack.files.filePicker.emptyStatePrompt', {
     defaultMessage: 'Upload your first file.',
   }),
-  selectFileLabel: i18n.translate('xpack.fileUpload.filePicker.selectFileButtonLable', {
+  selectFileLabel: i18n.translate('xpack.files.filePicker.selectFileButtonLable', {
     defaultMessage: 'Select file',
   }),
   selectFilesLabel: (nrOfFiles: number) =>
-    i18n.translate('xpack.fileUpload.filePicker.selectFilesButtonLable', {
+    i18n.translate('xpack.files.filePicker.selectFilesButtonLable', {
       defaultMessage: 'Select {nrOfFiles} files',
       values: { nrOfFiles },
     }),
-  searchFieldPlaceholder: i18n.translate('xpack.fileUpload.filePicker.searchFieldPlaceholder', {
+  searchFieldPlaceholder: i18n.translate('xpack.files.filePicker.searchFieldPlaceholder', {
     defaultMessage: 'Filter by name',
   }),
-  emptyFileGridPrompt: i18n.translate('xpack.fileUpload.filePicker.emptyGridPrompt', {
+  emptyFileGridPrompt: i18n.translate('xpack.files.filePicker.emptyGridPrompt', {
     defaultMessage: 'No files matched filter',
   }),
-  loadMoreButtonLabel: i18n.translate('xpack.fileUpload.filePicker.loadMoreButtonLabel', {
+  loadMoreButtonLabel: i18n.translate('xpack.files.filePicker.loadMoreButtonLabel', {
     defaultMessage: 'Load more',
   }),
 };
