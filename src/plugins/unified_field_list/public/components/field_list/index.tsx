@@ -9,4 +9,4 @@
 export {
   FieldListGrouped as FieldList,
   type FieldListGroupedProps as FieldListProps,
-} from './field_list_grouped';
+} from './field_list';
