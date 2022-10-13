@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const SESSION_VIEW_APP_ID = 'sessionView';
+
 // routes
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events';
 export const ALERTS_ROUTE = '/internal/session_view/alerts';

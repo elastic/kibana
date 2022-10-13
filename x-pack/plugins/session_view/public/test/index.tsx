@@ -17,6 +17,7 @@ import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { SECURITY_APP_ID, SESSION_VIEW_APP_ID } from '../../common/constants';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -46,8 +47,10 @@ const createCoreStartMock = (
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId) => {
     switch (appId) {
-      case 'sessionView':
+      case SESSION_VIEW_APP_ID:
         return '/app/sessionView';
+      case SECURITY_APP_ID:
+        return '/app/security';
       default:
         return `${appId} not mocked!`;
     }

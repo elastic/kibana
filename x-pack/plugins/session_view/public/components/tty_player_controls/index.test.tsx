@@ -115,12 +115,10 @@ describe('TTYPlayerControls component', () => {
         event: {
           process: {
             ...MOCK_PROCESS_EVENT_MIDDLE,
-            io: {
-              max_bytes_per_process_exceeded: true,
-            },
           },
         },
         line: 2,
+        maxBytesExceeded: true,
       },
       { event: MOCK_PROCESS_EVENT_END, line: 4 },
     ];

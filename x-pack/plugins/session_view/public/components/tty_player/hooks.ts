@@ -30,8 +30,6 @@ import {
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
   TTY_LINES_PRE_SEEK,
-  POLICIES_PAGE_PATH,
-  SECURITY_APP_ID,
 } from '../../../common/constants';
 import {
   VIEW_POLICIES,
@@ -174,7 +172,7 @@ export interface XtermPlayerDeps {
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetching?: boolean;
-  canAccessEndpointManagement?: boolean;
+  policiesUrl?: string;
 }
 
 export const useXtermPlayer = ({
@@ -186,19 +184,14 @@ export const useXtermPlayer = ({
   hasNextPage,
   fetchNextPage,
   isFetching,
-  canAccessEndpointManagement,
+  policiesUrl,
 }: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
-  const { getUrlForApp } = useKibana<CoreStart>().services.application;
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
   const tty = lines?.[currentLine]?.event.process?.tty;
   const processName = lines?.[currentLine]?.event.process?.name;
-  const settingsUrl = useMemo(
-    () => getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH }),
-    [getUrlForApp]
-  );
   const [terminal, searchAddon] = useMemo(() => {
     const term = new Terminal({
       theme: {
@@ -213,6 +206,7 @@ export const useXtermPlayer = ({
       rows: DEFAULT_TTY_ROWS,
       cols: DEFAULT_TTY_COLS,
       allowProposedApi: true,
+      allowTransparency: true,
     });
 
     const searchInstance = new SearchAddon();
@@ -238,6 +232,7 @@ export const useXtermPlayer = ({
 
     return () => {
       window.removeEventListener('wheel', onScroll, true);
+      terminal.dispose();
     };
   }, [terminal, ref]);
 
@@ -245,18 +240,18 @@ export const useXtermPlayer = ({
     if (tty?.columns) {
       const lineBreak = '-'.repeat(tty.columns);
       const message = `${PROCESS_DATA_LIMIT_EXCEEDED} \x1b[1m${processName}.\x1b[22m ${PROCESS_DATA_LIMIT_EXCEEDED_2}`;
-      const link = canAccessEndpointManagement
+      const link = policiesUrl
         ? `\x1b[${Math.min(
             message.length + 2,
             tty.columns - VIEW_POLICIES.length - 4
-          )}G\x1b[1m\x1b]8;;${settingsUrl}\x1b\\[ ${VIEW_POLICIES} ]\x1b]8;;\x1b\\\x1b[22m`
+          )}G\x1b[1m\x1b]8;;${policiesUrl}\x1b\\[ ${VIEW_POLICIES} ]\x1b]8;;\x1b\\\x1b[22m`
         : '';
 
       return `\n\n\x1b[33m${lineBreak}\n${message}${link}\n${lineBreak}\x1b[0m
 
 `;
     }
-  }, [canAccessEndpointManagement, processName, settingsUrl, tty?.columns]);
+  }, [policiesUrl, processName, tty?.columns]);
 
   const render = useCallback(
     (lineNumber: number, clear: boolean) => {
@@ -280,16 +275,24 @@ export const useXtermPlayer = ({
         linesToPrint = lines.slice(lineNumber, lineNumber + 1);
       }
 
-      linesToPrint.forEach((line) => {
+      linesToPrint.forEach((line, index) => {
         if (line?.value !== undefined) {
           terminal.write(line.value);
         }
-      });
 
-      const msg = renderTruncatedMsg();
-      if (msg && clear) {
-        terminal.write(msg);
-      }
+        const nextLine = lines[lineNumber + index + 1];
+        const maxBytesExceeded = line.event.process?.io?.max_bytes_per_process_exceeded;
+
+        // if next line is start of next event
+        // and process has exceeded max bytes
+        // render msg
+        if ((!nextLine || nextLine.event !== line.event) && maxBytesExceeded) {
+          const msg = renderTruncatedMsg();
+          if (msg) {
+            terminal.write(msg);
+          }
+        }
+      });
     },
     [lines, renderTruncatedMsg, terminal]
   );
