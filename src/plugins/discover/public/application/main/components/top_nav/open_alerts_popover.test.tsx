@@ -28,7 +28,6 @@ const mount = (dataView = dataViewMock) =>
         adHocDataViews={[]}
         services={discoverServiceMock}
         addAdHocDataView={jest.fn()}
-        updateAdHocDataViewId={jest.fn()}
         onClose={jest.fn()}
         discoverAlertServices={{} as DiscoverAlertServices}
         I18nContext={Context}

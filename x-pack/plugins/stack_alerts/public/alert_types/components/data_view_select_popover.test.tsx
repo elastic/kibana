@@ -10,29 +10,35 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { DataViewSelectPopover, DataViewSelectPopoverProps } from './data_view_select_popover';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 
+const selectedDataView = {
+  id: 'mock-data-logs-id',
+  namespaces: ['default'],
+  title: 'kibana_sample_data_logs',
+  isTimeBased: jest.fn(),
+  isPersisted: jest.fn(() => true),
+  getName: () => 'kibana_sample_data_logs',
+} as unknown as DataView;
+
 const props: DataViewSelectPopoverProps = {
   onSelectDataView: () => {},
-  dataViewName: 'kibana_sample_data_logs',
-  dataViewId: 'mock-data-logs-id',
+  dataView: selectedDataView,
 };
 
 const dataViewIds = ['mock-data-logs-id', 'mock-ecommerce-id', 'mock-test-id'];
 
 const dataViewOptions = [
-  {
-    id: 'mock-data-logs-id',
-    namespaces: ['default'],
-    title: 'kibana_sample_data_logs',
-    isTimeBased: jest.fn(),
-  },
+  selectedDataView,
   {
     id: 'mock-flyghts-id',
     namespaces: ['default'],
     title: 'kibana_sample_data_flights',
     isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => true),
+    getName: () => 'kibana_sample_data_flights',
   },
   {
     id: 'mock-ecommerce-id',
@@ -40,6 +46,8 @@ const dataViewOptions = [
     title: 'kibana_sample_data_ecommerce',
     typeMeta: {},
     isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => true),
+    getName: () => 'kibana_sample_data_ecommerce',
   },
   {
     id: 'mock-test-id',
@@ -47,6 +55,8 @@ const dataViewOptions = [
     title: 'test',
     typeMeta: {},
     isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => true),
+    getName: () => 'test',
   },
 ];
 

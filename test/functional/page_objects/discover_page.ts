@@ -25,7 +25,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
-  private readonly log = this.ctx.getService('log');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 

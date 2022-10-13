@@ -87,7 +87,6 @@ export const getTopNavLinks = ({
         adHocDataViews,
         addAdHocDataView,
         savedQueryId: state.appStateContainer.getState().savedQuery,
-        updateAdHocDataViewId,
       });
     },
     testId: 'discoverAlertsButton',

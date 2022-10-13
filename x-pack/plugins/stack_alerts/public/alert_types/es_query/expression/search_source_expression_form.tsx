@@ -222,11 +222,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
       <EuiSpacer size="s" />
 
-      <DataViewSelectPopover
-        dataViewName={dataView?.getName?.()}
-        dataViewId={dataView?.id}
-        onSelectDataView={onSelectDataView}
-      />
+      <DataViewSelectPopover dataView={dataView} onSelectDataView={onSelectDataView} />
 
       {Boolean(dataView?.id) && (
         <>

@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewSpec, ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -43,7 +43,6 @@ interface AlertsPopoverProps {
   services: DiscoverServices;
   discoverAlertServices: DiscoverAlertServices;
   addAdHocDataView: (dataView: DataView) => void;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }
 
 export function AlertsPopover({
@@ -56,10 +55,9 @@ export function AlertsPopover({
   discoverAlertServices,
   onClose: originalOnClose,
   addAdHocDataView,
-  updateAdHocDataViewId,
 }: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
-  const { triggersActionsUi, dataViews, data } = services;
+  const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
   const onClose = useCallback(() => {
     originalOnClose();
@@ -104,49 +102,12 @@ export function AlertsPopover({
     }
     return triggersActionsUi?.getAddAlertFlyout({
       consumer: 'discover',
-      onBeforeSave: async (rule) => {
-        const searchConfiguration = rule.params.searchConfiguration as SerializedSearchSourceFields;
-        if (
-          !searchConfiguration ||
-          typeof searchConfiguration.index !== 'object' ||
-          !searchConfiguration.index?.id
-        ) {
-          return rule;
-        }
-
-        // update adhoc data view ids
-        const dataViewInstance = await dataViews.get(
-          (searchConfiguration!.index as DataViewSpec).id!
-        );
-        if (!dataViewInstance.isPersisted()) {
-          const updatedDataView = await updateAdHocDataViewId(dataViewInstance);
-
-          const tempSearchSource = await data.search.searchSource.create(
-            rule.params.searchConfiguration as SerializedSearchSourceFields
-          );
-          tempSearchSource.setField('index', updatedDataView);
-          rule.params.searchConfiguration = tempSearchSource.getSerializedFields(false, false);
-          addAdHocDataView(updatedDataView);
-        }
-        return rule;
-      },
       onClose,
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
-      initialValues: {
-        params: getParams(),
-      },
+      initialValues: { params: getParams() },
     });
-  }, [
-    alertFlyoutVisible,
-    triggersActionsUi,
-    onClose,
-    getParams,
-    dataViews,
-    updateAdHocDataViewId,
-    data.search.searchSource,
-    addAdHocDataView,
-  ]);
+  }, [alertFlyoutVisible, getParams, triggersActionsUi, onClose]);
 
   const hasTimeFieldName = dataView.timeFieldName;
   const panels = [
@@ -222,7 +183,6 @@ export function openAlertsPopover({
   adHocDataViews,
   savedQueryId,
   addAdHocDataView,
-  updateAdHocDataViewId,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
@@ -231,7 +191,6 @@ export function openAlertsPopover({
   adHocDataViews: DataView[];
   savedQueryId?: string;
   addAdHocDataView: (dataView: DataView) => void;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }) {
   const discoverAlertServices: DiscoverAlertServices = {
     ...pick(services, [
@@ -269,7 +228,6 @@ export function openAlertsPopover({
       services={services}
       discoverAlertServices={discoverAlertServices}
       addAdHocDataView={addAdHocDataView}
-      updateAdHocDataViewId={updateAdHocDataViewId}
     />
   );
   ReactDOM.render(element, container);

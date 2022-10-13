@@ -26,9 +26,8 @@ import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import { useDiscoverAlertServices } from '../es_query/util';
 
 export interface DataViewSelectPopoverProps {
+  dataView: DataView;
   onSelectDataView: (selectedDataView: DataView) => void;
-  dataViewName?: string;
-  dataViewId?: string;
 }
 
 const toDataViewListItem = (dataView: DataView): DataViewListItem => {
@@ -40,15 +39,17 @@ const toDataViewListItem = (dataView: DataView): DataViewListItem => {
 };
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
+  dataView,
   onSelectDataView,
-  dataViewName,
-  dataViewId,
 }) => {
   const { dataViews, dataViewEditor } = useDiscoverAlertServices();
   const discoverContext = useDiscoverAlertContext();
-  const [adHocDataViews, setAdHocDataViews] = useState<DataViewListItem[]>(
-    discoverContext.initialAdHocDataViewList
-  );
+  const [adHocDataViews, setAdHocDataViews] = useState<DataViewListItem[]>(() => {
+    if (discoverContext.isManagementPage) {
+      return dataView.isPersisted() ? [] : [toDataViewListItem(dataView)];
+    }
+    return discoverContext.initialAdHocDataViewList;
+  });
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
@@ -153,7 +154,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             defaultMessage: 'data view',
           })}
           value={
-            dataViewName ??
+            dataView.getName() ??
             i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPlaceholder', {
               defaultMessage: 'Select a data view',
             })
@@ -162,7 +163,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           onClick={() => {
             setDataViewPopoverOpen(true);
           }}
-          isInvalid={!dataViewId}
+          isInvalid={!dataView.id}
         />
       }
       isOpen={dataViewPopoverOpen}
@@ -194,7 +195,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <DataViewSelector
-          currentDataViewId={dataViewId}
+          currentDataViewId={dataView.id}
           dataViewsList={allDataViewItems}
           setPopoverIsOpen={setDataViewPopoverOpen}
           onChangeDataView={onChangeDataView}
