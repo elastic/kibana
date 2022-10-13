@@ -28,9 +28,10 @@ export type GuideStatus = 'not_started' | 'in_progress' | 'ready_to_complete' | 
  *  inactive: Step has not started
  *  active: Step is ready to start (i.e., the guide has been started)
  *  in_progress: Step has been started and is in progress
+ *  ready_to_complete: Step can be manually completed
  *  complete: Step has been completed
  */
-export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'complete';
+export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_complete' | 'complete';
 
 export interface GuideStep {
   id: GuideStepIds;

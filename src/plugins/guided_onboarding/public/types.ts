@@ -60,6 +60,11 @@ export interface StepConfig {
   };
   status?: StepStatus;
   integration?: string;
+  manualCompletion?: {
+    title: string;
+    description: string;
+    readyToCompleteOnNavigation?: boolean;
+  };
 }
 export interface GuideConfig {
   title: string;

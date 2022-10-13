@@ -13,8 +13,12 @@ import { GuidedOnboardingApi } from '../types';
 import {
   getGuideConfig,
   getInProgressStepId,
+  getStepConfig,
+  getUpdatedSteps,
   isIntegrationInGuideStep,
   isLastStep,
+  isStepInProgress,
+  isStepReadyToComplete,
 } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '../../common/types';
@@ -216,16 +220,7 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public isGuideStepActive$(guideId: GuideId, stepId: GuideStepIds): Observable<boolean> {
     return this.fetchActiveGuideState$().pipe(
-      map((activeGuideState) => {
-        // Return false right away if the guide itself is not active
-        if (activeGuideState?.guideId !== guideId) {
-          return false;
-        }
-
-        // If the guide is active, next check the step
-        const selectedStep = activeGuideState.steps.find((step) => step.id === stepId);
-        return selectedStep ? selectedStep.status === 'in_progress' : false;
-      })
+      map((activeGuideState) => isStepInProgress(activeGuideState, guideId, stepId))
     );
   }
 
@@ -288,34 +283,20 @@ export class ApiService implements GuidedOnboardingApi {
       return undefined;
     }
 
-    const currentStepIndex = guideState.steps.findIndex((step) => step.id === stepId);
-    const currentStep = guideState.steps[currentStepIndex];
-    const isCurrentStepInProgress = currentStep ? currentStep.status === 'in_progress' : false;
+    const isCurrentStepInProgress = isStepInProgress(guideState, guideId, stepId);
+    const isCurrentStepReadyToComplete = isStepReadyToComplete(guideState, guideId, stepId);
 
-    if (isCurrentStepInProgress) {
-      const updatedSteps: GuideStep[] = guideState.steps.map((step, stepIndex) => {
-        const isCurrentStep = step.id === currentStep!.id;
-        const isNextStep = stepIndex === currentStepIndex + 1;
+    const stepConfig = getStepConfig(guideState.guideId, stepId);
+    const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
 
-        // Mark the current step as complete
-        if (isCurrentStep) {
-          return {
-            id: step.id,
-            status: 'complete',
-          };
-        }
-
-        // Update the next step to active status
-        if (isNextStep) {
-          return {
-            id: step.id,
-            status: 'active',
-          };
-        }
-
-        // All other steps return as-is
-        return step;
-      });
+    if (isCurrentStepInProgress || isCurrentStepReadyToComplete) {
+      const updatedSteps = getUpdatedSteps(
+        guideState,
+        stepId,
+        // if current step is in progress and configured for manual completion,
+        // set the status to ready_to_complete
+        isManualCompletion && isCurrentStepInProgress
+      );
 
       const currentGuide: GuideState = {
         guideId,
@@ -324,7 +305,13 @@ export class ApiService implements GuidedOnboardingApi {
         steps: updatedSteps,
       };
 
-      return await this.updateGuideState(currentGuide, true);
+      return await this.updateGuideState(
+        currentGuide,
+        // the panel is opened when the step is being set to complete.
+        // that happens when the step is not configured for manual completion
+        // or it's already ready_to_complete
+        !isManualCompletion || isCurrentStepReadyToComplete
+      );
     }
 
     return undefined;
