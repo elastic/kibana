@@ -37,7 +37,7 @@ export interface Operation {
   query_type: string | null;
 
   // Searches
-  query?: any[];
+  query: any[];
   rewrite_time?: number;
 
   // Aggregations
@@ -55,8 +55,7 @@ export interface Shard {
   relative: number | string;
   time: number;
   color: string;
-  aggregations?: Operation[];
-  searches?: Operation[];
+  searches: Operation[];
   rewrite_time?: number;
 }
 

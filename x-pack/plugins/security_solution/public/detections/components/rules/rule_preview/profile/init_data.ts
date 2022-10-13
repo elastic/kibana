@@ -7,47 +7,21 @@
 
 import { cloneDeep } from 'lodash';
 import { flow } from 'fp-ts/lib/function';
-import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
-import type { Index, Targets, Shard, ShardSerialized } from './types';
+import { calcTimes, sortIndices } from './unsafe_utils';
+import type { Index, Shard, ShardSerialized } from './types';
 
 export type IndexMap = Record<string, Index>;
-
-/**
- * Functions prefixed with "mutate" change values by reference. Be careful when using these!
- */
-export function mutateAggsTimesTree(shard: Shard) {
-  if (shard.aggregations == null) {
-    shard.time = 0;
-  }
-  let shardTime = 0;
-  for (const agg of shard.aggregations!) {
-    const totalTime = calcTimes([agg]);
-    shardTime += totalTime;
-  }
-  for (const agg of shard.aggregations!) {
-    initTree([agg], shardTime);
-    // To make this data structure consistent with that of search we
-    // mark each aggregation as it's own tree root.
-    agg.treeRoot = agg;
-  }
-  shard.time = shardTime;
-}
 
 export function mutateSearchTimesTree(shard: Shard) {
   if (shard.searches == null) {
     shard.time = 0;
   }
-  shard.rewrite_time = 0;
 
   let shardTime = 0;
-  for (const search of shard.searches!) {
-    shard.rewrite_time += search.rewrite_time!;
-    const totalTime = calcTimes(search.query!);
+  for (const search of shard.searches) {
+    const totalTime = calcTimes(search.query);
     shardTime += totalTime;
-    initTree(search.query!, totalTime);
-    search.treeRoot = search.query![0];
-    // Remove this object.
-    search.query = null as any;
+    search.treeRoot = search.query[0];
   }
   shard.time = shardTime;
 }
@@ -67,18 +41,9 @@ const initShards = (data: ShardSerialized[]) =>
     };
   });
 
-export const calculateShardValues = (target: Targets) => (data: Shard[]) => {
-  const mutateTimesTree =
-    target === 'searches'
-      ? mutateSearchTimesTree
-      : target === 'aggregations'
-      ? mutateAggsTimesTree
-      : null;
-
-  if (mutateTimesTree) {
-    for (const shard of data) {
-      mutateTimesTree(shard);
-    }
+export const calculateShardValues = () => (data: Shard[]) => {
+  for (const shard of data) {
+    mutateSearchTimesTree(shard);
   }
 
   return data;
@@ -90,30 +55,16 @@ export const initIndices = (data: Shard[]) => {
   for (const shard of data) {
     if (!indices[shard.id[1]]) {
       indices[shard.id[1]] = {
-        shards: [],
         time: 0,
         name: shard.id[1],
-        visible: false,
       };
     }
-    indices[shard.id[1]].shards.push(shard);
+    // indices[shard.id[1]].shards.push(shard);
     indices[shard.id[1]].time += shard.time;
   }
 
   return indices;
 };
 
-export const normalize = (target: Targets) => (data: IndexMap) => {
-  normalizeIndices(data, target);
-  return data;
-};
-
-export const initDataFor = (target: Targets) =>
-  flow(
-    cloneDeep as any,
-    initShards,
-    calculateShardValues(target),
-    initIndices,
-    normalize(target),
-    sortIndices
-  );
+export const initDataFor = () =>
+  flow(cloneDeep as any, initShards, calculateShardValues(), initIndices, sortIndices);

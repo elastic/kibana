@@ -7,7 +7,6 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiSwitch,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -99,7 +98,6 @@ const EditRulePageComponent: FC = () => {
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
-  const [profile, setProfile] = useState(null);
 
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
@@ -240,7 +238,6 @@ const EditRulePageComponent: FC = () => {
                   onRuleDataChange={onDataChange}
                   onPreviewDisabledStateChange={setIsPreviewDisabled}
                   defaultSavedQuery={savedQuery}
-                  profile={profile}
                 />
               )}
               <EuiSpacer />
@@ -335,7 +332,6 @@ const EditRulePageComponent: FC = () => {
       threatIndicesConfig,
       onDataChange,
       savedQuery,
-      profile,
       aboutStep.data,
       defineStep.data,
       scheduleStep.data,
@@ -559,7 +555,6 @@ const EditRulePageComponent: FC = () => {
                 scheduleStepData={scheduleStep.data}
                 exceptionsList={rule?.exceptions_list}
                 onClose={onPreviewClose}
-                setProfile={setProfile}
               />
             )}
           </MaxWidthEuiFlexItem>

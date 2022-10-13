@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { initDataFor } from './init_data';
 import { HighlightContextProvider } from './highlight_context';
 import type { Index, OnHighlightChangeArgs, ShardSerialized, Targets } from './types';
 import { IndexDetails } from './index_details';
-import { ShardDetails } from './shard_details';
 
 interface Props {
   target: Targets;
@@ -25,7 +23,7 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
 
   if (data && data.length) {
     try {
-      const sortedIndices: Index[] = initDataFor(target)(data);
+      const sortedIndices: Index[] = initDataFor()(data);
       content = (
         <HighlightContextProvider onHighlight={onHighlight}>
           <EuiFlexGroup
@@ -59,33 +57,3 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
 });
 
 ProfileTree.displayName = 'ProfileTree';
-
-const ProfileLoadingPlaceholder = () => {
-  return (
-    <div className="prfDevTool__main__emptyTreePlaceholder">
-      <EuiText color="subdued">
-        <h1>
-          {i18n.translate('xpack.searchProfiler.profilingLoaderText', {
-            defaultMessage: 'Loading query profiles...',
-          })}
-        </h1>
-      </EuiText>
-    </div>
-  );
-};
-
-// export const renderProfileTreeArea = () => {
-//   if (profiling) {
-//     return <ProfileLoadingPlaceholder />;
-//   }
-
-//   return (
-//     <ProfileTree
-//       onDataInitError={handleProfileTreeError}
-//       onHighlight={onHighlight}
-//       target={'searches'}
-//       data={currentResponse}
-//     />
-//   );
-
-// };

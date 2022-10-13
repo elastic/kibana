@@ -89,7 +89,7 @@ export const useProfile = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval, timeframeEnd]);
+  }, [rule, addError, invocationCount, from, interval, timeframeEnd, setProfile]);
 
   return { isLoading, response, rule, setRule };
 };
