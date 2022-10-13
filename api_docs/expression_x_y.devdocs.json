@@ -37,7 +37,23 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-public.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -78,6 +94,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.AnnotationLayerArgs.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "expressionXY",
             "id": "def-common.AnnotationLayerArgs.annotations",
@@ -420,92 +447,6 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionXY",
-        "id": "def-common.CollectiveConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "CollectiveConfig",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "expressionXY",
-            "scope": "common",
-            "docId": "kibExpressionXYPluginApi",
-            "section": "def-common.CollectiveConfig",
-            "text": "CollectiveConfig"
-          },
-          " extends Omit<",
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualPointEventAnnotationArgs",
-            "text": "ManualPointEventAnnotationArgs"
-          },
-          ", \"icon\">"
-        ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.timebucket",
-            "type": "number",
-            "tags": [],
-            "label": "timebucket",
-            "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.position",
-            "type": "string",
-            "tags": [],
-            "label": "position",
-            "description": [],
-            "signature": [
-              "\"bottom\""
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.icon",
-            "type": "string",
-            "tags": [],
-            "label": "icon",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.customTooltipDetails",
-            "type": "Function",
-            "tags": [],
-            "label": "customTooltipDetails",
-            "description": [],
-            "signature": [
-              "AnnotationTooltipFormatter",
-              " | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1060,6 +1001,106 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.MergedAnnotation",
+        "type": "Interface",
+        "tags": [],
+        "label": "MergedAnnotation",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.MergedAnnotation",
+            "text": "MergedAnnotation"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.ManualPointEventAnnotationArgs",
+            "text": "ManualPointEventAnnotationArgs"
+          },
+          ", \"icon\">"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.timebucket",
+            "type": "number",
+            "tags": [],
+            "label": "timebucket",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.position",
+            "type": "string",
+            "tags": [],
+            "label": "position",
+            "description": [],
+            "signature": [
+              "\"bottom\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.customTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "customTooltip",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{ header?: string | undefined; details?: string | undefined; datum: ",
+              "LineAnnotationDatum",
+              "<any> | ",
+              "RectAnnotationDatum",
+              "; }> | null"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.isGrouped",
+            "type": "boolean",
+            "tags": [],
+            "label": "isGrouped",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.ReferenceLineDecorationConfig",
         "type": "Interface",
         "tags": [],
@@ -1481,21 +1522,6 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.XYArgs.annotationLayers",
-            "type": "Array",
-            "tags": [],
-            "label": "annotationLayers",
-            "description": [],
-            "signature": [
-              "AnnotationLayerConfigResult",
-              "[]"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressionXY",
             "id": "def-common.XYArgs.fittingFunction",
             "type": "CompoundType",
             "tags": [],
@@ -1765,6 +1791,28 @@
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncTooltips",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncColors",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncColors",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1929,7 +1977,7 @@
         "label": "AvailableReferenceLineIcon",
         "description": [],
         "signature": [
-          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\" | \"empty\""
+          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\" | \"empty\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2587,9 +2635,7 @@
             "docId": "kibExpressionXYPluginApi",
             "section": "def-common.ReferenceLineLayerConfigResult",
             "text": "ReferenceLineLayerConfigResult"
-          },
-          " | ",
-          "ExtendedAnnotationLayerConfigResult"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2612,15 +2658,15 @@
             "text": "DataLayerArgs"
           },
           " | ",
+          "ReferenceLineArgs",
+          " | ",
           {
             "pluginId": "expressionXY",
             "scope": "common",
             "docId": "kibExpressionXYPluginApi",
             "section": "def-common.AnnotationLayerArgs",
             "text": "AnnotationLayerArgs"
-          },
-          " | ",
-          "ReferenceLineArgs"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2665,6 +2711,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

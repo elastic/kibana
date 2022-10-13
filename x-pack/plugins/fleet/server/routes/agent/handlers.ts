@@ -25,10 +25,9 @@ import type {
   GetOneAgentResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
-  PostBulkAgentReassignResponse,
-  PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
+  GetActionStatusResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -41,8 +40,9 @@ import type {
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
 export const getAgentHandler: RequestHandler<
@@ -64,7 +64,7 @@ export const getAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -90,7 +90,7 @@ export const deleteAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -124,7 +124,7 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -149,17 +149,9 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -196,7 +188,7 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -218,7 +210,7 @@ export const getAgentTagsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -241,7 +233,7 @@ export const putAgentsReassignHandler: RequestHandler<
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -265,17 +257,9 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       request.body.policy_id
     );
 
-    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -296,7 +280,7 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -322,7 +306,7 @@ export const getAgentDataHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -359,6 +343,22 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getActionStatusHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetActionStatusRequestSchema.query>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
+    const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
   }
 };

@@ -40,7 +40,7 @@ const stories: Meta<{}> = {
         },
         notifications: { toasts: { add: () => {}, addWarning: () => {} } },
         uiSettings: { get: () => [] },
-        dataViews: { get: async () => {} },
+        dataViews: { create: async () => {} },
       } as unknown as CoreStart;
 
       const KibanaReactContext = createKibanaReactContext(coreMock);

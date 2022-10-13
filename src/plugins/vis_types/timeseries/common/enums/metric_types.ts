@@ -16,7 +16,6 @@ export enum TSVB_METRIC_TYPES {
   STD_DEVIATION = 'std_deviation',
   SUM_OF_SQUARES = 'sum_of_squares',
   TOP_HIT = 'top_hit',
-  VALUE_COUNT = 'value_count',
   VARIANCE = 'variance',
   CALCULATION = 'calculation',
   MOVING_AVERAGE = 'moving_average',

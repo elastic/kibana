@@ -24,7 +24,7 @@ Object {
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
-      "required": true,
+      "requiredMinDimensionCount": 1,
       "supportsMoreColumns": false,
     },
     Object {
@@ -46,7 +46,7 @@ Object {
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
-      "required": false,
+      "requiredMinDimensionCount": 0,
       "supportsMoreColumns": false,
     },
     Object {
@@ -70,7 +70,7 @@ Object {
         "headingLabel": "Value",
       },
       "prioritizedOperation": "max",
-      "required": false,
+      "requiredMinDimensionCount": 0,
       "supportStaticValue": true,
       "supportsMoreColumns": false,
     },
@@ -91,7 +91,7 @@ Object {
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
       "layerId": "first",
-      "required": false,
+      "requiredMinDimensionCount": 0,
       "supportsMoreColumns": false,
     },
   ],

@@ -54,6 +54,38 @@
       },
       {
         "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-public.GetTableColumnDefinitionOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetTableColumnDefinitionOptions",
+        "description": [
+          "\nOptions for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}\n"
+        ],
+        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.GetTableColumnDefinitionOptions.serverPaging",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serverPaging",
+            "description": [
+              "\nBy default, the `tags` column definition will be automatically sortable\nby tag name.\n\nHowever, when paging is performed on the server, we need to remove the sorting\ncapability from the column to avoid unexpected behavior by triggering fetch request\nwhen sorting by column.\n\nShould be set to `true` when generating the definition for a table that performs\nserver-side paging.\n\nDefaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.ITagsCache",
         "type": "Interface",
         "tags": [],
@@ -438,7 +470,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ") => object is ",
+              "<",
+              "SavedObjectAttributes",
+              ">) => object is ",
               {
                 "pluginId": "savedObjectsTaggingOss",
                 "scope": "public",
@@ -465,7 +499,10 @@
                     "docId": "kibSavedObjectsPluginApi",
                     "section": "def-public.SavedObject",
                     "text": "SavedObject"
-                  }
+                  },
+                  "<",
+                  "SavedObjectAttributes",
+                  ">"
                 ],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
@@ -535,7 +572,15 @@
               "\nReturn the column definition to be used to display the tags in a EUI table.\nThe table's items must be of the `SavedObject` type (or at least have their references available\nvia the `references` field)\n"
             ],
             "signature": [
-              "() => ",
+              "(options?: ",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.GetTableColumnDefinitionOptions",
+                "text": "GetTableColumnDefinitionOptions"
+              },
+              " | undefined) => ",
               "EuiTableFieldDataColumnType",
               "<",
               "SavedObject",
@@ -544,7 +589,30 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTableColumnDefinition.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-public.GetTableColumnDefinitionOptions",
+                    "text": "GetTableColumnDefinitionOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1017,12 +1085,61 @@
               "\nThe object to display tags for."
             ],
             "signature": [
-              "SavedObject",
-              "<unknown>"
+              "{ references: ",
+              "SavedObjectReference",
+              "[]; }"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.TagListComponentProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nHandler to execute when clicking on a tag"
+            ],
+            "signature": [
+              "((tag: ",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.TagWithOptionalId",
+                "text": "TagWithOptionalId"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.TagListComponentProps.onClick.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tag",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-common.TagWithOptionalId",
+                    "text": "TagWithOptionalId"
+                  }
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1112,7 +1229,9 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ") => object is ",
+          "<",
+          "SavedObjectAttributes",
+          ">) => object is ",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "public",
@@ -1140,7 +1259,10 @@
                 "docId": "kibSavedObjectsPluginApi",
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
-              }
+              },
+              "<",
+              "SavedObjectAttributes",
+              ">"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
@@ -1164,7 +1286,9 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          " & { getTags(): string[]; setTags(tags: string[]): void; }"
+          "<",
+          "SavedObjectAttributes",
+          "> & { getTags(): string[]; setTags(tags: string[]): void; }"
         ],
         "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
         "deprecated": false,
@@ -1727,7 +1851,31 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-common.TagWithOptionalId",
+        "type": "Type",
+        "tags": [],
+        "label": "TagWithOptionalId",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          ", \"id\"> & { id?: string | undefined; }"
+        ],
+        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

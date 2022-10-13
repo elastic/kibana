@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
@@ -27,18 +26,16 @@ describe('EditableTitle', () => {
     isLoading: false,
   };
 
+  let appMock: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    appMock = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper).toMatchSnapshot();
+    const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+    expect(renderResult.getByText('Test title')).toBeInTheDocument();
   });
 
   it('does not show the edit icon when the user does not have edit permissions', () => {
@@ -269,12 +266,6 @@ describe('EditableTitle', () => {
   });
 
   describe('Badges', () => {
-    let appMock: AppMockRenderer;
-
-    beforeEach(() => {
-      appMock = createAppMockRenderer();
-    });
-
     it('does not render the badge if the release is ga', () => {
       const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
 

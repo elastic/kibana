@@ -28,9 +28,9 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
-import { LastEventIndexKey } from '../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import type { State } from '../../common/store';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
@@ -55,11 +55,9 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
 import { LandingPageComponent } from '../../common/components/landing_page';
-import { Loader } from '../../common/components/loader';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
+import { useLicense } from '../../common/hooks/use_license';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -103,7 +101,7 @@ const HostsComponent = () => {
     }
 
     if (tabName === HostsTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection);
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.host);
 
       return [...severityFilter, ...hostNameExistsFilter, ...filters];
     }
@@ -125,7 +123,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -147,9 +145,9 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+
+  const isEnterprisePlus = useLicense().isEnterprise();
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -174,10 +172,6 @@ const HostsComponent = () => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
-
-  if (loading) {
-    return <Loader data-test-subj="loadingPanelExploreHosts" overlay size="xl" />;
-  }
 
   return (
     <>
@@ -213,7 +207,8 @@ const HostsComponent = () => {
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 

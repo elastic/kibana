@@ -37,7 +37,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -78,7 +78,11 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { APP_UI_ID } from '../../../../../../common/constants';
+import {
+  APP_UI_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_KEY,
+} from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -112,6 +116,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import { RuleDetailsContextProvider } from './rule_details_context';
+import { useGetSavedQuery } from '../use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -300,6 +305,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
+    ruleType: rule?.type,
+  });
+
+  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -602,6 +614,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
     return (
       <LinkButton
+        data-test-subj="editRuleSettingsLink"
         onClick={goToEditRule}
         iconType="controlsHorizontal"
         isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
@@ -758,15 +771,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
                 <EuiFlexItem grow={1}>
                   <EuiFlexGroup direction="column">
-                    <EuiFlexItem component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                        {defineRuleData != null && (
+                    <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
+                      <StepPanel
+                        loading={isLoading || isSavedQueryLoading}
+                        title={ruleI18n.DEFINITION}
+                      >
+                        {defineRuleData != null && !isSavedQueryLoading && (
                           <StepDefineRule
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}
                             isLoading={false}
-                            defaultValues={{ dataViewTitle, ...defineRuleData }}
+                            defaultValues={{
+                              dataViewTitle,
+                              ...defineRuleData,
+                              queryBar: savedQueryBar ?? defineRuleData.queryBar,
+                            }}
                             kibanaDataViews={dataViewOptions}
+                            indicesConfig={indicesConfig}
+                            threatIndicesConfig={threatIndicesConfig}
                           />
                         )}
                       </StepPanel>
@@ -848,6 +870,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     rule={rule}
                     listType={ExceptionListTypeEnum.DETECTION}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="exceptionTab"
                   />
                 </Route>
@@ -858,6 +881,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     rule={rule}
                     listType={ExceptionListTypeEnum.ENDPOINT}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>

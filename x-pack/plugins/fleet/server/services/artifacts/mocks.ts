@@ -10,7 +10,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { SearchHit, ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { SearchHit, ESSearchResponse } from '@kbn/es-types';
 
 import type {
   Artifact,

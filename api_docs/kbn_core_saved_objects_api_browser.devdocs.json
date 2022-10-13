@@ -76,7 +76,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
+              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/resolve.ts",
             "deprecated": false,
@@ -242,6 +242,131 @@
               "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-browser",
+        "id": "def-common.SavedObjectsBulkDeleteOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteOptions",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsBulkDeleteOptions.force",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "force",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-browser",
+        "id": "def-common.SavedObjectsBulkDeleteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteResponse",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsBulkDeleteResponse.statuses",
+            "type": "Array",
+            "tags": [],
+            "label": "statuses",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsBulkDeleteResponseItem",
+                "text": "SavedObjectsBulkDeleteResponseItem"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-browser",
+        "id": "def-common.SavedObjectsBulkDeleteResponseItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkDeleteResponseItem",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsBulkDeleteResponseItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsBulkDeleteResponseItem.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsBulkDeleteResponseItem.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsBulkDeleteResponseItem.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "SavedObjectError",
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -677,6 +802,87 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsClientContract.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDeletes multiple documents at once"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectTypeIdTuple",
+              "[], options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsBulkDeleteOptions",
+                "text": "SavedObjectsBulkDeleteOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsBulkDeleteResponse",
+                "text": "SavedObjectsBulkDeleteResponse"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-browser",
+                "id": "def-common.SavedObjectsClientContract.bulkDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id, type"
+                ],
+                "signature": [
+                  "SavedObjectTypeIdTuple",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-browser",
+                "id": "def-common.SavedObjectsClientContract.bulkDelete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- optional force argument to force deletion of objects in a namespace other than the scoped client"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsBulkDeleteOptions",
+                    "text": "SavedObjectsBulkDeleteOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "The bulk delete result for the saved objects for the given types and ids."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1768,13 +1974,17 @@
         "label": "SavedObjectsFindOptions",
         "description": [],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; fields?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
         "deprecated": false,

@@ -11,8 +11,6 @@ import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { fullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
-import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { rulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isAlertType } from '../../rules/types';
 import type { BulkError } from '../utils';
 import { createBulkErrorObject } from '../utils';
@@ -23,19 +21,6 @@ import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_ge
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (
-  rule: PartialRule<RuleParams>,
-  ruleExecutionSummary: RuleExecutionSummary | null,
-  legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): [RulesSchema | null, string | null] => {
-  const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
-  if (transformed == null) {
-    return [null, 'Internal error transforming'];
-  } else {
-    return validateNonExact(transformed, rulesSchema);
-  }
-};
-
-export const newTransformValidate = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
@@ -52,10 +37,10 @@ export const transformValidateBulkError = (
   ruleId: string,
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null
-): RulesSchema | BulkError => {
+): FullResponseSchema | BulkError => {
   if (isAlertType(rule)) {
     const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
-    const [validated, errors] = validateNonExact(transformed, rulesSchema);
+    const [validated, errors] = validateNonExact(transformed, fullResponseSchema);
     if (errors != null || validated == null) {
       return createBulkErrorObject({
         ruleId,

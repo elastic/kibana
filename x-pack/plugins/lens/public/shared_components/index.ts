@@ -17,7 +17,8 @@ export {
   NewBucketButton,
   DraggableBucketContainer,
   DragDropBuckets,
-} from './drag_drop_bucket/buckets';
+  FieldsBucketContainer,
+} from './drag_drop_bucket';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,
@@ -36,5 +37,6 @@ export { NameInput } from './name_input';
 export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis_title_settings';
 export { DimensionEditorSection } from './dimension_section';
+export { FilterQueryInput } from './filter_query_input';
 export * from './static_header';
 export * from './vis_label';

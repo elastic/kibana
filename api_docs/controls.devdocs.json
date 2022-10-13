@@ -448,9 +448,7 @@
                 "section": "def-public.ControlOutput",
                 "text": "ControlOutput"
               },
-              ">, ",
-              "SavedObjectAttributes",
-              ">, partial?: Partial<TEmbeddableInput>) => ",
+              ">, unknown>, partial?: Partial<TEmbeddableInput>) => ",
               {
                 "pluginId": "controls",
                 "scope": "common",
@@ -507,9 +505,7 @@
                     "section": "def-public.ControlOutput",
                     "text": "ControlOutput"
                   },
-                  ">, ",
-                  "SavedObjectAttributes",
-                  ">"
+                  ">, unknown>"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
@@ -608,10 +604,26 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.untilReady",
+            "id": "def-public.ControlGroupContainer.untilAllChildrenReady",
             "type": "Function",
             "tags": [],
-            "label": "untilReady",
+            "label": "untilAllChildrenReady",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.untilInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "untilInitialized",
             "description": [],
             "signature": [
               "() => Promise<void>"
@@ -736,9 +748,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">"
+          ">, unknown>"
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
         "deprecated": false,
@@ -1431,9 +1441,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">,",
+          ">, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -2341,9 +2349,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">,",
+          ">, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -3608,9 +3614,7 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">"
+          ">, unknown>"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,

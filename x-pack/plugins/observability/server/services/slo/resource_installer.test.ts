@@ -9,20 +9,20 @@ import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/typesW
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  SLO_INGEST_PIPELINE_NAME,
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
-  SLO_INGEST_PIPELINE_NAME,
   SLO_RESOURCES_VERSION,
 } from '../../assets/constants';
-import { ResourceInstaller } from './resource_installer';
+import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
   describe("when the common resources don't exist", () => {
     it('installs the common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
-      const installer = new ResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 
@@ -49,9 +49,10 @@ describe('resourceInstaller', () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(true);
       mockClusterClient.ingest.getPipeline.mockResponseOnce({
+        // @ts-ignore _meta not typed properly
         [SLO_INGEST_PIPELINE_NAME]: { _meta: { version: SLO_RESOURCES_VERSION } },
       } as IngestGetPipelineResponse);
-      const installer = new ResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 

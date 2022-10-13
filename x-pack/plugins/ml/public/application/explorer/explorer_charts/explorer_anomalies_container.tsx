@@ -34,6 +34,7 @@ interface ExplorerAnomaliesContainerProps {
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
   showSelectedInterval?: boolean;
   chartsService: ChartsPluginStart;
+  timeRange: { from: string; to: string } | undefined;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -56,6 +57,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   onSelectEntity,
   showSelectedInterval,
   chartsService,
+  timeRange,
 }) => {
   return (
     <>
@@ -87,6 +89,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             mlLocator,
             timeBuckets,
             timefilter,
+            timeRange,
             onSelectEntity,
             tooManyBucketsCalloutMsg,
             showSelectedInterval,

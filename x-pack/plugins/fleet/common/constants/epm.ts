@@ -43,6 +43,12 @@ export const autoUpdatePackages = [
   FLEET_SYNTHETICS_PACKAGE,
 ];
 
+export const HIDDEN_API_REFERENCE_PACKAGES = [
+  FLEET_ENDPOINT_PACKAGE,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+];
+
 export const autoUpgradePoliciesPackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
 
 export const agentAssetTypes = {

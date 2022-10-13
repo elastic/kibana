@@ -73,10 +73,11 @@ class ApiService {
     return response;
   }
 
-  public async post<T>(apiUrl: string, data?: any, decodeType?: any) {
+  public async post<T>(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
     const response = await this._http!.post<T>(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
+      query: params,
     });
 
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
@@ -95,10 +96,11 @@ class ApiService {
     return response;
   }
 
-  public async put<T>(apiUrl: string, data?: any, decodeType?: any) {
+  public async put<T>(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
     const response = await this._http!.put<T>(apiUrl, {
       method: 'PUT',
       body: JSON.stringify(data),
+      query: params,
     });
 
     if (decodeType) {

@@ -94,3 +94,43 @@ export const bulkAddRuleActions = {
     }
   ),
 };
+
+export const bulkSetSchedule = {
+  FORM_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.formTitle',
+    {
+      defaultMessage: 'Update rule schedules',
+    }
+  ),
+  INTERVAL_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.intervalLabel',
+    {
+      defaultMessage: 'Runs every',
+    }
+  ),
+  INTERVAL_HELP_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.intervalHelpText',
+    {
+      defaultMessage: 'Rules run periodically and detect alerts within the specified time frame.',
+    }
+  ),
+  LOOKBACK_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.lookbackLabel',
+    {
+      defaultMessage: 'Additional look-back time',
+    }
+  ),
+  LOOKBACK_HELP_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.lookbackHelpText',
+    {
+      defaultMessage: 'Adds time to the look-back period to prevent missed alerts.',
+    }
+  ),
+  warningCalloutMessage: (rulesCount: number): JSX.Element => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.warningCalloutMessage"
+      defaultMessage="You're about to apply changes to {rulesCount, plural, one {# selected rule} other {# selected rules}}. The changes you make will overwrite the existing rule schedules and additional look-back time (if any)."
+      values={{ rulesCount }}
+    />
+  ),
+};

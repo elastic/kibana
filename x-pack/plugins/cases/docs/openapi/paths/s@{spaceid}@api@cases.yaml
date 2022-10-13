@@ -7,7 +7,6 @@ post:
     feature privileges, depending on the owner of the case you're creating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -58,11 +57,9 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             createCaseResponse:
               $ref: '../components/examples/create_case_response.yaml'
@@ -79,7 +76,6 @@ delete:
     depending on the owner of the cases you're deleting.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -105,7 +101,6 @@ patch:
     feature privileges, depending on the owner of the case you're updating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -163,11 +158,9 @@ patch:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             updateCaseResponse:
               $ref: '../components/examples/update_case_response.yaml'

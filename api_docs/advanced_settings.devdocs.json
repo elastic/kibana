@@ -294,9 +294,201 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "advancedSettings",
+        "id": "def-public.toEditableConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "toEditableConfig",
+        "description": [],
+        "signature": [
+          "({\n  def,\n  name,\n  value,\n  isCustom,\n  isOverridden,\n}: { def: ",
+          "PublicUiSettingsParams",
+          " & ",
+          "UserProvidedValues",
+          "<any>; name: string; value: ",
+          "SavedObjectAttribute",
+          "; isCustom: boolean; isOverridden: boolean; }) => ",
+          "FieldSetting"
+        ],
+        "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.toEditableConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  def,\n  name,\n  value,\n  isCustom,\n  isOverridden,\n}",
+            "description": [],
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.toEditableConfig.$1.def",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "PublicUiSettingsParams",
+                  " & ",
+                  "UserProvidedValues",
+                  "<any>"
+                ],
+                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.toEditableConfig.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.toEditableConfig.$1.value",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "SavedObjectAttributeSingle",
+                  " | ",
+                  "SavedObjectAttributeSingle",
+                  "[]"
+                ],
+                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.toEditableConfig.$1.isCustom",
+                "type": "boolean",
+                "tags": [],
+                "label": "isCustom",
+                "description": [],
+                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.toEditableConfig.$1.isOverridden",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOverridden",
+                "description": [],
+                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "the editable config object"
+        ],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "advancedSettings",
+        "id": "def-public.FieldState",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldState",
+        "description": [],
+        "path": "src/plugins/advanced_settings/public/management_app/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.FieldState.value",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/advanced_settings/public/management_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.FieldState.changeImage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "changeImage",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/advanced_settings/public/management_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.FieldState.loading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/advanced_settings/public/management_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.FieldState.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/advanced_settings/public/management_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.FieldState.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/plugins/advanced_settings/public/management_app/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],

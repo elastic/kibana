@@ -30,6 +30,8 @@ The following saved objects APIs are available:
 
 * <<saved-objects-api-delete, Delete object API>> to remove {kib} saved objects
 
+* <<saved-objects-api-bulk-delete, Bulk delete objects API>> to remove multiple {kib} saved objects
+
 * <<saved-objects-api-export, Export objects API>> to retrieve sets of saved objects that you want to import into {kib}
 
 * <<saved-objects-api-import, Import objects API>> to create sets of {kib} saved objects from a file created by the export API
@@ -46,6 +48,7 @@ include::saved-objects/bulk_create.asciidoc[]
 include::saved-objects/update.asciidoc[]
 include::saved-objects/bulk_update.asciidoc[]
 include::saved-objects/delete.asciidoc[]
+include::saved-objects/bulk_delete.asciidoc[]
 include::saved-objects/export.asciidoc[]
 include::saved-objects/import.asciidoc[]
 include::saved-objects/resolve_import_errors.asciidoc[]

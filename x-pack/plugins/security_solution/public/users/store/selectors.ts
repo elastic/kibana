@@ -23,7 +23,7 @@ export const allUsersSelector = () =>
 export const userRiskScoreSelector = () =>
   createSelector(selectUserPage, (users) => users.queries[UsersTableType.risk]);
 
-export const usersRiskScoreSeverityFilterSelector = () =>
+export const userRiskScoreSeverityFilterSelector = () =>
   createSelector(selectUserPage, (users) => users.queries[UsersTableType.risk].severitySelection);
 
 export const authenticationsSelector = () =>

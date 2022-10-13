@@ -39,11 +39,6 @@ export const slo: SavedObjectsType = {
           target: { type: 'float' },
         },
       },
-      settings: {
-        properties: {
-          destination_index: { type: 'text' },
-        },
-      },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },
     },

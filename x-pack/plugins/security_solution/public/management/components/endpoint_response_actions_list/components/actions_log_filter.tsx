@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import { orderBy } from 'lodash/fp';
+import React, { memo, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
-import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
+import { type FilterItems, type FilterName, useActionsLogFilter, getUiCommand } from './hooks';
 import { ClearAllButton } from './clear_all_button';
 import { UX_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -16,22 +18,82 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 export const ActionsLogFilter = memo(
   ({
     filterName,
+    isFlyout,
     onChangeFilterOptions,
   }: {
     filterName: FilterName;
+    isFlyout: boolean;
     onChangeFilterOptions: (selectedOptions: string[]) => void;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
-    const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
-      useActionsLogFilter(filterName);
+
+    // popover states and handlers
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const onPopoverButtonClick = useCallback(() => {
+      setIsPopoverOpen(!isPopoverOpen);
+    }, [setIsPopoverOpen, isPopoverOpen]);
+    const onClosePopover = useCallback(() => {
+      setIsPopoverOpen(false);
+    }, [setIsPopoverOpen]);
+
+    // search string state
+    const [searchString, setSearchString] = useState('');
+    const {
+      areHostsSelectedOnMount,
+      isLoading,
+      items,
+      setItems,
+      hasActiveFilters,
+      numActiveFilters,
+      numFilters,
+      setAreHostsSelectedOnMount,
+      setUrlActionsFilters,
+      setUrlHostsFilters,
+      setUrlStatusesFilters,
+    } = useActionsLogFilter({
+      filterName,
+      isFlyout,
+      isPopoverOpen,
+      searchString,
+    });
+
+    // track popover state to pin selected options
+    const wasPopoverOpen = useRef(isPopoverOpen);
+    useEffect(() => {
+      return () => {
+        wasPopoverOpen.current = isPopoverOpen;
+      };
+    }, [isPopoverOpen, wasPopoverOpen]);
+
+    // compute if selected hosts should be pinned
+    const shouldPinSelectedHosts = useCallback(
+      (isNotChangingOptions: boolean = true) => {
+        // case 1: when no hosts are selected initially
+        return (
+          isNotChangingOptions && wasPopoverOpen.current && isPopoverOpen && filterName === 'hosts'
+        );
+      },
+      [filterName, isPopoverOpen]
+    );
+
+    // augmented options based on hosts filter
+    const sortedHostsFilterOptions = useMemo(() => {
+      if (shouldPinSelectedHosts() || areHostsSelectedOnMount) {
+        // pin checked items to the top
+        return orderBy('checked', 'asc', items);
+      }
+      // return options as is for other filters
+      return items;
+    }, [areHostsSelectedOnMount, shouldPinSelectedHosts, items]);
 
     const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
 
-    const onChange = useCallback(
+    const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
-        setItems(newOptions.map((e) => e));
+        // update filter UI options state
+        setItems(newOptions.map((option) => option));
 
-        // update selected filter state
+        // compute selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
           if (curr.checked === 'on') {
             acc.push(curr.key);
@@ -39,38 +101,94 @@ export const ActionsLogFilter = memo(
           return acc;
         }, []);
 
+        if (!isFlyout) {
+          // update URL params
+          if (filterName === 'actions') {
+            setUrlActionsFilters(
+              selectedItems
+                .map((item) => getUiCommand(item as ResponseActionsApiCommandNames))
+                .join()
+            );
+          } else if (filterName === 'hosts') {
+            setUrlHostsFilters(selectedItems.join());
+          } else if (filterName === 'statuses') {
+            setUrlStatusesFilters(selectedItems.join());
+          }
+          // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
+          shouldPinSelectedHosts(false);
+          setAreHostsSelectedOnMount(false);
+        }
+
         // update query state
         onChangeFilterOptions(selectedItems);
       },
-      [setItems, onChangeFilterOptions]
+      [
+        shouldPinSelectedHosts,
+        filterName,
+        isFlyout,
+        setItems,
+        onChangeFilterOptions,
+        setAreHostsSelectedOnMount,
+        setUrlActionsFilters,
+        setUrlHostsFilters,
+        setUrlStatusesFilters,
+      ]
     );
 
     // clear all selected options
     const onClearAll = useCallback(() => {
+      // update filter UI options state
       setItems(
-        items.map((e) => {
-          e.checked = undefined;
-          return e;
+        items.map((option) => {
+          option.checked = undefined;
+          return option;
         })
       );
+
+      if (!isFlyout) {
+        // update URL params based on filter
+        if (filterName === 'actions') {
+          setUrlActionsFilters('');
+        } else if (filterName === 'hosts') {
+          setUrlHostsFilters('');
+        } else if (filterName === 'statuses') {
+          setUrlStatusesFilters('');
+        }
+      }
+      // update query state
       onChangeFilterOptions([]);
-    }, [items, setItems, onChangeFilterOptions]);
+    }, [
+      filterName,
+      isFlyout,
+      items,
+      setItems,
+      onChangeFilterOptions,
+      setUrlActionsFilters,
+      setUrlHostsFilters,
+      setUrlStatusesFilters,
+    ]);
 
     return (
       <ActionsLogFilterPopover
+        closePopover={onClosePopover}
         filterName={filterName}
         hasActiveFilters={hasActiveFilters}
+        isPopoverOpen={isPopoverOpen}
         numActiveFilters={numActiveFilters}
         numFilters={numFilters}
+        onButtonClick={onPopoverButtonClick}
       >
         <EuiSelectable
           aria-label={`${filterName}`}
-          onChange={onChange}
-          options={items}
+          emptyMessage={UX_MESSAGES.filterEmptyMessage(filterName)}
+          isLoading={isLoading}
+          onChange={onOptionsChange}
+          options={sortedHostsFilterOptions}
           searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: UX_MESSAGES.filterSearchPlaceholder(filterName),
             compressed: true,
+            onChange: (searchValue) => setSearchString(searchValue.trim()),
           }}
         >
           {(list, search) => {

@@ -5,48 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
-import { decodeCloudId } from '../../utils/decode_cloud_id';
-
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
+import { SettingsLogic } from '../settings/settings_logic';
+
 import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
+import { CurlRequest } from './components/curl_request/curl_request';
 import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
 import { ManageKeysPopover } from './components/manage_api_keys_popover/popover';
 
+import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 
 export const GenerateApiKeyPanel: React.FC = () => {
-  const { apiKey, isGenerateModalOpen, indexData } = useValues(OverviewLogic);
+  const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
+  const { indexName, ingestionMethod } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
+  const { defaultPipeline } = useValues(SettingsLogic);
 
-  const cloudContext = useCloudDetails();
-
-  const DEFAULT_URL = 'https://localhost:9200';
-  const searchIndexApiUrl =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
-
-  const apiKeyExample = apiKey || '<Create an API Key>';
+  const [optimizedRequest, setOptimizedRequest] = useState(true);
 
   return (
     <>
       {isGenerateModalOpen && (
-        <GenerateApiKeyModal indexName={indexData?.name ?? ''} onClose={closeGenerateModal} />
+        <GenerateApiKeyModal indexName={indexName} onClose={closeGenerateModal} />
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -55,7 +45,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
               <EuiFlexItem>
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem>
-                    {indexData?.name[0] !== '.' && (
+                    {indexName[0] !== '.' && (
                       <EuiTitle size="s">
                         <h2>
                           {i18n.translate(
@@ -65,6 +55,17 @@ export const GenerateApiKeyPanel: React.FC = () => {
                         </h2>
                       </EuiTitle>
                     )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-optimizedRequest`}
+                      onChange={(event) => setOptimizedRequest(event.target.checked)}
+                      label={i18n.translate(
+                        'xpack.enterpriseSearch.content.overview.optimizedRequest.label',
+                        { defaultMessage: 'View Enterprise Search optimized request' }
+                      )}
+                      checked={optimizedRequest}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
@@ -78,18 +79,16 @@ export const GenerateApiKeyPanel: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {indexData?.name[0] !== '.' && (
+              {indexName[0] !== '.' && (
                 <>
                   <EuiSpacer />
                   <EuiFlexItem>
-                    <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-                      {`\
-curl -X POST '${searchIndexApiUrl}/${indexData?.name}/_doc' \\
-  -H 'Content-Type: application/json' \\
-  -H 'Authorization: ApiKey ${apiKeyExample}' \\
-  -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
-`}
-                    </EuiCodeBlock>
+                    <CurlRequest
+                      apiKey={apiKey}
+                      document={DOCUMENTS_API_JSON_EXAMPLE}
+                      indexName={indexName}
+                      pipeline={optimizedRequest ? defaultPipeline : undefined}
+                    />
                   </EuiFlexItem>
                 </>
               )}

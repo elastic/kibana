@@ -12,22 +12,24 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import type {
-  ResponseActions,
+  ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
+import { doesLogsEndpointActionsIndexExist } from '../../utils';
 
 const formatStringIds = (value: string | string[] | undefined): undefined | string[] =>
   typeof value === 'string' ? [value] : value;
 
 const formatCommandValues = (
-  value: ResponseActions | ResponseActions[] | undefined
-): undefined | ResponseActions[] => (typeof value === 'string' ? [value] : value);
+  value: ResponseActionsApiCommandNames | ResponseActionsApiCommandNames[] | undefined
+): undefined | ResponseActionsApiCommandNames[] => (typeof value === 'string' ? [value] : value);
 
 const formatStatusValues = (
   value: ResponseActionStatus | ResponseActionStatus[]
@@ -59,6 +61,16 @@ export const actionListHandler = (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
+      const indexExists = await doesLogsEndpointActionsIndexExist({
+        context,
+        logger,
+        indexName: ENDPOINT_ACTIONS_INDEX,
+      });
+
+      if (!indexExists) {
+        return res.notFound({ body: 'index_not_found_exception' });
+      }
+
       const requestParams = {
         commands: formatCommandValues(commands),
         esClient,

@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
-  describe('page navigation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/142397
+  describe.skip('page navigation', function () {
     this.tags(['skipFirefox', 'ml']);
     before(async () => {
       await ml.api.cleanMlIndices();
@@ -23,6 +24,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('loads the overview page');
       await ml.navigation.navigateToOverview();
+
+      await ml.testExecution.logTestStep('loads the notifications page');
+      await ml.navigation.navigateToNotifications();
 
       await ml.testExecution.logTestStep('loads the anomaly detection area');
       await ml.navigation.navigateToAnomalyDetection();

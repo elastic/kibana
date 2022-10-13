@@ -59,7 +59,7 @@ export async function getSizeTimeseries({
     searchAggregatedTransactions,
   });
 
-  const [allIndicesStats, res] = await Promise.all([
+  const [{ indices: allIndicesStats }, res] = await Promise.all([
     getTotalIndicesStats({ setup, context }),
     apmEventClient.search('get_storage_timeseries', {
       apm: {
@@ -72,6 +72,7 @@ export async function getSizeTimeseries({
       },
       body: {
         size: 0,
+        track_total_hits: false,
         query: {
           bool: {
             filter: [
@@ -94,7 +95,7 @@ export async function getSizeTimeseries({
               services: {
                 terms: {
                   field: SERVICE_NAME,
-                  size: 500,
+                  size: 50,
                 },
                 aggs: {
                   storageTimeSeries: {

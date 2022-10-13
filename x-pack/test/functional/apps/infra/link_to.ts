@@ -42,6 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();
         const parsedUrl = new URL(currentUrl);
+        const documentTitle = await browser.getTitle();
 
         expect(parsedUrl.pathname).to.be('/app/logs/stream');
         expect(parsedUrl.searchParams.get('logFilter')).to.be(
@@ -51,6 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           `(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)`
         );
         expect(parsedUrl.searchParams.get('sourceId')).to.be('default');
+        expect(documentTitle).to.contain('Stream - Logs - Observability - Elastic');
       });
     });
   });

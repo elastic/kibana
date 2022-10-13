@@ -30,7 +30,7 @@ export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze({
     defaultMessage: 'My first agent policy',
   }),
   namespace: 'default',
-  monitoring_enabled: ['logs', 'metrics'],
+  monitoring_enabled: ['logs', 'metrics'] as NewAgentPolicy['monitoring_enabled'],
 });
 
 const sendGetAgentPolicy = async (agentPolicyId: string) => {

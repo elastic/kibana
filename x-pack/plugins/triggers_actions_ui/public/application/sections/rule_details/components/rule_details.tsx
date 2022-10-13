@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useReducer } from 'react';
-import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -20,7 +19,6 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
-  EuiIconTip,
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
@@ -28,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { updateAPIKey, deleteRules } from '../../../lib/rule_api';
+import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
@@ -36,7 +34,7 @@ import {
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
   Rule,
@@ -61,6 +59,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { runRule } from '../../../lib/run_rule';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -116,10 +115,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([
-      getAlertingSectionBreadcrumb('rules'),
-      getRuleDetailsBreadcrumb(rule.id, rule.name),
-    ]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -152,7 +148,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 
-  const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
     // can the user save the rule
     canSaveRule &&
@@ -161,9 +156,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const ruleActions = rule.actions;
-  const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
+  };
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -294,7 +290,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           setRulesToUpdateAPIKey([]);
         }}
         idsToUpdate={rulesToUpdateAPIKey}
-        apiUpdateApiKeyCall={updateAPIKey}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={() => {}}
         onUpdated={async () => {
           setRulesToUpdateAPIKey([]);
@@ -351,46 +347,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              {uniqueActions && uniqueActions.length ? (
-                <EuiFlexGroup responsive={false} gutterSize="xs">
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
-                        defaultMessage="Actions"
-                      />{' '}
-                      {hasActionsWithBrokenConnector && (
-                        <EuiIconTip
-                          data-test-subj="actionWithBrokenConnector"
-                          type="alert"
-                          color="danger"
-                          content={i18n.translate(
-                            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
-                            {
-                              defaultMessage:
-                                'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
-                            }
-                          )}
-                          position="right"
-                        />
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="xs">
-                      {uniqueActions.map((action, index) => (
-                        <EuiFlexItem key={index} grow={false}>
-                          <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                            {actionTypesByTypeId[action].name ?? action}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : null}
-            </EuiFlexItem>
           </EuiFlexGroup>
         }
         rightSideItems={[
@@ -411,6 +367,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }
               requestRefresh();
             }}
+            onRunRule={onRunRule}
           />,
           editButton,
           <EuiButtonEmpty

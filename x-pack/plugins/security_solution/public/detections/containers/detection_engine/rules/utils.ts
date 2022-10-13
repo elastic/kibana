@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { escapeKuery } from '../../../../common/lib/keury';
+import { escapeKuery } from '../../../../common/lib/kuery';
 import type { FilterOptions } from './types';
 
 const SEARCHABLE_RULE_PARAMS = [

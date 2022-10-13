@@ -649,10 +649,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
           },
           {
@@ -787,9 +783,11 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          "<",
+          "SavedObjectAttributes",
+          ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
+          ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -811,7 +809,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              "<",
+              "SavedObjectAttributes",
+              ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -858,7 +858,7 @@
             "signature": [
               "Pick<",
               "SavedObjectKibanaServices",
-              ", \"overlays\" | \"savedObjectsClient\">"
+              ", \"savedObjectsClient\" | \"overlays\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -1522,6 +1522,16 @@
         ],
         "label": "SavedObject",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObject",
+            "text": "SavedObject"
+          },
+          "<T>"
+        ],
         "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
@@ -1546,38 +1556,6 @@
           {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
           },
           {
             "plugin": "dashboard",
@@ -1645,7 +1623,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">"
+              "<T>>"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
@@ -1878,7 +1856,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">) | undefined"
+              "<T>>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
@@ -2093,7 +2071,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ") => Promise<",
+              "<",
+              "SavedObjectAttributes",
+              ">) => Promise<",
               {
                 "pluginId": "savedObjects",
                 "scope": "public",
@@ -2101,7 +2081,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">) | undefined"
+              "<",
+              "SavedObjectAttributes",
+              ">>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
@@ -2121,7 +2103,10 @@
                     "docId": "kibSavedObjectsPluginApi",
                     "section": "def-public.SavedObject",
                     "text": "SavedObject"
-                  }
+                  },
+                  "<",
+                  "SavedObjectAttributes",
+                  ">"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
@@ -2197,7 +2182,9 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ">(object: T, references: ",
+              "<",
+              "SavedObjectAttributes",
+              ">>(object: T, references: ",
               "SavedObjectReference",
               "[]) => void) | undefined"
             ],
@@ -3097,18 +3084,16 @@
               "docId": "kibSavedObjectsPluginApi",
               "section": "def-public.SavedObject",
               "text": "SavedObject"
-            }
+            },
+            "<",
+            "SavedObjectAttributes",
+            ">"
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-            }
-          ]
+          "references": []
         },
         {
           "parentPluginId": "savedObjects",

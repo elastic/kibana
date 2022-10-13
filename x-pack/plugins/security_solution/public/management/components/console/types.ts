@@ -58,9 +58,13 @@ export interface CommandDefinition<TMeta = any> {
    */
   HelpComponent?: CommandExecutionComponent;
   /**
-   * If defined, the button to add to the text bar will be disabled.
+   * If defined, the button to add to the text bar will be disabled and the user will not be able to use this command if entered into the console.
    */
   helpDisabled?: boolean;
+  /**
+   * If defined, the command will be hidden from in the Help menu and help text. It will warn the user and not execute the command if manually typed in.
+   */
+  helpHidden?: boolean;
   /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component
@@ -168,7 +172,7 @@ export type CommandExecutionComponent<
   /** The arguments that could have been entered by the user */
   TArgs extends SupportedArguments = any,
   /** Internal store for the Command execution */
-  TStore extends object = Record<string, unknown>,
+  TStore extends object = any,
   /** The metadata defined on the Command Definition */
   TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;

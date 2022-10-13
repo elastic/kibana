@@ -17,7 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('Cases', () => {
+  describe('Observability cases', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -56,6 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await observability.users.restoreDefaultTestUserRole();
       });
 
       it('should link to observability rule pages in case details', async () => {

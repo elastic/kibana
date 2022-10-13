@@ -55,6 +55,90 @@ describe('kibana index telemetry', () => {
               },
             ],
           },
+          by_execution_status: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'unknown',
+                doc_count: 0,
+              },
+              {
+                key: 'ok',
+                doc_count: 1,
+              },
+              {
+                key: 'active',
+                doc_count: 2,
+              },
+              {
+                key: 'pending',
+                doc_count: 3,
+              },
+              {
+                key: 'error',
+                doc_count: 4,
+              },
+              {
+                key: 'warning',
+                doc_count: 5,
+              },
+            ],
+          },
+          by_notify_when: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'onActionGroupChange',
+                doc_count: 5,
+              },
+              {
+                key: 'onActiveAlert',
+                doc_count: 6,
+              },
+              {
+                key: 'onThrottleInterval',
+                doc_count: 7,
+              },
+            ],
+          },
+          connector_types_by_consumers: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'alerts',
+                actions: {
+                  connector_types: {
+                    buckets: [
+                      {
+                        key: '.server-log',
+                        doc_count: 2,
+                      },
+                      {
+                        key: '.email',
+                        doc_count: 3,
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: 'siem',
+                actions: {
+                  connector_types: {
+                    buckets: [
+                      {
+                        key: '.index',
+                        doc_count: 4,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
           max_throttle_time: { value: 60 },
           min_throttle_time: { value: 0 },
           avg_throttle_time: { value: 30 },
@@ -64,6 +148,10 @@ describe('kibana index telemetry', () => {
           max_actions_count: { value: 4 },
           min_actions_count: { value: 0 },
           avg_actions_count: { value: 2.5 },
+          sum_rules_with_tags: { value: 10 },
+          sum_rules_snoozed: { value: 11 },
+          sum_rules_muted: { value: 12 },
+          sum_rules_with_muted_alerts: { value: 13 },
         },
       });
 
@@ -109,6 +197,29 @@ describe('kibana index telemetry', () => {
           max: 60,
           min: 0,
         },
+        count_rules_by_execution_status: {
+          success: 3,
+          error: 4,
+          warning: 5,
+        },
+        count_rules_with_tags: 10,
+        count_rules_by_notify_when: {
+          on_action_group_change: 5,
+          on_active_alert: 6,
+          on_throttle_interval: 7,
+        },
+        count_rules_snoozed: 11,
+        count_rules_muted: 12,
+        count_rules_with_muted_alerts: 13,
+        count_connector_types_by_consumers: {
+          alerts: {
+            __email: 3,
+            '__server-log': 2,
+          },
+          siem: {
+            __index: 4,
+          },
+        },
       });
     });
 
@@ -138,6 +249,20 @@ describe('kibana index telemetry', () => {
           min: 0,
         },
         count_by_type: {},
+        count_rules_by_execution_status: {
+          success: 0,
+          error: 0,
+          warning: 0,
+        },
+        count_rules_with_tags: 0,
+        count_rules_by_notify_when: {
+          on_action_group_change: 0,
+          on_active_alert: 0,
+          on_throttle_interval: 0,
+        },
+        count_rules_snoozed: 0,
+        count_rules_muted: 0,
+        count_rules_with_muted_alerts: 0,
         count_total: 0,
         schedule_time: {
           avg: '0s',
@@ -159,6 +284,7 @@ describe('kibana index telemetry', () => {
           max: 0,
           min: 0,
         },
+        count_connector_types_by_consumers: {},
       });
     });
   });

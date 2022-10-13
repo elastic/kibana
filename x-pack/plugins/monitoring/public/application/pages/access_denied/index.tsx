@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiCallOut, EuiButton } from '@elastic/eui';
@@ -14,8 +14,10 @@ import { Redirect } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { MonitoringStartPluginDependencies } from '../../../types';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
 
 export const AccessDeniedPage: React.FC<ComponentProps> = () => {
+  const { isCcsEnabled } = useContext(ExternalConfigContext);
   const { services } = useKibana<MonitoringStartPluginDependencies>();
   const [hasAccess, setHasAccess] = useState<boolean>(false);
 
@@ -62,6 +64,14 @@ export const AccessDeniedPage: React.FC<ComponentProps> = () => {
         the monitoring cluster."
           />
         </p>
+        {isCcsEnabled && (
+          <p>
+            <FormattedMessage
+              id="xpack.monitoring.accessDenied.noRemoteClusterClientDescription"
+              defaultMessage="Since Cross Cluster Search is enabled (`monitoring.ui.ccs.enabled` is set to `true`), make sure your cluster has the `remote_cluster_client` role on at least one node."
+            />
+          </p>
+        )}
         <p>
           <EuiButton href="../app/home">
             <FormattedMessage

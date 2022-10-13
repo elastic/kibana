@@ -41,6 +41,8 @@ interface StartPlugins {
   charts: ChartsPluginStart;
   cases?: CasesUiStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  core: CoreStart;
+  appName: string;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

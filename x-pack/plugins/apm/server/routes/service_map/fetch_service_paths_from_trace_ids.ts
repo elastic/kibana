@@ -33,6 +33,7 @@ export async function fetchServicePathsFromTraceIds(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

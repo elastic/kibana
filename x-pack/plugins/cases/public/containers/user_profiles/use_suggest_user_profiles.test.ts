@@ -18,7 +18,7 @@ jest.mock('./api');
 describe('useSuggestUserProfiles', () => {
   const props = {
     name: 'elastic',
-    owner: [GENERAL_CASES_OWNER],
+    owners: [GENERAL_CASES_OWNER],
   };
 
   const addSuccess = jest.fn();

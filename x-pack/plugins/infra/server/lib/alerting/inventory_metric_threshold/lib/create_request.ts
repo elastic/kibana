@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ESSearchRequest } from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest } from '@kbn/es-types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import {
@@ -55,6 +55,18 @@ export const createRequest = (
   const metricAggregations = createMetricAggregations(timerange, nodeType, metric, customMetric);
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
+  const additionalContextAgg = {
+    additionalContext: {
+      top_hits: {
+        size: 1,
+        _source: {
+          includes: ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*', 'container.*'],
+          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+        },
+      },
+    },
+  };
+
   const request: ESSearchRequest = {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -65,7 +77,7 @@ export const createRequest = (
       aggs: {
         nodes: {
           composite,
-          aggs: { ...metricAggregations, ...bucketSelector },
+          aggs: { ...metricAggregations, ...bucketSelector, ...additionalContextAgg },
         },
       },
     },

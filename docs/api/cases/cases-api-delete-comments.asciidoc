@@ -6,6 +6,12 @@
 
 Deletes one or all comments and alerts from a case.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `DELETE <kibana host>:<port>/api/cases/<case_id>/comments`

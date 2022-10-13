@@ -65,7 +65,7 @@ export function fetchAll(
   const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
 
   /**
-   * Method to create a an error handler that will forward the received error
+   * Method to create an error handler that will forward the received error
    * to the specified subjects. It will ignore AbortErrors and will use the data
    * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
    */
@@ -103,7 +103,7 @@ export function fetchAll(
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, recordRawType);
-    sendLoadingMsg(dataSubjects.documents$, recordRawType);
+    sendLoadingMsg(dataSubjects.documents$, recordRawType, query);
     sendLoadingMsg(dataSubjects.totalHits$, recordRawType);
     sendLoadingMsg(dataSubjects.charts$, recordRawType);
 
@@ -152,6 +152,7 @@ export function fetchAll(
           fetchStatus: FetchStatus.COMPLETE,
           result: docs,
           recordRawType,
+          query,
         });
 
         checkHitCount(docs.length);

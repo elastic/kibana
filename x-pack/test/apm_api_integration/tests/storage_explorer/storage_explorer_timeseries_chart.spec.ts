@@ -56,21 +56,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let status: number;
 
       before(async () => {
-        const serviceGo1 = apm.service('synth-go-1', 'production', 'go').instance('instance');
-        const serviceGo2 = apm.service('synth-go-2', 'production', 'go').instance('instance');
+        const serviceGo1 = apm
+          .service({ name: 'synth-go-1', environment: 'production', agentName: 'go' })
+          .instance('instance');
+        const serviceGo2 = apm
+          .service({ name: 'synth-go-2', environment: 'production', agentName: 'go' })
+          .instance('instance');
 
         await synthtraceEsClient.index([
           timerange(start, end)
             .interval('5m')
             .rate(1)
             .generator((timestamp) =>
-              serviceGo1.transaction('GET /api/product/list1').duration(2000).timestamp(timestamp)
+              serviceGo1
+                .transaction({ transactionName: 'GET /api/product/list1' })
+                .duration(2000)
+                .timestamp(timestamp)
             ),
           timerange(start, end)
             .interval('5m')
             .rate(1)
             .generator((timestamp) =>
-              serviceGo2.transaction('GET /api/product/list2').duration(2000).timestamp(timestamp)
+              serviceGo2
+                .transaction({ transactionName: 'GET /api/product/list2' })
+                .duration(2000)
+                .timestamp(timestamp)
             ),
         ]);
 

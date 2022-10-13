@@ -7,26 +7,18 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import {
-  Operation,
-  VisualizeEditorContext,
-  Suggestion,
-  OperationDescriptor,
-  DatasourcePublicAPI,
-} from '../../types';
+import { Operation, OperationDescriptor, DatasourcePublicAPI } from '../../types';
 import type {
   State,
   XYState,
-  XYSuggestion,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar } from '@kbn/chart-icons';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
@@ -36,8 +28,9 @@ import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
-import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -68,7 +61,7 @@ function exampleState(): XYState {
     layers: [
       {
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         splitAccessor: 'd',
         xAccessor: 'a',
@@ -89,6 +82,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -227,7 +221,7 @@ describe('xy_visualization', () => {
           ...exampleState().layers,
           {
             layerId: 'second',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'e',
             xAccessor: 'f',
@@ -245,7 +239,7 @@ describe('xy_visualization', () => {
       const layers = xyVisualization.appendLayer!(
         exampleState(),
         'foo',
-        layerTypes.DATA,
+        LayerTypes.DATA,
         'indexPattern1'
       ).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
@@ -334,7 +328,7 @@ describe('xy_visualization', () => {
 
   describe('#getLayerType', () => {
     it('should return the type only if the layer is in the state', () => {
-      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(layerTypes.DATA);
+      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(LayerTypes.DATA);
       expect(xyVisualization.getLayerType('foo', exampleState())).toBeUndefined();
     });
   });
@@ -344,7 +338,11 @@ describe('xy_visualization', () => {
     let frame: ReturnType<typeof createMockFramePublicAPI>;
 
     beforeEach(() => {
-      frame = createMockFramePublicAPI();
+      frame = createMockFramePublicAPI({
+        dataViews: createMockDataViewsState({
+          indexPatterns: { indexPattern1: createMockedIndexPattern() },
+        }),
+      });
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
@@ -379,7 +377,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
@@ -392,7 +390,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -408,7 +406,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -421,7 +419,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -437,7 +435,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'referenceLine',
-                layerType: layerTypes.REFERENCELINE,
+                layerType: LayerTypes.REFERENCELINE,
                 accessors: [],
               },
             ],
@@ -448,7 +446,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'referenceLine',
-        layerType: layerTypes.REFERENCELINE,
+        layerType: LayerTypes.REFERENCELINE,
         accessors: ['newCol'],
         yConfig: [
           {
@@ -469,9 +467,10 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'annotation',
-                  layerType: layerTypes.ANNOTATIONS,
+                  layerType: LayerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -481,8 +480,9 @@ describe('xy_visualization', () => {
           }).layers[0]
         ).toEqual({
           layerId: 'annotation',
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
+          ignoreGlobalFilters: true,
           annotations: [
             exampleAnnotation,
             {
@@ -498,571 +498,650 @@ describe('xy_visualization', () => {
           ],
         });
       });
-      it('should copy previous column if passed and assign a new id', () => {
-        expect(
-          xyVisualization.onDrop!({
-            frame,
-            prevState: {
-              ...exampleState(),
-              layers: [
-                {
-                  layerId: 'annotation',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation2],
-                },
-              ],
-            },
-            dropType: 'duplicate_compatible',
-            source: {
-              layerId: 'annotation',
-              groupId: 'xAnnotation',
-              columnId: 'an2',
-              id: 'an2',
-              humanData: { label: 'an2' },
-            },
-            target: {
-              layerId: 'annotation',
-              groupId: 'xAnnotation',
-              columnId: 'newColId',
-              filterOperations: Boolean,
-            },
-          }).layers[0]
-        ).toEqual({
-          layerId: 'annotation',
-          layerType: layerTypes.ANNOTATIONS,
-          indexPatternId: 'indexPattern1',
-          annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
-        });
-      });
-      it('should reorder a dimension to a annotation layer', () => {
-        expect(
-          xyVisualization.onDrop!({
-            frame,
-            prevState: {
-              ...exampleState(),
-              layers: [
-                {
-                  layerId: 'annotation',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation, exampleAnnotation2],
-                },
-              ],
-            },
-            source: {
-              layerId: 'annotation',
-              groupId: 'xAnnotation',
-              columnId: 'an2',
-              id: 'an2',
-              humanData: { label: 'label' },
-              filterOperations: () => true,
-            },
-            target: {
-              layerId: 'annotation',
-              groupId: 'xAnnotation',
-              columnId: 'an1',
-              filterOperations: () => true,
-            },
-            dropType: 'reorder',
-          }).layers[0]
-        ).toEqual({
-          layerId: 'annotation',
-          layerType: layerTypes.ANNOTATIONS,
-          indexPatternId: 'indexPattern1',
-          annotations: [exampleAnnotation2, exampleAnnotation],
-        });
-      });
 
-      it('should duplicate the annotations and replace the target in another annotation layer', () => {
-        expect(
-          xyVisualization.onDrop!({
-            frame,
-            prevState: {
-              ...exampleState(),
-              layers: [
-                {
-                  layerId: 'first',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation],
-                },
-                {
-                  layerId: 'second',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation2],
-                },
-              ],
-            },
-            source: {
-              layerId: 'first',
-              groupId: 'xAnnotation',
-              columnId: 'an1',
-              id: 'an1',
-              humanData: { label: 'label' },
-              filterOperations: () => true,
-            },
-            target: {
-              layerId: 'second',
-              groupId: 'xAnnotation',
-              columnId: 'an2',
-              filterOperations: () => true,
-            },
-            dropType: 'replace_duplicate_compatible',
-          }).layers
-        ).toEqual([
-          {
-            layerId: 'first',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation],
-          },
-          {
-            layerId: 'second',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [{ ...exampleAnnotation, id: 'an2' }],
-          },
-        ]);
-      });
-      it('should swap the annotations between layers', () => {
-        expect(
-          xyVisualization.onDrop!({
-            frame,
-            prevState: {
-              ...exampleState(),
-              layers: [
-                {
-                  layerId: 'first',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation],
-                },
-                {
-                  layerId: 'second',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation2],
-                },
-              ],
-            },
-            source: {
-              layerId: 'first',
-              groupId: 'xAnnotation',
-              columnId: 'an1',
-              id: 'an1',
-              humanData: { label: 'label' },
-              filterOperations: () => true,
-            },
-            target: {
-              layerId: 'second',
-              groupId: 'xAnnotation',
-              columnId: 'an2',
-              filterOperations: () => true,
-            },
-            dropType: 'swap_compatible',
-          }).layers
-        ).toEqual([
-          {
-            layerId: 'first',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation2],
-          },
-          {
-            layerId: 'second',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation],
-          },
-        ]);
-      });
-      it('should replace the target in another annotation layer', () => {
-        expect(
-          xyVisualization.onDrop!({
-            frame,
-            prevState: {
-              ...exampleState(),
-              layers: [
-                {
-                  layerId: 'first',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation],
-                },
-                {
-                  layerId: 'second',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation2],
-                },
-              ],
-            },
-            source: {
-              layerId: 'first',
-              groupId: 'xAnnotation',
-              columnId: 'an1',
-              id: 'an1',
-              humanData: { label: 'label' },
-              filterOperations: () => true,
-            },
-            target: {
-              layerId: 'second',
-              groupId: 'xAnnotation',
-              columnId: 'an2',
-              filterOperations: () => true,
-            },
-            dropType: 'replace_compatible',
-          }).layers
-        ).toEqual([
-          {
-            layerId: 'first',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [],
-          },
-          {
-            layerId: 'second',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation],
-          },
-        ]);
-      });
-      it('should move compatible to another annotation layer', () => {
-        expect(
-          xyVisualization.onDrop!({
-            frame,
-            prevState: {
-              ...exampleState(),
-              layers: [
-                {
-                  layerId: 'first',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [exampleAnnotation],
-                },
-                {
-                  layerId: 'second',
-                  layerType: layerTypes.ANNOTATIONS,
-                  indexPatternId: 'indexPattern1',
-                  annotations: [],
-                },
-              ],
-            },
-            source: {
-              layerId: 'first',
-              groupId: 'xAnnotation',
-              columnId: 'an1',
-              id: 'an1',
-              humanData: { label: 'label' },
-              filterOperations: () => true,
-            },
-            target: {
-              layerId: 'second',
-              groupId: 'xAnnotation',
-              columnId: 'an2',
-              filterOperations: () => true,
-            },
-            dropType: 'move_compatible',
-          }).layers
-        ).toEqual([
-          {
-            layerId: 'first',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [],
-          },
-          {
-            layerId: 'second',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation],
-          },
-        ]);
-      });
-    });
-  });
-
-  describe('#updateLayersConfigurationFromContext', () => {
-    let mockDatasource: ReturnType<typeof createMockDatasource>;
-    let frame: ReturnType<typeof createMockFramePublicAPI>;
-    let context: VisualizeEditorLayersContext;
-
-    beforeEach(() => {
-      frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
-
-      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd', fields: [] },
-        { columnId: 'a', fields: [] },
-        { columnId: 'b', fields: [] },
-        { columnId: 'c', fields: [] },
-      ]);
-
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
-        },
-      };
-
-      context = {
-        chartType: 'area',
-        axisPosition: 'right',
-        palette: {
-          name: 'temperature',
-          type: 'palette',
-        },
-        metrics: [
-          {
-            agg: 'count',
-            isFullReference: false,
-            fieldName: 'document',
-            params: {},
-            color: '#68BC00',
-          },
-        ],
-        timeInterval: 'auto',
-        format: 'bytes',
-      } as VisualizeEditorLayersContext;
-    });
-
-    it('sets the context configuration correctly', () => {
-      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
-        prevState: {
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'line',
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        layerId: 'first',
-        context,
-      });
-      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
-      expect((state?.layers[0] as XYDataLayerConfig).yConfig).toStrictEqual([
-        {
-          axisMode: 'right',
-          color: '#68BC00',
-          forAccessor: 'a',
-        },
-      ]);
-
-      expect((state?.layers[0] as XYDataLayerConfig).palette).toStrictEqual({
-        name: 'temperature',
-        type: 'palette',
-      });
-    });
-
-    it('sets the context configuration correctly for reference lines', () => {
-      const newContext = {
-        ...context,
-        metrics: [
-          {
-            agg: 'static_value',
-            fieldName: 'document',
-            isFullReference: true,
-            color: '#68BC00',
-            params: {
-              value: '10',
-            },
-          },
-        ],
-      };
-      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
-        prevState: {
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'line',
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        layerId: 'first',
-        context: newContext,
-      });
-      const firstLayer = state?.layers[0] as XYDataLayerConfig;
-      expect(firstLayer).toHaveProperty('seriesType', 'area');
-      expect(firstLayer).toHaveProperty('layerType', 'referenceLine');
-      expect(firstLayer.yConfig).toStrictEqual([
-        {
-          axisMode: 'right',
-          color: '#68BC00',
-          forAccessor: 'a',
-          fill: 'below',
-        },
-      ]);
-    });
-  });
-
-  describe('#getVisualizationSuggestionFromContext', () => {
-    let context: VisualizeEditorContext;
-    let suggestions: Suggestion[];
-
-    beforeEach(() => {
-      suggestions = [
-        {
-          title: 'Average of AvgTicketPrice over timestamp',
-          score: 0.3333333333333333,
-          hide: true,
-          visualizationId: 'lnsXY',
-          visualizationState: {
-            legend: {
-              isVisible: true,
-              position: 'right',
-            },
-            valueLabels: 'hide',
-            fittingFunction: 'None',
-            axisTitlesVisibilitySettings: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            tickLabelsVisibilitySettings: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            labelsOrientation: {
-              x: 0,
-              yLeft: 0,
-              yRight: 0,
-            },
-            gridlinesVisibilitySettings: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            preferredSeriesType: 'bar_stacked',
-            layers: [
-              {
-                layerId: 'e71c3459-ddcf-4a13-94a1-bf91f7b40175',
-                seriesType: 'bar_stacked',
-                xAccessor: '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
-                accessors: ['0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b'],
-                layerType: 'data',
+      describe('getDropProps', () => {
+        it('dragging operation: returns reorder for the same group existing columns', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                filterOperations: () => true,
+                indexPatternId: '1',
               },
-            ],
-          },
-          keptLayerIds: [],
-          datasourceState: {
-            layers: {
-              'e71c3459-ddcf-4a13-94a1-bf91f7b40175': {
-                indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-                columns: {
-                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1': {
-                    label: 'timestamp',
-                    dataType: 'date',
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                    isBucketed: true,
-                    scale: 'interval',
-                    params: {
-                      interval: 'auto',
-                    },
-                  },
-                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b': {
-                    label: 'Average of AvgTicketPrice',
-                    dataType: 'number',
-                    operationType: 'average',
-                    sourceField: 'AvgTicketPrice',
-                    isBucketed: false,
-                    scale: 'ratio',
-                  },
+              source: {
+                columnId: 'annotationColumn2',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                id: 'annotationColumn2',
+                humanData: { label: 'Event' },
+                indexPatternId: '1',
+              },
+              indexPatterns: {},
+            })
+          ).toEqual({ dropTypes: ['reorder'] });
+        });
+        it('dragging operation: returns duplicate for the same group existing column and not existing column', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                isNewColumn: true,
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              source: {
+                columnId: 'annotationColumn2',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                id: 'annotationColumn2',
+                humanData: { label: 'Event' },
+                indexPatternId: 'indexPattern1',
+              },
+              indexPatterns: {},
+            })
+          ).toEqual({ dropTypes: ['duplicate_compatible'] });
+        });
+        it('dragging operation: returns replace_duplicate and replace for replacing to different layer', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'first',
+                filterOperations: () => true,
+                indexPatternId: '1',
+              },
+              source: {
+                columnId: 'annotationColumn2',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                id: 'annotationColumn2',
+                humanData: { label: 'Event' },
+                indexPatternId: '1',
+              },
+              indexPatterns: {},
+            })
+          ).toEqual({
+            dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+          });
+        });
+        it('dragging operation: returns duplicate and move for replacing to different layer for empty column', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'first',
+                isNewColumn: true,
+                indexPatternId: 'indexPattern1',
+                filterOperations: () => true,
+              },
+              source: {
+                columnId: 'annotationColumn2',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                id: 'annotationColumn2',
+                humanData: { label: 'Event' },
+                indexPatternId: 'indexPattern1',
+              },
+              indexPatterns: {},
+            })
+          ).toEqual({
+            dropTypes: ['move_compatible', 'duplicate_compatible'],
+          });
+        });
+        it('dragging operation: does not allow to drop for different operations on different data views', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'first',
+                isNewColumn: true,
+                indexPatternId: 'indexPattern1',
+                filterOperations: () => true,
+              },
+              source: {
+                columnId: 'annotationColumn2',
+                groupId: 'xAnnotations',
+                layerId: 'second',
+                id: 'annotationColumn2',
+                humanData: { label: 'Event' },
+                indexPatternId: 'indexPattern2',
+              },
+              indexPatterns: {},
+            })
+          ).toEqual(undefined);
+        });
+        it('dragging field: should add a new dimension when dragged to a new dimension', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'first',
+                isNewColumn: true,
+                indexPatternId: 'indexPattern1',
+                filterOperations: () => true,
+              },
+              source: {
+                field: {
+                  name: 'agent.keyword',
+                  displayName: 'agent.keyword',
                 },
-                columnOrder: [
-                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
-                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b',
+                indexPatternId: 'indexPattern1',
+                id: 'agent.keyword',
+                humanData: {
+                  label: 'agent.keyword',
+                  position: 2,
+                },
+              },
+              indexPatterns: {},
+            })
+          ).toEqual({ dropTypes: ['field_add'] });
+        });
+        it('dragging field: should replace an existing dimension when dragged to a dimension', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'first',
+                indexPatternId: 'indexPattern1',
+                filterOperations: () => true,
+              },
+              source: {
+                field: {
+                  name: 'agent.keyword',
+                  displayName: 'agent.keyword',
+                },
+                indexPatternId: 'indexPattern1',
+                id: 'agent.keyword',
+                humanData: {
+                  label: 'agent.keyword',
+                  position: 2,
+                },
+              },
+              indexPatterns: {},
+            })
+          ).toEqual({ dropTypes: ['field_replace'] });
+        });
+        it('dragging field: should not allow to drop when data view conflict', () => {
+          expect(
+            xyVisualization.getDropProps?.({
+              state: 'datasourceState',
+              target: {
+                columnId: 'annotationColumn',
+                groupId: 'xAnnotations',
+                layerId: 'first',
+                indexPatternId: 'indexPattern1',
+                filterOperations: () => true,
+              },
+              source: {
+                field: {
+                  name: 'agent.keyword',
+                  displayName: 'agent.keyword',
+                },
+                indexPatternId: 'indexPattern2',
+                id: 'agent.keyword',
+                humanData: {
+                  label: 'agent.keyword',
+                  position: 2,
+                },
+              },
+              indexPatterns: {},
+            })
+          ).toEqual(undefined);
+        });
+      });
+
+      describe('onDrop', () => {
+        it('dragging field: should add a new dimension when dragged to a new dimension', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'annotation',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation2],
+                    ignoreGlobalFilters: true,
+                  },
                 ],
-                incompleteColumns: {},
               },
-            },
-          },
-          datasourceId: 'indexpattern',
-          columns: 2,
-          changeType: 'initial',
-        },
-      ] as unknown as Suggestion[];
-
-      context = {
-        layers: [
-          {
-            indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-            xFieldName: 'order_date',
-            xMode: 'date_histogram',
-            chartType: 'area',
-            axisPosition: 'left',
-            palette: {
-              type: 'palette',
-              name: 'default',
-            },
-            metrics: [
+              dropType: 'field_add',
+              source: {
+                field: {
+                  name: 'agent.keyword',
+                },
+                indexPatternId: 'indexPattern1',
+                id: 'agent.keyword',
+                humanData: {
+                  label: 'agent.keyword',
+                  position: 2,
+                },
+              },
+              target: {
+                layerId: 'annotation',
+                groupId: 'xAnnotation',
+                columnId: 'newColId',
+                filterOperations: Boolean,
+                indexPatternId: 'indexPattern1',
+              },
+            }).layers[0]
+          ).toEqual({
+            layerId: 'annotation',
+            layerType: LayerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [
+              exampleAnnotation2,
               {
-                agg: 'count',
-                isFullReference: false,
-                fieldName: 'document',
-                params: {},
-                color: '#68BC00',
+                filter: {
+                  language: 'kuery',
+                  query: 'agent.keyword: *',
+                  type: 'kibana_query',
+                },
+                id: 'newColId',
+                key: {
+                  type: 'point_in_time',
+                },
+                label: 'agent.keyword: *',
+                timeField: 'timestamp',
+                type: 'query',
               },
             ],
-            timeInterval: 'auto',
-          },
-        ],
-        type: 'lnsXY',
-        configuration: {
-          fill: '0.5',
-          legend: {
-            isVisible: true,
-            position: 'right',
-            shouldTruncate: true,
-            maxLines: true,
-          },
-          gridLinesVisibility: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          extents: {
-            yLeftExtent: {
-              mode: 'full',
-            },
-            yRightExtent: {
-              mode: 'full',
-            },
-          },
-        },
-        isVisualizeAction: true,
-      } as VisualizeEditorContext;
-    });
+            ignoreGlobalFilters: true,
+          });
+        });
+        it('dragging field: should replace an existing dimension when dragged to a dimension', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'annotation',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              dropType: 'field_replace',
+              source: {
+                field: {
+                  name: 'agent.keyword',
+                },
+                indexPatternId: 'indexPattern1',
+                id: 'agent.keyword',
+                humanData: {
+                  label: 'agent.keyword',
+                  position: 2,
+                },
+              },
+              target: {
+                layerId: 'annotation',
+                groupId: 'xAnnotation',
+                columnId: 'an1',
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+            }).layers[0]
+          ).toEqual({
+            layerId: 'annotation',
+            layerType: LayerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [
+              {
+                filter: {
+                  language: 'kuery',
+                  query: 'agent.keyword: *',
+                  type: 'kibana_query',
+                },
+                icon: 'circle',
+                id: 'an1',
+                key: {
+                  type: 'point_in_time',
+                },
+                label: 'agent.keyword: *',
+                timeField: 'timestamp',
+                type: 'query',
+              },
+            ],
+            ignoreGlobalFilters: true,
+          });
+        });
+        it('dragging operation: should copy previous column if passed and assign a new id', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'annotation',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation2],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              dropType: 'duplicate_compatible',
+              source: {
+                layerId: 'annotation',
+                groupId: 'xAnnotation',
+                columnId: 'an2',
+                id: 'an2',
+                humanData: { label: 'an2' },
+                indexPatternId: 'indexPattern1',
+              },
+              target: {
+                layerId: 'annotation',
+                groupId: 'xAnnotation',
+                columnId: 'newColId',
+                filterOperations: Boolean,
+                indexPatternId: 'indexPattern1',
+              },
+            }).layers[0]
+          ).toEqual({
+            layerId: 'annotation',
+            layerType: LayerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
+            ignoreGlobalFilters: true,
+          });
+        });
+        it('dragging operation: should reorder a dimension to a annotation layer', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'annotation',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation, exampleAnnotation2],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              source: {
+                layerId: 'annotation',
+                groupId: 'xAnnotation',
+                columnId: 'an2',
+                id: 'an2',
+                humanData: { label: 'label' },
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              target: {
+                layerId: 'annotation',
+                groupId: 'xAnnotation',
+                columnId: 'an1',
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              dropType: 'reorder',
+            }).layers[0]
+          ).toEqual({
+            layerId: 'annotation',
+            layerType: LayerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2, exampleAnnotation],
+            ignoreGlobalFilters: true,
+          });
+        });
 
-    it('updates the visualization state correctly based on the context', () => {
-      const suggestion = xyVisualization?.getVisualizationSuggestionFromContext?.({
-        suggestions,
-        context,
-      }) as XYSuggestion;
-      expect(suggestion?.visualizationState?.fillOpacity).toEqual(0.5);
-      expect(suggestion?.visualizationState?.yRightExtent).toEqual({ mode: 'full' });
-      expect(suggestion?.visualizationState?.legend).toEqual({
-        isVisible: true,
-        maxLines: true,
-        position: 'right',
-        shouldTruncate: true,
+        it('dragging operation: should duplicate the annotations and replace the target in another annotation layer', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'first',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation],
+                    ignoreGlobalFilters: true,
+                  },
+                  {
+                    layerId: 'second',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation2],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              source: {
+                layerId: 'first',
+                groupId: 'xAnnotation',
+                columnId: 'an1',
+                id: 'an1',
+                humanData: { label: 'label' },
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              target: {
+                layerId: 'second',
+                groupId: 'xAnnotation',
+                columnId: 'an2',
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              dropType: 'replace_duplicate_compatible',
+            }).layers
+          ).toEqual([
+            {
+              layerId: 'first',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
+            },
+            {
+              layerId: 'second',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [{ ...exampleAnnotation, id: 'an2' }],
+              ignoreGlobalFilters: true,
+            },
+          ]);
+        });
+        it('dragging operation: should swap the annotations between layers', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'first',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation],
+                    ignoreGlobalFilters: true,
+                  },
+                  {
+                    layerId: 'second',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation2],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              source: {
+                layerId: 'first',
+                groupId: 'xAnnotation',
+                columnId: 'an1',
+                id: 'an1',
+                humanData: { label: 'label' },
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              target: {
+                layerId: 'second',
+                groupId: 'xAnnotation',
+                columnId: 'an2',
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              dropType: 'swap_compatible',
+            }).layers
+          ).toEqual([
+            {
+              layerId: 'first',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: true,
+            },
+            {
+              layerId: 'second',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
+            },
+          ]);
+        });
+        it('dragging operation: should replace the target in another annotation layer', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'first',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation],
+                    ignoreGlobalFilters: true,
+                  },
+                  {
+                    layerId: 'second',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation2],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              source: {
+                layerId: 'first',
+                groupId: 'xAnnotation',
+                columnId: 'an1',
+                id: 'an1',
+                humanData: { label: 'label' },
+                filterOperations: () => true,
+              },
+              target: {
+                layerId: 'second',
+                groupId: 'xAnnotation',
+                columnId: 'an2',
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              dropType: 'replace_compatible',
+            }).layers
+          ).toEqual([
+            {
+              layerId: 'first',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [],
+              ignoreGlobalFilters: true,
+            },
+            {
+              layerId: 'second',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
+            },
+          ]);
+        });
+        it('dragging operation: should move compatible to another annotation layer', () => {
+          expect(
+            xyVisualization.onDrop!({
+              frame,
+              prevState: {
+                ...exampleState(),
+                layers: [
+                  {
+                    layerId: 'first',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [exampleAnnotation],
+                    ignoreGlobalFilters: true,
+                  },
+                  {
+                    layerId: 'second',
+                    layerType: LayerTypes.ANNOTATIONS,
+                    indexPatternId: 'indexPattern1',
+                    annotations: [],
+                    ignoreGlobalFilters: true,
+                  },
+                ],
+              },
+              source: {
+                layerId: 'first',
+                groupId: 'xAnnotation',
+                columnId: 'an1',
+                id: 'an1',
+                humanData: { label: 'label' },
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              target: {
+                layerId: 'second',
+                groupId: 'xAnnotation',
+                columnId: 'an2',
+                filterOperations: () => true,
+                indexPatternId: 'indexPattern1',
+              },
+              dropType: 'move_compatible',
+            }).layers
+          ).toEqual([
+            {
+              layerId: 'first',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [],
+              ignoreGlobalFilters: true,
+            },
+            {
+              layerId: 'second',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
+              annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
+            },
+          ]);
+        });
       });
     });
   });
@@ -1104,7 +1183,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -1116,7 +1195,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         seriesType: 'area',
         xAccessor: undefined,
         accessors: [],
@@ -1131,16 +1210,17 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
               },
               {
                 layerId: 'ann',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -1150,16 +1230,17 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'area',
           xAccessor: 'a',
           accessors: [],
         },
         {
           layerId: 'ann',
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
+          ignoreGlobalFilters: true,
         },
       ]);
     });
@@ -1311,7 +1392,7 @@ describe('xy_visualization', () => {
           frame,
           layerId: 'first',
         }).groups;
-        expect(splitGroup.required).toBe(true);
+        expect(splitGroup.requiredMinDimensionCount).toBe(1);
       });
 
       test.each([
@@ -1351,7 +1432,7 @@ describe('xy_visualization', () => {
             frame,
             layerId: 'first',
           }).groups;
-          expect(splitGroup.required).toBe(false);
+          expect(splitGroup.requiredMinDimensionCount).toBe(0);
         }
       );
 
@@ -1452,7 +1533,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              layerType: layerTypes.REFERENCELINE,
+              layerType: LayerTypes.REFERENCELINE,
             },
           ],
         ],
@@ -1500,7 +1581,7 @@ describe('xy_visualization', () => {
             frame,
             layerId: 'first',
           }).groups;
-          expect(splitGroup.required).toBe(true);
+          expect(splitGroup.requiredMinDimensionCount).toBe(1);
         }
       );
     });
@@ -1519,7 +1600,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               splitAccessor: undefined,
               xAccessor: undefined,
@@ -1527,7 +1608,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'referenceLine',
-              layerType: layerTypes.REFERENCELINE,
+              layerType: LayerTypes.REFERENCELINE,
               accessors: [],
               yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
             },
@@ -1869,7 +1950,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               splitAccessor: undefined,
               xAccessor: 'a',
@@ -1877,9 +1958,10 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'annotations',
-              layerType: layerTypes.ANNOTATIONS,
+              layerType: LayerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
             },
           ],
         };
@@ -2100,7 +2182,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -2116,14 +2198,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -2139,14 +2221,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -2163,7 +2245,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2179,7 +2261,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2187,7 +2269,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2204,14 +2286,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -2232,14 +2314,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2247,7 +2329,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'third',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -2269,21 +2351,21 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'third',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
@@ -2306,7 +2388,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -2354,7 +2436,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -2362,7 +2444,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -2376,7 +2458,7 @@ describe('xy_visualization', () => {
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
           longMessage:
-            'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });
@@ -2410,7 +2492,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -2418,7 +2500,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -2431,7 +2513,8 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
+          longMessage:
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });
@@ -2526,6 +2609,18 @@ describe('xy_visualization', () => {
         const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
         expect(errors).toHaveLength(4);
       });
+      it('should contain error if current annotation contains no time field set', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: undefined,
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining('Time field is missing'),
+          })
+        );
+      });
     });
   });
 
@@ -2575,7 +2670,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['b'],
@@ -2695,8 +2790,9 @@ describe('xy_visualization', () => {
               ...baseState.layers,
               {
                 layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -2714,9 +2810,10 @@ describe('xy_visualization', () => {
           ...baseState.layers,
           {
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -2732,8 +2829,9 @@ describe('xy_visualization', () => {
               ...baseState.layers,
               {
                 layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
+                layerType: LayerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -2751,12 +2849,90 @@ describe('xy_visualization', () => {
           ...baseState.layers,
           {
             layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
           },
         ],
       });
+    });
+  });
+
+  describe('getSupportedActionsForLayer', () => {
+    it('should return no actions for a data layer', () => {
+      expect(
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+      ).toHaveLength(0);
+    });
+
+    it('should return one action for an annotation layer', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: LayerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+                indexPatternId: 'myIndexPattern',
+              },
+            ],
+          },
+          jest.fn()
+        )
+      ).toEqual([
+        expect.objectContaining({
+          displayName: 'Keep global filters',
+          description:
+            'All the dimensions configured in this layer respect filters defined at kibana level.',
+          icon: 'eye',
+          isCompatible: true,
+          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
+        }),
+      ]);
+    });
+
+    it('should return an action that performs a state update on click', () => {
+      const baseState = exampleState();
+      const setState = jest.fn();
+      const [action] = xyVisualization.getSupportedActionsForLayer?.(
+        'annotation',
+        {
+          ...baseState,
+          layers: [
+            ...baseState.layers,
+            {
+              layerId: 'annotation',
+              layerType: LayerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: true,
+              indexPatternId: 'myIndexPattern',
+            },
+          ],
+        },
+        setState
+      )!;
+      action.execute();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: expect.arrayContaining([
+            {
+              layerId: 'annotation',
+              layerType: LayerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: false,
+              indexPatternId: 'myIndexPattern',
+            },
+          ]),
+        })
+      );
     });
   });
 });
