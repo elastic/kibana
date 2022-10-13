@@ -229,11 +229,11 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           aria-label="Filter Out"
-          class="euiButtonEmpty euiButtonEmpty--primary"
+          class="euiButtonEmpty css-9t7nyf-empty-primary"
           data-test-subj="abc"
           type="button"
         >
@@ -257,11 +257,11 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         aria-label="Filter Out"
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="abc"
         type="button"
       >
