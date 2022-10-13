@@ -23,8 +23,8 @@ export interface DateRange {
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
-    const now = moment(currentDate).startOf('minute');
-    const startTime = moment(timeWindow.calendar.start_time);
+    const now = moment.utc(currentDate).startOf('minute');
+    const startTime = moment.utc(timeWindow.calendar.start_time);
 
     const differenceInUnit = now.diff(startTime, unit);
     if (differenceInUnit < 0) {

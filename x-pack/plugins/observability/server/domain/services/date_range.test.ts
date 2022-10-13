@@ -15,109 +15,109 @@ const BIWEEKLY = new Duration(2, DurationUnit.w);
 const MONTHLY = new Duration(1, DurationUnit.M);
 const QUARTERLY = new Duration(1, DurationUnit.Q);
 
-const NOW = new Date('2022-10-11T08:31:00.000Z');
+const NOW = new Date('2022-08-11T08:31:00.000Z');
 
 describe('toDateRange', () => {
   describe('for calendar aligned time window', () => {
     describe("with 'weekly' duration", () => {
       it('computes the date range when starting the same day', () => {
-        const timeWindow = aCalendarTimeWindow(WEEKLY, new Date('2022-10-11T08:30:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(WEEKLY, new Date('2022-08-11T08:30:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-10-11T08:30:00.000Z'),
-          to: new Date('2022-10-18T08:30:00.000Z'),
+          from: new Date('2022-08-11T08:30:00.000Z'),
+          to: new Date('2022-08-18T08:30:00.000Z'),
         });
       });
 
       it('computes the date range when starting a month ago', () => {
-        const timeWindow = aCalendarTimeWindow(WEEKLY, new Date('2022-09-05T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(WEEKLY, new Date('2022-07-05T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-10-10T08:00:00.000Z'),
-          to: new Date('2022-10-17T08:00:00.000Z'),
+          from: new Date('2022-08-09T08:00:00.000Z'),
+          to: new Date('2022-08-16T08:00:00.000Z'),
         });
       });
     });
 
-    describe("With 'bi-weekly' duration", () => {
+    describe("with 'bi-weekly' duration", () => {
       it('computes the date range when starting the same day', () => {
-        const timeWindow = aCalendarTimeWindow(BIWEEKLY, new Date('2022-10-11T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(BIWEEKLY, new Date('2022-08-11T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-10-11T08:00:00.000Z'),
-          to: new Date('2022-10-25T08:00:00.000Z'),
+          from: new Date('2022-08-11T08:00:00.000Z'),
+          to: new Date('2022-08-25T08:00:00.000Z'),
         });
       });
 
       it('computes the date range when starting a month ago', () => {
-        const timeWindow = aCalendarTimeWindow(BIWEEKLY, new Date('2022-09-05T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(BIWEEKLY, new Date('2022-07-05T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-10-10T08:00:00.000Z'),
-          to: new Date('2022-10-24T08:00:00.000Z'),
+          from: new Date('2022-08-09T08:00:00.000Z'),
+          to: new Date('2022-08-23T08:00:00.000Z'),
         });
       });
     });
 
-    describe("With 'monthly' duration", () => {
+    describe("with 'monthly' duration", () => {
       it('computes the date range when starting the same month', () => {
-        const timeWindow = aCalendarTimeWindow(MONTHLY, new Date('2022-10-01T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(MONTHLY, new Date('2022-08-01T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-10-01T08:00:00.000Z'),
-          to: new Date('2022-11-01T08:00:00.000Z'),
+          from: new Date('2022-08-01T08:00:00.000Z'),
+          to: new Date('2022-09-01T08:00:00.000Z'),
         });
       });
 
       it('computes the date range when starting a month ago', () => {
-        const timeWindow = aCalendarTimeWindow(MONTHLY, new Date('2022-09-01T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(MONTHLY, new Date('2022-07-01T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-10-01T08:00:00.000Z'),
-          to: new Date('2022-11-01T08:00:00.000Z'),
+          from: new Date('2022-08-01T08:00:00.000Z'),
+          to: new Date('2022-09-01T08:00:00.000Z'),
         });
       });
     });
 
-    describe("With 'quarterly' duration", () => {
+    describe("with 'quarterly' duration", () => {
       it('computes the date range when starting the same quarter', () => {
-        const timeWindow = aCalendarTimeWindow(QUARTERLY, new Date('2022-09-01T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(QUARTERLY, new Date('2022-07-01T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-09-01T08:00:00.000Z'),
-          to: new Date('2022-12-01T09:00:00.000Z'),
+          from: new Date('2022-07-01T08:00:00.000Z'),
+          to: new Date('2022-10-01T08:00:00.000Z'),
         });
       });
 
       it('computes the date range when starting a quarter ago', () => {
-        const timeWindow = aCalendarTimeWindow(QUARTERLY, new Date('2022-06-01T08:00:00.000Z'));
+        const timeWindow = aCalendarTimeWindow(QUARTERLY, new Date('2022-03-01T08:00:00.000Z'));
         expect(toDateRange(timeWindow, NOW)).toEqual({
-          from: new Date('2022-09-01T08:00:00.000Z'),
-          to: new Date('2022-12-01T09:00:00.000Z'),
+          from: new Date('2022-06-01T08:00:00.000Z'),
+          to: new Date('2022-09-01T08:00:00.000Z'),
         });
       });
     });
   });
 
-  describe('For rolling time window', () => {
+  describe('for rolling time window', () => {
     it("computes the date range using a '30days' rolling window", () => {
       expect(toDateRange(aRollingTimeWindow(THIRTY_DAYS), NOW)).toEqual({
-        from: new Date('2022-09-11T08:31:00.000Z'),
-        to: new Date('2022-10-11T08:31:00.000Z'),
+        from: new Date('2022-07-12T08:31:00.000Z'),
+        to: new Date('2022-08-11T08:31:00.000Z'),
       });
     });
 
     it("computes the date range using a 'weekly' rolling window", () => {
       expect(toDateRange(aRollingTimeWindow(WEEKLY), NOW)).toEqual({
-        from: new Date('2022-10-04T08:31:00.000Z'),
-        to: new Date('2022-10-11T08:31:00.000Z'),
+        from: new Date('2022-08-04T08:31:00.000Z'),
+        to: new Date('2022-08-11T08:31:00.000Z'),
       });
     });
 
     it("computes the date range using a 'monthly' rolling window", () => {
       expect(toDateRange(aRollingTimeWindow(MONTHLY), NOW)).toEqual({
-        from: new Date('2022-09-11T08:31:00.000Z'),
-        to: new Date('2022-10-11T08:31:00.000Z'),
+        from: new Date('2022-07-11T08:31:00.000Z'),
+        to: new Date('2022-08-11T08:31:00.000Z'),
       });
     });
 
     it("computes the date range using a 'quarterly' rolling window", () => {
       expect(toDateRange(aRollingTimeWindow(QUARTERLY), NOW)).toEqual({
-        from: new Date('2022-07-11T08:31:00.000Z'),
-        to: new Date('2022-10-11T08:31:00.000Z'),
+        from: new Date('2022-05-11T08:31:00.000Z'),
+        to: new Date('2022-08-11T08:31:00.000Z'),
       });
     });
   });
