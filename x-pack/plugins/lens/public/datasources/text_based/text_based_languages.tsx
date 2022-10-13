@@ -209,8 +209,9 @@ export function getTextBasedDatasource({
       };
     },
 
-    syncColumns() {
-      throw new Error('Not yet implemented!');
+    syncColumns({ state }) {
+      // TODO implement this for real
+      return state;
     },
 
     onRefreshIndexPattern() {},
