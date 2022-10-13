@@ -481,7 +481,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           currentIndexPattern,
           fieldsExistenceReader.hasFieldData
         )}
-        hideDetails={hideDetails}
+        hideDetails={hideDetails || field.type === 'document'}
         itemIndex={itemIndex}
         groupIndex={groupIndex}
         dropOntoWorkspace={dropOntoWorkspace}

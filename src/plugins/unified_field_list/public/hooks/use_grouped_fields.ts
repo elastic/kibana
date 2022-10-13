@@ -148,6 +148,27 @@ export const useGroupedFields = ({
           }
         ),
       },
+      EmptyFields: {
+        fields: groupedFields.emptyFields,
+        fieldCount: groupedFields.emptyFields.length,
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+        isInitiallyOpen: false,
+        showInAccordion: true,
+        hideDetails: false,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabel', {
+          defaultMessage: 'Empty fields',
+        }),
+        defaultNoFieldsMessage: i18n.translate(
+          'unifiedFieldList.useGroupedFields.noEmptyDataLabel',
+          {
+            defaultMessage: `There are no empty fields.`,
+          }
+        ),
+        helpText: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabelHelp', {
+          defaultMessage: 'Empty fields did not contain any values based on your filters.',
+        }),
+      },
       MetaFields: {
         fields: groupedFields.metaFields,
         fieldCount: groupedFields.metaFields.length,
@@ -169,29 +190,8 @@ export const useGroupedFields = ({
     };
 
     // do not show empty field accordion if there is no existence information
-    if (!fieldsExistenceInfoUnavailable) {
-      // TODO: check ordering of groups in the list
-      fieldGroupDefinitions[FieldsGroupNames.EmptyFields] = {
-        fields: groupedFields.emptyFields,
-        fieldCount: groupedFields.emptyFields.length,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: false,
-        showInAccordion: true,
-        hideDetails: false,
-        title: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabel', {
-          defaultMessage: 'Empty fields',
-        }),
-        defaultNoFieldsMessage: i18n.translate(
-          'unifiedFieldList.useGroupedFields.noEmptyDataLabel',
-          {
-            defaultMessage: `There are no empty fields.`,
-          }
-        ),
-        helpText: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabelHelp', {
-          defaultMessage: 'Empty fields did not contain any values based on your filters.',
-        }),
-      };
+    if (fieldsExistenceInfoUnavailable) {
+      delete fieldGroupDefinitions.EmptyFields;
     }
 
     if (onOverrideFieldGroupDetails) {
