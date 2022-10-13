@@ -24,7 +24,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex, nonNullable } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -78,7 +78,7 @@ export function getInfoAtZeroIndexedPosition(
   if (ast.type === 'function') {
     const [match] = ast.args
       .map((arg) => getInfoAtZeroIndexedPosition(arg, zeroIndexedPosition, ast))
-      .filter((a) => a);
+      .filter(nonNullable);
     if (match) {
       return match;
     } else if (ast.location) {
@@ -297,7 +297,7 @@ function getArgumentSuggestions(
       const fields = validOperation.operations
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
-        .filter((field) => field);
+        .filter(nonNullable);
       const fieldArg = ast.args[0];
       const location = typeof fieldArg !== 'string' && (fieldArg as TinymathVariable).location;
       let range: monaco.IRange | undefined;
