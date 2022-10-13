@@ -15,12 +15,12 @@ import {
   textCss,
   descriptionContainerCss,
   headerCss,
-} from './exception_list_header.styles';
+} from './list_header.styles';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
 import { EditModal } from './edit_modal';
 import { ListDetails, Rule } from '../types';
-import { useExceptionListHeader } from './hooks/use_exception_list_header';
+import { useExceptionListHeader } from './use_list_header';
 
 interface ExceptionListHeaderComponentProps {
   name: string;
@@ -33,6 +33,7 @@ interface ExceptionListHeaderComponentProps {
   onEditListDetails: (listDetails: ListDetails) => void;
   onExportList: () => void;
   onDeleteList: () => void;
+  onManageRules: () => void;
 }
 
 const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
@@ -46,6 +47,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   onEditListDetails,
   onExportList,
   onDeleteList,
+  onManageRules,
 }) => {
   const { isModalVisible, listDetails, onEdit, onSave, onCancel } = useExceptionListHeader({
     name,
@@ -88,6 +90,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             securityLinkAnchorComponent={securityLinkAnchorComponent}
             onExportList={onExportList}
             onDeleteList={onDeleteList}
+            onManageRules={onManageRules}
           />,
         ]}
         breadcrumbs={[

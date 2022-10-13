@@ -40,7 +40,7 @@ export const generateLinedRulesMenuItems = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem css={itemContentCss}>
-            <SecurityLinkAnchor referenceName={rule.name} referenceId={rule.id} />
+            <SecurityLinkAnchor external referenceName={rule.name} referenceId={rule.id} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiContextMenuItem>

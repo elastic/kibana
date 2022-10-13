@@ -6,12 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListDetailsProvider } from './context';
 import { ExceptionListDetailsComponent } from './exception_list_details';
+import type { ExceptionListWithRules } from './types';
 
 export const ExceptionListDetails = memo(
-  ({ list, isReadOnly = false }: { list: ExceptionListSchema; isReadOnly: boolean }) => (
+  ({ list, isReadOnly = false }: { list: ExceptionListWithRules; isReadOnly: boolean }) => (
     <ExceptionListDetailsProvider>
       <ExceptionListDetailsComponent list={list} isReadOnly={isReadOnly} />
     </ExceptionListDetailsProvider>

@@ -7,7 +7,7 @@
 
 import type { ExceptionListInfo } from '../../../../detections/pages/detection_engine/rules/all/exceptions/use_all_exception_lists';
 
-export { ExceptionListInfo as ExceptionListWithRules };
+export type { ExceptionListInfo as ExceptionListWithRules };
 
 export interface ExceptionListDetailsComponentProps {
   isReadOnly: boolean;

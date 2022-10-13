@@ -18,21 +18,27 @@ import { ListWithSearch } from './list_with_search';
 import { useManageExceptionListDetails } from './hooks/use_manage_exception_list_details';
 import type { ExceptionListDetailsComponentProps } from './types';
 import { ListDetailsLinkAnchor } from '../../components/list_details_link_anchor';
+import { ManageRules } from './manage_rules';
 
 export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProps> = ({
   isReadOnly = false,
   list,
 }) => {
   const {
+    listId,
     linkedRules,
     exportedList,
     viewerStatus,
     listName,
     listDescription,
-    listId,
+    showManageRulesFlyout,
     onEditListDetails,
     onExportList,
     onDeleteList,
+    onManageRules,
+    onSaveManageRules,
+    onCancelManageRules,
+    onRuleSelectionChange,
   } = useManageExceptionListDetails({ isReadOnly, list });
   return (
     <>
@@ -46,6 +52,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         onEditListDetails={onEditListDetails}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
       />
       {viewerStatus === ViewerStatus.ERROR ? (
         <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />
@@ -53,6 +60,14 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         <>
           <AutoDownload blob={exportedList} name={listName} />
           <ListWithSearch list={list} />
+          {showManageRulesFlyout ? (
+            <ManageRules
+              linkedRules={linkedRules}
+              onSave={onSaveManageRules}
+              onCancel={onCancelManageRules}
+              onRuleSelectionChange={onRuleSelectionChange}
+            />
+          ) : null}
         </>
       )}
     </>

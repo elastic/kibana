@@ -15,6 +15,7 @@ export const useManageExceptionListDetails = ({
   isReadOnly,
   list,
 }: ExceptionListDetailsComponentProps) => {
+  const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
   const [exportedList, setExportedList] = useState<Blob>();
   const {
     name: listName,
@@ -77,6 +78,17 @@ export const useManageExceptionListDetails = ({
     }
   }, [handleErrorStatus, http, list.id, list.namespace_type, listName, toasts]);
 
+  const onManageRules = useCallback(() => {
+    setShowManageRulesFlyout(true);
+  }, []);
+  const onSaveManageRules = useCallback(() => {
+    // TODO: call API To save
+    setShowManageRulesFlyout(false);
+  }, []);
+  const onCancelManageRules = useCallback(() => {
+    setShowManageRulesFlyout(false);
+  }, []);
+  const onRuleSelectionChange = useCallback(() => {}, []);
   return {
     linkedRules,
     exportedList,
@@ -84,8 +96,13 @@ export const useManageExceptionListDetails = ({
     listName,
     listDescription,
     listId,
+    showManageRulesFlyout,
     onEditListDetails,
     onExportList,
     onDeleteList,
+    onManageRules,
+    onSaveManageRules,
+    onCancelManageRules,
+    onRuleSelectionChange,
   };
 };

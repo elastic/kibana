@@ -110,3 +110,29 @@ export const EXCEPTION_LIST_DELETED_SUCCESSFULLY = (listName: string) =>
     values: { listName },
     defaultMessage: '{listName} deleted successfully',
   });
+export const MANAGE_RULES_CANCEL = i18n.translate(
+  'xpack.securitySolution.exceptions.list.manage_rules_cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const MANAGE_RULES_SAVE = i18n.translate(
+  'xpack.securitySolution.exceptions.list.manage_rules_save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+export const MANAGE_RULES_HEADER = i18n.translate(
+  'xpack.securitySolution.exceptions.list.manage_rules_header',
+  {
+    defaultMessage: 'Manege rules',
+  }
+);
+
+export const MANAGE_RULES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.list.manage_rules_description',
+  {
+    defaultMessage: 'Link or unlink rules to this exception list.',
+  }
+);

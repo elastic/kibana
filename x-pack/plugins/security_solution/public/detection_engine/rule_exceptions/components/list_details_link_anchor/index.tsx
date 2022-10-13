@@ -15,16 +15,18 @@ import { SecuritySolutionLinkAnchor } from '../../../../common/components/links'
 interface LinkAnchorProps {
   referenceName: string;
   referenceId: string;
+  external?: boolean;
 }
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const LinkAnchor: FC<LinkAnchorProps> = ({ referenceName, referenceId }) => {
+const LinkAnchor: FC<LinkAnchorProps> = ({ referenceName, referenceId, external }) => {
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj="SecuritySolutionLinkAnchor"
       deepLinkId={SecurityPageName.rules}
       path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
+      external={external}
     >
       {referenceName}
     </SecuritySolutionLinkAnchor>

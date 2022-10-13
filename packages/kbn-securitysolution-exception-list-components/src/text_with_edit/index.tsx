@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Interpolation, Theme } from '@emotion/react';
-import { textWithEditContainerCss } from '../exception_list_header/exception_list_header.styles';
+import { textWithEditContainerCss } from '../list_header/list_header.styles';
 
 interface TextWithEditProps {
   isReadonly: boolean;

@@ -14,5 +14,5 @@ export * from './src/exception_items';
 export * from './src/exception_item_card';
 export * from './src/value_with_space_warning';
 export * from './src/types';
-export * from './src/exception_list_header';
+export * from './src/list_header';
 export * from './src/header_menu';

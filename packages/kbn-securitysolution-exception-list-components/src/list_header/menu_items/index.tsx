@@ -8,7 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
-import { headerMenuCss } from '../exception_list_header.styles';
+import { headerMenuCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
 import { generateLinedRulesMenuItems } from '../../generate_linked_rules_menu_item';
@@ -19,6 +19,7 @@ interface MenuItemsProps {
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onExportList: () => void;
   onDeleteList: () => void;
+  onManageRules: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = ({
@@ -28,6 +29,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   isReadonly,
   onExportList,
   onDeleteList,
+  onManageRules,
 }) => {
   const referencedLinks = useMemo(
     () =>
@@ -63,7 +65,13 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiButton data-test-subj={`${dataTestSubj || ''}ManageRulesButton`} fill>
+        <EuiButton
+          data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
+          fill
+          onClick={() => {
+            if (typeof onExportList === 'function') onManageRules();
+          }}
+        >
           {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
         </EuiButton>
       </EuiFlexItem>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useState } from 'react';
-import { ListDetails } from '../../types';
+import { ListDetails } from '../types';
 
 interface UseExceptionListHeaderProps {
   name: string;
