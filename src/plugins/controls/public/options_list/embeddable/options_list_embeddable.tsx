@@ -35,7 +35,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { optionsListReducers } from '../options_list_reducers';
+import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -105,6 +105,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     >({
       embeddable: this,
       reducers: optionsListReducers,
+      initialComponentState: getDefaultComponentState(),
     });
 
     this.initialize();

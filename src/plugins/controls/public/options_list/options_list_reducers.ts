@@ -16,6 +16,7 @@ import { getIpRangeQuery } from '../../common/options_list/ip_search';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   searchString: { value: '', valid: true },
+  exclude: false,
 });
 
 export const optionsListReducers = {
