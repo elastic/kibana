@@ -124,7 +124,8 @@ export const sortColumns = (
         ...acc,
         ...(key === 'metric' ? metricsWithoutDuplicates : visSchemas[key])?.reduce(
           (newAcc, schema) => {
-            newAcc[schema.aggId] = schema.accessor;
+            // metrics should always have sort more than buckets
+            newAcc[schema.aggId] = key === 'metric' ? schema.accessor : 1000 + schema.accessor;
             return newAcc;
           },
           {}

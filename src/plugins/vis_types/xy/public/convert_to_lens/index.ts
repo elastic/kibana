@@ -112,22 +112,22 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     return null;
   }
 
-  // doesn't support sibling pipeline aggs and split series together
+  // doesn't support several layers with terms split series which uses one of the metrics as order agg
   if (
-    visSchemas.group?.length &&
-    dataLayers.some((l) => Object.keys(l.buckets.customBuckets).length)
-  ) {
-    return null;
-  }
-
-  // doesn't support several metrics with terms split series which uses one of the metrics as order agg
-  if (
-    visSchemas.metric.length > 1 &&
+    dataLayers.length > 1 &&
     dataLayers.some((l) =>
       l.columns.some(
         (c) => c.isSplit && 'orderBy' in c.params && c.params.orderBy.type === 'column'
       )
     )
+  ) {
+    return null;
+  }
+
+  // doesn't support sibling pipeline aggs and split series together
+  if (
+    visSchemas.group?.length &&
+    dataLayers.some((l) => Object.keys(l.buckets.customBuckets).length)
   ) {
     return null;
   }
