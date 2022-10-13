@@ -49,5 +49,5 @@ export function AgentConfigurationTable({
     setting: variables[k],
     value: get(data, k), // TODO do we want default values?
   }));
-  return <EuiBasicTable items={items} columns={columns}></EuiBasicTable>;
+  return <EuiBasicTable items={items} columns={columns} />;
 }
