@@ -272,7 +272,7 @@ export const DashboardListing = ({
       } = {}
     ) => {
       return findDashboards
-        .findSavedObjects(searchTerm, {
+        .findSavedObjects({
           search: searchTerm,
           size: listingLimit,
           hasReference: references,
