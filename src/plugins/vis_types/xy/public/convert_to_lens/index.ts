@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
@@ -26,6 +27,13 @@ export interface Layer {
   isReferenceLineLayer: boolean;
   collapseFn?: string;
 }
+
+const SIBBLING_PIPELINE_AGGS: string[] = [
+  METRIC_TYPES.AVG_BUCKET,
+  METRIC_TYPES.SUM_BUCKET,
+  METRIC_TYPES.MAX_BUCKET,
+  METRIC_TYPES.MIN_BUCKET,
+];
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
@@ -98,7 +106,14 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     visibleSeries
       .reduce<Array<{ metrics: string[]; type: string; mode: string }>>((acc, s) => {
         const series = acc.find(({ type, mode }) => type === s.type && mode === s.mode);
-        if (series) {
+        // sibling pipeline agg always generate new layer because of custom bucket
+        if (
+          series &&
+          visSchemas.metric.some(
+            (m) =>
+              m.aggId?.split('.')[0] === s.data.id && !SIBBLING_PIPELINE_AGGS.includes(m.aggType)
+          )
+        ) {
           series.metrics.push(s.data.id);
         } else {
           acc.push({ metrics: [s.data.id], type: s.type, mode: s.mode });
