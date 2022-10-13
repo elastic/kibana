@@ -13,7 +13,7 @@ import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
-import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
 import type {

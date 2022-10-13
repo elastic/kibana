@@ -15,7 +15,7 @@ import type {
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../../config';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../../../signals/reason_formatters';
 import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';

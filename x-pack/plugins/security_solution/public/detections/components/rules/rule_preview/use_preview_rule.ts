@@ -13,8 +13,8 @@ import type {
   CreateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 
-import { previewRule } from '../../../containers/detection_engine/rules/api';
-import * as i18n from '../../../containers/detection_engine/rules/translations';
+import { previewRule } from '../../../../detection_engine/rule_management/api/api';
+import * as i18n from '../../../../detection_engine/rule_management/logic/translations';
 import { transformOutput } from '../../../containers/detection_engine/rules/transforms';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';

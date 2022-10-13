@@ -301,8 +301,6 @@ export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/store
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
 export const INTERNAL_DETECTION_ENGINE_RULES_URL = '/internal/detection_engine/rules' as const;
-export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 export const DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL =

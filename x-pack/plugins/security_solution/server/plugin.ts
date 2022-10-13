@@ -80,9 +80,10 @@ import type {
   CreateQueryRuleAdditionalOptions,
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
-// eslint-disable-next-line no-restricted-imports
-import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
+import {
+  legacyRulesNotificationAlertType,
+  legacyIsNotificationAlertExecutor,
+} from './lib/detection_engine/rule_actions_legacy';
 import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';

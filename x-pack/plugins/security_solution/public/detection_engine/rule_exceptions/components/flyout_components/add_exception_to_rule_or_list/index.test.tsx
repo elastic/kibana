@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../../rule_management/logic/types';
 
 import { ExceptionsAddToRulesOrLists } from '.';
 

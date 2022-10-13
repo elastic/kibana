@@ -57,7 +57,7 @@ import type {
   RuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
-} from '../schemas/rule_schemas';
+} from '../rule_schema';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';

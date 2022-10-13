@@ -15,7 +15,7 @@ import { createMockConfig } from '../../routes/__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 jest.mock('../../signals/utils', () => ({

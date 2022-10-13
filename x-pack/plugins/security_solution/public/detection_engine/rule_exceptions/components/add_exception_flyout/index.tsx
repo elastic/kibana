@@ -41,7 +41,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
-import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
+import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18nCommon from '../../../../common/translations';
@@ -52,7 +52,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { Loader } from '../../../../common/components/loader';
 import { useAddOrUpdateException } from '../../logic/use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { useFetchOrCreateRuleExceptionList } from '../../logic/use_fetch_or_create_rule_exception_list';
 import { ExceptionItemComments } from '../item_comments';
 import {
@@ -70,6 +69,7 @@ import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../../utils/types';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
+import { useRule } from '../../../rule_management/logic/use_rule';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
@@ -144,7 +144,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const { http, unifiedSearch, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
-  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
+  const { data: maybeRule, isLoading: isRuleLoading } = useRule(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
@@ -214,7 +214,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const handleDissasociationSuccess = useCallback(
     (id: string): void => {
       handleRuleChange(true);
-      addSuccess(sharedI18n.DISSASOCIATE_LIST_SUCCESS(id));
+      addSuccess(sharedI18n.DISASSOCIATE_LIST_SUCCESS(id));
       onCancel();
     },
     [handleRuleChange, addSuccess, onCancel]
@@ -222,7 +222,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   const handleDissasociationError = useCallback(
     (error: Error): void => {
-      addError(error, { title: sharedI18n.DISSASOCIATE_EXCEPTION_LIST_ERROR });
+      addError(error, { title: sharedI18n.DISASSOCIATE_EXCEPTION_LIST_ERROR });
       onCancel();
     },
     [addError, onCancel]

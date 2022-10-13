@@ -29,7 +29,7 @@ import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { useRule } from '../../../rule_management/logic/use_rule';
 import type { AlertData } from '../../utils/types';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
@@ -42,7 +42,7 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-hook-utils'),
   useAsync: jest.fn(),
 }));
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
@@ -57,7 +57,7 @@ const mockUseFetchOrCreateRuleExceptionList = useFetchOrCreateRuleExceptionList 
 >;
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
-const mockUseRuleAsync = useRuleAsync as jest.Mock;
+const mockUseRuleAsync = useRule as jest.Mock;
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -93,7 +93,7 @@ describe('When the add exception modal is opened', () => {
       },
     ]);
     mockUseRuleAsync.mockImplementation(() => ({
-      rule: getRulesSchemaMock(),
+      data: getRulesSchemaMock(),
     }));
   });
 

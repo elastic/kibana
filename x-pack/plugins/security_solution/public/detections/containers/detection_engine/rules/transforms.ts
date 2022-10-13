@@ -11,7 +11,7 @@ import type {
   CreateRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
-import type { Rule } from './types';
+import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these

@@ -39,11 +39,10 @@ import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
-import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
+import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../../utils/translations';
@@ -63,6 +62,7 @@ import { Loader } from '../../../../common/components/loader';
 import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
+import { useRule } from '../../../rule_management/logic/use_rule';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;
@@ -122,7 +122,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const { http, unifiedSearch, data } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
-  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
+  const { data: maybeRule, isLoading: isRuleLoading } = useRule(ruleId);
   const [updateError, setUpdateError] = useState<ErrorInfo | null>(null);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
@@ -188,7 +188,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
 
   const handleDissasociationSuccess = useCallback(
     (id: string): void => {
-      addSuccess(sharedI18n.DISSASOCIATE_LIST_SUCCESS(id));
+      addSuccess(sharedI18n.DISASSOCIATE_LIST_SUCCESS(id));
 
       if (onRuleChange) {
         onRuleChange();
@@ -201,7 +201,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
 
   const handleDissasociationError = useCallback(
     (error: Error): void => {
-      addError(error, { title: sharedI18n.DISSASOCIATE_EXCEPTION_LIST_ERROR });
+      addError(error, { title: sharedI18n.DISASSOCIATE_EXCEPTION_LIST_ERROR });
       onCancel();
     },
     [addError, onCancel]

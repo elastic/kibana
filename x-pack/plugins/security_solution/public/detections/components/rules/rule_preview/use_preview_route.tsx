@@ -8,7 +8,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { usePreviewRule } from './use_preview_rule';
-import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
+import { formatPreviewRule } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import type {
   AboutStepRule,

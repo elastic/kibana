@@ -26,7 +26,7 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 
 const StyledFlexItem = styled(EuiFlexItem)`

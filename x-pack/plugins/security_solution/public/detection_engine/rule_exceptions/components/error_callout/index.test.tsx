@@ -10,21 +10,21 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { getListMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { useDissasociateExceptionList } from '../../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list';
+import { useDisassociateExceptionList } from '../../../../detections/containers/detection_engine/rules/use_disassociate_exception_list';
 import { ErrorCallout } from '.';
-import { savedRuleMock } from '../../../../detections/containers/detection_engine/rules/mock';
+import { savedRuleMock } from '../../../rule_management/logic/mock';
 
 jest.mock(
-  '../../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list'
+  '../../../../detections/containers/detection_engine/rules/use_disassociate_exception_list'
 );
 
 const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('ErrorCallout', () => {
-  const mockDissasociate = jest.fn();
+  const mockDisassociate = jest.fn();
 
   beforeEach(() => {
-    (useDissasociateExceptionList as jest.Mock).mockReturnValue([false, mockDissasociate]);
+    (useDisassociateExceptionList as jest.Mock).mockReturnValue([false, mockDisassociate]);
   });
 
   it('it renders error details', () => {
@@ -104,7 +104,7 @@ describe('ErrorCallout', () => {
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'Error fetching exception list'
     );
-    expect(wrapper.find('[data-test-subj="errorCalloutDissasociateButton"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="errorCalloutDisassociateButton"]').exists()).toBeFalsy();
   });
 
   it('it renders specific missing exceptions list error', () => {
@@ -133,10 +133,10 @@ describe('ErrorCallout', () => {
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'The associated exception list (some_uuid) no longer exists. Please remove the missing exception list to add additional exceptions to the detection rule.'
     );
-    expect(wrapper.find('[data-test-subj="errorCalloutDissasociateButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="errorCalloutDisassociateButton"]').exists()).toBeTruthy();
   });
 
-  it('it dissasociates list from rule when remove exception list clicked ', () => {
+  it('it disassociates list from rule when remove exception list clicked ', () => {
     const wrapper = mountWithIntl(
       <ErrorCallout
         http={mockKibanaHttpService}
@@ -153,8 +153,8 @@ describe('ErrorCallout', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="errorCalloutDissasociateButton"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="errorCalloutDisassociateButton"]').at(0).simulate('click');
 
-    expect(mockDissasociate).toHaveBeenCalledWith([]);
+    expect(mockDisassociate).toHaveBeenCalledWith([]);
   });
 });

@@ -29,7 +29,7 @@ import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
-import type { Rule } from '../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -266,25 +266,25 @@ export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails =>
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
 
-export type PrePackagedRuleStatus =
+export type PrePackagedRuleInstallationStatus =
   | 'ruleInstalled'
   | 'ruleNotInstalled'
   | 'ruleNeedUpdate'
   | 'someRuleUninstall'
   | 'unknown';
 
-export type PrePackagedTimelineStatus =
+export type PrePackagedTimelineInstallationStatus =
   | 'timelinesNotInstalled'
   | 'timelinesInstalled'
   | 'someTimelineUninstall'
   | 'timelineNeedUpdate'
   | 'unknown';
 
-export const getPrePackagedRuleStatus = (
+export const getPrePackagedRuleInstallationStatus = (
   rulesInstalled?: number,
   rulesNotInstalled?: number,
   rulesNotUpdated?: number
-): PrePackagedRuleStatus => {
+): PrePackagedRuleInstallationStatus => {
   if (
     rulesNotInstalled != null &&
     rulesInstalled === 0 &&
@@ -319,11 +319,11 @@ export const getPrePackagedRuleStatus = (
   }
   return 'unknown';
 };
-export const getPrePackagedTimelineStatus = (
+export const getPrePackagedTimelineInstallationStatus = (
   timelinesInstalled?: number,
   timelinesNotInstalled?: number,
   timelinesNotUpdated?: number
-): PrePackagedTimelineStatus => {
+): PrePackagedTimelineInstallationStatus => {
   if (
     timelinesNotInstalled != null &&
     timelinesInstalled === 0 &&

@@ -15,7 +15,7 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';

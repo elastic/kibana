@@ -9,10 +9,10 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import * as rulesApi from '../../../detections/containers/detection_engine/rules/api';
+import * as rulesApi from '../../rule_management/api/api';
 import * as listsApi from '@kbn/securitysolution-list-api';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
+import { savedRuleMock } from '../../rule_management/logic/mock';
 import type {
   ExceptionListType,
   ListArray,

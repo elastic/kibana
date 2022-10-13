@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -239,7 +239,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(
             supertest,
@@ -326,7 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(
             supertest,
@@ -361,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(
             supertest,
@@ -418,7 +418,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "eb079c62-4481-4d6e-9643-3ca499df7aaa" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/external_alerts.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/external_alerts.json
           // since this rule does not have existing exceptions_list that we are going to use for tests
           const immutableRule = await getRule(
             supertest,
@@ -472,7 +472,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,

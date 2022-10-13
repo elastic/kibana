@@ -12,9 +12,9 @@ import {
   goToRuleEditPage,
   executeRulesBulkAction,
   bulkExportRules,
-} from '../../../pages/detection_engine/rules/all/actions';
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/actions';
 import { RuleActionsOverflow } from '.';
-import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -31,7 +31,7 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
-jest.mock('../../../pages/detection_engine/rules/all/actions');
+jest.mock('../../../../detection_engine/rule_management_ui/components/rules_table/actions');
 
 const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
 const bulkExportRulesMock = bulkExportRules as jest.Mock;

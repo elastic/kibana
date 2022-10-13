@@ -22,14 +22,14 @@ import {
 } from '../../utils/helpers';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import { SecurityPageName } from '../../../../../common/constants';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
 } from '../../../../../common/detection_engine/schemas/response';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from './translations';
 
 /**
