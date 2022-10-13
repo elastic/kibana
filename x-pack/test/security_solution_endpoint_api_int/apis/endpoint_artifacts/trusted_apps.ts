@@ -16,14 +16,10 @@ import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/commo
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const security = getService('security');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
@@ -31,12 +27,61 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
+    const userAndRoles: {
+      [rollName: string]: { username: string; password: string; permissions?: any };
+    } = {
+      readTrustedApps: {
+        permissions: {
+          feature: {
+            siem: ['minimal_all', 'trusted_applications_read'],
+          },
+          spaces: ['*'],
+        },
+        username: 'read_trusted_apps',
+        password: 'test',
+      },
+      createTrustedApps: {
+        permissions: {
+          feature: {
+            siem: ['minimal_all', 'trusted_applications_all'],
+          },
+          spaces: ['*'],
+        },
+        username: 'write_trusted_apps',
+        password: 'test',
+      },
+      noneTrustedApps: {
+        permissions: {
+          feature: {
+            siem: ['minimal_all'],
+          },
+          spaces: ['*'],
+        },
+        username: 'none_trusted_apps',
+        password: 'test',
+      },
+    };
+
     before(async () => {
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
 
       // create role/user
-      await createUserAndRole(getService, ROLES.detections_admin);
+      for (const role in userAndRoles) {
+        if (userAndRoles.hasOwnProperty(role)) {
+          if (userAndRoles[role].permissions) {
+            await security.role.create(role, {
+              kibana: [userAndRoles[role].permissions],
+            });
+          }
+
+          await security.user.create(userAndRoles[role].username, {
+            password: userAndRoles[role].password,
+            roles: [role],
+            full_name: userAndRoles[role].username,
+          });
+        }
+      }
     });
 
     after(async () => {
@@ -45,7 +90,12 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       // delete role/user
-      await deleteUserAndRole(getService, ROLES.detections_admin);
+      for (const role in userAndRoles) {
+        if (userAndRoles.hasOwnProperty(role)) {
+          await security.role.delete(role);
+          await security.user.delete(userAndRoles[role].username);
+        }
+      }
     });
 
     const anEndpointArtifactError = (res: { body: { message: string } }) => {
@@ -93,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
       > = [
         {
           method: 'post',
+          info: 'create single item',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () => {
             return exceptionsGenerator.generateTrustedAppForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
@@ -100,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           method: 'put',
+          info: 'update single item',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () =>
             exceptionsGenerator.generateTrustedAppForUpdate({
@@ -110,14 +162,61 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
 
-      describe('and has authorization to manage endpoint security', () => {
+      const needsWritePrivilege: TrustedAppApiCallsInterface = [
+        {
+          method: 'delete',
+          info: 'delete single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'post',
+          info: 'list export',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&id=${trustedAppData.artifact.id}`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
+      const needsReadPrivilege: TrustedAppApiCallsInterface = [
+        {
+          method: 'get',
+          info: 'single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'list summary',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'find items',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
+      describe('and has authorization to write trusted apps', () => {
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = trustedAppApiCall.getBody();
 
             body.entries[0].field = 'some.invalid.field';
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -130,7 +229,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries.push({ ...body.entries[0] });
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -150,7 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -183,7 +284,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -196,7 +298,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.os_types = ['linux', 'windows'];
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -209,7 +312,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
+            // Using superuser there as we need custo license for this action
             await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -217,57 +322,51 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
         }
+        for (const trustedAppApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
+          it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('write_trusted_apps', 'test')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(200);
+          });
+        }
       });
 
-      describe('and user DOES NOT have authorization to manage endpoint security', () => {
-        const allTrustedAppApiCalls: TrustedAppApiCallsInterface = [
-          ...trustedAppApiCalls,
-          {
-            method: 'get',
-            info: 'single item',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            info: 'list summary',
-            get path() {
-              return `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'delete',
-            info: 'single item',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'post',
-            info: 'list export',
-            get path() {
-              return `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&id=1`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            info: 'single items',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
-            },
-            getBody: () => undefined,
-          },
-        ];
-
-        for (const trustedAppApiCall of allTrustedAppApiCalls) {
-          it(`should error on [${trustedAppApiCall.method}]`, async () => {
+      describe('and user has authorization to read trusted apps', () => {
+        for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
+          it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLES.detections_admin, 'changeme')
+              .auth('read_trusted_apps', 'test')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(403, {
+                status_code: 403,
+                message: 'EndpointArtifactError: Endpoint authorization failure',
+              });
+          });
+        }
+
+        for (const trustedAppApiCall of needsReadPrivilege) {
+          it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('read_trusted_apps', 'test')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(200);
+          });
+        }
+      });
+
+      describe('and user has no authorization to trusted apps', () => {
+        for (const trustedAppApiCall of [
+          ...trustedAppApiCalls,
+          ...needsWritePrivilege,
+          ...needsReadPrivilege,
+        ]) {
+          it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth('none_trusted_apps', 'test')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(403, {
