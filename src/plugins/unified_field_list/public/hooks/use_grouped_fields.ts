@@ -21,13 +21,11 @@ import { type ExistingFieldsReader } from './use_existing_fields';
 
 const defaultFieldGroups: {
   specialFields: DataViewField[];
-  selectedFields: DataViewField[];
   availableFields: DataViewField[];
   emptyFields: DataViewField[];
   metaFields: DataViewField[];
 } = {
   specialFields: [],
-  selectedFields: [],
   availableFields: [],
   emptyFields: [],
   metaFields: [],
@@ -75,11 +73,8 @@ export const useGroupedFields = ({
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
     const containsData = (field: DataViewField) => {
-      if (!dataView) {
-        return true;
-      }
-      const overallField = dataView.getFieldByName(field.name);
-      return overallField && hasFieldData(dataViewId, overallField.name);
+      const overallField = dataView?.getFieldByName?.(field.name);
+      return Boolean(overallField && hasFieldData(dataViewId, overallField.name));
     };
 
     const allSupportedTypesFields = onSupportedFieldFilter

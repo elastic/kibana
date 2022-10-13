@@ -14,7 +14,7 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
-import { FieldList } from '@kbn/unified-field-list-plugin/public';
+import { FieldListGrouped } from '@kbn/unified-field-list-plugin/public';
 import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
 import { FieldItem } from './field_item';
@@ -229,46 +229,17 @@ const initialState: FormBasedPrivateState = {
   },
 };
 
-function getFrameAPIMock({ indexPatterns, ...rest }: Partial<DataViewsState> = {}) {
+function getFrameAPIMock({
+  indexPatterns,
+  ...rest
+}: Partial<DataViewsState> & { indexPatterns: DataViewsState['indexPatterns'] }) {
   const frameAPI = createMockFramePublicAPI();
-  const defaultIndexPatterns = {
-    '1': {
-      id: '1',
-      title: 'idx1',
-      timeFieldName: 'timestamp',
-      hasRestrictions: false,
-      fields: fieldsOne,
-      getFieldByName: getFieldByNameFactory(fieldsOne),
-      isPersisted: true,
-      spec: {},
-    },
-    '2': {
-      id: '2',
-      title: 'idx2',
-      timeFieldName: 'timestamp',
-      hasRestrictions: true,
-      fields: fieldsTwo,
-      getFieldByName: getFieldByNameFactory(fieldsTwo),
-      isPersisted: true,
-      spec: {},
-    },
-    '3': {
-      id: '3',
-      title: 'idx3',
-      timeFieldName: 'timestamp',
-      hasRestrictions: false,
-      fields: fieldsThree,
-      getFieldByName: getFieldByNameFactory(fieldsThree),
-      isPersisted: true,
-      spec: {},
-    },
-  };
 
   return {
     ...frameAPI,
     dataViews: {
       ...frameAPI.dataViews,
-      indexPatterns: indexPatterns ?? defaultIndexPatterns,
+      indexPatterns,
       ...rest,
     },
   };
@@ -302,6 +273,40 @@ describe('FormBased Data Panel', () => {
       spec: {},
     },
   };
+
+  const defaultIndexPatterns = {
+    '1': {
+      id: '1',
+      title: 'idx1',
+      timeFieldName: 'timestamp',
+      hasRestrictions: false,
+      fields: fieldsOne,
+      getFieldByName: getFieldByNameFactory(fieldsOne),
+      isPersisted: true,
+      spec: {},
+    },
+    '2': {
+      id: '2',
+      title: 'idx2',
+      timeFieldName: 'timestamp',
+      hasRestrictions: true,
+      fields: fieldsTwo,
+      getFieldByName: getFieldByNameFactory(fieldsTwo),
+      isPersisted: true,
+      spec: {},
+    },
+    '3': {
+      id: '3',
+      title: 'idx3',
+      timeFieldName: 'timestamp',
+      hasRestrictions: false,
+      fields: fieldsThree,
+      getFieldByName: getFieldByNameFactory(fieldsThree),
+      isPersisted: true,
+      spec: {},
+    },
+  };
+
   let defaultProps: Parameters<typeof InnerFormBasedDataPanel>[0] & {
     showNoDataPopover: () => void;
   };
@@ -311,7 +316,7 @@ describe('FormBased Data Panel', () => {
   beforeEach(() => {
     core = coreMock.createStart();
     dataViews = dataViewPluginMocks.createStartContract();
-    const frame = getFrameAPIMock();
+    const frame = getFrameAPIMock({ indexPatterns: defaultIndexPatterns });
     defaultProps = {
       data: dataPluginMock.createStartContract(),
       dataViews,
@@ -337,6 +342,22 @@ describe('FormBased Data Panel', () => {
       activeIndexPatterns: [frame.dataViews.indexPatterns['1']],
     };
 
+    core.uiSettings.get.mockImplementation((key: string) => {
+      if (key === UI_SETTINGS.META_FIELDS) {
+        return [];
+      }
+    });
+    dataViews.get.mockImplementation(async (id: string) => {
+      const dataView = [
+        indexPatterns.a,
+        indexPatterns.b,
+        defaultIndexPatterns['1'],
+        defaultIndexPatterns['2'],
+        defaultIndexPatterns['3'],
+      ].find((indexPattern) => indexPattern.id === id) as unknown as DataView;
+      dataView.metaFields = ['_id'];
+      return dataView;
+    });
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
     (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockClear();
     (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockClear();
@@ -370,16 +391,6 @@ describe('FormBased Data Panel', () => {
       currentIndexPatternId: keyof typeof indexPatterns;
       otherProps?: object;
     }) {
-      core.uiSettings.get.mockImplementation((key: string) => {
-        if (key === UI_SETTINGS.META_FIELDS) {
-          return [];
-        }
-      });
-      dataViews.get.mockImplementation(async (id: string) => {
-        return [indexPatterns.a, indexPatterns.b].find(
-          (indexPattern) => indexPattern.id === id
-        ) as unknown as DataView;
-      });
       return {
         ...defaultProps,
         indexPatternService: createIndexPatternServiceMock({
@@ -442,7 +453,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 2 available fields. 3 empty fields. 0 meta fields.');
     });
 
     it('loads existence data for current index pattern id', async () => {
@@ -477,7 +488,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('does not load existence data if date and index pattern ids are unchanged', async () => {
@@ -620,7 +631,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 2 available fields. 3 empty fields. 0 meta fields.');
 
       await act(async () => {
         await inst!.setProps({
@@ -655,7 +666,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('shows a loading indicator when loading', async () => {
@@ -684,7 +695,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('3 available fields. 0 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 3 available fields. 0 empty fields. 0 meta fields.');
 
       await act(() => {
         resolveFunction!({
@@ -699,7 +710,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it("should trigger showNoDataPopover if fields don't have data", async () => {
@@ -729,7 +740,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 available fields. 5 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 0 available fields. 5 empty fields. 0 meta fields.');
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
@@ -775,7 +786,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      ).toBe('0 selected fields. 2 available fields. 3 empty fields. 0 meta fields.');
     });
   });
 
@@ -784,15 +795,13 @@ describe('FormBased Data Panel', () => {
     beforeEach(() => {
       props = {
         ...defaultProps,
-        frame: getFrameAPIMock({
-          existingFields: {
-            idx1: {
-              bytes: true,
-              memory: true,
-            },
-          },
-        }),
       };
+
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+        return {
+          existingFieldNames: ['bytes', 'memory'],
+        };
+      });
     });
 
     it('should list all selected fields if exist', async () => {
@@ -800,80 +809,115 @@ describe('FormBased Data Panel', () => {
         ...props,
         layerFields: ['bytes'],
       };
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...newProps} />);
+
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...newProps} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternSelectedFields"]')
+        wrapper!
+          .find('[data-test-subj="fieldListGroupedSelectedFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['bytes']);
     });
 
     it('should not list the selected fields accordion if no fields given', async () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternSelectedFields"]')
+        wrapper!
+          .find('[data-test-subj="fieldListGroupedSelectedFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual([]);
     });
 
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
-      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
+      expect(wrapper!.find(FieldItem).first().prop('field').displayName).toEqual('Records');
+      const availableAccordion = wrapper!.find(
+        '[data-test-subj="fieldListGroupedAvailableFields"]'
+      );
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
-          .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').name)
+        availableAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['memory', 'bytes']);
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+      expect(availableAccordion.find(FieldItem).at(0).prop('exists')).toEqual(true);
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
-      const emptyAccordion = wrapper.find('[data-test-subj="lnsIndexPatternEmptyFields"]');
+      const emptyAccordion = wrapper!.find('[data-test-subj="fieldListGroupedEmptyFields"]');
       expect(
         emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['client', 'source', 'timestamp']);
       expect(
         emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
       ).toEqual(['client', 'source', 'timestampLabel']);
+      expect(emptyAccordion.find(FieldItem).at(1).prop('exists')).toEqual(false);
     });
 
     it('should show meta fields accordion', async () => {
-      const wrapper = mountWithIntl(
-        <InnerFormBasedDataPanel
-          {...props}
-          frame={getFrameAPIMock({
-            indexPatterns: {
-              '1': {
-                ...props.frame.dataViews.indexPatterns['1'],
-                fields: [
-                  ...props.frame.dataViews.indexPatterns['1'].fields,
-                  {
-                    name: '_id',
-                    displayName: '_id',
-                    meta: true,
-                    type: 'string',
-                    searchable: true,
-                    aggregatable: true,
-                  },
-                ],
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(
+          <InnerFormBasedDataPanel
+            {...props}
+            frame={getFrameAPIMock({
+              indexPatterns: {
+                '1': {
+                  ...props.frame.dataViews.indexPatterns['1'],
+                  fields: [
+                    ...props.frame.dataViews.indexPatterns['1'].fields,
+                    {
+                      name: '_id',
+                      displayName: '_id',
+                      meta: true,
+                      type: 'string',
+                      searchable: true,
+                      aggregatable: true,
+                    },
+                  ],
+                },
               },
-            },
-          })}
-        />
-      );
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+            })}
+          />
+        );
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedMetaFields"]')
         .find('button')
         .first()
         .simulate('click');
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+        wrapper!
+          .find('[data-test-subj="fieldListGroupedMetaFields"]')
           .find(FieldItem)
           .first()
           .prop('field').name
@@ -881,183 +925,253 @@ describe('FormBased Data Panel', () => {
     });
 
     it('should display NoFieldsCallout when all fields are empty', async () => {
-      const wrapper = mountWithIntl(
-        <InnerFormBasedDataPanel
-          {...defaultProps}
-          frame={getFrameAPIMock({ existingFields: { idx1: {} } })}
-        />
-      );
-      expect(wrapper.find(EuiCallOut).length).toEqual(2);
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+        return {
+          existingFieldNames: [],
+        };
+      });
+
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
+      expect(wrapper!.find(EuiCallOut).length).toEqual(2);
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
+        wrapper!
+          .find('[data-test-subj="fieldListGroupedAvailableFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual([]);
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        wrapper!
+          .find('[data-test-subj="fieldListGroupedEmptyFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').displayName)
       ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
     it('should display spinner for available fields accordion if existing fields are not loaded yet', async () => {
-      const wrapper = mountWithIntl(
-        <InnerFormBasedDataPanel
-          {...defaultProps}
-          frame={getFrameAPIMock({ existingFields: {} })}
-        />
-      );
+      let resolveFunction: (arg: unknown) => void;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveFunction = resolve;
+        });
+      });
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
       expect(
-        wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]').find(EuiLoadingSpinner)
+        wrapper!.find('[data-test-subj="fieldListGroupedAvailableFields"]').find(EuiLoadingSpinner)
           .length
       ).toEqual(1);
-      wrapper.setProps({ frame: getFrameAPIMock({ existingFields: { idx1: {} } }) });
-      expect(wrapper.find(EuiCallOut).length).toEqual(2);
+      expect(wrapper!.find(EuiCallOut).length).toEqual(0);
+
+      await act(() => {
+        resolveFunction!({
+          existingFieldNames: [],
+        });
+      });
+
+      await wrapper!.update();
+
+      expect(
+        wrapper!.find('[data-test-subj="fieldListGroupedAvailableFields"]').find(EuiLoadingSpinner)
+          .length
+      ).toEqual(0);
+      expect(wrapper!.find(EuiCallOut).length).toEqual(2);
     });
 
-    // TODO: refactor these tests
-    // it('renders correct number of Field Items', () => {
-    //   const wrapper = mountWithIntl(
-    //     <FieldsAccordion {...defaultProps} exists={(field) => field.name === 'timestamp'} />
-    //   );
-    //   expect(wrapper.find(FieldItem).at(0).prop('exists')).toEqual(true);
-    //   expect(wrapper.find(FieldItem).at(1).prop('exists')).toEqual(false);
-    // });
-    //
-    // it('passed correct exists flag to each field', () => {
-    //   const wrapper = mountWithIntl(<FieldsAccordion {...defaultProps} />);
-    //   expect(wrapper.find(FieldItem).length).toEqual(2);
-    // });
+    it('should not allow field details when error', async () => {
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+        throw new Error('test');
+      });
 
-    it('should not allow field details when error', () => {
-      const wrapper = mountWithIntl(
-        <InnerFormBasedDataPanel
-          {...props}
-          frame={getFrameAPIMock({ existenceFetchFailed: true })}
-        />
-      );
+      let wrapper: ReactWrapper;
 
-      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
+      expect(wrapper!.find(FieldListGrouped).prop('fieldGroups')).toEqual(
         expect.objectContaining({
           AvailableFields: expect.objectContaining({ hideDetails: true }),
         })
       );
     });
 
-    it('should allow field details when timeout', () => {
-      const wrapper = mountWithIntl(
-        <InnerFormBasedDataPanel
-          {...props}
-          frame={getFrameAPIMock({ existenceFetchTimeout: true })}
-        />
-      );
+    // it('should allow field details when timeout', () => {
+    //   const wrapper = mountWithIntl(
+    //     <InnerFormBasedDataPanel
+    //       {...props}
+    //       frame={getFrameAPIMock({ existenceFetchTimeout: true })}
+    //     />
+    //   );
+    //
+    //   expect(wrapper.find(FieldListGrouped).prop('fieldGroups')).toEqual(
+    //     expect.objectContaining({
+    //       AvailableFields: expect.objectContaining({ hideDetails: false }),
+    //     })
+    //   );
+    // });
 
-      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
-        expect.objectContaining({
-          AvailableFields: expect.objectContaining({ hideDetails: false }),
-        })
-      );
-    });
+    it('should filter down by name', async () => {
+      let wrapper: ReactWrapper;
 
-    it('should filter down by name', () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper!.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
           target: { value: 'me' },
         });
       });
 
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternEmptyFields"] button')
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedEmptyFields"] button')
         .first()
         .simulate('click');
 
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper!.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
         'timestamp',
       ]);
     });
 
-    it('should announce filter in live region', () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+    it('should announce filter in live region', async () => {
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper!.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
           target: { value: 'me' },
         });
       });
 
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
 
-      expect(wrapper.find('[aria-live="polite"]').at(1).text()).toEqual(
-        '1 available field. 1 empty field. 0 meta fields.'
+      expect(wrapper!.find('[aria-live="polite"]').at(1).text()).toEqual(
+        '0 selected fields. 1 available field. 1 empty field. 0 meta fields.'
       );
     });
 
-    it('should filter down by type', () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+    it('should filter down by type', async () => {
+      let wrapper: ReactWrapper;
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
 
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      await wrapper!.update();
+
+      wrapper!.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper!.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper!.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
       ).toEqual(['amemory', 'bytes']);
     });
 
-    it('should display no fields in groups when filtered by type Record', () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+    it('should display no fields in groups when filtered by type Record', async () => {
+      let wrapper: ReactWrapper;
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
 
-      wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
+      await wrapper!.update();
 
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
+      wrapper!.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper!.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
+
+      expect(wrapper!.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         DOCUMENT_FIELD_NAME,
       ]);
-      expect(wrapper.find(EuiCallOut).length).toEqual(3);
+      expect(wrapper!.find(EuiCallOut).length).toEqual(3);
     });
 
-    it('should toggle type if clicked again', () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+    it('should toggle type if clicked again', async () => {
+      let wrapper: ReactWrapper;
 
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
+      wrapper!.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper!.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      wrapper!.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper!.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
       ).toEqual(['Records', 'amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
-    it('should filter down by type and by name', () => {
-      const wrapper = mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+    it('should filter down by type and by name', async () => {
+      let wrapper: ReactWrapper;
+
+      await act(async () => {
+        wrapper = await mountWithIntl(<InnerFormBasedDataPanel {...props} />);
+        await wrapper.update();
+      });
+
+      await wrapper!.update();
+
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper!.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
           target: { value: 'me' },
         });
       });
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper!.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      wrapper!.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper!.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
       ]);
     });

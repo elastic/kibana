@@ -127,10 +127,10 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
               >
                 {i18n.translate('unifiedFieldList.fieldListGrouped.fieldSearchLiveRegion', {
                   defaultMessage:
-                    '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
+                    '{selectedFields} selected {selectedFields, plural, one {field} other {fields}}. {availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
                   values: {
+                    selectedFields: fieldGroups.SelectedFields?.fields.length || 0,
                     availableFields: fieldGroups.AvailableFields?.fields.length || 0,
-                    // empty fields can be undefined if there is no existence information to be fetched
                     emptyFields: fieldGroups.EmptyFields?.fields.length || 0,
                     metaFields: fieldGroups.MetaFields?.fields.length || 0,
                   },
