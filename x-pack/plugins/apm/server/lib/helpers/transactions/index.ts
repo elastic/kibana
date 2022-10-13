@@ -54,7 +54,7 @@ export async function getHasAggregatedTransactions({
   return response.hits.total.value > 0;
 }
 
-export async function getSearchAggregatedTransactions({
+export async function getSearchTransactionsEvents({
   config,
   start,
   end,

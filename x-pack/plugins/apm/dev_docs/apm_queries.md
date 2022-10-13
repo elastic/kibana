@@ -1,17 +1,20 @@
 ### Table of Contents
- - [Transactions](#transactions)
- - [System metrics](#system-metrics)
- - [Transaction breakdown metrics](#transaction-breakdown-metrics)
- - [Span breakdown metrics](#span-breakdown-metrics)
- - [Service destination metrics](#service-destination-metrics)
- - [Common filters](#common-filters)
+
+- [Transactions](#transactions)
+- [System metrics](#system-metrics)
+- [Transaction breakdown metrics](#transaction-breakdown-metrics)
+- [Span breakdown metrics](#span-breakdown-metrics)
+- [Service destination metrics](#service-destination-metrics)
+- [Common filters](#common-filters)
 
 ---
 
 ### Data model
+
 Elastic APM agents capture different types of information from within their instrumented applications. These are known as events, and can be spans, transactions, errors, or metrics. You can find more information [here](https://www.elastic.co/guide/en/apm/get-started/current/apm-data-model.html).
 
 ### Running examples
+
 You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data.
 
 # Transactions
@@ -34,7 +37,8 @@ A single transaction event where `transaction.duration.us` is the latency.
 or
 
 #### Aggregated (metric) document
-A pre-aggregated document where `_doc_count` is the number of transaction events, and `transaction.duration.histogram` is the latency distribution. 
+
+A pre-aggregated document where `_doc_count` is the number of transaction events, and `transaction.duration.histogram` is the latency distribution.
 
 ```json
 {
@@ -52,7 +56,7 @@ A pre-aggregated document where `_doc_count` is the number of transaction events
 
 You can find all the APM transaction fields [here](https://www.elastic.co/guide/en/apm/server/current/exported-fields-apm-transaction.html).
 
-The decision to use aggregated transactions or not is determined in [`getSearchAggregatedTransactions`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to specify [the transaction index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and [the latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
+The decision to use aggregated transactions or not is determined in [`getSearchTransactionsEvents`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to specify [the transaction index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and [the latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
 
 ### Latency
 
@@ -134,7 +138,6 @@ GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 }
 ```
 
-
 #### Metric-based throughput
 
 ```json
@@ -174,23 +177,23 @@ Noteworthy fields: `event.outcome`
 
 #### Transaction-based failed transaction rate
 
- ```json
+```json
 GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 {
-  "size": 0,
-  "query": {
-    "bool": {
-      "filter": [{ "terms": { "processor.event": ["transaction"] } }]
-    }
-  },
-  "aggs": {
-    "outcomes": {
-      "terms": {
-        "field": "event.outcome",
-        "include": ["failure", "success"]
-      }
-    }
-  }
+ "size": 0,
+ "query": {
+   "bool": {
+     "filter": [{ "terms": { "processor.event": ["transaction"] } }]
+   }
+ },
+ "aggs": {
+   "outcomes": {
+     "terms": {
+       "field": "event.outcome",
+       "include": ["failure", "success"]
+     }
+   }
+ }
 }
 ```
 
@@ -317,7 +320,7 @@ The above example is overly simplified. In reality [we do a bit more](https://gi
 
 # Span breakdown metrics
 
-A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
+A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group.
 
 Span breakdown metrics are used to power the "Time spent by span type" graph. Agents collect summarized metrics about the timings of spans, broken down by `span.type`.
 
@@ -435,7 +438,6 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 ### Throughput
 
 Captures the number of requests made from a service to an (external) endpoint
-
 
 #### Query
 
