@@ -15,8 +15,6 @@ import type {
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
 import {
-  BASE_POLICY_RESPONSE_ROUTE,
-  HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
@@ -24,8 +22,6 @@ import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
 } from '../../../../../common/endpoint/constants';
 import type {
-  GetHostPolicyResponse,
-  HostInfo,
   HostIsolationRequestBody,
   ResponseActionApiResponse,
   HostResultList,
@@ -37,7 +33,6 @@ import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isol
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import type { AppAction } from '../../../../common/store/actions';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
   asStaleResourceState,
@@ -59,7 +54,6 @@ import type {
 } from '../types';
 import type { EndpointPackageInfoStateChanged } from './action';
 import {
-  detailsData,
   endpointPackageInfo,
   endpointPackageVersion,
   getCurrentIsolationRequestState,
@@ -135,10 +129,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState())) {
       const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       await endpointDetailsMiddleware({ store, coreStart, selectedEndpoint });
-    }
-
-    if (action.type === 'endpointDetailsLoad') {
-      await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
     }
 
     // Isolate Host
@@ -471,77 +461,6 @@ async function endpointDetailsListMiddleware({
   }
 }
 
-async function loadEndpointDetails({
-  selectedEndpoint,
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-  selectedEndpoint: string;
-}) {
-  const { getState, dispatch } = store;
-  // call the endpoint details api
-  try {
-    const response = await coreStart.http.get<HostInfo>(
-      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
-    );
-    dispatch({
-      type: 'serverReturnedEndpointDetails',
-      payload: response,
-    });
-
-    try {
-      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-        coreStart.http,
-        [response],
-        nonExistingPolicies(getState())
-      );
-      if (ingestPolicies !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointNonExistingPolicies',
-          payload: ingestPolicies.packagePolicy,
-        });
-      }
-      if (ingestPolicies?.agentPolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointAgentPolicies',
-          payload: ingestPolicies.agentPolicy,
-        });
-      }
-    } catch (error) {
-      // TODO should handle the error instead of logging it to the browser
-      // Also this is an anti-pattern we shouldn't use
-      // Ignore Errors, since this should not hinder the user's ability to use the UI
-      logError(error);
-    }
-  } catch (error) {
-    dispatch({
-      type: 'serverFailedToReturnEndpointDetails',
-      payload: error,
-    });
-  }
-
-  loadEndpointsPendingActions(store);
-
-  // call the policy response api
-  try {
-    const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
-      BASE_POLICY_RESPONSE_ROUTE,
-      { query: { agentId: selectedEndpoint } }
-    );
-    dispatch({
-      type: 'serverReturnedEndpointPolicyResponse',
-      payload: policyResponse,
-    });
-  } catch (error) {
-    dispatch({
-      type: 'serverFailedToReturnEndpointPolicyResponse',
-      payload: error,
-    });
-  }
-}
-
 async function endpointDetailsMiddleware({
   coreStart,
   selectedEndpoint,
@@ -556,6 +475,9 @@ async function endpointDetailsMiddleware({
     type: 'serverCancelledPolicyItemsLoading',
   });
 
+  if (typeof selectedEndpoint === 'undefined') {
+    return;
+  }
   // If user navigated directly to a endpoint details page, load the endpoint list
   if (listData(getState()).length === 0) {
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
@@ -584,10 +506,6 @@ async function endpointDetailsMiddleware({
       type: 'serverCancelledEndpointListLoading',
     });
   }
-  if (typeof selectedEndpoint === 'undefined') {
-    return;
-  }
-  await loadEndpointDetails({ store, coreStart, selectedEndpoint });
 }
 
 export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {

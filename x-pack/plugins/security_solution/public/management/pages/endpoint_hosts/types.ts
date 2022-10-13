@@ -10,7 +10,6 @@ import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type {
   HostInfo,
   Immutable,
-  HostMetadata,
   HostPolicyResponse,
   AppLocation,
   PolicyData,
@@ -35,16 +34,6 @@ export interface EndpointState {
   loading: boolean;
   /** api error from retrieving host list */
   error?: ServerApiError;
-  endpointDetails: {
-    hostDetails: {
-      /** details data for a specific host */
-      details?: Immutable<HostMetadata>;
-      /** details page is retrieving data */
-      detailsLoading: boolean;
-      /** api error from retrieving host details */
-      detailsError?: ServerApiError;
-    };
-  };
   /** Holds the Policy Response for the Host currently being displayed in the details */
   policyResponse?: HostPolicyResponse;
   /** policyResponse is being retrieved */
@@ -83,8 +72,6 @@ export interface EndpointState {
   endpointsTotal: number;
   /** api error for total, actual Endpoints */
   endpointsTotalError?: ServerApiError;
-  /** The policy IDs and revision number of the corresponding agent, and endpoint. May be more recent than what's running */
-  policyVersionInfo?: HostInfo['policy_info'];
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
   /** Host isolation request state for a single endpoint */

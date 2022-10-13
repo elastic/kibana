@@ -12,7 +12,6 @@ import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
-import { HostStatus } from '../../../../../common/endpoint/types';
 import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -44,17 +43,6 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const detailsData = (state: Immutable<EndpointState>) =>
-  state.endpointDetails.hostDetails.details;
-
-export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
-  state.endpointDetails.hostDetails.detailsLoading;
-
-export const detailsError = (
-  state: Immutable<EndpointState>
-): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
-  state.endpointDetails.hostDetails.detailsError;
-
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
 export const policyItemsLoading = (state: Immutable<EndpointState>) => state.policyItemsLoading;
@@ -68,8 +56,6 @@ export const getIsEndpointPackageInfoUninitialized: (state: Immutable<EndpointSt
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
-
-export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
 
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
@@ -162,16 +148,6 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
   });
 
 /**
- * Returns the Host Status which is connected the fleet agent
- */
-export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state: Immutable<EndpointState>) => state.hostStatus,
-  (hostStatus) => {
-    return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
-  }
-);
-
-/**
  * Returns the Policy Response overall status
  */
 export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
@@ -255,10 +231,6 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
-
-export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
-  return (details && isEndpointHostIsolated(details)) || false;
-});
 
 export const getEndpointPendingActionsState = (
   state: Immutable<EndpointState>
