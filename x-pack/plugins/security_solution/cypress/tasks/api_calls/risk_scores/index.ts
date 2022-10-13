@@ -10,8 +10,8 @@ import { RISK_SCORE_URL } from '../../../urls/risk_score';
 import { visit } from '../../login';
 import { RiskScoreEntity } from '../../risk_scores/common';
 import {
-  getCreateLegacyRiskScoreIndicesOptions,
-  getCreateLegacyRiskScoreLatestIndicesOptions,
+  getLegacyRiskScoreIndicesOptions,
+  getLegacyRiskScoreLatestIndicesOptions,
 } from '../../risk_scores/indices';
 import {
   getIngestPipelineName,
@@ -133,7 +133,7 @@ const installLegacyHostRiskScoreModule = (spaceId: string) => {
        * Step 6 create ml_host_risk_score_{spaceId} index
        */
       return createIndex(
-        getCreateLegacyRiskScoreIndicesOptions({
+        getLegacyRiskScoreIndicesOptions({
           spaceId,
           riskScoreEntity: RiskScoreEntity.host,
         })
@@ -153,7 +153,7 @@ const installLegacyHostRiskScoreModule = (spaceId: string) => {
        * Step 8 create ml_host_risk_score_latest_{spaceId} index
        */
       return createIndex(
-        getCreateLegacyRiskScoreLatestIndicesOptions({
+        getLegacyRiskScoreLatestIndicesOptions({
           spaceId,
           riskScoreEntity: RiskScoreEntity.host,
         })
@@ -216,7 +216,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
        * Step 5 create ml_user_risk_score_{spaceId} index
        */
       return createIndex(
-        getCreateLegacyRiskScoreIndicesOptions({
+        getLegacyRiskScoreIndicesOptions({
           spaceId,
           riskScoreEntity: RiskScoreEntity.user,
         })
@@ -236,7 +236,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
        * Step 7 create ml_user_risk_score_latest_{spaceId} index
        */
       return createIndex(
-        getCreateLegacyRiskScoreLatestIndicesOptions({
+        getLegacyRiskScoreLatestIndicesOptions({
           spaceId,
           riskScoreEntity: RiskScoreEntity.user,
         })
