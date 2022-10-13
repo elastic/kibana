@@ -17,15 +17,35 @@ interface IpSegments {
   type: 'ipv4' | 'ipv6' | 'unknown';
 }
 
-const getIpSegments = (searchString: string): IpSegments => {
+export const getIpSegments = (searchString: string): IpSegments => {
   if (searchString.indexOf('.') !== -1) {
+    // ipv4 takes priority - so if search string contains both `.` and `:` then it will just be an invalid ipv4 search
     const ipv4Segments = searchString.split('.').filter((segment) => segment !== '');
     return { segments: ipv4Segments, type: 'ipv4' };
   } else if (searchString.indexOf(':') !== -1) {
+    // note that currently, because of the logic of splitting here, searching for shorthand IPv6 IPs is not supported (for example,
+    // must search for `59fb:0:0:0:0:1005:cc57:6571` and not `59fb::1005:cc57:6571` to get the expected match)
     const ipv6Segments = searchString.split(':').filter((segment) => segment !== '');
     return { segments: ipv6Segments, type: 'ipv6' };
   }
   return { segments: [searchString], type: 'unknown' };
+};
+
+export const getMinMaxIp = (
+  type: 'ipv4' | 'ipv6',
+  segments: IpSegments['segments']
+): { min: string; max: string } => {
+  const isIpv4 = type === 'ipv4';
+  const minIp = isIpv4
+    ? segments.concat(Array(4 - segments.length).fill('0')).join('.')
+    : segments.join(':') + '::';
+  const maxIp = isIpv4
+    ? segments.concat(Array(4 - segments.length).fill('255')).join('.')
+    : segments.concat(Array(8 - segments.length).fill('ffff')).join(':');
+  return {
+    min: minIp,
+    max: maxIp,
+  };
 };
 
 const buildFullIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['rangeQuery'] => {
@@ -41,23 +61,7 @@ const buildFullIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['rangeQ
       },
     ];
   }
-};
-
-const getMinMaxIp = (
-  type: 'ipv4' | 'ipv6',
-  segments: IpSegments['segments']
-): { min: string; max: string } => {
-  const isIpv4 = type === 'ipv4';
-  const minIp = isIpv4
-    ? segments.concat(Array(4 - segments.length).fill('0')).join('.')
-    : segments[0] + '::';
-  const maxIp = isIpv4
-    ? segments.concat(Array(4 - segments.length).fill('255')).join('.')
-    : segments.concat(Array(8 - segments.length).fill('ffff')).join(':');
-  return {
-    min: minIp,
-    max: maxIp,
-  };
+  return undefined;
 };
 
 const buildPartialIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['rangeQuery'] => {
@@ -97,28 +101,18 @@ export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
   }
 
   const ipSegments = getIpSegments(searchString);
-
   if (ipSegments.type === 'ipv4' && ipSegments.segments.length === 4) {
     const ipv4RangeQuery = buildFullIpSearchRangeQuery(ipSegments);
-    if (!Boolean(ipv4RangeQuery)) {
-      return { validSearch: false };
-    }
-    return { validSearch: true, rangeQuery: ipv4RangeQuery };
+    return { validSearch: Boolean(ipv4RangeQuery), rangeQuery: ipv4RangeQuery };
   }
   if (ipSegments.type === 'ipv6' && ipSegments.segments.length === 8) {
     const ipv6RangeQuery = buildFullIpSearchRangeQuery(ipSegments);
-    if (!Boolean(ipv6RangeQuery)) {
-      return { validSearch: false };
-    }
-    return { validSearch: true, rangeQuery: ipv6RangeQuery };
+    return { validSearch: Boolean(ipv6RangeQuery), rangeQuery: ipv6RangeQuery };
   }
 
   const partialRangeQuery = buildPartialIpSearchRangeQuery(ipSegments);
-  if (partialRangeQuery === []) {
-    return { validSearch: false };
-  }
   return {
-    validSearch: true,
+    validSearch: !(partialRangeQuery?.length === 0),
     rangeQuery: partialRangeQuery,
   };
 };
