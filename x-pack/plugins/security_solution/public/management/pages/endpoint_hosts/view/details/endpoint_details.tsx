@@ -7,20 +7,14 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { useGetEndpointDetails } from '../../../../hooks';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import {
-  detailsData,
-  detailsError,
-  hostStatusInfo,
-  policyVersionInfo,
-  showView,
-  uiQueryParams,
-} from '../../store/selectors';
+import { showView, uiQueryParams } from '../../store/selectors';
 import { useEndpointSelector } from '../hooks';
 import * as i18 from '../translations';
 import { ActionsMenu } from './components/actions_menu';
@@ -37,11 +31,12 @@ export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const hostDetails = useEndpointSelector(detailsData);
-  const hostDetailsError = useEndpointSelector(detailsError);
+  const {
+    data: hostDetails,
+    error: hostDetailsError,
+    isFetching: isHostDetailsLoading,
+  } = useGetEndpointDetails(queryParams.selected_endpoint ?? '');
 
-  const policyInfo = useEndpointSelector(policyVersionInfo);
-  const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
   const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -72,9 +67,9 @@ export const EndpointDetails = memo(() => {
               ContentLoadingMarkup
             ) : (
               <EndpointDetailsContent
-                details={hostDetails}
-                policyInfo={policyInfo}
-                hostStatus={hostStatus}
+                details={hostDetails && hostDetails.metadata}
+                policyInfo={hostDetails.policy_info}
+                hostStatus={hostDetails.host_status}
               />
             ),
         },
@@ -96,21 +91,14 @@ export const EndpointDetails = memo(() => {
       }
       return tabs;
     },
-    [
-      canAccessEndpointActionsLogManagement,
-      ContentLoadingMarkup,
-      hostDetails,
-      policyInfo,
-      hostStatus,
-      queryParams,
-    ]
+    [canAccessEndpointActionsLogManagement, ContentLoadingMarkup, hostDetails, queryParams]
   );
 
   const showFlyoutFooter =
     show === 'details' || show === 'policy_response' || show === 'activity_log';
 
   useEffect(() => {
-    if (hostDetailsError !== undefined) {
+    if (hostDetailsError !== null) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
           defaultMessage: 'Could not find host',
@@ -126,9 +114,10 @@ export const EndpointDetails = memo(() => {
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
         <EndpointDetailsFlyoutHeader
+          isHostDetailsLoading={isHostDetailsLoading}
           hasBorder
-          endpointId={hostDetails?.agent.id}
-          hostname={hostDetails?.host?.hostname}
+          endpointId={hostDetails?.metadata.agent.id}
+          hostname={hostDetails?.metadata.host?.hostname}
         />
       )}
       {hostDetails === undefined ? (
@@ -139,23 +128,26 @@ export const EndpointDetails = memo(() => {
         <>
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
-              hostname={hostDetails.host.hostname}
+              hostname={hostDetails?.metadata.host.hostname}
+              isHostDetailsLoading={isHostDetailsLoading}
               // show overview tab if forcing response actions history
               // tab via URL without permission
-              show={!canAccessEndpointActionsLogManagement ? 'details' : show}
-              tabs={getTabs(hostDetails.agent.id)}
+              show={show}
+              tabs={getTabs(hostDetails?.metadata.agent.id)}
             />
           )}
 
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
+          {show === 'policy_response' && (
+            <PolicyResponseFlyoutPanel hostMeta={hostDetails?.metadata} />
+          )}
 
           {(show === 'isolate' || show === 'unisolate') && (
-            <EndpointIsolationFlyoutPanel hostMeta={hostDetails} />
+            <EndpointIsolationFlyoutPanel hostMeta={hostDetails?.metadata} />
           )}
 
           {showFlyoutFooter && (
             <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
-              <ActionsMenu />
+              <ActionsMenu hostMetadata={hostDetails?.metadata} />
             </EuiFlyoutFooter>
           )}
         </>

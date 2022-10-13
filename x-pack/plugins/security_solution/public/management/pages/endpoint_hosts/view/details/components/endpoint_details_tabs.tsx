@@ -48,10 +48,12 @@ EndpointDetailsTab.displayName = 'EndpointDetailsTab';
 export const EndpointDetailsFlyoutTabs = memo(
   ({
     hostname,
+    isHostDetailsLoading,
     show,
     tabs,
   }: {
     hostname: string;
+    isHostDetailsLoading: boolean;
     show: EndpointIndexUIQueryParams['show'];
     tabs: EndpointDetailsTabs[];
   }) => {
@@ -63,7 +65,11 @@ export const EndpointDetailsFlyoutTabs = memo(
 
     return (
       <>
-        <EndpointDetailsFlyoutHeader hostname={hostname} hasBorder>
+        <EndpointDetailsFlyoutHeader
+          hostname={hostname}
+          hasBorder
+          isHostDetailsLoading={isHostDetailsLoading}
+        >
           <EuiTabs bottomBorder={false} style={{ marginBottom: '-25px' }}>
             {renderTabs}
           </EuiTabs>
