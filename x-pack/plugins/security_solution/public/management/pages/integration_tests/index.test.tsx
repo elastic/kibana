@@ -34,7 +34,6 @@ describe('when in the Administration tab', () => {
     expect(await render().findByTestId('noIngestPermissions')).not.toBeNull();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/135166
   it('should display the Management view if user has privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
