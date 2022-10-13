@@ -6,7 +6,7 @@
  */
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getSearchTransactionsEvents } from './transactions';
-import { getSearchAggregatedServiceMetrics } from './service_metrics';
+import { getSearchServiceMetrics } from './service_metrics';
 import { APMConfig } from '../..';
 
 export async function getServiceInventorySearchSource({
@@ -36,7 +36,7 @@ export async function getServiceInventorySearchSource({
   const [searchAggregatedTransactions, searchAggregatedServiceMetrics] =
     await Promise.all([
       getSearchTransactionsEvents({ ...commonProps, config }),
-      getSearchAggregatedServiceMetrics({
+      getSearchServiceMetrics({
         ...commonProps,
         serviceMetricsEnabled,
       }),
