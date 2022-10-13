@@ -228,17 +228,11 @@ export class ElasticV3ServerShipper implements IShipper {
 
         // Send the events now if (validations sorted from cheapest to most CPU expensive):
         // - We are shutting down.
-        // - There are some events in the queue, and we didn't send anything in the last 10 minutes.
-        // - The last time we sent was more than 10 seconds ago and:
-        //   - We reached the minimum batch size of 10kB per request in our leaky bucket.
-        //   - The queue is full (meaning we'll never get to 10kB because the events are very small).
+        // - There are some events in the queue, and we didn't send anything in the last 10 seconds.
         filter(
           () =>
-            (this.internalQueue.length > 0 &&
-              (this.shutdown$.isStopped || Date.now() - this.lastBatchSent >= 10 * MINUTE)) ||
-            (Date.now() - this.lastBatchSent >= 10 * SECOND &&
-              (this.internalQueue.length === MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE ||
-                this.getQueueByteSize(this.internalQueue) >= 10 * KIB))
+            this.shutdown$.isStopped ||
+            (this.internalQueue.length > 0 && Date.now() - this.lastBatchSent >= 10 * SECOND)
         ),
 
         // Send the events:
