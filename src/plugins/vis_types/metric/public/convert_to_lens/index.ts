@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { ConvertMetricVisToLensVisualization } from './types';
 
@@ -42,11 +42,10 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const [{ getColumnsFromVis }, { getConfiguration, getPercentageModeConfig }] = await Promise.all([
-    convertToLensModule,
-    import('./configurations'),
-  ]);
+  const [{ getColumnsFromVis, getPalette, getPercentageModeConfig }, { getConfiguration }] =
+    await Promise.all([convertToLensModule, import('./configurations')]);
 
+  const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
   const result = getColumnsFromVis(
     vis,
     timefilter,
@@ -54,7 +53,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     {
       splits: ['group'],
     },
-    { dropEmptyRowsInDateHistogram: true, ...getPercentageModeConfig(vis.params) }
+    { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
 
   if (result === null) {
@@ -86,7 +85,12 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(layerId, vis.params, result),
+    configuration: getConfiguration(
+      layerId,
+      vis.params,
+      getPalette(vis.params.metric, percentageModeConfig),
+      result
+    ),
     indexPatternIds: [indexPatternId],
   };
 };

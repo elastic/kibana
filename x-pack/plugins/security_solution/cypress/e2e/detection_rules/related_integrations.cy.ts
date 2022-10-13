@@ -33,7 +33,7 @@ import {
   goToTheRuleDetailsOf,
   openIntegrationsPopover,
   waitForRulesTableToShow,
-  waitForRuleToChangeStatus,
+  waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 
 /*
@@ -184,7 +184,7 @@ describe('Related integrations', () => {
           '{"package":"system","version":"1.17.0"}{"package":"aws","integration":"cloudtrail","version":"1.17.0"}{"package":"aws","integration":"cloudfront","version":"1.17.0"}{"package":"aws","integration":"unknown","version":"1.17.0"}';
 
         enableRule(firstRule);
-        waitForRuleToChangeStatus();
+        waitForRuleToUpdate();
         goToTheRuleDetailsOf(rule.name);
         waitForAlertsToPopulate();
         expandFirstAlert();
