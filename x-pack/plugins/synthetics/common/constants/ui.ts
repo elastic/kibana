@@ -7,6 +7,10 @@
 
 export const MONITOR_ROUTE = '/monitor/:monitorId?';
 
+export const MONITOR_HISTORY_ROUTE = '/monitor/:monitorId/history';
+
+export const MONITOR_ERRORS_ROUTE = '/monitor/:monitorId/errors';
+
 export const MONITOR_ADD_ROUTE = '/add-monitor';
 
 export const MONITOR_EDIT_ROUTE = '/edit-monitor/:monitorId';
