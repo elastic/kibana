@@ -1,4 +1,4 @@
-Differentials[[osquery]]
+[[osquery]]
 = Osquery
 
 [partintro]
@@ -314,8 +314,7 @@ Osquery responses include the following information:
 * For scheduled queries in a pack, the `action_id` has the format `pack_<pack-name>_<query-ID>`. You can use this information to look up the query that was run.
 
 * By default, all query results are https://osquery.readthedocs.io/en/stable/deployment/logging/#snapshot-logs[snapshot logs]
-that represent a point in time with a set of results. You can modify the result type so that query results are returned as
-https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[differentials] or differentials without removals (this will only show data that has been added).
+that represent a point in time with a set of results. You can modify the result type to be https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[differentials] or differentials without removals (results only show data that has been added).
 
 * Osquery data is stored in the `logs-osquery_manager.result-<namespace>` datastream, and the result row data is under the `osquery` property in the document.
 
