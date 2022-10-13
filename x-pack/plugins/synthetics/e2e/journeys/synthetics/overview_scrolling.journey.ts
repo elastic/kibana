@@ -54,6 +54,6 @@ journey('Overview Scrolling', async ({ page, params }) => {
     expect(await showingAllMonitorsNode.isVisible()).toBe(true);
 
     count = await gridItems.count();
-    expect(count).toBe(300);
+    expect(count).toBe(100);
   });
 });
