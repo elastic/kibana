@@ -538,7 +538,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmAWSLambdaPricePerGbSeconds': {
+  'observability:apmAWSLambdaPriceFactor': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },

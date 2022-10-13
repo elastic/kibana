@@ -6,6 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import {
+  apmAWSLambdaPriceFactor,
+  AwsLambdaPriceFactor,
+} from '@kbn/observability-plugin/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -93,6 +97,14 @@ const serverlessMetricsRoute = createApmServerRoute({
   }> => {
     const { params } = resources;
     const setup = await setupRequest(resources);
+
+    const {
+      uiSettings: { client: uiSettingsClient },
+    } = await resources.context.core;
+
+    const awsLambdaPriceFactor =
+      await uiSettingsClient.get<AwsLambdaPriceFactor>(apmAWSLambdaPriceFactor);
+
     const { serviceName } = params.path;
     const { environment, kuery, start, end } = params.query;
     const options = {
@@ -111,7 +123,7 @@ const serverlessMetricsRoute = createApmServerRoute({
       serverlessActiveInstancesOverview,
     ] = await Promise.all([
       getServerlessAgentMetricsCharts(options),
-      getServerlessSummary(options),
+      getServerlessSummary({ ...options, awsLambdaPriceFactor }),
       getServerlessFunctionsOverview(options),
       getServerlessActiveInstancesOverview(options),
     ]);

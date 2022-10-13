@@ -145,7 +145,7 @@ export interface UsageStats {
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmAWSLambdaArchitecture': string;
-  'observability:apmAWSLambdaPricePerGbSeconds': string;
+  'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;

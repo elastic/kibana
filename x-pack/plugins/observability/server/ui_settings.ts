@@ -26,9 +26,9 @@ import {
   enableServiceMetrics,
   enableAwsLambdaMetrics,
   apmAWSLambdaArchitecture,
-  apmAWSLambdaPricePerGbSeconds,
+  apmAWSLambdaPriceFactor,
 } from '../common/ui_settings_keys';
-import { AwsLambdaArchitecture } from '../common/aws_lambda_architecture';
+import { AwsLambdaArchitecture } from '../common/aws_lambda';
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
@@ -318,9 +318,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'AWS lambda architecture',
     }),
     description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Select which architecture your AWS lambda functions are running',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      defaultMessage: 'Select which architecture your AWS lambda functions are running',
     }),
     value: AwsLambdaArchitecture.arm,
     schema: schema.oneOf([
@@ -340,9 +338,8 @@ export const uiSettings: Record<string, UiSettings> = {
         { defaultMessage: 'x86' }
       ),
     },
-    showInLabs: true,
   },
-  [apmAWSLambdaPricePerGbSeconds]: {
+  [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSeconds', {
       defaultMessage: 'AWS lambda price factor',

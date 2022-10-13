@@ -9,3 +9,8 @@ export const enum AwsLambdaArchitecture {
   x86 = 'x86',
   arm = 'arm',
 }
+
+export interface AwsLambdaPriceFactor {
+  x86: Record<number, number>;
+  arm: Record<number, number>;
+}

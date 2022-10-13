@@ -27,7 +27,8 @@ export {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
-  apmAWSLambdaPricePerGbSeconds,
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaArchitecture,
 } from './ui_settings_keys';
 
 export {
@@ -53,3 +54,5 @@ export const casesPath = '/cases';
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+
+export { AwsLambdaPriceFactor } from './aws_lambda';

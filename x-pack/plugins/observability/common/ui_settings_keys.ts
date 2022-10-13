@@ -23,4 +23,4 @@ export const enableInfrastructureHostsView = 'observability:enableInfrastructure
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableServiceMetrics = 'observability:apmEnableServiceMetrics';
 export const apmAWSLambdaArchitecture = 'observability:apmAWSLambdaArchitecture';
-export const apmAWSLambdaPricePerGbSeconds = 'observability:apmAWSLambdaPricePerGbSeconds';
+export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
