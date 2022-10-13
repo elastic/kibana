@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { DEFAULT_GROUPS } from '..';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -34,8 +35,16 @@ export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
   const { logger, esClient, query: queryParams, condition: conditionParams } = params;
-  const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
-    queryParams;
+  const {
+    index,
+    timeWindowSize,
+    timeWindowUnit,
+    interval,
+    timeField,
+    dateStart,
+    dateEnd,
+    filterKuery,
+  } = queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
@@ -49,15 +58,18 @@ export async function timeSeriesQuery(
       size: 0,
       query: {
         bool: {
-          filter: {
-            range: {
-              [timeField]: {
-                gte: dateRangeInfo.dateStart,
-                lt: dateRangeInfo.dateEnd,
-                format: 'strict_date_time',
+          filter: [
+            {
+              range: {
+                [timeField]: {
+                  gte: dateRangeInfo.dateStart,
+                  lt: dateRangeInfo.dateEnd,
+                  format: 'strict_date_time',
+                },
               },
             },
-          },
+            ...(!!filterKuery ? [toElasticsearchQuery(fromKueryExpression(filterKuery))] : []),
+          ],
         },
       },
       // aggs: {...}, filled in below

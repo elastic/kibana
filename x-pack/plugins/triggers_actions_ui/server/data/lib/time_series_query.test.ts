@@ -54,6 +54,26 @@ describe('timeSeriesQuery', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid date format for dateStart: \\"x\\""`);
   });
 
+  it('filters the results when filter param is passed', async () => {
+    await timeSeriesQuery({
+      ...params,
+      query: { ...params.query, filterKuery: 'event.provider: alerting' },
+    });
+    // @ts-ignore
+    expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[1]).toEqual({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            match: {
+              'event.provider': 'alerting',
+            },
+          },
+        ],
+      },
+    });
+  });
+
   it('should create correct query when aggType=count and termField is undefined (count over all) and selector params are undefined', async () => {
     await timeSeriesQuery(params);
     expect(esClient.search).toHaveBeenCalledWith(
@@ -80,15 +100,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -132,15 +154,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -193,15 +217,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -271,15 +297,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -336,15 +364,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -405,15 +435,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -483,15 +515,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -578,15 +612,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
@@ -656,15 +692,17 @@ describe('timeSeriesQuery', () => {
           },
           query: {
             bool: {
-              filter: {
-                range: {
-                  'time-field': {
-                    format: 'strict_date_time',
-                    gte: '2021-04-22T15:14:31.000Z',
-                    lt: '2021-04-22T15:20:31.000Z',
+              filter: [
+                {
+                  range: {
+                    'time-field': {
+                      format: 'strict_date_time',
+                      gte: '2021-04-22T15:14:31.000Z',
+                      lt: '2021-04-22T15:20:31.000Z',
+                    },
                   },
                 },
-              },
+              ],
             },
           },
           size: 0,
